@@ -65,12 +65,12 @@ class Page {
 
             pstmt = StmtLibrary.getPSPNLDEFN(this.PNLNAME);
             rs = pstmt.executeQuery();
-            rs.next(); // Do nothing with record for now.
+			rs.next(); // Do nothing with record for now.
             rs.close();
             pstmt.close();
 
             pstmt = StmtLibrary.getPSPNLFIELD(this.PNLNAME);
-            rs = pstmt.executeQuery();
+			rs = pstmt.executeQuery();
 
             ArrayList<String> subpanels = new ArrayList<String>();
             while(rs.next()) {
@@ -86,7 +86,7 @@ class Page {
 				}
             }
             rs.close();
-            pstmt.close();
+			pstmt.close();
 
         } catch(Exception ex) {
             ex.printStackTrace();

@@ -29,5 +29,6 @@ class BuildAssistant {
 
 		System.out.println("Total pages: " + pageDefnCache.size());
 		System.out.println("Total fields: " + allRecordFields.size());
+		System.out.println("SQL Stmts Emitted: " + StmtLibrary.emittedStmts.size());
 	}
 }

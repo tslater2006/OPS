@@ -1,103 +1,57 @@
 package com.enterrupt;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 class DbBroker {
-
-	private static final String PS_NULL = " ";
-
-	private static HashMap<String, Boolean> allRecordFields;
-	private static HashMap<String, Boolean> allPages;
 
     public static void main(String[] args) {
 
 		StmtLibrary.init();
+		BuildAssistant.init();
 
-		allRecordFields = new HashMap<String, Boolean>();
-		allPages = new HashMap<String, Boolean>();
+		Component c = new Component("SSS_STUDENT_CENTER", "GBL");
+		c.loadInitialMetadata();
 
-		loadComponent("SSS_STUDENT_CENTER", "GBL");
-
-		for(Map.Entry<String, Boolean> cursor : allRecordFields.entrySet()) {
-			System.out.println("Field: " + cursor.getKey());
+		for(String pnlname : c.pages) {
+			recurseSubPagesOf(pnlname, 0);
 		}
 
-		System.out.println("Total pages: " + allPages.size());
-		System.out.println("Total fields: " + allRecordFields.size());
+		for(String pnlname : c.pages) {
+			recurseSecPagesOf(pnlname, 0);
+		}
 
 		StmtLibrary.disconnect();
+		BuildAssistant.printInfo();
     }
 
-	public static void loadComponent(String componentName, String market) {
+	private static void recurseSubPagesOf(String pnlname, int indent) {
 
-		PreparedStatement pstmt;
-		ResultSet rs;
-
-		try {
-			pstmt = StmtLibrary.getPSPNLGRPDEFN(componentName, market);
-			rs = pstmt.executeQuery();
-			rs.next();		//Do nothing with record for now.
-			rs.close();
-			pstmt.close();
-
-			pstmt = StmtLibrary.getPSPNLGROUP(componentName, market);
-			rs = pstmt.executeQuery();
-			while(rs.next()) {
-				getAllPageFields(rs.getString("PNLNAME"));
-			}
-			rs.close();
-			pstmt.close();
-
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
+		Page p = BuildAssistant.pageDefnCache.get(pnlname);
+		if(p == null) {
+			p = new Page(pnlname);
+			p.loadInitialMetadata();
+			BuildAssistant.cachePage(p);
+		}
+		for(String subpnlname : p.subpages) {
+			recurseSubPagesOf(subpnlname, indent+1);
 		}
 	}
 
-	private static void getAllPageFields(String pageName) {
+	private static void recurseSecPagesOf(String pnlname, int indent) {
 
-		PreparedStatement pstmt;
-		ResultSet rs;
+		Page p = BuildAssistant.pageDefnCache.get(pnlname);
+		if(p == null) {
+			p = new Page(pnlname);
+			p.loadInitialMetadata();
+			BuildAssistant.cachePage(p);
+		}
 
-		try{
+		// Recursively expand/search subpages for secpages.
+		for(String subpnlname : p.subpages) {
+			recurseSecPagesOf(subpnlname, indent+1);
+		}
 
-			pstmt = StmtLibrary.getPSPNLDEFN(pageName);
-			rs = pstmt.executeQuery();
-			rs.next(); // Do nothing with record for now.
-			rs.close();
-			pstmt.close();
-
-			pstmt = StmtLibrary.getPSPNLFIELD(pageName);
-			rs = pstmt.executeQuery();
-
-			ArrayList<String> subpanels = new ArrayList<String>();
-	    	while(rs.next()) {
-				if(rs.getInt("FIELDTYPE") == 11) {  //11: Subpage
-					subpanels.add(rs.getString("SUBPNLNAME"));
-    			} else {
-					allRecordFields.put(rs.getString("RECNAME") + "." + rs.getString("FIELDNAME"), true);
-				}
-			}
-			rs.close();
-			pstmt.close();
-
-			allPages.put(pageName, true);
-			System.out.println("Retrieved Page." + pageName);
-
-			for(String subpanelName : subpanels) {
-				//Only retrieve page details if page hasn't been processed yet.
-				if(!allPages.containsKey(subpanelName)) {
-					getAllPageFields(subpanelName);
-				}
-			}
-
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
+		// Then, recursively expand/search secpages for more secpages.
+		for(String secpnlname : p.secpages) {
+			recurseSecPagesOf(secpnlname, indent+1);
 		}
 	}
 }

@@ -5,6 +5,7 @@ import java.sql.*;
 public class StmtLibrary {
 
 	private static Connection conn;
+	private static final String PS_NULL = " ";
 
 	public static void init() {
 		try {
@@ -32,6 +33,7 @@ public class StmtLibrary {
 	}
 
 	public static PreparedStatement getPSPNLDEFN(String b1) throws Exception {
+		System.out.println("Querying: " + b1);
 		PreparedStatement pstmt = conn.prepareStatement("SELECT VERSION, PNLTYPE, GRIDHORZ, GRIDVERT, FIELDCOUNT, MAXPNLFLDID, HELPCONTEXTNUM, PANELLEFT, PANELTOP, PANELRIGHT, PANELBOTTOM, PNLSTYLE, STYLESHEETNAME, PNLUSE, DEFERPROC, DESCR, POPUPMENU, LICENSE_CODE, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID, OBJECTOWNERID, DESCRLONG FROM PSPNLDEFN WHERE PNLNAME = ?");
 		pstmt.setString(1, b1);
 		return pstmt;

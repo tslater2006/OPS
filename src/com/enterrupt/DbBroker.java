@@ -20,6 +20,7 @@ class DbBroker {
 
 		StmtLibrary.disconnect();
 		BuildAssistant.printInfo();
+		BuildAssistant.verifyAgainstTraceFile();
     }
 
 	private static void recurseSubPagesOf(String pnlname, int indent) {

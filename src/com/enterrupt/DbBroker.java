@@ -13,6 +13,8 @@ class DbBroker {
 		Menu m = new Menu("SA_LEARNER_SERVICES");
 		m.loadInitialMetadata();
 
+		c.loadSearchRecord();
+
 		for(String pnlname : c.pages) {
 			recurseSubPagesOf(pnlname, 0);
 		}

@@ -46,6 +46,8 @@ class Component {
 	private String PNLGRPNAME;
 	private String MARKET;
 
+	private String SEARCHRECNAME; // name of search record for this component 
+
 	public Component(String pnlgrpname, String market) {
 		this.PNLGRPNAME = pnlgrpname;
 		this.MARKET = market;
@@ -60,7 +62,8 @@ class Component {
         try {
             pstmt = StmtLibrary.getPSPNLGRPDEFN(this.PNLGRPNAME, this.MARKET);
             rs = pstmt.executeQuery();
-            rs.next();      //Do nothing with record for now.
+            rs.next();
+			this.SEARCHRECNAME = rs.getString("SEARCHRECNAME");
             rs.close();
             pstmt.close();
 
@@ -68,6 +71,40 @@ class Component {
             rs = pstmt.executeQuery();
             while(rs.next()) {
 				this.pages.add(rs.getString("PNLNAME"));
+            }
+            rs.close();
+            pstmt.close();
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+	}
+
+	public void loadSearchRecord() {
+
+		PreparedStatement pstmt;
+        ResultSet rs;
+
+        try {
+            pstmt = StmtLibrary.getPSRECDEFN(this.SEARCHRECNAME);
+            rs = pstmt.executeQuery();
+            rs.next();
+            rs.close();
+            pstmt.close();
+
+            pstmt = StmtLibrary.getPSDBFIELD_PSRECFIELD_JOIN(this.SEARCHRECNAME);
+            rs = pstmt.executeQuery();
+            while(rs.next()) {
+				// Do nothing with records for now.
+            }
+            rs.close();
+            pstmt.close();
+
+            pstmt = StmtLibrary.getPSDBFLDLBL(this.SEARCHRECNAME);
+            rs = pstmt.executeQuery();
+            while(rs.next()) {
+				// Do nothing with records for now.
             }
             rs.close();
             pstmt.close();

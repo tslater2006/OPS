@@ -5,6 +5,41 @@ import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.util.HashMap;
 
+class Menu {
+
+	public String MENUNAME;
+
+	public Menu(String menuname) {
+		this.MENUNAME = menuname;
+	}
+
+	public void loadInitialMetadata() {
+
+		PreparedStatement pstmt;
+        ResultSet rs;
+
+        try {
+            pstmt = StmtLibrary.getPSMENUDEFN(this.MENUNAME);
+            rs = pstmt.executeQuery();
+            rs.next();      //Do nothing with record for now.
+            rs.close();
+            pstmt.close();
+
+            pstmt = StmtLibrary.getPSMENUITEM(this.MENUNAME);
+            rs = pstmt.executeQuery();
+            while(rs.next()) {
+				//Do nothing with records for now.
+            }
+            rs.close();
+            pstmt.close();
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+	}
+}
+
 class Component {
 
 	public ArrayList<String> pages;

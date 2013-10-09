@@ -19,6 +19,31 @@ class SQLStmt {
         this.sql = sql;
         this.bindVals = new HashMap<Integer, String>();
 	}
+
+	public boolean equals(Object obj) {
+		if(obj == this)
+			return true;
+		if(obj == null)
+			return false;
+		if(!(obj instanceof SQLStmt))
+			return false;
+
+		SQLStmt otherStmt = (SQLStmt)obj;
+		if(!this.sql.equals(otherStmt.sql) ||
+			this.bindVals.size() != otherStmt.bindVals.size()) {
+			return false;
+		}
+
+		// Ensure bind value indices and values match those in the other statement.
+		for(Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
+			if(!cursor.getValue().equals(
+					otherStmt.bindVals.get(cursor.getKey()))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
 
 class ENTStmt extends SQLStmt {
@@ -32,23 +57,26 @@ class ENTStmt extends SQLStmt {
         for(Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
             pstmt.setString(cursor.getKey(), cursor.getValue());
         }
-        StmtLibrary.emittedStmts.push(this);
+        StmtLibrary.emittedStmts.add(this);
         return pstmt;
     }
 }
 
 class PSStmt extends SQLStmt {
+
 	// Note: this regex uses positve lookbehind and lookahead.
 	private final String BIND_IDX_REGEX = "(?<=\\s)(:\\d+)(?=\\s?)";
+	public String originalStmt;
+	public int line_nbr;
 
-	public PSStmt(String sql) {
+	public PSStmt(String sql, int line_nbr) {
 		super(sql);
+
+		this.line_nbr = line_nbr;
 
 		Pattern bindIdxPattern = Pattern.compile(BIND_IDX_REGEX);
 		Matcher m = bindIdxPattern.matcher(sql);
-		sql = m.replaceAll("?");
-
-		System.out.println(sql);
-		this.sql = sql;
+		this.originalStmt = sql;
+		this.sql =  m.replaceAll("?");
 	}
 }

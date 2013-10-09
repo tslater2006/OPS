@@ -3,17 +3,17 @@ package com.enterrupt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.DriverManager;
-import java.util.Stack;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class StmtLibrary {
 
 	private static Connection conn;
 	private static final String PS_NULL = " ";
-	public static Stack<ENTStmt> emittedStmts;
+	public static ArrayList<ENTStmt> emittedStmts;
 
 	public static void init() {
-		emittedStmts = new Stack<ENTStmt>();
+		emittedStmts = new ArrayList<ENTStmt>();
 
 		try {
 			conn = DriverManager.getConnection(

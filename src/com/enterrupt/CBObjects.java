@@ -47,11 +47,13 @@ class Component {
 	private String MARKET;
 
 	private String SEARCHRECNAME; // name of search record for this component 
+	private ArrayList<PeopleCodeProg> searchRecordProgs;
 
 	public Component(String pnlgrpname, String market) {
 		this.PNLGRPNAME = pnlgrpname;
 		this.MARKET = market;
 		pages = new ArrayList<String>();
+		searchRecordProgs = new ArrayList<PeopleCodeProg>();
 	}
 
 	public void loadInitialMetadata() {
@@ -114,6 +116,88 @@ class Component {
             System.exit(1);
         }
 	}
+
+	public void getListOfComponentPC() {
+
+		PreparedStatement pstmt;
+        ResultSet rs;
+
+        try {
+            pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT, this.PNLGRPNAME,
+														PSDefn.MARKET, this.MARKET);
+            rs = pstmt.executeQuery();
+            while(rs.next()) {
+				// Do nothing with these records for now.
+            }
+            rs.close();
+            pstmt.close();
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+	}
+
+	public void loadAndRunSearchRecordPC() {
+
+		PreparedStatement pstmt;
+        ResultSet rs;
+
+        try {
+            pstmt = StmtLibrary.getPSPCMPROG_SearchRecordPCList(PSDefn.RECORD, this.SEARCHRECNAME);
+            rs = pstmt.executeQuery();
+            while(rs.next()) {
+				this.searchRecordProgs.add(new PeopleCodeProg(rs.getString("OBJECTVALUE1"),
+										   					  rs.getString("OBJECTVALUE2"),
+									       					  rs.getString("OBJECTVALUE3")));
+            }
+            rs.close();
+            pstmt.close();
+
+			for(PeopleCodeProg prog : this.searchRecordProgs) {
+				if(prog.event.equals("SearchInit")) {
+
+					// Get program text.
+					pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.RECORD, prog.recname,
+															    PSDefn.FIELD, prog.fldname,
+															    PSDefn.EVENT, prog.event,
+																"0", PSDefn.NULL,
+																"0", PSDefn.NULL,
+																"0", PSDefn.NULL,
+																"0", PSDefn.NULL);
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						System.out.println(rs.getBlob("PROGTXT").length());
+					}
+					rs.close();
+					pstmt.close();
+
+					// Get program references.
+					pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, prog.recname,
+															 PSDefn.FIELD, prog.fldname,
+															 PSDefn.EVENT, prog.event,
+															 "0", PSDefn.NULL,
+															 "0", PSDefn.NULL,
+															 "0", PSDefn.NULL,
+															 "0", PSDefn.NULL);
+					rs = pstmt.executeQuery();
+					while(rs.next()) {
+						// Do nothing with records for now.
+					}
+					rs.close();
+					pstmt.close();
+
+					/**
+				     * TODO: Call PC interpreter.
+				     */
+				}
+			}
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+	}
 }
 
 class Page {
@@ -164,5 +248,18 @@ class Page {
             ex.printStackTrace();
             System.exit(1);
         }
+	}
+}
+
+class PeopleCodeProg {
+
+	public String recname;
+	public String fldname;
+	public String event;
+
+	public PeopleCodeProg(String recname, String fldname, String event) {
+		this.recname = recname;
+		this.fldname = fldname;
+		this.event = event;
 	}
 }

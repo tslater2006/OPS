@@ -15,6 +15,9 @@ class DbBroker {
 
 		c.loadSearchRecord();
 
+		c.getListOfComponentPC();
+		c.loadAndRunSearchRecordPC();
+
 		for(String pnlname : c.pages) {
 			recurseSubPagesOf(pnlname, 0);
 		}

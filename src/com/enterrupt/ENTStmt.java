@@ -44,12 +44,20 @@ class SQLStmt {
 
 		return true;
 	}
+
+	public String toString() {
+		String str = sql + "\n";
+		for(Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
+			str = str + ":" + cursor.getKey() + " = " + cursor.getValue() + "\n";
+		}
+		return str;
+	}
 }
 
 class ENTStmt extends SQLStmt {
 
     public ENTStmt(String sql) {
-		super(sql);
+		super(sql.trim());
     }
 
     public PreparedStatement generatePreparedStmt(Connection conn) throws Exception {
@@ -70,13 +78,13 @@ class PSStmt extends SQLStmt {
 	public int line_nbr;
 
 	public PSStmt(String sql, int line_nbr) {
-		super(sql);
+		super(sql.trim());
 
 		this.line_nbr = line_nbr;
 
 		Pattern bindIdxPattern = Pattern.compile(BIND_IDX_REGEX);
 		Matcher m = bindIdxPattern.matcher(sql);
 		this.originalStmt = sql;
-		this.sql =  m.replaceAll("?");
+		this.sql =  m.replaceAll("?").trim();
 	}
 }

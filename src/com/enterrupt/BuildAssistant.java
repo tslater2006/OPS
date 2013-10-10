@@ -71,6 +71,11 @@ class BuildAssistant {
 		while((ps_stmt = getNextSqlStmt()) != null) {
 			numTraceStmts++;
 
+			//if(ps_stmt.line_nbr == 245) {
+			//	System.out.println(ps_stmt);
+			//	System.out.println(StmtLibrary.emittedStmts.get(curr_ent_stmt_idx));
+			//}
+
 			if(inCoverageRegion) {
 				numCoverageAreaStmts++;
 			}

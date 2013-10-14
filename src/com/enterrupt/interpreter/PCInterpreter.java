@@ -129,7 +129,8 @@ public class PCInterpreter {
 			new SimpleElementParser((byte) 28, "If", PCToken.IF_STYLE),			// 0x1C
 			new SimpleElementParser((byte) 31, "Then", PCToken.THEN_STYLE),		// 0x1F
 			new ReferenceParser((byte) 33),										// 0x21
-			new CommentParser((byte) 36) 										// 0x24
+			new CommentParser((byte) 36), 										// 0x24
+			new NumberParser((byte) 80, 18)										// 0x50
 		};
 
 		// Initialize hash table of parsers, indexed by start byte.

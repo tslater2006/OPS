@@ -23,11 +23,11 @@ public class PCInterpreter {
 		ElementParser lastParser = null;
 		int nIndent = 0;
 
-		int debugIdx = 0;
+		/*int debugIdx = 0;
 		for(byte b : prog.progBytes) {
 			System.out.printf("%d: 0x%02X\n", debugIdx, b);
 			debugIdx++;
-		}
+		}*/
 
 		while(prog.byteCursorPos < prog.progBytes.length && !endDetected) {
 			if(endDetected = (prog.getCurrentByte() == (byte) 7)) {

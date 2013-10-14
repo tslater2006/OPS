@@ -95,7 +95,7 @@ public class PCInterpreter {
 				nIndent = 0;
 			}
 		}
-		System.out.println(prog.getProgText());	
+		System.out.println(prog.getProgText());
 	}
 
 	public static void init() {
@@ -104,9 +104,11 @@ public class PCInterpreter {
 
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
-			new PureStringParser((byte) 10),								// 0x0A (Function | Method | External Datatype | Class name)
-			new SimpleElementParser((byte) 28, "If", PCToken.IF_STYLE),		// 0x1C
-			new CommentParser((byte) 36) 									// 0x24
+			new PureStringParser((byte) 10),									// 0x0A (Function | Method | External Datatype | Class name)
+			new SimpleElementParser((byte) 11, "(", PCToken.NO_SPACE_AFTER),	// 0x0B
+			new SimpleElementParser((byte) 28, "If", PCToken.IF_STYLE),			// 0x1C
+			new ReferenceParser((byte) 33),										// 0x21
+			new CommentParser((byte) 36) 										// 0x24
 		};
 
 		// Initialize hash table of parsers, indexed by start byte.

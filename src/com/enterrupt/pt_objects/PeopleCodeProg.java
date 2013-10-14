@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.sql.Blob;
 import java.lang.StringBuilder;
+import java.util.HashMap;
+import com.enterrupt.sql.StmtLibrary;
 
 public class PeopleCodeProg {
 
@@ -13,6 +15,7 @@ public class PeopleCodeProg {
     public String event;
 	private StringBuilder progTextBuilder;
     public byte[] progBytes;
+	public HashMap<Integer, String> progRefsTable;
 
 	public int byteCursorPos = 0;
 
@@ -20,6 +23,7 @@ public class PeopleCodeProg {
         this.recname = recname;
         this.fldname = fldname;
         this.event = event;
+		this.progRefsTable = new HashMap<Integer, String>();
     }
 
     public void setProgText(Blob b) throws Exception {
@@ -68,6 +72,73 @@ public class PeopleCodeProg {
 
 	public String getProgText() {
 		return this.progTextBuilder.toString();
+	}
+
+	public String getProgReference(int refNbr) {
+		return this.progRefsTable.get(refNbr);
+	}
+
+	public void loadInitialMetadata() throws Exception {
+
+		PreparedStatement pstmt;
+		ResultSet rs;
+
+		// Get program text.
+        pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.RECORD, this.recname,
+                                                    PSDefn.FIELD, this.fldname,
+                                                    PSDefn.EVENT, this.event,
+                                                    "0", PSDefn.NULL,
+                                                    "0", PSDefn.NULL,
+                                                    "0", PSDefn.NULL,
+                                                    "0", PSDefn.NULL);
+       	rs = pstmt.executeQuery();
+        if(rs.next()) {
+        	this.setProgText(rs.getBlob("PROGTXT"));
+        }
+        rs.close();
+        pstmt.close();
+
+		// Index the reference keywords.
+		/**
+		 * TODO: Put this in a place where it is only done once; doing this for every
+		 * program is a waste.
+		 */
+		HashMap<String, String> refReservedWordsTable = new HashMap<String, String>();
+		for(String s : PSDefn.refReservedWords) {
+			refReservedWordsTable.put(s.toUpperCase(), s);
+		}
+
+		// Get program references.
+        pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, this.recname,
+                                                 PSDefn.FIELD, this.fldname,
+                                                 PSDefn.EVENT, this.event,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL);
+        rs = pstmt.executeQuery();
+        while(rs.next()) {
+        	Integer NAMENUM = rs.getInt("NAMENUM");
+			if(progRefsTable.get(NAMENUM) != null) {
+				/**
+				 * TODO: Make this merely a warning and don't stop execution. A duplicate ref
+				 * shouldn't matter anyway, but I want to exit(1) on it for now just to see how often
+			     * it occurs.
+				 */
+				System.out.println("Warning: duplicate reference.");
+				System.exit(1);
+			}
+			String RECNAME = rs.getString("RECNAME").trim();
+			String reservedWord = refReservedWordsTable.get(RECNAME);
+			if(reservedWord != null) {
+				RECNAME = reservedWord;	// remember: this assigns the value (lowercase) rather than the key (upper).
+			}
+			String REFNAME = rs.getString("REFNAME").trim();
+			this.progRefsTable.put(NAMENUM,
+				(RECNAME != null && RECNAME.length() > 0 ? RECNAME + "." : "") + REFNAME);
+        }
+        rs.close();
+        pstmt.close();
 	}
 }
 

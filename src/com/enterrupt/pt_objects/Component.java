@@ -105,36 +105,7 @@ public class Component {
 
         for(PeopleCodeProg prog : this.searchRecordProgs) {
             if(prog.event.equals("SearchInit")) {
-
-                // Get program text.
-                pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.RECORD, prog.recname,
-                                                            PSDefn.FIELD, prog.fldname,
-                                                            PSDefn.EVENT, prog.event,
-                                                            "0", PSDefn.NULL,
-                                                            "0", PSDefn.NULL,
-                                                            "0", PSDefn.NULL,
-                                                            "0", PSDefn.NULL);
-                rs = pstmt.executeQuery();
-                if(rs.next()) {
-                    prog.setProgText(rs.getBlob("PROGTXT"));
-                }
-                rs.close();
-                pstmt.close();
-                // Get program references.
-                pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, prog.recname,
-                                                         PSDefn.FIELD, prog.fldname,
-                                                         PSDefn.EVENT, prog.event,
-                                                         "0", PSDefn.NULL,
-                                                         "0", PSDefn.NULL,
-                                                         "0", PSDefn.NULL,
-                                                         "0", PSDefn.NULL);
-                rs = pstmt.executeQuery();
-                while(rs.next()) {
-                    // Do nothing with records for now.
-                }
-                rs.close();
-                pstmt.close();
-
+				prog.loadInitialMetadata();
                 PCInterpreter.interpret(prog);
             }
         }

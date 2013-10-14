@@ -45,6 +45,21 @@ public class PCInterpreter {
 					!((lastParser != null && (lastParser.format & PCToken.NEWLINE_AFTER) > 0)
 										  || (lastParser.format == PCToken.SEMICOLON)));
 
+				if(lastParser != null
+					&& !in_declare
+					&& (((lastParser.format & PCToken.INCREASE_INDENT) > 0)
+						|| ((lastParser.format & PCToken.INCREASE_INDENT_ONCE) > 0 && nIndent == 0))) {
+					nIndent++;
+				}
+
+				if((p.format & PCToken.RESET_INDENT_BEFORE) > 0 && !in_declare) {
+					nIndent = 0;
+				}
+
+				if((p.format & PCToken.DECREASE_INDENT) > 0 && nIndent > 0 && !in_declare) {
+					nIndent--;
+				}
+
 				if(!firstLine
 					&& p.format != PCToken.PUNCTUATION
 					&& (p.format & PCToken.SEMICOLON) == 0
@@ -104,9 +119,15 @@ public class PCInterpreter {
 
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
+			new SimpleElementParser((byte) 6, "="),								// 0x06
 			new PureStringParser((byte) 10),									// 0x0A (Function | Method | External Datatype | Class name)
 			new SimpleElementParser((byte) 11, "(", PCToken.NO_SPACE_AFTER),	// 0x0B
+			new PureStringParser((byte) 18),									// 0x12 (System variable name)
+			new SimpleElementParser((byte) 20, ")", PCToken.NO_SPACE_BEFORE),	// 0x14
+			new SimpleElementParser((byte) 21, ";", PCToken.SEMICOLON | PCToken.NEWLINE_AFTER | PCToken.NO_SPACE_BEFORE),	// 0x15
+			new SimpleElementParser((byte) 26, "End-If", PCToken.ENDIF_STYLE),	// 0x1A
 			new SimpleElementParser((byte) 28, "If", PCToken.IF_STYLE),			// 0x1C
+			new SimpleElementParser((byte) 31, "Then", PCToken.THEN_STYLE),		// 0x1F
 			new ReferenceParser((byte) 33),										// 0x21
 			new CommentParser((byte) 36) 										// 0x24
 		};

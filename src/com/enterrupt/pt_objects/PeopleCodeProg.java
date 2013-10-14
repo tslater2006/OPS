@@ -4,14 +4,14 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.sql.Blob;
-import java.io.StringWriter;
+import java.lang.StringBuilder;
 
 public class PeopleCodeProg {
 
     public String recname;
     public String fldname;
     public String event;
-	private StringWriter progTextWriter;
+	private StringBuilder progTextBuilder;
     public byte[] progBytes;
 
 	public int byteCursorPos = 0;
@@ -45,15 +45,29 @@ public class PeopleCodeProg {
 		return this.progBytes[this.byteCursorPos++];
 	}
 
-	public void appendProgText(char c) {
-		if(this.progTextWriter == null) {
-			this.progTextWriter = new StringWriter();
+	public byte readAhead() {
+		if(this.byteCursorPos >= this.progBytes.length - 1) {
+			return -1;
 		}
-		progTextWriter.write(c);
+		return this.progBytes[this.byteCursorPos];
+	}
+
+	public void appendProgText(char c) {
+		if(this.progTextBuilder == null) {
+			this.progTextBuilder = new StringBuilder();
+		}
+		progTextBuilder.append(c);
+	}
+
+	public void appendProgText(String s) {
+		if(this.progTextBuilder == null) {
+			this.progTextBuilder = new StringBuilder();
+		}
+		progTextBuilder.append(s);
 	}
 
 	public String getProgText() {
-		return this.progTextWriter.toString();
+		return this.progTextBuilder.toString();
 	}
 }
 

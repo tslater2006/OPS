@@ -13,7 +13,14 @@ public class PCInterpreter {
 
 		init();
 		prog.setByteCursorPos(37); 	// Program begins at byte 37.
-		boolean endDetected = false;
+		boolean endDetected = false,
+				firstLine = true,
+				in_declare = false,
+				startOfLine = true,
+				and_indicator = false,
+				did_newline = false;
+		ElementParser lastParser = null;
+		int nIndent = 0;
 
 		/*int i = 0;
 		for(byte b : prog.progBytes) {
@@ -31,8 +38,45 @@ public class PCInterpreter {
 			if(p == null) {
 				System.out.println("[ERROR] Reached unimplementable byte.");
 				break;
+			} else {
+				/* TODO: Fill out as needed. */
+				in_declare = (in_declare &&
+					!((lastParser != null && (lastParser.format & PCToken.NEWLINE_AFTER) > 0)
+										  || (lastParser.format == PCToken.SEMICOLON)));
+
+				if(!firstLine
+					&& p.format != PCToken.PUNCTUATION
+					&& (p.format & PCToken.SEMICOLON) == 0
+					&& !in_declare
+					&& (	(	(lastParser != null && ((lastParser.format & PCToken.NEWLINE_AFTER) > 0)
+									|| (lastParser.format == PCToken.SEMICOLON))
+					  		&&  (p.format & PCToken.COMMENT_ON_SAME_LINE) == 0)
+						|| ((p.format & PCToken.NEWLINE_BEFORE) > 0))
+						|| ((p.format & PCToken.NEWLINE_ONCE) > 0 && !did_newline && prog.readAhead() != (byte) 21)) {
+
+					prog.appendProgText('\n');
+					startOfLine = true;
+					did_newline = true;
+				}
+
+				if(startOfLine && p.writesNonBlank()) {
+					for(int i=0; i < nIndent + (and_indicator? 2 : 0); i++) {
+						prog.appendProgText("   ");
+					}
+				}
 			}
+			firstLine = false;
+			int initialByteCursorPos = prog.byteCursorPos;
 			p.parse(prog);
+			in_declare = in_declare || (p.format & PCToken.IN_DECLARE) > 0;
+			startOfLine = startOfLine && !p.writesNonBlank();
+			did_newline = did_newline && (prog.byteCursorPos == initialByteCursorPos);
+			and_indicator = (p.format & PCToken.AND_INDICATOR) > 0
+				|| (and_indicator && (p.format & PCToken.COMMENT_ON_SAME_LINE) != 0);
+			lastParser = p;
+			if((p.format & PCToken.RESET_INDENT_AFTER) > 0) {
+				nIndent = 0;
+			}
 		}
 		System.out.println(prog.getProgText());	
 	}
@@ -43,7 +87,8 @@ public class PCInterpreter {
 
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
-			new CommentParser((byte) 36, PCToken.NEWLINE_BEFORE_AND_AFTER) // 0x24
+			new SimpleElementParser((byte) 28, "If", PCToken.IF_STYLE),		// 0x1C
+			new CommentParser((byte) 36, PCToken.NEWLINE_BEFORE_AND_AFTER) 	// 0x24
 		};
 
 		// Initialize hash table of parsers, indexed by start byte.

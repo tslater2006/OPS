@@ -1,4 +1,4 @@
-package com.enterrupt;
+package com.enterrupt.sql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

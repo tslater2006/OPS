@@ -10,7 +10,10 @@ import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 import java.util.HashMap;
 
-class BuildAssistant {
+import com.enterrupt.pt_objects.*;
+import com.enterrupt.sql.*;
+
+public class BuildAssistant {
 
 	public static HashMap<String, Boolean> allRecordFields;
 	public static HashMap<String, Page> pageDefnCache;

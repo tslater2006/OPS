@@ -1,0 +1,17 @@
+<project name="ENT Server" default="build" basedir=".">
+
+	<description>Build file for the ENT app server / db broker.</description>
+
+	<presetdef name="javac">
+		<javac includeantruntime="false"/>
+	</presetdef>
+
+	<target name="build">
+		<mkdir dir="bin"/>
+		<javac srcdir="src" destdir="bin"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="bin"/>
+	</target>
+</project>

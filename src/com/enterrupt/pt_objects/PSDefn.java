@@ -1,4 +1,4 @@
-package com.enterrupt;
+package com.enterrupt.pt_objects;
 
 class PSDefn {
 	public static final String RECORD = "1";

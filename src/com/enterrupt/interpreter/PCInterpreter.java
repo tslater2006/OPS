@@ -1,6 +1,8 @@
-package com.enterrupt;
+package com.enterrupt.interpreter;
 
-class PCInterpreter {
+import com.enterrupt.pt_objects.PeopleCodeProg;
+
+public class PCInterpreter {
 
 	public static void interpret(PeopleCodeProg prog) {
 

@@ -1,19 +1,13 @@
-SRC_PACKAGE=src/com/enterrupt
-JAVA_D=-Duser.timezone=GMT -Djava.library.path=/usr/lib/oracle/12.1/client64/lib
+OCI_DIR=/usr/lib/oracle/12.1/client64/lib
+JAVA_D=-Duser.timezone=GMT -Djava.library.path=$(OCI_DIR)
 TRACE_FILE=-Dtracefile=trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql
 IGNORE_STMTS_FILE=-Dignore_stmts_file=conf/ignore_stmts.conf
-JAVA_CP=bin:/usr/lib/oracle/12.1/client64/lib/ojdbc7.jar
-JAVA_MAIN=com.enterrupt.DbBroker
-BUILD_DIR=bin
+JAVA_CP=bin:$(OCI_DIR)/ojdbc7.jar
+JAVA_MAIN=com.enterrupt.Main
 
-all: main
+all: build_and_run
 
-main: com.enterrupt
-		java $(JAVA_D) $(TRACE_FILE) $(IGNORE_STMTS_FILE) -cp $(JAVA_CP) com.enterrupt.DbBroker
-
-com.enterrupt:
-		javac -d $(BUILD_DIR) $(SRC_PACKAGE)/*.java
-
-run:
-		java $(JAVA_D) $(TRACE_FILE) $(IGNORE_STMTS_FILE) -cp $(JAVA_CP) com.enterrupt.DbBroker
+build_and_run:
+		ant build
+		java $(JAVA_D) $(TRACE_FILE) $(IGNORE_STMTS_FILE) -cp $(JAVA_CP) $(JAVA_MAIN)
  

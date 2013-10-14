@@ -18,15 +18,16 @@ public class PCInterpreter {
 				in_declare = false,
 				startOfLine = true,
 				and_indicator = false,
-				did_newline = false;
+				did_newline = false,
+				wroteSpace = false;
 		ElementParser lastParser = null;
 		int nIndent = 0;
 
-		/*int i = 0;
+		int debugIdx = 0;
 		for(byte b : prog.progBytes) {
-			System.out.printf("%d: 0x%02X\n", i, b);
-			i++;
-		}*/
+			System.out.printf("%d: 0x%02X\n", debugIdx, b);
+			debugIdx++;
+		}
 
 		while(prog.byteCursorPos < prog.progBytes.length && !endDetected) {
 			if(endDetected = (prog.getCurrentByte() == (byte) 7)) {
@@ -57,6 +58,21 @@ public class PCInterpreter {
 					prog.appendProgText('\n');
 					startOfLine = true;
 					did_newline = true;
+				} else {
+					if(!startOfLine
+						&& !wroteSpace
+						&& (p.format != PCToken.PUNCTUATION)
+						&& (p.format != PCToken.SEMICOLON)
+					    && (	(	(lastParser != null && (lastParser.format & PCToken.SPACE_AFTER) > 0))
+								||	(p.format & PCToken.SPACE_BEFORE) > 0)
+						&& (lastParser == null || ((lastParser.format != PCToken.PUNCTUATION
+													&& (lastParser.format & PCToken.NO_SPACE_AFTER) == 0)
+									   		   || ((p.format & PCToken.SPACE_BEFORE2) > 0)))
+						&& (p.format & PCToken.NO_SPACE_BEFORE) == 0) {
+
+						prog.appendProgText(' ');
+						wroteSpace = true;
+					}
 				}
 
 				if(startOfLine && p.writesNonBlank()) {
@@ -68,6 +84,7 @@ public class PCInterpreter {
 			firstLine = false;
 			int initialByteCursorPos = prog.byteCursorPos;
 			p.parse(prog);
+			wroteSpace = wroteSpace && !p.writesNonBlank();
 			in_declare = in_declare || (p.format & PCToken.IN_DECLARE) > 0;
 			startOfLine = startOfLine && !p.writesNonBlank();
 			did_newline = did_newline && (prog.byteCursorPos == initialByteCursorPos);
@@ -87,8 +104,9 @@ public class PCInterpreter {
 
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
+			new PureStringParser((byte) 10),								// 0x0A (Function | Method | External Datatype | Class name)
 			new SimpleElementParser((byte) 28, "If", PCToken.IF_STYLE),		// 0x1C
-			new CommentParser((byte) 36, PCToken.NEWLINE_BEFORE_AND_AFTER) 	// 0x24
+			new CommentParser((byte) 36) 									// 0x24
 		};
 
 		// Initialize hash table of parsers, indexed by start byte.

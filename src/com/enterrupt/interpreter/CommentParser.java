@@ -6,6 +6,10 @@ public class CommentParser extends ElementParser {
 
 	private byte b;
 
+	public CommentParser(byte _b) {
+		this(_b, PCToken.NEWLINE_BEFORE_AND_AFTER);
+	}
+
 	public CommentParser(byte _b, int _f) {
 		this.b = _b;
 		this.format = _f;
@@ -33,7 +37,6 @@ public class CommentParser extends ElementParser {
 				}
 			}
 		}
-		System.out.println("done");
 	}
 
 	public boolean writesNonBlank() {

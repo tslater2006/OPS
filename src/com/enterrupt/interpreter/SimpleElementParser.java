@@ -13,6 +13,10 @@ public class SimpleElementParser extends ElementParser {
 		format = _format;
 	}
 
+	SimpleElementParser(byte _b, String _t) {
+		this(_b, _t, PCToken.SPACE_BEFORE_AND_AFTER);
+	}
+
 	public void parse(PeopleCodeProg prog) throws Exception {
 		prog.appendProgText(t);
 	}

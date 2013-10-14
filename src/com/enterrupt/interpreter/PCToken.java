@@ -21,6 +21,7 @@ public class PCToken {
 	public static final int SPACE_BEFORE2 = 0x10000;
 	public static final int COMMENT_ON_SAME_LINE = 0x20000;
 	public static final int SPACE_BEFORE_AND_AFTER = SPACE_BEFORE | SPACE_AFTER;
+	public static final int SPACE_BEFORE_AND_AFTER2 = SPACE_BEFORE2 | SPACE_BEFORE | SPACE_AFTER;
 	public static final int IF_STYLE = NEWLINE_BEFORE | SPACE_BEFORE | SPACE_AFTER;
 	public static final int NEWLINE_BEFORE_AND_AFTER = NEWLINE_BEFORE | NEWLINE_AFTER;
 	public static final int THEN_STYLE = SPACE_BEFORE | SPACE_BEFORE2 | NEWLINE_AFTER |

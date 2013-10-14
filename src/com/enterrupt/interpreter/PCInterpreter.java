@@ -119,6 +119,7 @@ public class PCInterpreter {
 
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
+			new IdentifierParser((byte) 0),										// 0x00
 			new SimpleElementParser((byte) 6, "="),								// 0x06
 			new PureStringParser((byte) 10),									// 0x0A (Function | Method | External Datatype | Class name)
 			new SimpleElementParser((byte) 11, "(", PCToken.NO_SPACE_AFTER),	// 0x0B
@@ -130,6 +131,7 @@ public class PCInterpreter {
 			new SimpleElementParser((byte) 31, "Then", PCToken.THEN_STYLE),		// 0x1F
 			new ReferenceParser((byte) 33),										// 0x21
 			new CommentParser((byte) 36), 										// 0x24
+			new SimpleElementParser((byte) 47, "True", PCToken.SPACE_BEFORE_AND_AFTER2),	// 0x2F
 			new NumberParser((byte) 80, 18)										// 0x50
 		};
 

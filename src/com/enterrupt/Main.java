@@ -20,7 +20,8 @@ public class Main {
 			c.loadSearchRecord();
 
 			c.getListOfComponentPC();
-			c.loadAndRunSearchRecordPC();
+			c.loadAndRunRecordPConSearchRecord();
+			c.loadAndRunComponentPConSearchRecord();
 
 			for(String pnlname : c.pages) {
 				recurseSubPagesOf(pnlname, 0);

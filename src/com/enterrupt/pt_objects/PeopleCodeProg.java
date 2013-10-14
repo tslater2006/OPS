@@ -10,6 +10,9 @@ import com.enterrupt.sql.StmtLibrary;
 
 public class PeopleCodeProg {
 
+	public String pcType;
+	public String pnlgrpname;
+	public String market;
     public String recname;
     public String fldname;
     public String event;
@@ -19,12 +22,24 @@ public class PeopleCodeProg {
 
 	public int byteCursorPos = 0;
 
-    public PeopleCodeProg(String recname, String fldname, String event) {
-        this.recname = recname;
-        this.fldname = fldname;
-        this.event = event;
+    public PeopleCodeProg() {
 		this.progRefsTable = new HashMap<Integer, String>();
     }
+
+	public void initRecordPCProg(String recname, String fldname, String event) {
+		this.pcType = "RecordPC";
+		this.recname = recname;
+        this.fldname = fldname;
+        this.event = event;
+	}
+
+	public void initComponentPCProg(String pnlgrpname, String market, String recname, String event) {
+		this.pcType = "ComponentPC";
+		this.pnlgrpname = pnlgrpname;
+		this.market = market;
+		this.recname = recname;
+		this.event = event;
+	}
 
     public void setProgText(Blob b) throws Exception {
 
@@ -80,17 +95,31 @@ public class PeopleCodeProg {
 
 	public void loadInitialMetadata() throws Exception {
 
-		PreparedStatement pstmt;
+		PreparedStatement pstmt = null;
 		ResultSet rs;
 
 		// Get program text.
-        pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.RECORD, this.recname,
+        if(this.pcType.equals("RecordPC")) {
+			pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.RECORD, this.recname,
                                                     PSDefn.FIELD, this.fldname,
                                                     PSDefn.EVENT, this.event,
                                                     "0", PSDefn.NULL,
                                                     "0", PSDefn.NULL,
                                                     "0", PSDefn.NULL,
                                                     "0", PSDefn.NULL);
+		} else if(this.pcType.equals("ComponentPC")) {
+			pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.COMPONENT, this.pnlgrpname,
+                                                    PSDefn.MARKET, this.market,
+													PSDefn.RECORD, this.recname,
+                                                    PSDefn.EVENT, this.event,
+                                                    "0", PSDefn.NULL,
+                                                    "0", PSDefn.NULL,
+                                                    "0", PSDefn.NULL);
+		} else {
+			System.out.println("[ERROR]: Unexpected value for pcType.");
+			System.exit(1);
+		}
+
        	rs = pstmt.executeQuery();
         if(rs.next()) {
         	this.setProgText(rs.getBlob("PROGTXT"));
@@ -109,14 +138,28 @@ public class PeopleCodeProg {
 		}
 
 		// Get program references.
-        pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, this.recname,
+        if(pcType.equals("RecordPC")) {
+			pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, this.recname,
                                                  PSDefn.FIELD, this.fldname,
                                                  PSDefn.EVENT, this.event,
                                                  "0", PSDefn.NULL,
                                                  "0", PSDefn.NULL,
                                                  "0", PSDefn.NULL,
                                                  "0", PSDefn.NULL);
-        rs = pstmt.executeQuery();
+        } else if(pcType.equals("ComponentPC")) {
+			pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.COMPONENT, this.pnlgrpname,
+												 PSDefn.MARKET, this.market,
+                                                 PSDefn.RECORD, this.recname,
+                                                 PSDefn.EVENT, this.event,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL);
+		} else {
+			System.out.println("[ERROR] Unexpected value for pcType.");
+			System.exit(1);
+		}
+
+		rs = pstmt.executeQuery();
         while(rs.next()) {
         	Integer NAMENUM = rs.getInt("NAMENUM");
 			if(progRefsTable.get(NAMENUM) != null) {

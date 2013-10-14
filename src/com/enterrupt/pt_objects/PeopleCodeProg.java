@@ -41,7 +41,7 @@ public class PeopleCodeProg {
 	}
 
 	public byte readNextByte() {
-		System.out.printf("[READ] %d: 0x%02X\n", this.byteCursorPos+1, this.progBytes[this.byteCursorPos+1]);
+		System.out.printf("[READ] %d: 0x%02X\n", this.byteCursorPos, this.progBytes[this.byteCursorPos]);
 		return this.progBytes[this.byteCursorPos++];
 	}
 

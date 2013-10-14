@@ -21,8 +21,9 @@ public class CommentParser extends ElementParser {
 		int commLen = (int) prog.readNextByte() & 0xff;
 		commLen = commLen + ((int) prog.readNextByte() & 0xff) * 256;
 
+		System.out.println("Comment length: " + commLen);
 		byte b;
-		for(int i=0; i < commLen && prog.byteCursorPos < prog.progBytes.length; i++) {
+		for(int i=0; i < commLen && (prog.byteCursorPos < prog.progBytes.length); i++) {
 			b = prog.readNextByte();
 			if(b != 0) {
 				if(b == (byte) 10) {
@@ -32,6 +33,7 @@ public class CommentParser extends ElementParser {
 				}
 			}
 		}
+		System.out.println("done");
 	}
 
 	public boolean writesNonBlank() {

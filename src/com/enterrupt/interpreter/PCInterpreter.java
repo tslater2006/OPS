@@ -15,19 +15,26 @@ public class PCInterpreter {
 		prog.setByteCursorPos(37); 	// Program begins at byte 37.
 		boolean endDetected = false;
 
+		/*int i = 0;
+		for(byte b : prog.progBytes) {
+			System.out.printf("%d: 0x%02X\n", i, b);
+			i++;
+		}*/
+
 		while(prog.byteCursorPos < prog.progBytes.length && !endDetected) {
 			if(endDetected = (prog.getCurrentByte() == (byte) 7)) {
 				break;
 			}
 			byte b = prog.readNextByte();
+			System.out.printf("Getting parser for byte: 0x%02X\n", b);
 			ElementParser p = parserTable.get(new Byte(b));
 			if(p == null) {
 				System.out.println("[ERROR] Reached unimplementable byte.");
 				break;
 			}
 			p.parse(prog);
-			System.out.println(prog.getProgText());
 		}
+		System.out.println(prog.getProgText());	
 	}
 
 	public static void init() {
@@ -36,7 +43,7 @@ public class PCInterpreter {
 
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
-			new CommentParser((byte) 36, PCToken.NEWLINE_BEFORE_AND_AFTER)
+			new CommentParser((byte) 36, PCToken.NEWLINE_BEFORE_AND_AFTER) // 0x24
 		};
 
 		// Initialize hash table of parsers, indexed by start byte.

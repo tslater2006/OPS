@@ -9,7 +9,7 @@ public class PureStringParser extends StringParser {
 
 	PureStringParser(byte _b) {
 		b = _b;
-		format = PCToken.SPACE_BEFORE;
+		format = PFlag.SPACE_BEFORE;
 	}
 
 	PureStringParser(byte _b, int _format) {
@@ -34,7 +34,7 @@ public class PureStringParser extends StringParser {
 		if(str.trim().charAt(0) == '%') {
 			try {
 				Field f = RunTimeEnvironment.class.getField(str.replaceFirst("%", "SYSVAR_"));
-				t = new Token(PCToken.SYSTEM_VAR);
+				t = new Token(Token.SYSTEM_VAR);
 				return t;
 			} catch(NoSuchFieldException nsfe) {
 				System.out.println("[FATAL] Unimplemented system variable: " + str);
@@ -45,7 +45,7 @@ public class PureStringParser extends StringParser {
 		// Check to see if the string represents a system function.
 		try {
 			Method m = RunTimeEnvironment.class.getMethod(str);
-			t = new Token(PCToken.SYSTEM_FN);
+			t = new Token(Token.SYSTEM_FN);
 			return t;
 		} catch(NoSuchMethodException nsme) {
 			/**

@@ -10,7 +10,7 @@ public class NumberParser extends ElementParser {
 	public NumberParser(byte _b, int _nBytes) {
 		b = _b;
 		nBytes = _nBytes;
-		format = PCToken.SPACE_BEFORE | PCToken.NO_SPACE_AFTER;
+		format = PFlag.SPACE_BEFORE | PFlag.NO_SPACE_AFTER;
 	}
 
 	public byte getStartByte() {

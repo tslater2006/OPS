@@ -1,6 +1,6 @@
 package com.enterrupt.interpreter;
 
-public class PCToken {
+public class PFlag {
 
 	public static final int PUNCTUATION = 0x0;
 	public static final int SPACE_BEFORE = 0x1;
@@ -27,15 +27,4 @@ public class PCToken {
 	public static final int THEN_STYLE = SPACE_BEFORE | SPACE_BEFORE2 | NEWLINE_AFTER |
 										 SPACE_AFTER | INCREASE_INDENT;
 	public static final int ENDIF_STYLE = NEWLINE_BEFORE | SPACE_BEFORE | DECREASE_INDENT | NEWLINE_AFTER;
-
-
-
-	public static final int IF = 0x1;
-	public static final int SYSTEM = 0x2;
-	public static final int FUNCTION = 0x4;
-	public static final int VARIABLE = 0x8;
-	public static final int COMMENT = 0x10;
-	public static final int REFERENCE = 0x20;
-	public static final int SYSTEM_VAR = SYSTEM | VARIABLE;
-	public static final int SYSTEM_FN = SYSTEM | FUNCTION;
 }

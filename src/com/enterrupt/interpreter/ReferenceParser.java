@@ -8,7 +8,7 @@ public class ReferenceParser extends ElementParser {
 
 	public ReferenceParser(byte _b) {
 		this.b = _b;
-		this.format = PCToken.SPACE_BEFORE_AND_AFTER;
+		this.format = PFlag.SPACE_BEFORE_AND_AFTER;
 	}
 
 	public byte getStartByte() {
@@ -52,6 +52,6 @@ public class ReferenceParser extends ElementParser {
 
 	public Token interpret() throws Exception {
 		String ref = this.getReference();
-		return new Token(PCToken.REFERENCE);
+		return new Token(Token.REFERENCE);
 	}
 }

@@ -7,7 +7,7 @@ public class CommentParser extends ElementParser {
 	private byte b;
 
 	public CommentParser(byte _b) {
-		this(_b, PCToken.NEWLINE_BEFORE_AND_AFTER);
+		this(_b, PFlag.NEWLINE_BEFORE_AND_AFTER);
 	}
 
 	public CommentParser(byte _b, int _f) {
@@ -49,7 +49,7 @@ public class CommentParser extends ElementParser {
 
 		int commLen = this.getCommentLength();
 		PCParser.prog.byteCursorPos += commLen;	// fast forward through comment.
-		return new Token(PCToken.COMMENT);
+		return new Token(Token.COMMENT);
 	}
 
 	public boolean writesNonBlank() {

@@ -8,7 +8,7 @@ public class IdentifierParser extends StringParser {
 
 	IdentifierParser(byte _b) {
 		this.b = _b;
-		this.format = PCToken.SPACE_BEFORE | PCToken.SPACE_AFTER;
+		this.format = PFlag.SPACE_BEFORE | PFlag.SPACE_AFTER;
 	}
 
 	public byte getStartByte() {

@@ -22,7 +22,7 @@ public class IdentifierParser extends StringParser {
 		PCParser.prog.appendProgText(getString());
 	}
 
-	public void interpret() throws Exception {
-
+	public Token interpret() throws Exception {
+		return new Token(0);
 	}
 }

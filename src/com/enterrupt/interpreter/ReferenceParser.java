@@ -15,7 +15,7 @@ public class ReferenceParser extends ElementParser {
 		return b;
 	}
 
-	public void parse() throws Exception {
+	public String getReference() throws Exception {
 
 		PeopleCodeProg prog = PCParser.prog;
 
@@ -42,11 +42,16 @@ public class ReferenceParser extends ElementParser {
 					ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
 				}
 			}
-			prog.appendProgText(ref);
 		}
+		return ref;
 	}
 
-	public void interpret() throws Exception {
+	public void parse() throws Exception {
+		PCParser.prog.appendProgText(this.getReference());
+	}
 
+	public Token interpret() throws Exception {
+		String ref = this.getReference();
+		return new Token(PCToken.REFERENCE);
 	}
 }

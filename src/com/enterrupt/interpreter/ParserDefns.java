@@ -7,7 +7,7 @@ abstract class ElementParser {
 
 	protected int format;
 	public abstract void parse() throws Exception;
-	public abstract void interpret() throws Exception;
+	public abstract Token interpret() throws Exception;
 	public abstract byte getStartByte();
 
 	public int getFormat() {

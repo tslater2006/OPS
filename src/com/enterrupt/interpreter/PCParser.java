@@ -72,7 +72,7 @@ public class PCParser {
 			if(endDetected = (prog.getCurrentByte() == (byte) 7)) {
 				break;
 			}
-			parseNextToken();
+			Token t = parseNextToken();
 		}
 	}
 
@@ -97,12 +97,14 @@ public class PCParser {
 			parseNextToken();
 		}
 
+		System.out.println(prog.getProgText());
 		prog.verifyEntireProgramText();
 	}
 
-	private static void parseNextToken() throws Exception {
+	public static Token parseNextToken() throws Exception {
 
 		byte b = prog.readNextByte();
+		Token t = null;
 
 		if(prog.interpretFlag) {
 			System.out.printf("Getting parser for byte: 0x%02X\n", b);
@@ -173,7 +175,7 @@ public class PCParser {
 		firstLine = false;
 		int initialByteCursorPos = prog.byteCursorPos;
 		if(prog.interpretFlag) {
-			p.interpret();
+			t = p.interpret();
 		} else {
 			p.parse();
 		}
@@ -187,5 +189,7 @@ public class PCParser {
 		if((p.format & PCToken.RESET_INDENT_AFTER) > 0) {
 			nIndent = 0;
 		}
+
+		return t;
 	}
 }

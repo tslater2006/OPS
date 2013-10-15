@@ -51,7 +51,7 @@ public class NumberParser extends ElementParser {
 		prog.appendProgText(out_number);
 	}
 
-	public void interpret() throws Exception {
-
+	public Token interpret() throws Exception {
+		return new Token(0);
 	}
 }

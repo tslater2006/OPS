@@ -45,10 +45,11 @@ public class CommentParser extends ElementParser {
 		}
 	}
 
-	public void interpret() throws Exception {
+	public Token interpret() throws Exception {
 
 		int commLen = this.getCommentLength();
 		PCParser.prog.byteCursorPos += commLen;	// fast forward through comment.
+		return new Token(PCToken.COMMENT);
 	}
 
 	public boolean writesNonBlank() {

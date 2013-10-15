@@ -21,11 +21,11 @@ public class SimpleElementParser extends ElementParser {
 		PCParser.prog.appendProgText(t);
 	}
 
-	public void interpret() throws Exception {
+	public Token interpret() throws Exception {
 		if(t.equals("If")) {
-			// TODO: Peform all logic here, don't use objects for now. Check for PureStringParser, have it
-			// resolve None to global function.
+			Token tok = PCParser.parseNextToken();
 		}
+		return new Token(PCToken.IF);
 	}
 
 	public byte getStartByte() {

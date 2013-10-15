@@ -4,9 +4,12 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.lang.StringBuilder;
 import java.util.HashMap;
 import com.enterrupt.sql.StmtLibrary;
+import java.security.MessageDigest;
+import org.apache.commons.codec.binary.Base64;
 
 public class PeopleCodeProg {
 
@@ -183,5 +186,73 @@ public class PeopleCodeProg {
         rs.close();
         pstmt.close();
 	}
+
+	/**
+     * REMEMBER: SQL emitted here should not show up in the emittedStmts
+     * list, otherwise trace verification will fail.
+	 * Note: PSPCMTXT contains only 1/10 of the records in PSPCMPROG. Do not fail
+     * here if no match is found in PSPCMTXT.
+     */
+    public void verifyEntireProgramText() throws Exception {
+
+    	PreparedStatement pstmt = null;
+		ResultSet rs;
+
+		System.out.println("Verifying...");
+		System.out.println(this.getProgText());
+
+        if(pcType.equals("RecordPC")) {
+			pstmt = StmtLibrary.getPSPCMTXT(PSDefn.RECORD, this.recname,
+                                                 PSDefn.FIELD, this.fldname,
+                                                 PSDefn.EVENT, this.event,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL);
+        } else if(pcType.equals("ComponentPC")) {
+			pstmt = StmtLibrary.getPSPCMTXT(PSDefn.COMPONENT, this.pnlgrpname,
+												 PSDefn.MARKET, this.market,
+                                                 PSDefn.RECORD, this.recname,
+                                                 PSDefn.EVENT, this.event,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL,
+                                                 "0", PSDefn.NULL);
+		} else {
+			System.out.println("[ERROR] Unexpected value for pcType.");
+			System.exit(1);
+		}
+
+		rs = pstmt.executeQuery();
+		if(rs.next()) {
+			Clob progTextClob = rs.getClob("PCTEXT");
+
+			/**
+			 * TODO: We risk losing text characters here, need to use
+		     * a character stream or other method in the long term.
+			 */
+			int progTextLen = (int) progTextClob.length();
+			String officialProgText = progTextClob.getSubString(1, progTextLen); // first char is at pos 1
+			MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+
+        	crypt.reset();
+        	crypt.update(this.getProgText().trim().getBytes());
+        	byte[] entDigest = crypt.digest();
+    	    String entBase64 = Base64.encodeBase64String(entDigest);
+
+			crypt.reset();
+			crypt.update(officialProgText.trim().getBytes());
+			byte[] psDigest = crypt.digest();
+			String psBase64 = Base64.encodeBase64String(psDigest);
+
+			if(!entBase64.equals(psBase64)) {
+				System.out.println("[ERROR] PeopleCode program digests do not match.");
+				System.exit(1);
+			} else {
+				System.out.println("[OK] PeopleCode program digests match.");
+			}
+		} else {
+			System.out.println("[NOTICE]: PCPCMTXT does not contain PC for requested program.");
+		}
+    }
 }
 

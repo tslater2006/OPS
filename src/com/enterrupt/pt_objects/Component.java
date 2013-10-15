@@ -14,7 +14,7 @@ public class Component {
     private String PNLGRPNAME;
     private String MARKET;
 
-    private String SEARCHRECNAME; // name of search record for this component 
+    private String SEARCHRECNAME; // name of search record for this component
     private ArrayList<PeopleCodeProg> searchRecordProgs;
 
     public Component(String pnlgrpname, String market) {
@@ -108,7 +108,8 @@ public class Component {
         for(PeopleCodeProg prog : this.searchRecordProgs) {
             if(prog.event.equals("SearchInit")) {
 				prog.loadInitialMetadata();
-                PCInterpreter.interpret(prog);
+                PCInterpreter.parseEntireProgram(prog);
+				prog.verifyEntireProgramText();
             }
         }
     }
@@ -128,6 +129,7 @@ public class Component {
 		PeopleCodeProg prog = new PeopleCodeProg();
 		prog.initComponentPCProg(this.PNLGRPNAME, this.MARKET, this.SEARCHRECNAME, "SearchInit");
 		prog.loadInitialMetadata();
-		PCInterpreter.interpret(prog);
+		PCInterpreter.parseEntireProgram(prog);
+		prog.verifyEntireProgramText();
 	}
 }

@@ -1,5 +1,6 @@
 package com.enterrupt.interpreter;
 
+import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import java.util.HashMap;
 
@@ -9,7 +10,7 @@ public class PCInterpreter {
 	private static ElementParser[] allParsers;
 	private static HashMap<Byte, ElementParser> parserTable;
 
-	public static void interpret(PeopleCodeProg prog) throws Exception {
+	public static void parseEntireProgram(PeopleCodeProg prog) throws Exception {
 
 		init();
 		prog.setByteCursorPos(37); 	// Program begins at byte 37.
@@ -34,7 +35,7 @@ public class PCInterpreter {
 				break;
 			}
 			byte b = prog.readNextByte();
-			System.out.printf("Getting parser for byte: 0x%02X\n", b);
+			//System.out.printf("Getting parser for byte: 0x%02X\n", b);
 			ElementParser p = parserTable.get(new Byte(b));
 			if(p == null) {
 				System.out.println("[ERROR] Reached unimplementable byte.");
@@ -110,7 +111,6 @@ public class PCInterpreter {
 				nIndent = 0;
 			}
 		}
-		System.out.println(prog.getProgText());
 	}
 
 	public static void init() {

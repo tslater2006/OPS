@@ -134,6 +134,32 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
+
+
+	/**
+	 * NOTE: This is not a statement executed by PeopleTools; this is used by Enterrupt
+	 * to verify that the internal PeopleCode parser produced the correct program text.
+	 * It must not appear in the emitted SQL statements list.
+	 */
+	public static PreparedStatement getPSPCMTXT(String b1, String b2, String b3, String b4, String b5, String b6, String b7, String b8, String b9, String b10, String b11, String b12, String b13, String b14) throws Exception {
+		PreparedStatement pstmt = conn.prepareStatement("SELECT PCTEXT FROM PSPCMTXT WHERE  OBJECTID1 = ? AND OBJECTVALUE1 = ? AND  OBJECTID2 = ? AND OBJECTVALUE2 = ? AND  OBJECTID3 = ? AND OBJECTVALUE3 = ? AND  OBJECTID4 = ? AND OBJECTVALUE4 = ? AND  OBJECTID5 = ? AND OBJECTVALUE5 = ? AND  OBJECTID6 = ? AND OBJECTVALUE6 = ? AND  OBJECTID7 = ? AND OBJECTVALUE7 = ? ORDER BY PROGSEQ");
+		pstmt.setString(1, b1);
+		pstmt.setString(2, b2);
+		pstmt.setString(3, b3);
+		pstmt.setString(4, b4);
+		pstmt.setString(5, b5);
+		pstmt.setString(6, b6);
+		pstmt.setString(7, b7);
+		pstmt.setString(8, b8);
+		pstmt.setString(9, b9);
+		pstmt.setString(10, b10);
+		pstmt.setString(11, b11);
+		pstmt.setString(12, b12);
+		pstmt.setString(13, b13);
+		pstmt.setString(14, b14);
+		return pstmt;
+	}
+
 	public static void disconnect() {
 		try {
 			conn.close();

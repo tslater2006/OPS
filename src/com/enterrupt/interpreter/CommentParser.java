@@ -25,7 +25,7 @@ public class CommentParser extends ElementParser {
 		int commLen = (int) prog.readNextByte() & 0xff;
 		commLen = commLen + ((int) prog.readNextByte() & 0xff) * 256;
 
-		System.out.println("Comment length: " + commLen);
+		//System.out.println("Comment length: " + commLen);
 		byte b;
 		for(int i=0; i < commLen && (prog.byteCursorPos < prog.progBytes.length); i++) {
 			b = prog.readNextByte();

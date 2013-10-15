@@ -22,6 +22,7 @@ public class PeopleCodeProg {
 	private StringBuilder progTextBuilder;
     public byte[] progBytes;
 	public HashMap<Integer, String> progRefsTable;
+	public boolean interpretFlag;
 
 	public int byteCursorPos = 0;
 
@@ -198,8 +199,8 @@ public class PeopleCodeProg {
     	PreparedStatement pstmt = null;
 		ResultSet rs;
 
-		System.out.println("Verifying...");
-		System.out.println(this.getProgText());
+		//System.out.println("Verifying...");
+		//System.out.println(this.getProgText());
 
         if(pcType.equals("RecordPC")) {
 			pstmt = StmtLibrary.getPSPCMTXT(PSDefn.RECORD, this.recname,
@@ -248,10 +249,10 @@ public class PeopleCodeProg {
 				System.out.println("[ERROR] PeopleCode program digests do not match.");
 				System.exit(1);
 			} else {
-				System.out.println("[OK] PeopleCode program digests match.");
+				//System.out.println("[OK] PeopleCode program digests match.");
 			}
 		} else {
-			System.out.println("[NOTICE]: PCPCMTXT does not contain PC for requested program.");
+			//System.out.println("[NOTICE]: PCPCMTXT does not contain PC for requested program.");
 		}
     }
 }

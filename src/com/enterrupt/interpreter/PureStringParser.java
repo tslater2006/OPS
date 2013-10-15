@@ -20,7 +20,11 @@ public class PureStringParser extends StringParser {
 		return b;
 	}
 
-	public void parse(PeopleCodeProg prog) throws Exception {
-		prog.appendProgText(getString(prog));
+	public void parse() throws Exception {
+		PCParser.prog.appendProgText(getString());
+	}
+
+	public void interpret() throws Exception {
+
 	}
 }

@@ -15,10 +15,14 @@ public class IdentifierParser extends StringParser {
 		return this.b;
 	}
 
-	public void parse(PeopleCodeProg prog) throws Exception {
+	public void parse() throws Exception {
 
-		prog.byteCursorPos--;	// current byte is 0x00, need to back up.
-		prog.byteCursorPos--;
-		prog.appendProgText(getString(prog));
+		PCParser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
+		PCParser.prog.byteCursorPos--;
+		PCParser.prog.appendProgText(getString());
+	}
+
+	public void interpret() throws Exception {
+
 	}
 }

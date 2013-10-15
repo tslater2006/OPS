@@ -15,10 +15,14 @@ public class ReferenceParser extends ElementParser {
 		return b;
 	}
 
-	public void parse(PeopleCodeProg prog) throws Exception {
+	public void parse() throws Exception {
+
+		PeopleCodeProg prog = PCParser.prog;
+
 		int b1 = (int) (prog.readNextByte() & 0xff);
 		int b2 = (int) (prog.readNextByte() & 0xff);
 		String ref = prog.getProgReference(b2 * 256 + b1 + 1);
+
 		if(ref == null) {
 			System.out.println("Unable to find reference number: " + b1);
 			System.exit(1);
@@ -40,5 +44,9 @@ public class ReferenceParser extends ElementParser {
 			}
 			prog.appendProgText(ref);
 		}
+	}
+
+	public void interpret() throws Exception {
+
 	}
 }

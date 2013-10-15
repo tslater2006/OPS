@@ -17,8 +17,15 @@ public class SimpleElementParser extends ElementParser {
 		this(_b, _t, PCToken.SPACE_BEFORE_AND_AFTER);
 	}
 
-	public void parse(PeopleCodeProg prog) throws Exception {
-		prog.appendProgText(t);
+	public void parse() throws Exception {
+		PCParser.prog.appendProgText(t);
+	}
+
+	public void interpret() throws Exception {
+		if(t.equals("If")) {
+			// TODO: Peform all logic here, don't use objects for now. Check for PureStringParser, have it
+			// resolve None to global function.
+		}
 	}
 
 	public byte getStartByte() {

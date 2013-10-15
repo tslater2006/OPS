@@ -6,7 +6,8 @@ import java.lang.StringBuilder;
 abstract class ElementParser {
 
 	protected int format;
-	public abstract void parse(PeopleCodeProg prog) throws Exception;
+	public abstract void parse() throws Exception;
+	public abstract void interpret() throws Exception;
 	public abstract byte getStartByte();
 
 	public int getFormat() {
@@ -24,8 +25,9 @@ abstract class ElementParser {
 
 abstract class StringParser extends ElementParser {
 
-	String getString(PeopleCodeProg prog) {
+	String getString() {
 		byte b;
+		PeopleCodeProg prog = PCParser.prog;
 		StringBuilder builder = new StringBuilder();
 
         while((b = prog.readNextByte()) != 0) {

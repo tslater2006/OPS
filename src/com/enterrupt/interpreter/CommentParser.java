@@ -19,11 +19,17 @@ public class CommentParser extends ElementParser {
 		return b;
 	}
 
-	public void parse(PeopleCodeProg prog) throws Exception {
+	private int getCommentLength() {
 
 		// Length byte is wide ANDed and cast to integer.
-		int commLen = (int) prog.readNextByte() & 0xff;
-		commLen = commLen + ((int) prog.readNextByte() & 0xff) * 256;
+		int commLen = (int) PCParser.prog.readNextByte() & 0xff;
+		return commLen + ((int) PCParser.prog.readNextByte() & 0xff) * 256;
+	}
+
+	public void parse() throws Exception {
+
+		PeopleCodeProg prog = PCParser.prog;
+		int commLen = this.getCommentLength();
 
 		//System.out.println("Comment length: " + commLen);
 		byte b;
@@ -37,6 +43,12 @@ public class CommentParser extends ElementParser {
 				}
 			}
 		}
+	}
+
+	public void interpret() throws Exception {
+
+		int commLen = this.getCommentLength();
+		PCParser.prog.byteCursorPos += commLen;	// fast forward through comment.
 	}
 
 	public boolean writesNonBlank() {

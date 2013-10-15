@@ -2,6 +2,7 @@ package com.enterrupt;
 
 import com.enterrupt.sql.*;
 import com.enterrupt.pt_objects.*;
+import com.enterrupt.interpreter.*;
 
 public class Main {
 
@@ -10,6 +11,7 @@ public class Main {
 		try {
 			StmtLibrary.init();
 			BuildAssistant.init();
+			PCParser.init();
 
 			Component c = new Component("SSS_STUDENT_CENTER", "GBL");
 			c.loadInitialMetadata();

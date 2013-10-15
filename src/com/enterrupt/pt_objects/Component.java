@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.sql.Blob;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.interpreter.PCInterpreter;
+import com.enterrupt.interpreter.PCParser;
 
 public class Component {
 
@@ -108,8 +108,8 @@ public class Component {
         for(PeopleCodeProg prog : this.searchRecordProgs) {
             if(prog.event.equals("SearchInit")) {
 				prog.loadInitialMetadata();
-                PCInterpreter.parseEntireProgram(prog);
-				prog.verifyEntireProgramText();
+				PCParser.parse(prog);
+				PCParser.interpret(prog);
             }
         }
     }
@@ -129,7 +129,7 @@ public class Component {
 		PeopleCodeProg prog = new PeopleCodeProg();
 		prog.initComponentPCProg(this.PNLGRPNAME, this.MARKET, this.SEARCHRECNAME, "SearchInit");
 		prog.loadInitialMetadata();
-		PCInterpreter.parseEntireProgram(prog);
-		prog.verifyEntireProgramText();
+		PCParser.parse(prog);
+		PCParser.interpret(prog);
 	}
 }

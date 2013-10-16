@@ -27,12 +27,12 @@ public class RunTimeEnvironment {
 	 * TODO: The PS documentation states that 0 in a required numeric field should return false.
 	 */
 	public static void None() {
-		Token t = Interpreter.popFromRuntimeStack();
-		if(t.isNull()) {
+		Token t = Interpreter.popFromCallStack();
+		/*if(t.isNull()) {
 			Interpreter.pushToRuntimeStack(new BooleanToken(true));
 		} else {
 			Interpreter.pushToRuntimeStack(new BooleanToken(false));
-		}
+		}*/
 	}
 
 	public static void Hide() {

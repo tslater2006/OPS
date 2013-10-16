@@ -5,6 +5,7 @@ import com.enterrupt.Parser;
 import com.enterrupt.tokens.*;
 import java.lang.reflect.*;
 import com.enterrupt.RunTimeEnvironment;
+import java.util.EnumSet;
 
 public class PureStringParser extends StringParser {
 
@@ -37,7 +38,7 @@ public class PureStringParser extends StringParser {
 		if(str.trim().charAt(0) == '%') {
 			try {
 				Field f = RunTimeEnvironment.class.getField(str.replaceFirst("%", "SYSVAR_"));
-				t = new Token(Token.SYSTEM_VAR);
+				t = new Token(EnumSet.of(TFlag.SYSTEM, TFlag.VARIABLE));
 				return t;
 			} catch(NoSuchFieldException nsfe) {
 				System.out.println("[FATAL] Unimplemented system variable: " + str);
@@ -48,7 +49,7 @@ public class PureStringParser extends StringParser {
 		// Check to see if the string represents a system function.
 		try {
 			Method m = RunTimeEnvironment.class.getMethod(str);
-			FunctionToken fnToken = new FunctionToken(Token.SYSTEM_FN);
+			FunctionToken fnToken = new FunctionToken(TFlag.SYSTEM);
 			fnToken.fnTarget = m;
 			return fnToken;
 		} catch(NoSuchMethodException nsme) {

@@ -54,6 +54,6 @@ public class NumberParser extends ElementParser {
 	}
 
 	public Token interpret() throws Exception {
-		return new Token(0);
+		return new Token(TFlag.NUMBER);
 	}
 }

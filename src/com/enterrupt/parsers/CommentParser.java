@@ -51,7 +51,7 @@ public class CommentParser extends ElementParser {
 
 		int commLen = this.getCommentLength();
 		Parser.prog.byteCursorPos += commLen;	// fast forward through comment.
-		return new Token(Token.COMMENT);
+		return new Token(TFlag.COMMENT);
 	}
 
 	public boolean writesNonBlank() {

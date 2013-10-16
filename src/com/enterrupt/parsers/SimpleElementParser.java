@@ -8,17 +8,17 @@ public class SimpleElementParser extends ElementParser {
 
 	private byte b;
 	private String t;
-	private int tokenType;
+	private TFlag tflag;
 
-	public SimpleElementParser(byte _b, int _tokenType, String _t, int _format) {
+	public SimpleElementParser(byte _b, TFlag _f, String _t, int _format) {
 		b = _b;
-		tokenType = _tokenType;
+		tflag = _f;
 		t = _t;
 		format = _format;
 	}
 
-	public SimpleElementParser(byte _b, int _tokenType, String _t) {
-		this(_b, _tokenType, _t, PFlags.SPACE_BEFORE_AND_AFTER);
+	public SimpleElementParser(byte _b, TFlag _f, String _t) {
+		this(_b, _f, _t, PFlags.SPACE_BEFORE_AND_AFTER);
 	}
 
 	public void parse() throws Exception {
@@ -26,7 +26,7 @@ public class SimpleElementParser extends ElementParser {
 	}
 
 	public Token interpret() throws Exception {
-		return new Token(this.tokenType);
+		return new Token(tflag);
 	}
 
 	public byte getStartByte() {

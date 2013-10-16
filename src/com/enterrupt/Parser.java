@@ -5,6 +5,7 @@ import com.enterrupt.pt_objects.PeopleCodeProg;
 import java.util.HashMap;
 import com.enterrupt.parsers.*;
 import com.enterrupt.tokens.*;
+import java.util.EnumSet;
 
 public class Parser {
 
@@ -21,24 +22,25 @@ public class Parser {
 	private static ElementParser lastParser;
 	private static int nIndent;
 	public static PeopleCodeProg prog;
+	public static Token queuedParseStreamToken;
 
 	public static void init() {
 
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
 			new IdentifierParser((byte) 0),										// 0x00
-			new SimpleElementParser((byte) 6, Token.EQUAL, "="),								// 0x06
+			new SimpleElementParser((byte) 6, TFlag.EQUAL, "="),								// 0x06
 			new PureStringParser((byte) 10),									// 0x0A (Function | Method | External Datatype | Class name)
-			new SimpleElementParser((byte) 11, Token.L_PAREN, "(", PFlags.NO_SPACE_AFTER),	// 0x0B
+			new SimpleElementParser((byte) 11, TFlag.L_PAREN, "(", PFlags.NO_SPACE_AFTER),	// 0x0B
 			new PureStringParser((byte) 18),									// 0x12 (System variable name)
-			new SimpleElementParser((byte) 20, Token.R_PAREN, ")", PFlags.NO_SPACE_BEFORE),	// 0x14
-			new SimpleElementParser((byte) 21, Token.SEMICOLON, ";", PFlags.SEMICOLON | PFlags.NEWLINE_AFTER | PFlags.NO_SPACE_BEFORE),	// 0x15
-			new SimpleElementParser((byte) 26, Token.END_IF, "End-If", PFlags.ENDIF_STYLE),	// 0x1A
-			new SimpleElementParser((byte) 28, Token.IF, "If", PFlags.IF_STYLE),			// 0x1C
-			new SimpleElementParser((byte) 31, Token.THEN, "Then", PFlags.THEN_STYLE),		// 0x1F
+			new SimpleElementParser((byte) 20, TFlag.R_PAREN, ")", PFlags.NO_SPACE_BEFORE),	// 0x14
+			new SimpleElementParser((byte) 21, TFlag.SEMICOLON, ";", PFlags.SEMICOLON | PFlags.NEWLINE_AFTER | PFlags.NO_SPACE_BEFORE),	// 0x15
+			new SimpleElementParser((byte) 26, TFlag.END_IF, "End-If", PFlags.ENDIF_STYLE),	// 0x1A
+			new SimpleElementParser((byte) 28, TFlag.IF, "If", PFlags.IF_STYLE),			// 0x1C
+			new SimpleElementParser((byte) 31, TFlag.THEN, "Then", PFlags.THEN_STYLE),		// 0x1F
 			new ReferenceParser((byte) 33),										// 0x21
 			new CommentParser((byte) 36), 										// 0x24
-			new SimpleElementParser((byte) 47, Token.TRUE, "True", PFlags.SPACE_BEFORE_AND_AFTER2),	// 0x2F
+			new SimpleElementParser((byte) 47, TFlag.TRUE, "True", PFlags.SPACE_BEFORE_AND_AFTER2),	// 0x2F
 			new NumberParser((byte) 80, 18)										// 0x50
 		};
 
@@ -60,6 +62,16 @@ public class Parser {
 		ElementParser lastParser = null;
 		nIndent = 0;
 		prog = null;
+		queuedParseStreamToken = null;
+	}
+
+	public static void returnToParseStream(Token t) {
+		if(queuedParseStreamToken != null) {
+			System.out.println("[ERROR] There is already a token queued in the parse stream; parser only " +
+				"supports 1 character of look-ahead.");
+			System.exit(1);
+		}
+		queuedParseStreamToken = t;
 	}
 
 	public static void interpret(PeopleCodeProg p) throws Exception {
@@ -71,12 +83,12 @@ public class Parser {
 		Interpreter.init();
 		prog.setByteCursorPos(37);			// Program begins at byte 37.
 
-		while(prog.byteCursorPos < prog.progBytes.length && !endDetected) {
-			if(endDetected = (prog.getCurrentByte() == (byte) 7)) {
-				break;
-			}
-			Token t = parseNextToken();
-			Interpreter.submitToken(t);
+		StmtListToken.parse();
+
+		// Detect: END_OF_PROGRAM
+		if(!parseNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
+			System.out.println("[ERROR] Expected END_OF_PROGRAM");
+			System.exit(1);
 		}
 	}
 
@@ -94,11 +106,11 @@ public class Parser {
 			debugIdx++;
 		}*/
 
-		while(prog.byteCursorPos < prog.progBytes.length && !endDetected) {
-			if(endDetected = (prog.getCurrentByte() == (byte) 7)) {
+		while(prog.byteCursorPos < prog.progBytes.length) {
+			Token t = parseNextToken();
+			if(p.getCurrentByte() == (byte) 7) {		// Signals end of program.
 				break;
 			}
-			parseNextToken();
 		}
 
 		System.out.println(prog.getProgText());
@@ -108,10 +120,22 @@ public class Parser {
 	public static Token parseNextToken() throws Exception {
 
 		Token t = null;
+
+		// If a token has been returned to the parse stream, return it immediately.
+		if(queuedParseStreamToken != null) {
+			t = queuedParseStreamToken;
+			queuedParseStreamToken = null;
+			return t;
+		}
+
 		byte b = prog.readNextByte();
 
+		if(b == (byte) 7) {
+			return new Token(EnumSet.of(TFlag.END_OF_PROGRAM, TFlag.END_OF_BLOCK));
+		}
+
 		if(prog.interpretFlag) {
-			//System.out.printf("Getting parser for byte: 0x%02X\n", b);
+			System.out.printf("Getting parser for byte: 0x%02X\n", b);
 		}
 
 		ElementParser p = parserTable.get(new Byte(b));

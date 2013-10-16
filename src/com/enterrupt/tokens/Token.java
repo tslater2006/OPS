@@ -1,42 +1,20 @@
 package com.enterrupt.tokens;
 
+import java.util.EnumSet;
+
 public class Token {
 
-	public static final int ANY = 0x0;		// internal use
-    public static final int IF = 0x1;
-    public static final int SYSTEM = 0x2;
-    public static final int FUNCTION = 0x4;
-    public static final int VARIABLE = 0x8;
-    public static final int COMMENT = 0x10;
-    public static final int REFERENCE = 0x20;
-    public static final int L_PAREN = 0x30;
-    public static final int R_PAREN = 0x40;
-    public static final int EQUAL = 0x50;
-    public static final int SEMICOLON = 0x60;
-    public static final int END_IF = 0x70;
-    public static final int THEN = 0x80;
-    public static final int TRUE = 0x90;
-	public static final int FALSE = 0x800;
-    public static final int SYSTEM_VAR = SYSTEM | VARIABLE;
-    public static final int SYSTEM_FN = SYSTEM | FUNCTION;
-
-	public int type;
+	public EnumSet<TFlag> flags;
 
 	public Token() {
-		this.type = 0;
+		this.flags = EnumSet.noneOf(TFlag.class);
 	}
 
-	public Token(int type) {
-		this.type = type;
+	public Token(TFlag flag) {
+		this.flags = EnumSet.of(flag);
 	}
 
-	public boolean isExact(int expectedType) {
-		return (this.type - expectedType) == 0;
+	public Token(EnumSet<TFlag> flagSet) {
+		this.flags = EnumSet.copyOf(flagSet);
 	}
-
-	public boolean isA(int expectedType) {
-		return (this.type & expectedType) == expectedType;
-	}
-
-	public boolean isNull() { return false; }
 }

@@ -25,6 +25,6 @@ public class IdentifierParser extends StringParser {
 	}
 
 	public Token interpret() throws Exception {
-		return new Token(0);
+		return new Token(TFlag.IDENTIFIER);
 	}
 }

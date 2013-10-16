@@ -7,7 +7,7 @@ public class ReferenceToken extends Token {
 	private String ref;
 
 	public ReferenceToken(String r) {
-		super(Token.REFERENCE);
+		super(TFlag.REFERENCE);
 		this.ref = r;
 	}
 

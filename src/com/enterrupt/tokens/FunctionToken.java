@@ -7,8 +7,8 @@ public class FunctionToken extends Token {
 
 	public Method fnTarget;
 
-	public FunctionToken(int type) {
-		super(type);
+	public FunctionToken(TFlag flag) {
+		super(flag);
 	}
 
 	public void invoke() throws Exception {

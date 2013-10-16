@@ -2,7 +2,7 @@ package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.tokens.*;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 
 public class SimpleElementParser extends ElementParser {
 
@@ -22,7 +22,7 @@ public class SimpleElementParser extends ElementParser {
 	}
 
 	public void parse() throws Exception {
-		PCParser.prog.appendProgText(t);
+		Parser.prog.appendProgText(t);
 	}
 
 	public Token interpret() throws Exception {

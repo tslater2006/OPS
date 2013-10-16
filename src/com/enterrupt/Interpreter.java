@@ -44,7 +44,7 @@ public class Interpreter {
 
 		if(t.isExact(Token.L_PAREN)) {
 			if(tokenStack.peek().isA(Token.FUNCTION)) {
-				pushToRuntimeStack(PCParser.parseNextToken());		// push function arg to runtime stack
+				pushToRuntimeStack(Parser.parseNextToken());		// push function arg to runtime stack
 			}
 			return; // don't push ( on stack (for now anyway)
 		}

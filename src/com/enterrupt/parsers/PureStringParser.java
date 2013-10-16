@@ -1,7 +1,7 @@
 package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 import com.enterrupt.tokens.*;
 import java.lang.reflect.*;
 import com.enterrupt.RunTimeEnvironment;
@@ -25,7 +25,7 @@ public class PureStringParser extends StringParser {
 	}
 
 	public void parse() throws Exception {
-		PCParser.prog.appendProgText(getString());
+		Parser.prog.appendProgText(getString());
 	}
 
 	public Token interpret() throws Exception {

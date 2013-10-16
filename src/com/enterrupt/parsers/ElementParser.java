@@ -3,7 +3,7 @@ package com.enterrupt.parsers;
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import java.lang.StringBuilder;
 import com.enterrupt.tokens.*;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 
 public abstract class ElementParser {
 

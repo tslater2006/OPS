@@ -2,7 +2,7 @@ package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.tokens.*;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 
 public class IdentifierParser extends StringParser {
 
@@ -19,9 +19,9 @@ public class IdentifierParser extends StringParser {
 
 	public void parse() throws Exception {
 
-		PCParser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
-		PCParser.prog.byteCursorPos--;
-		PCParser.prog.appendProgText(getString());
+		Parser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
+		Parser.prog.byteCursorPos--;
+		Parser.prog.appendProgText(getString());
 	}
 
 	public Token interpret() throws Exception {

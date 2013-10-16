@@ -2,7 +2,7 @@ package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.tokens.*;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 
 public class NumberParser extends ElementParser {
 
@@ -25,7 +25,7 @@ public class NumberParser extends ElementParser {
 		String out_number = "";
 		int num_bytes = nBytes - 3;
 		long val = 0, fact = 1;
-		PeopleCodeProg prog = PCParser.prog;
+		PeopleCodeProg prog = Parser.prog;
 
 		prog.byteCursorPos++;	// skip first byte
 		dValue = (int) prog.readNextByte();

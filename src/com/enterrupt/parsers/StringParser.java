@@ -3,13 +3,13 @@ package com.enterrupt.parsers;
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.tokens.*;
 import java.lang.StringBuilder;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 
 public abstract class StringParser extends ElementParser {
 
     public String getString() {
         byte b;
-        PeopleCodeProg prog = PCParser.prog;
+        PeopleCodeProg prog = Parser.prog;
         StringBuilder builder = new StringBuilder();
 
         while((b = prog.readNextByte()) != 0) {

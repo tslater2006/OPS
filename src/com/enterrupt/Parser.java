@@ -6,7 +6,7 @@ import java.util.HashMap;
 import com.enterrupt.parsers.*;
 import com.enterrupt.tokens.*;
 
-public class PCParser {
+public class Parser {
 
 	private static ElementParser[] allParsers;
 	private static HashMap<Byte, ElementParser> parserTable;

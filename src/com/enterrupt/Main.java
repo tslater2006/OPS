@@ -10,7 +10,7 @@ public class Main {
 		try {
 			StmtLibrary.init();
 			BuildAssistant.init();
-			PCParser.init();
+			Parser.init();
 
 			RunTimeEnvironment.init();
 			RunTimeEnvironment.SYSVAR_EmployeeId = "AA0001";

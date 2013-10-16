@@ -2,7 +2,7 @@ package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.tokens.*;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 
 public class CommentParser extends ElementParser {
 
@@ -24,13 +24,13 @@ public class CommentParser extends ElementParser {
 	private int getCommentLength() {
 
 		// Length byte is wide ANDed and cast to integer.
-		int commLen = (int) PCParser.prog.readNextByte() & 0xff;
-		return commLen + ((int) PCParser.prog.readNextByte() & 0xff) * 256;
+		int commLen = (int) Parser.prog.readNextByte() & 0xff;
+		return commLen + ((int) Parser.prog.readNextByte() & 0xff) * 256;
 	}
 
 	public void parse() throws Exception {
 
-		PeopleCodeProg prog = PCParser.prog;
+		PeopleCodeProg prog = Parser.prog;
 		int commLen = this.getCommentLength();
 
 		//System.out.println("Comment length: " + commLen);
@@ -50,7 +50,7 @@ public class CommentParser extends ElementParser {
 	public Token interpret() throws Exception {
 
 		int commLen = this.getCommentLength();
-		PCParser.prog.byteCursorPos += commLen;	// fast forward through comment.
+		Parser.prog.byteCursorPos += commLen;	// fast forward through comment.
 		return new Token(Token.COMMENT);
 	}
 

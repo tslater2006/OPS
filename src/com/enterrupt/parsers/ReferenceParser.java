@@ -2,7 +2,7 @@ package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.tokens.*;
-import com.enterrupt.PCParser;
+import com.enterrupt.Parser;
 import com.enterrupt.RunTimeEnvironment;
 
 public class ReferenceParser extends ElementParser {
@@ -20,7 +20,7 @@ public class ReferenceParser extends ElementParser {
 
 	public String getReference() throws Exception {
 
-		PeopleCodeProg prog = PCParser.prog;
+		PeopleCodeProg prog = Parser.prog;
 
 		int b1 = (int) (prog.readNextByte() & 0xff);
 		int b2 = (int) (prog.readNextByte() & 0xff);
@@ -50,7 +50,7 @@ public class ReferenceParser extends ElementParser {
 	}
 
 	public void parse() throws Exception {
-		PCParser.prog.appendProgText(this.getReference());
+		Parser.prog.appendProgText(this.getReference());
 	}
 
 	public Token interpret() throws Exception {

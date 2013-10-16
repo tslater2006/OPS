@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.sql.Blob;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.interpreter.PCParser;
+import com.enterrupt.PCParser;
 
 public class Component {
 

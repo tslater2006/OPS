@@ -2,7 +2,6 @@ package com.enterrupt;
 
 import com.enterrupt.sql.*;
 import com.enterrupt.pt_objects.*;
-import com.enterrupt.interpreter.*;
 
 public class Main {
 

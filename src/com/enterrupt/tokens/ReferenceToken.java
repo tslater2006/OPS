@@ -1,4 +1,6 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.tokens;
+
+import com.enterrupt.RunTimeEnvironment;
 
 public class ReferenceToken extends Token {
 

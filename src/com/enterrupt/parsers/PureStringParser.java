@@ -1,18 +1,21 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.PCParser;
+import com.enterrupt.tokens.*;
 import java.lang.reflect.*;
+import com.enterrupt.RunTimeEnvironment;
 
 public class PureStringParser extends StringParser {
 
 	private byte b;
 
-	PureStringParser(byte _b) {
+	public PureStringParser(byte _b) {
 		b = _b;
-		format = PFlag.SPACE_BEFORE;
+		format = PFlags.SPACE_BEFORE;
 	}
 
-	PureStringParser(byte _b, int _format) {
+	public PureStringParser(byte _b, int _format) {
 		this(_b);
 		format = _format;
 	}

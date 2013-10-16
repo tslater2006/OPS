@@ -1,13 +1,15 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.tokens.*;
+import com.enterrupt.PCParser;
 
 public class CommentParser extends ElementParser {
 
 	private byte b;
 
 	public CommentParser(byte _b) {
-		this(_b, PFlag.NEWLINE_BEFORE_AND_AFTER);
+		this(_b, PFlags.NEWLINE_BEFORE_AND_AFTER);
 	}
 
 	public CommentParser(byte _b, int _f) {

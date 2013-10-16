@@ -1,6 +1,7 @@
-package com.enterrupt.interpreter;
+package com.enterrupt;
 
 import java.util.HashMap;
+import com.enterrupt.tokens.*;
 
 public class RunTimeEnvironment {
 

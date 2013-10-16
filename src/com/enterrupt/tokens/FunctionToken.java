@@ -1,6 +1,7 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.tokens;
 
 import java.lang.reflect.*;
+import com.enterrupt.RunTimeEnvironment;
 
 public class FunctionToken extends Token {
 

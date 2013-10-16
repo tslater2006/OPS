@@ -1,6 +1,8 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.tokens.*;
+import com.enterrupt.PCParser;
 
 public class NumberParser extends ElementParser {
 
@@ -10,7 +12,7 @@ public class NumberParser extends ElementParser {
 	public NumberParser(byte _b, int _nBytes) {
 		b = _b;
 		nBytes = _nBytes;
-		format = PFlag.SPACE_BEFORE | PFlag.NO_SPACE_AFTER;
+		format = PFlags.SPACE_BEFORE | PFlags.NO_SPACE_AFTER;
 	}
 
 	public byte getStartByte() {

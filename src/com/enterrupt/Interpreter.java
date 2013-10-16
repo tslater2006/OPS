@@ -1,6 +1,8 @@
-package com.enterrupt.interpreter;
+package com.enterrupt;
 
 import java.util.Stack;
+import com.enterrupt.tokens.*;
+import com.enterrupt.parsers.*;
 
 public class Interpreter {
 

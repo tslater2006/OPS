@@ -1,14 +1,16 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.tokens.*;
+import com.enterrupt.PCParser;
 
 public class IdentifierParser extends StringParser {
 
 	byte b;
 
-	IdentifierParser(byte _b) {
+	public IdentifierParser(byte _b) {
 		this.b = _b;
-		this.format = PFlag.SPACE_BEFORE | PFlag.SPACE_AFTER;
+		this.format = PFlags.SPACE_BEFORE | PFlags.SPACE_AFTER;
 	}
 
 	public byte getStartByte() {

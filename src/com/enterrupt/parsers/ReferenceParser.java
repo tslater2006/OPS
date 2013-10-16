@@ -1,6 +1,9 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.parsers;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.tokens.*;
+import com.enterrupt.PCParser;
+import com.enterrupt.RunTimeEnvironment;
 
 public class ReferenceParser extends ElementParser {
 
@@ -8,7 +11,7 @@ public class ReferenceParser extends ElementParser {
 
 	public ReferenceParser(byte _b) {
 		this.b = _b;
-		this.format = PFlag.SPACE_BEFORE_AND_AFTER;
+		this.format = PFlags.SPACE_BEFORE_AND_AFTER;
 	}
 
 	public byte getStartByte() {

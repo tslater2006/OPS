@@ -1,4 +1,4 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.tokens;
 
 public class Token {
 

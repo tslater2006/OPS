@@ -1,5 +1,7 @@
 package com.enterrupt.tokens;
 
+import com.enterrupt.Parser;
+
 public class IfToken extends Token implements IBlockStartable {
 
 	private ExprToken expression;
@@ -9,25 +11,32 @@ public class IfToken extends Token implements IBlockStartable {
 		super(TFlag.IF);
 	}
 
-	public static IfToken parse() {
+	public static void parse() throws Exception {
 
 		IfToken ifToken = new IfToken();
-/*
-		// Detect: EXPRESSION, THEN, STMT_LIST, END_IF
-		ifToken.expression = ExprToken.parse();
-		if(!Parser.readNextToken().isExact(Token.THEN)) {
+
+		// Detect: IF, EXPRESSION, THEN, STMT_LIST, END_IF
+		if(!Parser.parseNextToken().flags.contains(TFlag.IF)) {
+			System.out.println("[ERROR] Expected IF, did not parse.");
+			System.exit(1);
+		}
+
+		//ifToken.expression = ExprToken.parse();
+
+		if(!Parser.parseNextToken().flags.contains(TFlag.THEN)) {
 			System.out.println("[ERROR] Expected THEN, did not parse.");
 			System.exit(1);
 		}
+
 		//TODO: Only parse stmt list if EXPRESSION evaluates to TRUE,
 		// still need to find the *correct* End-If;
 		//ifToken.stmtList = StmtListToken.parse();
-		Token.parse(Token.END_IF);
-		if(!Parser.readNextToken().isExact(Token.END_IF)) {
+		//StmtListToken.parse()
+
+		if(!Parser.parseNextToken().flags.contains(TFlag.END_IF)) {
 			System.out.println("[ERROR] Expected END_IF, did not parse.");
 			System.exit(1);
-		}*/
-		return ifToken;
+		}
 	}
 
 	public boolean endsWith(Token t) {

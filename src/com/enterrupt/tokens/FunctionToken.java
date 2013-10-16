@@ -2,13 +2,14 @@ package com.enterrupt.tokens;
 
 import java.lang.reflect.*;
 import com.enterrupt.RunTimeEnvironment;
+import java.util.EnumSet;
 
 public class FunctionToken extends Token {
 
 	public Method fnTarget;
 
 	public FunctionToken(TFlag flag) {
-		super(flag);
+		super(EnumSet.of(TFlag.FUNCTION, flag));
 	}
 
 	public void invoke() throws Exception {

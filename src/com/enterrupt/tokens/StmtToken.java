@@ -8,23 +8,24 @@ public class StmtToken extends Token {
 		super(TFlag.STATEMENT);
 	}
 
-	public static Token parse() {
+	public static void parse() throws Exception {
 
-		StmtToken stmtToken = new StmtToken();
-/*		Token t = Parser.getNextToken();
+		Token t = Parser.lookAheadNextToken();
 
 		// Detect: single-line comment
-		if(t.isExact(Token.COMMENT)) {
-			//TODO : RETURN
+		if(t.flags.contains(TFlag.COMMENT)) {
+			Parser.parseNextToken(); // Don't need value, just move to next token.
+			return;
 		}
 
-		// Detect: IF
-		if(t.isExact(Token.IF)) {
-			return IfToken.parse();
+		// [LOOKAHEAD] Detect: IF
+		if(t.flags.contains(TFlag.IF)) {
+			IfToken.parse();
+			return;
 		}
 
 		// Detect: END_IF
-		if(t.isA(Token.END_IF)) {
+	/*	if(t.isA(Token.END_IF)) {
 			return new Token(Token.END_IF);
 		}
 
@@ -33,11 +34,9 @@ public class StmtToken extends Token {
 		// Detect: END_OF_PROGRAM
 		if(t.isA(Token.END_OF_PROGRAM)) {
 			return new Token(Token.END_OF_PROGRAM);
-		}
+		}*/
 
 		System.out.println("[ERROR] Encountered unexpected statement token.");
-		System.exit(1);*/
-
-		return stmtToken;
+		System.exit(1);
 	}
 }

@@ -65,13 +65,12 @@ public class Parser {
 		queuedParseStreamToken = null;
 	}
 
-	public static void returnToParseStream(Token t) {
-		if(queuedParseStreamToken != null) {
-			System.out.println("[ERROR] There is already a token queued in the parse stream; parser only " +
-				"supports 1 character of look-ahead.");
-			System.exit(1);
+	// Note: Only supports 1 character of look-ahead.
+	public static Token lookAheadNextToken() throws Exception {
+		if(queuedParseStreamToken == null) {
+			queuedParseStreamToken = parseNextToken();
 		}
-		queuedParseStreamToken = t;
+		return queuedParseStreamToken;
 	}
 
 	public static void interpret(PeopleCodeProg p) throws Exception {
@@ -204,6 +203,7 @@ public class Parser {
 		int initialByteCursorPos = prog.byteCursorPos;
 		if(prog.interpretFlag) {
 			t = p.interpret();
+			System.out.println(t.flags.toString());
 		} else {
 			p.parse();
 		}

@@ -24,11 +24,7 @@ public class SimpleElementParser extends ElementParser {
 	}
 
 	public Token interpret() throws Exception {
-		Token tok = new Token(this.tokenType);
-		if(t.equals("If")) {
-			tok = PCParser.parseNextToken();
-		}
-		return tok;
+		return new Token(this.tokenType);
 	}
 
 	public byte getStartByte() {

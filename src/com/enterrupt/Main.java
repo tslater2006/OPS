@@ -13,6 +13,7 @@ public class Main {
 			BuildAssistant.init();
 			PCParser.init();
 
+			RunTimeEnvironment.init();
 			RunTimeEnvironment.SYSVAR_EmployeeId = "AA0001";
 			RunTimeEnvironment.SYSVAR_Menu = "SA_LEARNER_SERVICES";
 

@@ -45,8 +45,9 @@ public class PureStringParser extends StringParser {
 		// Check to see if the string represents a system function.
 		try {
 			Method m = RunTimeEnvironment.class.getMethod(str);
-			t = new Token(Token.SYSTEM_FN);
-			return t;
+			FunctionToken fnToken = new FunctionToken(Token.SYSTEM_FN);
+			fnToken.fnTarget = m;
+			return fnToken;
 		} catch(NoSuchMethodException nsme) {
 			/**
 			 * TODO: Replace this exit with code that checks for declared/imported functions.

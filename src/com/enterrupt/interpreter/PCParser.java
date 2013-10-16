@@ -66,6 +66,7 @@ public class PCParser {
 		reset();
 		prog = p;
 		prog.interpretFlag = true;
+		Interpreter.init();
 		prog.setByteCursorPos(37);			// Program begins at byte 37.
 
 		while(prog.byteCursorPos < prog.progBytes.length && !endDetected) {
@@ -73,6 +74,7 @@ public class PCParser {
 				break;
 			}
 			Token t = parseNextToken();
+			Interpreter.submitToken(t);
 		}
 	}
 
@@ -103,11 +105,11 @@ public class PCParser {
 
 	public static Token parseNextToken() throws Exception {
 
-		byte b = prog.readNextByte();
 		Token t = null;
+		byte b = prog.readNextByte();
 
 		if(prog.interpretFlag) {
-			System.out.printf("Getting parser for byte: 0x%02X\n", b);
+			//System.out.printf("Getting parser for byte: 0x%02X\n", b);
 		}
 
 		ElementParser p = parserTable.get(new Byte(b));

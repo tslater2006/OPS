@@ -52,6 +52,6 @@ public class ReferenceParser extends ElementParser {
 
 	public Token interpret() throws Exception {
 		String ref = this.getReference();
-		return new Token(Token.REFERENCE);
+		return new ReferenceToken(ref);
 	}
 }

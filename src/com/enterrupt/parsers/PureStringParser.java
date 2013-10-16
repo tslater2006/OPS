@@ -49,7 +49,7 @@ public class PureStringParser extends StringParser {
 		// Check to see if the string represents a system function.
 		try {
 			Method m = RunTimeEnvironment.class.getMethod(str);
-			FunctionToken fnToken = new FunctionToken(TFlag.SYSTEM);
+			FnCallToken fnToken = new FnCallToken(TFlag.SYSTEM);
 			fnToken.fnTarget = m;
 			return fnToken;
 		} catch(NoSuchMethodException nsme) {

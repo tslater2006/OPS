@@ -4,7 +4,7 @@ public enum TFlag {
 
 	SYSTEM,										// combined with FUNCTION, VARIABLE
 	COMMENT,
-	VARIABLE, FUNCTION, REFERENCE, IDENTIFIER, NUMBER, TRUE, FALSE,		// these all evaluate to some value
+	VARIABLE, FN_CALL, REFERENCE, IDENTIFIER, NUMBER, TRUE, FALSE,		// these all evaluate to some value
 
 	IF,
 	END_IF,

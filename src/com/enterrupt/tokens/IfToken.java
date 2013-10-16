@@ -21,7 +21,7 @@ public class IfToken extends Token implements IBlockStartable {
 			System.exit(1);
 		}
 
-		//ifToken.expression = ExprToken.parse();
+		ExprToken.parse();
 
 		if(!Parser.parseNextToken().flags.contains(TFlag.THEN)) {
 			System.out.println("[ERROR] Expected THEN, did not parse.");

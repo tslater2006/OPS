@@ -2,7 +2,7 @@ package com.enterrupt.tokens;
 
 import com.enterrupt.RunTimeEnvironment;
 
-public class ReferenceToken extends Token {
+public class ReferenceToken extends Token implements IEvaluatable {
 
 	private String ref;
 
@@ -11,12 +11,12 @@ public class ReferenceToken extends Token {
 		this.ref = r;
 	}
 
-	public boolean isNull() {
+	public boolean isEmpty() {
 
 		// Look up value in symbol table.
 		/**
 		 * TODO: Need to get type instead of assuming String.
 	     */
-		return RunTimeEnvironment.resolveReference(ref) == null;
+		return RunTimeEnvironment.resolveReference(this.ref) == null;
 	}
 }

@@ -16,5 +16,7 @@ public enum TFlag {
 
 	L_PAREN, R_PAREN, SEMICOLON, EQUAL,
 
-	EXPRESSION, STATEMENT, STMT_LIST
+	BOOLEAN, EXPRESSION, STATEMENT, STMT_LIST,
+
+	CONTEXT_BOUNDARY		// delimits context boundaries on call stack.
 }

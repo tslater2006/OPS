@@ -13,8 +13,6 @@ public class IfToken extends Token implements IBlockStartable {
 
 	public static void parse() throws Exception {
 
-		IfToken ifToken = new IfToken();
-
 		// Detect: IF, EXPRESSION, THEN, STMT_LIST, END_IF
 		if(!Parser.parseNextToken().flags.contains(TFlag.IF)) {
 			System.out.println("[ERROR] Expected IF, did not parse.");

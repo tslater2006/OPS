@@ -8,31 +8,30 @@ public class RunTimeEnvironment {
 	public static String SYSVAR_EmployeeId = "";
 	public static String SYSVAR_Menu = "";
 
-	private static HashMap<String, Boolean> globalRefTable;
+	private static HashMap<String, String> globalRefTable;
 
 	public static void init() {
-		globalRefTable = new HashMap<String, Boolean>();
+		globalRefTable = new HashMap<String, String>();
+		//globalRefTable.put("LS_SS_PERS_SRCH.EMPLID", "");
 	}
 
-	/**
-	 * TODO: In the future, this should point to an object
-     * that can be modified/updated by the interpreter.
-	 */
-	public static Boolean resolveReference(String ref) {
+	public static String resolveReference(String ref) {
 		return globalRefTable.get(ref);
 	}
 
 	/**
 	 * TODO: Support arbitrary argument list.
 	 * TODO: The PS documentation states that 0 in a required numeric field should return false.
+	 * TODO: Remember that references must be resolved after retrieving from the call stack, unlike
+     *       primitives.
 	 */
 	public static void None() {
 		Token t = Interpreter.popFromCallStack();
-		/*if(t.isNull()) {
-			Interpreter.pushToRuntimeStack(new BooleanToken(true));
+		if(((IEvaluatable) t).isEmpty()) {
+			Interpreter.pushToCallStack(new Token(TFlag.TRUE));
 		} else {
-			Interpreter.pushToRuntimeStack(new BooleanToken(false));
-		}*/
+			Interpreter.pushToCallStack(new Token(TFlag.FALSE));
+		}
 	}
 
 	public static void Hide() {

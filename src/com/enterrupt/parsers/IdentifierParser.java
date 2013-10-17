@@ -25,6 +25,10 @@ public class IdentifierParser extends StringParser {
 	}
 
 	public Token interpret() throws Exception {
+
+		Parser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
+		Parser.prog.byteCursorPos--;
+		Parser.prog.appendProgText(getString());
 		return new Token(TFlag.IDENTIFIER);
 	}
 }

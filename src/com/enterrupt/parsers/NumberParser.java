@@ -8,6 +8,7 @@ public class NumberParser extends ElementParser {
 
 	byte b;
 	int nBytes;
+	String value;
 
 	public NumberParser(byte _b, int _nBytes) {
 		b = _b;
@@ -19,7 +20,7 @@ public class NumberParser extends ElementParser {
 		return b;
 	}
 
-	public void parse() throws Exception {
+	public void parseOutValue() throws Exception {
 
 		int dValue = 0;	 // decimal position from far right going left
 		String out_number = "";
@@ -50,10 +51,17 @@ public class NumberParser extends ElementParser {
 			}
 		}
 
-		prog.appendProgText(out_number);
+		this.value = out_number;
+	}
+
+	public void parse() throws Exception {
+		this.parseOutValue();
+		Parser.prog.appendProgText(this.value);
 	}
 
 	public Token interpret() throws Exception {
+		this.parseOutValue();
+		Parser.prog.appendProgText(this.value);
 		return new Token(TFlag.NUMBER);
 	}
 }

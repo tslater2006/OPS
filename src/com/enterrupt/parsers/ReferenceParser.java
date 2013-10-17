@@ -8,6 +8,7 @@ import com.enterrupt.RunTimeEnvironment;
 public class ReferenceParser extends ElementParser {
 
 	byte b;
+	String value;
 
 	public ReferenceParser(byte _b) {
 		this.b = _b;
@@ -18,7 +19,7 @@ public class ReferenceParser extends ElementParser {
 		return b;
 	}
 
-	public String getReference() throws Exception {
+	public void parseOutValue() throws Exception {
 
 		PeopleCodeProg prog = Parser.prog;
 
@@ -46,15 +47,17 @@ public class ReferenceParser extends ElementParser {
 				}
 			}
 		}
-		return ref;
+		this.value = ref;
 	}
 
 	public void parse() throws Exception {
-		Parser.prog.appendProgText(this.getReference());
+		this.parseOutValue();
+		Parser.prog.appendProgText(this.value);
 	}
 
 	public Token interpret() throws Exception {
-		String ref = this.getReference();
-		return new ReferenceToken(ref);
+		this.parseOutValue();
+		Parser.prog.appendProgText(this.value);
+		return new ReferenceToken(this.value);
 	}
 }

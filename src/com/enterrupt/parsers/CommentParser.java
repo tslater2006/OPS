@@ -7,6 +7,7 @@ import com.enterrupt.Parser;
 public class CommentParser extends ElementParser {
 
 	private byte b;
+	private int commLen;
 
 	public CommentParser(byte _b) {
 		this(_b, PFlags.NEWLINE_BEFORE_AND_AFTER);
@@ -21,21 +22,22 @@ public class CommentParser extends ElementParser {
 		return b;
 	}
 
-	private int getCommentLength() {
+	private void parseOutCommentLength() {
 
 		// Length byte is wide ANDed and cast to integer.
-		int commLen = (int) Parser.prog.readNextByte() & 0xff;
-		return commLen + ((int) Parser.prog.readNextByte() & 0xff) * 256;
+		int len = (int) Parser.prog.readNextByte() & 0xff;
+		this.commLen = len + ((int) Parser.prog.readNextByte() & 0xff) * 256;
 	}
 
 	public void parse() throws Exception {
 
-		PeopleCodeProg prog = Parser.prog;
-		int commLen = this.getCommentLength();
+		this.parseOutCommentLength();
 
-		//System.out.println("Comment length: " + commLen);
+		PeopleCodeProg prog = Parser.prog;
+
+		//System.out.println("Comment length: " + this.commLen);
 		byte b;
-		for(int i=0; i < commLen && (prog.byteCursorPos < prog.progBytes.length); i++) {
+		for(int i=0; i < this.commLen && (prog.byteCursorPos < prog.progBytes.length); i++) {
 			b = prog.readNextByte();
 			if(b != 0) {
 				if(b == (byte) 10) {
@@ -49,8 +51,8 @@ public class CommentParser extends ElementParser {
 
 	public Token interpret() throws Exception {
 
-		int commLen = this.getCommentLength();
-		Parser.prog.byteCursorPos += commLen;	// fast forward through comment.
+		this.parseOutCommentLength();
+		Parser.prog.byteCursorPos += this.commLen;	// fast forward through comment.
 		return new Token(TFlag.COMMENT);
 	}
 

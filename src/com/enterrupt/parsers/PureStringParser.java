@@ -10,6 +10,7 @@ import java.util.EnumSet;
 public class PureStringParser extends StringParser {
 
 	private byte b;
+	private String value;
 
 	public PureStringParser(byte _b) {
 		b = _b;
@@ -25,30 +26,36 @@ public class PureStringParser extends StringParser {
 		return b;
 	}
 
+	public void parseOutValue() {
+		this.value = getString();
+	}
+
 	public void parse() throws Exception {
-		Parser.prog.appendProgText(getString());
+		parseOutValue();
+		Parser.prog.appendProgText(this.value);
 	}
 
 	public Token interpret() throws Exception {
+		parseOutValue();
+		Parser.prog.appendProgText(this.value);
 
 		Token t = null;
-		String str = getString();
 
 		// If string is %______, check for system variable.
-		if(str.trim().charAt(0) == '%') {
+		if(this.value.trim().charAt(0) == '%') {
 			try {
-				Field f = RunTimeEnvironment.class.getField(str.replaceFirst("%", "SYSVAR_"));
+				Field f = RunTimeEnvironment.class.getField(this.value.replaceFirst("%", "SYSVAR_"));
 				t = new Token(EnumSet.of(TFlag.SYSTEM, TFlag.VARIABLE));
 				return t;
 			} catch(NoSuchFieldException nsfe) {
-				System.out.println("[FATAL] Unimplemented system variable: " + str);
+				System.out.println("[FATAL] Unimplemented system variable: " + this.value);
 				System.exit(1);
 			}
 		}
 
 		// Check to see if the string represents a system function.
 		try {
-			Method m = RunTimeEnvironment.class.getMethod(str);
+			Method m = RunTimeEnvironment.class.getMethod(this.value);
 			FnCallToken fnToken = new FnCallToken(TFlag.SYSTEM);
 			fnToken.fnTarget = m;
 			return fnToken;
@@ -56,7 +63,7 @@ public class PureStringParser extends StringParser {
 			/**
 			 * TODO: Replace this exit with code that checks for declared/imported functions.
 			 */
-			System.out.println("[FATAL] Unimplemented method: " + str);
+			System.out.println("[FATAL] Unimplemented method: " + this.value);
 			System.exit(1);
 		}
 		return t;

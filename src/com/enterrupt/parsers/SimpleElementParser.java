@@ -26,6 +26,7 @@ public class SimpleElementParser extends ElementParser {
 	}
 
 	public Token interpret() throws Exception {
+		Parser.prog.appendProgText(t);
 		return new Token(tflag);
 	}
 

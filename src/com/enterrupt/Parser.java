@@ -78,6 +78,7 @@ public class Parser {
 		System.out.println("Interpreting PC...");
 		reset();
 		prog = p;
+		prog.resetProgText();
 		prog.interpretFlag = true;
 		Interpreter.init();
 		prog.setByteCursorPos(37);			// Program begins at byte 37.
@@ -96,6 +97,7 @@ public class Parser {
 		System.out.println("Parsing PC...");
 		reset();
 		prog = p;
+		prog.resetProgText();
 		prog.interpretFlag = false;
 		prog.setByteCursorPos(37);			// Program begins at byte 37.
 
@@ -116,6 +118,23 @@ public class Parser {
 		prog.verifyEntireProgramText();
 	}
 
+	public static byte fastForwardUntil(byte startByte, byte endByte) {
+		while(true) {
+			byte b = prog.readNextByte();
+			if(b == startByte) {
+				return b;
+			}
+			/**
+			 * If we reach the end token, decrement the byte cursor to ensure that
+			 * when parsing resumes, it is parsed as a token.
+			 */
+			if(b == endByte) {
+				prog.byteCursorPos--;
+				return b;
+			}
+		}
+	}
+
 	public static Token parseNextToken() throws Exception {
 
 		Token t = null;
@@ -134,7 +153,7 @@ public class Parser {
 		}
 
 		if(prog.interpretFlag) {
-			System.out.printf("Getting parser for byte: 0x%02X\n", b);
+			//System.out.printf("Getting parser for byte: 0x%02X\n", b);
 		}
 
 		ElementParser p = parserTable.get(new Byte(b));

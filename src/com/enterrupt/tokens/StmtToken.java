@@ -36,6 +36,8 @@ public class StmtToken extends Token {
 			return new Token(Token.END_OF_PROGRAM);
 		}*/
 
+		System.out.println(Parser.prog.getProgText());
+
 		System.out.println("[ERROR] Encountered unexpected statement token.");
 		System.exit(1);
 	}

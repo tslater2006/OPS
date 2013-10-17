@@ -93,6 +93,10 @@ public class PeopleCodeProg {
 		return this.progTextBuilder.toString();
 	}
 
+	public void resetProgText() {
+		this.progTextBuilder = new StringBuilder();
+	}
+
 	public String getProgReference(int refNbr) {
 		return this.progRefsTable.get(refNbr);
 	}

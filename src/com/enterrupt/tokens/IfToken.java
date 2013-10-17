@@ -1,6 +1,8 @@
 package com.enterrupt.tokens;
 
 import com.enterrupt.Parser;
+import com.enterrupt.Interpreter;
+import java.util.Stack;
 
 public class IfToken extends Token implements IBlockStartable {
 
@@ -26,14 +28,42 @@ public class IfToken extends Token implements IBlockStartable {
 			System.exit(1);
 		}
 
-		//TODO: Only parse stmt list if EXPRESSION evaluates to TRUE,
-		// still need to find the *correct* End-If;
-		//ifToken.stmtList = StmtListToken.parse();
-		//StmtListToken.parse()
+		// Get the value of the expression; expect boolean.
+		boolean exprResult = ((BooleanToken) Interpreter.popFromExprStack()).getValue();
+
+		if(!exprResult) {
+			fastForwardToEndToken();
+		} else {
+			StmtListToken.parse();
+		}
 
 		if(!Parser.parseNextToken().flags.contains(TFlag.END_IF)) {
 			System.out.println("[ERROR] Expected END_IF, did not parse.");
 			System.exit(1);
+		}
+
+		if(!Parser.parseNextToken().flags.contains(TFlag.SEMICOLON)) {
+			System.out.println("[ERROR] Expected SEMICOLON, did not parse.");
+			System.exit(1);
+		}
+	}
+
+	public static void fastForwardToEndToken() {
+		Stack<Byte> byteMarkers = new Stack<Byte>();
+		byte IF = (byte) 28;
+		byte END_IF = (byte) 26;
+
+		while(true) {
+			byte b = Parser.fastForwardUntil(IF, END_IF);
+			if(b == IF) {
+				byteMarkers.push(b);		// we have reached the starting token for a nested If stmt.
+			} else {
+				if(byteMarkers.size() == 0) {
+					return;		// we have reached the closing token for the desired If stmt.
+				} else {
+					byteMarkers.pop();		// we have reached the closing token for a nested If stmt.
+				}
+			}
 		}
 	}
 

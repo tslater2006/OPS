@@ -12,7 +12,7 @@ public class RunTimeEnvironment {
 
 	public static void init() {
 		globalRefTable = new HashMap<String, String>();
-		//globalRefTable.put("LS_SS_PERS_SRCH.EMPLID", "");
+		globalRefTable.put("LS_SS_PERS_SRCH.EMPLID", "");
 	}
 
 	public static String resolveReference(String ref) {
@@ -28,9 +28,9 @@ public class RunTimeEnvironment {
 	public static void None() {
 		Token t = Interpreter.popFromCallStack();
 		if(((IEvaluatable) t).isEmpty()) {
-			Interpreter.pushToCallStack(new Token(TFlag.TRUE));
+			Interpreter.pushToCallStack(new BooleanToken(true));
 		} else {
-			Interpreter.pushToCallStack(new Token(TFlag.FALSE));
+			Interpreter.pushToCallStack(new BooleanToken(false));
 		}
 	}
 

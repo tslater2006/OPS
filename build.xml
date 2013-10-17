@@ -8,7 +8,7 @@
 
 	<target name="build">
 		<mkdir dir="bin"/>
-		<javac srcdir="src" destdir="bin">
+		<javac srcdir="src" destdir="bin" debug="true">
 			<classpath>
 				<fileset dir="lib">
 					<include name="*.jar"/>

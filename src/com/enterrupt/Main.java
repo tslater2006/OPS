@@ -16,8 +16,8 @@ public class Main {
 			Parser.init();
 
 			RunTimeEnvironment.init();
-			RunTimeEnvironment.systemVarTable.get("%EmployeeId").systemWrite("AA0001");
-			RunTimeEnvironment.systemVarTable.get("%Menu").systemWrite("SA_LEARNER_SERVICES");
+			((StringPtr)RunTimeEnvironment.systemVarTable.get("%EmployeeId")).systemWrite("AA0001");
+			((StringPtr)RunTimeEnvironment.systemVarTable.get("%Menu")).systemWrite("SA_LEARNER_SERVICES");
 
 			// TODO: Remove, should be generated during SQL processing.
 			RunTimeEnvironment.compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr());

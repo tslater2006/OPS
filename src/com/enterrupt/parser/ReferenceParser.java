@@ -1,14 +1,10 @@
-package com.enterrupt.parsers;
+package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
-import com.enterrupt.tokens.*;
-import com.enterrupt.Parser;
-import com.enterrupt.RunTimeEnvironment;
 
 public class ReferenceParser extends ElementParser {
 
 	byte b;
-	String value;
 
 	public ReferenceParser(byte _b) {
 		this.b = _b;
@@ -19,7 +15,7 @@ public class ReferenceParser extends ElementParser {
 		return b;
 	}
 
-	public void parseOutValue() throws Exception {
+	public Token parse() throws Exception {
 
 		PeopleCodeProg prog = Parser.prog;
 
@@ -47,17 +43,15 @@ public class ReferenceParser extends ElementParser {
 				}
 			}
 		}
-		this.value = ref;
-	}
 
-	public void parse() throws Exception {
-		this.parseOutValue();
-		Parser.prog.appendProgText(this.value);
-	}
+		prog.appendProgText(ref);
 
-	public Token interpret() throws Exception {
-		this.parseOutValue();
-		Parser.prog.appendProgText(this.value);
-		return new ReferenceToken(this.value);
+		if(prog.interpretFlag) {
+			Token t = new Token(TFlag.REFERENCE);
+			t.refName = ref;
+			return t;
+		}
+
+		return null;
 	}
 }

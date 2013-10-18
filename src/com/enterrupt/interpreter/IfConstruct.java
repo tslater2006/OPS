@@ -1,48 +1,42 @@
-package com.enterrupt.tokens;
+package com.enterrupt.interpreter;
 
-import com.enterrupt.Parser;
-import com.enterrupt.Interpreter;
 import java.util.Stack;
+import com.enterrupt.types.*;
+import com.enterrupt.parser.TFlag;
+import com.enterrupt.parser.Token;
 
-public class IfToken extends Token implements IBlockStartable {
+public class IfConstruct {
 
-	private ExprToken expression;
-	private StmtListToken stmtList;
-
-	public IfToken() {
-		super(TFlag.IF);
-	}
-
-	public static void parse() throws Exception {
+	public static void interpret() throws Exception {
 
 		// Detect: IF, EXPRESSION, THEN, STMT_LIST, END_IF
-		if(!Parser.parseNextToken().flags.contains(TFlag.IF)) {
+		if(!Interpreter.parseNextToken().flags.contains(TFlag.IF)) {
 			System.out.println("[ERROR] Expected IF, did not parse.");
 			System.exit(1);
 		}
 
-		ExprToken.parse();
+		ExprConstruct.interpret();
 
-		if(!Parser.parseNextToken().flags.contains(TFlag.THEN)) {
+		if(!Interpreter.parseNextToken().flags.contains(TFlag.THEN)) {
 			System.out.println("[ERROR] Expected THEN, did not parse.");
 			System.exit(1);
 		}
 
 		// Get the value of the expression; expect boolean.
-		boolean exprResult = ((BooleanToken) Interpreter.popFromExprStack()).getValue();
+		boolean exprResult = ((BooleanPtr) Interpreter.popFromRuntimeStack()).read();
 
 		if(!exprResult) {
 			fastForwardToEndToken();
 		} else {
-			StmtListToken.parse();
+			StmtListConstruct.interpret();
 		}
 
-		if(!Parser.parseNextToken().flags.contains(TFlag.END_IF)) {
+		if(!Interpreter.parseNextToken().flags.contains(TFlag.END_IF)) {
 			System.out.println("[ERROR] Expected END_IF, did not parse.");
 			System.exit(1);
 		}
 
-		if(!Parser.parseNextToken().flags.contains(TFlag.SEMICOLON)) {
+		if(!Interpreter.parseNextToken().flags.contains(TFlag.SEMICOLON)) {
 			System.out.println("[ERROR] Expected SEMICOLON, did not parse.");
 			System.exit(1);
 		}
@@ -54,7 +48,7 @@ public class IfToken extends Token implements IBlockStartable {
 		byte END_IF = (byte) 26;
 
 		while(true) {
-			byte b = Parser.fastForwardUntil(IF, END_IF);
+			byte b = Interpreter.fastForwardUntil(IF, END_IF);
 			if(b == IF) {
 				byteMarkers.push(b);		// we have reached the starting token for a nested If stmt.
 			} else {
@@ -65,15 +59,5 @@ public class IfToken extends Token implements IBlockStartable {
 				}
 			}
 		}
-	}
-
-	public boolean endsWith(Token t) {
-
-		/**
-		 * TODO: May want to put an identifier in this token
-		 * during parsing that concretely links it with its end token
-		 * for extra protection.
-		 */
-		return t.flags.contains(TFlag.END_IF);
 	}
 }

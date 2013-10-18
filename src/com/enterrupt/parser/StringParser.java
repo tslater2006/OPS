@@ -1,9 +1,7 @@
-package com.enterrupt.parsers;
+package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
-import com.enterrupt.tokens.*;
 import java.lang.StringBuilder;
-import com.enterrupt.Parser;
 
 public abstract class StringParser extends ElementParser {
 

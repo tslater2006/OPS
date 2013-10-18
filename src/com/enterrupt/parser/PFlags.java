@@ -1,4 +1,4 @@
-package com.enterrupt.parsers;
+package com.enterrupt.parser;
 
 public class PFlags {
 

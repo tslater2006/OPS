@@ -1,8 +1,6 @@
-package com.enterrupt.parsers;
+package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
-import com.enterrupt.tokens.*;
-import com.enterrupt.Parser;
 
 public class IdentifierParser extends StringParser {
 
@@ -17,18 +15,16 @@ public class IdentifierParser extends StringParser {
 		return this.b;
 	}
 
-	public void parse() throws Exception {
+	public Token parse() throws Exception {
 
 		Parser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
 		Parser.prog.byteCursorPos--;
 		Parser.prog.appendProgText(getString());
-	}
 
-	public Token interpret() throws Exception {
+		if(Parser.prog.interpretFlag) {
+			return new Token(TFlag.IDENTIFIER);
+		}
 
-		Parser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
-		Parser.prog.byteCursorPos--;
-		Parser.prog.appendProgText(getString());
-		return new Token(TFlag.IDENTIFIER);
+		return null;
 	}
 }

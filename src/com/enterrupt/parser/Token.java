@@ -1,10 +1,11 @@
-package com.enterrupt.tokens;
+package com.enterrupt.parser;
 
 import java.util.EnumSet;
 
 public class Token {
 
 	public EnumSet<TFlag> flags;
+	public String refName;			// holds reference name for REFERENCE tokens.
 
 	public Token() {
 		this.flags = EnumSet.noneOf(TFlag.class);

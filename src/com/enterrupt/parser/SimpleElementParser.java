@@ -1,8 +1,6 @@
-package com.enterrupt.parsers;
+package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
-import com.enterrupt.tokens.*;
-import com.enterrupt.Parser;
 
 public class SimpleElementParser extends ElementParser {
 
@@ -21,17 +19,19 @@ public class SimpleElementParser extends ElementParser {
 		this(_b, _f, _t, PFlags.SPACE_BEFORE_AND_AFTER);
 	}
 
-	public void parse() throws Exception {
-		Parser.prog.appendProgText(t);
-	}
-
-	public Token interpret() throws Exception {
-		Parser.prog.appendProgText(t);
-		return new Token(tflag);
-	}
-
 	public byte getStartByte() {
 		return b;
+	}
+
+	public Token parse() throws Exception {
+
+		Parser.prog.appendProgText(t);
+
+		if(Parser.prog.interpretFlag) {
+			return new Token(this.tflag);
+		}
+
+		return null;
 	}
 
 	public boolean writesNonBlank() {

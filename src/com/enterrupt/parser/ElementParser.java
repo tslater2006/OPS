@@ -1,15 +1,12 @@
-package com.enterrupt.parsers;
+package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import java.lang.StringBuilder;
-import com.enterrupt.tokens.*;
-import com.enterrupt.Parser;
 
 public abstract class ElementParser {
 
     public int format;
-    public abstract void parse() throws Exception;
-    public abstract Token interpret() throws Exception;
+    public abstract Token parse() throws Exception;
     public abstract byte getStartByte();
 
     public int getFormat() {

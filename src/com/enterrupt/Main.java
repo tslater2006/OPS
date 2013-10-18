@@ -2,6 +2,9 @@ package com.enterrupt;
 
 import com.enterrupt.sql.*;
 import com.enterrupt.pt_objects.*;
+import com.enterrupt.types.*;
+import com.enterrupt.parser.Parser;
+import com.enterrupt.interpreter.RunTimeEnvironment;
 
 public class Main {
 
@@ -13,8 +16,11 @@ public class Main {
 			Parser.init();
 
 			RunTimeEnvironment.init();
-			RunTimeEnvironment.SYSVAR_EmployeeId = "AA0001";
-			RunTimeEnvironment.SYSVAR_Menu = "SA_LEARNER_SERVICES";
+			RunTimeEnvironment.systemVarTable.get("%EmployeeId").systemWrite("AA0001");
+			RunTimeEnvironment.systemVarTable.get("%Menu").systemWrite("SA_LEARNER_SERVICES");
+
+			// TODO: Remove, should be generated during SQL processing.
+			RunTimeEnvironment.compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr());
 
 			Component c = new Component("SSS_STUDENT_CENTER", "GBL");
 			c.loadInitialMetadata();

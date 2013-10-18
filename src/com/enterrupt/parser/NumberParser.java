@@ -1,14 +1,11 @@
-package com.enterrupt.parsers;
+package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
-import com.enterrupt.tokens.*;
-import com.enterrupt.Parser;
 
 public class NumberParser extends ElementParser {
 
 	byte b;
 	int nBytes;
-	String value;
 
 	public NumberParser(byte _b, int _nBytes) {
 		b = _b;
@@ -20,7 +17,7 @@ public class NumberParser extends ElementParser {
 		return b;
 	}
 
-	public void parseOutValue() throws Exception {
+	public Token parse() throws Exception {
 
 		int dValue = 0;	 // decimal position from far right going left
 		String out_number = "";
@@ -51,17 +48,16 @@ public class NumberParser extends ElementParser {
 			}
 		}
 
-		this.value = out_number;
-	}
+		prog.appendProgText(out_number);
 
-	public void parse() throws Exception {
-		this.parseOutValue();
-		Parser.prog.appendProgText(this.value);
-	}
+		if(prog.interpretFlag) {
+			/**
+			 * TODO: Attach a new numeric TypePtr object
+			 * to this token.
+			 */
+			return new Token(TFlag.NUMBER);
+		}
 
-	public Token interpret() throws Exception {
-		this.parseOutValue();
-		Parser.prog.appendProgText(this.value);
-		return new Token(TFlag.NUMBER);
+		return null;
 	}
 }

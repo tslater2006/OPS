@@ -1,10 +1,8 @@
-package com.enterrupt;
+package com.enterrupt.parser;
 
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import java.util.HashMap;
-import com.enterrupt.parsers.*;
-import com.enterrupt.tokens.*;
 import java.util.EnumSet;
 
 public class Parser {
@@ -22,7 +20,6 @@ public class Parser {
 	private static ElementParser lastParser;
 	private static int nIndent;
 	public static PeopleCodeProg prog;
-	public static Token queuedParseStreamToken;
 
 	public static void init() {
 
@@ -62,34 +59,6 @@ public class Parser {
 		ElementParser lastParser = null;
 		nIndent = 0;
 		prog = null;
-		queuedParseStreamToken = null;
-	}
-
-	// Note: Only supports 1 character of look-ahead.
-	public static Token lookAheadNextToken() throws Exception {
-		if(queuedParseStreamToken == null) {
-			queuedParseStreamToken = parseNextToken();
-		}
-		return queuedParseStreamToken;
-	}
-
-	public static void interpret(PeopleCodeProg p) throws Exception {
-
-		System.out.println("Interpreting PC...");
-		reset();
-		prog = p;
-		prog.resetProgText();
-		prog.interpretFlag = true;
-		Interpreter.init();
-		prog.setByteCursorPos(37);			// Program begins at byte 37.
-
-		StmtListToken.parse();
-
-		// Detect: END_OF_PROGRAM
-		if(!parseNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
-			System.out.println("[ERROR] Expected END_OF_PROGRAM");
-			System.exit(1);
-		}
 	}
 
 	public static void parse(PeopleCodeProg p) throws Exception {
@@ -118,34 +87,9 @@ public class Parser {
 		prog.verifyEntireProgramText();
 	}
 
-	public static byte fastForwardUntil(byte startByte, byte endByte) {
-		while(true) {
-			byte b = prog.readNextByte();
-			if(b == startByte) {
-				return b;
-			}
-			/**
-			 * If we reach the end token, decrement the byte cursor to ensure that
-			 * when parsing resumes, it is parsed as a token.
-			 */
-			if(b == endByte) {
-				prog.byteCursorPos--;
-				return b;
-			}
-		}
-	}
-
 	public static Token parseNextToken() throws Exception {
 
 		Token t = null;
-
-		// If a token has been returned to the parse stream, return it immediately.
-		if(queuedParseStreamToken != null) {
-			t = queuedParseStreamToken;
-			queuedParseStreamToken = null;
-			return t;
-		}
-
 		byte b = prog.readNextByte();
 
 		if(b == (byte) 7) {
@@ -220,12 +164,9 @@ public class Parser {
 
 		firstLine = false;
 		int initialByteCursorPos = prog.byteCursorPos;
-		if(prog.interpretFlag) {
-			t = p.interpret();
-			System.out.println(t.flags.toString());
-		} else {
-			p.parse();
-		}
+
+		t = p.parse();
+
 		wroteSpace = wroteSpace && !p.writesNonBlank();
 		in_declare = in_declare || (p.format & PFlags.IN_DECLARE) > 0;
 		startOfLine = startOfLine && !p.writesNonBlank();

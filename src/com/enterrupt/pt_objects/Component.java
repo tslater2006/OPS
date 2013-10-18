@@ -6,7 +6,8 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.sql.Blob;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.Parser;
+import com.enterrupt.parser.Parser;
+import com.enterrupt.interpreter.Interpreter;
 
 public class Component {
 
@@ -109,7 +110,7 @@ public class Component {
             if(prog.event.equals("SearchInit")) {
 				prog.loadInitialMetadata();
 				Parser.parse(prog);
-				Parser.interpret(prog);
+				Interpreter.run(prog);
             }
         }
     }
@@ -130,6 +131,6 @@ public class Component {
 		prog.initComponentPCProg(this.PNLGRPNAME, this.MARKET, this.SEARCHRECNAME, "SearchInit");
 		prog.loadInitialMetadata();
 		Parser.parse(prog);
-		Parser.interpret(prog);
+		Interpreter.run(prog);
 	}
 }

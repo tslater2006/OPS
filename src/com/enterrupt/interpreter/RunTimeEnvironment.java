@@ -14,8 +14,10 @@ public class RunTimeEnvironment {
 	public static HashMap<String, MemoryPtr> systemVarTable;
 	public static HashMap<String, MemoryPtr> compBufferTable;
 	public static HashMap<String, Method> systemFuncTable;
+	public static HashMap<String, Boolean> defnReservedWordTable;
 
 	public static HashMap<Integer, MemoryPtr> integerMemPool;
+	public static HashMap<String, MemoryPtr> stringMemPool;
 
 	public static void init() throws Exception {
 
@@ -25,6 +27,11 @@ public class RunTimeEnvironment {
 
 		// Create memory pools.
 		integerMemPool = new HashMap<Integer, MemoryPtr>();
+		stringMemPool = new HashMap<String, MemoryPtr>();
+
+		// Load reserved words for definition literals.
+		defnReservedWordTable = new HashMap<String, Boolean>();
+		defnReservedWordTable.put("MenuName", true);
 
 		// Load system variables.
 		systemVarTable = new HashMap<String, MemoryPtr>();
@@ -49,6 +56,16 @@ public class RunTimeEnvironment {
 		}
 		p = new IntegerPtr(val, MFlag.READ_ONLY);
 		integerMemPool.put(val, p);
+		return p;
+	}
+
+	public static MemoryPtr getFromMemoryPool(String val) {
+		MemoryPtr p = stringMemPool.get(val);
+		if(p != null) {
+			return p;
+		}
+		p = new StringPtr(val, MFlag.READ_ONLY);
+		stringMemPool.put(val, p);
 		return p;
 	}
 

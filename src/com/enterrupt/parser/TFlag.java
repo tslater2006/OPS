@@ -20,7 +20,7 @@ public enum TFlag {
 
 	INTEGER,							// NUMBER tokens are given these specific flags by SymbolicConstruct
 
-	VAR, FIELD, FUNCTION,				// REFERENCE tokens that point to functions are given these flags
-										// by SymbolicConstruct, which are then returned to calling constructs.
+	VAR, FIELD, FUNCTION, DEFN_LITERAL,			// REFERENCE tokens that point to functions are given these flags
+												// by SymbolicConstruct, which are then returned to calling constructs.
 	END_OF_BLOCK			// signals StmtListConstruct to stop interpretation.
 }

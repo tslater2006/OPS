@@ -41,6 +41,18 @@ public class SymbolicConstruct {
 				return t;
 			}
 
+			// Does the reference refer to a definition literal (i.e., "MenuName.____")?
+			String[] parts = refName.split("\\.");		// split accepts regex, we want to split on '.' char.
+			if(parts.length == 2
+				&& parts[1].length() > 0
+				&& (RunTimeEnvironment.defnReservedWordTable.get(parts[0]) != null)) {
+
+				ptr = RunTimeEnvironment.getFromMemoryPool(parts[1]);
+				Interpreter.pushToRuntimeStack(ptr);
+				t.flags.add(TFlag.DEFN_LITERAL);
+				return t;
+			}
+
 			Token l = Interpreter.lookAheadNextToken();
 			Method m = null;
 

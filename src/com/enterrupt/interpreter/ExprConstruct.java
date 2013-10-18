@@ -1,5 +1,6 @@
 package com.enterrupt.interpreter;
 
+import com.enterrupt.types.*;
 import com.enterrupt.parser.TFlag;
 
 /**
@@ -30,8 +31,17 @@ public class ExprConstruct {
 			 * TODO: Interpret another SymbolicConstruct, pop 2 values from runtime stack,
 			 * compare them, and push the result.
 		     */
-			System.out.println("Haven't implemented comparison yet.");
-			System.exit(1);
+			Interpreter.parseNextToken();
+			SymbolicConstruct.interpret();
+
+			MemoryPtr p2 = Interpreter.popFromRuntimeStack();
+			MemoryPtr p1 = Interpreter.popFromRuntimeStack();
+
+			if(MemoryPtr.isEqual(p1, p2)) {
+				Interpreter.pushToRuntimeStack(RunTimeEnvironment.TRUE);
+			} else {
+				Interpreter.pushToRuntimeStack(RunTimeEnvironment.FALSE);
+			}
 		}
 	}
 }

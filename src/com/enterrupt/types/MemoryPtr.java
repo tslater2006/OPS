@@ -32,4 +32,20 @@ public abstract class MemoryPtr<T> {
 			System.exit(1);
 		}
 	}
+
+	public static boolean isEqual(MemoryPtr p1, MemoryPtr p2) {
+
+		/**
+		 * TODO: In the future, increase performance by checking if p1 and p2
+		 * point to the same (Java) object; if that's the case, return true immediately.
+		 */
+		if(p1.flags.contains(MFlag.STRING) && p2.flags.contains(MFlag.STRING)) {
+			return ((StringPtr) p1).read().equals(((StringPtr) p2).read());
+		} else {
+			System.out.println("[ERROR] Unable to determine if pointer values are equal; types do not agree.");
+			System.exit(1);
+		}
+
+		return false;
+	}
 }

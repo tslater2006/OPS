@@ -8,6 +8,7 @@ public class Token {
 	public EnumSet<TFlag> flags;
 	public String refName;				// holds reference name for REFERENCE tokens.
 	public String numericVal;			// holds value of NUMBER tokens.
+	public String identifierName;		// holds value of IDENTIFIER tokens.
 
 	public Token() {
 		this.flags = EnumSet.noneOf(TFlag.class);

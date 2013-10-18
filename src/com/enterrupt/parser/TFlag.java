@@ -16,6 +16,8 @@ public enum TFlag {
 	EQUAL,
 	REFERENCE,
 
+	DISCARD,							// Tells the parser to discard a token; currently used for empty identifiers.
+
 	INTEGER,							// NUMBER tokens are given these specific flags by SymbolicConstruct
 
 	VAR, FIELD, FUNCTION,				// REFERENCE tokens that point to functions are given these flags

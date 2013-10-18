@@ -70,11 +70,11 @@ public class Parser {
 		prog.interpretFlag = false;
 		prog.setByteCursorPos(37);			// Program begins at byte 37.
 
-		int debugIdx = 0;
+		/*int debugIdx = 0;
 		for(byte b : prog.progBytes) {
 			System.out.printf("%d: 0x%02X\n", debugIdx, b);
 			debugIdx++;
-		}
+		}*/
 
 		while(prog.byteCursorPos < prog.progBytes.length) {
 			Token t = parseNextToken();
@@ -105,6 +105,7 @@ public class Parser {
 			System.out.println("[ERROR] Reached unimplementable byte.");
 			System.exit(1);
 		} else {
+
 			/* TODO: Fill out as needed. */
 			in_declare = (in_declare &&
 				!((lastParser != null && (lastParser.format & PFlags.NEWLINE_AFTER) > 0)
@@ -176,6 +177,23 @@ public class Parser {
 		lastParser = p;
 		if((p.format & PFlags.RESET_INDENT_AFTER) > 0) {
 			nIndent = 0;
+		}
+
+       /**
+        * I've been having an issue with the parser emitting an IDENTIFIER token immediately
+        * after a NUMBER token in LS_SS_PERS_SRCH.EMPLID.SearchInit, despite the fact that the identifier
+        * name parsed out is empty. If the identifier is empty here, I'm going to parse the next token.
+        * If it's another empty IDENTIFIER, I'll exit. Otherwise I'll let the interpreter continue.
+        * TODO: Once I have more PeopleCode running through here, try to collect information about how
+        * often this occurs, after which tokens, etc. I may be able to modify the NumberParser / other parser
+        * objects accordingly.
+        */
+		if(t != null && t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
+			t = parseNextToken();
+			if(t != null && t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
+				System.out.println("[ERROR] Discarded two empty IDENTIFIER tokens in a row.");
+				System.exit(1);
+			}
 		}
 
 		return t;

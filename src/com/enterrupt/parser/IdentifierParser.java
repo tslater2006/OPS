@@ -17,15 +17,25 @@ public class IdentifierParser extends StringParser {
 
 	public Token parse() throws Exception {
 
-		System.out.println("Cursor: " + Parser.prog.byteCursorPos);
 		Parser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
 		Parser.prog.byteCursorPos--;
-		Parser.prog.appendProgText(getString());
+		String str = getString();
+		Parser.prog.appendProgText(str);
 
 		if(Parser.prog.interpretFlag) {
-			return new Token(TFlag.IDENTIFIER);
+			Token t = new Token(TFlag.IDENTIFIER);
+			t.identifierName = str;
+
+			// Will cause parseNextToken to discard this token and replace it
+			// with the next one in the stream.
+			if(str.length() == 0) {
+				t.flags.add(TFlag.DISCARD);
+			}
+
+			return t;
 		}
 
 		return null;
 	}
 }
+

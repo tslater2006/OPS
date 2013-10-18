@@ -22,11 +22,12 @@ public class NumberParser extends ElementParser {
 		int dValue = 0;	 // decimal position from far right going left
 		String out_number = "";
 		int num_bytes = nBytes - 3;
-		long val = 0, fact = 1;
+
 		PeopleCodeProg prog = Parser.prog;
 
 		prog.byteCursorPos++;	// skip first byte
 		dValue = (int) prog.readNextByte();
+		long val = 0, fact = 1;
 
 		for(int i = 0; i < num_bytes; i++) {
 			val += fact * (long) (prog.readNextByte() & 0xff);

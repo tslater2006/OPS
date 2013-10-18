@@ -8,8 +8,8 @@ import com.enterrupt.types.*;
 
 public class RunTimeEnvironment {
 
-	private static BooleanPtr TRUE;
-	private static BooleanPtr FALSE;
+	public static BooleanPtr TRUE;
+	public static BooleanPtr FALSE;
 
 	public static HashMap<String, MemoryPtr> systemVarTable;
 	public static HashMap<String, MemoryPtr> compBufferTable;

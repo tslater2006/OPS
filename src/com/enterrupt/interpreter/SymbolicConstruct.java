@@ -72,6 +72,12 @@ public class SymbolicConstruct {
 			System.exit(1);
 		}
 
+		// Detect boolean true literal.
+		if(t.flags.contains(TFlag.TRUE)) {
+			Interpreter.pushToRuntimeStack(RunTimeEnvironment.TRUE);
+			return t;
+		}
+
 		System.out.println("[ERROR] Unexpected token encountered during SymbolicConstruct interpretation.");
 		System.exit(1);
 

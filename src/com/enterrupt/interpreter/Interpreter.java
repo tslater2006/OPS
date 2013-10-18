@@ -64,7 +64,7 @@ public class Interpreter {
         StmtListConstruct.interpret();
 
         // Detect: END_OF_PROGRAM
-        if(!Parser.parseNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
+        if(!Interpreter.parseNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
             System.out.println("[ERROR] Expected END_OF_PROGRAM");
             System.exit(1);
         }

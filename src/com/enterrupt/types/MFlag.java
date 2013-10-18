@@ -4,6 +4,7 @@ public enum MFlag {
 
 	BOOLEAN,
 	STRING,
+	INTEGER,
 
 	READ_ONLY
 }

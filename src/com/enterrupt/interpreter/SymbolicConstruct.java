@@ -57,8 +57,24 @@ public class SymbolicConstruct {
 			System.exit(1);
 		}
 
+		if(t.flags.contains(TFlag.NUMBER)) {
+
+			// Is the number an integer?
+			if(t.numericVal.indexOf(".") == -1) {
+				MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(new Integer(t.numericVal));
+				Interpreter.pushToRuntimeStack(ptr);
+				t.flags.add(TFlag.INTEGER);
+				return t;
+			}
+
+			// If not an integer, it must be a decimal.
+			System.out.println("[ERROR] Detected decimal number; need to create a BigDecimal memory pool and type.");
+			System.exit(1);
+		}
+
 		System.out.println("[ERROR] Unexpected token encountered during SymbolicConstruct interpretation.");
 		System.exit(1);
+
 		return null;
 	}
 }

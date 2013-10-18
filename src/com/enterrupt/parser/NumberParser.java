@@ -51,11 +51,9 @@ public class NumberParser extends ElementParser {
 		prog.appendProgText(out_number);
 
 		if(prog.interpretFlag) {
-			/**
-			 * TODO: Attach a new numeric TypePtr object
-			 * to this token.
-			 */
-			return new Token(TFlag.NUMBER);
+			Token t = new Token(TFlag.NUMBER);
+			t.numericVal = out_number;
+			return t;
 		}
 
 		return null;

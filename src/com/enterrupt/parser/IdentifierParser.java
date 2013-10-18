@@ -17,6 +17,7 @@ public class IdentifierParser extends StringParser {
 
 	public Token parse() throws Exception {
 
+		System.out.println("Cursor: " + Parser.prog.byteCursorPos);
 		Parser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
 		Parser.prog.byteCursorPos--;
 		Parser.prog.appendProgText(getString());

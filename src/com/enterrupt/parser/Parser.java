@@ -70,11 +70,11 @@ public class Parser {
 		prog.interpretFlag = false;
 		prog.setByteCursorPos(37);			// Program begins at byte 37.
 
-		/*int debugIdx = 0;
+		int debugIdx = 0;
 		for(byte b : prog.progBytes) {
 			System.out.printf("%d: 0x%02X\n", debugIdx, b);
 			debugIdx++;
-		}*/
+		}
 
 		while(prog.byteCursorPos < prog.progBytes.length) {
 			Token t = parseNextToken();

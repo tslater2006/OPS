@@ -15,17 +15,16 @@ public class RunTimeEnvironment {
 	public static HashMap<String, MemoryPtr> compBufferTable;
 	public static HashMap<String, Method> systemFuncTable;
 
-	private static HashMap<String, String> globalRefTable;
+	public static HashMap<Integer, MemoryPtr> integerMemPool;
 
 	public static void init() throws Exception {
 
-		// Load static literals.
+		// Load static boolean literals.
 		TRUE = new BooleanPtr(new Boolean(true), MFlag.READ_ONLY);
 		FALSE = new BooleanPtr(new Boolean(false), MFlag.READ_ONLY);
 
-		/**
-		 * TODO: Initialize an empty string literal and number constant pool.
-		 */
+		// Create memory pools.
+		integerMemPool = new HashMap<Integer, MemoryPtr>();
 
 		// Load system variables.
 		systemVarTable = new HashMap<String, MemoryPtr>();
@@ -42,7 +41,17 @@ public class RunTimeEnvironment {
 		// Initialize empty component buffer.
 		compBufferTable = new HashMap<String, MemoryPtr>();
 
-		//globalRefTable.put("LS_SS_PERS_SRCH.EMPLID", "");
+		//compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr("test", MFlag.READ_ONLY));
+	}
+
+	public static MemoryPtr getFromMemoryPool(Integer val) {
+		MemoryPtr p = integerMemPool.get(val);
+		if(p != null) {
+			return p;
+		}
+		p = new IntegerPtr(val, MFlag.READ_ONLY);
+		integerMemPool.put(val, p);
+		return p;
 	}
 
 	public static ArrayList<MemoryPtr> getArgsFromCallStack() {

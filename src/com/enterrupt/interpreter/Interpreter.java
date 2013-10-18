@@ -30,6 +30,10 @@ public class Interpreter {
 		return p;
 	}
 
+	public static MemoryPtr peekAtCallStack() {
+		return callStack.peek();
+	}
+
 	public static void pushToRuntimeStack(MemoryPtr p) {
 		System.out.println("[Push] [RuntimeStack]\t" + (p == null ? "null" : p.flags.toString()));
 		runtimeStack.push(p);
@@ -39,6 +43,10 @@ public class Interpreter {
 		MemoryPtr p = runtimeStack.pop();
 		System.out.println("[Pop] [RuntimeStack]\t\t" + (p == null ? "null" : p.flags.toString()));
 		return p;
+	}
+
+	public static MemoryPtr peekAtRuntimeStack() {
+		return runtimeStack.peek();
 	}
 
 	public static void run(PeopleCodeProg p) throws Exception {

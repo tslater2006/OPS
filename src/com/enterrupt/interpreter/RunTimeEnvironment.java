@@ -2,6 +2,8 @@ package com.enterrupt.interpreter;
 
 import java.util.HashMap;
 import java.lang.reflect.*;
+import java.util.Collections;
+import java.util.ArrayList;
 import com.enterrupt.types.*;
 
 public class RunTimeEnvironment {
@@ -34,6 +36,7 @@ public class RunTimeEnvironment {
 		systemFuncTable = new HashMap<String, Method>();
 		systemFuncTable.put("None", RunTimeEnvironment.class.getMethod("None"));
 		systemFuncTable.put("Hide", RunTimeEnvironment.class.getMethod("Hide"));
+		systemFuncTable.put("SetSearchDialogBehavior", RunTimeEnvironment.class.getMethod("SetSearchDialogBehavior"));
 		systemFuncTable.put("AllowEmplIdChg", RunTimeEnvironment.class.getMethod("AllowEmplIdChg"));
 
 		// Initialize empty component buffer.
@@ -42,16 +45,35 @@ public class RunTimeEnvironment {
 		//globalRefTable.put("LS_SS_PERS_SRCH.EMPLID", "");
 	}
 
+	public static ArrayList<MemoryPtr> getArgsFromCallStack() {
+
+		ArrayList<MemoryPtr> args = new ArrayList<MemoryPtr>();
+		MemoryPtr p;
+		while((p = Interpreter.peekAtCallStack()) != null) {
+			args.add(Interpreter.popFromCallStack());
+		}
+
+		// The last argument appears at the top of the stack,
+	    // so we need to reverse the argument list here before returning it.
+		Collections.reverse(args);
+		return args;
+	}
+
 	/**
 	 * TODO: Support arbitrary argument list.
 	 * TODO: The PS documentation states that 0 in a required numeric field should return false.
-	 * TODO: Remember that references must be resolved after retrieving from the call stack, unlike
-     *       primitives.
 	 */
 	public static void None() {
-		MemoryPtr p = Interpreter.popFromCallStack();
-		System.out.println("here");
-		if(p.isEmpty()) {
+
+		ArrayList<MemoryPtr> args = getArgsFromCallStack();
+
+		// Only supporting one argument for now.
+		if(args.size() != 1) {
+			System.out.println("[ERROR] Expected 1 argument for None()");
+			System.exit(1);
+		}
+
+		if(args.get(0).isEmpty()) {
 			Interpreter.pushToCallStack(TRUE);
 		} else {
 			Interpreter.pushToCallStack(FALSE);
@@ -59,14 +81,17 @@ public class RunTimeEnvironment {
 	}
 
 	public static void Hide() {
+		getArgsFromCallStack();
 		// Not yet implemented.
 	}
 
 	public static void SetSearchDialogBehavior() {
+		getArgsFromCallStack();
 		// Not yet implemented.
 	}
 
 	public static void AllowEmplIdChg() {
+		getArgsFromCallStack();
 		// Not yet implemented.
 	}
 }

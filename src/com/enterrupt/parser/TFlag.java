@@ -16,5 +16,7 @@ public enum TFlag {
 	EQUAL,
 	REFERENCE,
 
-	END_OF_BLOCK				// signals StmtListConstruct to stop interpretation.
+	VAR, FIELD, FUNCTION,				// REFERENCE tokens that point to functions are given these flags
+										// by SymbolicConstruct, which are then returned to calling constructs.
+	END_OF_BLOCK			// signals StmtListConstruct to stop interpretation.
 }

@@ -26,18 +26,18 @@ public class Parser {
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
 			new IdentifierParser((byte) 0),										// 0x00
-			new SimpleElementParser((byte) 6, TFlag.EQUAL, "="),								// 0x06
+			new SimpleElementParser((byte) 6, EnumSet.of(TFlag.EQUAL), "="),								// 0x06
 			new PureStringParser((byte) 10),									// 0x0A (Function | Method | External Datatype | Class name)
-			new SimpleElementParser((byte) 11, TFlag.L_PAREN, "(", PFlags.NO_SPACE_AFTER),	// 0x0B
+			new SimpleElementParser((byte) 11, EnumSet.of(TFlag.L_PAREN), "(", PFlags.NO_SPACE_AFTER),	// 0x0B
 			new PureStringParser((byte) 18),									// 0x12 (System variable name)
-			new SimpleElementParser((byte) 20, TFlag.R_PAREN, ")", PFlags.NO_SPACE_BEFORE),	// 0x14
-			new SimpleElementParser((byte) 21, TFlag.SEMICOLON, ";", PFlags.SEMICOLON | PFlags.NEWLINE_AFTER | PFlags.NO_SPACE_BEFORE),	// 0x15
-			new SimpleElementParser((byte) 26, TFlag.END_IF, "End-If", PFlags.ENDIF_STYLE),	// 0x1A
-			new SimpleElementParser((byte) 28, TFlag.IF, "If", PFlags.IF_STYLE),			// 0x1C
-			new SimpleElementParser((byte) 31, TFlag.THEN, "Then", PFlags.THEN_STYLE),		// 0x1F
+			new SimpleElementParser((byte) 20, EnumSet.of(TFlag.R_PAREN), ")", PFlags.NO_SPACE_BEFORE),	// 0x14
+			new SimpleElementParser((byte) 21, EnumSet.of(TFlag.SEMICOLON), ";", PFlags.SEMICOLON | PFlags.NEWLINE_AFTER | PFlags.NO_SPACE_BEFORE),	// 0x15
+			new SimpleElementParser((byte) 26, EnumSet.of(TFlag.END_IF, TFlag.END_OF_BLOCK), "End-If", PFlags.ENDIF_STYLE),	// 0x1A
+			new SimpleElementParser((byte) 28, EnumSet.of(TFlag.IF), "If", PFlags.IF_STYLE),			// 0x1C
+			new SimpleElementParser((byte) 31, EnumSet.of(TFlag.THEN), "Then", PFlags.THEN_STYLE),		// 0x1F
 			new ReferenceParser((byte) 33),										// 0x21
 			new CommentParser((byte) 36), 										// 0x24
-			new SimpleElementParser((byte) 47, TFlag.TRUE, "True", PFlags.SPACE_BEFORE_AND_AFTER2),	// 0x2F
+			new SimpleElementParser((byte) 47, EnumSet.of(TFlag.TRUE), "True", PFlags.SPACE_BEFORE_AND_AFTER2),	// 0x2F
 			new NumberParser((byte) 80, 18)										// 0x50
 		};
 

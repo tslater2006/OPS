@@ -1,22 +1,23 @@
 package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import java.util.EnumSet;
 
 public class SimpleElementParser extends ElementParser {
 
 	private byte b;
 	private String t;
-	private TFlag tflag;
+	private EnumSet<TFlag> tflags;
 
-	public SimpleElementParser(byte _b, TFlag _f, String _t, int _format) {
+	public SimpleElementParser(byte _b, EnumSet<TFlag> _e, String _t, int _format) {
 		b = _b;
-		tflag = _f;
+		tflags = _e;
 		t = _t;
 		format = _format;
 	}
 
-	public SimpleElementParser(byte _b, TFlag _f, String _t) {
-		this(_b, _f, _t, PFlags.SPACE_BEFORE_AND_AFTER);
+	public SimpleElementParser(byte _b, EnumSet<TFlag> _e, String _t) {
+		this(_b, _e, _t, PFlags.SPACE_BEFORE_AND_AFTER);
 	}
 
 	public byte getStartByte() {
@@ -28,7 +29,7 @@ public class SimpleElementParser extends ElementParser {
 		Parser.prog.appendProgText(t);
 
 		if(Parser.prog.interpretFlag) {
-			return new Token(this.tflag);
+			return new Token(this.tflags);
 		}
 
 		return null;

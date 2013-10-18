@@ -22,14 +22,33 @@ public class StmtConstruct {
 			return;
 		}
 
-		SymbolicConstruct.interpret();
+		Token resolvedToken = SymbolicConstruct.interpret();
+		t = Interpreter.parseNextToken();
 
-		/**
-		 * If next token is a semicolon, we just interpreted a function.
-		 * If next token is EQUAL, we need to assign the next symbolic
-		 * to this symbolic. Don't create an AssignmentConstruct to handle this,
-		 * just do it here (assignment can't be done in expressions in PeopleCode).
-		 */
+		// Detect: SEMICOLON (must be preceded by a function call).
+		if(t.flags.contains(TFlag.SEMICOLON)) {
+			if(resolvedToken.flags.contains(TFlag.FUNCTION)) {
+				return;
+			} else {
+				System.out.println("[ERROR] Parsed semicolon, but a token other than FUNCTION preceded it.");
+				System.exit(1);
+			}
+		}
+
+		// Detect: assignment.
+		if(t.flags.contains(TFlag.EQUAL)) {
+			SymbolicConstruct.interpret();
+
+			// Do assignment.
+
+			t = Interpreter.parseNextToken();
+			if(!t.flags.contains(TFlag.SEMICOLON)) {
+				System.out.println("[ERROR] Expected semicolon after assignment.");
+				System.exit(1);
+			}
+
+			return;
+		}
 
 		System.out.println("[ERROR] Encountered unexpected statement token.");
 		System.exit(1);

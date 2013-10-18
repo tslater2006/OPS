@@ -9,7 +9,13 @@ import com.enterrupt.parser.Token;
 
 public class SymbolicConstruct {
 
-	public static void interpret() throws Exception {
+	/**
+	 * SymbolicConstruct resolves generic tokens (i.e., REFERENCE)
+	 * to a more specific type (i.e., VAR, FUNCTION, FIELD). Calling constructs
+     * (i.e., StmtConstruct) may use the additional data (provided by the returned Token) to ensure that tokens
+ 	 * are being interpreted as expected.
+	 */
+	public static Token interpret() throws Exception {
 
 		Token t = Interpreter.parseNextToken();
 
@@ -22,15 +28,17 @@ public class SymbolicConstruct {
 			if(refName.charAt(0) == '%' &&
 				(ptr = RunTimeEnvironment.systemVarTable.get(refName)) != null) {
 
+				t.flags.add(TFlag.VAR);
 				Interpreter.pushToRuntimeStack(ptr);
-				return;
+				return t;
 			}
 
 			// Does the reference refer to a field in the component buffer?
 			if((ptr = RunTimeEnvironment.compBufferTable.get(refName)) != null) {
 
+				t.flags.add(TFlag.FIELD);
 				Interpreter.pushToRuntimeStack(ptr);
-				return;
+				return t;
 			}
 
 			Token l = Interpreter.lookAheadNextToken();
@@ -40,8 +48,9 @@ public class SymbolicConstruct {
 			if(l.flags.contains(TFlag.L_PAREN) &&
 				(m = RunTimeEnvironment.systemFuncTable.get(refName)) != null) {
 
+				t.flags.add(TFlag.FUNCTION);
 				FnCallConstruct.interpret(m);
-				return;
+				return t;
 			}
 
 			System.out.println("[ERROR] Unable to resolve REFERENCE token.");
@@ -50,5 +59,6 @@ public class SymbolicConstruct {
 
 		System.out.println("[ERROR] Unexpected token encountered during SymbolicConstruct interpretation.");
 		System.exit(1);
+		return null;
 	}
 }

@@ -22,4 +22,14 @@ public abstract class MemoryPtr<T> {
 	public abstract void write(T val);
 	public abstract void systemWrite(T val);
 	public abstract boolean isEmpty();
+
+	public static void copy(MemoryPtr src, MemoryPtr dest) {
+
+		if(src.flags.contains(MFlag.STRING) && dest.flags.contains(MFlag.STRING)) {
+			((StringPtr) dest).write(((StringPtr) src).read());
+		} else {
+			System.out.println("[ERROR] Pointer types do not agree; unable to copy from source to destination.");
+			System.exit(1);
+		}
+	}
 }

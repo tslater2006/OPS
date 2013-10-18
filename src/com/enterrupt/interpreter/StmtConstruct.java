@@ -39,7 +39,9 @@ public class StmtConstruct {
 		if(t.flags.contains(TFlag.EQUAL)) {
 			SymbolicConstruct.interpret();
 
-			// Do assignment.
+			MemoryPtr srcOperand = Interpreter.popFromRuntimeStack();
+			MemoryPtr destOperand = Interpreter.popFromRuntimeStack();
+			MemoryPtr.copy(srcOperand, destOperand);
 
 			t = Interpreter.parseNextToken();
 			if(!t.flags.contains(TFlag.SEMICOLON)) {

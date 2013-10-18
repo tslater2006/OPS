@@ -40,8 +40,6 @@ public class RunTimeEnvironment {
 
 		// Initialize empty component buffer.
 		compBufferTable = new HashMap<String, MemoryPtr>();
-
-		//compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr("test", MFlag.READ_ONLY));
 	}
 
 	public static MemoryPtr getFromMemoryPool(Integer val) {

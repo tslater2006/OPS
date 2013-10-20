@@ -22,6 +22,15 @@ public class Record {
 			return;
 		}
 
+		/**
+		 * The PSXLATITEM table is a system table and should not have its record
+		 * definition loaded.
+		 * TODO: Make a system table list that should be excluded from record definition initialization.
+		 */
+		if(this.RECNAME.equals("PSXLATITEM")) {
+			return;
+		}
+
 		System.out.println("Loading Record " + this.RECNAME + "...");
 
 		int fieldcount = 0;

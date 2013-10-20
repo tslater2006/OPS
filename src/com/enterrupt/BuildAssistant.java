@@ -67,7 +67,7 @@ public class BuildAssistant {
 		boolean inCoverageRegion = false;
 		int coverageStartLine = -1, coverageEndLine = -1;
 
-		int curr_unmatched_idx = 0, unmatched_size = 5;
+		int curr_unmatched_idx = 0, unmatched_size = 15;
 		int[] firstUnmatchedTokenLineNbrs = new int[unmatched_size];
 
 		double numTraceStmts = 0.0;

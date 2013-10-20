@@ -18,6 +18,7 @@ public class Main {
 			RunTimeEnvironment.init();
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%EmployeeId")).systemWrite("AA0001");
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%Menu")).systemWrite("SA_LEARNER_SERVICES");
+			((StringPtr)RunTimeEnvironment.systemVarTable.get("%OperatorId")).systemWrite("KADAMS");
 
 			// TODO: Remove, should be generated during SQL processing.
 			RunTimeEnvironment.compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr());
@@ -33,6 +34,7 @@ public class Main {
 			c.getListOfComponentPC();
 			c.loadAndRunRecordPConSearchRecord();
 			c.loadAndRunComponentPConSearchRecord();
+			c.fillSearchRecord();
 
 			for(String pnlname : c.pages) {
 				recurseSubPagesOf(pnlname, 0);

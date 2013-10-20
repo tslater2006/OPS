@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 public class PSStmt extends SQLStmt {
 
 	// Note: this regex uses positve lookbehind and lookahead.
-	private final String BIND_IDX_REGEX = "(?<=\\s)(:\\d+)(?=\\s?)";
+	private final String BIND_IDX_REGEX = "(?<=\\s*)(:\\d+)(?=\\s?)";
 	public String originalStmt;
 	public int line_nbr;
 

@@ -36,6 +36,7 @@ public class RunTimeEnvironment {
 		// Load system variables.
 		systemVarTable = new HashMap<String, MemoryPtr>();
 		systemVarTable.put("%EmployeeId", new StringPtr(MFlag.READ_ONLY));
+		systemVarTable.put("%OperatorId", new StringPtr(MFlag.READ_ONLY));
 		systemVarTable.put("%Menu", new StringPtr(MFlag.READ_ONLY));
 
 		// Load system function references.

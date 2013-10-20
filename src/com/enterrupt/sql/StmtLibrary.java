@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.ArrayList;
+import com.enterrupt.interpreter.RunTimeEnvironment;
+import com.enterrupt.types.*;
 
 public class StmtLibrary {
 
@@ -134,7 +136,17 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
-
+	/**
+	 * TODO: Clean this up. Remember that this query is dynamically generated based on 1) the structure
+	 * and keys on the search record 2) the data in the component buffer following execution of SearchInit PC.
+	 */
+	public static PreparedStatement getSearchRecordFillQuery() throws Exception {
+		// I hardcoded: "PS_LS_SS_PERS_SRCH", "EMPLID", the value for EMPLID, "OPRID", and the value for OPRID.
+		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '" +
+			((StringPtr) RunTimeEnvironment.compBufferTable.get("LS_SS_PERS_SRCH.EMPLID")).read() + "%' AND OPRID=? ORDER BY EMPLID");
+		stmt.bindVals.put(1, ((StringPtr) RunTimeEnvironment.systemVarTable.get("%OperatorId")).read());
+		return stmt.generatePreparedStmt(conn);
+	}
 
 	/**
 	 * NOTE: This is not a statement executed by PeopleTools; this is used by Enterrupt

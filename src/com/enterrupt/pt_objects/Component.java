@@ -133,4 +133,27 @@ public class Component {
 		Parser.parse(prog);
 		Interpreter.run(prog);
 	}
+
+	/**
+	 * Note: The search record fill query can't be executed as a 100% prepared stmt b/c PT
+	 * hardcodes the EMPLID in the query for some reason. This statement will also need to be
+	 * dynamically generated based on the fields present, etc., which I'm skipping for now in order
+     * to move on and get a better understanding of the patterns of SQL present in the next part
+	 * of the trace file.
+	 * TODO: Address the notes presented above.
+	 */
+	public void fillSearchRecord() throws Exception {
+
+		PreparedStatement pstmt;
+		ResultSet rs;
+
+		pstmt = StmtLibrary.getSearchRecordFillQuery();
+		rs = pstmt.executeQuery();
+
+		while(rs.next()) {
+			// Do nothing with records for now.
+		}
+		rs.close();
+		pstmt.close();
+	}
 }

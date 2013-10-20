@@ -153,6 +153,11 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
+	public static PreparedStatement getSubrecordsUsingPSDBFIELD_PSRECFIELD_JOIN(String b1) throws Exception {
+		ENTStmt stmt = new ENTStmt("SELECT FIELDNUM, FIELDNAME, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID, RECNAME FROM PSRECFIELD WHERE RECNAME = ? AND SUBRECORD = 'Y' ORDER BY RECNAME, FIELDNUM");
+		stmt.bindVals.put(1, b1);
+		return stmt.generatePreparedStmt(conn);
+	}
 
 
 

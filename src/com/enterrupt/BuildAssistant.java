@@ -17,6 +17,7 @@ public class BuildAssistant {
 
 	public static HashMap<String, Boolean> allRecordFields;
 	public static HashMap<String, Page> pageDefnCache;
+	public static HashMap<String, Record> recDefnCache;
 	private static final String SQL_TOKEN_REGEX = "\\sStmt=(.*)";
 	private static final String BIND_VAL_REGEX = "\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)";
 	private static BufferedReader traceReader;
@@ -27,6 +28,7 @@ public class BuildAssistant {
 	public static void init() {
 		allRecordFields = new HashMap<String, Boolean>();
 		pageDefnCache = new HashMap<String, Page>();
+		recDefnCache = new HashMap<String, Record>();
 	}
 
 	public static void addRecordField(String recField) {
@@ -35,7 +37,12 @@ public class BuildAssistant {
 
 	public static void cachePage(Page p) {
 		pageDefnCache.put(p.PNLNAME, p);
-		//System.out.println("Cached Page." + p.PNLNAME);
+		//System.out.println("Cached Page: " + p.PNLNAME);
+	}
+
+	public static void cacheRecord(Record r) {
+		recDefnCache.put(r.RECNAME, r);
+		//System.out.println("Cached Record: " + r.RECNAME);
 	}
 
 	public static void printInfo() {

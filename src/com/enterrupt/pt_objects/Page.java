@@ -42,8 +42,36 @@ public class Page {
                     this.secpages.add(rs.getString("SUBPNLNAME"));
                     break;
                 default:
-                    BuildAssistant.addRecordField(rs.getString("RECNAME") + "." + rs.getString("FIELDNAME"));
+  	            	BuildAssistant.addRecordField(rs.getString("RECNAME") + "." + rs.getString("FIELDNAME"));
             }
+
+			/**
+			 * If the RECNAME field is not blank, load it's record metadata, regardless of
+			 * what type of field the record represents. If the record defn has already been loaded,
+			 * do not load it again.
+			 */
+			String recname = rs.getString("RECNAME");
+			if(BuildAssistant.recDefnCache.get(recname) == null && recname.trim().length() > 0) {
+				Record r = new Record(recname);
+				System.out.println("Page: " + this.PNLNAME + "FieldType: " + rs.getString("FIELDTYPE") + ", RECNAME: " + recname);
+				r.loadInitialMetadata();
+				BuildAssistant.cacheRecord(r);
+			}
+
+			/**
+			 * If the field is a grid (FieldType 19), PT seems to be stripping the underscores from
+			 * RECNAME, appending "LN", and doing the RECDEFN/DBFIELD/DBFIELDLABL query
+			 * sequence using that RECNAME.
+			 */
+			if(rs.getInt("FIELDTYPE") == 19) {
+				String gridRecName = recname.replaceAll("_", "") + "LN";
+				if(BuildAssistant.recDefnCache.get(gridRecName) == null && gridRecName.trim().length() > 0) {
+					Record r = new Record(gridRecName);
+					System.out.println("Page: " + this.PNLNAME + "FieldType: " + rs.getString("FIELDTYPE") + ", RECNAME: " + gridRecName);
+					r.loadInitialMetadata();
+					BuildAssistant.cacheRecord(r);
+				}
+			}
         }
         rs.close();
         pstmt.close();

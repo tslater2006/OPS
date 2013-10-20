@@ -47,15 +47,13 @@ public class Page {
 
 			/**
 			 * If the RECNAME field is not blank, load it's record metadata, regardless of
-			 * what type of field the record represents. If the record defn has already been loaded,
-			 * do not load it again.
+			 * what type of field the record represents.
 			 */
-			String recname = rs.getString("RECNAME");
+			String recname = rs.getString("RECNAME").trim();
 			if(BuildAssistant.recDefnCache.get(recname) == null && recname.trim().length() > 0) {
 				Record r = new Record(recname);
 				System.out.println("Page: " + this.PNLNAME + "FieldType: " + rs.getString("FIELDTYPE") + ", RECNAME: " + recname);
 				r.loadInitialMetadata();
-				BuildAssistant.cacheRecord(r);
 			}
 
 			/**
@@ -64,12 +62,11 @@ public class Page {
 			 * sequence using that RECNAME.
 			 */
 			if(rs.getInt("FIELDTYPE") == 19) {
-				String gridRecName = recname.replaceAll("_", "") + "LN";
-				if(BuildAssistant.recDefnCache.get(gridRecName) == null && gridRecName.trim().length() > 0) {
+				String gridRecName = (recname.replaceAll("_", "") + "LN").trim();
+				if(BuildAssistant.recDefnCache.get(gridRecName) == null && gridRecName.length() > 0) {
 					Record r = new Record(gridRecName);
-					System.out.println("Page: " + this.PNLNAME + "FieldType: " + rs.getString("FIELDTYPE") + ", RECNAME: " + gridRecName);
 					r.loadInitialMetadata();
-					BuildAssistant.cacheRecord(r);
+					System.out.println("Page: " + this.PNLNAME + "FieldType: " + rs.getString("FIELDTYPE") + ", RECNAME: " + gridRecName);
 				}
 			}
         }

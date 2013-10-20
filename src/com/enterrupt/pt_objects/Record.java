@@ -16,6 +16,11 @@ public class Record {
 
     public void loadInitialMetadata() throws Exception {
 
+		// Do not contain if record definition has been cached.
+		if(BuildAssistant.recDefnCache.get(this.RECNAME) != null) {
+			return;
+		}
+
         PreparedStatement pstmt;
         ResultSet rs;
 
@@ -25,6 +30,25 @@ public class Record {
         rs.next(); // Do nothing with record for now.
         rs.close();
         pstmt.close();
+
+        pstmt = StmtLibrary.getPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
+        rs = pstmt.executeQuery();
+        while(rs.next()) {
+            // Do nothing with records for now.
+        }
+        rs.close();
+        pstmt.close();
+
+        pstmt = StmtLibrary.getPSDBFLDLBL(this.RECNAME);
+        rs = pstmt.executeQuery();
+        while(rs.next()) {
+            // Do nothing with records for now.
+        }
+        rs.close();
+        pstmt.close();
+
+		// Cache the record definition.
+		BuildAssistant.cacheRecord(this);
     }
 }
 

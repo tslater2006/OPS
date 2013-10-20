@@ -48,30 +48,8 @@ public class Component {
 
 	public void loadSearchRecord() throws Exception {
 
-        PreparedStatement pstmt;
-        ResultSet rs;
-
-        pstmt = StmtLibrary.getPSRECDEFN(this.SEARCHRECNAME);
-        rs = pstmt.executeQuery();
-        rs.next();
-        rs.close();
-        pstmt.close();
-
-        pstmt = StmtLibrary.getPSDBFIELD_PSRECFIELD_JOIN(this.SEARCHRECNAME);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-            // Do nothing with records for now.
-        }
-        rs.close();
-        pstmt.close();
-
-        pstmt = StmtLibrary.getPSDBFLDLBL(this.SEARCHRECNAME);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-            // Do nothing with records for now.
-        }
-        rs.close();
-        pstmt.close();
+		Record r = new Record(this.SEARCHRECNAME);
+		r.loadInitialMetadata();
     }
 
     public void getListOfComponentPC() throws Exception {

@@ -17,9 +17,14 @@ public class StmtLibrary {
 	public static void init() {
 		emittedStmts = new ArrayList<ENTStmt>();
 
+		/**
+		 * TODO: When I use "jdbc:oracle:thin", the EVM will only work intermittently.
+		 * Setting it to "jdbc:oracle:oci" seems to work all the time. Ideally I would like
+		 * to use the thin client rather than the full OCI client. Look into this issue eventually.
+		 */
 		try {
 			conn = DriverManager.getConnection(
-				"jdbc:oracle:thin:@//10.0.1.88:1521/ENTCSDEV", "SYSADM", "SYSADM");
+				"jdbc:oracle:oci:@//10.0.1.88:1521/ENTCSDEV", "SYSADM", "SYSADM");
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			System.exit(1);

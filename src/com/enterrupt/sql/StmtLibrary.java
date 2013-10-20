@@ -17,7 +17,7 @@ public class StmtLibrary {
 
 		try {
 			conn = DriverManager.getConnection(
-				"jdbc:oracle:oci8:@//10.0.1.88:1521/ENTCSDEV", "SYSADM", "SYSADM");
+				"jdbc:oracle:thin:@//10.0.1.88:1521/ENTCSDEV", "SYSADM", "SYSADM");
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			System.exit(1);

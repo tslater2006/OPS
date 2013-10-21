@@ -14,6 +14,7 @@ public class Main {
 			StmtLibrary.init();
 			BuildAssistant.init();
 			Parser.init();
+			ComponentBuffer.init();
 
 			RunTimeEnvironment.init();
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%EmployeeId")).systemWrite("AA0001");

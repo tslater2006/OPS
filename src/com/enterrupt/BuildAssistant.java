@@ -1,5 +1,6 @@
 package com.enterrupt;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.BufferedReader;
@@ -15,7 +16,7 @@ import com.enterrupt.sql.*;
 
 public class BuildAssistant {
 
-	public static HashMap<String, Boolean> allRecordFields;
+	public static HashMap<String, HashMap<String, Integer>> allRecordFields;
 	public static HashMap<String, Page> pageDefnCache;
 	public static HashMap<String, Record> recDefnCache;
 	private static final String SQL_TOKEN_REGEX = "\\sStmt=(.*)";
@@ -26,13 +27,25 @@ public class BuildAssistant {
 	private static int currTraceLineNbr = 0;
 
 	public static void init() {
-		allRecordFields = new HashMap<String, Boolean>();
+		allRecordFields = new HashMap<String, HashMap<String, Integer>>();
 		pageDefnCache = new HashMap<String, Page>();
 		recDefnCache = new HashMap<String, Record>();
 	}
 
-	public static void addRecordField(String recField) {
-		allRecordFields.put(recField, true);
+	public static void addRecordField(String rec, String fld) {
+		HashMap<String, Integer> fields = allRecordFields.get(rec);
+		if(fields == null) {
+			//System.out.println("Caching record for first time: " + rec);
+			fields = new HashMap<String, Integer>();
+		}
+
+		if(fields.get(fld) == null) {
+			fields.put(fld, 1);
+		} else {
+			fields.put(fld, fields.get(fld) + 1);
+		}
+
+		allRecordFields.put(rec, fields);
 	}
 
 	public static void cachePage(Page p) {
@@ -46,13 +59,24 @@ public class BuildAssistant {
 	}
 
 	public static void printInfo() {
-		for(Map.Entry<String, Boolean> cursor : allRecordFields.entrySet()) {
-			//System.out.println("Field: " + cursor.getKey());
-		}
+
+	/*	System.out.println("\n\nPAGE FIELDS\n\n");
+		for(Map.Entry<String, HashMap<String, Integer>> cursor : allRecordFields.entrySet()) {
+			String recname = cursor.getKey();
+			HashMap<String, Integer> fields = cursor.getValue();
+
+			System.out.println("Record: " + recname);
+			for(Map.Entry<String, Integer> cursor2 : fields.entrySet()) {
+				System.out.println("\t" + cursor2.getKey() + " (" + cursor2.getValue() + ")");
+			}
+			System.out.println("\n\n");
+		}*/
 
 		System.out.println("Total pages: " + pageDefnCache.size());
 		System.out.println("Total fields: " + allRecordFields.size());
 		System.out.println("Cached records: " + recDefnCache.size());
+
+		ComponentBuffer.print();
 	}
 
 	public static void verifyAgainstTraceFile() {
@@ -68,7 +92,7 @@ public class BuildAssistant {
 		boolean inCoverageRegion = false;
 		int coverageStartLine = -1, coverageEndLine = -1;
 
-		int curr_unmatched_idx = 0, unmatched_size = 110;
+		int curr_unmatched_idx = 0, unmatched_size = 10;
 		int[] firstUnmatchedTokenLineNbrs = new int[unmatched_size];
 
 		double numTraceStmts = 0.0;

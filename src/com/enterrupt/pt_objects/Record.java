@@ -91,7 +91,7 @@ public class Record {
 		BuildAssistant.cacheRecord(this);
 
 		for(String subrecname : subrecnames) {
-			System.out.println("Loading subrecord : " + subrecname);
+			//System.out.println("Loading subrecord : " + subrecname);
 			Record r = new Record(subrecname);
 			r.loadInitialMetadata();
 		}

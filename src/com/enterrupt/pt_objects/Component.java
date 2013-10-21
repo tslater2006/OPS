@@ -11,7 +11,7 @@ import com.enterrupt.interpreter.Interpreter;
 
 public class Component {
 
-    public ArrayList<String> pages;
+    public ArrayList<Page> pages;
     private String PNLGRPNAME;
     private String MARKET;
 
@@ -21,7 +21,7 @@ public class Component {
     public Component(String pnlgrpname, String market) {
         this.PNLGRPNAME = pnlgrpname;
         this.MARKET = market;
-        pages = new ArrayList<String>();
+        pages = new ArrayList<Page>();
         searchRecordProgs = new ArrayList<PeopleCodeProg>();
     }
 
@@ -40,7 +40,7 @@ public class Component {
         pstmt = StmtLibrary.getPSPNLGROUP(this.PNLGRPNAME, this.MARKET);
         rs = pstmt.executeQuery();
         while(rs.next()) {
-            this.pages.add(rs.getString("PNLNAME"));
+            this.pages.add(new Page(rs.getString("PNLNAME")));
         }
         rs.close();
         pstmt.close();
@@ -133,5 +133,14 @@ public class Component {
 		}
 		rs.close();
 		pstmt.close();
+	}
+
+	public void loadPages() throws Exception {
+		for(Page p : this.pages) {
+			p.recursivelyLoadSubpages();
+		}
+		for(Page p : this.pages) {
+			p.recursivelyLoadSecpages();
+		}
 	}
 }

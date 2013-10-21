@@ -10,18 +10,21 @@ import com.enterrupt.ComponentBuffer;
 public class Page {
 
     public String PNLNAME;
-    public ArrayList<String> subpages;
-    public ArrayList<String> secpages;
+    public ArrayList<Page> subpages;
+    public ArrayList<Page> secpages;
 
     public Page(String pnlname) {
         this.PNLNAME = pnlname;
-        this.subpages = new ArrayList<String>();
-        this.secpages = new ArrayList<String>();
+        this.subpages = new ArrayList<Page>();
+        this.secpages = new ArrayList<Page>();
     }
 
-    public void loadInitialMetadata(int indent) throws Exception {
+    public void loadInitialMetadata() throws Exception {
 
-		for(int i=0; i<indent; i++){ System.out.print(" "); }
+		if(BuildAssistant.pageDefnCache.get(this.PNLNAME) != null) {
+			return;
+		}
+
 		System.out.println("Page: " + this.PNLNAME);
 
         PreparedStatement pstmt;
@@ -40,10 +43,10 @@ public class Page {
         while(rs.next()) {
             switch(rs.getInt("FIELDTYPE")) {
                 case 11:
-                    this.subpages.add(rs.getString("SUBPNLNAME"));
+                    this.subpages.add(new Page(rs.getString("SUBPNLNAME")));
                     break;
                 case 18:
-                    this.secpages.add(rs.getString("SUBPNLNAME"));
+                    this.secpages.add(new Page(rs.getString("SUBPNLNAME")));
                     break;
 				case 19:
 					System.out.println("Found grid; occurs level: " + rs.getInt("OCCURSLEVEL"));
@@ -67,7 +70,6 @@ public class Page {
 			String recname = rs.getString("RECNAME").trim();
 			if(BuildAssistant.recDefnCache.get(recname) == null && recname.trim().length() > 0) {
 
-				//for(int i=0; i<indent + 1; i++){ System.out.print(" "); }
 				//System.out.println("Record: " + recname + " (" + rs.getString("FIELDTYPE") + ")");
 
 				Record r = new Record(recname);
@@ -92,6 +94,29 @@ public class Page {
         }
         rs.close();
         pstmt.close();
+
+		BuildAssistant.cachePage(this);
     }
+
+	public void recursivelyLoadSubpages() throws Exception {
+		this.loadInitialMetadata();
+		for(Page p : this.subpages) {
+			p.recursivelyLoadSubpages();
+		}
+	}
+
+	public void recursivelyLoadSecpages() throws Exception {
+		this.loadInitialMetadata();
+
+		// Recursively expand/search subpages for secpages.
+		for(Page p : this.subpages) {
+			p.recursivelyLoadSecpages();
+		}
+
+		// Then, recursively expand/search secpages for more secpages.
+		for(Page p : this.secpages) {
+			p.recursivelyLoadSecpages();
+		}
+	}
 }
 

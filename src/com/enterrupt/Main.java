@@ -37,13 +37,7 @@ public class Main {
 			c.loadAndRunComponentPConSearchRecord();
 			c.fillSearchRecord();
 
-			for(String pnlname : c.pages) {
-				recurseSubPagesOf(pnlname, 0);
-			}
-
-			for(String pnlname : c.pages) {
-				recurseSecPagesOf(pnlname, 0);
-			}
+			c.loadPages();
 
 			StmtLibrary.disconnect();
 			BuildAssistant.printInfo();
@@ -53,37 +47,4 @@ public class Main {
 			System.exit(1);
 		}
     }
-
-	private static void recurseSubPagesOf(String pnlname, int indent) throws Exception {
-
-		Page p = BuildAssistant.pageDefnCache.get(pnlname);
-		if(p == null) {
-			p = new Page(pnlname);
-			p.loadInitialMetadata(indent);
-			BuildAssistant.cachePage(p);
-		}
-		for(String subpnlname : p.subpages) {
-			recurseSubPagesOf(subpnlname, indent+2);
-		}
-	}
-
-	private static void recurseSecPagesOf(String pnlname, int indent) throws Exception {
-
-		Page p = BuildAssistant.pageDefnCache.get(pnlname);
-		if(p == null) {
-			p = new Page(pnlname);
-			p.loadInitialMetadata(indent);
-			BuildAssistant.cachePage(p);
-		}
-
-		// Recursively expand/search subpages for secpages.
-		for(String subpnlname : p.subpages) {
-			recurseSecPagesOf(subpnlname, indent+2);
-		}
-
-		// Then, recursively expand/search secpages for more secpages.
-		for(String secpnlname : p.secpages) {
-			recurseSecPagesOf(secpnlname, indent+2);
-		}
-	}
 }

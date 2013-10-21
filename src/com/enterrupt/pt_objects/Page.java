@@ -12,11 +12,14 @@ public class Page {
     public String PNLNAME;
     public ArrayList<Page> subpages;
     public ArrayList<Page> secpages;
+	public ArrayList<Object> pageObjs;
+	public static final byte REL_DISP_FLAG = (byte) 16;
 
     public Page(String pnlname) {
         this.PNLNAME = pnlname;
         this.subpages = new ArrayList<Page>();
         this.secpages = new ArrayList<Page>();
+		this.pageObjs = new ArrayList<Object>();
     }
 
     public void loadInitialMetadata() throws Exception {
@@ -24,8 +27,6 @@ public class Page {
 		if(BuildAssistant.pageDefnCache.get(this.PNLNAME) != null) {
 			return;
 		}
-
-		System.out.println("Page: " + this.PNLNAME);
 
         PreparedStatement pstmt;
         ResultSet rs;
@@ -41,55 +42,42 @@ public class Page {
 
         ArrayList<String> subpanels = new ArrayList<String>();
         while(rs.next()) {
+
+			String r = rs.getString("RECNAME").trim();
+			String f = rs.getString("FIELDNAME").trim();
+
             switch(rs.getInt("FIELDTYPE")) {
                 case 11:
-                    this.subpages.add(new Page(rs.getString("SUBPNLNAME")));
+                    Page p1 = new Page(rs.getString("SUBPNLNAME"));
+					this.subpages.add(p1);
+					this.pageObjs.add(p1);
                     break;
                 case 18:
-                    this.secpages.add(new Page(rs.getString("SUBPNLNAME")));
-                    break;
+                    Page p2 = new Page(rs.getString("SUBPNLNAME"));
+                    this.secpages.add(p2);
+					this.pageObjs.add(p2);
 				case 19:
-					System.out.println("Found grid; occurs level: " + rs.getInt("OCCURSLEVEL"));
+					//System.out.println("Found grid; occurs level: " + rs.getInt("OCCURSLEVEL"));
 					break;
         		case 27:
-					System.out.println("Found scroll; occurs level: " + rs.getInt("OCCURSLEVEL"));
-					System.out.println(this.PNLNAME);
+					//System.out.println("Found scroll; occurs level: " + rs.getInt("OCCURSLEVEL"));
 					break;
 		      	default:
-					String r = rs.getString("RECNAME").trim();
-					String f = rs.getString("FIELDNAME").trim();
 					if(r.length() > 0 && f.length() > 0) {
-  	            		BuildAssistant.addRecordField(rs.getString("RECNAME"), rs.getString("FIELDNAME"));
+						PageField pf = new PageField(r, f);
+						pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
+						pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
+						pageObjs.add(pf);
 					}
             }
 
 			/**
-			 * If the RECNAME field is not blank, load it's record metadata, regardless of
-			 * what type of field the record represents.
-			 */
-			String recname = rs.getString("RECNAME").trim();
-			if(BuildAssistant.recDefnCache.get(recname) == null && recname.trim().length() > 0) {
-
-				//System.out.println("Record: " + recname + " (" + rs.getString("FIELDTYPE") + ")");
-
-				Record r = new Record(recname);
-				r.loadInitialMetadata();
-			}
-
-			String fldname = rs.getString("FIELDNAME").trim();
-			byte fieldUseMask = (byte) rs.getInt("FIELDUSE");
-			byte REL_DISP_FLAG = (byte) 16;
-			if(recname.length() > 0 && fldname.length() > 0) {
-
-				if(recname.equals("EO_ADDRESS_WRK")) {
-					System.out.println("EO_ADDRESS_WRK, Field : " + fldname);
-				}
-
-				if((fieldUseMask & REL_DISP_FLAG) > 0) {
-					//System.out.println("Related display field: " + fldname + "on page " + this.PNLNAME);
-				} else {
-					ComponentBuffer.addField(recname, fldname, rs.getInt("OCCURSLEVEL"));
-				}
+			 * Issue request for record's definition and fields,
+			 * regardless of field type.
+		 	 */
+			if(r.length() > 0) {
+				Record rec = new Record(r);
+				rec.loadInitialMetadata();
 			}
         }
         rs.close();
@@ -116,6 +104,26 @@ public class Page {
 		// Then, recursively expand/search secpages for more secpages.
 		for(Page p : this.secpages) {
 			p.recursivelyLoadSecpages();
+		}
+	}
+
+	public void generateStructure() {
+
+		for(Object pageobj : this.pageObjs) {
+
+			if(pageobj instanceof PageField) {
+				PageField pf = (PageField) pageobj;
+				if((pf.FIELDUSE & REL_DISP_FLAG) > 0) {
+					//System.out.println("Related display field: " + fldname + "on page " + this.PNLNAME);
+				} else {
+					ComponentBuffer.addField(pf);
+				}
+				continue;
+			}
+
+			// TODO: Should this just involve subpages first, or both subpages and secpages?
+			Page p = (Page) pageobj;
+			p.generateStructure();
 		}
 	}
 }

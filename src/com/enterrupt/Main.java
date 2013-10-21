@@ -39,6 +39,8 @@ public class Main {
 
 			c.loadPages();
 
+			c.generateStructure();
+
 			StmtLibrary.disconnect();
 			BuildAssistant.printInfo();
 			BuildAssistant.verifyAgainstTraceFile();

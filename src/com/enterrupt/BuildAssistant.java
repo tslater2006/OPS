@@ -16,7 +16,6 @@ import com.enterrupt.sql.*;
 
 public class BuildAssistant {
 
-	public static HashMap<String, HashMap<String, Integer>> allRecordFields;
 	public static HashMap<String, Page> pageDefnCache;
 	public static HashMap<String, Record> recDefnCache;
 	private static final String SQL_TOKEN_REGEX = "\\sStmt=(.*)";
@@ -27,25 +26,8 @@ public class BuildAssistant {
 	private static int currTraceLineNbr = 0;
 
 	public static void init() {
-		allRecordFields = new HashMap<String, HashMap<String, Integer>>();
 		pageDefnCache = new HashMap<String, Page>();
 		recDefnCache = new HashMap<String, Record>();
-	}
-
-	public static void addRecordField(String rec, String fld) {
-		HashMap<String, Integer> fields = allRecordFields.get(rec);
-		if(fields == null) {
-			//System.out.println("Caching record for first time: " + rec);
-			fields = new HashMap<String, Integer>();
-		}
-
-		if(fields.get(fld) == null) {
-			fields.put(fld, 1);
-		} else {
-			fields.put(fld, fields.get(fld) + 1);
-		}
-
-		allRecordFields.put(rec, fields);
 	}
 
 	public static void cachePage(Page p) {
@@ -60,20 +42,7 @@ public class BuildAssistant {
 
 	public static void printInfo() {
 
-	/*	System.out.println("\n\nPAGE FIELDS\n\n");
-		for(Map.Entry<String, HashMap<String, Integer>> cursor : allRecordFields.entrySet()) {
-			String recname = cursor.getKey();
-			HashMap<String, Integer> fields = cursor.getValue();
-
-			System.out.println("Record: " + recname);
-			for(Map.Entry<String, Integer> cursor2 : fields.entrySet()) {
-				System.out.println("\t" + cursor2.getKey() + " (" + cursor2.getValue() + ")");
-			}
-			System.out.println("\n\n");
-		}*/
-
 		System.out.println("Total pages: " + pageDefnCache.size());
-		System.out.println("Total fields: " + allRecordFields.size());
 		System.out.println("Cached records: " + recDefnCache.size());
 
 		ComponentBuffer.print();

@@ -143,4 +143,10 @@ public class Component {
 			p.recursivelyLoadSecpages();
 		}
 	}
+
+	public void generateStructure() {
+		for(Page p : this.pages) {
+			p.generateStructure();
+		}
+	}
 }

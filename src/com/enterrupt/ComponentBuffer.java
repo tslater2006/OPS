@@ -2,7 +2,9 @@ package com.enterrupt;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 import java.lang.StringBuilder;
+import com.enterrupt.pt_objects.PageField;
 
 public class ComponentBuffer {
 
@@ -12,10 +14,10 @@ public class ComponentBuffer {
 		level0 = new ScrollBuffer(0);
 	}
 
-	public static void addField(String recname, String fldname, int level) {
+	public static void addField(PageField pf) {
 
-		if(level == 0) {
-			level0.addField(recname, fldname);
+		if(pf.OCCURSLEVEL == 0) {
+			level0.addField(pf.RECNAME, pf.FIELDNAME);
 		}
 	}
 
@@ -30,19 +32,24 @@ class ScrollBuffer {
 
 	public String primaryRecName;
 	public int scrollLevel;
+
 	public HashMap<String, RecordBuffer> records;
+	public ArrayList<RecordBuffer> orderedRecords;
+
 	public HashMap<String, ScrollBuffer> scrolls;
 
 	public ScrollBuffer(int level) {
 		this.scrollLevel = level;
 		this.scrolls = new HashMap<String, ScrollBuffer>();
 		this.records = new HashMap<String, RecordBuffer>();
+		this.orderedRecords = new ArrayList<RecordBuffer>();
 	}
 
 	public void addField(String recname, String fldname) {
 		RecordBuffer r = this.records.get(recname);
 		if(r == null) {
 			r = new RecordBuffer(recname);
+			orderedRecords.add(r);
 		}
 
 		r.addField(fldname);
@@ -52,11 +59,10 @@ class ScrollBuffer {
 	public String toString() {
 
 		StringBuilder b = new StringBuilder();
-		for(Map.Entry<String, RecordBuffer> cursor : records.entrySet()) {
-			RecordBuffer r = cursor.getValue();
+		for(RecordBuffer r : orderedRecords) {
 			b.append(r.recName + "\n");
 		}
-		b.append("Total records: " + records.size() + "\n");
+		b.append("Total records: " + orderedRecords.size() + "\n");
 		return b.toString();
 	}
 }

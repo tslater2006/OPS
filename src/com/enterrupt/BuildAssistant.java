@@ -52,6 +52,7 @@ public class BuildAssistant {
 
 		System.out.println("Total pages: " + pageDefnCache.size());
 		System.out.println("Total fields: " + allRecordFields.size());
+		System.out.println("Cached records: " + recDefnCache.size());
 	}
 
 	public static void verifyAgainstTraceFile() {
@@ -67,7 +68,7 @@ public class BuildAssistant {
 		boolean inCoverageRegion = false;
 		int coverageStartLine = -1, coverageEndLine = -1;
 
-		int curr_unmatched_idx = 0, unmatched_size = 15;
+		int curr_unmatched_idx = 0, unmatched_size = 110;
 		int[] firstUnmatchedTokenLineNbrs = new int[unmatched_size];
 
 		double numTraceStmts = 0.0;

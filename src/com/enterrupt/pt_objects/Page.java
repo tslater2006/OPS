@@ -18,7 +18,10 @@ public class Page {
         this.secpages = new ArrayList<String>();
     }
 
-    public void loadInitialMetadata() throws Exception {
+    public void loadInitialMetadata(int indent) throws Exception {
+
+		for(int i=0; i<indent; i++){ System.out.print(" "); }
+		System.out.println("Page: " + this.PNLNAME);
 
         PreparedStatement pstmt;
         ResultSet rs;
@@ -51,7 +54,10 @@ public class Page {
 			 */
 			String recname = rs.getString("RECNAME").trim();
 			if(BuildAssistant.recDefnCache.get(recname) == null && recname.trim().length() > 0) {
-				System.out.println("Page: " + this.PNLNAME + ", FieldType: " + rs.getString("FieldType"));
+
+				for(int i=0; i<indent + 1; i++){ System.out.print(" "); }
+				System.out.println("Record: " + recname + " (" + rs.getString("FIELDTYPE") + ")");
+
 				Record r = new Record(recname);
 				r.loadInitialMetadata();
 			}

@@ -58,11 +58,11 @@ public class Main {
 		Page p = BuildAssistant.pageDefnCache.get(pnlname);
 		if(p == null) {
 			p = new Page(pnlname);
-			p.loadInitialMetadata();
+			p.loadInitialMetadata(indent);
 			BuildAssistant.cachePage(p);
 		}
 		for(String subpnlname : p.subpages) {
-			recurseSubPagesOf(subpnlname, indent+1);
+			recurseSubPagesOf(subpnlname, indent+2);
 		}
 	}
 
@@ -71,18 +71,18 @@ public class Main {
 		Page p = BuildAssistant.pageDefnCache.get(pnlname);
 		if(p == null) {
 			p = new Page(pnlname);
-			p.loadInitialMetadata();
+			p.loadInitialMetadata(indent);
 			BuildAssistant.cachePage(p);
 		}
 
 		// Recursively expand/search subpages for secpages.
 		for(String subpnlname : p.subpages) {
-			recurseSecPagesOf(subpnlname, indent+1);
+			recurseSecPagesOf(subpnlname, indent+2);
 		}
 
 		// Then, recursively expand/search secpages for more secpages.
 		for(String secpnlname : p.secpages) {
-			recurseSecPagesOf(secpnlname, indent+1);
+			recurseSecPagesOf(secpnlname, indent+2);
 		}
 	}
 }

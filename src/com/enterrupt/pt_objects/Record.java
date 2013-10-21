@@ -31,8 +31,6 @@ public class Record {
 			return;
 		}
 
-		System.out.println("Loading Record " + this.RECNAME + "...");
-
 		int fieldcount = 0;
 		ArrayList<String> subrecnames = new ArrayList<String>();
 
@@ -88,8 +86,6 @@ public class Record {
         }
         rs.close();
         pstmt.close();
-
-		System.out.println("Loaded Record: " + this.RECNAME);
 
 		// Cache the record definition.
 		BuildAssistant.cacheRecord(this);

@@ -20,6 +20,9 @@ public class ComponentBuffer {
 
 	public static void addPageField(PageField pf) {
 
+		// Ensure we're pointing at the correct scroll buffer.
+		pointAtScroll(pf.scrollLevel, pf.scrollLevelPrimaryRecName);
+
 		// The primary RECNAME for scroll level 0 isn't none until the very first page field is inserted.
 		if(compBuffer.primaryRecName == null) {
 			compBuffer = new ScrollBuffer(currSB.scrollLevel, pf.RECNAME, null);
@@ -33,6 +36,12 @@ public class ComponentBuffer {
 
 		//System.out.println("Switching to scroll level " + targetScrollLevel +
 		//	" (primary rec name: " + targetPrimaryRecName + ")");
+
+		// Remember that there's only one scroll level at 0.
+		if(currSB.scrollLevel == targetScrollLevel &&
+			(currSB.scrollLevel == 0 || currSB.primaryRecName.equals(targetPrimaryRecName))) {
+			return;
+		}
 
 		while(currScrollLevel < targetScrollLevel) {
 			//System.out.println("Decrementing...");

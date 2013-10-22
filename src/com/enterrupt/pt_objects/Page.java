@@ -1,6 +1,7 @@
 package com.enterrupt.pt_objects;
 
 import java.sql.PreparedStatement;
+import java.util.Stack;
 import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -8,10 +9,22 @@ import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.ComponentBuffer;
 
+class ScrollLevelStart {
+	public int scrollLevel;
+	public String primaryRecName;
+	public ScrollLevelStart(int s, String p) {
+		this.scrollLevel = s;
+		this.primaryRecName = p;
+	}
+}
+
 public class Page {
 
     public String PNLNAME;
-	public int scrollLevel;
+
+	public int scrollLevel;	  // calculated using OCCURSLEVEL
+	public String scrollLevelPrimaryRecName;
+
     public ArrayList<Page> subpages;
     public ArrayList<Page> secpages;
 	public ArrayList<Object> pageObjs;
@@ -43,57 +56,71 @@ public class Page {
         pstmt = StmtLibrary.getPSPNLFIELD(this.PNLNAME);
         rs = pstmt.executeQuery();
 
-        ArrayList<String> subpanels = new ArrayList<String>();
-		PageField prevScrollPanelPf = null;
+		Stack<ScrollLevelStart> scrolls = new Stack<ScrollLevelStart>();
+		scrolls.push(new ScrollLevelStart(this.scrollLevel, this.scrollLevelPrimaryRecName));
+		boolean newScrollStartedFlag = false;
+
         while(rs.next()) {
 
 			String r = rs.getString("RECNAME").trim();
 			String f = rs.getString("FIELDNAME").trim();
+			String subpnlname = rs.getString("SUBPNLNAME").trim();
+			int currScrollLevel = this.scrollLevel + rs.getInt("OCCURSLEVEL");
 
-			/**
-			 * Result set is forward only, so if the previous element was a scroll
-			 * panel, use the current RECNAME as the primary record name of the scroll area.
-			 */
-			if(prevScrollPanelPf != null) {
-				prevScrollPanelPf.RECNAME = r;
-				this.pageObjs.add(prevScrollPanelPf);
-				prevScrollPanelPf = null;
+			while(scrolls.peek().scrollLevel > currScrollLevel) {
+				scrolls.pop();
+			}
+
+			if(newScrollStartedFlag) {
+				scrolls.peek().primaryRecName = r;
+				newScrollStartedFlag = false;
 			}
 
             switch(rs.getInt("FIELDTYPE")) {
+
+				case 2:
+					System.out.println("Found groupox for rec " + r + " on page " + this.PNLNAME);
+					break;
+
                 case 11:
-                    Page p1 = new Page(rs.getString("SUBPNLNAME"), this.scrollLevel + rs.getInt("OCCURSLEVEL"));
+                    Page p1 = new Page(subpnlname, scrolls.peek().scrollLevel);
+					p1.scrollLevelPrimaryRecName = scrolls.peek().primaryRecName;
 					this.subpages.add(p1);
 					this.pageObjs.add(p1);
                     break;
                 case 18:
-                    Page p2 = new Page(rs.getString("SUBPNLNAME"), this.scrollLevel + rs.getInt("OCCURSLEVEL"));
+                    Page p2 = new Page(subpnlname, scrolls.peek().scrollLevel);
+					p2.scrollLevelPrimaryRecName = scrolls.peek().primaryRecName;
                     this.secpages.add(p2);
 					this.pageObjs.add(p2);
 					break;
 
-				// Treating grid and scroll processing the same.
+				// Treating scroll bar, grid, and scroll area processing the same.
+				case 10:
 				case 19:
         		case 27:
-					//System.out.println("Found grid/scroll at page: " + this.PNLNAME);
-					PageField scrollPf = new PageField(null, null);
-					scrollPf.beginsScroll = true;
-					scrollPf.scrollLevel = this.scrollLevel + rs.getInt("OCCURSLEVEL");
-					prevScrollPanelPf = scrollPf;
+					//System.out.println("Found scroll bar/grid/scroll at page: " + this.PNLNAME);
+					newScrollStartedFlag = true;
+					scrolls.push(new ScrollLevelStart(currScrollLevel, null));
 					break;
 
 		      	default:
 					if(r.length() > 0 && f.length() > 0) {
 						PageField pf = new PageField(r, f);
 						pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
-						if(rs.getString("SUBPNLNAME").trim().length() > 0) {
-							pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
+						if(subpnlname.length() > 0) {
+							pf.SUBPNLNAME = subpnlname;
 						}
-						pf.scrollLevel = this.scrollLevel + rs.getInt("OCCURSLEVEL");
-						//System.out.println(pf.scrollLevel);
+						pf.scrollLevel = scrolls.peek().scrollLevel;
+						pf.scrollLevelPrimaryRecName = scrolls.peek().primaryRecName;
 						pageObjs.add(pf);
 					}
             }
+
+			if(r.equals("FERPA_OVERRIDE")) {
+				System.out.println(this.PNLNAME);
+				System.out.println(scrolls.peek().scrollLevel + "\t" + scrolls.peek().primaryRecName);
+			}
 
 			/**
 			 * Issue request for record's definition and fields,
@@ -148,9 +175,7 @@ public class Page {
 				/**
 				 * TODO: In the event of problems, mess around with the ordering here.
 			 	 */
-				if(pf.beginsScroll) {
-					ComponentBuffer.pointAtScroll(pf.scrollLevel, pf.RECNAME);
-				} else if(pf.SUBPNLNAME != null) {
+				if(pf.SUBPNLNAME != null) {
 
 					/**
 					 * TODO 10-22-2013
@@ -172,9 +197,6 @@ public class Page {
 				} else if((pf.FIELDUSE & REL_DISP_FLAG) > 0) {
 					//System.out.println("Related display field: " + fldname + "on page " + this.PNLNAME);
 				} else {
-					if(pf.scrollLevel < ComponentBuffer.currScrollLevel) {
-						ComponentBuffer.pointAtScroll(pf.scrollLevel, null);
-					}
 					ComponentBuffer.addPageField(pf);
 				}
 				continue;
@@ -182,7 +204,7 @@ public class Page {
 
 			Page p = (Page) pageobj;
 			if(preemptivelyGeneratedPageList.get(p) == null) {
-				System.out.println("Generating structure from page: " + p.PNLNAME);
+				//System.out.println("Generating structure from page: " + p.PNLNAME);
 				p.generateStructure();
 			}
 		}

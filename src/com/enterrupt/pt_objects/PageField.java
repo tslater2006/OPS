@@ -8,8 +8,7 @@ public class PageField {
 	public String SUBPNLNAME;
 
     public int scrollLevel; // calculated using OCCURSLEVEL
-
-	public boolean beginsScroll = false; 	// when true, tells component buffer to shift to sub scroll.
+	public String scrollLevelPrimaryRecName;
 
     public PageField(String recname, String fieldname) {
         this.RECNAME = recname;

@@ -8,9 +8,10 @@ public class PageField {
 	public String SUBPNLNAME;
 	public int FIELDTYPE;
 	public Record recordDefn;
+	public int OCCURSLEVEL;
 
-    public int scrollLevel; // calculated using OCCURSLEVEL
-	public String scrollLevelPrimaryRecName;
+    public int contextScrollLevel; // calculated using OCCURSLEVEL
+	public String contextPrimaryRecName;
 
     public PageField(String recname, String fieldname) {
         this.RECNAME = recname;

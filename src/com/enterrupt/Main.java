@@ -39,7 +39,7 @@ public class Main {
 
 			c.loadPages();
 
-			c.generateStructure();
+			c.assembleComponentStructure();
 
 			StmtLibrary.disconnect();
 			BuildAssistant.printInfo();

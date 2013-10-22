@@ -10,40 +10,21 @@ import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.ComponentBuffer;
 
-class ScrollLevelStart {
-	public int scrollLevel;
-	public String primaryRecName;
-	public ScrollLevelStart(int s, String p) {
-		this.scrollLevel = s;
-		this.primaryRecName = p;
-	}
-}
-
 public class Page {
 
     public String PNLNAME;
+    public ArrayList<PgToken> subpages;
+    public ArrayList<PgToken> secpages;
+	public ArrayList<PgToken> tokens;
 
-	public int scrollLevel;	  // calculated using OCCURSLEVEL
-	public String scrollLevelPrimaryRecName;
-
-    public ArrayList<Page> subpages;
-    public ArrayList<Page> secpages;
-	public ArrayList<Object> pageObjs;
-	public static final byte REL_DISP_FLAG = (byte) 16;
-
-    public Page(String pnlname, int scrollLevel) {
+    public Page(String pnlname) {
         this.PNLNAME = pnlname;
-		this.scrollLevel = scrollLevel;
-        this.subpages = new ArrayList<Page>();
-        this.secpages = new ArrayList<Page>();
-		this.pageObjs = new ArrayList<Object>();
+        this.subpages = new ArrayList<PgToken>();
+        this.secpages = new ArrayList<PgToken>();
+		this.tokens = new ArrayList<PgToken>();
     }
 
     public void loadInitialMetadata() throws Exception {
-
-		if(BuildAssistant.pageDefnCache.get(this.PNLNAME) != null) {
-			return;
-		}
 
         PreparedStatement pstmt;
         ResultSet rs;
@@ -57,63 +38,159 @@ public class Page {
         pstmt = StmtLibrary.getPSPNLFIELD(this.PNLNAME);
         rs = pstmt.executeQuery();
 
+		// TODO: Throw exception if no records were read (need to use counter, no method on rs available).
         while(rs.next()) {
 
-			String r = rs.getString("RECNAME").trim();
-			String f = rs.getString("FIELDNAME").trim();
-			String subpnlname = rs.getString("SUBPNLNAME").trim();
-			int currScrollLevel = this.scrollLevel + rs.getInt("OCCURSLEVEL");
+			PgToken pf = new PgToken();
+			pf.RECNAME = rs.getString("RECNAME").trim();
+			pf.FIELDNAME = rs.getString("FIELDNAME").trim();
+			pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
+			pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
+			pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
 
 			/**
 			 * Issue request for the record definition and record fields,
 			 * regardless of field type.
 		 	 */
-			Record recDefn = BuildAssistant.getRecordDefn(r);
+			BuildAssistant.getRecordDefn(pf.RECNAME);
 
             switch(rs.getInt("FIELDTYPE")) {
 
                 case 11:
-                    Page p1 = new Page(subpnlname, currScrollLevel);
-					this.subpages.add(p1);
-					this.pageObjs.add(p1);
+					pf.flags.add(AFlag.SUBPAGE);
+					this.subpages.add(pf);
+					this.tokens.add(pf);
                     break;
                 case 18:
-                    Page p2 = new Page(subpnlname, currScrollLevel);
-                    this.secpages.add(p2);
-					this.pageObjs.add(p2);
+					pf.flags.add(AFlag.SECPAGE);
+                    this.secpages.add(pf);
+					this.tokens.add(pf);
 					break;
 
-				// Treating scroll bar, grid, and scroll area processing the same.
-				case 10:
-				case 19:
-        		case 27:
-					//System.out.println("Found scroll bar/grid/scroll at page: " + this.PNLNAME);
-					this.pageObjs.add(new ScrollLevelStart(currScrollLevel, null));
+				case 10: // scroll bar
+				case 19: // grid
+        		case 27: // scroll area
+					pf.flags.add(AFlag.SCROLL_CHNG);
+					this.tokens.add(pf);
 					break;
 
 		      	default:
-					if(r.length() > 0 && f.length() > 0) {
-						PageField pf = new PageField(r, f);
-						pf.FIELDTYPE = rs.getInt("FIELDTYPE");
-						pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
-						pf.recordDefn = recDefn;
-						if(subpnlname.length() > 0) {
-							pf.SUBPNLNAME = subpnlname;
-						}
-						pf.scrollLevel = currScrollLevel;
-						pageObjs.add(pf);
+					if(pf.RECNAME.length() > 0 && pf.FIELDNAME.length() > 0) {
+						pf.flags.add(AFlag.GENERIC);
+						this.tokens.add(pf);
 					}
             }
         }
         rs.close();
         pstmt.close();
+    }
 
-		/**
-		 * Now that all page objects have been collected, set the appropriate
-		 * scroll level primary record names for each object.
-		 */
+	public void recursivelyLoadSubpages() throws Exception {
+		Page loadedPage = BuildAssistant.getLoadedPage(this.PNLNAME);
+		for(PgToken tok : loadedPage.subpages) {
+			Page p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
+			p.recursivelyLoadSubpages();
+		}
+	}
+
+	public void recursivelyLoadSecpages() throws Exception {
+		Page loadedPage = BuildAssistant.getLoadedPage(this.PNLNAME);
+		Page p;
+
+		// Recursively expand/search subpages for secpages.
+		for(PgToken tok : loadedPage.subpages) {
+			p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
+			p.recursivelyLoadSecpages();
+		}
+
+		// Then, recursively expand/search secpages for more secpages.
+		for(PgToken tok : loadedPage.secpages) {
+			p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
+			p.recursivelyLoadSecpages();
+		}
+	}
+
+/*	public void generateStructure(int contextScrollLevel, String contextPrimaryRecName) throws Exception {
+
+		**
+		 * Adjust the scroll levels and primary record names
+		 * based on the current context.
+		 *
+		this.adjustPageObjsWithinThisContext(contextScrollLevel, contextPrimaryRecName);
+
+		//System.out.println("Page objects for page; " + this.PNLNAME + "; size: " + this.pageObjs.size());
+
+		// We'll reset the buffer pointer once we finish using these initial values.
+		int initialScrollLevel = ComponentBuffer.currScrollLevel;
+		String initialPrimaryRecName = ComponentBuffer.currSB.primaryRecName;
+
+		//System.out.println("Generating structure for page: " + this.PNLNAME);
+
+		HashMap<Page, Boolean> preemptivelyGeneratedPageList = new HashMap<Page, Boolean>();
+
+		//TODO: Throw exception if there are no page objects.
+		for(Object pageobj : this.pageObjs) {
+
+			if(pageobj instanceof ScrollLevelStart) {
+				continue;
+			} else if(pageobj instanceof PageField) {
+
+				PageField pf = (PageField) pageobj;
+
+				**
+				 * TODO: In the event of problems, mess around with the ordering here.
+			 	 *
+				if(pf.SUBPNLNAME != null) {
+
+					**
+					 * TODO 10-22-2013
+					 * The code below fixed the problem with Level 0 record ordering,
+					 * but fails to account for potential scroll starts before seeking to
+					 * the page to preemptively load. Need to re-architect this method, possibly
+					 * with a queue or other data structure.
+					 *
+					//System.out.println("Found subpanel attacted to Record." + pf.RECNAME + " Field." + pf.FIELDNAME);
+					for(int i=0; i<this.pageObjs.size(); i++) {
+						if(this.pageObjs.get(i) instanceof Page
+							&& ((Page) pageObjs.get(i)).PNLNAME.equals(pf.SUBPNLNAME)) {
+							Page p1 = BuildAssistant.getLoadedPage(((Page) pageObjs.get(i)));
+							p1.generateStructure(p1.contextScrollLevel, p1.contextPrimaryRecName);
+							preemptivelyGeneratedPageList.put(((Page) pageObjs.get(i)), true);
+							break;
+						}
+					}
+					ComponentBuffer.addPageField(pf);
+				} else if((pf.FIELDUSE & REL_DISP_FLAG) > 0) {
+					//System.out.println("Related display field: " + fldname + "on page " + this.PNLNAME);
+				} else if(pf.recordDefn != null && pf.recordDefn.RECTYPE == 3) {
+					// Subrecord fields are not part of the component structure.
+					//System.out.println("Detected field on subrecord.");
+				} else {
+					ComponentBuffer.addPageField(pf);
+				}
+				continue;
+			}
+
+			Page p = (Page) pageobj;
+			if(preemptivelyGeneratedPageList.get(p) == null) {
+				Page p2 = BuildAssistant.getLoadedPage(p);
+				if(this.PNLNAME.equals("SCC_SUM_WORK")) {
+					System.out.println(p2.PNLNAME + ", " + p2.contextScrollLevel);
+				}
+				p2.generateStructure(p2.contextScrollLevel, p2.contextPrimaryRecName);
+			}
+		}
+
+		// Reset the buffer pointer to where it was when we started.
+		ComponentBuffer.pointAtScroll(initialScrollLevel, initialPrimaryRecName);
+	}
+
+	public void adjustPageObjsWithinThisContext(int contextScrollLevel, String contextPrimaryRecName) {
+
 		Stack<ScrollLevelStart> scrolls = new Stack<ScrollLevelStart>();
-		scrolls.push(new ScrollLevelStart(this.scrollLevel, this.scrollLevelPrimaryRecName));
+		ScrollLevelStart initialSls = new ScrollLevelStart(contextScrollLevel);
+		initialSls.contextPrimaryRecName = contextPrimaryRecName;
+		scrolls.push(initialSls);
 
 		for(int i=0; i < this.pageObjs.size(); i++) {
 			Object obj = this.pageObjs.get(i);
@@ -140,126 +217,36 @@ public class Page {
 					System.exit(1);
 				}
 
-				sls.primaryRecName = foundPrimaryRecName;
+				sls.contextPrimaryRecName = foundPrimaryRecName;
+				sls.contextScrollLevel = contextScrollLevel + sls.OCCURSLEVEL;
 				scrolls.push(sls);
 
 			} else {
 				int expectedScrollLevel = -1;
 
 				if(obj instanceof Page) {
-					expectedScrollLevel = ((Page) obj).scrollLevel;
+					expectedScrollLevel = contextScrollLevel + ((Page) obj).OCCURSLEVEL;
 				} else {
-					expectedScrollLevel = ((PageField) obj).scrollLevel;
+					expectedScrollLevel = contextScrollLevel + ((PageField) obj).OCCURSLEVEL;
 				}
 
-				while(scrolls.peek().scrollLevel > expectedScrollLevel) {
+				while(scrolls.peek().contextScrollLevel > expectedScrollLevel) {
 					scrolls.pop();
 				}
 
 				if(obj instanceof Page) {
 					Page modPage = ((Page) obj);
-					modPage.scrollLevelPrimaryRecName = scrolls.peek().primaryRecName;
+					modPage.contextScrollLevel = scrolls.peek().contextScrollLevel;
+					modPage.contextPrimaryRecName = scrolls.peek().contextPrimaryRecName;
 					this.pageObjs.set(i, modPage);
 				} else {
 					PageField modPf = ((PageField) obj);
-					modPf.scrollLevelPrimaryRecName = scrolls.peek().primaryRecName;
+					modPf.contextScrollLevel = scrolls.peek().contextScrollLevel;
+					modPf.contextPrimaryRecName = scrolls.peek().contextPrimaryRecName;
 					this.pageObjs.set(i, modPf);
 				}
 			}
 		}
-
-		/**
-		 * Remove all ScrollLevelStart objects.
-		 */
-		Iterator iter = this.pageObjs.iterator();
-		while(iter.hasNext()) {
-			Object obj = iter.next();
-			if(obj instanceof ScrollLevelStart) {
-				iter.remove();
-			}
-		}
-
-		BuildAssistant.cachePage(this);
-    }
-
-	public void recursivelyLoadSubpages() throws Exception {
-		this.loadInitialMetadata();
-		for(Page p : this.subpages) {
-			p.recursivelyLoadSubpages();
-		}
-	}
-
-	public void recursivelyLoadSecpages() throws Exception {
-		this.loadInitialMetadata();
-
-		// Recursively expand/search subpages for secpages.
-		for(Page p : this.subpages) {
-			p.recursivelyLoadSecpages();
-		}
-
-		// Then, recursively expand/search secpages for more secpages.
-		for(Page p : this.secpages) {
-			p.recursivelyLoadSecpages();
-		}
-	}
-
-	public void generateStructure() {
-
-		// We'll reset the buffer pointer once we finish using these initial values.
-		int initialScrollLevel = ComponentBuffer.currScrollLevel;
-		String initialPrimaryRecName = ComponentBuffer.currSB.primaryRecName;
-
-		//System.out.println("Generating structure for page: " + this.PNLNAME);
-
-		HashMap<Page, Boolean> preemptivelyGeneratedPageList = new HashMap<Page, Boolean>();
-
-		for(Object pageobj : this.pageObjs) {
-
-			if(pageobj instanceof PageField) {
-
-				PageField pf = (PageField) pageobj;
-
-				/**
-				 * TODO: In the event of problems, mess around with the ordering here.
-			 	 */
-				if(pf.SUBPNLNAME != null) {
-
-					/**
-					 * TODO 10-22-2013
-					 * The code below fixed the problem with Level 0 record ordering,
-					 * but fails to account for potential scroll starts before seeking to
-					 * the page to preemptively load. Need to re-architect this method, possibly
-					 * with a queue or other data structure.
-					 */
-					//System.out.println("Found subpanel attacted to Record." + pf.RECNAME + " Field." + pf.FIELDNAME);
-					for(int i=0; i<this.pageObjs.size(); i++) {
-						if(this.pageObjs.get(i) instanceof Page
-							&& ((Page) pageObjs.get(i)).PNLNAME.equals(pf.SUBPNLNAME)) {
-							((Page) pageObjs.get(i)).generateStructure();
-							preemptivelyGeneratedPageList.put(((Page) pageObjs.get(i)), true);
-							break;
-						}
-					}
-					ComponentBuffer.addPageField(pf);
-				} else if((pf.FIELDUSE & REL_DISP_FLAG) > 0) {
-					//System.out.println("Related display field: " + fldname + "on page " + this.PNLNAME);
-				} else if(pf.recordDefn != null && pf.recordDefn.RECTYPE == 3) {
-					System.out.println("Detected field on subrecord.");
-				} else {
-					ComponentBuffer.addPageField(pf);
-				}
-				continue;
-			}
-
-			Page p = (Page) pageobj;
-			if(preemptivelyGeneratedPageList.get(p) == null) {
-				//System.out.println("Generating structure from page: " + p.PNLNAME);
-				p.generateStructure();
-			}
-		}
-
-		// Reset the buffer pointer to where it was when we started.
-		ComponentBuffer.pointAtScroll(initialScrollLevel, initialPrimaryRecName);
-	}
+	}*/
 }
 

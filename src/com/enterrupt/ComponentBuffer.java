@@ -8,20 +8,26 @@ import com.enterrupt.pt_objects.*;
 
 public class ComponentBuffer {
 
-	private static ScrollBuffer compBuffer;
+	private static HashMap<Integer, ScrollBuffer> scrollTable;
 
 	public static int currScrollLevel;
 	public static ScrollBuffer currSB;
 
 	public static void init() {
-		compBuffer = new ScrollBuffer(0, null, null);
-		currSB = compBuffer;
+		//scrollTable = new HashMap<Integer, ScrollBuffer>();
+		//scrollTable.put(0, new ScrollBuffer(0));
 	}
 
-	public static void addPageField(PageField pf) {
+	/*public static void placeholder (PageField pf, int level, String primaryRecName) {
+
+		ScrollBuffer sb = scrollTable.get(level);
+		if(sb == null) {
+			sb = new ScrollBuffer(level);
+			scrollTable.put(level, sb);
+		}
 
 		// Ensure we're pointing at the correct scroll buffer.
-		pointAtScroll(pf.scrollLevel, pf.scrollLevelPrimaryRecName);
+		pointAtScroll(pf.contextScrollLevel, pf.contextPrimaryRecName);
 
 		// The primary RECNAME for scroll level 0 isn't none until the very first page field is inserted.
 		if(compBuffer.primaryRecName == null) {
@@ -56,18 +62,20 @@ public class ComponentBuffer {
 		}
 
 		// The scroll level may not have changed, but the target scroll buffer may have.
-		if(currScrollLevel > 0 && !currSB.primaryRecName.equals(targetPrimaryRecName)) {
+		if(currScrollLevel > 0 &&
+			!currSB.primaryRecName.equals(targetPrimaryRecName)) {
 			currSB = currSB.parent.getChildScroll(targetPrimaryRecName);
+			currScrollLevel = currSB.scrollLevel;
 		}
 
 		//System.out.println("Scroll level set to " + currSB.scrollLevel + " with primary rec name " + 
 		//	currSB.primaryRecName);
-	}
+	}*/
 
 	public static void print() {
 		System.out.println("\n\nPRINTING COMPONENT BUFFER");
 		System.out.println("=========================");
-		System.out.println(compBuffer.toString(0));
+		//System.out.println(compBuffer.toString(0));
 	}
 }
 

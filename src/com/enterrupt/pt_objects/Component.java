@@ -1,5 +1,6 @@
 package com.enterrupt.pt_objects;
 
+import com.enterrupt.BuildAssistant;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.sql.ResultSet;
@@ -41,7 +42,8 @@ public class Component {
         rs = pstmt.executeQuery();
         while(rs.next()) {
 			// all pages at the root of the component start at scroll level 0.
-            this.pages.add(new Page(rs.getString("PNLNAME"), 0));
+			Page p = new Page(rs.getString("PNLNAME"));
+            this.pages.add(p);
         }
         rs.close();
         pstmt.close();
@@ -145,9 +147,19 @@ public class Component {
 		}
 	}
 
-	public void generateStructure() {
+	public void assembleComponentStructure() throws Exception {
+
+		PgToken pf;
+		PgTokenStream pfs;
+
+		final byte REL_DISP_FLAG = (byte) 16;
+
 		for(Page p : this.pages) {
-			p.generateStructure();
+			pfs = new PgTokenStream(p.PNLNAME);
+
+			while((pf = pfs.next()) != null) {
+				System.out.println(pf.flags);
+			}
 		}
 	}
 }

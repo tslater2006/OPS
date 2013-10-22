@@ -30,11 +30,6 @@ public class BuildAssistant {
 		recDefnCache = new HashMap<String, Record>();
 	}
 
-	public static void cachePage(Page p) {
-		pageDefnCache.put(p.PNLNAME, p);
-		//System.out.println("Cached Page: " + p.PNLNAME);
-	}
-
 	public static void cacheRecord(Record r) {
 		recDefnCache.put(r.RECNAME, r);
 		//System.out.println("Cached Record: " + r.RECNAME);
@@ -58,6 +53,21 @@ public class BuildAssistant {
 			cacheRecord(r);
 		}
 		return r;
+	}
+
+	public static Page getLoadedPage(String PNLNAME) throws Exception {
+
+        if(PNLNAME.length() == 0) {
+            return null;
+        }
+
+		Page p = pageDefnCache.get(PNLNAME);
+		if(p == null) {
+			p = new Page(PNLNAME);
+			p.loadInitialMetadata();
+			pageDefnCache.put(PNLNAME, p);
+		}
+		return p;
 	}
 
 	public static void printInfo() {

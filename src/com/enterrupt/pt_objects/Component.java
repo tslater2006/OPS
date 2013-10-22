@@ -40,7 +40,8 @@ public class Component {
         pstmt = StmtLibrary.getPSPNLGROUP(this.PNLGRPNAME, this.MARKET);
         rs = pstmt.executeQuery();
         while(rs.next()) {
-            this.pages.add(new Page(rs.getString("PNLNAME")));
+			// all pages at the root of the component start at scroll level 0.
+            this.pages.add(new Page(rs.getString("PNLNAME"), 0));
         }
         rs.close();
         pstmt.close();

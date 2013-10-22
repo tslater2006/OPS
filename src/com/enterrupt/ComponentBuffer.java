@@ -34,8 +34,8 @@ public class ComponentBuffer {
 
 	public static void pointAtScroll(int targetScrollLevel, String targetPrimaryRecName) {
 
-		System.out.println("Switching to scroll level " + targetScrollLevel +
-			" (primary rec name: " + targetPrimaryRecName + ")");
+		//System.out.println("Switching to scroll level " + targetScrollLevel +
+		//	" (primary rec name: " + targetPrimaryRecName + ")");
 
 		// Remember that there's only one scroll level at 0.
 		if(currSB.scrollLevel == targetScrollLevel &&

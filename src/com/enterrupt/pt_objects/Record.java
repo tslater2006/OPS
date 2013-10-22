@@ -10,26 +10,13 @@ public class Record {
 
     public String RECNAME;
 	public String RELLANGRECNAME;
+	public int RECTYPE;
 
     public Record(String recname) {
         this.RECNAME = recname;
     }
 
     public void loadInitialMetadata() throws Exception {
-
-		// Do not contain if record definition has been cached.
-		if(BuildAssistant.recDefnCache.get(this.RECNAME) != null) {
-			return;
-		}
-
-		/**
-		 * The PSXLATITEM table is a system table and should not have its record
-		 * definition loaded.
-		 * TODO: Make a system table list that should be excluded from record definition initialization.
-		 */
-		if(this.RECNAME.equals("PSXLATITEM")) {
-			return;
-		}
 
 		int fieldcount = 0;
 		ArrayList<String> subrecnames = new ArrayList<String>();
@@ -43,6 +30,7 @@ public class Record {
 		if(rs.next()) {
 			fieldcount = rs.getInt("FIELDCOUNT");
 			this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
+			this.RECTYPE = rs.getInt("RECTYPE");
 		} else {
 			System.out.println("[ERROR] Expected record to be returned from PSRECDEFN query.");
 			System.exit(1);
@@ -87,13 +75,9 @@ public class Record {
         rs.close();
         pstmt.close();
 
-		// Cache the record definition.
-		BuildAssistant.cacheRecord(this);
-
 		for(String subrecname : subrecnames) {
 			//System.out.println("Loading subrecord : " + subrecname);
-			Record r = new Record(subrecname);
-			r.loadInitialMetadata();
+			BuildAssistant.getRecordDefn(subrecname);
 		}
 
 		/**
@@ -104,8 +88,7 @@ public class Record {
 	     * to Enterrupt; need to look into this.
 		 */
 		if(this.RELLANGRECNAME.length() > 0) {
-			Record r = new Record(this.RELLANGRECNAME);
-			r.loadInitialMetadata();
+			BuildAssistant.getRecordDefn(this.RELLANGRECNAME);
 		}
     }
 }

@@ -40,6 +40,26 @@ public class BuildAssistant {
 		//System.out.println("Cached Record: " + r.RECNAME);
 	}
 
+	public static Record getRecordDefn(String RECNAME) throws Exception {
+
+        /**
+         * The PSXLATITEM table is a system table and should not have its record
+         * definition loaded.
+         * TODO: Make a system table list that should be excluded from record definition initialization.
+         */
+        if(RECNAME.length() == 0 || RECNAME.equals("PSXLATITEM")) {
+            return null;
+        }
+
+		Record r = recDefnCache.get(RECNAME);
+		if(r == null) {
+			r = new Record(RECNAME);
+			r.loadInitialMetadata();
+			cacheRecord(r);
+		}
+		return r;
+	}
+
 	public static void printInfo() {
 
 		System.out.println("Total pages: " + pageDefnCache.size());

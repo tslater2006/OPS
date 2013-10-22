@@ -64,6 +64,12 @@ public class Page {
 			String subpnlname = rs.getString("SUBPNLNAME").trim();
 			int currScrollLevel = this.scrollLevel + rs.getInt("OCCURSLEVEL");
 
+			/**
+			 * Issue request for the record definition and record fields,
+			 * regardless of field type.
+		 	 */
+			Record recDefn = BuildAssistant.getRecordDefn(r);
+
             switch(rs.getInt("FIELDTYPE")) {
 
                 case 11:
@@ -90,6 +96,7 @@ public class Page {
 						PageField pf = new PageField(r, f);
 						pf.FIELDTYPE = rs.getInt("FIELDTYPE");
 						pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
+						pf.recordDefn = recDefn;
 						if(subpnlname.length() > 0) {
 							pf.SUBPNLNAME = subpnlname;
 						}
@@ -97,20 +104,6 @@ public class Page {
 						pageObjs.add(pf);
 					}
             }
-
-			//if(r.equals("FERPA_OVERRIDE")) {
-			//	System.out.println(this.PNLNAME);
-			//	System.out.println(scrolls.peek().scrollLevel + "\t" + scrolls.peek().primaryRecName);
-			//}
-
-			/**
-			 * Issue request for record's definition and fields,
-			 * regardless of field type.
-		 	 */
-			if(r.length() > 0) {
-				Record rec = new Record(r);
-				rec.loadInitialMetadata();
-			}
         }
         rs.close();
         pstmt.close();
@@ -128,26 +121,15 @@ public class Page {
 			if(obj instanceof ScrollLevelStart) {
 				ScrollLevelStart sls = ((ScrollLevelStart) obj);
 
-						if(this.PNLNAME.equals("FERPA_DISPLAY1_SP")) {
-							System.out.println("Looking at for primary recname of scroll.");
-						}
-
 				String foundPrimaryRecName = null;
 				for(int a = (i+1); a < this.pageObjs.size(); a++) {
 					Object o = this.pageObjs.get(a);
 					if(o instanceof PageField) {
 						PageField pf = ((PageField) o);
 
-						if(this.PNLNAME.equals("FERPA_DISPLAY1_SP")) {
-							System.out.println("Looking at field of type " + pf.FIELDTYPE);
-						}
 						// Exclude groupboxes and empty RECNAMEs.
 						if(pf.FIELDTYPE != 2 && pf.RECNAME.length() > 0) {
 							foundPrimaryRecName = pf.RECNAME;
-						if(this.PNLNAME.equals("FERPA_DISPLAY1_SP")) {
-							System.out.println("Using recname : " + pf.RECNAME);
-						}
-
 							break;
 						}
 					}
@@ -227,7 +209,7 @@ public class Page {
 		int initialScrollLevel = ComponentBuffer.currScrollLevel;
 		String initialPrimaryRecName = ComponentBuffer.currSB.primaryRecName;
 
-		System.out.println("Generating structure for page: " + this.PNLNAME);
+		//System.out.println("Generating structure for page: " + this.PNLNAME);
 
 		HashMap<Page, Boolean> preemptivelyGeneratedPageList = new HashMap<Page, Boolean>();
 
@@ -261,6 +243,8 @@ public class Page {
 					ComponentBuffer.addPageField(pf);
 				} else if((pf.FIELDUSE & REL_DISP_FLAG) > 0) {
 					//System.out.println("Related display field: " + fldname + "on page " + this.PNLNAME);
+				} else if(pf.recordDefn != null && pf.recordDefn.RECTYPE == 3) {
+					System.out.println("Detected field on subrecord.");
 				} else {
 					ComponentBuffer.addPageField(pf);
 				}

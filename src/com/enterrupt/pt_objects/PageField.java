@@ -5,6 +5,7 @@ public class PageField {
     public String RECNAME;
     public String FIELDNAME;
     public byte FIELDUSE;
+	public String SUBPNLNAME;
 
     public int scrollLevel; // calculated using OCCURSLEVEL
 

@@ -3,6 +3,7 @@ package com.enterrupt.pt_objects;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.sql.ResultSet;
+import java.util.HashMap;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.ComponentBuffer;
@@ -85,6 +86,9 @@ public class Page {
 					if(r.length() > 0 && f.length() > 0) {
 						PageField pf = new PageField(r, f);
 						pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
+						if(rs.getString("SUBPNLNAME").trim().length() > 0) {
+							pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
+						}
 						pf.scrollLevel = this.scrollLevel + rs.getInt("OCCURSLEVEL");
 						//System.out.println(pf.scrollLevel);
 						pageObjs.add(pf);
@@ -133,14 +137,38 @@ public class Page {
 		int initialScrollLevel = ComponentBuffer.currScrollLevel;
 		String initialPrimaryRecName = ComponentBuffer.currSB.primaryRecName;
 
+		HashMap<Page, Boolean> preemptivelyGeneratedPageList = new HashMap<Page, Boolean>();
+
 		for(Object pageobj : this.pageObjs) {
 
 			if(pageobj instanceof PageField) {
 
 				PageField pf = (PageField) pageobj;
 
+				/**
+				 * TODO: In the event of problems, mess around with the ordering here.
+			 	 */
 				if(pf.beginsScroll) {
 					ComponentBuffer.pointAtScroll(pf.scrollLevel, pf.RECNAME);
+				} else if(pf.SUBPNLNAME != null) {
+
+					/**
+					 * TODO 10-22-2013
+					 * The code below fixed the problem with Level 0 record ordering,
+					 * but fails to account for potential scroll starts before seeking to
+					 * the page to preemptively load. Need to re-architect this method, possibly
+					 * with a queue or other data structure.
+					 */
+					//System.out.println("Found subpanel attacted to Record." + pf.RECNAME + " Field." + pf.FIELDNAME);
+					for(int i=0; i<this.pageObjs.size(); i++) {
+						if(this.pageObjs.get(i) instanceof Page
+							&& ((Page) pageObjs.get(i)).PNLNAME.equals(pf.SUBPNLNAME)) {
+							((Page) pageObjs.get(i)).generateStructure();
+							preemptivelyGeneratedPageList.put(((Page) pageObjs.get(i)), true);
+							break;
+						}
+					}
+					ComponentBuffer.addPageField(pf);
 				} else if((pf.FIELDUSE & REL_DISP_FLAG) > 0) {
 					//System.out.println("Related display field: " + fldname + "on page " + this.PNLNAME);
 				} else {
@@ -152,13 +180,11 @@ public class Page {
 				continue;
 			}
 
-			/**
-			 * TODO: If problems arise with ordering, consider structuring this similar to loading,
-			 * where subpage traversal is prioritized/split out from secpages.
-			 */
 			Page p = (Page) pageobj;
-			System.out.println("Generating structure from page: " + p.PNLNAME);
-			p.generateStructure();
+			if(preemptivelyGeneratedPageList.get(p) == null) {
+				System.out.println("Generating structure from page: " + p.PNLNAME);
+				p.generateStructure();
+			}
 		}
 
 		// Reset the buffer pointer to where it was when we started.

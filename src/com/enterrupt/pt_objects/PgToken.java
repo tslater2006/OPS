@@ -1,6 +1,7 @@
 package com.enterrupt.pt_objects;
 
 import java.util.EnumSet;
+import com.enterrupt.BuildAssistant;
 
 public class PgToken {
 
@@ -10,6 +11,8 @@ public class PgToken {
 	public String SUBPNLNAME;
 	public int OCCURSLEVEL;
 	public byte FIELDUSE;
+
+	private final byte REL_DISP_FLAG = (byte) 16;
 
 	public String primaryRecName; 		// used for SCROLL_CHNG tokens.
 
@@ -23,5 +26,26 @@ public class PgToken {
 
 	public PgToken(EnumSet<AFlag> flagSet) {
 		this.flags = EnumSet.copyOf(flagSet);
+	}
+
+	public boolean doesBelongInComponentStructure() throws Exception {
+
+		// If RECNAME or FIELDNAME is empty, don't add.
+		if(this.RECNAME.length() == 0 || this.FIELDNAME.length() == 0) {
+			return false;
+		}
+
+		// Related display fields should not be added.
+		if((this.FIELDUSE & this.REL_DISP_FLAG) > 0) {
+			return false;
+		}
+
+		// Subrecords (type 3) should not be added.
+		Record recDefn = BuildAssistant.getRecordDefn(this.RECNAME);
+		if(recDefn.RECTYPE == 3) {
+			return false;
+		}
+
+		return true;
 	}
 }

@@ -198,21 +198,21 @@ public class Component {
 					continue;
 				}
 
-				// Remember: don't use continue here, flag can be attached to regular fields.
+				// Remember: don't "continue" here, since SCROLL_LVL_DECREMENT can be attached to regular fields.
 				if(tok.flags.contains(AFlag.SCROLL_LVL_DECREMENT)) {
 					scrollMarkers.pop();
 				}
 
-				if(tok.RECNAME.length() > 0 &&
-				   tok.FIELDNAME.length() > 0) {
+				if(tok.doesBelongInComponentStructure()) {
 					ComponentBuffer.addPageField(tok, scrollMarkers.peek().scrollLevel,
 						scrollMarkers.peek().primaryRecName);
 				}
-				//System.out.println("[" + scrollMarkers.peek().scrollLevel + ", " +
-				//	scrollMarkers.peek().primaryRecName + "]\t" + tok.flags);
 			}
 
-			System.out.println("Stack size: " + scrollMarkers.size());
+			if(scrollMarkers.size() != 0) {
+				System.out.println("[ERROR] Scroll marker stack size exceeds 0 at the end of the page token stream.");
+				System.exit(1);
+			}
 		}
 	}
 }

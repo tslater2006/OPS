@@ -11,6 +11,8 @@ public class PgToken {
 	public int OCCURSLEVEL;
 	public byte FIELDUSE;
 
+	public String primaryRecName; 		// used for SCROLL_CHNG tokens.
+
 	public PgToken() {
 		this.flags = EnumSet.noneOf(AFlag.class);
 	}

@@ -8,14 +8,19 @@ import com.enterrupt.pt_objects.*;
 
 public class ComponentBuffer {
 
-	private static HashMap<Integer, ScrollBuffer> scrollTable;
+	//private static HashMap<String, RecordBuffer> level0RecBufferTable;
+	//private static ArrayList<RecordBuffer> level0OrderedRecBuffers;
+
+	//private static HashMap<Integer, ScrollBuffer> scrollTable;
 
 	public static int currScrollLevel;
 	public static ScrollBuffer currSB;
 
 	public static void init() {
 		//scrollTable = new HashMap<Integer, ScrollBuffer>();
-		//scrollTable.put(0, new ScrollBuffer(0));
+		//scrollTable.put(1, new ScrollBuffer(1));
+		//scrollTable.put(2, new ScrollBuffer(2));
+		//scrollTable.put(3, new ScrollBuffer(3));
 	}
 
 	/*public static void placeholder (PageField pf, int level, String primaryRecName) {

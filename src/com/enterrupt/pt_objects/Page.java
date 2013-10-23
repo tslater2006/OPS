@@ -56,13 +56,17 @@ public class Page {
 
             switch(rs.getInt("FIELDTYPE")) {
 
+				case 2:
+					pf.flags.add(AFlag.GROUPBOX);
+					this.tokens.add(pf);
+					break;
                 case 11:
-					pf.flags.add(AFlag.SUBPAGE);
+					pf.flags.add(AFlag.PAGE);
 					this.subpages.add(pf);
 					this.tokens.add(pf);
                     break;
                 case 18:
-					pf.flags.add(AFlag.SECPAGE);
+					pf.flags.add(AFlag.PAGE);
                     this.secpages.add(pf);
 					this.tokens.add(pf);
 					break;
@@ -70,7 +74,7 @@ public class Page {
 				case 10: // scroll bar
 				case 19: // grid
         		case 27: // scroll area
-					pf.flags.add(AFlag.SCROLL_CHNG);
+					pf.flags.add(AFlag.SCROLL_START);
 					this.tokens.add(pf);
 					break;
 

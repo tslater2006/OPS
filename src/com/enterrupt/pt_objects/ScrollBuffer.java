@@ -6,8 +6,8 @@ import java.util.Collections;
 
 public class ScrollBuffer {
 
+	public int scrollLevel;
     public String primaryRecName;
-    public int scrollLevel;
     public ScrollBuffer parent;
 
     public HashMap<String, RecordBuffer> recBufferTable;

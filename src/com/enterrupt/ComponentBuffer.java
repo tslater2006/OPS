@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.lang.StringBuilder;
+import java.util.Collections;
 import com.enterrupt.pt_objects.*;
 
 public class ComponentBuffer {
@@ -94,7 +95,7 @@ class ScrollBuffer {
 
         RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
         if(r == null) {
-            r = new RecordBuffer(tok.RECNAME);
+            r = new RecordBuffer(tok.RECNAME, this.scrollLevel);
         	this.recBufferTable.put(r.recName, r);
             orderedRecBuffers.add(r);
         }
@@ -138,11 +139,13 @@ class ScrollBuffer {
 class RecordBuffer {
 
     public String recName;
+	public int scrollLevel;
     public HashMap<String, RecordFieldBuffer> fieldBufferTable;
 	public ArrayList<RecordFieldBuffer> unorderedFieldBuffers;
 
-    public RecordBuffer(String r) {
+    public RecordBuffer(String r, int scrollLevel) {
         this.recName = r;
+		this.scrollLevel = scrollLevel;
         this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
 		this.unorderedFieldBuffers = new ArrayList<RecordFieldBuffer>();
     }
@@ -165,7 +168,7 @@ class RecordBuffer {
         for(int i=0; i<indent; i++) {b.append(" ");}
         b.append("- " + this.recName + "\n");
 
-        //Collections.sort(this.orderedRecordFieldBuffers);
+        Collections.sort(this.unorderedFieldBuffers);
         for(RecordFieldBuffer f : this.unorderedFieldBuffers) {
             for(int i=0; i<(indent + 2); i++) {b.append(" ");}
             b.append("+ " + f.toString() + "\n");
@@ -199,7 +202,12 @@ class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
     }
 
 	public void processPageField() throws Exception {
-		if(this.fldDefn.isKey()) {
+
+		if(this.parentRecordBuffer.scrollLevel == 0
+			&& !this.recDefn.isDerivedWorkRecord()
+			&& !this.fldDefn.isSearchKey()
+			&& !this.fldDefn.isAlternateSearchKey()) {
+
 			for(Map.Entry<String, RecordField> cursor : this.recDefn.fieldTable.entrySet()) {
 				if(!cursor.getKey().equals(this.fldName)) {
 					this.parentRecordBuffer.addPageField(this.recDefn.RECNAME, cursor.getValue().FIELDNAME);
@@ -213,7 +221,9 @@ class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
     }
 
     public int compareTo(RecordFieldBuffer fb) {
-        return this.fldName.compareTo(fb.fldName);
+        int a = this.fldDefn.posInRecord;
+		int b = fb.fldDefn.posInRecord;
+		return a > b ? +1 : a < b ? -1 : 0;
     }
 }
 

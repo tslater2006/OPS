@@ -52,6 +52,14 @@ public class Page {
 
             switch(rs.getInt("FIELDTYPE")) {
 
+				case 1: 	// frame
+					break;
+				case 23: 	// horizontal rule
+					break;
+				case 3: 	// static image
+					break;
+				case 0:	 	// text (on page, linked to msg set/nbr, not in component or page buffer)
+					break;
 				case 2:
 					pf.flags.add(AFlag.GROUPBOX);
 					this.tokens.add(pf);
@@ -75,9 +83,12 @@ public class Page {
 					break;
 
 		      	default:
-					if(pf.RECNAME.length() > 0 && pf.FIELDNAME.length() > 0) {
-						pf.flags.add(AFlag.GENERIC);
-						this.tokens.add(pf);
+					pf.flags.add(AFlag.GENERIC);
+					this.tokens.add(pf);
+
+					if(pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
+						System.out.println("[WARNING] A generic field with either a blank RECNAME or FIELDNAME was encountered.");
+						System.exit(1);
 					}
             }
         }

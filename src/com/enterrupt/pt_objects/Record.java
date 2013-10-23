@@ -25,6 +25,10 @@ public class Record {
 		return this.RECTYPE == 3;
 	}
 
+	public boolean isDerivedWorkRecord() {
+		return this.RECTYPE == 2;
+	}
+
     public void loadInitialMetadata() throws Exception {
 
 		int fieldcount = 0;

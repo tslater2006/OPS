@@ -2,8 +2,10 @@ package com.enterrupt.pt_objects;
 
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.TreeMap;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.Map;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 
@@ -13,11 +15,13 @@ public class Record {
 	public String RELLANGRECNAME;
 	public int RECTYPE;
 	public HashMap<String, RecordField> fieldTable;
+	public TreeMap<Integer, Object> fldAndSubrecordTable;
 	public ArrayList<String> subRecordNames;
 
     public Record(String recname) {
         this.RECNAME = recname;
 		this.fieldTable = new HashMap<String, RecordField>();
+		this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
 		this.subRecordNames = new ArrayList<String>();
     }
 
@@ -56,10 +60,12 @@ public class Record {
 		int i = 0;
         while(rs.next()) {
 			RecordField f = new RecordField();
-			f.posInRecord = i;
+			f.RECNAME = this.RECNAME;
 			f.FIELDNAME = rs.getString("FIELDNAME").trim();
 			f.USEEDIT = (byte) rs.getInt("USEEDIT");
+			f.FIELDNUM = rs.getInt("FIELDNUM");
 			this.fieldTable.put(f.FIELDNAME, f);
+			this.fldAndSubrecordTable.put(f.FIELDNUM, f);
             i++;
         }
         rs.close();
@@ -74,6 +80,7 @@ public class Record {
 			rs = pstmt.executeQuery();
 
 			while(rs.next()) {
+				this.fldAndSubrecordTable.put(rs.getInt("FIELDNUM"), rs.getString("FIELDNAME"));
 				subRecordNames.add(rs.getString("FIELDNAME"));
 				i++;
 			}
@@ -108,5 +115,22 @@ public class Record {
 			BuildAssistant.getRecordDefn(this.RELLANGRECNAME);
 		}
     }
+
+	public ArrayList<RecordField> getExpandedFieldList() throws Exception {
+
+		ArrayList<RecordField> expandedFieldList = new ArrayList<RecordField>();
+
+		for(Map.Entry<Integer, Object> cursor : this.fldAndSubrecordTable.entrySet()) {
+			Object obj = cursor.getValue();
+			if(obj instanceof RecordField) {
+				expandedFieldList.add((RecordField) obj);
+			} else {
+				Record subrecDefn = BuildAssistant.getRecordDefn((String) obj);
+				expandedFieldList.addAll(subrecDefn.getExpandedFieldList());
+			}
+		}
+
+		return expandedFieldList;
+	}
 }
 

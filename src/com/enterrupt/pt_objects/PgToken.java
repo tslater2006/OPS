@@ -40,6 +40,11 @@ public class PgToken {
 			return false;
 		}
 
+		/**
+		 * TODO: Keep an eye on these two checks involving subrecords.
+		 * It may be necessary to resolve subrecord fields to their parent/gp/etc.,
+		 * rather than simply waiting for records to be expanded by the component buffer.
+		 */
 		// Subrecords should not be added.
 		Record recDefn = BuildAssistant.getRecordDefn(this.RECNAME);
 		if(recDefn.isSubrecord()) {

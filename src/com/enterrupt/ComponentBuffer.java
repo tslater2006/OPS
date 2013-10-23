@@ -143,8 +143,7 @@ class RecordBuffer {
 	public boolean isPrimaryScrollRecordBuffer;
     public HashMap<String, RecordFieldBuffer> fieldBufferTable;
 	public ArrayList<RecordFieldBuffer> unorderedFieldBuffers;
-	public HashMap<String, RecordBuffer> subrecordBufferTable;
-	public ArrayList<RecordBuffer> orderedSubrecordBuffers;
+	private boolean hasBeenExpanded;
 
     public RecordBuffer(String r, int scrollLevel, String primaryRecName) {
         this.recName = r;
@@ -156,8 +155,6 @@ class RecordBuffer {
 
         this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
 		this.unorderedFieldBuffers = new ArrayList<RecordFieldBuffer>();
-		this.subrecordBufferTable = new HashMap<String, RecordBuffer>();
-		this.orderedSubrecordBuffers = new ArrayList<RecordBuffer>();
     }
 
     public void addPageField(String RECNAME, String FIELDNAME) throws Exception {
@@ -167,45 +164,29 @@ class RecordBuffer {
             f = new RecordFieldBuffer(RECNAME, FIELDNAME, this);
 	        this.fieldBufferTable.put(f.fldName, f);
 			this.unorderedFieldBuffers.add(f);
-			f.processPageField(); // Ensure this is done after adding to the table, could cause infinte loop otherwise.
+			f.checkFieldBufferRules(); // Ensure this is done after adding to the table, could cause infinte loop otherwise.
         }
     }
 
-	/**
-	 * TODO: Optimize this / calls to this by setting a flag if it's already been run before.
-	 */
 	public void expandEntireRecordIntoBuffer() throws Exception {
 
-		Record recDefn = BuildAssistant.getRecordDefn(this.recName);
+		if(!hasBeenExpanded) {
 
-		// Add all fields into buffer.
-		for(Map.Entry<String, RecordField> cursor : recDefn.fieldTable.entrySet()) {
-			this.addPageField(recDefn.RECNAME, cursor.getValue().FIELDNAME);
-		}
+			fieldBufferTable.clear();
+			unorderedFieldBuffers.clear();
+			Record recDefn = BuildAssistant.getRecordDefn(this.recName);
+			ArrayList<RecordField> expandedFieldList = recDefn.getExpandedFieldList();
 
-		// Add all subrecord fields into buffer.
-		for(String subrecname : recDefn.subRecordNames) {
-			if(this.subrecordBufferTable.get(subrecname) == null) {
-				RecordBuffer srb = new RecordBuffer(subrecname, this.scrollLevel, null);
-				this.subrecordBufferTable.put(srb.recName, srb);
-				this.orderedSubrecordBuffers.add(srb);
-				srb.expandEntireRecordIntoBuffer();
+			for(RecordField fld : expandedFieldList) {
+				// Note: the true RECNAME is preserved in the FieldBuffer; if the field is in a subrecord,
+				// the RECNAME in the FieldBuffer will be that of the subrecord itself.
+				RecordFieldBuffer fldBuffer = new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this);
+				this.fieldBufferTable.put(fldBuffer.fldName, fldBuffer);
+				this.unorderedFieldBuffers.add(fldBuffer);
 			}
+
+			hasBeenExpanded = true;
 		}
-	}
-
-	public String subrecordToString(int indent) {
-
-		StringBuilder b = new StringBuilder();
-
-        Collections.sort(this.unorderedFieldBuffers);
-        for(RecordFieldBuffer f : this.unorderedFieldBuffers) {
-            for(int i=0; i<(indent + 2); i++) {b.append(" ");}
-            b.append("+ " + f.toString() + "\n");
-        }
-
-		return b.toString();
-
 	}
 
     public String toString(int indent) {
@@ -215,15 +196,15 @@ class RecordBuffer {
         for(int i=0; i<indent; i++) {b.append(" ");}
         b.append("- " + this.recName + "\n");
 
-        Collections.sort(this.unorderedFieldBuffers);
+		// The expansion routine returns fields in order; running sort on that would mess up the order.
+		if(!hasBeenExpanded) {
+       		Collections.sort(this.unorderedFieldBuffers);
+		}
+
         for(RecordFieldBuffer f : this.unorderedFieldBuffers) {
             for(int i=0; i<(indent + 2); i++) {b.append(" ");}
             b.append("+ " + f.toString() + "\n");
         }
-
-		for(RecordBuffer subrecbuf : this.orderedSubrecordBuffers) {
-			b.append(subrecbuf.subrecordToString(indent));
-		}
 
         return b.toString();
     }
@@ -242,18 +223,13 @@ class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
 		this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
 		this.parentRecordBuffer = parent;
 
-		/**
-		 * TODO: Traversing a record's subrecords here may be necessary
-		 * in the future; skipping for now as it is not needed to form
-		 * the component structure.
-		 */
 		if(this.fldDefn == null) {
 			System.out.println("[ERROR] Field is not on the record. Likely on a subrecord. Subrecord traversal in RecordFieldBuffer not supported at this time.");
 			System.exit(1);
 		}
     }
 
-	public void processPageField() throws Exception {
+	public void checkFieldBufferRules() throws Exception {
 
 		/**
 		 * If a level 0, non-derived record contains at least one field
@@ -284,8 +260,8 @@ class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
     }
 
     public int compareTo(RecordFieldBuffer fb) {
-        int a = this.fldDefn.posInRecord;
-		int b = fb.fldDefn.posInRecord;
+        int a = this.fldDefn.FIELDNUM;
+		int b = fb.fldDefn.FIELDNUM;
 		return a > b ? +1 : a < b ? -1 : 0;
     }
 }

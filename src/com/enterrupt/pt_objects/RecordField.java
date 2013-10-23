@@ -2,10 +2,11 @@ package com.enterrupt.pt_objects;
 
 public class RecordField {
 
+	public String RECNAME;
 	public String FIELDNAME;
 	public byte USEEDIT;
+	public int FIELDNUM;
 
-	public int posInRecord;
 	private final byte KEY_FLAG = (byte) 1;
 	private final byte ALTERNATE_SEARCH_KEY_FLAG = (byte) 16;
 	private final byte SEARCH_KEY_FLAG = (byte) 2048;

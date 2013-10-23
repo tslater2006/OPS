@@ -10,6 +10,7 @@ import java.sql.Blob;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
+import com.enterrupt.ComponentBuffer;
 
 public class Component {
 
@@ -163,23 +164,21 @@ public class Component {
 
 			while((tok = pfs.next()) != null) {
 
-				if(tok.flags.contains(AFlag.END_OF_PAGE)) {
-					while(scrollMarkers.peek().src == AFlag.SCROLL_START) {
-						scrollMarkers.pop(); // pop interim scroll levels.
-					}
-					scrollMarkers.pop();		// pop the matching page.
-				}
-
 				if(tok.flags.contains(AFlag.PAGE)) {
 					ScrollMarker sm = new ScrollMarker();
 					sm.src = AFlag.PAGE;
 					sm.primaryRecName = scrollMarkers.peek().primaryRecName;
 					sm.scrollLevel = scrollMarkers.peek().scrollLevel;
 					scrollMarkers.push(sm);
+					continue;
 				}
 
-				if(tok.flags.contains(AFlag.SCROLL_LVL_DECREMENT)) {
-					scrollMarkers.pop();
+				if(tok.flags.contains(AFlag.END_OF_PAGE)) {
+					while(scrollMarkers.peek().src == AFlag.SCROLL_START) {
+						scrollMarkers.pop(); // pop interim scroll levels.
+					}
+					scrollMarkers.pop();		// pop the matching page.
+					continue;
 				}
 
 				if(tok.flags.contains(AFlag.SCROLL_START)) {
@@ -196,15 +195,21 @@ public class Component {
 					sm.primaryRecName = tok.primaryRecName;
 					sm.scrollLevel = scrollMarkers.peek().scrollLevel + tok.OCCURSLEVEL;
 					scrollMarkers.push(sm);
+					continue;
 				}
 
-				if(scrollMarkers.size() > 0) {
-					System.out.println("[" + scrollMarkers.peek().scrollLevel + ", " +
-					scrollMarkers.peek().primaryRecName + "]\t" + tok.flags);
-				} else {
-					System.out.println("Stack size is 0: " + tok.flags);
-					//System.exit(1);
+				// Remember: don't use continue here, flag can be attached to regular fields.
+				if(tok.flags.contains(AFlag.SCROLL_LVL_DECREMENT)) {
+					scrollMarkers.pop();
 				}
+
+				if(tok.RECNAME.length() > 0 &&
+				   tok.FIELDNAME.length() > 0) {
+					ComponentBuffer.addPageField(tok, scrollMarkers.peek().scrollLevel,
+						scrollMarkers.peek().primaryRecName);
+				}
+				//System.out.println("[" + scrollMarkers.peek().scrollLevel + ", " +
+				//	scrollMarkers.peek().primaryRecName + "]\t" + tok.flags);
 			}
 
 			System.out.println("Stack size: " + scrollMarkers.size());

@@ -8,39 +8,21 @@ import com.enterrupt.pt_objects.*;
 
 public class ComponentBuffer {
 
-	//private static HashMap<String, RecordBuffer> level0RecBufferTable;
-	//private static ArrayList<RecordBuffer> level0OrderedRecBuffers;
-
-	//private static HashMap<Integer, ScrollBuffer> scrollTable;
-
 	public static int currScrollLevel;
 	public static ScrollBuffer currSB;
+	public static ScrollBuffer compBuffer;
 
 	public static void init() {
-		//scrollTable = new HashMap<Integer, ScrollBuffer>();
-		//scrollTable.put(1, new ScrollBuffer(1));
-		//scrollTable.put(2, new ScrollBuffer(2));
-		//scrollTable.put(3, new ScrollBuffer(3));
+		compBuffer = new ScrollBuffer(0, null, null);
+		currSB = compBuffer;
 	}
 
-	/*public static void placeholder (PageField pf, int level, String primaryRecName) {
-
-		ScrollBuffer sb = scrollTable.get(level);
-		if(sb == null) {
-			sb = new ScrollBuffer(level);
-			scrollTable.put(level, sb);
-		}
+	public static void addPageField(PgToken tok, int level, String primaryRecName) {
 
 		// Ensure we're pointing at the correct scroll buffer.
-		pointAtScroll(pf.contextScrollLevel, pf.contextPrimaryRecName);
+		pointAtScroll(level, primaryRecName);
 
-		// The primary RECNAME for scroll level 0 isn't none until the very first page field is inserted.
-		if(compBuffer.primaryRecName == null) {
-			compBuffer = new ScrollBuffer(currSB.scrollLevel, pf.RECNAME, null);
-			currSB = compBuffer;
-		}
-		//System.out.println("Primary rec: " + currSB.primaryRecName);
-		currSB.addPageField(pf);
+		currSB.addPageField(tok);
 	}
 
 	public static void pointAtScroll(int targetScrollLevel, String targetPrimaryRecName) {
@@ -66,7 +48,8 @@ public class ComponentBuffer {
 			currScrollLevel = currSB.scrollLevel;
 		}
 
-		// The scroll level may not have changed, but the target scroll buffer may have.
+		// The scroll level may not have changed, but if the targeted primary rec name
+		// differs from the current, we need to change buffers.
 		if(currScrollLevel > 0 &&
 			!currSB.primaryRecName.equals(targetPrimaryRecName)) {
 			currSB = currSB.parent.getChildScroll(targetPrimaryRecName);
@@ -75,12 +58,12 @@ public class ComponentBuffer {
 
 		//System.out.println("Scroll level set to " + currSB.scrollLevel + " with primary rec name " + 
 		//	currSB.primaryRecName);
-	}*/
+	}
 
 	public static void print() {
 		System.out.println("\n\nPRINTING COMPONENT BUFFER");
 		System.out.println("=========================");
-		//System.out.println(compBuffer.toString(0));
+		System.out.println(compBuffer.toString(0));
 	}
 }
 

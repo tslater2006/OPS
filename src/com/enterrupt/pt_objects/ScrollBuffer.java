@@ -20,22 +20,23 @@ public class ScrollBuffer {
         this.scrollLevel = level;
         this.primaryRecName = primaryRecName;
         this.parent = parent;
+
         this.recBufferTable = new HashMap<String, RecordBuffer>();
         this.orderedRecBuffers = new ArrayList<RecordBuffer>();
         this.scrollBufferTable = new HashMap<String, ScrollBuffer>();
         this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
     }
 
-    public void addPageField(PageField pf) {
+    public void addPageField(PgToken tok) {
 
-        RecordBuffer r = this.recBufferTable.get(pf.RECNAME);
+        RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
         if(r == null) {
-            r = new RecordBuffer(pf.RECNAME);
+            r = new RecordBuffer(tok.RECNAME);
             orderedRecBuffers.add(r);
         }
 
-        r.addField(pf.FIELDNAME);
-        this.recBufferTable.put(pf.RECNAME, r);
+        r.addField(tok.FIELDNAME);
+        this.recBufferTable.put(tok.RECNAME, r);
     }
 
     public ScrollBuffer getChildScroll(String targetPrimaryRecName) {

@@ -95,7 +95,7 @@ class ScrollBuffer {
 
         RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
         if(r == null) {
-            r = new RecordBuffer(tok.RECNAME, this.scrollLevel);
+            r = new RecordBuffer(tok.RECNAME, this.scrollLevel, this.primaryRecName);
         	this.recBufferTable.put(r.recName, r);
             orderedRecBuffers.add(r);
         }
@@ -140,14 +140,24 @@ class RecordBuffer {
 
     public String recName;
 	public int scrollLevel;
+	public boolean isPrimaryScrollRecordBuffer;
     public HashMap<String, RecordFieldBuffer> fieldBufferTable;
 	public ArrayList<RecordFieldBuffer> unorderedFieldBuffers;
+	public HashMap<String, RecordBuffer> subrecordBufferTable;
+	public ArrayList<RecordBuffer> orderedSubrecordBuffers;
 
-    public RecordBuffer(String r, int scrollLevel) {
+    public RecordBuffer(String r, int scrollLevel, String primaryRecName) {
         this.recName = r;
 		this.scrollLevel = scrollLevel;
+
+		if(primaryRecName != null && this.recName.equals(primaryRecName)) {
+			this.isPrimaryScrollRecordBuffer = true;
+		}
+
         this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
 		this.unorderedFieldBuffers = new ArrayList<RecordFieldBuffer>();
+		this.subrecordBufferTable = new HashMap<String, RecordBuffer>();
+		this.orderedSubrecordBuffers = new ArrayList<RecordBuffer>();
     }
 
     public void addPageField(String RECNAME, String FIELDNAME) throws Exception {
@@ -161,6 +171,43 @@ class RecordBuffer {
         }
     }
 
+	/**
+	 * TODO: Optimize this / calls to this by setting a flag if it's already been run before.
+	 */
+	public void expandEntireRecordIntoBuffer() throws Exception {
+
+		Record recDefn = BuildAssistant.getRecordDefn(this.recName);
+
+		// Add all fields into buffer.
+		for(Map.Entry<String, RecordField> cursor : recDefn.fieldTable.entrySet()) {
+			this.addPageField(recDefn.RECNAME, cursor.getValue().FIELDNAME);
+		}
+
+		// Add all subrecord fields into buffer.
+		for(String subrecname : recDefn.subRecordNames) {
+			if(this.subrecordBufferTable.get(subrecname) == null) {
+				RecordBuffer srb = new RecordBuffer(subrecname, this.scrollLevel, null);
+				this.subrecordBufferTable.put(srb.recName, srb);
+				this.orderedSubrecordBuffers.add(srb);
+				srb.expandEntireRecordIntoBuffer();
+			}
+		}
+	}
+
+	public String subrecordToString(int indent) {
+
+		StringBuilder b = new StringBuilder();
+
+        Collections.sort(this.unorderedFieldBuffers);
+        for(RecordFieldBuffer f : this.unorderedFieldBuffers) {
+            for(int i=0; i<(indent + 2); i++) {b.append(" ");}
+            b.append("+ " + f.toString() + "\n");
+        }
+
+		return b.toString();
+
+	}
+
     public String toString(int indent) {
 
         StringBuilder b = new StringBuilder();
@@ -173,6 +220,11 @@ class RecordBuffer {
             for(int i=0; i<(indent + 2); i++) {b.append(" ");}
             b.append("+ " + f.toString() + "\n");
         }
+
+		for(RecordBuffer subrecbuf : this.orderedSubrecordBuffers) {
+			b.append(subrecbuf.subrecordToString(indent));
+		}
+
         return b.toString();
     }
 }
@@ -203,16 +255,27 @@ class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
 
 	public void processPageField() throws Exception {
 
+		/**
+		 * If a level 0, non-derived record contains at least one field
+	 	 * that is neither a search key nor an alternate key, all of the record's fields
+		 * should be present in the component buffer.
+		 */
 		if(this.parentRecordBuffer.scrollLevel == 0
 			&& !this.recDefn.isDerivedWorkRecord()
 			&& !this.fldDefn.isSearchKey()
 			&& !this.fldDefn.isAlternateSearchKey()) {
 
-			for(Map.Entry<String, RecordField> cursor : this.recDefn.fieldTable.entrySet()) {
-				if(!cursor.getKey().equals(this.fldName)) {
-					this.parentRecordBuffer.addPageField(this.recDefn.RECNAME, cursor.getValue().FIELDNAME);
-				}
-			}
+			this.parentRecordBuffer.expandEntireRecordIntoBuffer();
+		}
+
+		/**
+		 * All the fields on a primary scroll record at level 1 or higher
+		 * should be present in the component buffer.
+		 */
+		if(this.parentRecordBuffer.scrollLevel > 0
+			&& this.parentRecordBuffer.isPrimaryScrollRecordBuffer) {
+
+			this.parentRecordBuffer.expandEntireRecordIntoBuffer();
 		}
 	}
 

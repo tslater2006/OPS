@@ -40,9 +40,19 @@ public class PgToken {
 			return false;
 		}
 
-		// Subrecords (type 3) should not be added.
+		// Subrecords should not be added.
 		Record recDefn = BuildAssistant.getRecordDefn(this.RECNAME);
-		if(recDefn.RECTYPE == 3) {
+		if(recDefn.isSubrecord()) {
+			return false;
+		}
+
+		/**
+		 * Even if RECNAME does not point to a subrecord, this field
+		 * may point to a subrecord on the record pointed to by RECNAME,
+		 * in which case it will not be present in the immediate record.
+	 	 * If that's the case, this field should not be added.
+		 */
+		if(recDefn.fieldTable.get(this.FIELDNAME) == null) {
 			return false;
 		}
 

@@ -3,6 +3,7 @@ package com.enterrupt.pt_objects;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.sql.ResultSet;
+import java.util.HashMap;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 
@@ -11,15 +12,22 @@ public class Record {
     public String RECNAME;
 	public String RELLANGRECNAME;
 	public int RECTYPE;
+	public HashMap<String, RecordField> fieldTable;
+	public ArrayList<String> subRecordNames;
 
     public Record(String recname) {
         this.RECNAME = recname;
+		this.fieldTable = new HashMap<String, RecordField>();
+		this.subRecordNames = new ArrayList<String>();
     }
+
+	public boolean isSubrecord() {
+		return this.RECTYPE == 3;
+	}
 
     public void loadInitialMetadata() throws Exception {
 
 		int fieldcount = 0;
-		ArrayList<String> subrecnames = new ArrayList<String>();
 
         PreparedStatement pstmt;
         ResultSet rs;
@@ -43,6 +51,11 @@ public class Record {
 
 		int i = 0;
         while(rs.next()) {
+			RecordField f = new RecordField();
+			f.posInRecord = i;
+			f.FIELDNAME = rs.getString("FIELDNAME").trim();
+			f.USEEDIT = (byte) rs.getInt("USEEDIT");
+			this.fieldTable.put(f.FIELDNAME, f);
             i++;
         }
         rs.close();
@@ -57,7 +70,7 @@ public class Record {
 			rs = pstmt.executeQuery();
 
 			while(rs.next()) {
-				subrecnames.add(rs.getString("FIELDNAME"));
+				subRecordNames.add(rs.getString("FIELDNAME"));
 				i++;
 			}
 
@@ -75,7 +88,7 @@ public class Record {
         rs.close();
         pstmt.close();
 
-		for(String subrecname : subrecnames) {
+		for(String subrecname : subRecordNames) {
 			//System.out.println("Loading subrecord : " + subrecname);
 			BuildAssistant.getRecordDefn(subrecname);
 		}

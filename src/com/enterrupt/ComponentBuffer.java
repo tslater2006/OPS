@@ -17,7 +17,7 @@ public class ComponentBuffer {
 		currSB = compBuffer;
 	}
 
-	public static void addPageField(PgToken tok, int level, String primaryRecName) {
+	public static void addPageField(PgToken tok, int level, String primaryRecName) throws Exception {
 
 		// Ensure we're pointing at the correct scroll buffer.
 		pointAtScroll(level, primaryRecName);
@@ -56,7 +56,7 @@ public class ComponentBuffer {
 			currScrollLevel = currSB.scrollLevel;
 		}
 
-		//System.out.println("Scroll level set to " + currSB.scrollLevel + " with primary rec name " + 
+		//System.out.println("Scroll level set to " + currSB.scrollLevel + " with primary rec name " +
 		//	currSB.primaryRecName);
 	}
 
@@ -90,16 +90,16 @@ class ScrollBuffer {
         this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
     }
 
-    public void addPageField(PgToken tok) {
+    public void addPageField(PgToken tok) throws Exception {
 
         RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
         if(r == null) {
             r = new RecordBuffer(tok.RECNAME);
+        	this.recBufferTable.put(r.recName, r);
             orderedRecBuffers.add(r);
         }
 
-        r.addField(tok.FIELDNAME);
-        this.recBufferTable.put(tok.RECNAME, r);
+        r.addPageField(tok.RECNAME, tok.FIELDNAME);
     }
 
     public ScrollBuffer getChildScroll(String targetPrimaryRecName) {
@@ -130,7 +130,7 @@ class ScrollBuffer {
             b.append(sb.toString(indent + 2));
         }
         //b.append("Level " + this.scrollLevel + " records: " + this.orderedRecBuffers.size() + "\n");
-        //b.append("Level " + (this.scrollLevel + 1) + " scrolls: " + this.orderedScrollBuffers.size() + "\n"); 
+        //b.append("Level " + (this.scrollLevel + 1) + " scrolls: " + this.orderedScrollBuffers.size() + "\n");
         return b.toString();
     }
 }
@@ -138,22 +138,24 @@ class ScrollBuffer {
 class RecordBuffer {
 
     public String recName;
-    public HashMap<String, FieldBuffer> fieldBufferTable;
-    public ArrayList<FieldBuffer> orderedFieldBuffers;
+    public HashMap<String, RecordFieldBuffer> fieldBufferTable;
+	public ArrayList<RecordFieldBuffer> unorderedFieldBuffers;
 
     public RecordBuffer(String r) {
         this.recName = r;
-        this.fieldBufferTable = new HashMap<String, FieldBuffer>();
-        this.orderedFieldBuffers = new ArrayList<FieldBuffer>();
+        this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
+		this.unorderedFieldBuffers = new ArrayList<RecordFieldBuffer>();
     }
 
-    public void addField(String fldname) {
-        FieldBuffer f = this.fieldBufferTable.get(fldname);
+    public void addPageField(String RECNAME, String FIELDNAME) throws Exception {
+
+        RecordFieldBuffer f = this.fieldBufferTable.get(FIELDNAME);
         if(f == null) {
-            f = new FieldBuffer(fldname);
-            orderedFieldBuffers.add(f);
+            f = new RecordFieldBuffer(RECNAME, FIELDNAME, this);
+	        this.fieldBufferTable.put(f.fldName, f);
+			this.unorderedFieldBuffers.add(f);
+			f.processPageField(); // Ensure this is done after adding to the table, could cause infinte loop otherwise.
         }
-        this.fieldBufferTable.put(fldname, f);
     }
 
     public String toString(int indent) {
@@ -163,8 +165,8 @@ class RecordBuffer {
         for(int i=0; i<indent; i++) {b.append(" ");}
         b.append("- " + this.recName + "\n");
 
-        //Collections.sort(this.orderedFieldBuffers);
-        for(FieldBuffer f : this.orderedFieldBuffers) {
+        //Collections.sort(this.orderedRecordFieldBuffers);
+        for(RecordFieldBuffer f : this.unorderedFieldBuffers) {
             for(int i=0; i<(indent + 2); i++) {b.append(" ");}
             b.append("+ " + f.toString() + "\n");
         }
@@ -172,19 +174,45 @@ class RecordBuffer {
     }
 }
 
-class FieldBuffer implements Comparable<FieldBuffer> {
+class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
 
     public String fldName;
+	public Record recDefn;
+	public RecordField fldDefn;
+	public RecordBuffer parentRecordBuffer;
 
-    public FieldBuffer(String f) {
+    public RecordFieldBuffer(String r, String f, RecordBuffer parent) throws Exception {
         this.fldName = f;
+		this.recDefn = BuildAssistant.getRecordDefn(r);
+		this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
+		this.parentRecordBuffer = parent;
+
+		/**
+		 * TODO: Traversing a record's subrecords here may be necessary
+		 * in the future; skipping for now as it is not needed to form
+		 * the component structure.
+		 */
+		if(this.fldDefn == null) {
+			System.out.println("[ERROR] Field is not on the record. Likely on a subrecord. Subrecord traversal in RecordFieldBuffer not supported at this time.");
+			System.exit(1);
+		}
     }
+
+	public void processPageField() throws Exception {
+		if(this.fldDefn.isKey()) {
+			for(Map.Entry<String, RecordField> cursor : this.recDefn.fieldTable.entrySet()) {
+				if(!cursor.getKey().equals(this.fldName)) {
+					this.parentRecordBuffer.addPageField(this.recDefn.RECNAME, cursor.getValue().FIELDNAME);
+				}
+			}
+		}
+	}
 
     public String toString() {
         return fldName;
     }
 
-    public int compareTo(FieldBuffer fb) {
+    public int compareTo(RecordFieldBuffer fb) {
         return this.fldName.compareTo(fb.fldName);
     }
 }

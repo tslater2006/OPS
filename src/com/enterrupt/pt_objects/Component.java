@@ -165,6 +165,7 @@ public class Component {
 			while((tok = pfs.next()) != null) {
 
 				if(tok.flags.contains(AFlag.PAGE)) {
+					//System.out.println(tok.SUBPNLNAME);
 					ScrollMarker sm = new ScrollMarker();
 					sm.src = AFlag.PAGE;
 					sm.primaryRecName = scrollMarkers.peek().primaryRecName;

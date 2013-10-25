@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.sql.ResultSet;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
+import com.enterrupt.RecordPCListRequestBuffer;
+import java.util.HashMap;
 
 public class Page {
 
@@ -66,11 +68,13 @@ public class Page {
 					break;
                 case 11:
 					pf.flags.add(AFlag.PAGE);
+					pf.flags.add(AFlag.SUBPAGE);
 					this.subpages.add(pf);
 					this.tokens.add(pf);
                     break;
                 case 18:
 					pf.flags.add(AFlag.PAGE);
+					pf.flags.add(AFlag.SECPAGE);
                     this.secpages.add(pf);
 					this.tokens.add(pf);
 					break;
@@ -104,20 +108,62 @@ public class Page {
 		}
 	}
 
+	/**
+	 * This method is complex for a reason. PeopleTools recursively iterates through
+	 * subpages before recursively iterating through secpages. However, during both sets
+	 * of recursion, the order in which records are first referenced must be preserved in a buffer;
+	 * when the secpage recursion begins, each occurrence of a secpage must cause the buffer
+	 * to be flushed in the form of SQL requests for each record's Record PC listing. To accomplish this,
+	 * we must be able to "expand" the secpages during secpage recursion, with emphasis on the fact that
+	 * the expansions must be done in place, surrounded by all the other fields that come before/after it
+	 * in the recursive traversal. The RecordPCListRequestBuffer abstracts the expansion process away
+	 * from this routine.
+	 */
 	public void recursivelyLoadSecpages() throws Exception {
+
 		Page loadedPage = BuildAssistant.getLoadedPage(this.PNLNAME);
 		Page p;
 
+		ArrayList<PgToken> secpageMarkers = new ArrayList<PgToken>();
+
 		// Recursively expand/search subpages for secpages.
-		for(PgToken tok : loadedPage.subpages) {
-			p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
-			p.recursivelyLoadSecpages();
+		for(PgToken tok : loadedPage.tokens) {
+
+			if(tok.flags.contains(AFlag.SUBPAGE)) {
+				p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
+				p.recursivelyLoadSecpages();
+
+			} else if(tok.flags.contains(AFlag.SECPAGE)) {
+
+				/**
+				 * Create a new PgToken instead of using the current one,
+				 * otherwise there could be issues if the same token is submitted twice,
+				 * which is valid because secpages can appear on multiple pages.
+				 */
+				PgToken marker = new PgToken(AFlag.SECPAGE);
+				marker.SUBPNLNAME = tok.SUBPNLNAME;
+				secpageMarkers.add(marker);
+				RecordPCListRequestBuffer.queueSecpageToken(marker);
+
+			} else if(tok.SUBPNLNAME.length() == 0 && tok.RECNAME.length() > 0 &&
+					tok.FIELDNAME.length() > 0) {
+
+				/**
+				 * The RECNAME on this token will be used to query for the record's
+				 * Record PC listing if it is the first instance of the RECNAME in
+				 * the expanded stream.
+				 */
+				RecordPCListRequestBuffer.queueFieldToken(tok);
+			}
 		}
 
 		// Then, recursively expand/search secpages for more secpages.
-		for(PgToken tok : loadedPage.secpages) {
-			p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
+		for(PgToken marker : secpageMarkers) {
+			RecordPCListRequestBuffer.notifyStartOfExpansion(marker);
+			RecordPCListRequestBuffer.flushUpTo(marker);
+			p = BuildAssistant.getLoadedPage(marker.SUBPNLNAME);
 			p.recursivelyLoadSecpages();
+			RecordPCListRequestBuffer.notifyEndOfExpansion(marker);
 		}
 	}
 }

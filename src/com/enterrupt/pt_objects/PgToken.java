@@ -2,6 +2,7 @@ package com.enterrupt.pt_objects;
 
 import java.util.EnumSet;
 import com.enterrupt.BuildAssistant;
+import java.util.ArrayList;
 
 public class PgToken {
 
@@ -11,6 +12,7 @@ public class PgToken {
 	public String SUBPNLNAME;
 	public int OCCURSLEVEL;
 	public byte FIELDUSE;
+	public ArrayList<String> recordsSeenUpToThisSecPage;
 
 	private final byte REL_DISP_FLAG = (byte) 16;
 

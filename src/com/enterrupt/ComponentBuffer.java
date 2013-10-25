@@ -64,7 +64,7 @@ public class ComponentBuffer {
 	public static void print() {
 		System.out.println("\n\nPRINTING COMPONENT BUFFER");
 		System.out.println("=========================");
-		System.out.println(compBuffer.toString(0));
+		//System.out.println(compBuffer.toString(0));
 	}
 }
 

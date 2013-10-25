@@ -11,6 +11,7 @@ import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
 import com.enterrupt.ComponentBuffer;
+import com.enterrupt.RecordPCListRequestBuffer;
 
 public class Component {
 
@@ -77,7 +78,7 @@ public class Component {
         PreparedStatement pstmt;
         ResultSet rs;
 
-        pstmt = StmtLibrary.getPSPCMPROG_SearchRecordPCList(PSDefn.RECORD, this.SEARCHRECNAME);
+        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.SEARCHRECNAME);
         rs = pstmt.executeQuery();
         while(rs.next()) {
 			PeopleCodeProg prog = new PeopleCodeProg();
@@ -144,9 +145,12 @@ public class Component {
 		for(Page p : this.pages) {
 			p.recursivelyLoadSubpages();
 		}
+
+		RecordPCListRequestBuffer.init();
 		for(Page p : this.pages) {
 			p.recursivelyLoadSecpages();
 		}
+		RecordPCListRequestBuffer.flushEntireTokenStream();
 	}
 
 	public void assembleComponentStructure() throws Exception {

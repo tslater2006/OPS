@@ -24,25 +24,32 @@ public class BuildAssistant {
 	private static String currentTraceLine = "";
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
+	private static HashMap<String, Boolean> systemTableRecNames;
 
 	public static void init() {
 		pageDefnCache = new HashMap<String, Page>();
 		recDefnCache = new HashMap<String, Record>();
+
+		// Initialize the list of system tables for which metadata should not be gathered.
+		systemTableRecNames = new HashMap<String, Boolean>();
+		systemTableRecNames.put("PSXLATITEM", true);
 	}
 
 	public static void cacheRecord(Record r) {
 		recDefnCache.put(r.RECNAME, r);
-		//System.out.println("Cached Record: " + r.RECNAME);
+	}
+
+	public static boolean isSystemTable(String RECNAME) {
+		if(systemTableRecNames.get(RECNAME) != null) {
+			return true;
+		}
+		return false;
 	}
 
 	public static Record getRecordDefn(String RECNAME) throws Exception {
 
-        /**
-         * The PSXLATITEM table is a system table and should not have its record
-         * definition loaded.
-         * TODO: Make a system table list that should be excluded from record definition initialization.
-         */
-        if(RECNAME.length() == 0 || RECNAME.equals("PSXLATITEM")) {
+		// We don't need to query for system table metadata; ignore requests for such tables.
+        if(RECNAME.length() == 0 || isSystemTable(RECNAME)) {
             return null;
         }
 

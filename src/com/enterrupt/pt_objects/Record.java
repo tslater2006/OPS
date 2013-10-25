@@ -17,12 +17,14 @@ public class Record {
 	public HashMap<String, RecordField> fieldTable;
 	public TreeMap<Integer, Object> fldAndSubrecordTable;
 	public ArrayList<String> subRecordNames;
+	private boolean hasListOfRecordPCBeenRetrieved;
 
     public Record(String recname) {
         this.RECNAME = recname;
 		this.fieldTable = new HashMap<String, RecordField>();
 		this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
 		this.subRecordNames = new ArrayList<String>();
+		this.hasListOfRecordPCBeenRetrieved = false;
     }
 
 	public boolean isSubrecord() {
@@ -131,6 +133,24 @@ public class Record {
 		}
 
 		return expandedFieldList;
+	}
+
+	public void getListOfRecordPCPrograms() throws Exception {
+
+		if(!this.hasListOfRecordPCBeenRetrieved) {
+
+			PreparedStatement pstmt;
+            ResultSet rs;
+
+            // 1 == Record PC
+            pstmt = StmtLibrary.getPSPCMPROG_RecordPCList("1", this.RECNAME);
+            rs = pstmt.executeQuery();
+            rs.next();   // Do nothing with records for now.
+            rs.close();
+            pstmt.close();
+
+			this.hasListOfRecordPCBeenRetrieved = true;
+		}
 	}
 }
 

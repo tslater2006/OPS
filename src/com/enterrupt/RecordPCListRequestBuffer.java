@@ -3,11 +3,8 @@ package com.enterrupt;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.HashMap;
-import com.enterrupt.pt_objects.*;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import com.enterrupt.sql.StmtLibrary;
 import java.util.Stack;
+import com.enterrupt.pt_objects.*;
 
 /**
  * This class abstracts away the process of expanding secpages
@@ -117,24 +114,15 @@ public class RecordPCListRequestBuffer {
 		if(flushedRecordNames.get(RECNAME) == null &&
 				!BuildAssistant.isSystemTable(RECNAME)) {
 
-			flushedRecordNames.put(RECNAME, true);
-
-			PreparedStatement pstmt;
-			ResultSet rs;
-
-			// 1 == Record PC
-			pstmt = StmtLibrary.getPSPCMPROG_RecordPCList("1", RECNAME);
-			rs = pstmt.executeQuery();
-			rs.next();   // Do nothing with records for now.
-			rs.close();
-			pstmt.close();
-
-			/**
-			 * If this record contains subrecords, requests for their
-			 * Record PC listings should be issued now.
-		 	 */
 			Record recDefn = BuildAssistant.getRecordDefn(RECNAME);
 			if(recDefn != null) {
+				recDefn.getListOfRecordPCPrograms();
+				flushedRecordNames.put(RECNAME, true);
+
+				/**
+				 * If this record contains subrecords, requests for their
+				 * Record PC listings should be issued now.
+		 		 */
 				for(String subrecname : recDefn.subRecordNames) {
 					issuePCListRequestForRecord(subrecname);
 				}

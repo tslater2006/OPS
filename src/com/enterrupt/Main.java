@@ -41,10 +41,10 @@ public class Main {
 			c.loadPages();
 
 			c.assembleComponentStructure();
-			c.validateComponentStructure();
 
 			StmtLibrary.disconnect();
-			BuildAssistant.verifyAgainstTraceFile();
+			BuildAssistant.runValidationTests(c);
+
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			System.exit(1);

@@ -6,6 +6,9 @@ import java.util.Stack;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.sql.Blob;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.parser.Parser;
@@ -234,33 +237,77 @@ public class Component {
 		}
 	}
 
-	public static void validateComponentStructure() {
+	public boolean validateComponentStructure(boolean verboseFlag) throws Exception {
 
 		int indent = 0;
 		IStreamableBuffer buf;
+
+		File structureFile = new File("test/" + this.PNLGRPNAME + ".structure");
+		BufferedReader reader = new BufferedReader(new FileReader(structureFile));
+		String line;
+		String lineParts[];
+
 		while((buf = ComponentBuffer.next()) != null) {
+
+			line = reader.readLine().trim();
+			lineParts = line.split(";");
 
 			if(buf instanceof ScrollBuffer) {
 
 				ScrollBuffer sbuf = (ScrollBuffer) buf;
 				indent = sbuf.scrollLevel * 3;
 
-				for(int i=0; i<indent; i++){System.out.print(" ");}
-				System.out.println("Scroll - Level " + sbuf.scrollLevel +
-					"\tPrimary Record: " + sbuf.primaryRecName);
-				for(int i=0; i<indent; i++){System.out.print(" ");}
-				System.out.println("=======================================================");
+				if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
+					Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
+						(!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
+							&& Integer.parseInt(lineParts[1]) > 0)) {
+					System.out.println("[ERROR] Incorrect/absent scroll token encountered during component structure verification.");
+					System.exit(1);
+				}
+
+				if(verboseFlag) {
+					for(int i=0; i<indent; i++){System.out.print(" ");}
+					System.out.println("Scroll - Level " + sbuf.scrollLevel +
+						"\tPrimary Record: " + sbuf.primaryRecName);
+					for(int i=0; i<indent; i++){System.out.print(" ");}
+					System.out.println("=======================================================");
+				}
 
 			} else if(buf instanceof RecordBuffer) {
 				RecordBuffer rbuf = (RecordBuffer) buf;
-				for(int i=0; i<indent; i++){System.out.print(" ");}
-				System.out.println(" + " + rbuf.recName);
+
+				if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
+					!lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
+					System.out.println("[ERROR] Incorrect/absent record token encountered during component structure verification.");
+					System.exit(1);
+				}
+
+				if(verboseFlag) {
+					for(int i=0; i<indent; i++){System.out.print(" ");}
+					System.out.println(" + " + rbuf.recName);
+				}
 
 			} else {
 				RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
-				for(int i=0; i<indent; i++){System.out.print(" ");}
-				System.out.println("   - " + fbuf.fldName);
+
+				if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
+					!lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
+					System.out.println("[ERROR] Incorrect/absent field token encountered during component structure verification.");
+					System.exit(1);
+				}
+
+				if(verboseFlag) {
+					for(int i=0; i<indent; i++){System.out.print(" ");}
+					System.out.println("   - " + fbuf.fldName);
+				}
 			}
 		}
+
+		if(!reader.readLine().trim().equals("END-COMPONENT-STRUCTURE")) {
+			System.out.println("[ERROR] Expected END-COMPONENT-STRUCTURE in .structure file.");
+			System.exit(1);
+		}
+
+		return true;
 	}
 }

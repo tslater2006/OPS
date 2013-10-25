@@ -77,7 +77,7 @@ public class BuildAssistant {
 		return p;
 	}
 
-	public static void verifyAgainstTraceFile() {
+	public static void runValidationTests(Component componentObj) throws Exception {
 		openTraceFile();
 		loadIgnoredStmts();
 
@@ -146,6 +146,8 @@ public class BuildAssistant {
 			}
 		}
 
+		boolean isCompStructureValid = componentObj.validateComponentStructure(false);
+
 		DecimalFormat df = new DecimalFormat("0.0");
 
 		System.out.println("\nTRACE FILE VERIFICATION SUMMARY");
@@ -154,9 +156,11 @@ public class BuildAssistant {
 		System.out.println("Lines in trace file:\t\t\t\t" + (currTraceLineNbr - 1));
 		System.out.println("Total Trace Stmts / Total Ignored:\t\t" + (int)numTraceStmts +
 			"\t\t" + (int)numIgnoredTraceStmts);
-		System.out.println("Coverage Stmts / Coverage Stmts Ignored:\t" + (int)numCoverageAreaStmts + 
+		System.out.println("Coverage Stmts / Coverage Stmts Ignored:\t" + (int)numCoverageAreaStmts +
 			"\t\t" + (int)numIgnoredCoverageAreaStmts);
-		System.out.println("Coverage Area Bounded?:\t\t\t\t\t\t\t\t" + (inCoverageRegion ? "!!NO!!" : "YES"));
+		System.out.println("Is Component Structure Valid?\t\t\t\t\t\t\t" +
+			(isCompStructureValid ? "YES" : "!!NO!!"));
+		System.out.println("Coverage Area Bounded?\t\t\t\t\t\t\t\t" + (inCoverageRegion ? "!!NO!!" : "YES"));
 		System.out.println("Coverage Area Start / End Line:\t\t\t" + "L_" + coverageStartLine + "\t\t" +
 			"L_" + coverageEndLine);
 		System.out.println("Matches / Total Emitted:\t\t\t" + (int)numCoverageAreaMatches + "\t\t"

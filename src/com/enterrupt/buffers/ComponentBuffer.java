@@ -1,10 +1,11 @@
-package com.enterrupt;
+package com.enterrupt.buffers;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.lang.StringBuilder;
 import java.util.Collections;
+import com.enterrupt.BuildAssistant;
 import com.enterrupt.pt_objects.*;
 
 public class ComponentBuffer {
@@ -64,7 +65,7 @@ public class ComponentBuffer {
 	public static void print() {
 		System.out.println("\n\nPRINTING COMPONENT BUFFER");
 		System.out.println("=========================");
-		//System.out.println(compBuffer.toString(0));
+		System.out.println(compBuffer.toString(0));
 	}
 }
 

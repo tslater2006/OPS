@@ -10,8 +10,8 @@ import java.sql.Blob;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
-import com.enterrupt.ComponentBuffer;
-import com.enterrupt.RecordPCListRequestBuffer;
+import com.enterrupt.buffers.ComponentBuffer;
+import com.enterrupt.buffers.RecordPCListRequestBuffer;
 
 public class Component {
 

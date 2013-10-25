@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.sql.ResultSet;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.RecordPCListRequestBuffer;
+import com.enterrupt.buffers.RecordPCListRequestBuffer;
 import java.util.HashMap;
 
 public class Page {

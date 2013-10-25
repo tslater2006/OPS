@@ -4,6 +4,7 @@ import com.enterrupt.sql.*;
 import com.enterrupt.pt_objects.*;
 import com.enterrupt.types.*;
 import com.enterrupt.parser.Parser;
+import com.enterrupt.buffers.ComponentBuffer;
 import com.enterrupt.interpreter.RunTimeEnvironment;
 
 public class Main {

@@ -8,12 +8,15 @@ import java.util.Collections;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.pt_objects.*;
 
-public class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
+public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFieldBuffer> {
 
     public String fldName;
     public Record recDefn;
     public RecordField fldDefn;
     public RecordBuffer parentRecordBuffer;
+
+	// Used for reading.
+	private boolean hasEmittedSelf = false;
 
     public RecordFieldBuffer(String r, String f, RecordBuffer parent) throws Exception {
         this.fldName = f;
@@ -54,14 +57,26 @@ public class RecordFieldBuffer implements Comparable<RecordFieldBuffer> {
         }
     }
 
-    public String toString() {
-        return fldName;
-    }
-
     public int compareTo(RecordFieldBuffer fb) {
+
         int a = this.fldDefn.FIELDNUM;
         int b = fb.fldDefn.FIELDNUM;
         return a > b ? +1 : a < b ? -1 : 0;
+    }
+
+    public IStreamableBuffer next() {
+
+		if(!this.hasEmittedSelf) {
+			this.hasEmittedSelf = true;
+			return this;
+		}
+
+		return null;
+    }
+
+    public void resetCursors() {
+
+		this.hasEmittedSelf = false;
     }
 }
 

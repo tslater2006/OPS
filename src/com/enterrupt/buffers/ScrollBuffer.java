@@ -7,7 +7,7 @@ import java.lang.StringBuilder;
 import java.util.Collections;
 import com.enterrupt.pt_objects.*;
 
-public class ScrollBuffer {
+public class ScrollBuffer implements IStreamableBuffer {
 
     public int scrollLevel;
     public String primaryRecName;
@@ -18,6 +18,11 @@ public class ScrollBuffer {
 
     public HashMap<String, ScrollBuffer> scrollBufferTable;
     public ArrayList<ScrollBuffer> orderedScrollBuffers;
+
+	// Used for reading.
+	private boolean hasEmittedSelf = false;
+	private int recBufferCursor = 0;
+	private int scrollBufferCursor = 0;
 
     public ScrollBuffer(int level, String primaryRecName, ScrollBuffer parent) {
         this.scrollLevel = level;
@@ -51,26 +56,52 @@ public class ScrollBuffer {
             this.orderedScrollBuffers.add(sb);
         }
         return sb;
-   }
+   	}
 
-	public String toString(int indent) {
+	public IStreamableBuffer next() {
 
-        StringBuilder b = new StringBuilder();
+		if(!this.hasEmittedSelf) {
+			this.hasEmittedSelf = true;
+			return this;
+		}
 
-        for(int i=0; i<indent; i++) {b.append(" ");}
-        b.append("Scroll - Level " + this.scrollLevel + "\tPrimary Record: " + this.primaryRecName + "\n");
+		if(this.recBufferCursor < this.orderedRecBuffers.size()) {
+			RecordBuffer rbuf = this.orderedRecBuffers.get(this.recBufferCursor);
+			IStreamableBuffer toRet = rbuf.next();
+			if(toRet != null) {
+				return toRet;
+			} else {
+				this.recBufferCursor++;
+				return this.next();
+			}
+		}
 
-        for(int i=0; i<indent; i++) {b.append(" ");}
-        b.append("=========================================================\n");
+		if(this.scrollBufferCursor < this.orderedScrollBuffers.size()) {
+			ScrollBuffer sbuf = this.orderedScrollBuffers.get(this.scrollBufferCursor);
+			IStreamableBuffer toRet = sbuf.next();
+			if(toRet != null) {
+				return toRet;
+			} else {
+				this.scrollBufferCursor++;
+				return this.next();
+			}
+		}
 
-        for(RecordBuffer r : this.orderedRecBuffers) {
-            b.append(r.toString(indent + 2));
-        }
-        for(ScrollBuffer sb : this.orderedScrollBuffers) {
-            b.append(sb.toString(indent + 2));
-        }
-        //b.append("Level " + this.scrollLevel + " records: " + this.orderedRecBuffers.size() + "\n");
-        //b.append("Level " + (this.scrollLevel + 1) + " scrolls: " + this.orderedScrollBuffers.size() + "\n");
-        return b.toString();
-    }
+		return null;
+	}
+
+	public void resetCursors() {
+
+		this.hasEmittedSelf = false;
+		this.recBufferCursor = 0;
+		this.scrollBufferCursor = 0;
+
+		for(RecordBuffer rbuf : this.orderedRecBuffers) {
+			rbuf.resetCursors();
+		}
+
+		for(ScrollBuffer sbuf : this.orderedScrollBuffers) {
+			sbuf.resetCursors();
+		}
+	}
 }

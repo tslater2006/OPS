@@ -8,14 +8,18 @@ import java.util.Collections;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.pt_objects.*;
 
-public class RecordBuffer {
+public class RecordBuffer implements IStreamableBuffer {
 
     public String recName;
     public int scrollLevel;
     public boolean isPrimaryScrollRecordBuffer;
     public HashMap<String, RecordFieldBuffer> fieldBufferTable;
-    public ArrayList<RecordFieldBuffer> unorderedFieldBuffers;
+    public ArrayList<RecordFieldBuffer> fieldBuffers;
     private boolean hasBeenExpanded;
+
+	// Used for reading.
+	private boolean hasEmittedSelf = false;
+	private int fieldBufferCursor = 0;
 
     public RecordBuffer(String r, int scrollLevel, String primaryRecName) {
         this.recName = r;
@@ -26,7 +30,7 @@ public class RecordBuffer {
         }
 
         this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
-        this.unorderedFieldBuffers = new ArrayList<RecordFieldBuffer>();
+        this.fieldBuffers = new ArrayList<RecordFieldBuffer>();
     }
 
     public void addPageField(String RECNAME, String FIELDNAME) throws Exception {
@@ -35,7 +39,7 @@ public class RecordBuffer {
         if(f == null) {
             f = new RecordFieldBuffer(RECNAME, FIELDNAME, this);
             this.fieldBufferTable.put(f.fldName, f);
-            this.unorderedFieldBuffers.add(f);
+            this.fieldBuffers.add(f);
             f.checkFieldBufferRules(); // Ensure this is done after adding to the table, could cause infinte loop ot$
         }
     }
@@ -45,7 +49,7 @@ public class RecordBuffer {
         if(!hasBeenExpanded) {
 
             fieldBufferTable.clear();
-            unorderedFieldBuffers.clear();
+            fieldBuffers.clear();
             Record recDefn = BuildAssistant.getRecordDefn(this.recName);
             ArrayList<RecordField> expandedFieldList = recDefn.getExpandedFieldList();
 
@@ -54,31 +58,47 @@ public class RecordBuffer {
                 // the RECNAME in the FieldBuffer will be that of the subrecord itself.
                 RecordFieldBuffer fldBuffer = new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this);
                 this.fieldBufferTable.put(fldBuffer.fldName, fldBuffer);
-                this.unorderedFieldBuffers.add(fldBuffer);
+                this.fieldBuffers.add(fldBuffer);
             }
 
             hasBeenExpanded = true;
         }
     }
 
-	public String toString(int indent) {
+    public IStreamableBuffer next() {
 
-        StringBuilder b = new StringBuilder();
+		if(!this.hasEmittedSelf) {
+			this.hasEmittedSelf = true;
 
-        for(int i=0; i<indent; i++) {b.append(" ");}
-        b.append("- " + this.recName + "\n");
+			/**
+			 * The expansion routine returns fields in order, so sorting the
+			 * expanded array would mess up the proper order, since subrecord fields
+			 * would be interleaved with the parent's fields (order is determined by FIELDNUM).
+			 */
+			if(!this.hasBeenExpanded) {
+				Collections.sort(this.fieldBuffers);
+			}
+			return this;
+		}
 
-        // The expansion routine returns fields in order; running sort on that would mess up the order.
-        if(!hasBeenExpanded) {
-            Collections.sort(this.unorderedFieldBuffers);
-        }
+		if(this.fieldBufferCursor < this.fieldBuffers.size()) {
+			RecordFieldBuffer fbuf = this.fieldBuffers.get(this.fieldBufferCursor);
+			IStreamableBuffer toRet = fbuf.next();
+			if(toRet != null) {
+				return toRet;
+			} else {
+				this.fieldBufferCursor++;
+				return this.next();
+			}
+		}
 
-        for(RecordFieldBuffer f : this.unorderedFieldBuffers) {
-            for(int i=0; i<(indent + 2); i++) {b.append(" ");}
-            b.append("+ " + f.toString() + "\n");
-        }
+		return null;
+    }
 
-        return b.toString();
+    public void resetCursors() {
+
+		this.hasEmittedSelf = false;
+		this.fieldBufferCursor = 0;
     }
 }
 

@@ -1,17 +1,16 @@
 package com.enterrupt.pt_objects;
 
-import com.enterrupt.BuildAssistant;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Stack;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.sql.Blob;
+import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
-import com.enterrupt.buffers.ComponentBuffer;
-import com.enterrupt.buffers.RecordPCListRequestBuffer;
+import com.enterrupt.buffers.*;
 
 public class Component {
 
@@ -21,6 +20,20 @@ public class Component {
 
     private String SEARCHRECNAME; // name of search record for this component
     private ArrayList<PeopleCodeProg> searchRecordProgs;
+
+	private class ScrollMarker {
+		public String primaryRecName;
+		public int scrollLevel;
+		public AFlag src;
+
+		public ScrollMarker() {}
+
+		public ScrollMarker(int s, String p, AFlag a) {
+			this.scrollLevel = s;
+			this.primaryRecName = p;
+			this.src = a;
+		}
+	}
 
     public Component(String pnlgrpname, String market) {
         this.PNLGRPNAME = pnlgrpname;
@@ -220,18 +233,34 @@ public class Component {
 			}
 		}
 	}
-}
 
-class ScrollMarker {
-	public String primaryRecName;
-	public int scrollLevel;
-	public AFlag src;
+	public static void validateComponentStructure() {
 
-	public ScrollMarker() {}
+		int indent = 0;
+		IStreamableBuffer buf;
+		while((buf = ComponentBuffer.next()) != null) {
 
-	public ScrollMarker(int s, String p, AFlag a) {
-		this.scrollLevel = s;
-		this.primaryRecName = p;
-		this.src = a;
+			if(buf instanceof ScrollBuffer) {
+
+				ScrollBuffer sbuf = (ScrollBuffer) buf;
+				indent = sbuf.scrollLevel * 3;
+
+				for(int i=0; i<indent; i++){System.out.print(" ");}
+				System.out.println("Scroll - Level " + sbuf.scrollLevel +
+					"\tPrimary Record: " + sbuf.primaryRecName);
+				for(int i=0; i<indent; i++){System.out.print(" ");}
+				System.out.println("=======================================================");
+
+			} else if(buf instanceof RecordBuffer) {
+				RecordBuffer rbuf = (RecordBuffer) buf;
+				for(int i=0; i<indent; i++){System.out.print(" ");}
+				System.out.println(" + " + rbuf.recName);
+
+			} else {
+				RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+				for(int i=0; i<indent; i++){System.out.print(" ");}
+				System.out.println("   - " + fbuf.fldName);
+			}
+		}
 	}
 }

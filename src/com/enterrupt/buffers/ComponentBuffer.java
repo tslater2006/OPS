@@ -21,16 +21,12 @@ public class ComponentBuffer {
 
 	public static void addPageField(PgToken tok, int level, String primaryRecName) throws Exception {
 
-		// Ensure we're pointing at the correct scroll buffer.
+		// Ensure that we're pointing at the correct scroll buffer.
 		pointAtScroll(level, primaryRecName);
-
 		currSB.addPageField(tok);
 	}
 
 	public static void pointAtScroll(int targetScrollLevel, String targetPrimaryRecName) {
-
-		//System.out.println("Switching to scroll level " + targetScrollLevel +
-		//	" (primary rec name: " + targetPrimaryRecName + ")");
 
 		// Remember that there's only one scroll level at 0.
 		if(currSB.scrollLevel == targetScrollLevel &&
@@ -39,13 +35,11 @@ public class ComponentBuffer {
 		}
 
 		while(currScrollLevel < targetScrollLevel) {
-			//System.out.println("Decrementing...");
 			currSB = currSB.getChildScroll(targetPrimaryRecName);
 			currScrollLevel = currSB.scrollLevel;
 		}
 
 		while(currScrollLevel > targetScrollLevel) {
-			//System.out.println("Incrementing...");
 			currSB = currSB.parent;
 			currScrollLevel = currSB.scrollLevel;
 		}
@@ -57,15 +51,22 @@ public class ComponentBuffer {
 			currSB = currSB.parent.getChildScroll(targetPrimaryRecName);
 			currScrollLevel = currSB.scrollLevel;
 		}
-
-		//System.out.println("Scroll level set to " + currSB.scrollLevel + " with primary rec name " +
-		//	currSB.primaryRecName);
 	}
 
-	public static void print() {
-		System.out.println("\n\nPRINTING COMPONENT BUFFER");
-		System.out.println("=========================");
-		System.out.println(compBuffer.toString(0));
+	/**
+	 * This is the entry point / wrapper for reading
+	 * buffers out of the component buffer in a recursive, depth-first
+	 * manner.
+	 */
+	public static IStreamableBuffer next() {
+		return compBuffer.next();
+	}
+
+	/**
+	 * Propagates cursor resets to all
+	 * buffers.
+	 */
+	public static void resetCursors() {
+		compBuffer.resetCursors();
 	}
 }
-

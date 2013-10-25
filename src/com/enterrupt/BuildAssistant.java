@@ -77,14 +77,6 @@ public class BuildAssistant {
 		return p;
 	}
 
-	public static void printInfo() {
-
-		System.out.println("Total pages: " + pageDefnCache.size());
-		System.out.println("Cached records: " + recDefnCache.size());
-
-		ComponentBuffer.print();
-	}
-
 	public static void verifyAgainstTraceFile() {
 		openTraceFile();
 		loadIgnoredStmts();

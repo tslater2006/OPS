@@ -41,9 +41,9 @@ public class Main {
 			c.loadPages();
 
 			c.assembleComponentStructure();
+			c.validateComponentStructure();
 
 			StmtLibrary.disconnect();
-			BuildAssistant.printInfo();
 			BuildAssistant.verifyAgainstTraceFile();
 		} catch(Exception ex) {
 			ex.printStackTrace();

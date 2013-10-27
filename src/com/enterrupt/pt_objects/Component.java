@@ -70,8 +70,8 @@ public class Component {
 
 	public void loadSearchRecord() throws Exception {
 
-		Record r = new Record(this.SEARCHRECNAME);
-		r.loadInitialMetadata();
+		// Loads the search record and puts it in cache.
+		BuildAssistant.getRecordDefn(this.SEARCHRECNAME);
     }
 
     public void getListOfComponentPC() throws Exception {
@@ -247,6 +247,7 @@ public class Component {
 		String line;
 		String lineParts[];
 
+		ComponentBuffer.resetCursors();
 		while((buf = ComponentBuffer.next()) != null) {
 
 			line = reader.readLine().trim();
@@ -279,6 +280,8 @@ public class Component {
 				if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
 					!lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
 					System.out.println("[ERROR] Incorrect/absent record token encountered during component structure verification.");
+					System.out.println(line);
+					System.out.println(rbuf.recName);
 					System.exit(1);
 				}
 
@@ -309,5 +312,30 @@ public class Component {
 		}
 
 		return true;
+	}
+
+	public void loadAllRecordPCProgsAndReferencedDefns() throws Exception {
+
+		IStreamableBuffer buf;
+
+		ComponentBuffer.resetCursors();
+		while((buf = ComponentBuffer.next()) != null) {
+
+			if(buf instanceof RecordFieldBuffer) {
+				RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+
+				ArrayList<PeopleCodeProg> fieldProgs = fbuf.recDefn
+					.recordProgsByFieldTable.get(fbuf.fldName);
+				if(fieldProgs != null) {
+					for(PeopleCodeProg prog : fieldProgs) {
+						prog.loadInitialMetadata();
+					}
+				}
+
+				//if(rbuf.recName.equals("DERIVED_CS")) {
+				//	System.exit(1);
+				//}
+			}
+		}
 	}
 }

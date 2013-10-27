@@ -13,5 +13,6 @@ class PSDefn {
 												   "MenuName", "BarName", "ItemName", "CompIntfc",
 												   "Image", "Interlink", "StyleSheet", "FileLayout",
 												   "Page", "PanelGroup", "Message", "BusProcess",
-												   "BusEvent", "BusActivity", "Field", "Record"};
+												   "BusEvent", "BusActivity", "Field", "Record",
+												   "Operation", "SQL"};
 }

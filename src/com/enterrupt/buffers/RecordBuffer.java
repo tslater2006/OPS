@@ -99,6 +99,11 @@ public class RecordBuffer implements IStreamableBuffer {
 
 		this.hasEmittedSelf = false;
 		this.fieldBufferCursor = 0;
+
+		for(RecordFieldBuffer fbuf : this.fieldBuffers) {
+			fbuf.resetCursors();
+		}
     }
 }
+
 

@@ -18,6 +18,7 @@ public class Record {
 	public TreeMap<Integer, Object> fldAndSubrecordTable;
 	public ArrayList<String> subRecordNames;
 	private boolean hasListOfRecordPCBeenRetrieved;
+	public HashMap<String, ArrayList<PeopleCodeProg>> recordProgsByFieldTable;
 
     public Record(String recname) {
         this.RECNAME = recname;
@@ -42,6 +43,7 @@ public class Record {
         PreparedStatement pstmt;
         ResultSet rs;
 
+		System.out.println("Querying: " + this.RECNAME);
         pstmt = StmtLibrary.getPSRECDEFN(this.RECNAME);
         rs = pstmt.executeQuery();
 
@@ -142,10 +144,26 @@ public class Record {
 			PreparedStatement pstmt;
             ResultSet rs;
 
+			this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
+
             // 1 == Record PC
             pstmt = StmtLibrary.getPSPCMPROG_RecordPCList("1", this.RECNAME);
             rs = pstmt.executeQuery();
-            rs.next();   // Do nothing with records for now.
+
+			while(rs.next()) {
+
+				PeopleCodeProg prog = new PeopleCodeProg();
+				prog.initRecordPCProg(rs.getString("OBJECTVALUE1"), rs.getString("OBJECTVALUE2"),
+										rs.getString("OBJECTVALUE3"));
+
+				ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
+					.get(rs.getString("OBJECTVALUE2"));
+				if(fieldProgList == null) {
+					fieldProgList = new ArrayList<PeopleCodeProg>();
+				}
+				fieldProgList.add(prog);
+				this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
+			}
             rs.close();
             pstmt.close();
 

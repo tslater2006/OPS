@@ -10,6 +10,7 @@ import java.util.HashMap;
 import com.enterrupt.sql.StmtLibrary;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Base64;
+import com.enterrupt.BuildAssistant;
 
 public class PeopleCodeProg {
 
@@ -23,11 +24,13 @@ public class PeopleCodeProg {
     public byte[] progBytes;
 	public HashMap<Integer, String> progRefsTable;
 	public boolean interpretFlag;
+	private boolean hasInitialMetadataBeenLoaded;
 
 	public int byteCursorPos = 0;
 
     public PeopleCodeProg() {
 		this.progRefsTable = new HashMap<Integer, String>();
+		this.hasInitialMetadataBeenLoaded = false;
     }
 
 	public void initRecordPCProg(String recname, String fldname, String event) {
@@ -103,6 +106,10 @@ public class PeopleCodeProg {
 
 	public void loadInitialMetadata() throws Exception {
 
+		if(this.hasInitialMetadataBeenLoaded) {
+			return;
+		}
+
 		PreparedStatement pstmt = null;
 		ResultSet rs;
 
@@ -147,6 +154,9 @@ public class PeopleCodeProg {
 
 		// Get program references.
         if(pcType.equals("RecordPC")) {
+
+			System.out.println("Getting refs: " + this.recname + ", " + this.fldname + ", " + this.event);
+
 			pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, this.recname,
                                                  PSDefn.FIELD, this.fldname,
                                                  PSDefn.EVENT, this.event,
@@ -176,13 +186,19 @@ public class PeopleCodeProg {
 				 * shouldn't matter anyway, but I want to exit(1) on it for now just to see how often
 			     * it occurs.
 				 */
-				System.out.println("Warning: duplicate reference.");
+				System.out.println("[WARNING] Duplicate reference encountered when loading refernces for PeopleCodeProg.");
 				System.exit(1);
 			}
 			String RECNAME = rs.getString("RECNAME").trim();
 			String reservedWord = refReservedWordsTable.get(RECNAME);
 			if(reservedWord != null) {
 				RECNAME = reservedWord;	// remember: this assigns the value (lowercase) rather than the key (upper).
+			} else {
+
+				if(pcType.equals("RecordPC")) {
+					// Load the record if it isn't present in the cache.
+					BuildAssistant.getRecordDefn(RECNAME);
+				}
 			}
 			String REFNAME = rs.getString("REFNAME").trim();
 			this.progRefsTable.put(NAMENUM,
@@ -190,6 +206,8 @@ public class PeopleCodeProg {
         }
         rs.close();
         pstmt.close();
+
+		this.hasInitialMetadataBeenLoaded = true;
 	}
 
 	/**

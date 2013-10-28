@@ -178,12 +178,18 @@ public class PeopleCodeProg {
         rs.close();
         pstmt.close();
 
+		this.hasInitialMetadataBeenLoaded = true;
+	}
+
+	public void loadReferencedDefinitionsAndPrograms() throws Exception {
+
 		/**
 		 * We need to determine which functions, if any, are imported
 		 * by this program; these references are not denoted in PSPCMNAME, so
 		 * they must be collected via the parser.
 		 */
-		HashMap<String, PeopleCodeProg> importedFuncTable = Parser.scanForListOfDeclaredAndImportedFunctions(this);
+		HashMap<Reference, PeopleCodeProg> importedFuncTable
+			= Parser.scanForListOfDeclaredAndImportedFunctions(this);
 
 		for(Map.Entry<Integer, Reference> cursor : this.progRefsTable.entrySet()) {
 			Reference ref = cursor.getValue();
@@ -196,10 +202,23 @@ public class PeopleCodeProg {
 				BuildAssistant.getRecordDefn(ref.RECNAME);
 			}
 
-			
+			/**
+			 * If this reference corresponds to an imported/declared external PeopleCode function,
+			 * that program's initial metadata must be loaded now.
+			 */
+			if(importedFuncTable.get(ref) != null) {
+				importedFuncTable.get(ref).loadInitialMetadata();
+			}
 		}
 
-		this.hasInitialMetadataBeenLoaded = true;
+		/**
+		 * All programs referenced by this program must have their referenced
+		 * definitions and programs loaded now.
+		 */
+		for(Map.Entry<Reference, PeopleCodeProg> cursor : importedFuncTable.entrySet()) {
+			PeopleCodeProg prog = cursor.getValue();
+			prog.loadReferencedDefinitionsAndPrograms();
+		}
 	}
 
 	/**

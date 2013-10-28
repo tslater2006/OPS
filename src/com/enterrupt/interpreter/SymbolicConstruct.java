@@ -10,7 +10,7 @@ import com.enterrupt.parser.Token;
 public class SymbolicConstruct {
 
 	/**
-	 * SymbolicConstruct resolves generic tokens (i.e., REFERENCE)
+	 * SymbolicConstruct resolves generic tokens (i.e., REFERENCE, PURE_STRING, NUMBER)
 	 * to a more specific type (i.e., VAR_REF, FUNC_REF, FIELD_REF). Calling constructs
      * (i.e., StmtConstruct) may use the additional data (provided by the returned Token) to ensure that tokens
  	 * are being interpreted as expected.
@@ -61,8 +61,6 @@ public class SymbolicConstruct {
 
 			Token l = Interpreter.lookAheadNextToken();
 			Method m = null;
-
-			System.out.println("HERE: " + l.flags);
 
 			// Does the pure string refer to a system function?
 			if(l.flags.contains(TFlag.L_PAREN) &&

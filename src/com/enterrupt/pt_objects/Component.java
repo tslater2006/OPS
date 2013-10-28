@@ -130,6 +130,7 @@ public class Component {
 		PeopleCodeProg prog = new PeopleCodeProg();
 		prog.initComponentPCProg(this.PNLGRPNAME, this.MARKET, this.SEARCHRECNAME, "SearchInit");
 		prog.loadInitialMetadata();
+		prog.loadReferencedDefinitionsAndPrograms();
 		Parser.parse(prog);
 		Interpreter.run(prog);
 	}
@@ -333,6 +334,7 @@ public class Component {
 
 					for(PeopleCodeProg prog : fieldProgs) {
 						prog.loadInitialMetadata();
+						prog.loadReferencedDefinitionsAndPrograms();
 					}
 				}
 

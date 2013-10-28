@@ -2,6 +2,7 @@ package com.enterrupt.parser;
 
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.Reference;
 import java.util.HashMap;
 import java.util.EnumSet;
 
@@ -78,20 +79,12 @@ public class Parser {
 		prog = null;
 	}
 
-	public static HashMap<String, PeopleCodeProg> scanForListOfDeclaredAndImportedFunctions(PeopleCodeProg p) throws Exception {
+	public static HashMap<Reference, PeopleCodeProg> scanForListOfDeclaredAndImportedFunctions(PeopleCodeProg p) throws Exception {
 
-		/**
-		 * TODO: Remove this, only for debugging purposes.
-		 */
-		if(p.recname.equals("LS_SS_PERS_SRCH") || p.recname.equals("DERIVED_SCC_SUM")
-			|| p.recname.equals("SCC_PERS_SA_VW")) {
-			return null;
-		}
+		HashMap<Reference, PeopleCodeProg> importedFuncTable = new HashMap<Reference, PeopleCodeProg>();
 
 		System.out.println("Scanning for PC imports...");
 		reset();
-
-		HashMap<String, PeopleCodeProg> importedFuncTable = new HashMap<String, PeopleCodeProg>();
 
 		prog = p;
 		prog.resetProgText();
@@ -106,12 +99,13 @@ public class Parser {
 			 * in one motion while we do initial parsing of the program, but as of now
 		 	 * the parser can't read enough tokens and I want to bring the parser up incrementally,
 			 * not all at once. This conditional simply checks for tokens after the imports and stops
-			 * checking for imported functions once it seems them.
+			 * checking for imported functions once it sees them.
 			 */
 			if(t.flags.contains(TFlag.EVALUATE) ||
 				t.flags.contains(TFlag.IF) ||
 				t.flags.contains(TFlag.EQUAL) ||
-				t.flags.contains(TFlag.TRY)) {
+				t.flags.contains(TFlag.TRY) ||
+				t.flags.contains(TFlag.FUNCTION)) {
 				break;
 			}
 			if(t.pureStrVal != null && t.pureStrVal.equals("Transfer")) {
@@ -136,7 +130,14 @@ public class Parser {
 				}
 
 				t = parseNextToken();
+				Reference refObj = t.refObj;
+
 				t = parseNextToken();
+				String event = t.pureStrVal;
+
+				PeopleCodeProg prog = new PeopleCodeProg();
+				prog.initRecordPCProg(refObj.RECNAME, refObj.REFNAME, event);
+				importedFuncTable.put(refObj, prog);
 			}
 
 			if(p.getCurrentByte() == (byte) 7) {		// Signals end of program.

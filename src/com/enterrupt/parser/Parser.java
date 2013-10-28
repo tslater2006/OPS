@@ -3,6 +3,7 @@ package com.enterrupt.parser;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.pt_objects.Reference;
+import com.enterrupt.pt_objects.RecordPeopleCodeProg;
 import java.util.HashMap;
 import java.util.EnumSet;
 
@@ -135,8 +136,7 @@ public class Parser {
 				t = parseNextToken();
 				String event = t.pureStrVal;
 
-				PeopleCodeProg prog = new PeopleCodeProg();
-				prog.initRecordPCProg(refObj.RECNAME, refObj.REFNAME, event);
+				RecordPeopleCodeProg prog = new RecordPeopleCodeProg(refObj.RECNAME, refObj.REFNAME, event);
 				importedFuncTable.put(refObj, prog);
 			}
 

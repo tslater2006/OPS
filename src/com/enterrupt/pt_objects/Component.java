@@ -97,10 +97,8 @@ public class Component {
         pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.SEARCHRECNAME);
         rs = pstmt.executeQuery();
         while(rs.next()) {
-			PeopleCodeProg prog = new PeopleCodeProg();
-			prog.initRecordPCProg(rs.getString("OBJECTVALUE1"),
-								  rs.getString("OBJECTVALUE2"),
-								  rs.getString("OBJECTVALUE3"));
+			PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
+				rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
             this.searchRecordProgs.add(prog);
         }
         rs.close();
@@ -127,8 +125,8 @@ public class Component {
      */
 	public void loadAndRunComponentPConSearchRecord() throws Exception {
 
-		PeopleCodeProg prog = new PeopleCodeProg();
-		prog.initComponentPCProg(this.PNLGRPNAME, this.MARKET, this.SEARCHRECNAME, "SearchInit");
+		PeopleCodeProg prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+			this.SEARCHRECNAME, "SearchInit");
 		prog.loadInitialMetadata();
 		prog.loadReferencedDefinitionsAndPrograms();
 		Parser.parse(prog);
@@ -337,10 +335,6 @@ public class Component {
 						prog.loadReferencedDefinitionsAndPrograms();
 					}
 				}
-
-				//if(rbuf.recName.equals("DERIVED_CS")) {
-				//	System.exit(1);
-				//}
 			}
 		}
 	}

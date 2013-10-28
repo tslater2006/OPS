@@ -152,9 +152,8 @@ public class Record {
 
 			while(rs.next()) {
 
-				PeopleCodeProg prog = new PeopleCodeProg();
-				prog.initRecordPCProg(rs.getString("OBJECTVALUE1"), rs.getString("OBJECTVALUE2"),
-										rs.getString("OBJECTVALUE3"));
+				PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
+					rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
 
 				ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
 					.get(rs.getString("OBJECTVALUE2"));

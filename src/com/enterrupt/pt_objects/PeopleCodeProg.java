@@ -1,65 +1,34 @@
 package com.enterrupt.pt_objects;
 
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.sql.ResultSet;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.util.Map;
-import java.lang.StringBuilder;
 import java.util.HashMap;
 import java.util.TreeMap;
-import com.enterrupt.sql.StmtLibrary;
+import java.lang.StringBuilder;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Base64;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.Parser;
 
-public class PeopleCodeProg {
+public abstract class PeopleCodeProg {
 
-	public String pcType;
-	public String pnlgrpname;
-	public String market;
-    public String recname;
-    public String fldname;
     public String event;
-	private StringBuilder progTextBuilder;
     public byte[] progBytes;
-	public TreeMap<Integer, Reference> progRefsTable;
-	public boolean interpretFlag;
-	private boolean hasInitialMetadataBeenLoaded;
-
 	public int byteCursorPos = 0;
+	public boolean interpretFlag;
+	public TreeMap<Integer, Reference> progRefsTable;
 
-    public PeopleCodeProg() {
+	private StringBuilder progTextBuilder;
+	protected boolean hasInitialMetadataBeenLoaded;
+
+    protected PeopleCodeProg() {
 		this.progRefsTable = new TreeMap<Integer, Reference>();
 		this.hasInitialMetadataBeenLoaded = false;
     }
 
-	public void initRecordPCProg(String recname, String fldname, String event) {
-		this.pcType = "RecordPC";
-		this.recname = recname;
-        this.fldname = fldname;
-        this.event = event;
-	}
-
-	public void initComponentPCProg(String pnlgrpname, String market, String recname, String event) {
-		this.pcType = "ComponentPC";
-		this.pnlgrpname = pnlgrpname;
-		this.market = market;
-		this.recname = recname;
-		this.event = event;
-	}
-
-    public void setProgText(Blob b) throws Exception {
-
-        /**
-         * TODO: Here we risk losing progtext bytes since the length (originally a long)
-         * is cast to int. Build in a check for this, use binarystream when this is the case.
-         */
-        int num_bytes = (int) b.length();
-        this.progBytes = b.getBytes(1, num_bytes); // first byte is at idx 1
-    }
+	public abstract void loadInitialMetadata() throws Exception;
+	public abstract Clob getProgTextClob() throws Exception;
 
 	public void setByteCursorPos(int pos) {
 		this.byteCursorPos = pos;
@@ -107,79 +76,15 @@ public class PeopleCodeProg {
 		return this.progRefsTable.get(refNbr);
 	}
 
-	public void loadInitialMetadata() throws Exception {
+    public void setProgText(Blob b) throws Exception {
 
-		if(this.hasInitialMetadataBeenLoaded) {
-			return;
-		}
-
-		PreparedStatement pstmt = null;
-		ResultSet rs;
-
-		// Get program text.
-        if(this.pcType.equals("RecordPC")) {
-			pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.RECORD, this.recname,
-                                                    PSDefn.FIELD, this.fldname,
-                                                    PSDefn.EVENT, this.event,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL);
-		} else if(this.pcType.equals("ComponentPC")) {
-			pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.COMPONENT, this.pnlgrpname,
-                                                    PSDefn.MARKET, this.market,
-													PSDefn.RECORD, this.recname,
-                                                    PSDefn.EVENT, this.event,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL);
-		} else {
-			System.out.println("[ERROR]: Unexpected value for pcType.");
-			System.exit(1);
-		}
-
-       	rs = pstmt.executeQuery();
-        if(rs.next()) {
-        	this.setProgText(rs.getBlob("PROGTXT"));
-        }
-        rs.close();
-        pstmt.close();
-
-		// Get program references.
-        if(pcType.equals("RecordPC")) {
-
-			System.out.println("Getting refs: " + this.recname + ", " + this.fldname + ", " + this.event);
-
-			pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, this.recname,
-                                                 PSDefn.FIELD, this.fldname,
-                                                 PSDefn.EVENT, this.event,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL);
-        } else if(pcType.equals("ComponentPC")) {
-			pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.COMPONENT, this.pnlgrpname,
-												 PSDefn.MARKET, this.market,
-                                                 PSDefn.RECORD, this.recname,
-                                                 PSDefn.EVENT, this.event,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL);
-		} else {
-			System.out.println("[ERROR] Unexpected value for pcType.");
-			System.exit(1);
-		}
-
-		rs = pstmt.executeQuery();
-        while(rs.next()) {
-			this.progRefsTable.put(rs.getInt("NAMENUM"),
-				new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
-        }
-        rs.close();
-        pstmt.close();
-
-		this.hasInitialMetadataBeenLoaded = true;
-	}
+        /**
+         * TODO: Here we risk losing progtext bytes since the length (originally a long)
+         * is cast to int. Build in a check for this, use binarystream when this is the case.
+         */
+        int num_bytes = (int) b.length();
+        this.progBytes = b.getBytes(1, num_bytes); // first byte is at idx 1
+    }
 
 	public void loadReferencedDefinitionsAndPrograms() throws Exception {
 
@@ -229,36 +134,9 @@ public class PeopleCodeProg {
      */
     public void verifyEntireProgramText() throws Exception {
 
-    	PreparedStatement pstmt = null;
-		ResultSet rs;
+		Clob progTextClob = this.getProgTextClob();
 
-		//System.out.println("Verifying...");
-		//System.out.println(this.getProgText());
-
-        if(pcType.equals("RecordPC")) {
-			pstmt = StmtLibrary.getPSPCMTXT(PSDefn.RECORD, this.recname,
-                                                 PSDefn.FIELD, this.fldname,
-                                                 PSDefn.EVENT, this.event,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL);
-        } else if(pcType.equals("ComponentPC")) {
-			pstmt = StmtLibrary.getPSPCMTXT(PSDefn.COMPONENT, this.pnlgrpname,
-												 PSDefn.MARKET, this.market,
-                                                 PSDefn.RECORD, this.recname,
-                                                 PSDefn.EVENT, this.event,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL);
-		} else {
-			System.out.println("[ERROR] Unexpected value for pcType.");
-			System.exit(1);
-		}
-
-		rs = pstmt.executeQuery();
-		if(rs.next()) {
-			Clob progTextClob = rs.getClob("PCTEXT");
+		if(progTextClob != null) {
 
 			/**
 			 * TODO: We risk losing text characters here, need to use

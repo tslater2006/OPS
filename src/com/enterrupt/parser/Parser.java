@@ -4,6 +4,8 @@ import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.pt_objects.Reference;
 import com.enterrupt.pt_objects.RecordPeopleCodeProg;
+import com.enterrupt.pt_objects.AppPackagePeopleCodeProg;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.EnumSet;
 
@@ -138,6 +140,21 @@ public class Parser {
 
 				RecordPeopleCodeProg prog = new RecordPeopleCodeProg(refObj.RECNAME, refObj.REFNAME, event);
 				importedFuncTable.put(refObj, prog);
+			}
+
+			if(t.flags.contains(TFlag.IMPORT)) {
+
+				ArrayList<String> pathParts = new ArrayList<String>();
+
+				// Path to app class is variable length.
+				do {
+					t = parseNextToken();
+					pathParts.add(t.pureStrVal);
+					t = parseNextToken();
+				} while(t.flags.contains(TFlag.COLON));
+
+				AppPackagePeopleCodeProg prog = new AppPackagePeopleCodeProg(pathParts.toArray(new String[0]));
+				//importedFuncTable.put(refObj, prog);
 			}
 
 			if(p.getCurrentByte() == (byte) 7) {		// Signals end of program.

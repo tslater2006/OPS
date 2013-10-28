@@ -25,14 +25,20 @@ public class BuildAssistant {
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
 	private static HashMap<String, Boolean> systemTableRecNames;
+	public static HashMap<String, Boolean> appPackageDefnCache;
 
 	public static void init() {
 		pageDefnCache = new HashMap<String, Page>();
 		recDefnCache = new HashMap<String, Record>();
+		appPackageDefnCache = new HashMap<String, Boolean>();
 
 		// Initialize the list of system tables for which metadata should not be gathered.
 		systemTableRecNames = new HashMap<String, Boolean>();
 		systemTableRecNames.put("PSXLATITEM", true);
+	}
+
+	public static void cacheAppPackageDefn(String appPackageName) {
+		appPackageDefnCache.put(appPackageName, true);
 	}
 
 	public static void cacheRecord(Record r) {

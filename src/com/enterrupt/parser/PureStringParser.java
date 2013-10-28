@@ -27,9 +27,9 @@ public class PureStringParser extends StringParser {
 		Parser.prog.appendProgText(str);
 
 		if(Parser.prog.interpretFlag) {
-			Token t = new Token(TFlag.REFERENCE);
-			t.refName = str;
-			System.out.println("Reference: " + str);
+			Token t = new Token(TFlag.PURE_STRING);
+			t.pureStrVal = str;
+			System.out.println("Pure String: " + str);
 			return t;
 		}
 

@@ -2,11 +2,13 @@ package com.enterrupt.parser;
 
 import java.util.EnumSet;
 import java.math.BigDecimal;
+import com.enterrupt.pt_objects.Reference;
 
 public class Token {
 
 	public EnumSet<TFlag> flags;
-	public String refName;				// holds reference name for REFERENCE tokens.
+	public Reference refObj;			// holds reference object for REFERENCE tokens.
+	public String pureStrVal;			// holds value of PureString tokens.
 	public String numericVal;			// holds value of NUMBER tokens.
 	public String identifierName;		// holds value of IDENTIFIER tokens.
 

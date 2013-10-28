@@ -1,6 +1,7 @@
 package com.enterrupt.parser;
 
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.Reference;
 
 public class ReferenceParser extends ElementParser {
 
@@ -21,7 +22,8 @@ public class ReferenceParser extends ElementParser {
 
 		int b1 = (int) (prog.readNextByte() & 0xff);
 		int b2 = (int) (prog.readNextByte() & 0xff);
-		String ref = prog.getProgReference(b2 * 256 + b1 + 1).getValue();
+		Reference refObj = prog.getProgReference(b2 * 256 + b1 + 1);
+		String ref = refObj.getValue();
 
 		if(ref == null) {
 			System.out.println("Unable to find reference number: " + b1);
@@ -34,6 +36,9 @@ public class ReferenceParser extends ElementParser {
 						   ref.startsWith("Record.") ||
 						   ref.startsWith("Scroll."))) {
 				ref = ref.substring(ref.indexOf('.') + 1);
+
+				System.out.println("Here");
+				System.exit(1);
 			}
 			int p1 = ref.indexOf('.');
 			if(p1 > 0) {
@@ -48,8 +53,8 @@ public class ReferenceParser extends ElementParser {
 
 		if(prog.interpretFlag) {
 			Token t = new Token(TFlag.REFERENCE);
-			t.refName = ref;
-			System.out.println("Reference: " + ref);
+			t.refObj = refObj;
+			System.out.println("Reference: " + refObj.getValue());
 			return t;
 		}
 

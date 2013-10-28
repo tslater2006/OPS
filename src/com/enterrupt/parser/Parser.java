@@ -114,7 +114,7 @@ public class Parser {
 				t.flags.contains(TFlag.TRY)) {
 				break;
 			}
-			if(t.refName != null && t.refName.equals("Transfer")) {
+			if(t.pureStrVal != null && t.pureStrVal.equals("Transfer")) {
 				break;
 			}
 

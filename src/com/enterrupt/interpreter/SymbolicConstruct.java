@@ -18,20 +18,11 @@ public class SymbolicConstruct {
 	public static Token interpret() throws Exception {
 
 		Token t = Interpreter.parseNextToken();
+		MemoryPtr ptr = null;
 
 		if(t.flags.contains(TFlag.REFERENCE)) {
 
-			String refName = t.refName.trim();
-			MemoryPtr ptr = null;
-
-			// Does the reference refer to a system variable?
-			if(refName.charAt(0) == '%' &&
-				(ptr = RunTimeEnvironment.systemVarTable.get(refName)) != null) {
-
-				t.flags.add(TFlag.VAR_REF);
-				Interpreter.pushToRuntimeStack(ptr);
-				return t;
-			}
+			String refName = t.refObj.getValue();
 
 			// Does the reference refer to a field in the component buffer?
 			if((ptr = RunTimeEnvironment.compBufferTable.get(refName)) != null) {
@@ -53,19 +44,36 @@ public class SymbolicConstruct {
 				return t;
 			}
 
+			System.out.println("[ERROR] Unable to resolve REFERENCE token.");
+			System.exit(1);
+		}
+
+		if(t.flags.contains(TFlag.PURE_STRING)) {
+
+			// Does the pure string refer to a system variable?
+			if(t.pureStrVal.charAt(0) == '%' &&
+				(ptr = RunTimeEnvironment.systemVarTable.get(t.pureStrVal)) != null) {
+
+				t.flags.add(TFlag.VAR_REF);
+				Interpreter.pushToRuntimeStack(ptr);
+				return t;
+			}
+
 			Token l = Interpreter.lookAheadNextToken();
 			Method m = null;
 
-			// Does the reference refer to a system function?
+			System.out.println("HERE: " + l.flags);
+
+			// Does the pure string refer to a system function?
 			if(l.flags.contains(TFlag.L_PAREN) &&
-				(m = RunTimeEnvironment.systemFuncTable.get(refName)) != null) {
+				(m = RunTimeEnvironment.systemFuncTable.get(t.pureStrVal)) != null) {
 
 				t.flags.add(TFlag.FUNC_REF);
 				FnCallConstruct.interpret(m);
 				return t;
 			}
 
-			System.out.println("[ERROR] Unable to resolve REFERENCE token.");
+			System.out.println("[ERROR] Unable to resolve PURE_STRING token.");
 			System.exit(1);
 		}
 
@@ -73,7 +81,7 @@ public class SymbolicConstruct {
 
 			// Is the number an integer?
 			if(t.numericVal.indexOf(".") == -1) {
-				MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(new Integer(t.numericVal));
+				ptr = RunTimeEnvironment.getFromMemoryPool(new Integer(t.numericVal));
 				Interpreter.pushToRuntimeStack(ptr);
 				t.flags.add(TFlag.INTEGER);
 				return t;

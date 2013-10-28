@@ -196,14 +196,8 @@ public class PeopleCodeProg {
 				BuildAssistant.getRecordDefn(ref.RECNAME);
 			}
 
-			/** NEXT: If the ref exists in the importedFuncTable, load the corresponding PC Program.*/
+			
 		}
-
-		// Iterate through references
-		// Load the record if it isn't present in the cache.
-			// If the reference is used in a declare/import, load the PeopleCode for it
-		//BuildAssistant.getRecordDefn(RECNAME);
-
 
 		this.hasInitialMetadataBeenLoaded = true;
 	}

@@ -14,7 +14,6 @@ public enum TFlag {
 	R_PAREN,
 	SEMICOLON,
 	EQUAL,
-	REFERENCE,
 	LOCAL,
 	COMMA,
 	DECLARE,
@@ -27,6 +26,8 @@ public enum TFlag {
 	GLOBAL,
 	PERIOD,
 	TRY,
+
+	REFERENCE, PURE_STRING,
 
 	DISCARD,							// Tells the parser to discard a token; currently used for empty identifiers.
 

@@ -27,7 +27,7 @@ public class StmtConstruct {
 
 		// Detect: SEMICOLON (must be preceded by a function call).
 		if(t.flags.contains(TFlag.SEMICOLON)) {
-			if(resolvedToken.flags.contains(TFlag.FUNCTION)) {
+			if(resolvedToken.flags.contains(TFlag.FUNC_REF)) {
 				return;
 			} else {
 				System.out.println("[ERROR] Parsed semicolon, but a token other than FUNCTION preceded it.");

@@ -327,6 +327,10 @@ public class Component {
 				ArrayList<PeopleCodeProg> fieldProgs = fbuf.recDefn
 					.recordProgsByFieldTable.get(fbuf.fldName);
 				if(fieldProgs != null) {
+
+					System.out.println("[LOADING] Record: " + fbuf.recDefn.RECNAME +
+						", Field: " + fbuf.fldName);
+
 					for(PeopleCodeProg prog : fieldProgs) {
 						prog.loadInitialMetadata();
 					}

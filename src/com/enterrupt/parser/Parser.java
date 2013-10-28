@@ -26,6 +26,9 @@ public class Parser {
 		// Array of all available parsers.
 		allParsers = new ElementParser[] {
 			new IdentifierParser((byte) 0),										// 0x00
+			new PureStringParser((byte) 1),										// 0x01
+			new SimpleElementParser((byte) 3, EnumSet.of(TFlag.COMMA), ",", PFlags.NO_SPACE_BEFORE | PFlags.SPACE_AFTER),	// 0x03
+			new SimpleElementParser((byte) 5, EnumSet.of(TFlag.PERIOD), ".", PFlags.PUNCTUATION),	// 0x05
 			new SimpleElementParser((byte) 6, EnumSet.of(TFlag.EQUAL), "="),								// 0x06
 			new PureStringParser((byte) 10),									// 0x0A (Function | Method | External Datatype | Class name)
 			new SimpleElementParser((byte) 11, EnumSet.of(TFlag.L_PAREN), "(", PFlags.NO_SPACE_AFTER),	// 0x0B
@@ -37,8 +40,22 @@ public class Parser {
 			new SimpleElementParser((byte) 31, EnumSet.of(TFlag.THEN), "Then", PFlags.THEN_STYLE),		// 0x1F
 			new ReferenceParser((byte) 33),										// 0x21
 			new CommentParser((byte) 36), 										// 0x24
+			new SimpleElementParser((byte) 45, EnumSet.of(TFlag.DISCARD), "", PFlags.NEWLINE_ONCE),	// 0x2D
 			new SimpleElementParser((byte) 47, EnumSet.of(TFlag.TRUE), "True", PFlags.SPACE_BEFORE_AND_AFTER2),	// 0x2F
-			new NumberParser((byte) 80, 18)										// 0x50
+			new SimpleElementParser((byte) 49, EnumSet.of(TFlag.DECLARE), "Declare", PFlags.NEWLINE_BEFORE_SPACE_AFTER | PFlags.IN_DECLARE),  // 0x31
+			new SimpleElementParser((byte) 50, EnumSet.of(TFlag.FUNCTION), "Function", PFlags.FUNCTION_STYLE),	// 0x32
+			new SimpleElementParser((byte) 58, EnumSet.of(TFlag.PEOPLECODE), "PeopleCode"),		// 0x3A
+			new SimpleElementParser((byte) 60, EnumSet.of(TFlag.EVALUATE), "Evaluate", PFlags.INCREASE_INDENT | PFlags.SPACE_AFTER),
+			new PureStringParser((byte) 64),		// 0x40 (PeopleCode Variable Type Name)
+			new SimpleElementParser((byte) 66, EnumSet.of(TFlag.DISCARD), ""),	// 0x42
+			new SimpleElementParser((byte) 68, EnumSet.of(TFlag.LOCAL), "Local", PFlags.NEWLINE_BEFORE_SPACE_AFTER), // 0x44
+			new SimpleElementParser((byte) 69, EnumSet.of(TFlag.GLOBAL), "Global", PFlags.NEWLINE_BEFORE_SPACE_AFTER), 		// 0x45
+			new SimpleElementParser((byte) 79, EnumSet.of(TFlag.DISCARD), "", PFlags.NEWLINE_AFTER),
+			new NumberParser((byte) 80, 18),										// 0x50
+			new SimpleElementParser((byte) 84, EnumSet.of(TFlag.COMPONENT), "Component", PFlags.NEWLINE_BEFORE_SPACE_AFTER),			// 0x54
+			new SimpleElementParser((byte) 87, EnumSet.of(TFlag.COLON), ":", PFlags.PUNCTUATION),
+			new SimpleElementParser((byte) 88, EnumSet.of(TFlag.IMPORT), "import"),	// 0x58
+			new SimpleElementParser((byte) 101, EnumSet.of(TFlag.TRY), "try", PFlags.SPACE_BEFORE_NEWLINE_AFTER)	// 0x65
 		};
 
 		// Initialize hash table of parsers, indexed by start byte.
@@ -59,6 +76,75 @@ public class Parser {
 		ElementParser lastParser = null;
 		nIndent = 0;
 		prog = null;
+	}
+
+	public static HashMap<String, PeopleCodeProg> scanForListOfDeclaredAndImportedFunctions(PeopleCodeProg p) throws Exception {
+
+		/**
+		 * TODO: Remove this, only for debugging purposes.
+		 */
+		if(p.recname.equals("LS_SS_PERS_SRCH") || p.recname.equals("DERIVED_SCC_SUM")
+			|| p.recname.equals("SCC_PERS_SA_VW")) {
+			return null;
+		}
+
+		System.out.println("Scanning for PC imports...");
+		reset();
+
+		HashMap<String, PeopleCodeProg> importedFuncTable = new HashMap<String, PeopleCodeProg>();
+
+		prog = p;
+		prog.resetProgText();
+		prog.interpretFlag = true;
+		prog.setByteCursorPos(37);
+
+		while(prog.byteCursorPos < prog.progBytes.length) {
+			Token t = parseNextToken();
+
+			/**
+		     * TODO: Remove this. Eventually we'll parse imports/declares out
+			 * in one motion while we do initial parsing of the program, but as of now
+		 	 * the parser can't read enough tokens and I want to bring the parser up incrementally,
+			 * not all at once. This conditional simply checks for tokens after the imports and stops
+			 * checking for imported functions once it seems them.
+			 */
+			if(t.flags.contains(TFlag.EVALUATE) ||
+				t.flags.contains(TFlag.IF) ||
+				t.flags.contains(TFlag.EQUAL) ||
+				t.flags.contains(TFlag.TRY)) {
+				break;
+			}
+			if(t.refName != null && t.refName.equals("Transfer")) {
+				break;
+			}
+
+			if(t.flags.contains(TFlag.DECLARE)) {
+
+				t = parseNextToken();
+				if(!t.flags.contains(TFlag.FUNCTION)) {
+					System.out.println("[ERROR] Expected FUNCTION after DECLARES.");
+					System.exit(1);
+				}
+
+				// Name of the function.
+				t = parseNextToken();
+
+				t = parseNextToken();
+				if(!t.flags.contains(TFlag.PEOPLECODE)) {
+					System.out.println("[ERROR] Expected PEOPLECODE after function name.");
+					System.exit(1);
+				}
+
+				t = parseNextToken();
+				t = parseNextToken();
+			}
+
+			if(p.getCurrentByte() == (byte) 7) {		// Signals end of program.
+				break;
+			}
+		}
+
+		return importedFuncTable;
 	}
 
 	public static void parse(PeopleCodeProg p) throws Exception {
@@ -96,9 +182,7 @@ public class Parser {
 			return new Token(EnumSet.of(TFlag.END_OF_PROGRAM, TFlag.END_OF_BLOCK));
 		}
 
-		if(prog.interpretFlag) {
-			//System.out.printf("Getting parser for byte: 0x%02X\n", b);
-		}
+		System.out.printf("Getting parser for byte: 0x%02X\n", b);
 
 		ElementParser p = parserTable.get(new Byte(b));
 		if(p == null) {

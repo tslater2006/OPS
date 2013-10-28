@@ -49,6 +49,7 @@ public class ReferenceParser extends ElementParser {
 		if(prog.interpretFlag) {
 			Token t = new Token(TFlag.REFERENCE);
 			t.refName = ref;
+			System.out.println("Reference: " + ref);
 			return t;
 		}
 

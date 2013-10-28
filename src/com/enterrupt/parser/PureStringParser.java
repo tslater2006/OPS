@@ -29,6 +29,7 @@ public class PureStringParser extends StringParser {
 		if(Parser.prog.interpretFlag) {
 			Token t = new Token(TFlag.REFERENCE);
 			t.refName = str;
+			System.out.println("Reference: " + str);
 			return t;
 		}
 

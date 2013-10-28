@@ -11,6 +11,7 @@ import com.enterrupt.sql.StmtLibrary;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Base64;
 import com.enterrupt.BuildAssistant;
+import com.enterrupt.parser.Parser;
 
 public class PeopleCodeProg {
 
@@ -186,19 +187,13 @@ public class PeopleCodeProg {
 				 * shouldn't matter anyway, but I want to exit(1) on it for now just to see how often
 			     * it occurs.
 				 */
-				System.out.println("[WARNING] Duplicate reference encountered when loading refernces for PeopleCodeProg.");
+				System.out.println("[WARNING] Duplicate reference encountered when loading references for PeopleCodeProg.");
 				System.exit(1);
 			}
 			String RECNAME = rs.getString("RECNAME").trim();
 			String reservedWord = refReservedWordsTable.get(RECNAME);
 			if(reservedWord != null) {
 				RECNAME = reservedWord;	// remember: this assigns the value (lowercase) rather than the key (upper).
-			} else {
-
-				if(pcType.equals("RecordPC")) {
-					// Load the record if it isn't present in the cache.
-					BuildAssistant.getRecordDefn(RECNAME);
-				}
 			}
 			String REFNAME = rs.getString("REFNAME").trim();
 			this.progRefsTable.put(NAMENUM,
@@ -206,6 +201,19 @@ public class PeopleCodeProg {
         }
         rs.close();
         pstmt.close();
+
+		/**
+		 * We need to determine which functions, if any, are imported
+		 * by this program; these references are not denoted in PSPCMNAME, so
+		 * they must be collected via the parser.
+		 */
+		HashMap<String, PeopleCodeProg> importedFuncTable = Parser.scanForListOfDeclaredAndImportedFunctions(this);
+
+		// Iterate through references
+		// Load the record if it isn't present in the cache.
+			// If the reference is used in a declare/import, load the PeopleCode for it
+		//BuildAssistant.getRecordDefn(RECNAME);
+
 
 		this.hasInitialMetadataBeenLoaded = true;
 	}

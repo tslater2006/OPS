@@ -11,7 +11,7 @@ public class SymbolicConstruct {
 
 	/**
 	 * SymbolicConstruct resolves generic tokens (i.e., REFERENCE)
-	 * to a more specific type (i.e., VAR, FUNCTION, FIELD). Calling constructs
+	 * to a more specific type (i.e., VAR_REF, FUNC_REF, FIELD_REF). Calling constructs
      * (i.e., StmtConstruct) may use the additional data (provided by the returned Token) to ensure that tokens
  	 * are being interpreted as expected.
 	 */
@@ -28,7 +28,7 @@ public class SymbolicConstruct {
 			if(refName.charAt(0) == '%' &&
 				(ptr = RunTimeEnvironment.systemVarTable.get(refName)) != null) {
 
-				t.flags.add(TFlag.VAR);
+				t.flags.add(TFlag.VAR_REF);
 				Interpreter.pushToRuntimeStack(ptr);
 				return t;
 			}
@@ -36,7 +36,7 @@ public class SymbolicConstruct {
 			// Does the reference refer to a field in the component buffer?
 			if((ptr = RunTimeEnvironment.compBufferTable.get(refName)) != null) {
 
-				t.flags.add(TFlag.FIELD);
+				t.flags.add(TFlag.FIELD_REF);
 				Interpreter.pushToRuntimeStack(ptr);
 				return t;
 			}
@@ -49,7 +49,7 @@ public class SymbolicConstruct {
 
 				ptr = RunTimeEnvironment.getFromMemoryPool(parts[1]);
 				Interpreter.pushToRuntimeStack(ptr);
-				t.flags.add(TFlag.DEFN_LITERAL);
+				t.flags.add(TFlag.DEFN_LITERAL_REF);
 				return t;
 			}
 
@@ -60,7 +60,7 @@ public class SymbolicConstruct {
 			if(l.flags.contains(TFlag.L_PAREN) &&
 				(m = RunTimeEnvironment.systemFuncTable.get(refName)) != null) {
 
-				t.flags.add(TFlag.FUNCTION);
+				t.flags.add(TFlag.FUNC_REF);
 				FnCallConstruct.interpret(m);
 				return t;
 			}

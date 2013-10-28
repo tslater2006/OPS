@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.util.Map;
 import java.lang.StringBuilder;
 import java.util.HashMap;
+import java.util.TreeMap;
 import com.enterrupt.sql.StmtLibrary;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Base64;
@@ -23,14 +25,14 @@ public class PeopleCodeProg {
     public String event;
 	private StringBuilder progTextBuilder;
     public byte[] progBytes;
-	public HashMap<Integer, String> progRefsTable;
+	public TreeMap<Integer, Reference> progRefsTable;
 	public boolean interpretFlag;
 	private boolean hasInitialMetadataBeenLoaded;
 
 	public int byteCursorPos = 0;
 
     public PeopleCodeProg() {
-		this.progRefsTable = new HashMap<Integer, String>();
+		this.progRefsTable = new TreeMap<Integer, Reference>();
 		this.hasInitialMetadataBeenLoaded = false;
     }
 
@@ -101,7 +103,7 @@ public class PeopleCodeProg {
 		this.progTextBuilder = new StringBuilder();
 	}
 
-	public String getProgReference(int refNbr) {
+	public Reference getProgReference(int refNbr) {
 		return this.progRefsTable.get(refNbr);
 	}
 
@@ -143,16 +145,6 @@ public class PeopleCodeProg {
         rs.close();
         pstmt.close();
 
-		// Index the reference keywords.
-		/**
-		 * TODO: Put this in a place where it is only done once; doing this for every
-		 * program is a waste.
-		 */
-		HashMap<String, String> refReservedWordsTable = new HashMap<String, String>();
-		for(String s : PSDefn.refReservedWords) {
-			refReservedWordsTable.put(s.toUpperCase(), s);
-		}
-
 		// Get program references.
         if(pcType.equals("RecordPC")) {
 
@@ -180,24 +172,8 @@ public class PeopleCodeProg {
 
 		rs = pstmt.executeQuery();
         while(rs.next()) {
-        	Integer NAMENUM = rs.getInt("NAMENUM");
-			if(progRefsTable.get(NAMENUM) != null) {
-				/**
-				 * TODO: Make this merely a warning and don't stop execution. A duplicate ref
-				 * shouldn't matter anyway, but I want to exit(1) on it for now just to see how often
-			     * it occurs.
-				 */
-				System.out.println("[WARNING] Duplicate reference encountered when loading references for PeopleCodeProg.");
-				System.exit(1);
-			}
-			String RECNAME = rs.getString("RECNAME").trim();
-			String reservedWord = refReservedWordsTable.get(RECNAME);
-			if(reservedWord != null) {
-				RECNAME = reservedWord;	// remember: this assigns the value (lowercase) rather than the key (upper).
-			}
-			String REFNAME = rs.getString("REFNAME").trim();
-			this.progRefsTable.put(NAMENUM,
-				(RECNAME != null && RECNAME.length() > 0 ? RECNAME + "." : "") + REFNAME);
+			this.progRefsTable.put(rs.getInt("NAMENUM"),
+				new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
         }
         rs.close();
         pstmt.close();
@@ -208,6 +184,20 @@ public class PeopleCodeProg {
 		 * they must be collected via the parser.
 		 */
 		HashMap<String, PeopleCodeProg> importedFuncTable = Parser.scanForListOfDeclaredAndImportedFunctions(this);
+
+		for(Map.Entry<Integer, Reference> cursor : this.progRefsTable.entrySet()) {
+			Reference ref = cursor.getValue();
+
+			/**
+			 * Currently assuming that no keyword indicates it's a Record.Field reference;
+			 * this assumption may or may not be valid in the future. TODO: Verify this.
+			 */
+			if(ref.isRecordFieldRef) {
+				BuildAssistant.getRecordDefn(ref.RECNAME);
+			}
+
+			/** NEXT: If the ref exists in the importedFuncTable, load the corresponding PC Program.*/
+		}
 
 		// Iterate through references
 		// Load the record if it isn't present in the cache.

@@ -21,7 +21,7 @@ public class ReferenceParser extends ElementParser {
 
 		int b1 = (int) (prog.readNextByte() & 0xff);
 		int b2 = (int) (prog.readNextByte() & 0xff);
-		String ref = prog.getProgReference(b2 * 256 + b1 + 1);
+		String ref = prog.getProgReference(b2 * 256 + b1 + 1).getValue();
 
 		if(ref == null) {
 			System.out.println("Unable to find reference number: " + b1);

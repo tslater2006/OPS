@@ -80,9 +80,25 @@ public abstract class PeopleCodeProg {
 				}
 			}
 
-			tokenList.add(t);
-			System.out.println(t.flags);
+			if(!t.flags.contains(TFlag.DISCARD)) {
+				tokenList.add(t);
+				System.out.print(t.flags);
 
+				if(t.flags.contains(TFlag.REFERENCE)) {
+					System.out.print("\t\t\t" + t.refObj.getValue());
+				}
+				if(t.flags.contains(TFlag.PURE_STRING)) {
+					System.out.print("\t\t\t" + t.pureStrVal);
+				}
+				if(t.flags.contains(TFlag.EMBEDDED_STRING)) {
+					System.out.print("\t\t\t" + t.embeddedStrVal);
+				}
+				if(t.flags.contains(TFlag.NUMBER)) {
+					System.out.print("\t\t\t" + t.numericVal);
+				}
+
+				System.out.println();
+			}
 		} while(!t.flags.contains(TFlag.END_OF_PROGRAM));
 
 		this.progTokens = tokenList.toArray(new Token[0]);

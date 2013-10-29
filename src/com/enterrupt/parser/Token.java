@@ -11,6 +11,7 @@ public class Token {
 	public String pureStrVal;			// holds value of PureString tokens.
 	public String numericVal;			// holds value of NUMBER tokens.
 	public String identifierName;		// holds value of IDENTIFIER tokens.
+	public String embeddedStrVal;		// holds value of EmbeddedString tokens.
 
 	public Token() {
 		this.flags = EnumSet.noneOf(TFlag.class);

@@ -35,9 +35,6 @@ public class ReferenceParser extends ElementParser {
 						   ref.startsWith("Record.") ||
 						   ref.startsWith("Scroll."))) {
 				ref = ref.substring(ref.indexOf('.') + 1);
-
-				System.out.println("Here");
-				System.exit(1);
 			}
 			int p1 = ref.indexOf('.');
 			if(p1 > 0) {

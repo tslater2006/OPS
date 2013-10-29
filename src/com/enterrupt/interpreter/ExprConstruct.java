@@ -2,6 +2,7 @@ package com.enterrupt.interpreter;
 
 import com.enterrupt.types.*;
 import com.enterrupt.parser.TFlag;
+import com.enterrupt.pt_objects.PeopleCodeProg;
 
 /**
  * TODO: Remember to implement order of operations.
@@ -9,7 +10,7 @@ import com.enterrupt.parser.TFlag;
  */
 public class ExprConstruct {
 
-	public static void interpret() throws Exception {
+	public static void interpret(PeopleCodeProg prog) throws Exception {
 
 		/**
 		 * TODO: Immediately interpret a SymbolicConstruct.
@@ -23,16 +24,16 @@ public class ExprConstruct {
 		 * a SymbolicConstruct?
 		 */
 
-		SymbolicConstruct.interpret();
+		SymbolicConstruct.interpret(prog);
 
 		// Detect: SymbolicConstruct $ComparisonOperator SymbolicConstruct
-		if(Interpreter.lookAheadNextToken().flags.contains(TFlag.EQUAL)) {
+		if(prog.peekNextToken().flags.contains(TFlag.EQUAL)) {
 			/**
 			 * TODO: Interpret another SymbolicConstruct, pop 2 values from runtime stack,
 			 * compare them, and push the result.
 		     */
-			Interpreter.parseNextToken();
-			SymbolicConstruct.interpret();
+			prog.readNextToken();
+			SymbolicConstruct.interpret(prog);
 
 			MemoryPtr p2 = Interpreter.popFromRuntimeStack();
 			MemoryPtr p1 = Interpreter.popFromRuntimeStack();

@@ -11,12 +11,15 @@ public class Interpreter {
 
 	private static Stack<MemoryPtr>	callStack;
 	private static Stack<MemoryPtr>	runtimeStack;
-	private static Token queuedLookAheadToken;
+	private PeopleCodeProg prog;
 
-	public static void init() {
-		callStack = new Stack<MemoryPtr>();
-		runtimeStack = new Stack<MemoryPtr>();
-		queuedLookAheadToken = null;
+	public Interpreter(PeopleCodeProg prog) {
+		this.prog = prog;
+
+		if(callStack == null || runtimeStack == null) {
+			callStack = new Stack<MemoryPtr>();
+			runtimeStack = new Stack<MemoryPtr>();
+		}
 	}
 
 	public static void pushToCallStack(MemoryPtr p) {
@@ -49,73 +52,14 @@ public class Interpreter {
 		return runtimeStack.peek();
 	}
 
-	public static void run(PeopleCodeProg p) throws Exception {
+	public void run() throws Exception {
 
-/*        System.out.println("Interpreting PC...");
-        Parser.reset();
-
-		p.resetProgText();
-		p.interpretFlag = true;
-        p.setByteCursorPos(37);          // Program begins at byte 37.
-        Parser.prog = p;
-
-        init();
-
-        StmtListConstruct.interpret();
+        StmtListConstruct.interpret(prog);
 
         // Detect: END_OF_PROGRAM
-        if(!Interpreter.parseNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
+        if(!prog.readNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
             System.out.println("[ERROR] Expected END_OF_PROGRAM");
             System.exit(1);
-        }*/
-	}
-
-	public static Token parseNextToken() throws Exception {
-
-		Token t = null;
-
-       // If a token has been returned to the parse stream, return it immediately.
-     /*   if(queuedLookAheadToken != null) {
-            t = queuedLookAheadToken;
-            queuedLookAheadToken = null;
-            return t;
         }
-
-		t = Parser.parseNextToken();
-		System.out.println(t.flags.toString());
-*/
-		/**
-		 * TODO: Resolve REFERENCE tokens here.
-		 */
-
-		return t;
 	}
-
-    // Note: Only supports 1 character of look-ahead.
-    public static Token lookAheadNextToken() throws Exception {
-        if(queuedLookAheadToken == null) {
-            queuedLookAheadToken = parseNextToken();
-        }
-        return queuedLookAheadToken;
-    }
-
-    public static byte fastForwardUntil(byte startByte, byte endByte) {
-/*        while(true) {
-            byte b = Parser.prog.readNextByte();
-            if(b == startByte) {
-                return b;
-            }*/
-            /**
-             * If we reach the end token, decrement the byte cursor to ensure that
-             * when parsing resumes, it is parsed as a token.
-             */
-         /*   if(b == endByte) {
-                Parser.prog.byteCursorPos--;
-                return b;
-            }
-        }*/
-
-		/** TODO: REMOVE */
-		return (byte) 0;
-    }
 }

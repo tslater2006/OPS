@@ -107,7 +107,9 @@ public class Component {
         for(PeopleCodeProg prog : this.searchRecordProgs) {
             if(prog.event.equals("SearchInit")) {
 				prog.loadInitialMetadata();
-				Interpreter.run(prog);
+
+				Interpreter interpreter = new Interpreter(prog);
+				interpreter.run();
             }
         }
     }
@@ -128,7 +130,9 @@ public class Component {
 			this.SEARCHRECNAME, "SearchInit");
 		prog.loadInitialMetadata();
 		prog.loadReferencedDefinitionsAndPrograms();
-		Interpreter.run(prog);
+
+		Interpreter interpreter = new Interpreter(prog);
+		interpreter.run();
 	}
 
 	/**

@@ -54,7 +54,9 @@ public abstract class PeopleCodeProg {
 		Parser p = new Parser(this);
 		Token t;
 
-		while(!(t = p.parseNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
+		do {
+
+			t = p.parseNextToken();
 
 			// Discard comments.
 			if(t.flags.contains(TFlag.COMMENT)) {
@@ -79,7 +81,9 @@ public abstract class PeopleCodeProg {
 			}
 
 			tokenList.add(t);
-		}
+			System.out.println(t.flags);
+
+		} while(!t.flags.contains(TFlag.END_OF_PROGRAM));
 
 		this.progTokens = tokenList.toArray(new Token[0]);
 		System.out.println(this.getProgText());
@@ -90,6 +94,14 @@ public abstract class PeopleCodeProg {
 
 	public void setByteCursorPos(int pos) {
 		this.byteCursorPos = pos;
+	}
+
+	public Token readNextToken() {
+		return this.progTokens[this.tokenCursorPos++];
+	}
+
+	public Token peekNextToken() {
+		return this.progTokens[this.tokenCursorPos];
 	}
 
 	public byte getCurrentByte() {

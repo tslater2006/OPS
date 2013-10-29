@@ -6,6 +6,7 @@ import java.lang.reflect.*;
 import com.enterrupt.types.*;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.parser.Token;
+import com.enterrupt.pt_objects.PeopleCodeProg;
 
 public class SymbolicConstruct {
 
@@ -15,9 +16,9 @@ public class SymbolicConstruct {
      * (i.e., StmtConstruct) may use the additional data (provided by the returned Token) to ensure that tokens
  	 * are being interpreted as expected.
 	 */
-	public static Token interpret() throws Exception {
+	public static Token interpret(PeopleCodeProg prog) throws Exception {
 
-		Token t = Interpreter.parseNextToken();
+		Token t = prog.readNextToken();
 		MemoryPtr ptr = null;
 
 		if(t.flags.contains(TFlag.REFERENCE)) {
@@ -59,7 +60,7 @@ public class SymbolicConstruct {
 				return t;
 			}
 
-			Token l = Interpreter.lookAheadNextToken();
+			Token l = prog.peekNextToken();
 			Method m = null;
 
 			// Does the pure string refer to a system function?
@@ -67,7 +68,7 @@ public class SymbolicConstruct {
 				(m = RunTimeEnvironment.systemFuncTable.get(t.pureStrVal)) != null) {
 
 				t.flags.add(TFlag.FUNC_REF);
-				FnCallConstruct.interpret(m);
+				FnCallConstruct.interpret(prog, m);
 				return t;
 			}
 
@@ -96,6 +97,7 @@ public class SymbolicConstruct {
 			return t;
 		}
 
+		System.out.println(t.flags);
 		System.out.println("[ERROR] Unexpected token encountered during SymbolicConstruct interpretation.");
 		System.exit(1);
 

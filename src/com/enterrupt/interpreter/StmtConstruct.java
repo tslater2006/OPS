@@ -3,27 +3,22 @@ package com.enterrupt.interpreter;
 import com.enterrupt.types.*;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.parser.Token;
+import com.enterrupt.pt_objects.PeopleCodeProg;
 
 public class StmtConstruct {
 
-	public static void interpret() throws Exception {
+	public static void interpret(PeopleCodeProg prog) throws Exception {
 
-		Token t = Interpreter.lookAheadNextToken();
-
-		// Detect: single-line comment
-		if(t.flags.contains(TFlag.COMMENT)) {
-			Interpreter.parseNextToken(); // Don't need value, just move to next token.
-			return;
-		}
+		Token t = prog.peekNextToken();
 
 		// Detect: IF
 		if(t.flags.contains(TFlag.IF)) {
-			IfConstruct.interpret();
+			IfConstruct.interpret(prog);
 			return;
 		}
 
-		Token resolvedToken = SymbolicConstruct.interpret();
-		t = Interpreter.parseNextToken();
+		Token resolvedToken = SymbolicConstruct.interpret(prog);
+		t = prog.readNextToken();
 
 		// Detect: SEMICOLON (must be preceded by a function call).
 		if(t.flags.contains(TFlag.SEMICOLON)) {
@@ -37,13 +32,13 @@ public class StmtConstruct {
 
 		// Detect: assignment.
 		if(t.flags.contains(TFlag.EQUAL)) {
-			SymbolicConstruct.interpret();
+			SymbolicConstruct.interpret(prog);
 
 			MemoryPtr srcOperand = Interpreter.popFromRuntimeStack();
 			MemoryPtr destOperand = Interpreter.popFromRuntimeStack();
 			MemoryPtr.copy(srcOperand, destOperand);
 
-			t = Interpreter.parseNextToken();
+			t = prog.readNextToken();
 			if(!t.flags.contains(TFlag.SEMICOLON)) {
 				System.out.println("[ERROR] Expected semicolon after assignment.");
 				System.exit(1);

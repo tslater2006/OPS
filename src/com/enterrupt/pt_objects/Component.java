@@ -99,6 +99,8 @@ public class Component {
         while(rs.next()) {
 			PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
 				rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
+			prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+
             this.searchRecordProgs.add(prog);
         }
         rs.close();
@@ -106,7 +108,7 @@ public class Component {
 
         for(PeopleCodeProg prog : this.searchRecordProgs) {
             if(prog.event.equals("SearchInit")) {
-				prog.loadInitialMetadata();
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 
 				Interpreter interpreter = new Interpreter(prog);
 				interpreter.run();
@@ -128,8 +130,10 @@ public class Component {
 
 		PeopleCodeProg prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
 			this.SEARCHRECNAME, "SearchInit");
-		prog.loadInitialMetadata();
-		prog.loadReferencedDefinitionsAndPrograms();
+		prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+
+		BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+		BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
 
 		Interpreter interpreter = new Interpreter(prog);
 		interpreter.run();
@@ -329,12 +333,12 @@ public class Component {
 					.recordProgsByFieldTable.get(fbuf.fldName);
 				if(fieldProgs != null) {
 
-					System.out.println("[LOADING] Record: " + fbuf.recDefn.RECNAME +
+					System.out.println("Loading Component-Level Program on Record: " + fbuf.recDefn.RECNAME +
 						", Field: " + fbuf.fldName);
 
 					for(PeopleCodeProg prog : fieldProgs) {
-						prog.loadInitialMetadata();
-						prog.loadReferencedDefinitionsAndPrograms();
+						BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+						BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
 					}
 				}
 			}

@@ -4,15 +4,18 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.lang.StringBuilder;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 
 public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
 	public String[] bindValues;
+	public String[] pathParts;
 
 	public AppPackagePeopleCodeProg(String[] path) {
 		super();
+		this.pathParts = path;
 		this.event = "OnExecute";
 
 		/**
@@ -50,6 +53,16 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 		//System.exit(1);
 	}
 
+	public String getDescriptor() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("AppPackagePC:");
+		for(int i = 0; i < this.pathParts.length; i++) {
+			sb.append(this.pathParts[i]).append(".");
+		}
+		sb.append(this.event);
+		return sb.toString();
+	}
+
 	private void getListOfAllConstituentAppClassPrograms() throws Exception {
 
 		if(BuildAssistant.appPackageDefnCache.get(this.bindValues[1]) != null) {
@@ -61,6 +74,12 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
         pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(this.bindValues[0], this.bindValues[1]);
         rs = pstmt.executeQuery();
+
+		/**
+		 * TODO: BE VERY CAREFUL HERE; not only is this not ordered by PROGSEQ, but
+		 * there may be multiple entries per program if it is greater than 28,000 bytes.
+		 * Keep those considerations in mind before using the records returned here.
+		 */
 		rs.next(); // Do nothing with records for now.
         rs.close();
         pstmt.close();
@@ -84,11 +103,26 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 													this.bindValues[10], this.bindValues[11],
 													this.bindValues[12], this.bindValues[13]);
         rs = pstmt.executeQuery();
-        if(rs.next()) {
-            this.setProgText(rs.getBlob("PROGTXT"));
+
+        /**
+         * Append the program bytecode; there could be multiple records
+         * for this program if the length exceeds 28,000 bytes. Note that
+         * the above query must be ordered by PROSEQ, otherwise these records
+         * will need to be pre-sorted before appending the BLOBs together.
+         */
+        int PROGLEN = -1;
+        while(rs.next()) {
+            PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
+            this.appendProgBytes(rs.getBlob("PROGTXT"));
         }
         rs.close();
         pstmt.close();
+
+        if(this.progBytes.length != PROGLEN) {
+            System.out.println("[ERROR] Number of bytes in " + this.getDescriptor() + " ("
+				+ this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
+            System.exit(1);
+        }
 
     	// Get program references.
         pstmt = StmtLibrary.getPSPCMPROG_GetRefs(this.bindValues[0], this.bindValues[1],

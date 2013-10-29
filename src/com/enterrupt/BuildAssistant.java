@@ -26,19 +26,70 @@ public class BuildAssistant {
 	private static int currTraceLineNbr = 0;
 	private static HashMap<String, Boolean> systemTableRecNames;
 	public static HashMap<String, Boolean> appPackageDefnCache;
+	public static HashMap<String, PeopleCodeProg> progCache;
 
 	public static void init() {
 		pageDefnCache = new HashMap<String, Page>();
 		recDefnCache = new HashMap<String, Record>();
 		appPackageDefnCache = new HashMap<String, Boolean>();
+		progCache = new HashMap<String, PeopleCodeProg>();
 
 		// Initialize the list of system tables for which metadata should not be gathered.
 		systemTableRecNames = new HashMap<String, Boolean>();
 		systemTableRecNames.put("PSXLATITEM", true);
 	}
 
+	public static void loadInitialMetadataForProg(String progDescriptor) throws Exception {
+
+		PeopleCodeProg prog = progCache.get(progDescriptor);
+		if(prog == null) {
+			System.out.println("[ERROR] Expected program definition before loading initial metadata.");
+			System.exit(1);
+		}
+
+		if(!prog.isLoaded()) {
+			System.out.println("[NOT LOADED] Loading initial metadata for " + progDescriptor);
+			prog.loadInitialMetadata();
+			prog.markLoaded();
+		} else {
+			System.out.println("[ALREADY LOADED] Metadata exists for " + progDescriptor);
+		}
+	}
+
+	public static void loadReferencedProgsAndDefnsForProg(String progDescriptor) throws Exception {
+
+		PeopleCodeProg prog = progCache.get(progDescriptor);
+		if(prog == null) {
+			System.out.println("[ERROR] Expected program definition before loading referenced programs and defns.");
+			System.exit(1);
+		}
+
+		if(!prog.isLoaded()) {
+			System.out.println("[ERROR] Expected program to be loaded before loading referenced programs and defns.");
+			System.exit(1);
+		}
+
+		if(!prog.areReferencesLoaded()) {
+			System.out.println("[NOT LOADED] Loading referenced defns and progs for " + progDescriptor);
+			prog.loadReferencedDefinitionsAndPrograms();
+			prog.markReferencesLoaded();
+		} else {
+			System.out.println("[ALREADY LOADED] Referenced defns and progs already loaded for " + progDescriptor);
+		}
+	}
+
 	public static void cacheAppPackageDefn(String appPackageName) {
 		appPackageDefnCache.put(appPackageName, true);
+	}
+
+	public static PeopleCodeProg getProgramOrCacheIfMissing(PeopleCodeProg prog) {
+
+		PeopleCodeProg p = progCache.get(prog.getDescriptor());
+		if(p == null) {
+			p = prog;
+			progCache.put(p.getDescriptor(), p);
+		}
+		return p;
 	}
 
 	public static void cacheRecord(Record r) {

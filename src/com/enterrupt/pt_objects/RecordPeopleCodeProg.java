@@ -18,6 +18,10 @@ public class RecordPeopleCodeProg extends PeopleCodeProg {
 		this.event = event;
 	}
 
+	public String getDescriptor() {
+		return "RecordPC." + this.RECNAME + "." + this.FLDNAME + "." + this.event;
+	}
+
 	protected void progSpecific_loadInitialMetadata() throws Exception {
 
         PreparedStatement pstmt = null;
@@ -32,11 +36,26 @@ public class RecordPeopleCodeProg extends PeopleCodeProg {
                                                     "0", PSDefn.NULL,
                                                     "0", PSDefn.NULL);
         rs = pstmt.executeQuery();
-        if(rs.next()) {
-            this.setProgText(rs.getBlob("PROGTXT"));
+
+		/**
+		 * Append the program bytecode; there could be multiple records
+		 * for this program if the length exceeds 28,000 bytes. Note that
+		 * the above query must be ordered by PROSEQ, otherwise these records
+		 * will need to be pre-sorted before appending the BLOBs together.
+	 	 */
+        int PROGLEN = -1;
+        while(rs.next()) {
+            PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
+            this.appendProgBytes(rs.getBlob("PROGTXT"));
         }
         rs.close();
         pstmt.close();
+
+        if(this.progBytes.length != PROGLEN) {
+            System.out.println("[ERROR] Number of bytes in " + this.getDescriptor() + " ("
+                + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
+            System.exit(1);
+        }
 
         // Get program references.
         pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, this.RECNAME,

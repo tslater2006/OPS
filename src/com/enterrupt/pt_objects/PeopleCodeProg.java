@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Iterator;
+import java.io.InputStream;
 import java.lang.StringBuilder;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Base64;
@@ -20,28 +22,44 @@ public abstract class PeopleCodeProg {
     public String event;
 	public TreeMap<Integer, Reference> progRefsTable;
 
+	/** TODO: Byte cursor should be moved to a PeopleCodeByteStream class. */
     public byte[] progBytes;
 	public int byteCursorPos = 0;
 
 	public Token[] progTokens;
-	public int tokenCursorPos = 0;
 
 	private StringBuilder progTextBuilder;
-	protected boolean hasInitialMetadataBeenLoaded;
+	private boolean hasInitialMetadataBeenLoaded;
+	private boolean haveLoadedReferencedDefnsAndProgs;
 
     protected PeopleCodeProg() {
+		this.progBytes = new byte[0];
 		this.progRefsTable = new TreeMap<Integer, Reference>();
 		this.hasInitialMetadataBeenLoaded = false;
+		this.haveLoadedReferencedDefnsAndProgs = false;
     }
+
+	public void markLoaded() {
+		this.hasInitialMetadataBeenLoaded = true;
+	}
+
+	public boolean isLoaded() {
+		return this.hasInitialMetadataBeenLoaded;
+	}
+
+	public void markReferencesLoaded() {
+		this.haveLoadedReferencedDefnsAndProgs = true;
+	}
+
+	public boolean areReferencesLoaded() {
+		return this.haveLoadedReferencedDefnsAndProgs;
+	}
 
 	protected abstract void progSpecific_loadInitialMetadata() throws Exception;
 	public abstract Clob getProgTextClob() throws Exception;
+	public abstract String getDescriptor();
 
 	public void loadInitialMetadata() throws Exception {
-
-		if(this.hasInitialMetadataBeenLoaded) {
-			return;
-		}
 
 		this.progSpecific_loadInitialMetadata();
 
@@ -72,17 +90,17 @@ public abstract class PeopleCodeProg {
        		* often this occurs, after which tokens, etc. I may be able to modify the NumberParser / other parser
         	* objects accordingly.
         	*/
-			if(t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
+		/*	if(t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
 				t = p.parseNextToken();
 				if(t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
 					System.out.println("[ERROR] Discarded two empty IDENTIFIER tokens in a row.");
 					System.exit(1);
 				}
-			}
+			}*/
 
 			if(!t.flags.contains(TFlag.DISCARD)) {
 				tokenList.add(t);
-				System.out.print(t.flags);
+		 		/*System.out.print(t.flags);
 
 				if(t.flags.contains(TFlag.REFERENCE)) {
 					System.out.print("\t\t\t" + t.refObj.getValue());
@@ -97,27 +115,17 @@ public abstract class PeopleCodeProg {
 					System.out.print("\t\t\t" + t.numericVal);
 				}
 
-				System.out.println();
+				System.out.println();*/
 			}
 		} while(!t.flags.contains(TFlag.END_OF_PROGRAM));
 
 		this.progTokens = tokenList.toArray(new Token[0]);
-		System.out.println(this.getProgText());
+		//System.out.println(this.getProgText());
 		this.verifyEntireProgramText();
-
-		this.hasInitialMetadataBeenLoaded = true;
 	}
 
 	public void setByteCursorPos(int pos) {
 		this.byteCursorPos = pos;
-	}
-
-	public Token readNextToken() {
-		return this.progTokens[this.tokenCursorPos++];
-	}
-
-	public Token peekNextToken() {
-		return this.progTokens[this.tokenCursorPos];
 	}
 
 	public byte getCurrentByte() {
@@ -162,54 +170,120 @@ public abstract class PeopleCodeProg {
 		return this.progRefsTable.get(refNbr);
 	}
 
-    public void setProgText(Blob b) throws Exception {
+    public void appendProgBytes(Blob blob) throws Exception {
 
-        /**
-         * TODO: Here we risk losing progtext bytes since the length (originally a long)
-         * is cast to int. Build in a check for this, use binarystream when this is the case.
-         */
-        int num_bytes = (int) b.length();
-        this.progBytes = b.getBytes(1, num_bytes); // first byte is at idx 1
+		int b;
+		InputStream stream = blob.getBinaryStream();
+		ArrayList<Integer> bytes = new ArrayList<Integer>();
+
+		while((b = stream.read()) != -1) {
+			bytes.add(b);
+		}
+
+		int startIdx;
+		byte[] allBytes;
+
+		if(this.progBytes.length == 0) {
+			allBytes = new byte[bytes.size()];
+			startIdx = 0;
+		} else {
+			allBytes = new byte[this.progBytes.length + bytes.size()];
+			startIdx = this.progBytes.length;
+		}
+
+		Iterator<Integer> iter = bytes.iterator();
+		for(int i = startIdx; i < allBytes.length; i++) {
+			allBytes[i] = iter.next().byteValue();
+		}
+
+		this.progBytes = allBytes;
     }
 
 	public void loadReferencedDefinitionsAndPrograms() throws Exception {
 
-		/**
-		 * We need to determine which functions, if any, are imported
-		 * by this program; these references are not denoted in PSPCMNAME, so
-		 * they must be collected via the parser.
-		 */
-/*		HashMap<Reference, PeopleCodeProg> importedFuncTable
-			= Parser.scanForListOfDeclaredAndImportedFunctions(this);
+		Token t;
+		PeopleCodeTokenStream stream = new PeopleCodeTokenStream(this);
+		ArrayList<PeopleCodeProg> referencedProgs = new ArrayList<PeopleCodeProg>();
 
-		for(Map.Entry<Integer, Reference> cursor : this.progRefsTable.entrySet()) {
-			Reference ref = cursor.getValue();
-*/
-			/**
-			 * Currently assuming that no keyword indicates it's a Record.Field reference;
-			 * this assumption may or may not be valid in the future. TODO: Verify this.
-			 */
-/*			if(ref.isRecordFieldRef) {
-				BuildAssistant.getRecordDefn(ref.RECNAME);
+		while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
+
+			if(t.flags.contains(TFlag.DECLARE)) {
+
+				t = stream.readNextToken();
+				if(!t.flags.contains(TFlag.FUNCTION)) {
+					System.out.println("[ERROR] Expected FUNCTION after DECLARES.");
+					System.exit(1);
+				}
+
+				// Name of the function.
+				t = stream.readNextToken();
+
+				t = stream.readNextToken();
+				if(!t.flags.contains(TFlag.PEOPLECODE)) {
+					System.out.println("[ERROR] Expected PEOPLECODE after function name.");
+					System.exit(1);
+				}
+
+				t = stream.readNextToken();
+				Reference refObj = t.refObj;
+
+				t = stream.readNextToken();
+				String event = t.pureStrVal;
+
+				// Load the record definition if it hasn't already been cached.
+				BuildAssistant.getRecordDefn(refObj.RECNAME);
+
+				PeopleCodeProg prog = new RecordPeopleCodeProg(refObj.RECNAME, refObj.REFNAME, event);
+				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+
+				referencedProgs.add(prog);
+
+				// Load the program's initial metadata if it hasn't already been cached.
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 			}
-*/
-			/**
-			 * If this reference corresponds to an imported/declared external PeopleCode function,
-			 * that program's initial metadata must be loaded now.
-			 */
-/*			if(importedFuncTable.get(ref) != null) {
-				importedFuncTable.get(ref).loadInitialMetadata();
+
+			if(t.flags.contains(TFlag.IMPORT)) {
+
+				ArrayList<String> pathParts = new ArrayList<String>();
+
+				// Path to app class is variable length.
+				do {
+					t = stream.readNextToken();
+					pathParts.add(t.pureStrVal);
+					t = stream.readNextToken();
+				} while(t.flags.contains(TFlag.COLON));
+
+				PeopleCodeProg prog = new AppPackagePeopleCodeProg(pathParts.toArray(new String[0]));
+				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+
+				referencedProgs.add(prog);
+
+				// Load the program's initial metadata.
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+			}
+
+			// Load the record defn if it hasn't already been cached; only want record.field references here.
+			if(t.flags.contains(TFlag.REFERENCE) && t.refObj.isRecordFieldRef) {
+				BuildAssistant.getRecordDefn(t.refObj.RECNAME);
 			}
 		}
-*/
+
 		/**
 		 * All programs referenced by this program must have their referenced
 		 * definitions and programs loaded now.
 		 */
-/*		for(Map.Entry<Reference, PeopleCodeProg> cursor : importedFuncTable.entrySet()) {
-			PeopleCodeProg prog = cursor.getValue();
-			prog.loadReferencedDefinitionsAndPrograms();
-		}*/
+		for(PeopleCodeProg prog : referencedProgs) {
+
+			/**
+			 * TODO: Keep this in the back of your mind. It appears that Record PC programs
+			 * have their definitions and external function references loaded, but App Package PC
+			 * programs do not. If this doesn't get loaded during initialization, I'll need to understand
+			 * where App Package PC dependencies get loaded when it comes to time to run the interpreter.
+			 */
+			if(!(prog instanceof AppPackagePeopleCodeProg)) {
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+			}
+		}
 	}
 
 	/**

@@ -5,16 +5,17 @@ import com.enterrupt.parser.Token;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeTokenStream;
 import com.enterrupt.types.MemoryPtr;
 
 public class Interpreter {
 
 	private static Stack<MemoryPtr>	callStack;
 	private static Stack<MemoryPtr>	runtimeStack;
-	private PeopleCodeProg prog;
+	private PeopleCodeTokenStream stream;
 
 	public Interpreter(PeopleCodeProg prog) {
-		this.prog = prog;
+		this.stream = new PeopleCodeTokenStream(prog);
 
 		if(callStack == null || runtimeStack == null) {
 			callStack = new Stack<MemoryPtr>();
@@ -54,10 +55,10 @@ public class Interpreter {
 
 	public void run() throws Exception {
 
-        StmtListConstruct.interpret(prog);
+        StmtListConstruct.interpret(stream);
 
         // Detect: END_OF_PROGRAM
-        if(!prog.readNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
+        if(!stream.readNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
             System.out.println("[ERROR] Expected END_OF_PROGRAM");
             System.exit(1);
         }

@@ -3,22 +3,22 @@ package com.enterrupt.interpreter;
 import com.enterrupt.types.*;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.parser.Token;
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeTokenStream;
 
 public class StmtConstruct {
 
-	public static void interpret(PeopleCodeProg prog) throws Exception {
+	public static void interpret(PeopleCodeTokenStream stream) throws Exception {
 
-		Token t = prog.peekNextToken();
+		Token t = stream.peekNextToken();
 
 		// Detect: IF
 		if(t.flags.contains(TFlag.IF)) {
-			IfConstruct.interpret(prog);
+			IfConstruct.interpret(stream);
 			return;
 		}
 
-		Token resolvedToken = SymbolicConstruct.interpret(prog);
-		t = prog.readNextToken();
+		Token resolvedToken = SymbolicConstruct.interpret(stream);
+		t = stream.readNextToken();
 
 		// Detect: SEMICOLON (must be preceded by a function call).
 		if(t.flags.contains(TFlag.SEMICOLON)) {
@@ -32,13 +32,13 @@ public class StmtConstruct {
 
 		// Detect: assignment.
 		if(t.flags.contains(TFlag.EQUAL)) {
-			SymbolicConstruct.interpret(prog);
+			SymbolicConstruct.interpret(stream);
 
 			MemoryPtr srcOperand = Interpreter.popFromRuntimeStack();
 			MemoryPtr destOperand = Interpreter.popFromRuntimeStack();
 			MemoryPtr.copy(srcOperand, destOperand);
 
-			t = prog.readNextToken();
+			t = stream.readNextToken();
 			if(!t.flags.contains(TFlag.SEMICOLON)) {
 				System.out.println("[ERROR] Expected semicolon after assignment.");
 				System.exit(1);

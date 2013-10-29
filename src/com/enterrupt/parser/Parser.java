@@ -70,6 +70,7 @@ public class Parser {
 				new SimpleElementParser((byte) 38, EnumSet.of(TFlag.END_WHILE), "End-While", PFlags.ENDIF_STYLE), // 0x26
 				new SimpleElementParser((byte) 41, EnumSet.of(TFlag.FOR), "For", PFlags.FOR_STYLE),	// 0x29
 				new SimpleElementParser((byte) 42, EnumSet.of(TFlag.TO), "To"),	// 0x42
+				new SimpleElementParser((byte) 43, EnumSet.of(TFlag.STEP), "Step"), // 0x2B
 				new SimpleElementParser((byte) 44, EnumSet.of(TFlag.END_FOR), "End-For", PFlags.ENDIF_STYLE),	// 0x2C
 				new SimpleElementParser((byte) 45, EnumSet.of(TFlag.DISCARD), "", PFlags.NEWLINE_ONCE),	// 0x2D
 				new SimpleElementParser((byte) 46, EnumSet.of(TFlag.BREAK), "Break", PFlags.SPACE_BEFORE), // 0x2E
@@ -77,7 +78,10 @@ public class Parser {
 				new SimpleElementParser((byte) 48, EnumSet.of(TFlag.FALSE), "False", PFlags.SPACE_BEFORE_AND_AFTER2), // 0x30
 				new SimpleElementParser((byte) 49, EnumSet.of(TFlag.DECLARE), "Declare", PFlags.NEWLINE_BEFORE_SPACE_AFTER | PFlags.IN_DECLARE),  // 0x31
 				new SimpleElementParser((byte) 50, EnumSet.of(TFlag.FUNCTION), "Function", PFlags.FUNCTION_STYLE),	// 0x32
+				new SimpleElementParser((byte) 53, EnumSet.of(TFlag.AS), "As"),		// 0x35
 				new SimpleElementParser((byte) 55, EnumSet.of(TFlag.END_FUNCTION), "End-Function", PFlags.END_FUNCTION_STYLE),		// 0x37
+				new SimpleElementParser((byte) 56, EnumSet.of(TFlag.RETURN), "Return"),		// 0x38
+				new SimpleElementParser((byte) 57, EnumSet.of(TFlag.RETURNS), "Returns"),	// 0x39
 				new SimpleElementParser((byte) 58, EnumSet.of(TFlag.PEOPLECODE), "PeopleCode"),		// 0x3A
 				new SimpleElementParser((byte) 60, EnumSet.of(TFlag.EVALUATE), "Evaluate", PFlags.INCREASE_INDENT | PFlags.SPACE_AFTER),
 				new SimpleElementParser((byte) 61, EnumSet.of(TFlag.WHEN), "When", PFlags.DECREASE_INDENT | PFlags.NEWLINE_BEFORE_SPACE_AFTER | PFlags.INCREASE_INDENT),	// 0x3D
@@ -90,6 +94,7 @@ public class Parser {
 				new SimpleElementParser((byte) 68, EnumSet.of(TFlag.LOCAL), "Local", PFlags.NEWLINE_BEFORE_SPACE_AFTER), // 0x44
 				new SimpleElementParser((byte) 69, EnumSet.of(TFlag.GLOBAL), "Global", PFlags.NEWLINE_BEFORE_SPACE_AFTER), 		// 0x45
 				new SimpleElementParser((byte) 71, EnumSet.of(TFlag.AT_SIGN), "@", PFlags.SPACE_BEFORE | PFlags.NO_SPACE_AFTER),	// 0x47
+				new SimpleElementParser((byte) 73, EnumSet.of(TFlag.SET), "set"),	// 0x49
 				new ReferenceParser((byte) 74), 		// 0x4A
 				new SimpleElementParser((byte) 76, EnumSet.of(TFlag.L_BRACKET), "[", PFlags.SPACE_BEFORE | PFlags.NO_SPACE_AFTER),		// 0x4C
 				new SimpleElementParser((byte) 77, EnumSet.of(TFlag.R_BRACKET), "]", PFlags.NO_SPACE_BEFORE | PFlags.SPACE_AFTER),		// 0x4D
@@ -99,10 +104,21 @@ public class Parser {
 				new CommentParser((byte) 85, PFlags.NEWLINE_AFTER | PFlags.COMMENT_ON_SAME_LINE | PFlags.SPACE_BEFORE),		// 0x55
 				new SimpleElementParser((byte) 87, EnumSet.of(TFlag.COLON), ":", PFlags.PUNCTUATION),
 				new SimpleElementParser((byte) 88, EnumSet.of(TFlag.IMPORT), "import"),	// 0x58
+				new SimpleElementParser((byte) 90, EnumSet.of(TFlag.CLASS), "class", PFlags.FUNCTION_STYLE),	// 0x5A
+				new SimpleElementParser((byte) 91, EnumSet.of(TFlag.END_CLASS), "end-class", PFlags.END_FUNCTION_STYLE),		// 0x5B
+				new SimpleElementParser((byte) 94, EnumSet.of(TFlag.PROPERTY), "property", PFlags.NEWLINE_BEFORE_SPACE_AFTER),		// 0x5E
+				new SimpleElementParser((byte) 95, EnumSet.of(TFlag.GET), "get"),		// 0x5F
+				new SimpleElementParser((byte) 97, EnumSet.of(TFlag.PRIVATE), "private", PFlags.ELSE_STYLE),	// 0x61
+				new SimpleElementParser((byte) 98, EnumSet.of(TFlag.INSTANCE), "instance"), 	// 0x62
+				new SimpleElementParser((byte) 99, EnumSet.of(TFlag.METHOD), "method", PFlags.NEWLINE_BEFORE | PFlags.SPACE_AFTER | PFlags.INCREASE_INDENT_ONCE),	// 0x63
+				new SimpleElementParser((byte) 100, EnumSet.of(TFlag.END_METHOD), "end-method", PFlags.END_FUNCTION_STYLE),	// 0x64
 				new SimpleElementParser((byte) 101, EnumSet.of(TFlag.TRY), "try", PFlags.SPACE_BEFORE_NEWLINE_AFTER),	// 0x65
 				new SimpleElementParser((byte) 102, EnumSet.of(TFlag.CATCH), "catch"),	// 0x66
 				new SimpleElementParser((byte) 103, EnumSet.of(TFlag.END_TRY), "end-try"), // 0x67
-				new SimpleElementParser((byte) 105, EnumSet.of(TFlag.CREATE), "create")	// 0x69
+				new SimpleElementParser((byte) 105, EnumSet.of(TFlag.CREATE), "create"),	// 0x69
+				new SimpleElementParser((byte) 106, EnumSet.of(TFlag.END_GET), "end-get"),	// 0x6A
+				new SimpleElementParser((byte) 107, EnumSet.of(TFlag.END_SET), "end-set"),	// 0x6B
+				new EmbeddedStringParser((byte) 109, "/+ ", " +/", PFlags.NEWLINE_BEFORE_AND_AFTER)	// 0x6D
 			};
 
 			// Initialize hash table of parsers, indexed by start byte.
@@ -122,7 +138,7 @@ public class Parser {
 			return new Token(EnumSet.of(TFlag.END_OF_PROGRAM, TFlag.END_OF_BLOCK));
 		}
 
-		System.out.printf("Getting parser for byte: 0x%02X\n", b);
+		//System.out.printf("Getting parser for byte: 0x%02X\n", b);
 
 		ElementParser p = parserTable.get(new Byte(b));
 		if(p == null) {

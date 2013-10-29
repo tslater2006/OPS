@@ -4,13 +4,13 @@ import java.lang.reflect.*;
 import java.util.EnumSet;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.types.*;
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeTokenStream;
 
 public class FnCallConstruct {
 
-	public static void interpret(PeopleCodeProg prog, Method fnPtr) throws Exception {
+	public static void interpret(PeopleCodeTokenStream stream, Method fnPtr) throws Exception {
 
-	    if(!prog.readNextToken().flags.contains(TFlag.L_PAREN)) {
+	    if(!stream.readNextToken().flags.contains(TFlag.L_PAREN)) {
     	    System.out.println("[ERROR] Expected L_PAREN");
             System.exit(1);
         }
@@ -19,9 +19,9 @@ public class FnCallConstruct {
 		 * Expecting only one argument for now.
 		 * TODO: Add support for indefinite arguments.
 		 */
-		ExprConstruct.interpret(prog);
+		ExprConstruct.interpret(stream);
 
-        if(!prog.readNextToken().flags.contains(TFlag.R_PAREN)) {
+        if(!stream.readNextToken().flags.contains(TFlag.R_PAREN)) {
             System.out.println("[ERROR] Expected R_PAREN");
 	        System.exit(1);
         }

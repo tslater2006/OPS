@@ -6,7 +6,7 @@ import java.lang.reflect.*;
 import com.enterrupt.types.*;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.parser.Token;
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeTokenStream;
 
 public class SymbolicConstruct {
 
@@ -16,9 +16,9 @@ public class SymbolicConstruct {
      * (i.e., StmtConstruct) may use the additional data (provided by the returned Token) to ensure that tokens
  	 * are being interpreted as expected.
 	 */
-	public static Token interpret(PeopleCodeProg prog) throws Exception {
+	public static Token interpret(PeopleCodeTokenStream stream) throws Exception {
 
-		Token t = prog.readNextToken();
+		Token t = stream.readNextToken();
 		MemoryPtr ptr = null;
 
 		if(t.flags.contains(TFlag.REFERENCE)) {
@@ -60,7 +60,7 @@ public class SymbolicConstruct {
 				return t;
 			}
 
-			Token l = prog.peekNextToken();
+			Token l = stream.peekNextToken();
 			Method m = null;
 
 			// Does the pure string refer to a system function?
@@ -68,7 +68,7 @@ public class SymbolicConstruct {
 				(m = RunTimeEnvironment.systemFuncTable.get(t.pureStrVal)) != null) {
 
 				t.flags.add(TFlag.FUNC_REF);
-				FnCallConstruct.interpret(prog, m);
+				FnCallConstruct.interpret(stream, m);
 				return t;
 			}
 

@@ -51,7 +51,7 @@ public class Interpreter {
 
 	public static void run(PeopleCodeProg p) throws Exception {
 
-        System.out.println("Interpreting PC...");
+/*        System.out.println("Interpreting PC...");
         Parser.reset();
 
 		p.resetProgText();
@@ -67,7 +67,7 @@ public class Interpreter {
         if(!Interpreter.parseNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
             System.out.println("[ERROR] Expected END_OF_PROGRAM");
             System.exit(1);
-        }
+        }*/
 	}
 
 	public static Token parseNextToken() throws Exception {
@@ -75,7 +75,7 @@ public class Interpreter {
 		Token t = null;
 
        // If a token has been returned to the parse stream, return it immediately.
-        if(queuedLookAheadToken != null) {
+     /*   if(queuedLookAheadToken != null) {
             t = queuedLookAheadToken;
             queuedLookAheadToken = null;
             return t;
@@ -83,7 +83,7 @@ public class Interpreter {
 
 		t = Parser.parseNextToken();
 		System.out.println(t.flags.toString());
-
+*/
 		/**
 		 * TODO: Resolve REFERENCE tokens here.
 		 */
@@ -100,19 +100,22 @@ public class Interpreter {
     }
 
     public static byte fastForwardUntil(byte startByte, byte endByte) {
-        while(true) {
+/*        while(true) {
             byte b = Parser.prog.readNextByte();
             if(b == startByte) {
                 return b;
-            }
+            }*/
             /**
              * If we reach the end token, decrement the byte cursor to ensure that
              * when parsing resumes, it is parsed as a token.
              */
-            if(b == endByte) {
+         /*   if(b == endByte) {
                 Parser.prog.byteCursorPos--;
                 return b;
             }
-        }
+        }*/
+
+		/** TODO: REMOVE */
+		return (byte) 0;
     }
 }

@@ -24,15 +24,10 @@ public class SimpleElementParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse() throws Exception {
+	public Token parse(PeopleCodeProg prog) throws Exception {
 
-		Parser.prog.appendProgText(t);
-
-		if(Parser.prog.interpretFlag) {
-			return new Token(this.tflags);
-		}
-
-		return null;
+		prog.appendProgText(t);
+		return new Token(this.tflags);
 	}
 
 	public boolean writesNonBlank() {

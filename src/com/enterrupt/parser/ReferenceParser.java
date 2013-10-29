@@ -16,12 +16,11 @@ public class ReferenceParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse() throws Exception {
-
-		PeopleCodeProg prog = Parser.prog;
+	public Token parse(PeopleCodeProg prog) throws Exception {
 
 		int b1 = (int) (prog.readNextByte() & 0xff);
 		int b2 = (int) (prog.readNextByte() & 0xff);
+
 		Reference refObj = prog.getProgReference(b2 * 256 + b1 + 1);
 		String ref = refObj.getValue();
 
@@ -51,13 +50,8 @@ public class ReferenceParser extends ElementParser {
 
 		prog.appendProgText(ref);
 
-		if(prog.interpretFlag) {
-			Token t = new Token(TFlag.REFERENCE);
-			t.refObj = refObj;
-			System.out.println("Reference: " + refObj.getValue());
-			return t;
-		}
-
-		return null;
+		Token t = new Token(TFlag.REFERENCE);
+		t.refObj = refObj;
+		return t;
 	}
 }

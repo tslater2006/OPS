@@ -5,9 +5,8 @@ import java.lang.StringBuilder;
 
 public abstract class StringParser extends ElementParser {
 
-    public String getString() {
+    public String getString(PeopleCodeProg prog) {
         byte b;
-        PeopleCodeProg prog = Parser.prog;
         StringBuilder builder = new StringBuilder();
 
         while((b = prog.readNextByte()) != 0) {
@@ -18,6 +17,7 @@ public abstract class StringParser extends ElementParser {
                 builder.append((char) b);
             }
         }
+
         prog.byteCursorPos++;
         return builder.toString();
     }

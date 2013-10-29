@@ -15,27 +15,24 @@ public class IdentifierParser extends StringParser {
 		return this.b;
 	}
 
-	public Token parse() throws Exception {
+	public Token parse(PeopleCodeProg prog) throws Exception {
 
-		Parser.prog.byteCursorPos--;	// current byte is 0x00, need to back up.
-		Parser.prog.byteCursorPos--;
-		String str = getString();
-		Parser.prog.appendProgText(str);
+		prog.byteCursorPos--;	// current byte is 0x00, need to back up.
+		prog.byteCursorPos--;
+		String str = getString(prog);
 
-		if(Parser.prog.interpretFlag) {
-			Token t = new Token(TFlag.IDENTIFIER);
-			t.identifierName = str;
+		prog.appendProgText(str);
 
-			// Will cause parseNextToken to discard this token and replace it
-			// with the next one in the stream.
-			if(str.length() == 0) {
-				t.flags.add(TFlag.DISCARD);
-			}
+		Token t = new Token(TFlag.IDENTIFIER);
+		t.identifierName = str;
 
-			return t;
+		// Will cause parseNextToken to discard this token and replace it
+		// with the next one in the stream.
+		if(str.length() == 0) {
+			t.flags.add(TFlag.DISCARD);
 		}
 
-		return null;
+		return t;
 	}
 }
 

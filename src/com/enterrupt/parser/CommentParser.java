@@ -19,18 +19,11 @@ public class CommentParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse() throws Exception {
-
-		PeopleCodeProg prog = Parser.prog;
+	public Token parse(PeopleCodeProg prog) throws Exception {
 
 		// Length byte is wide ANDed and cast to integer.
 		int commLen = (int) prog.readNextByte() & 0xff;
 		commLen = commLen + ((int) prog.readNextByte() & 0xff) * 256;
-
-		if(prog.interpretFlag) {
-			prog.byteCursorPos += commLen;	// fast forward through comment.
-			return new Token(TFlag.COMMENT);
-		}
 
 		byte b;
 		for(int i=0; i < commLen && (prog.byteCursorPos < prog.progBytes.length); i++) {
@@ -44,7 +37,7 @@ public class CommentParser extends ElementParser {
 			}
 		}
 
-		return null;
+		return new Token(TFlag.COMMENT);
 	}
 
 	public boolean writesNonBlank() {

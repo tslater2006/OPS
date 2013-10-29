@@ -5,19 +5,26 @@ import java.sql.Clob;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.lang.StringBuilder;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Base64;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.Parser;
+import com.enterrupt.parser.Token;
+import com.enterrupt.parser.TFlag;
 
 public abstract class PeopleCodeProg {
 
     public String event;
+	public TreeMap<Integer, Reference> progRefsTable;
+
     public byte[] progBytes;
 	public int byteCursorPos = 0;
-	public boolean interpretFlag;
-	public TreeMap<Integer, Reference> progRefsTable;
+
+	public Token[] progTokens;
+	public int tokenCursorPos = 0;
 
 	private StringBuilder progTextBuilder;
 	protected boolean hasInitialMetadataBeenLoaded;
@@ -27,8 +34,59 @@ public abstract class PeopleCodeProg {
 		this.hasInitialMetadataBeenLoaded = false;
     }
 
-	public abstract void loadInitialMetadata() throws Exception;
+	protected abstract void progSpecific_loadInitialMetadata() throws Exception;
 	public abstract Clob getProgTextClob() throws Exception;
+
+	public void loadInitialMetadata() throws Exception {
+
+		if(this.hasInitialMetadataBeenLoaded) {
+			return;
+		}
+
+		this.progSpecific_loadInitialMetadata();
+
+		/**
+		 * Parse the entire program into tokens. We'll find out what programs are
+		 * referenced by this one in the process. The final list of tokens will used
+		 * by the interpreter at runtime.
+		 */
+		ArrayList<Token> tokenList = new ArrayList<Token>();
+		Parser p = new Parser(this);
+		Token t;
+
+		while(!(t = p.parseNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
+
+			// Discard comments.
+			if(t.flags.contains(TFlag.COMMENT)) {
+				continue;
+			}
+
+	       /**
+	        * I've been having an issue with the parser emitting an IDENTIFIER token immediately
+    	    * after a NUMBER token in LS_SS_PERS_SRCH.EMPLID.SearchInit, despite the fact that the identifier
+      		* name parsed out is empty. If the identifier is empty here, I'm going to parse the next token.
+      	  	* If it's another empty IDENTIFIER, I'll exit. Otherwise I'll let the interpreter continue.
+        	* TODO: Once I have more PeopleCode running through here, try to collect information about how
+       		* often this occurs, after which tokens, etc. I may be able to modify the NumberParser / other parser
+        	* objects accordingly.
+        	*/
+			if(t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
+				t = p.parseNextToken();
+				if(t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
+					System.out.println("[ERROR] Discarded two empty IDENTIFIER tokens in a row.");
+					System.exit(1);
+				}
+			}
+
+			tokenList.add(t);
+		}
+
+		this.progTokens = tokenList.toArray(new Token[0]);
+		System.out.println(this.getProgText());
+		this.verifyEntireProgramText();
+
+		this.hasInitialMetadataBeenLoaded = true;
+	}
 
 	public void setByteCursorPos(int pos) {
 		this.byteCursorPos = pos;
@@ -93,37 +151,37 @@ public abstract class PeopleCodeProg {
 		 * by this program; these references are not denoted in PSPCMNAME, so
 		 * they must be collected via the parser.
 		 */
-		HashMap<Reference, PeopleCodeProg> importedFuncTable
+/*		HashMap<Reference, PeopleCodeProg> importedFuncTable
 			= Parser.scanForListOfDeclaredAndImportedFunctions(this);
 
 		for(Map.Entry<Integer, Reference> cursor : this.progRefsTable.entrySet()) {
 			Reference ref = cursor.getValue();
-
+*/
 			/**
 			 * Currently assuming that no keyword indicates it's a Record.Field reference;
 			 * this assumption may or may not be valid in the future. TODO: Verify this.
 			 */
-			if(ref.isRecordFieldRef) {
+/*			if(ref.isRecordFieldRef) {
 				BuildAssistant.getRecordDefn(ref.RECNAME);
 			}
-
+*/
 			/**
 			 * If this reference corresponds to an imported/declared external PeopleCode function,
 			 * that program's initial metadata must be loaded now.
 			 */
-			if(importedFuncTable.get(ref) != null) {
+/*			if(importedFuncTable.get(ref) != null) {
 				importedFuncTable.get(ref).loadInitialMetadata();
 			}
 		}
-
+*/
 		/**
 		 * All programs referenced by this program must have their referenced
 		 * definitions and programs loaded now.
 		 */
-		for(Map.Entry<Reference, PeopleCodeProg> cursor : importedFuncTable.entrySet()) {
+/*		for(Map.Entry<Reference, PeopleCodeProg> cursor : importedFuncTable.entrySet()) {
 			PeopleCodeProg prog = cursor.getValue();
 			prog.loadReferencedDefinitionsAndPrograms();
-		}
+		}*/
 	}
 
 	/**

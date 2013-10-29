@@ -68,11 +68,7 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 		BuildAssistant.cacheAppPackageDefn(this.bindValues[1]);
 	}
 
-	public void loadInitialMetadata() throws Exception {
-
-        if(this.hasInitialMetadataBeenLoaded) {
-            return;
-        }
+	protected void progSpecific_loadInitialMetadata() throws Exception {
 
 		this.getListOfAllConstituentAppClassPrograms();
 
@@ -109,8 +105,6 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
         }
         rs.close();
         pstmt.close();
-
-        this.hasInitialMetadataBeenLoaded = true;
     }
 
 	public Clob getProgTextClob() throws Exception {

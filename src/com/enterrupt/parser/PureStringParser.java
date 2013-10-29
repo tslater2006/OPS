@@ -22,17 +22,13 @@ public class PureStringParser extends StringParser {
 		return b;
 	}
 
-	public Token parse() throws Exception {
-		String str = getString();
-		Parser.prog.appendProgText(str);
+	public Token parse(PeopleCodeProg prog) throws Exception {
 
-		if(Parser.prog.interpretFlag) {
-			Token t = new Token(TFlag.PURE_STRING);
-			t.pureStrVal = str;
-			System.out.println("Pure String: " + str);
-			return t;
-		}
+		String str = getString(prog);
+		prog.appendProgText(str);
 
-		return null;
+		Token t = new Token(TFlag.PURE_STRING);
+		t.pureStrVal = str;
+		return t;
 	}
 }

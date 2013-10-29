@@ -20,11 +20,7 @@ public class ComponentPeopleCodeProg extends PeopleCodeProg {
 		this.event = event;
 	}
 
-	 public void loadInitialMetadata() throws Exception {
-
-        if(this.hasInitialMetadataBeenLoaded) {
-            return;
-        }
+ 	protected void progSpecific_loadInitialMetadata() throws Exception {
 
         PreparedStatement pstmt = null;
         ResultSet rs;
@@ -59,8 +55,6 @@ public class ComponentPeopleCodeProg extends PeopleCodeProg {
         }
         rs.close();
         pstmt.close();
-
-        this.hasInitialMetadataBeenLoaded = true;
     }
 
 	public Clob getProgTextClob() throws Exception {

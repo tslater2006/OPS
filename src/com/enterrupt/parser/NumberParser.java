@@ -17,13 +17,11 @@ public class NumberParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse() throws Exception {
+	public Token parse(PeopleCodeProg prog) throws Exception {
 
 		int dValue = 0;	 // decimal position from far right going left
 		String out_number = "";
 		int num_bytes = nBytes - 3;
-
-		PeopleCodeProg prog = Parser.prog;
 
 		prog.byteCursorPos++;	// skip first byte
 		dValue = (int) prog.readNextByte();
@@ -51,12 +49,8 @@ public class NumberParser extends ElementParser {
 
 		prog.appendProgText(out_number);
 
-		if(prog.interpretFlag) {
-			Token t = new Token(TFlag.NUMBER);
-			t.numericVal = out_number;
-			return t;
-		}
-
-		return null;
+		Token t = new Token(TFlag.NUMBER);
+		t.numericVal = out_number;
+		return t;
 	}
 }

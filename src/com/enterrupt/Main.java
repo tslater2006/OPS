@@ -14,7 +14,6 @@ public class Main {
 		try {
 			StmtLibrary.init();
 			BuildAssistant.init();
-			Parser.init();
 			ComponentBuffer.init();
 
 			RunTimeEnvironment.init();

@@ -20,9 +20,10 @@ public class Component {
     public ArrayList<Page> pages;
     private String PNLGRPNAME;
     private String MARKET;
-
     private String SEARCHRECNAME; // name of search record for this component
-    private ArrayList<PeopleCodeProg> searchRecordProgs;
+
+	public ArrayList<ComponentPeopleCodeProg> orderedComponentProgs;
+	private boolean hasListOfComponentPCBeenRetrieved = false;
 
 	private class ScrollMarker {
 		public String primaryRecName;
@@ -42,7 +43,6 @@ public class Component {
         this.PNLGRPNAME = pnlgrpname;
         this.MARKET = market;
         pages = new ArrayList<Page>();
-        searchRecordProgs = new ArrayList<PeopleCodeProg>();
     }
 
     public void loadInitialMetadata() throws Exception {
@@ -76,37 +76,65 @@ public class Component {
 
     public void getListOfComponentPC() throws Exception {
 
-        PreparedStatement pstmt;
-        ResultSet rs;
+		if(!this.hasListOfComponentPCBeenRetrieved) {
 
-        pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT, this.PNLGRPNAME,
+	        PreparedStatement pstmt;
+	  		ResultSet rs;
+
+			this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
+
+	        pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT, this.PNLGRPNAME,
                                                         PSDefn.MARKET, this.MARKET);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-            // Do nothing with these records for now.
-        }
-        rs.close();
-        pstmt.close();
+   	        rs = pstmt.executeQuery();
+
+     	    while(rs.next()) {
+
+				String objectid3 = rs.getString("OBJECTID3").trim();
+				String objectval3 = rs.getString("OBJECTVALUE3").trim();
+				String objectid4 = rs.getString("OBJECTID4").trim();
+				String objectval4 = rs.getString("OBJECTVALUE4").trim();
+				String objectid5 = rs.getString("OBJECTID5").trim();
+				String objectval5 = rs.getString("OBJECTVALUE5").trim();
+
+				PeopleCodeProg prog = null;
+
+				// Example: SSS_STUDENT_CENTER.GBL.PreBuild
+				if(objectid3.equals(PSDefn.EVENT)) {
+					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+						objectval3);
+
+				// Example: SSS_STUDENT_CENTER.LS_SS_PERS_SRCH.SearchInit
+				} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.EVENT)) {
+					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+						objectval3, objectval4);
+
+				// Example: SSS_STUDENT_CENTER.LS_DERIVED_SSS_SCL.SS_CLS_SCHED_LINK.FieldChange
+				} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.FIELD) &&
+							objectid5.equals(PSDefn.EVENT)) {
+					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+						objectval3, objectval4, objectval5);
+
+				} else {
+					System.out.println("[ERROR] Unexpected type of Component PC encountered.");
+					System.exit(1);
+				}
+
+				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+				this.orderedComponentProgs.add((ComponentPeopleCodeProg)prog);
+     	   	}
+      	   	rs.close();
+      	   	pstmt.close();
+
+			this.hasListOfComponentPCBeenRetrieved = true;
+		}
     }
 
     public void loadAndRunRecordPConSearchRecord() throws Exception {
 
-        PreparedStatement pstmt;
-        ResultSet rs;
+		Record recDefn = BuildAssistant.getRecordDefn(this.SEARCHRECNAME);
+		recDefn.getListOfRecordPCPrograms();
 
-        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.SEARCHRECNAME);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-			PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
-				rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
-			prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
-
-            this.searchRecordProgs.add(prog);
-        }
-        rs.close();
-        pstmt.close();
-
-        for(PeopleCodeProg prog : this.searchRecordProgs) {
+        for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
             if(prog.event.equals("SearchInit")) {
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 
@@ -116,27 +144,19 @@ public class Component {
         }
     }
 
-	/**
-	 * IMPORTANT TODO: In all likelihood, PT is using the data gathered in a
-     * previous query (the one above in getListOfComponentPC()) to run
-     * Component PC attached to the search record. However, after running that query in
-	 * SQL Developer, I can see that there are two SearchInit Component PC events, one for
-     * LS_SS_PERS_SRCH and the other for STDNT_SRCH. In the trace file, only the event
-     * attached to LS_SS_PERS_SRCH is run, likely because STDNT_SRCH is not the search record.
-     * This logic needs to be implemented, but for now I'm simply describing it and will tie this
-     * down later.
-     */
 	public void loadAndRunComponentPConSearchRecord() throws Exception {
 
-		PeopleCodeProg prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
-			this.SEARCHRECNAME, "SearchInit");
-		prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 
-		BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-		BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+			if(prog.RECNAME != null && prog.RECNAME.equals(this.SEARCHRECNAME)) {
 
-		Interpreter interpreter = new Interpreter(prog);
-		interpreter.run();
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+
+				Interpreter interpreter = new Interpreter(prog);
+				interpreter.run();
+			}
+		}
 	}
 
 	/**
@@ -341,6 +361,17 @@ public class Component {
 						BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
 					}
 				}
+			}
+		}
+	}
+
+	public void loadAllComponentPCProgsAndReferencedDefns() throws Exception {
+
+		// Load the PostBuild event for the component first.
+		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
+			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PostBuild")) {
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
 			}
 		}
 	}

@@ -42,6 +42,7 @@ public class Main {
 			c.assembleComponentStructure();
 
 			c.loadAllRecordPCProgsAndReferencedDefns();
+			c.loadAllComponentPCProgsAndReferencedDefns();
 
 			StmtLibrary.disconnect();
 			BuildAssistant.runValidationTests(c);

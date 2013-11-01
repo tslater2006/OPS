@@ -100,7 +100,7 @@ public abstract class PeopleCodeProg {
 
 			if(!t.flags.contains(TFlag.DISCARD)) {
 				tokenList.add(t);
-		 		/*System.out.print(t.flags);
+		 	/*	System.out.print(t.flags);
 
 				if(t.flags.contains(TFlag.REFERENCE)) {
 					System.out.print("\t\t\t" + t.refObj.getValue());
@@ -189,6 +189,11 @@ public abstract class PeopleCodeProg {
 		} else {
 			allBytes = new byte[this.progBytes.length + bytes.size()];
 			startIdx = this.progBytes.length;
+
+			// Copy previous bytes to new array.
+			for(int i = 0; i < startIdx; i++) {
+				allBytes[i] = this.progBytes[i];
+			}
 		}
 
 		Iterator<Integer> iter = bytes.iterator();
@@ -206,6 +211,8 @@ public abstract class PeopleCodeProg {
 		ArrayList<PeopleCodeProg> referencedProgs = new ArrayList<PeopleCodeProg>();
 
 		while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
+
+			//System.out.println(t.flags);
 
 			if(t.flags.contains(TFlag.DECLARE)) {
 
@@ -253,6 +260,12 @@ public abstract class PeopleCodeProg {
 					t = stream.readNextToken();
 				} while(t.flags.contains(TFlag.COLON));
 
+				// TEMP: Wildcards not supported yet.
+				if(pathParts.get(pathParts.size() - 1) == null ||
+					pathParts.get(pathParts.size() - 1).equals("*")) {
+					continue;
+				}
+
 				PeopleCodeProg prog = new AppPackagePeopleCodeProg(pathParts.toArray(new String[0]));
 				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
 
@@ -281,6 +294,7 @@ public abstract class PeopleCodeProg {
 			 * where App Package PC dependencies get loaded when it comes to time to run the interpreter.
 			 */
 			if(!(prog instanceof AppPackagePeopleCodeProg)) {
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
 			}
 		}

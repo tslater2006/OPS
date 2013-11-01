@@ -9,7 +9,7 @@ public class Reference {
                                                    "Image", "Interlink", "StyleSheet", "FileLayout",
                                                    "Page", "PanelGroup", "Message", "BusProcess",
                                                    "BusEvent", "BusActivity", "Field", "Record",
-                                                   "Operation", "SQL"};
+                                                   "Operation", "SQL", "HTML"};
 	public static HashMap<String, String> refReservedWordsTable;
 	private String processedRef;
 	public String RECNAME;

@@ -17,8 +17,10 @@ public class Record {
 	public HashMap<String, RecordField> fieldTable;
 	public TreeMap<Integer, Object> fldAndSubrecordTable;
 	public ArrayList<String> subRecordNames;
-	private boolean hasListOfRecordPCBeenRetrieved;
+
 	public HashMap<String, ArrayList<PeopleCodeProg>> recordProgsByFieldTable;
+	public ArrayList<PeopleCodeProg> orderedRecordProgs;
+	private boolean hasListOfRecordPCBeenRetrieved;
 
     public Record(String recname) {
         this.RECNAME = recname;
@@ -145,9 +147,9 @@ public class Record {
             ResultSet rs;
 
 			this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
+			this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
 
-            // 1 == Record PC
-            pstmt = StmtLibrary.getPSPCMPROG_RecordPCList("1", this.RECNAME);
+            pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
             rs = pstmt.executeQuery();
 
 			while(rs.next()) {
@@ -161,8 +163,10 @@ public class Record {
 				if(fieldProgList == null) {
 					fieldProgList = new ArrayList<PeopleCodeProg>();
 				}
+
 				fieldProgList.add(prog);
 				this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
+				this.orderedRecordProgs.add(prog);
 			}
             rs.close();
             pstmt.close();

@@ -96,14 +96,17 @@ public class Parser {
 				new SimpleElementParser((byte) 71, EnumSet.of(TFlag.AT_SIGN), "@", PFlags.SPACE_BEFORE | PFlags.NO_SPACE_AFTER),	// 0x47
 				new SimpleElementParser((byte) 73, EnumSet.of(TFlag.SET), "set"),	// 0x49
 				new ReferenceParser((byte) 74), 		// 0x4A
+				new SimpleElementParser((byte) 75, EnumSet.of(TFlag.NULL), "Null"),		// 0x4B
 				new SimpleElementParser((byte) 76, EnumSet.of(TFlag.L_BRACKET), "[", PFlags.SPACE_BEFORE | PFlags.NO_SPACE_AFTER),		// 0x4C
 				new SimpleElementParser((byte) 77, EnumSet.of(TFlag.R_BRACKET), "]", PFlags.NO_SPACE_BEFORE | PFlags.SPACE_AFTER),		// 0x4D
+				new CommentParser((byte) 78, PFlags.NEWLINE_AFTER | PFlags.COMMENT_ON_SAME_LINE | PFlags.SPACE_BEFORE),		// 0x4E
 				new SimpleElementParser((byte) 79, EnumSet.of(TFlag.DISCARD), "", PFlags.NEWLINE_AFTER),
 				new NumberParser((byte) 80, 18),										// 0x50
 				new SimpleElementParser((byte) 84, EnumSet.of(TFlag.COMPONENT), "Component", PFlags.NEWLINE_BEFORE_SPACE_AFTER),			// 0x54
 				new CommentParser((byte) 85, PFlags.NEWLINE_AFTER | PFlags.COMMENT_ON_SAME_LINE | PFlags.SPACE_BEFORE),		// 0x55
 				new SimpleElementParser((byte) 87, EnumSet.of(TFlag.COLON), ":", PFlags.PUNCTUATION),
 				new SimpleElementParser((byte) 88, EnumSet.of(TFlag.IMPORT), "import"),	// 0x58
+				new SimpleElementParser((byte) 89, EnumSet.of(TFlag.WILDCARD_IMPORT), "*"),		// 0x59
 				new SimpleElementParser((byte) 90, EnumSet.of(TFlag.CLASS), "class", PFlags.FUNCTION_STYLE),	// 0x5A
 				new SimpleElementParser((byte) 91, EnumSet.of(TFlag.END_CLASS), "end-class", PFlags.END_FUNCTION_STYLE),		// 0x5B
 				new SimpleElementParser((byte) 94, EnumSet.of(TFlag.PROPERTY), "property", PFlags.NEWLINE_BEFORE_SPACE_AFTER),		// 0x5E

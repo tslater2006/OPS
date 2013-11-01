@@ -48,9 +48,9 @@ public class BuildAssistant {
 		}
 
 		if(!prog.isLoaded()) {
+			prog.markLoaded();		// Mark before loading to prevent infinite loop during cyclical dependencies.
 			System.out.println("[NOT LOADED] Loading initial metadata for " + progDescriptor);
 			prog.loadInitialMetadata();
-			prog.markLoaded();
 		} else {
 			System.out.println("[ALREADY LOADED] Metadata exists for " + progDescriptor);
 		}
@@ -70,9 +70,9 @@ public class BuildAssistant {
 		}
 
 		if(!prog.areReferencesLoaded()) {
+			prog.markReferencesLoaded();	// Mark before loading to prevent infinte loop during cyclical dependencies
 			System.out.println("[NOT LOADED] Loading referenced defns and progs for " + progDescriptor);
 			prog.loadReferencedDefinitionsAndPrograms();
-			prog.markReferencesLoaded();
 		} else {
 			System.out.println("[ALREADY LOADED] Referenced defns and progs already loaded for " + progDescriptor);
 		}

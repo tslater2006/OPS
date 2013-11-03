@@ -367,16 +367,26 @@ public class Component {
 
 	public void loadAllComponentPCProgsAndReferencedDefns() throws Exception {
 
-		// Load the PostBuild event for the component first.
+		// Load the PostBuild event for the component first, if it exists.
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PostBuild")) {
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
 			}
+		}
+
+		// Then the PreBuild event, if it exists.
+		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PreBuild")) {
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
 			}
+		}
+
+		// Then load each Component PC program in order of appearance in result set.
+		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
+			BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+			BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
 		}
 	}
 }

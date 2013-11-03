@@ -105,12 +105,14 @@ public class Parser {
 				new SimpleElementParser((byte) 84, EnumSet.of(TFlag.COMPONENT), "Component", PFlags.NEWLINE_BEFORE_SPACE_AFTER),			// 0x54
 				new CommentParser((byte) 85, PFlags.NEWLINE_AFTER | PFlags.COMMENT_ON_SAME_LINE | PFlags.SPACE_BEFORE),		// 0x55
 				new SimpleElementParser((byte) 87, EnumSet.of(TFlag.COLON), ":", PFlags.PUNCTUATION),
+				new SimpleElementParser((byte) 86, EnumSet.of(TFlag.CONSTANT), "Constant", PFlags.NEWLINE_BEFORE_SPACE_AFTER),		// 0x56
 				new SimpleElementParser((byte) 88, EnumSet.of(TFlag.IMPORT), "import"),	// 0x58
 				new SimpleElementParser((byte) 89, EnumSet.of(TFlag.WILDCARD_IMPORT), "*"),		// 0x59
 				new SimpleElementParser((byte) 90, EnumSet.of(TFlag.CLASS), "class", PFlags.FUNCTION_STYLE),	// 0x5A
 				new SimpleElementParser((byte) 91, EnumSet.of(TFlag.END_CLASS), "end-class", PFlags.END_FUNCTION_STYLE),		// 0x5B
 				new SimpleElementParser((byte) 94, EnumSet.of(TFlag.PROPERTY), "property", PFlags.NEWLINE_BEFORE_SPACE_AFTER),		// 0x5E
 				new SimpleElementParser((byte) 95, EnumSet.of(TFlag.GET), "get"),		// 0x5F
+				new SimpleElementParser((byte) 96, EnumSet.of(TFlag.READONLY), "readonly"), 		// 0x60
 				new SimpleElementParser((byte) 97, EnumSet.of(TFlag.PRIVATE), "private", PFlags.ELSE_STYLE),	// 0x61
 				new SimpleElementParser((byte) 98, EnumSet.of(TFlag.INSTANCE), "instance"), 	// 0x62
 				new SimpleElementParser((byte) 99, EnumSet.of(TFlag.METHOD), "method", PFlags.NEWLINE_BEFORE | PFlags.SPACE_AFTER | PFlags.INCREASE_INDENT_ONCE),	// 0x63
@@ -118,6 +120,7 @@ public class Parser {
 				new SimpleElementParser((byte) 101, EnumSet.of(TFlag.TRY), "try", PFlags.SPACE_BEFORE_NEWLINE_AFTER),	// 0x65
 				new SimpleElementParser((byte) 102, EnumSet.of(TFlag.CATCH), "catch"),	// 0x66
 				new SimpleElementParser((byte) 103, EnumSet.of(TFlag.END_TRY), "end-try"), // 0x67
+				new SimpleElementParser((byte) 104, EnumSet.of(TFlag.THROW), "throw"),		// 0x68
 				new SimpleElementParser((byte) 105, EnumSet.of(TFlag.CREATE), "create"),	// 0x69
 				new SimpleElementParser((byte) 106, EnumSet.of(TFlag.END_GET), "end-get"),	// 0x6A
 				new SimpleElementParser((byte) 107, EnumSet.of(TFlag.END_SET), "end-set"),	// 0x6B
@@ -145,7 +148,7 @@ public class Parser {
 
 		ElementParser p = parserTable.get(new Byte(b));
 		if(p == null) {
-			System.out.println("[ERROR] Reached unimplementable byte.");
+			System.out.printf("[ERROR] Reached unimplementable byte: 0x%02X\n", b);
 			System.exit(1);
 		} else {
 

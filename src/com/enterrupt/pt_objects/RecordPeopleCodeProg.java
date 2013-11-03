@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import com.enterrupt.sql.StmtLibrary;
 
-public class RecordPeopleCodeProg extends PeopleCodeProg {
+public class RecordPeopleCodeProg extends ClassicPeopleCodeProg {
 
 	public String RECNAME;
 	public String FLDNAME;

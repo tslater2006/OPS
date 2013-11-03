@@ -31,6 +31,8 @@ public abstract class PeopleCodeProg {
 	private StringBuilder progTextBuilder;
 	private boolean hasInitialMetadataBeenLoaded;
 	private boolean haveLoadedReferencedDefnsAndProgs;
+	protected ArrayList<PeopleCodeProg> referencedProgs;
+	protected HashMap<String, Boolean> importedAppPackages;
 
     protected PeopleCodeProg() {
 		this.progBytes = new byte[0];
@@ -56,6 +58,7 @@ public abstract class PeopleCodeProg {
 	}
 
 	protected abstract void progSpecific_loadInitialMetadata() throws Exception;
+	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream) throws Exception;
 	public abstract Clob getProgTextClob() throws Exception;
 	public abstract String getDescriptor();
 
@@ -121,7 +124,11 @@ public abstract class PeopleCodeProg {
 
 		this.progTokens = tokenList.toArray(new Token[0]);
 		//System.out.println(this.getProgText());
-		this.verifyEntireProgramText();
+
+		/**
+		 * TODO: Re-enable this at some point.
+		 */
+		//this.verifyEntireProgramText();
 	}
 
 	public void setByteCursorPos(int pos) {
@@ -204,91 +211,6 @@ public abstract class PeopleCodeProg {
 		this.progBytes = allBytes;
     }
 
-	public void loadReferencedDefinitionsAndPrograms() throws Exception {
-
-		Token t;
-		PeopleCodeTokenStream stream = new PeopleCodeTokenStream(this);
-		ArrayList<PeopleCodeProg> referencedProgs = new ArrayList<PeopleCodeProg>();
-
-		while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
-
-			//System.out.println(t.flags);
-
-			if(t.flags.contains(TFlag.IMPORT)) {
-
-				ArrayList<String> pathParts = new ArrayList<String>();
-
-				// Path is variable length.
-				do {
-					t = stream.readNextToken();
-					pathParts.add(t.pureStrVal);
-					t = stream.readNextToken();
-				} while(t.flags.contains(TFlag.COLON));
-
-				// Load the app package (get list of all programs within) if not already cached.
-				BuildAssistant.getAppPackageDefn(pathParts.get(0));
-			}
-
-			if(t.flags.contains(TFlag.DECLARE)) {
-
-				t = stream.readNextToken();
-				if(!t.flags.contains(TFlag.FUNCTION)) {
-					System.out.println("[ERROR] Expected FUNCTION after DECLARES.");
-					System.exit(1);
-				}
-
-				// Name of the function.
-				t = stream.readNextToken();
-
-				t = stream.readNextToken();
-				if(!t.flags.contains(TFlag.PEOPLECODE)) {
-					System.out.println("[ERROR] Expected PEOPLECODE after function name.");
-					System.exit(1);
-				}
-
-				t = stream.readNextToken();
-				Reference refObj = t.refObj;
-
-				t = stream.readNextToken();
-				String event = t.pureStrVal;
-
-				// Load the record definition if it hasn't already been cached.
-				BuildAssistant.getRecordDefn(refObj.RECNAME);
-
-				PeopleCodeProg prog = new RecordPeopleCodeProg(refObj.RECNAME, refObj.REFNAME, event);
-				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
-
-				referencedProgs.add(prog);
-
-				// Load the program's initial metadata if it hasn't already been cached.
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-			}
-
-			// Load the record defn if it hasn't already been cached; only want record.field references here.
-			if(t.flags.contains(TFlag.REFERENCE) && t.refObj.isRecordFieldRef) {
-				BuildAssistant.getRecordDefn(t.refObj.RECNAME);
-			}
-		}
-
-		/**
-		 * All programs referenced by this program must have their referenced
-		 * definitions and programs loaded now.
-		 */
-		for(PeopleCodeProg prog : referencedProgs) {
-
-			/**
-			 * TODO: Keep this in the back of your mind. It appears that Record PC programs
-			 * have their definitions and external function references loaded, but App Package PC
-			 * programs do not. If this doesn't get loaded during initialization, I'll need to understand
-			 * where App Package PC dependencies get loaded when it comes to time to run the interpreter.
-			 */
-			if(!(prog instanceof AppPackagePeopleCodeProg)) {
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
-			}
-		}
-	}
-
 	/**
      * REMEMBER: SQL emitted here should not show up in the emittedStmts
      * list, otherwise trace verification will fail.
@@ -329,5 +251,78 @@ public abstract class PeopleCodeProg {
 			//System.out.println("[NOTICE]: PCPCMTXT does not contain PC for requested program.");
 		}
     }
+
+	public void loadReferencedDefnsAndPrograms() throws Exception {
+
+ 		Token t;
+		this.referencedProgs = new ArrayList<PeopleCodeProg>();
+        this.importedAppPackages = new HashMap<String, Boolean>();
+        PeopleCodeTokenStream stream = new PeopleCodeTokenStream(this);
+
+        while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
+
+            //System.out.println(t.flags);
+
+			/**
+			 * TODO: Determine whether this belongs here or in ClassicPeopleCodeProg.
+			 * For now I'm assuming that imported packages are checked in both classic
+			 * and app package programs.
+			 */
+            if(t.flags.contains(TFlag.IMPORT)) {
+
+                ArrayList<String> pathParts = new ArrayList<String>();
+
+                // Path is variable length.
+                do {
+                    t = stream.readNextToken();
+                    pathParts.add(t.pureStrVal);
+                    t = stream.readNextToken();
+                } while(t.flags.contains(TFlag.COLON));
+
+                // Load the app package (get list of all programs within) if not already cached.
+                BuildAssistant.getAppPackageDefn(pathParts.get(0));
+
+                importedAppPackages.put(pathParts.get(0), true);
+            }
+
+			this.typeSpecific_handleReferencedToken(t, stream);
+        }
+
+        /**
+         * All programs referenced by this program must have their referenced
+         * definitions and programs loaded now.
+         */
+        for(PeopleCodeProg prog : referencedProgs) {
+            BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+   	        BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+        }
+	}
+
+	/**
+	* CRITICAL TODO: I've seen an instance where a LOCAL token was followed by a single
+    * PURE_STRING containing just the name of the app class in the bytecode, without the packages
+    * specified before it, even though in App Designer it was displayed in text with the packages
+    * before it. This was causing Enterrupt to not load the app class. I can't reproduce the issue
+    * at the moment because messing with the program in App Designer caused App Designer to
+    * store the whole path in the bytecode. In order to resolve this in the future, I'll need
+    * to keep a list of terminal app classes in a hash table, mapped to the matching preceding path.
+    * In the event of duplicate class names with different paths, I've verified that the whole path
+    * will appear in the variable declaration bytecode.
+    */
+	protected String[] getAppClassPathFromStream(Token t, PeopleCodeTokenStream stream) {
+
+    	ArrayList<String> pathParts = new ArrayList<String>();
+        pathParts.add(t.pureStrVal);        // add the package name to the path.
+        stream.readNextToken();     // skip over COLON
+
+        // Path is variable length.
+        do {
+        	t = stream.readNextToken();
+            pathParts.add(t.pureStrVal);
+            t = stream.readNextToken();
+        } while(t.flags.contains(TFlag.COLON));
+
+		return pathParts.toArray(new String[0]);
+	}
 }
 

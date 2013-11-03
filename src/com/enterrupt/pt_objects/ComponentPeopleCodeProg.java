@@ -7,7 +7,7 @@ import java.sql.PreparedStatement;
 import java.lang.StringBuilder;
 import com.enterrupt.sql.StmtLibrary;
 
-public class ComponentPeopleCodeProg extends PeopleCodeProg {
+public class ComponentPeopleCodeProg extends ClassicPeopleCodeProg {
 
 	public String PNLGRPNAME;
 	public String MARKET;

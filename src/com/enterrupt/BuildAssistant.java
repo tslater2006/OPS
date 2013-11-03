@@ -72,7 +72,7 @@ public class BuildAssistant {
 		if(!prog.areReferencesLoaded()) {
 			prog.markReferencesLoaded();	// Mark before loading to prevent infinte loop during cyclical dependencies
 			System.out.println("[NOT LOADED] Loading referenced defns and progs for " + progDescriptor);
-			prog.loadReferencedDefinitionsAndPrograms();
+			prog.loadReferencedDefnsAndPrograms();
 		} else {
 			System.out.println("[ALREADY LOADED] Referenced defns and progs already loaded for " + progDescriptor);
 		}

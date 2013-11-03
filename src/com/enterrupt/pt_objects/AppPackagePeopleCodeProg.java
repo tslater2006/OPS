@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.lang.StringBuilder;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
+import com.enterrupt.parser.Token;
+import com.enterrupt.parser.TFlag;
 
 public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
@@ -52,7 +54,7 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
 		this.rootPackage = BuildAssistant.getAppPackageDefn(this.bindValues[1]);
 
-		//System.out.println(java.util.Arrays.toString(this.bindValues));
+		System.out.println(java.util.Arrays.toString(this.bindValues));
 		//System.exit(1);
 	}
 
@@ -135,5 +137,33 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
             return rs.getClob("PCTXT");
 		}
 		return null;
+	}
+
+	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream) throws Exception {
+
+		/**
+		 * Detect application classes referenced as instance and property values in an object
+		 * definition.
+		 */
+		if(t.flags.contains(TFlag.INSTANCE) || t.flags.contains(TFlag.PROPERTY)) {
+
+			t = stream.readNextToken();
+			Token l = stream.peekNextToken();
+
+			if(t.flags.contains(TFlag.PURE_STRING)
+				&& l.flags.contains(TFlag.COLON)
+				&& importedAppPackages.get(t.pureStrVal) != null) {
+
+				String[] path = this.getAppClassPathFromStream(t, stream);
+
+				PeopleCodeProg prog = new AppPackagePeopleCodeProg(path);
+				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+
+				referencedProgs.add(prog);
+
+				// Load the program's initial metadata.
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+			}
+		}
 	}
 }

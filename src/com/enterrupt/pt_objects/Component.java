@@ -151,7 +151,7 @@ public class Component {
 			if(prog.RECNAME != null && prog.RECNAME.equals(this.SEARCHRECNAME)) {
 
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
 
 				Interpreter interpreter = new Interpreter(prog);
 				interpreter.run();
@@ -358,7 +358,7 @@ public class Component {
 
 					for(PeopleCodeProg prog : fieldProgs) {
 						BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-						BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+						BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "RecPCMode");
 					}
 				}
 			}
@@ -371,7 +371,7 @@ public class Component {
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PostBuild")) {
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
 			}
 		}
 	}

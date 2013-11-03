@@ -58,7 +58,8 @@ public abstract class PeopleCodeProg {
 	}
 
 	protected abstract void progSpecific_loadInitialMetadata() throws Exception;
-	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream) throws Exception;
+	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
+		int recursionLevel, String mode) throws Exception;
 	public abstract Clob getProgTextClob() throws Exception;
 	public abstract String getDescriptor();
 
@@ -252,7 +253,7 @@ public abstract class PeopleCodeProg {
 		}
     }
 
-	public void loadReferencedDefnsAndPrograms() throws Exception {
+	public void loadReferencedDefnsAndPrograms(int recursionLevel, String mode) throws Exception {
 
  		Token t;
 		this.referencedProgs = new ArrayList<PeopleCodeProg>();
@@ -285,7 +286,7 @@ public abstract class PeopleCodeProg {
                 importedAppPackages.put(pathParts.get(0), true);
             }
 
-			this.typeSpecific_handleReferencedToken(t, stream);
+			this.typeSpecific_handleReferencedToken(t, stream, recursionLevel, mode);
         }
 
         /**
@@ -294,7 +295,19 @@ public abstract class PeopleCodeProg {
          */
         for(PeopleCodeProg prog : referencedProgs) {
             BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-   	        BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor());
+
+			/**
+			 * In Record PC mode, referenced defns and progs should be recursively loaded indefinitely.
+			 * In Component PC mode, all App Package PC programs must be permitted to load their references
+			 * recursively; for all other program types, their references should be loaded only if they are
+			 * directly referenced in the root Component PC program being loaded (which exists at recursion
+			 * level 0).
+			 */
+			if(mode.equals("RecPCMode")
+				|| (mode.equals("CompPCMode")
+					&& (prog instanceof AppPackagePeopleCodeProg || recursionLevel == 0))) {
+	   	        BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), recursionLevel+1, mode);
+			}
         }
 	}
 

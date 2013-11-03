@@ -56,7 +56,7 @@ public class BuildAssistant {
 		}
 	}
 
-	public static void loadReferencedProgsAndDefnsForProg(String progDescriptor) throws Exception {
+	public static void loadReferencedProgsAndDefnsForProg(String progDescriptor, int recursionLevel, String mode) throws Exception {
 
 		PeopleCodeProg prog = progCache.get(progDescriptor);
 		if(prog == null) {
@@ -72,7 +72,7 @@ public class BuildAssistant {
 		if(!prog.areReferencesLoaded()) {
 			prog.markReferencesLoaded();	// Mark before loading to prevent infinte loop during cyclical dependencies
 			System.out.println("[NOT LOADED] Loading referenced defns and progs for " + progDescriptor);
-			prog.loadReferencedDefnsAndPrograms();
+			prog.loadReferencedDefnsAndPrograms(recursionLevel, mode);
 		} else {
 			System.out.println("[ALREADY LOADED] Referenced defns and progs already loaded for " + progDescriptor);
 		}

@@ -23,7 +23,8 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 	public abstract String getDescriptor();
 	protected abstract void progSpecific_loadInitialMetadata() throws Exception;
 
-	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream) throws Exception {
+	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
+		int recursionLevel, String mode) throws Exception {
 
     	if(t.flags.contains(TFlag.DECLARE)) {
         	t = stream.readNextToken();
@@ -87,14 +88,14 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 		}
 
         // Load the record defn if it hasn't already been cached; only want record.field references here.
-        if(t.flags.contains(TFlag.REFERENCE) && t.refObj.isRecordFieldRef) {
-
-			/*if(t.refObj.RECNAME.equals("CLASS_TBL_VW1")) {
-				System.out.println(this.getDescriptor());
-				System.out.println("FOUND IT");
-				System.exit(1);
-			}*/
-
+		/**
+		 * References to records should always be loaded when the root program is a Record PC prog.
+		 * If the root program is a Component PC prog, references to records should only be loaded
+		 * if this object represents either the root Component PC programs itself or one of the
+		 * programs referenced by it (recursion levels 0 and 1, respectively).
+		 */
+		if((mode.equals("RecPCMode") || (mode.equals("CompPCMode") && recursionLevel < 2)) &&
+			t.flags.contains(TFlag.REFERENCE) && t.refObj.isRecordFieldRef) {
         	BuildAssistant.getRecordDefn(t.refObj.RECNAME);
         }
 	}

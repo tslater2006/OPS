@@ -139,7 +139,8 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 		return null;
 	}
 
-	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream) throws Exception {
+	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
+		int recursionLevel, String mode) throws Exception {
 
 		/**
 		 * Detect application classes referenced as instance and property values in an object
@@ -163,6 +164,17 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
 				// Load the program's initial metadata.
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+
+				/**
+				 * I added this call in order to align ENT with the Component PC loading section of the
+				 * the trace file; I've learned that when PT encounters a referenced object in an app
+				 * class, it recursively loads that app class's references immediately. Thus I added this call.
+			     * It's possible that this call may need to be locked down to Component PC
+				 * loading mode if issues with Record PC loading surface later on. At this time, running
+				 * this unconditionally is not interfering with the previous sections of the trace file.
+				 * TODO: keep this in mind.
+				 */
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), recursionLevel+1, mode);
 			}
 		}
 	}

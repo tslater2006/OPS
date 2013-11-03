@@ -40,7 +40,7 @@ public enum TFlag {
 	FOR,
 	TO,
 	END_FOR,
-	MINUS,
+	SUBTRACT,
 	CREATE,
 	OR,
 	NOT,
@@ -78,6 +78,7 @@ public enum TFlag {
 	CONSTANT,
 	THROW,
 	READONLY,
+	DIVIDE,
 
 	REFERENCE, PURE_STRING, EMBEDDED_STRING,
 

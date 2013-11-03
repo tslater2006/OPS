@@ -373,6 +373,10 @@ public class Component {
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
 			}
+			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PreBuild")) {
+				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
+			}
 		}
 	}
 }

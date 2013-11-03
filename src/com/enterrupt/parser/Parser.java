@@ -38,6 +38,7 @@ public class Parser {
 				new IdentifierParser((byte) 0),										// 0x00
 				new PureStringParser((byte) 1),										// 0x01
 				new SimpleElementParser((byte) 3, EnumSet.of(TFlag.COMMA), ",", PFlags.NO_SPACE_BEFORE | PFlags.SPACE_AFTER),	// 0x03
+				new SimpleElementParser((byte) 4, EnumSet.of(TFlag.DIVIDE), "/"), 	// 0x04
 				new SimpleElementParser((byte) 5, EnumSet.of(TFlag.PERIOD), ".", PFlags.PUNCTUATION),	// 0x05
 				new SimpleElementParser((byte) 6, EnumSet.of(TFlag.EQUAL), "="),								// 0x06
 				new SimpleElementParser((byte) 8, EnumSet.of(TFlag.GT_OR_EQUAL), ">="),	// 0x08
@@ -46,7 +47,7 @@ public class Parser {
 				new SimpleElementParser((byte) 11, EnumSet.of(TFlag.L_PAREN), "(", PFlags.NO_SPACE_AFTER),	// 0x0B
 				new SimpleElementParser((byte) 12, EnumSet.of(TFlag.LT_OR_EQUAL), "<="),	// 0x0C
 				new SimpleElementParser((byte) 13, EnumSet.of(TFlag.LESS_THAN), "<"),		// 0x0D
-				new SimpleElementParser((byte) 14, EnumSet.of(TFlag.MINUS), "-"), // 0x0E
+				new SimpleElementParser((byte) 14, EnumSet.of(TFlag.SUBTRACT), "-"), // 0x0E
 				new SimpleElementParser((byte) 16, EnumSet.of(TFlag.NOT_EQUAL), "<>"),	// 0x10
 				new NumberParser((byte) 17, 14),	// 0x11
 				new PureStringParser((byte) 18),									// 0x12 (System variable name)

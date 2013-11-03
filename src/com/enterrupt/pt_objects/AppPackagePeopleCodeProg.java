@@ -12,8 +12,9 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
 	public String[] bindValues;
 	public String[] pathParts;
+	public AppPackage rootPackage;
 
-	public AppPackagePeopleCodeProg(String[] path) {
+	public AppPackagePeopleCodeProg(String[] path) throws Exception {
 		super();
 		this.pathParts = path;
 		this.event = "OnExecute";
@@ -49,6 +50,8 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 			}
 		}
 
+		this.rootPackage = BuildAssistant.getAppPackageDefn(this.bindValues[1]);
+
 		//System.out.println(java.util.Arrays.toString(this.bindValues));
 		//System.exit(1);
 	}
@@ -63,33 +66,7 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 		return sb.toString();
 	}
 
-	private void getListOfAllConstituentAppClassPrograms() throws Exception {
-
-		if(BuildAssistant.appPackageDefnCache.get(this.bindValues[1]) != null) {
-			return;
-		}
-
-		PreparedStatement pstmt;
-        ResultSet rs;
-
-        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(this.bindValues[0], this.bindValues[1]);
-        rs = pstmt.executeQuery();
-
-		/**
-		 * TODO: BE VERY CAREFUL HERE; not only is this not ordered by PROGSEQ, but
-		 * there may be multiple entries per program if it is greater than 28,000 bytes.
-		 * Keep those considerations in mind before using the records returned here.
-		 */
-		rs.next(); // Do nothing with records for now.
-        rs.close();
-        pstmt.close();
-
-		BuildAssistant.cacheAppPackageDefn(this.bindValues[1]);
-	}
-
 	protected void progSpecific_loadInitialMetadata() throws Exception {
-
-		this.getListOfAllConstituentAppClassPrograms();
 
         PreparedStatement pstmt = null;
         ResultSet rs;

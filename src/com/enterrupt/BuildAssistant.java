@@ -25,13 +25,13 @@ public class BuildAssistant {
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
 	private static HashMap<String, Boolean> systemTableRecNames;
-	public static HashMap<String, Boolean> appPackageDefnCache;
+	public static HashMap<String, AppPackage> appPackageDefnCache;
 	public static HashMap<String, PeopleCodeProg> progCache;
 
 	public static void init() {
 		pageDefnCache = new HashMap<String, Page>();
 		recDefnCache = new HashMap<String, Record>();
-		appPackageDefnCache = new HashMap<String, Boolean>();
+		appPackageDefnCache = new HashMap<String, AppPackage>();
 		progCache = new HashMap<String, PeopleCodeProg>();
 
 		// Initialize the list of system tables for which metadata should not be gathered.
@@ -78,10 +78,6 @@ public class BuildAssistant {
 		}
 	}
 
-	public static void cacheAppPackageDefn(String appPackageName) {
-		appPackageDefnCache.put(appPackageName, true);
-	}
-
 	public static PeopleCodeProg getProgramOrCacheIfMissing(PeopleCodeProg prog) {
 
 		PeopleCodeProg p = progCache.get(prog.getDescriptor());
@@ -117,6 +113,17 @@ public class BuildAssistant {
 			cacheRecord(r);
 		}
 		return r;
+	}
+
+	public static AppPackage getAppPackageDefn(String packageName) throws Exception {
+
+		AppPackage ap = appPackageDefnCache.get(packageName);
+		if(ap == null) {
+			ap = new AppPackage(packageName);
+			ap.getListOfAllAppClassPrograms();
+			appPackageDefnCache.put(packageName, ap);
+		}
+		return ap;
 	}
 
 	public static Page getLoadedPage(String PNLNAME) throws Exception {

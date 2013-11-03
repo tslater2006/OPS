@@ -214,6 +214,21 @@ public abstract class PeopleCodeProg {
 
 			//System.out.println(t.flags);
 
+			if(t.flags.contains(TFlag.IMPORT)) {
+
+				ArrayList<String> pathParts = new ArrayList<String>();
+
+				// Path is variable length.
+				do {
+					t = stream.readNextToken();
+					pathParts.add(t.pureStrVal);
+					t = stream.readNextToken();
+				} while(t.flags.contains(TFlag.COLON));
+
+				// Load the app package (get list of all programs within) if not already cached.
+				BuildAssistant.getAppPackageDefn(pathParts.get(0));
+			}
+
 			if(t.flags.contains(TFlag.DECLARE)) {
 
 				t = stream.readNextToken();
@@ -246,32 +261,6 @@ public abstract class PeopleCodeProg {
 				referencedProgs.add(prog);
 
 				// Load the program's initial metadata if it hasn't already been cached.
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-			}
-
-			if(t.flags.contains(TFlag.IMPORT)) {
-
-				ArrayList<String> pathParts = new ArrayList<String>();
-
-				// Path to app class is variable length.
-				do {
-					t = stream.readNextToken();
-					pathParts.add(t.pureStrVal);
-					t = stream.readNextToken();
-				} while(t.flags.contains(TFlag.COLON));
-
-				// TEMP: Wildcards not supported yet.
-				if(pathParts.get(pathParts.size() - 1) == null ||
-					pathParts.get(pathParts.size() - 1).equals("*")) {
-					continue;
-				}
-
-				PeopleCodeProg prog = new AppPackagePeopleCodeProg(pathParts.toArray(new String[0]));
-				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
-
-				referencedProgs.add(prog);
-
-				// Load the program's initial metadata.
 				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
 			}
 

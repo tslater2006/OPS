@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.lang.StringBuilder;
 import java.util.Collections;
-import com.enterrupt.BuildAssistant;
+import com.enterrupt.DefnCache;
 import com.enterrupt.pt_objects.*;
 
 public class RecordBuffer implements IStreamableBuffer {
@@ -50,7 +50,7 @@ public class RecordBuffer implements IStreamableBuffer {
 
             fieldBufferTable.clear();
             fieldBuffers.clear();
-            Record recDefn = BuildAssistant.getRecordDefn(this.recName);
+            Record recDefn = DefnCache.getRecord(this.recName);
             ArrayList<RecordField> expandedFieldList = recDefn.getExpandedFieldList();
 
             for(RecordField fld : expandedFieldList) {

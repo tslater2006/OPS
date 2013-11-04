@@ -17,7 +17,6 @@ import com.enterrupt.sql.*;
 public class BuildAssistant {
 
 	public static HashMap<String, Page> pageDefnCache;
-	public static HashMap<String, Record> recDefnCache;
 	private static final String SQL_TOKEN_REGEX = "\\sStmt=(.*)";
 	private static final String BIND_VAL_REGEX = "\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)";
 	private static BufferedReader traceReader;
@@ -30,7 +29,6 @@ public class BuildAssistant {
 
 	public static void init() {
 		pageDefnCache = new HashMap<String, Page>();
-		recDefnCache = new HashMap<String, Record>();
 		appPackageDefnCache = new HashMap<String, AppPackage>();
 		progCache = new HashMap<String, PeopleCodeProg>();
 
@@ -49,10 +47,10 @@ public class BuildAssistant {
 
 		if(!prog.isLoaded()) {
 			prog.markLoaded();		// Mark before loading to prevent infinite loop during cyclical dependencies.
-			System.out.println("[NOT LOADED] Loading initial metadata for " + progDescriptor);
+			//System.out.println("[NOT LOADED] Loading initial metadata for " + progDescriptor);
 			prog.loadInitialMetadata();
 		} else {
-			System.out.println("[ALREADY LOADED] Metadata exists for " + progDescriptor);
+			//System.out.println("[ALREADY LOADED] Metadata exists for " + progDescriptor);
 		}
 	}
 
@@ -71,10 +69,10 @@ public class BuildAssistant {
 
 		if(!prog.areReferencesLoaded()) {
 			prog.markReferencesLoaded();	// Mark before loading to prevent infinte loop during cyclical dependencies
-			System.out.println("[NOT LOADED] Loading referenced defns and progs for " + progDescriptor);
+			//System.out.println("[NOT LOADED] Loading referenced defns and progs for " + progDescriptor);
 			prog.loadReferencedDefnsAndPrograms(recursionLevel, mode);
 		} else {
-			System.out.println("[ALREADY LOADED] Referenced defns and progs already loaded for " + progDescriptor);
+			//System.out.println("[ALREADY LOADED] Referenced defns and progs already loaded for " + progDescriptor);
 		}
 	}
 
@@ -88,31 +86,11 @@ public class BuildAssistant {
 		return p;
 	}
 
-	public static void cacheRecord(Record r) {
-		recDefnCache.put(r.RECNAME, r);
-	}
-
 	public static boolean isSystemTable(String RECNAME) {
 		if(systemTableRecNames.get(RECNAME) != null) {
 			return true;
 		}
 		return false;
-	}
-
-	public static Record getRecordDefn(String RECNAME) throws Exception {
-
-		// We don't need to query for system table metadata; ignore requests for such tables.
-        if(RECNAME.length() == 0 || isSystemTable(RECNAME)) {
-            return null;
-        }
-
-		Record r = recDefnCache.get(RECNAME);
-		if(r == null) {
-			r = new Record(RECNAME);
-			r.loadInitialMetadata();
-			cacheRecord(r);
-		}
-		return r;
 	}
 
 	public static AppPackage getAppPackageDefn(String packageName) throws Exception {

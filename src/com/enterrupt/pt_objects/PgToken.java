@@ -1,7 +1,7 @@
 package com.enterrupt.pt_objects;
 
 import java.util.EnumSet;
-import com.enterrupt.BuildAssistant;
+import com.enterrupt.DefnCache;
 
 public class PgToken {
 
@@ -46,7 +46,7 @@ public class PgToken {
 		 * rather than simply waiting for records to be expanded by the component buffer.
 		 */
 		// Subrecords should not be added.
-		Record recDefn = BuildAssistant.getRecordDefn(this.RECNAME);
+		Record recDefn = DefnCache.getRecord(this.RECNAME);
 		if(recDefn.isSubrecord()) {
 			return false;
 		}

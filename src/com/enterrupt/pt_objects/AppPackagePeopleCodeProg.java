@@ -54,7 +54,7 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
 		this.rootPackage = BuildAssistant.getAppPackageDefn(this.bindValues[1]);
 
-		System.out.println(java.util.Arrays.toString(this.bindValues));
+		//System.out.println(java.util.Arrays.toString(this.bindValues));
 		//System.exit(1);
 	}
 

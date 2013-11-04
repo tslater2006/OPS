@@ -25,10 +25,7 @@ public class Main {
 			RunTimeEnvironment.compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr());
 
 			Component c = new Component("SSS_STUDENT_CENTER", "GBL");
-			c.loadInitialMetadata();
-
 			Menu m = new Menu("SA_LEARNER_SERVICES");
-			m.loadInitialMetadata();
 
 			c.loadSearchRecord();
 

@@ -29,6 +29,6 @@ public class AppPackage {
         rs.close();
         pstmt.close();
 
-		System.out.println("Loaded app package: " + this.packageName);
+		//System.out.println("Loaded app package: " + this.packageName);
 	}
 }

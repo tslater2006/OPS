@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
+import com.enterrupt.DefnCache;
 
 public class Record {
 
@@ -45,7 +46,7 @@ public class Record {
         PreparedStatement pstmt;
         ResultSet rs;
 
-		System.out.println("Querying: " + this.RECNAME);
+		//System.out.println("Querying: " + this.RECNAME);
         pstmt = StmtLibrary.getPSRECDEFN(this.RECNAME);
         rs = pstmt.executeQuery();
 
@@ -107,7 +108,7 @@ public class Record {
 
 		for(String subrecname : subRecordNames) {
 			//System.out.println("Loading subrecord : " + subrecname);
-			BuildAssistant.getRecordDefn(subrecname);
+			DefnCache.getRecord(subrecname);
 		}
 
 		/**
@@ -118,7 +119,7 @@ public class Record {
 	     * to Enterrupt; need to look into this.
 		 */
 		if(this.RELLANGRECNAME.length() > 0) {
-			BuildAssistant.getRecordDefn(this.RELLANGRECNAME);
+			DefnCache.getRecord(this.RELLANGRECNAME);
 		}
     }
 
@@ -131,7 +132,7 @@ public class Record {
 			if(obj instanceof RecordField) {
 				expandedFieldList.add((RecordField) obj);
 			} else {
-				Record subrecDefn = BuildAssistant.getRecordDefn((String) obj);
+				Record subrecDefn = DefnCache.getRecord((String) obj);
 				expandedFieldList.addAll(subrecDefn.getExpandedFieldList());
 			}
 		}

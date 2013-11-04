@@ -16,6 +16,7 @@ import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.parser.Token;
 import com.enterrupt.parser.TFlag;
+import com.enterrupt.DefnCache;
 
 public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 
@@ -49,7 +50,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
             String event = t.pureStrVal;
 
             // Load the record definition if it hasn't already been cached.
-            BuildAssistant.getRecordDefn(refObj.RECNAME);
+            DefnCache.getRecord(refObj.RECNAME);
 
             PeopleCodeProg prog = new RecordPeopleCodeProg(refObj.RECNAME, refObj.REFNAME, event);
             prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
@@ -96,7 +97,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 		 */
 		if((mode.equals("RecPCMode") || (mode.equals("CompPCMode") && recursionLevel < 2)) &&
 			t.flags.contains(TFlag.REFERENCE) && t.refObj.isRecordFieldRef) {
-        	BuildAssistant.getRecordDefn(t.refObj.RECNAME);
+        	DefnCache.getRecord(t.refObj.RECNAME);
         }
 	}
 }

@@ -7,6 +7,7 @@ import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.buffers.RecordPCListRequestBuffer;
 import java.util.HashMap;
+import com.enterrupt.DefnCache;
 
 public class Page {
 
@@ -54,7 +55,7 @@ public class Page {
 			 * Issue request for the record definition and record fields,
 			 * regardless of field type.
 		 	 */
-			BuildAssistant.getRecordDefn(pf.RECNAME);
+			DefnCache.getRecord(pf.RECNAME);
 
             switch(rs.getInt("FIELDTYPE")) {
 

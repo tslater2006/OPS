@@ -14,6 +14,7 @@ import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
 import com.enterrupt.buffers.*;
+import com.enterrupt.DefnCache;
 
 public class Component {
 
@@ -39,13 +40,10 @@ public class Component {
 		}
 	}
 
-    public Component(String pnlgrpname, String market) {
+    public Component(String pnlgrpname, String market) throws Exception {
         this.PNLGRPNAME = pnlgrpname;
         this.MARKET = market;
         pages = new ArrayList<Page>();
-    }
-
-    public void loadInitialMetadata() throws Exception {
 
         PreparedStatement pstmt;
         ResultSet rs;
@@ -71,7 +69,7 @@ public class Component {
 	public void loadSearchRecord() throws Exception {
 
 		// Loads the search record and puts it in cache.
-		BuildAssistant.getRecordDefn(this.SEARCHRECNAME);
+		DefnCache.getRecord(this.SEARCHRECNAME);
     }
 
     public void getListOfComponentPC() throws Exception {
@@ -131,7 +129,7 @@ public class Component {
 
     public void loadAndRunRecordPConSearchRecord() throws Exception {
 
-		Record recDefn = BuildAssistant.getRecordDefn(this.SEARCHRECNAME);
+		Record recDefn = DefnCache.getRecord(this.SEARCHRECNAME);
 		recDefn.getListOfRecordPCPrograms();
 
         for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
@@ -353,8 +351,8 @@ public class Component {
 					.recordProgsByFieldTable.get(fbuf.fldName);
 				if(fieldProgs != null) {
 
-					System.out.println("Loading Component-Level Program on Record: " + fbuf.recDefn.RECNAME +
-						", Field: " + fbuf.fldName);
+					//System.out.println("Loading Component-Level Program on Record: " + fbuf.recDefn.RECNAME +
+					//	", Field: " + fbuf.fldName);
 
 					for(PeopleCodeProg prog : fieldProgs) {
 						BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.lang.StringBuilder;
 import java.util.Collections;
-import com.enterrupt.BuildAssistant;
+import com.enterrupt.DefnCache;
 import com.enterrupt.pt_objects.*;
 
 public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFieldBuffer> {
@@ -20,7 +20,7 @@ public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFi
 
     public RecordFieldBuffer(String r, String f, RecordBuffer parent) throws Exception {
         this.fldName = f;
-        this.recDefn = BuildAssistant.getRecordDefn(r);
+        this.recDefn = DefnCache.getRecord(r);
         this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
         this.parentRecordBuffer = parent;
 

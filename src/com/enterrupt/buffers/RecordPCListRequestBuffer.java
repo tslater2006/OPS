@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Stack;
-import com.enterrupt.BuildAssistant;
+import com.enterrupt.DefnCache;
 import com.enterrupt.pt_objects.*;
 
 /**
@@ -113,9 +113,9 @@ public class RecordPCListRequestBuffer {
 
 		// If the record is a system table, we can ignore it.
 		if(flushedRecordNames.get(RECNAME) == null &&
-				!BuildAssistant.isSystemTable(RECNAME)) {
+				!PSDefn.isSystemRecord(RECNAME)) {
 
-			Record recDefn = BuildAssistant.getRecordDefn(RECNAME);
+			Record recDefn = DefnCache.getRecord(RECNAME);
 			if(recDefn != null) {
 				recDefn.getListOfRecordPCPrograms();
 				flushedRecordNames.put(RECNAME, true);

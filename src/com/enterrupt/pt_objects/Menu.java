@@ -8,11 +8,8 @@ public class Menu {
 
     public String MENUNAME;
 
-    public Menu(String menuname) {
+    public Menu(String menuname) throws Exception {
         this.MENUNAME = menuname;
-    }
-
-    public void loadInitialMetadata() throws Exception {
 
         PreparedStatement pstmt;
         ResultSet rs;

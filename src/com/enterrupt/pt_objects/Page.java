@@ -14,12 +14,16 @@ public class Page {
     public ArrayList<PgToken> subpages;
     public ArrayList<PgToken> secpages;
 	public ArrayList<PgToken> tokens;
+	private boolean hasPagePCBeenRetrieved;
+	public PeopleCodeProg pageActivateProg;
 
     public Page(String pnlname) {
         this.PNLNAME = pnlname;
         this.subpages = new ArrayList<PgToken>();
         this.secpages = new ArrayList<PgToken>();
 		this.tokens = new ArrayList<PgToken>();
+		this.hasPagePCBeenRetrieved = false;
+		this.pageActivateProg = null;
     }
 
     public void loadInitialMetadata() throws Exception {
@@ -164,6 +168,27 @@ public class Page {
 			p = BuildAssistant.getLoadedPage(marker.SUBPNLNAME);
 			p.recursivelyLoadSecpages();
 			RecordPCListRequestBuffer.notifyEndOfExpansion(marker);
+		}
+	}
+
+	public void getPagePC() throws Exception {
+
+		if(!this.hasPagePCBeenRetrieved) {
+
+			PreparedStatement pstmt;
+			ResultSet rs;
+
+			// Check to see if this page has any Page PeopleCode associated with it.
+            pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.PAGE, this.PNLNAME);
+            rs = pstmt.executeQuery();
+			while(rs.next()) {
+				PeopleCodeProg prog = new PagePeopleCodeProg(this.PNLNAME);
+				this.pageActivateProg = BuildAssistant.getProgramOrCacheIfMissing(prog);
+			}
+			rs.close();
+			pstmt.close();
+
+			this.hasPagePCBeenRetrieved = true;
 		}
 	}
 }

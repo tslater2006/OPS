@@ -389,4 +389,24 @@ public class Component {
 			BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
 		}
 	}
+
+	public void loadAllPagePC() throws Exception {
+
+		for(Page p : this.pages) {
+			Page cachedPage = BuildAssistant.getLoadedPage(p.PNLNAME);
+			cachedPage.getPagePC();
+			if(cachedPage.pageActivateProg != null) {
+				BuildAssistant.loadInitialMetadataForProg(cachedPage.pageActivateProg.getDescriptor());
+
+				/**
+				 * TODO: Need to test this with components other than SSS_STUDENT_CENTER. I'm sure that loading
+				 * references is required, but with SSS_STUDENT_CENTER all references appear to have been loaded
+			     * previously; therefore, I can't confirm what mode should be used for loading here. Using
+				 * RecPCMode for the time being.
+				 */
+				BuildAssistant.loadReferencedProgsAndDefnsForProg(cachedPage.pageActivateProg.getDescriptor(),
+					0, "RecPCMode");
+			}
+		}
+	}
 }

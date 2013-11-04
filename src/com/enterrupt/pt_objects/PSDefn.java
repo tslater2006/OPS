@@ -7,6 +7,8 @@ class PSDefn {
 	public static final String EVENT = "12";
 	public static final String MARKET = "39";
 	public static final String APP_PACKAGE = "104";
+	public static final String PAGE = "9";
 
 	public static final String NULL = " ";
 }
+

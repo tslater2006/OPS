@@ -130,7 +130,7 @@ public class Component {
     public void loadAndRunRecordPConSearchRecord() throws Exception {
 
 		Record recDefn = DefnCache.getRecord(this.SEARCHRECNAME);
-		recDefn.getListOfRecordPCPrograms();
+		recDefn.discoverRecordPC();
 
         for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
             if(prog.event.equals("SearchInit")) {

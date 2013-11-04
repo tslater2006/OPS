@@ -15,41 +15,32 @@ public class Record {
     public String RECNAME;
 	public String RELLANGRECNAME;
 	public int RECTYPE;
+
 	public HashMap<String, RecordField> fieldTable;
 	public TreeMap<Integer, Object> fldAndSubrecordTable;
 	public ArrayList<String> subRecordNames;
-
 	public HashMap<String, ArrayList<PeopleCodeProg>> recordProgsByFieldTable;
 	public ArrayList<PeopleCodeProg> orderedRecordProgs;
-	private boolean hasListOfRecordPCBeenRetrieved;
+
+	private boolean hasRecordPCBeenDiscovered = false;
+	private boolean hasBeenInitialized = false;
 
     public Record(String recname) {
         this.RECNAME = recname;
-		this.fieldTable = new HashMap<String, RecordField>();
-		this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
-		this.subRecordNames = new ArrayList<String>();
-		this.hasListOfRecordPCBeenRetrieved = false;
     }
 
-	public boolean isSubrecord() {
-		return this.RECTYPE == 3;
-	}
+    public void init() throws Exception {
 
-	public boolean isDerivedWorkRecord() {
-		return this.RECTYPE == 2;
-	}
-
-    public void loadInitialMetadata() throws Exception {
-
-		int fieldcount = 0;
+		if(this.hasBeenInitialized) { return; }
+		this.hasBeenInitialized = true;
 
         PreparedStatement pstmt;
         ResultSet rs;
 
-		//System.out.println("Querying: " + this.RECNAME);
         pstmt = StmtLibrary.getPSRECDEFN(this.RECNAME);
         rs = pstmt.executeQuery();
 
+		int fieldcount = 0;
 		if(rs.next()) {
 			fieldcount = rs.getInt("FIELDCOUNT");
 			this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
@@ -64,6 +55,9 @@ public class Record {
         pstmt = StmtLibrary.getPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
         rs = pstmt.executeQuery();
 
+		this.fieldTable = new HashMap<String, RecordField>();
+		this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
+
 		int i = 0;
         while(rs.next()) {
 			RecordField f = new RecordField();
@@ -77,6 +71,8 @@ public class Record {
         }
         rs.close();
         pstmt.close();
+
+		this.subRecordNames = new ArrayList<String>();
 
 		/**
 		 * If the number of fields retrieved differs from the FIELDCOUNT for the record
@@ -123,6 +119,49 @@ public class Record {
 		}
     }
 
+	public void discoverRecordPC() throws Exception {
+
+		if(this.hasRecordPCBeenDiscovered) { return; }
+		this.hasRecordPCBeenDiscovered = true;
+
+		PreparedStatement pstmt;
+        ResultSet rs;
+
+		this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
+		this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
+
+        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
+        rs = pstmt.executeQuery();
+
+		while(rs.next()) {
+
+			PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
+				rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
+			prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+
+			ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
+				.get(rs.getString("OBJECTVALUE2"));
+			if(fieldProgList == null) {
+				fieldProgList = new ArrayList<PeopleCodeProg>();
+			}
+
+			fieldProgList.add(prog);
+			this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
+			this.orderedRecordProgs.add(prog);
+		}
+
+        rs.close();
+        pstmt.close();
+	}
+
+	public boolean isSubrecord() {
+		return this.RECTYPE == 3;
+	}
+
+	public boolean isDerivedWorkRecord() {
+		return this.RECTYPE == 2;
+	}
+
 	public ArrayList<RecordField> getExpandedFieldList() throws Exception {
 
 		ArrayList<RecordField> expandedFieldList = new ArrayList<RecordField>();
@@ -138,42 +177,6 @@ public class Record {
 		}
 
 		return expandedFieldList;
-	}
-
-	public void getListOfRecordPCPrograms() throws Exception {
-
-		if(!this.hasListOfRecordPCBeenRetrieved) {
-
-			PreparedStatement pstmt;
-            ResultSet rs;
-
-			this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
-			this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
-
-            pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
-            rs = pstmt.executeQuery();
-
-			while(rs.next()) {
-
-				PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
-					rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
-				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
-
-				ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
-					.get(rs.getString("OBJECTVALUE2"));
-				if(fieldProgList == null) {
-					fieldProgList = new ArrayList<PeopleCodeProg>();
-				}
-
-				fieldProgList.add(prog);
-				this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
-				this.orderedRecordProgs.add(prog);
-			}
-            rs.close();
-            pstmt.close();
-
-			this.hasListOfRecordPCBeenRetrieved = true;
-		}
 	}
 }
 

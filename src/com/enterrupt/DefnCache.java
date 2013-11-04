@@ -22,7 +22,7 @@ public class DefnCache {
 		Record r = records.get(RECNAME);
 		if(r == null) {
 			r = new Record(RECNAME);
-			r.loadInitialMetadata();
+			r.init();
 			records.put(RECNAME, r);
 		}
 		return r;

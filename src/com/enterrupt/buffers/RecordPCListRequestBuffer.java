@@ -116,17 +116,15 @@ public class RecordPCListRequestBuffer {
 				!PSDefn.isSystemRecord(RECNAME)) {
 
 			Record recDefn = DefnCache.getRecord(RECNAME);
-			if(recDefn != null) {
-				recDefn.getListOfRecordPCPrograms();
-				flushedRecordNames.put(RECNAME, true);
+			recDefn.discoverRecordPC();
+			flushedRecordNames.put(RECNAME, true);
 
-				/**
-				 * If this record contains subrecords, requests for their
-				 * Record PC listings should be issued now.
-		 		 */
-				for(String subrecname : recDefn.subRecordNames) {
-					issuePCListRequestForRecord(subrecname);
-				}
+			/**
+			 * If this record contains subrecords, requests for their
+			 * Record PC listings should be issued now.
+	 		 */
+			for(String subrecname : recDefn.subRecordNames) {
+				issuePCListRequestForRecord(subrecname);
 			}
 		}
 	}

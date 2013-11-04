@@ -31,10 +31,6 @@ public class BuildAssistant {
 		pageDefnCache = new HashMap<String, Page>();
 		appPackageDefnCache = new HashMap<String, AppPackage>();
 		progCache = new HashMap<String, PeopleCodeProg>();
-
-		// Initialize the list of system tables for which metadata should not be gathered.
-		systemTableRecNames = new HashMap<String, Boolean>();
-		systemTableRecNames.put("PSXLATITEM", true);
 	}
 
 	public static void loadInitialMetadataForProg(String progDescriptor) throws Exception {
@@ -84,13 +80,6 @@ public class BuildAssistant {
 			progCache.put(p.getDescriptor(), p);
 		}
 		return p;
-	}
-
-	public static boolean isSystemTable(String RECNAME) {
-		if(systemTableRecNames.get(RECNAME) != null) {
-			return true;
-		}
-		return false;
 	}
 
 	public static AppPackage getAppPackageDefn(String packageName) throws Exception {

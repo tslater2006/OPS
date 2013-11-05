@@ -19,6 +19,7 @@ import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.parser.Token;
 import com.enterrupt.parser.TFlag;
+import com.enterrupt.DefnCache;
 
 public abstract class PeopleCodeProg {
 
@@ -335,7 +336,8 @@ public abstract class PeopleCodeProg {
          * definitions and programs loaded now.
          */
         for(PeopleCodeProg prog : referencedProgs) {
-            BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+			PeopleCodeProg p = DefnCache.getProgram(prog);
+			p.loadInitialMetadata();
 
 			/**
 			 * In Record PC mode, referenced defns and progs should be recursively loaded indefinitely.
@@ -346,8 +348,8 @@ public abstract class PeopleCodeProg {
 			 */
 			if(mode.equals("RecPCMode")
 				|| (mode.equals("CompPCMode")
-					&& (prog instanceof AppPackagePeopleCodeProg || recursionLevel == 0))) {
-	   	        BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), recursionLevel+1, mode);
+					&& (p instanceof AppPackagePeopleCodeProg || recursionLevel == 0))) {
+	   	        p.loadReferencedDefnsAndPrograms(recursionLevel+1, mode);
 			}
         }
 	}

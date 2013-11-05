@@ -4,6 +4,7 @@ import java.lang.StringBuilder;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.Token;
 import com.enterrupt.parser.TFlag;
+import com.enterrupt.DefnCache;
 
 public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
@@ -81,12 +82,12 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 				String[] path = this.getAppClassPathFromStream(t, stream);
 
 				PeopleCodeProg prog = new AppPackagePeopleCodeProg(path);
-				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+				prog = DefnCache.getProgram(prog);
 
 				referencedProgs.add(prog);
 
 				// Load the program's initial metadata.
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+				prog.loadInitialMetadata();
 
 				/**
 				 * I added this call in order to align ENT with the Component PC loading section of the
@@ -97,7 +98,7 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 				 * this unconditionally is not interfering with the previous sections of the trace file.
 				 * TODO: keep this in mind.
 				 */
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), recursionLevel+1, mode);
+				prog.loadReferencedDefnsAndPrograms(recursionLevel+1, mode);
 			}
 		}
 	}

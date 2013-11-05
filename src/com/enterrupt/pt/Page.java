@@ -184,7 +184,7 @@ public class Page {
             rs = pstmt.executeQuery();
 			while(rs.next()) {
 				PeopleCodeProg prog = new PagePeopleCodeProg(this.PNLNAME);
-				this.pageActivateProg = BuildAssistant.getProgramOrCacheIfMissing(prog);
+				this.pageActivateProg = DefnCache.getProgram(prog);
 			}
 			rs.close();
 			pstmt.close();

@@ -24,34 +24,10 @@ public class BuildAssistant {
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
 	public static HashMap<String, AppPackage> appPackageDefnCache;
-	public static HashMap<String, PeopleCodeProg> progCache;
 
 	public static void init() {
 		pageDefnCache = new HashMap<String, Page>();
 		appPackageDefnCache = new HashMap<String, AppPackage>();
-		progCache = new HashMap<String, PeopleCodeProg>();
-	}
-
-	public static void loadInitialMetadataForProg(String progDescriptor) throws Exception {
-
-		PeopleCodeProg prog = progCache.get(progDescriptor);
-		prog.loadInitialMetadata();
-	}
-
-	public static void loadReferencedProgsAndDefnsForProg(String progDescriptor, int recursionLevel, String mode) throws Exception {
-
-		PeopleCodeProg prog = progCache.get(progDescriptor);
-		prog.loadReferencedDefnsAndPrograms(recursionLevel, mode);
-	}
-
-	public static PeopleCodeProg getProgramOrCacheIfMissing(PeopleCodeProg prog) {
-
-		PeopleCodeProg p = progCache.get(prog.getDescriptor());
-		if(p == null) {
-			p = prog;
-			progCache.put(p.getDescriptor(), p);
-		}
-		return p;
 	}
 
 	public static AppPackage getAppPackageDefn(String packageName) throws Exception {

@@ -51,12 +51,12 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
             DefnCache.getRecord(refObj.RECNAME);
 
             PeopleCodeProg prog = new RecordPeopleCodeProg(refObj.RECNAME, refObj.REFNAME, event);
-            prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+            prog = DefnCache.getProgram(prog);
 
             this.referencedProgs.add(prog);
 
             // Load the program's initial metadata if it hasn't already been cached.
-            BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+			prog.loadInitialMetadata();
 		}
 
        if(t.flags.contains(TFlag.GLOBAL) || t.flags.contains(TFlag.COMPONENT) ||
@@ -77,12 +77,12 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 				String[] path = this.getAppClassPathFromStream(t, stream);
 
             	PeopleCodeProg prog = new AppPackagePeopleCodeProg(path);
-             	prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+				prog = DefnCache.getProgram(prog);
 
  	            referencedProgs.add(prog);
 
     	        // Load the program's initial metadata.
-        	    BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
+				prog.loadInitialMetadata();
        		}
 		}
 

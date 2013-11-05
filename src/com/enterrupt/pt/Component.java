@@ -117,7 +117,7 @@ public class Component {
 					System.exit(1);
 				}
 
-				prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+				prog = DefnCache.getProgram(prog);
 				this.orderedComponentProgs.add((ComponentPeopleCodeProg)prog);
      	   	}
       	   	rs.close();
@@ -134,9 +134,9 @@ public class Component {
 
         for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
             if(prog.event.equals("SearchInit")) {
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-
-				Interpreter interpreter = new Interpreter(prog);
+				PeopleCodeProg p = DefnCache.getProgram(prog);
+				p.loadInitialMetadata();
+				Interpreter interpreter = new Interpreter(p);
 				interpreter.run();
             }
         }
@@ -147,11 +147,10 @@ public class Component {
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 
 			if(prog.RECNAME != null && prog.RECNAME.equals(this.SEARCHRECNAME)) {
-
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
-
-				Interpreter interpreter = new Interpreter(prog);
+				PeopleCodeProg p = DefnCache.getProgram(prog);
+				p.loadInitialMetadata();
+				p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
+				Interpreter interpreter = new Interpreter(p);
 				interpreter.run();
 			}
 		}
@@ -355,8 +354,9 @@ public class Component {
 					//	", Field: " + fbuf.fldName);
 
 					for(PeopleCodeProg prog : fieldProgs) {
-						BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-						BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "RecPCMode");
+						PeopleCodeProg p = DefnCache.getProgram(prog);
+						p.loadInitialMetadata();
+						p.loadReferencedDefnsAndPrograms(0, "RecPCMode");
 					}
 				}
 			}
@@ -368,23 +368,26 @@ public class Component {
 		// Load the PostBuild event for the component first, if it exists.
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PostBuild")) {
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
+				PeopleCodeProg p = DefnCache.getProgram(prog);
+				p.loadInitialMetadata();
+				p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
 			}
 		}
 
 		// Then the PreBuild event, if it exists.
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PreBuild")) {
-				BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
+				PeopleCodeProg p = DefnCache.getProgram(prog);
+				p.loadInitialMetadata();
+				p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
 			}
 		}
 
 		// Then load each Component PC program in order of appearance in result set.
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-			BuildAssistant.loadInitialMetadataForProg(prog.getDescriptor());
-			BuildAssistant.loadReferencedProgsAndDefnsForProg(prog.getDescriptor(), 0, "CompPCMode");
+			PeopleCodeProg p = DefnCache.getProgram(prog);
+			p.loadInitialMetadata();
+			p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
 		}
 	}
 
@@ -394,7 +397,8 @@ public class Component {
 			Page cachedPage = BuildAssistant.getLoadedPage(p.PNLNAME);
 			cachedPage.getPagePC();
 			if(cachedPage.pageActivateProg != null) {
-				BuildAssistant.loadInitialMetadataForProg(cachedPage.pageActivateProg.getDescriptor());
+				PeopleCodeProg pr = DefnCache.getProgram(cachedPage.pageActivateProg);
+				pr.loadInitialMetadata();
 
 				/**
 				 * TODO: Need to test this with components other than SSS_STUDENT_CENTER. I'm sure that loading
@@ -402,8 +406,7 @@ public class Component {
 			     * previously; therefore, I can't confirm what mode should be used for loading here. Using
 				 * RecPCMode for the time being.
 				 */
-				BuildAssistant.loadReferencedProgsAndDefnsForProg(cachedPage.pageActivateProg.getDescriptor(),
-					0, "RecPCMode");
+				pr.loadReferencedDefnsAndPrograms(0, "RecPCMode");
 			}
 		}
 	}

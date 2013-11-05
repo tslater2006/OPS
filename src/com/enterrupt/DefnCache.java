@@ -29,4 +29,14 @@ public class DefnCache {
 		}
 		return r;
 	}
+
+	public static PeopleCodeProg getProgram(PeopleCodeProg prog) {
+
+		PeopleCodeProg p = programs.get(prog.getDescriptor());
+		if(p == null) {
+			p = prog;
+			programs.put(p.getDescriptor(), p);
+		}
+		return p;
+	}
 }

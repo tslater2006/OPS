@@ -137,7 +137,7 @@ public class Record {
 
 			PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
 				rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
-			prog = BuildAssistant.getProgramOrCacheIfMissing(prog);
+			prog = DefnCache.getProgram(prog);
 
 			ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
 				.get(rs.getString("OBJECTVALUE2"));

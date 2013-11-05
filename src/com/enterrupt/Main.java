@@ -6,8 +6,11 @@ import com.enterrupt.types.*;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.buffers.ComponentBuffer;
 import com.enterrupt.interpreter.RunTimeEnvironment;
+import org.apache.logging.log4j.*;
 
 public class Main {
+
+	private static Logger log = LogManager.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
 
@@ -41,6 +44,8 @@ public class Main {
 
 			StmtLibrary.disconnect();
 			BuildAssistant.runValidationTests(c);
+
+			log.warn("HERE");
 
 		} catch(Exception ex) {
 			ex.printStackTrace();

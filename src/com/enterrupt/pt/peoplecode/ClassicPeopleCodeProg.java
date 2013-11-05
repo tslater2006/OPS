@@ -63,7 +63,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 
 				String[] path = this.getAppClassPathFromStream(t, stream);
 
-            	PeopleCodeProg prog = new AppPackagePeopleCodeProg(path);
+            	PeopleCodeProg prog = new AppClassPeopleCodeProg(path);
 				prog = DefnCache.getProgram(prog);
 
  	            referencedProgs.add(prog);

@@ -208,7 +208,7 @@ public abstract class PeopleCodeProg {
                 } while(t.flags.contains(TFlag.COLON));
 
                 // Load the app package (get list of all programs within) if not already cached.
-                BuildAssistant.getAppPackageDefn(pathParts.get(0));
+                DefnCache.getAppPackage(pathParts.get(0));
 
                 importedAppPackages.put(pathParts.get(0), true);
             }
@@ -233,7 +233,7 @@ public abstract class PeopleCodeProg {
 			 */
 			if(lflag == LFlag.RECORD
 				|| (lflag == LFlag.COMPONENT
-					&& (p instanceof AppPackagePeopleCodeProg || recursionLevel == 0))) {
+					&& (p instanceof AppClassPeopleCodeProg || recursionLevel == 0))) {
 	   	        p.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag);
 			}
         }

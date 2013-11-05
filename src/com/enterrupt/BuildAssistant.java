@@ -22,22 +22,6 @@ public class BuildAssistant {
 	private static String currentTraceLine = "";
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
-	public static HashMap<String, AppPackage> appPackageDefnCache;
-
-	public static void init() {
-		appPackageDefnCache = new HashMap<String, AppPackage>();
-	}
-
-	public static AppPackage getAppPackageDefn(String packageName) throws Exception {
-
-		AppPackage ap = appPackageDefnCache.get(packageName);
-		if(ap == null) {
-			ap = new AppPackage(packageName);
-			ap.getListOfAllAppClassPrograms();
-			appPackageDefnCache.put(packageName, ap);
-		}
-		return ap;
-	}
 
 	public static void runValidationTests(Component componentObj) throws Exception {
 		openTraceFile();

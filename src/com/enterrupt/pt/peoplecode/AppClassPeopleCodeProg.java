@@ -6,17 +6,17 @@ import com.enterrupt.parser.Token;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.DefnCache;
 
-public class AppPackagePeopleCodeProg extends PeopleCodeProg {
+public class AppClassPeopleCodeProg extends PeopleCodeProg {
 
 	public String[] pathParts;
 	public AppPackage rootPackage;
 
-	public AppPackagePeopleCodeProg(String[] path) throws Exception {
+	public AppClassPeopleCodeProg(String[] path) throws Exception {
 		super();
 		this.pathParts = path;
 		this.event = "OnExecute";
 		this.initBindVals();
-		this.rootPackage = BuildAssistant.getAppPackageDefn(this.bindVals[1]);
+		this.rootPackage = DefnCache.getAppPackage(this.bindVals[1]);
 	}
 
 	protected void initBindVals() {
@@ -82,7 +82,7 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 
 				String[] path = this.getAppClassPathFromStream(t, stream);
 
-				PeopleCodeProg prog = new AppPackagePeopleCodeProg(path);
+				PeopleCodeProg prog = new AppClassPeopleCodeProg(path);
 				prog = DefnCache.getProgram(prog);
 
 				referencedProgs.add(prog);

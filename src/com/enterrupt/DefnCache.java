@@ -8,11 +8,13 @@ public class DefnCache {
 	private static HashMap<String, Record> records;
 	private static HashMap<String, PeopleCodeProg> programs;
 	private static HashMap<String, Page> pages;
+	private static HashMap<String, AppPackage> appPackages;
 
 	static {
 		records = new HashMap<String, Record>();
 		programs = new HashMap<String, PeopleCodeProg>();
 		pages = new HashMap<String, Page>();
+		appPackages = new HashMap<String, AppPackage>();
 	}
 
 	public static Record getRecord(String RECNAME) throws Exception {
@@ -45,6 +47,17 @@ public class DefnCache {
 			pages.put(p.PNLNAME, p);
 		}
 		return p;
+	}
+
+	public static AppPackage getAppPackage(String packageName) throws Exception {
+
+        AppPackage ap = appPackages.get(packageName);
+        if(ap == null) {
+            ap = new AppPackage(packageName);
+            ap.discoverAppClassPC();
+            appPackages.put(ap.packageName, ap);
+        }
+        return ap;
 	}
 
 	public static PeopleCodeProg getProgram(PeopleCodeProg prog) {

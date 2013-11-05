@@ -11,7 +11,6 @@ import com.enterrupt.types.*;
 public class StmtLibrary {
 
 	private static Connection conn;
-	private static final String PS_NULL = " ";
 	public static ArrayList<ENTStmt> emittedStmts;
 
 	public static void init() {

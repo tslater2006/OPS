@@ -6,13 +6,18 @@ import com.enterrupt.sql.StmtLibrary;
 
 public class AppPackage {
 
-	private String packageName;
+	public String packageName;
+
+	private boolean hasDiscoveredAppClassPC = false;
 
 	public AppPackage(String pName) {
 		this.packageName = pName;
 	}
 
-	public void getListOfAllAppClassPrograms() throws Exception {
+	public void discoverAppClassPC() throws Exception {
+
+		if(this.hasDiscoveredAppClassPC) { return; }
+		this.hasDiscoveredAppClassPC = true;
 
         PreparedStatement pstmt;
         ResultSet rs;

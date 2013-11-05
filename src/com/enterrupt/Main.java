@@ -13,7 +13,6 @@ public class Main {
 
 		try {
 			StmtLibrary.init();
-			BuildAssistant.init();
 			ComponentBuffer.init();
 
 			RunTimeEnvironment.init();

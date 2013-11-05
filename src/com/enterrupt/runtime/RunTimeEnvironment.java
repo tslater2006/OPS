@@ -54,7 +54,7 @@ public class RunTimeEnvironment {
 			// Initialize empty component buffer.
 			compBufferTable = new HashMap<String, MemoryPtr>();
 
-        } catch(NoSuchMethodException nsme) {
+        } catch(java.lang.NoSuchMethodException nsme) {
             log.fatal(nsme.getMessage(), nsme);
             System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());
         }

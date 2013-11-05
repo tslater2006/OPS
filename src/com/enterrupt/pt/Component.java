@@ -41,7 +41,7 @@ public class Component {
 		}
 	}
 
-    public Component(String pnlgrpname, String market) throws Exception {
+    public Component(String pnlgrpname, String market) throws java.sql.SQLException {
         this.PNLGRPNAME = pnlgrpname;
         this.MARKET = market;
 

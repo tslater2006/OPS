@@ -4,36 +4,39 @@ import java.util.HashMap;
 
 public class Reference {
 
-    public static final String[] refReservedWords = {"Component", "Panel", "RecName", "Scroll",
-                                                   "MenuName", "BarName", "ItemName", "CompIntfc",
-                                                   "Image", "Interlink", "StyleSheet", "FileLayout",
-                                                   "Page", "PanelGroup", "Message", "BusProcess",
-                                                   "BusEvent", "BusActivity", "Field", "Record",
-                                                   "Operation", "SQL", "HTML"};
-	public static HashMap<String, String> refReservedWordsTable;
-	private String processedRef;
 	public String RECNAME;
 	public String REFNAME;
-	public boolean isRecordFieldRef;
+
+	private String processedRef;
+	public boolean isRecordFieldRef = false;
+
+    public static final String[] refReservedWords;
+	public static HashMap<String, String> refReservedWordsTable;
+
+	static {
+
+		refReservedWords = new String[] {"Component", "Panel", "RecName", "Scroll",
+                         "MenuName", "BarName", "ItemName", "CompIntfc",
+                         "Image", "Interlink", "StyleSheet", "FileLayout",
+                         "Page", "PanelGroup", "Message", "BusProcess",
+                         "BusEvent", "BusActivity", "Field", "Record",
+                         "Operation", "SQL", "HTML"};
+
+		refReservedWordsTable = new HashMap<String, String>();
+		for(String s : refReservedWords) {
+			refReservedWordsTable.put(s.toUpperCase(), s);
+		}
+	}
 
 	public Reference(String recname, String refname) {
 
-		if(refReservedWordsTable == null) {
-			refReservedWordsTable = new HashMap<String, String>();
-			for(String s : refReservedWords) {
-				refReservedWordsTable.put(s.toUpperCase(), s);
-			}
-		}
-
 		this.processedRef = "";
-		this.isRecordFieldRef = false;
-
-		boolean containsKeyword = false;
 
 		/**
 	     * If the RECNAME is a reserved word, replace it with the appropriate
 		 * camelcase equivalent and set the appropriate flag.
 		 */
+		boolean containsKeyword = false;
 		if(refReservedWordsTable.get(recname) != null) {
 			// remember: this assigns the value (which is camelcase) rather than the key (which is upper).
 			recname = refReservedWordsTable.get(recname);

@@ -5,6 +5,8 @@ import java.lang.reflect.*;
 import java.util.Collections;
 import java.util.ArrayList;
 import com.enterrupt.types.*;
+import org.apache.logging.log4j.*;
+import com.enterrupt.runtime.ExitCode;
 
 public class RunTimeEnvironment {
 
@@ -18,6 +20,8 @@ public class RunTimeEnvironment {
 
 	public static HashMap<Integer, MemoryPtr> integerMemPool;
 	public static HashMap<String, MemoryPtr> stringMemPool;
+
+	private static Logger log = LogManager.getLogger(RunTimeEnvironment.class.getName());
 
 	static {
 
@@ -49,10 +53,11 @@ public class RunTimeEnvironment {
 
 			// Initialize empty component buffer.
 			compBufferTable = new HashMap<String, MemoryPtr>();
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
-		}
+
+        } catch(NoSuchMethodException nsme) {
+            log.fatal(nsme.getMessage(), nsme);
+            System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());
+        }
 	}
 
 	public static MemoryPtr getFromMemoryPool(Integer val) {

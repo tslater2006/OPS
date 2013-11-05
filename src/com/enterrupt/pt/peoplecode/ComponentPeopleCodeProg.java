@@ -40,7 +40,6 @@ public class ComponentPeopleCodeProg extends ClassicPeopleCodeProg {
 
 		this.bindVals = new String[14];
 
-		// Initialize empty defaults.
 		this.bindVals[0] = PSDefn.COMPONENT;
 		this.bindVals[1] = this.PNLGRPNAME;
 		this.bindVals[2] = PSDefn.MARKET;

@@ -28,7 +28,5 @@ public class AppPackage {
         rs.next(); // Do nothing with records for now.
         rs.close();
         pstmt.close();
-
-		//System.out.println("Loaded app package: " + this.packageName);
 	}
 }

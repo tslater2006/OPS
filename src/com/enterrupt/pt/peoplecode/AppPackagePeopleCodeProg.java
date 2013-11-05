@@ -54,8 +54,9 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 	}
 
 	public String getDescriptor() {
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("AppPackagePC:");
+		sb.append("AppPackagePC.");
 		for(int i = 0; i < this.pathParts.length; i++) {
 			sb.append(this.pathParts[i]).append(".");
 		}
@@ -63,7 +64,7 @@ public class AppPackagePeopleCodeProg extends PeopleCodeProg {
 		return sb.toString();
 	}
 
-	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
+	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
 		int recursionLevel, LFlag lflag) throws Exception {
 
 		/**

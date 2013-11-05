@@ -13,26 +13,26 @@ import com.enterrupt.DefnCache;
 public abstract class PeopleCodeProg {
 
     public byte[] progBytes;
-	protected String[] bindVals;
 	public Token[] progTokens;
-	public String parsedText;
-	public String event;
+
+	protected String[] bindVals;
+	protected String event;
+	private String parsedText;
 
 	protected ArrayList<PeopleCodeProg> referencedProgs;
 	protected HashMap<String, Boolean> importedAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
 
 	private boolean hasInitialized = false;
-	private boolean haveLoadedReferencedDefnsAndProgs = false;
+	private boolean haveLoadedDefnsAndPrograms = false;
 
-    protected PeopleCodeProg() {
-		this.progBytes = new byte[0];
-		this.progRefsTable = new TreeMap<Integer, Reference>();
-    }
+    protected PeopleCodeProg() {}
 
 	protected abstract void initBindVals();
+
 	public abstract String getDescriptor();
-	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
+
+	protected abstract void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
 		int recursionLevel, LFlag lflag) throws Exception;
 
 	public Reference getProgReference(int refNbr) {
@@ -77,6 +77,8 @@ public abstract class PeopleCodeProg {
             System.exit(1);
         }
 
+		this.progRefsTable = new TreeMap<Integer, Reference>();
+
 	    // Get program references.
         pstmt = StmtLibrary.getPSPCMPROG_GetRefs(this.bindVals[0], this.bindVals[1],
                                                     this.bindVals[2], this.bindVals[3],
@@ -116,11 +118,6 @@ public abstract class PeopleCodeProg {
 
 		this.parsedText = byteStream.getParsedText();
 		this.progTokens = tokenList.toArray(new Token[0]);
-
-		/**
-		 * TODO: Re-enable this at some point.
-		 */
-		//this.verifyEntireProgramText();
 	}
 
     public void appendProgBytes(Blob blob) throws Exception {
@@ -136,7 +133,7 @@ public abstract class PeopleCodeProg {
 		int startIdx;
 		byte[] allBytes;
 
-		if(this.progBytes.length == 0) {
+		if(this.progBytes == null) {
 			allBytes = new byte[bytes.size()];
 			startIdx = 0;
 		} else {
@@ -155,51 +152,6 @@ public abstract class PeopleCodeProg {
 		}
 
 		this.progBytes = allBytes;
-    }
-
-	/**
-     * REMEMBER: SQL emitted here should not show up in the emittedStmts
-     * list, otherwise trace verification will fail.
-	 * Note: PSPCMTXT contains only 1/10 of the records in PSPCMPROG. Do not fail
-     * here if no match is found in PSPCMTXT.
-     */
-    public void verifyEntireProgramText() throws Exception {
-
-		Clob progTextClob = this.getProgTextClob();
-
-		if(progTextClob != null) {
-
-			/**
-			 * TODO: We risk losing text characters here, need to use
-		     * a character stream or other method in the long term.
-			 */
-			int progTextLen = (int) progTextClob.length();
-			String officialProgText = progTextClob.getSubString(1, progTextLen); // first char is at pos 1
-			MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-
-        	crypt.reset();
-        	crypt.update(this.parsedText.trim().getBytes());
-        	byte[] entDigest = crypt.digest();
-    	    String entBase64 = Base64.encodeBase64String(entDigest);
-
-			crypt.reset();
-			crypt.update(officialProgText.trim().getBytes());
-			byte[] psDigest = crypt.digest();
-			String psBase64 = Base64.encodeBase64String(psDigest);
-
-			if(!entBase64.equals(psBase64)) {
-				//System.out.println("[ERROR] PeopleCode program digests do not match.");
-				//System.out.println(this.parsedText.trim());
-				//System.out.println("===============");
-				//System.out.println(officialProgText.trim());
-				//System.out.println("===============");
-				//System.exit(1);
-			} else {
-				//System.out.println("[OK] PeopleCode program digests match.");
-			}
-		} else {
-			//System.out.println("[NOTICE]: PCPCMTXT does not contain PC for requested program.");
-		}
     }
 
 	public void loadDefnsAndPrograms() throws Exception {
@@ -227,8 +179,8 @@ public abstract class PeopleCodeProg {
 
 	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag) throws Exception {
 
-		if(this.haveLoadedReferencedDefnsAndProgs) { return; }
-		this.haveLoadedReferencedDefnsAndProgs = true;
+		if(this.haveLoadedDefnsAndPrograms) { return; }
+		this.haveLoadedDefnsAndPrograms = true;
 
  		Token t;
 		this.referencedProgs = new ArrayList<PeopleCodeProg>();
@@ -261,7 +213,7 @@ public abstract class PeopleCodeProg {
                 importedAppPackages.put(pathParts.get(0), true);
             }
 
-			this.typeSpecific_handleReferencedToken(t, stream, recursionLevel, lflag);
+			this.subclassTokenHandler(t, stream, recursionLevel, lflag);
         }
 
         /**
@@ -302,7 +254,7 @@ public abstract class PeopleCodeProg {
 
     	ArrayList<String> pathParts = new ArrayList<String>();
         pathParts.add(t.pureStrVal);        // add the package name to the path.
-        stream.readNextToken();     // skip over COLON
+        stream.readNextToken();     		// skip over COLON
 
         // Path is variable length.
         do {
@@ -313,26 +265,5 @@ public abstract class PeopleCodeProg {
 
 		return pathParts.toArray(new String[0]);
 	}
-
-    public Clob getProgTextClob() throws Exception {
-
-        PreparedStatement pstmt;
-        ResultSet rs;
-        pstmt = StmtLibrary.getPSPCMTXT(this.bindVals[0], this.bindVals[1],
-                                        this.bindVals[2], this.bindVals[3],
-                                        this.bindVals[4], this.bindVals[5],
-                                        this.bindVals[6], this.bindVals[7],
-                                        this.bindVals[8], this.bindVals[9],
-                                        this.bindVals[10], this.bindVals[11],
-                                        this.bindVals[12], this.bindVals[13]);
-        rs = pstmt.executeQuery();
-        if(rs.next()) {
-            return rs.getClob("PCTEXT");
-        }
-
-		rs.close();
-		pstmt.close();
-        return null;
-    }
 }
 

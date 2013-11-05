@@ -1,18 +1,5 @@
 package com.enterrupt.pt_objects;
 
-import java.sql.Blob;
-import java.sql.Clob;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.io.InputStream;
-import java.lang.StringBuilder;
-import java.security.MessageDigest;
-import org.apache.commons.codec.binary.Base64;
-import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.parser.Token;
 import com.enterrupt.parser.TFlag;
@@ -22,7 +9,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 
 	public abstract String getDescriptor();
 
-	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
+	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
 		int recursionLevel, LFlag lflag) throws Exception {
 
     	if(t.flags.contains(TFlag.DECLARE)) {
@@ -86,15 +73,16 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
        		}
 		}
 
-        // Load the record defn if it hasn't already been cached; only want record.field references here.
 		/**
 		 * References to records should always be loaded when the root program is a Record PC prog.
 		 * If the root program is a Component PC prog, references to records should only be loaded
-		 * if this object represents either the root Component PC programs itself or one of the
+		 * if this object represents either the root Component PC program itself or one of the
 		 * programs referenced by it (recursion levels 0 and 1, respectively).
 		 */
 		if((lflag == LFlag.RECORD || (lflag == LFlag.COMPONENT && recursionLevel < 2)) &&
 			t.flags.contains(TFlag.REFERENCE) && t.refObj.isRecordFieldRef) {
+
+	        // Load the record defn if it hasn't already been cached; only want record.field references here.
         	DefnCache.getRecord(t.refObj.RECNAME);
         }
 	}

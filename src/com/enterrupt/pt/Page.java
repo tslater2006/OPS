@@ -27,7 +27,7 @@ public class Page {
 		this.pageActivateProg = null;
     }
 
-    public void loadInitialMetadata() throws Exception {
+    public void init() throws Exception {
 
         PreparedStatement pstmt;
         ResultSet rs;
@@ -106,9 +106,9 @@ public class Page {
     }
 
 	public void recursivelyLoadSubpages() throws Exception {
-		Page loadedPage = BuildAssistant.getLoadedPage(this.PNLNAME);
+		Page loadedPage = DefnCache.getPage(this.PNLNAME);
 		for(PgToken tok : loadedPage.subpages) {
-			Page p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
+			Page p = DefnCache.getPage(tok.SUBPNLNAME);
 			p.recursivelyLoadSubpages();
 		}
 	}
@@ -126,7 +126,7 @@ public class Page {
 	 */
 	public void recursivelyLoadSecpages() throws Exception {
 
-		Page loadedPage = BuildAssistant.getLoadedPage(this.PNLNAME);
+		Page loadedPage = DefnCache.getPage(this.PNLNAME);
 		Page p;
 
 		ArrayList<PgToken> secpageMarkers = new ArrayList<PgToken>();
@@ -135,7 +135,7 @@ public class Page {
 		for(PgToken tok : loadedPage.tokens) {
 
 			if(tok.flags.contains(AFlag.SUBPAGE)) {
-				p = BuildAssistant.getLoadedPage(tok.SUBPNLNAME);
+				p = DefnCache.getPage(tok.SUBPNLNAME);
 				p.recursivelyLoadSecpages();
 
 			} else if(tok.flags.contains(AFlag.SECPAGE)) {
@@ -166,7 +166,7 @@ public class Page {
 		for(PgToken marker : secpageMarkers) {
 			RecordPCListRequestBuffer.notifyStartOfExpansion(marker);
 			RecordPCListRequestBuffer.flushUpTo(marker);
-			p = BuildAssistant.getLoadedPage(marker.SUBPNLNAME);
+			p = DefnCache.getPage(marker.SUBPNLNAME);
 			p.recursivelyLoadSecpages();
 			RecordPCListRequestBuffer.notifyEndOfExpansion(marker);
 		}

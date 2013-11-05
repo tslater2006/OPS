@@ -7,10 +7,12 @@ public class DefnCache {
 
 	private static HashMap<String, Record> records;
 	private static HashMap<String, PeopleCodeProg> programs;
+	private static HashMap<String, Page> pages;
 
 	static {
 		records = new HashMap<String, Record>();
 		programs = new HashMap<String, PeopleCodeProg>();
+		pages = new HashMap<String, Page>();
 	}
 
 	public static Record getRecord(String RECNAME) throws Exception {
@@ -28,6 +30,21 @@ public class DefnCache {
 			records.put(RECNAME, r);
 		}
 		return r;
+	}
+
+	public static Page getPage(String PNLNAME) throws Exception {
+
+		if(PNLNAME.length() == 0) {
+			return null;
+		}
+
+		Page p = pages.get(PNLNAME);
+		if(p == null) {
+			p = new Page(PNLNAME);
+			p.init();
+			pages.put(p.PNLNAME, p);
+		}
+		return p;
 	}
 
 	public static PeopleCodeProg getProgram(PeopleCodeProg prog) {

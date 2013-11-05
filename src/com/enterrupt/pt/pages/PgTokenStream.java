@@ -3,6 +3,7 @@ package com.enterrupt.pt_objects;
 import com.enterrupt.BuildAssistant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import com.enterrupt.DefnCache;
 
 public class PgTokenStream {
 
@@ -15,7 +16,7 @@ public class PgTokenStream {
 	private HashMap<String, Boolean> loadedPageNames;
 
 	public PgTokenStream(String PNLNAME) throws Exception {
-		this.p = BuildAssistant.getLoadedPage(PNLNAME);
+		this.p = DefnCache.getPage(PNLNAME);
 		this.loadedPageNames = new HashMap<String, Boolean>();
 	}
 
@@ -74,9 +75,11 @@ public class PgTokenStream {
 				}
 			}
 
-			// If this token is not a page, but it has a SUBPNLNAME, preemptively emit it in the stream.
-			// This token should be emitted immediately after the preemptively loaded page, so remind the cursor
-			// by 1 to ensure that it gets picked up again later.
+			/**
+			 * If this token is not a page, but it has a SUBPNLNAME, preemptively emit it in the stream.
+			 * This token should be emitted immediately after the preemptively loaded page, so remind the cursor
+			 * by 1 to ensure that it gets picked up again later.
+			 */
 			if(tok.SUBPNLNAME.length() > 0 && !tok.flags.contains(AFlag.PAGE)) {
 				if(this.loadedPageNames.get(tok.SUBPNLNAME) == null) {
 					this.pfs = new PgTokenStream(tok.SUBPNLNAME);
@@ -110,6 +113,7 @@ public class PgTokenStream {
 	}
 
 	public PgToken readFromPfs() throws Exception {
+
 		PgToken tok = this.pfs.next();
 		if(tok == null) {
 			this.doReadFromPfs = false;

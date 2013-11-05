@@ -391,7 +391,7 @@ public class Component {
 	public void loadAllPagePC() throws Exception {
 
 		for(Page p : this.pages) {
-			Page cachedPage = BuildAssistant.getLoadedPage(p.PNLNAME);
+			Page cachedPage = DefnCache.getPage(p.PNLNAME);
 			cachedPage.getPagePC();
 			if(cachedPage.pageActivateProg != null) {
 				PeopleCodeProg pr = DefnCache.getProgram(cachedPage.pageActivateProg);

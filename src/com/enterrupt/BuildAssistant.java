@@ -16,7 +16,6 @@ import com.enterrupt.sql.*;
 
 public class BuildAssistant {
 
-	public static HashMap<String, Page> pageDefnCache;
 	private static final String SQL_TOKEN_REGEX = "\\sStmt=(.*)";
 	private static final String BIND_VAL_REGEX = "\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)";
 	private static BufferedReader traceReader;
@@ -26,7 +25,6 @@ public class BuildAssistant {
 	public static HashMap<String, AppPackage> appPackageDefnCache;
 
 	public static void init() {
-		pageDefnCache = new HashMap<String, Page>();
 		appPackageDefnCache = new HashMap<String, AppPackage>();
 	}
 
@@ -39,21 +37,6 @@ public class BuildAssistant {
 			appPackageDefnCache.put(packageName, ap);
 		}
 		return ap;
-	}
-
-	public static Page getLoadedPage(String PNLNAME) throws Exception {
-
-        if(PNLNAME.length() == 0) {
-            return null;
-        }
-
-		Page p = pageDefnCache.get(PNLNAME);
-		if(p == null) {
-			p = new Page(PNLNAME);
-			p.loadInitialMetadata();
-			pageDefnCache.put(PNLNAME, p);
-		}
-		return p;
 	}
 
 	public static void runValidationTests(Component componentObj) throws Exception {

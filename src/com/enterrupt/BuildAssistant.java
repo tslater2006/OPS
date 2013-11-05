@@ -36,40 +36,13 @@ public class BuildAssistant {
 	public static void loadInitialMetadataForProg(String progDescriptor) throws Exception {
 
 		PeopleCodeProg prog = progCache.get(progDescriptor);
-		if(prog == null) {
-			System.out.println("[ERROR] Expected program definition before loading initial metadata.");
-			System.exit(1);
-		}
-
-		if(!prog.isLoaded()) {
-			prog.markLoaded();		// Mark before loading to prevent infinite loop during cyclical dependencies.
-			//System.out.println("[NOT LOADED] Loading initial metadata for " + progDescriptor);
-			prog.loadInitialMetadata();
-		} else {
-			//System.out.println("[ALREADY LOADED] Metadata exists for " + progDescriptor);
-		}
+		prog.loadInitialMetadata();
 	}
 
 	public static void loadReferencedProgsAndDefnsForProg(String progDescriptor, int recursionLevel, String mode) throws Exception {
 
 		PeopleCodeProg prog = progCache.get(progDescriptor);
-		if(prog == null) {
-			System.out.println("[ERROR] Expected program definition before loading referenced programs and defns.");
-			System.exit(1);
-		}
-
-		if(!prog.isLoaded()) {
-			System.out.println("[ERROR] Expected program to be loaded before loading referenced programs and defns.");
-			System.exit(1);
-		}
-
-		if(!prog.areReferencesLoaded()) {
-			prog.markReferencesLoaded();	// Mark before loading to prevent infinte loop during cyclical dependencies
-			//System.out.println("[NOT LOADED] Loading referenced defns and progs for " + progDescriptor);
-			prog.loadReferencedDefnsAndPrograms(recursionLevel, mode);
-		} else {
-			//System.out.println("[ALREADY LOADED] Referenced defns and progs already loaded for " + progDescriptor);
-		}
+		prog.loadReferencedDefnsAndPrograms(recursionLevel, mode);
 	}
 
 	public static PeopleCodeProg getProgramOrCacheIfMissing(PeopleCodeProg prog) {

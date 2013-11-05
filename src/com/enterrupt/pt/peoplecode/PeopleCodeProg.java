@@ -32,40 +32,25 @@ public abstract class PeopleCodeProg {
 	public Token[] progTokens;
 
 	private StringBuilder progTextBuilder;
-	private boolean hasInitialMetadataBeenLoaded;
-	private boolean haveLoadedReferencedDefnsAndProgs;
+	private boolean hasInitialMetadataBeenLoaded = false;
+	private boolean haveLoadedReferencedDefnsAndProgs = false;
 	protected ArrayList<PeopleCodeProg> referencedProgs;
 	protected HashMap<String, Boolean> importedAppPackages;
 
     protected PeopleCodeProg() {
 		this.progBytes = new byte[0];
 		this.progRefsTable = new TreeMap<Integer, Reference>();
-		this.hasInitialMetadataBeenLoaded = false;
-		this.haveLoadedReferencedDefnsAndProgs = false;
     }
 
-	public void markLoaded() {
-		this.hasInitialMetadataBeenLoaded = true;
-	}
-
-	public boolean isLoaded() {
-		return this.hasInitialMetadataBeenLoaded;
-	}
-
-	public void markReferencesLoaded() {
-		this.haveLoadedReferencedDefnsAndProgs = true;
-	}
-
-	public boolean areReferencesLoaded() {
-		return this.haveLoadedReferencedDefnsAndProgs;
-	}
-
 	protected abstract void initBindVals();
+	public abstract String getDescriptor();
 	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
 		int recursionLevel, String mode) throws Exception;
-	public abstract String getDescriptor();
 
 	public void loadInitialMetadata() throws Exception {
+
+		if(this.hasInitialMetadataBeenLoaded) { return; }
+		this.hasInitialMetadataBeenLoaded = true;
 
     	PreparedStatement pstmt;
         ResultSet rs;
@@ -303,6 +288,9 @@ public abstract class PeopleCodeProg {
     }
 
 	public void loadReferencedDefnsAndPrograms(int recursionLevel, String mode) throws Exception {
+
+		if(this.haveLoadedReferencedDefnsAndProgs) { return; }
+		this.haveLoadedReferencedDefnsAndProgs = true;
 
  		Token t;
 		this.referencedProgs = new ArrayList<PeopleCodeProg>();

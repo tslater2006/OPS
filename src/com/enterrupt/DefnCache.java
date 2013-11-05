@@ -6,9 +6,11 @@ import java.util.HashMap;
 public class DefnCache {
 
 	private static HashMap<String, Record> records;
+	private static HashMap<String, PeopleCodeProg> programs;
 
 	static {
 		records = new HashMap<String, Record>();
+		programs = new HashMap<String, PeopleCodeProg>();
 	}
 
 	public static Record getRecord(String RECNAME) throws Exception {

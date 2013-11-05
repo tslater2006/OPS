@@ -14,6 +14,8 @@ public class Main {
 
     public static void main(String[] args) {
 
+		Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
+
 		try {
 
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%EmployeeId")).systemWrite("AA0001");
@@ -42,14 +44,17 @@ public class Main {
 
 			c.loadAllPagePC();
 
-			StmtLibrary.disconnect();
 			BuildAssistant.runValidationTests(c);
-
-			log.warn("HERE");
 
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			System.exit(1);
 		}
     }
+
+	private static class ENTShutdownHook extends Thread {
+		public void run() {
+			StmtLibrary.disconnect();
+		}
+	}
 }

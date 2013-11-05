@@ -277,8 +277,12 @@ public abstract class PeopleCodeProg {
 			String psBase64 = Base64.encodeBase64String(psDigest);
 
 			if(!entBase64.equals(psBase64)) {
-				System.out.println("[ERROR] PeopleCode program digests do not match.");
-				System.exit(1);
+				//System.out.println("[ERROR] PeopleCode program digests do not match.");
+				//System.out.println(this.getProgText().trim());
+				//System.out.println("===============");
+				//System.out.println(officialProgText.trim());
+				//System.out.println("===============");
+				//System.exit(1);
 			} else {
 				//System.out.println("[OK] PeopleCode program digests match.");
 			}
@@ -388,7 +392,7 @@ public abstract class PeopleCodeProg {
                                                     this.bindVals[12], this.bindVals[13]);
         rs = pstmt.executeQuery();
         if(rs.next()) {
-            return rs.getClob("PCTXT");
+            return rs.getClob("PCTEXT");
         }
         return null;
     }

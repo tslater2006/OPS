@@ -23,7 +23,6 @@ public class BuildAssistant {
 	private static String currentTraceLine = "";
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
-	private static HashMap<String, Boolean> systemTableRecNames;
 	public static HashMap<String, AppPackage> appPackageDefnCache;
 	public static HashMap<String, PeopleCodeProg> progCache;
 

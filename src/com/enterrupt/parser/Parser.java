@@ -118,8 +118,8 @@ public class Parser {
 				new SimpleElementParser((byte) 98, EnumSet.of(TFlag.INSTANCE), "instance"), 	// 0x62
 				new SimpleElementParser((byte) 99, EnumSet.of(TFlag.METHOD), "method", PFlags.NEWLINE_BEFORE | PFlags.SPACE_AFTER | PFlags.INCREASE_INDENT_ONCE),	// 0x63
 				new SimpleElementParser((byte) 100, EnumSet.of(TFlag.END_METHOD), "end-method", PFlags.END_FUNCTION_STYLE),	// 0x64
-				new SimpleElementParser((byte) 101, EnumSet.of(TFlag.TRY), "try", PFlags.SPACE_BEFORE_NEWLINE_AFTER),	// 0x65
-				new SimpleElementParser((byte) 102, EnumSet.of(TFlag.CATCH), "catch"),	// 0x66
+				new SimpleElementParser((byte) 101, EnumSet.of(TFlag.TRY), "try", PFlags.SPACE_BEFORE_NEWLINE_AFTER | PFlags.INCREASE_INDENT),	// 0x65
+				new SimpleElementParser((byte) 102, EnumSet.of(TFlag.CATCH), "catch", PFlags.DECREASE_INDENT),	// 0x66
 				new SimpleElementParser((byte) 103, EnumSet.of(TFlag.END_TRY), "end-try"), // 0x67
 				new SimpleElementParser((byte) 104, EnumSet.of(TFlag.THROW), "throw"),		// 0x68
 				new SimpleElementParser((byte) 105, EnumSet.of(TFlag.CREATE), "create"),	// 0x69

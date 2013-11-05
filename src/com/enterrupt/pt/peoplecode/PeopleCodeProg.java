@@ -22,7 +22,7 @@ public abstract class PeopleCodeProg {
 	protected HashMap<String, Boolean> importedAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
 
-	private boolean hasInitialMetadataBeenLoaded = false;
+	private boolean hasInitialized = false;
 	private boolean haveLoadedReferencedDefnsAndProgs = false;
 
     protected PeopleCodeProg() {
@@ -33,16 +33,16 @@ public abstract class PeopleCodeProg {
 	protected abstract void initBindVals();
 	public abstract String getDescriptor();
 	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, String mode) throws Exception;
+		int recursionLevel, LFlag lflag) throws Exception;
 
 	public Reference getProgReference(int refNbr) {
 		return this.progRefsTable.get(refNbr);
 	}
 
-	public void loadInitialMetadata() throws Exception {
+	public void init() throws Exception {
 
-		if(this.hasInitialMetadataBeenLoaded) { return; }
-		this.hasInitialMetadataBeenLoaded = true;
+		if(this.hasInitialized) { return; }
+		this.hasInitialized = true;
 
     	PreparedStatement pstmt;
         ResultSet rs;
@@ -202,7 +202,30 @@ public abstract class PeopleCodeProg {
 		}
     }
 
-	public void loadReferencedDefnsAndPrograms(int recursionLevel, String mode) throws Exception {
+	public void loadDefnsAndPrograms() throws Exception {
+
+		LFlag flag = null;
+		if(this instanceof ComponentPeopleCodeProg) {
+			flag = LFlag.COMPONENT;
+
+         /**
+          * TODO: Need to test this with components other than SSS_STUDENT_CENTER. I'm sure that loading
+          * references for pages is required, but with SSS_STUDENT_CENTER all references appear to have been loaded
+          * previously by the time pages are loaded; therefore, I can't confirm what mode
+		  * should be used for loading here. Using RECORD for pages for the time being.
+ 	      */
+		} else if(this instanceof PagePeopleCodeProg || this instanceof RecordPeopleCodeProg) {
+			flag = LFlag.RECORD;
+
+		} else {
+			System.out.println("[ERROR] Unexpected type of root PeopleCode.");
+			System.exit(1);
+		}
+
+		this.recurseLoadDefnsAndPrograms(0, flag);
+	}
+
+	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag) throws Exception {
 
 		if(this.haveLoadedReferencedDefnsAndProgs) { return; }
 		this.haveLoadedReferencedDefnsAndProgs = true;
@@ -238,7 +261,7 @@ public abstract class PeopleCodeProg {
                 importedAppPackages.put(pathParts.get(0), true);
             }
 
-			this.typeSpecific_handleReferencedToken(t, stream, recursionLevel, mode);
+			this.typeSpecific_handleReferencedToken(t, stream, recursionLevel, lflag);
         }
 
         /**
@@ -247,7 +270,7 @@ public abstract class PeopleCodeProg {
          */
         for(PeopleCodeProg prog : referencedProgs) {
 			PeopleCodeProg p = DefnCache.getProgram(prog);
-			p.loadInitialMetadata();
+			p.init();
 
 			/**
 			 * In Record PC mode, referenced defns and progs should be recursively loaded indefinitely.
@@ -256,10 +279,10 @@ public abstract class PeopleCodeProg {
 			 * directly referenced in the root Component PC program being loaded (which exists at recursion
 			 * level 0).
 			 */
-			if(mode.equals("RecPCMode")
-				|| (mode.equals("CompPCMode")
+			if(lflag == LFlag.RECORD
+				|| (lflag == LFlag.COMPONENT
 					&& (p instanceof AppPackagePeopleCodeProg || recursionLevel == 0))) {
-	   	        p.loadReferencedDefnsAndPrograms(recursionLevel+1, mode);
+	   	        p.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag);
 			}
         }
 	}

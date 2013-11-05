@@ -135,7 +135,7 @@ public class Component {
         for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
             if(prog.event.equals("SearchInit")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.loadInitialMetadata();
+				p.init();
 				Interpreter interpreter = new Interpreter(p);
 				interpreter.run();
             }
@@ -148,8 +148,8 @@ public class Component {
 
 			if(prog.RECNAME != null && prog.RECNAME.equals(this.SEARCHRECNAME)) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.loadInitialMetadata();
-				p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
+				p.init();
+				p.loadDefnsAndPrograms();
 				Interpreter interpreter = new Interpreter(p);
 				interpreter.run();
 			}
@@ -350,13 +350,10 @@ public class Component {
 					.recordProgsByFieldTable.get(fbuf.fldName);
 				if(fieldProgs != null) {
 
-					//System.out.println("Loading Component-Level Program on Record: " + fbuf.recDefn.RECNAME +
-					//	", Field: " + fbuf.fldName);
-
 					for(PeopleCodeProg prog : fieldProgs) {
 						PeopleCodeProg p = DefnCache.getProgram(prog);
-						p.loadInitialMetadata();
-						p.loadReferencedDefnsAndPrograms(0, "RecPCMode");
+						p.init();
+						p.loadDefnsAndPrograms();
 					}
 				}
 			}
@@ -369,8 +366,8 @@ public class Component {
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PostBuild")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.loadInitialMetadata();
-				p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
+				p.init();
+				p.loadDefnsAndPrograms();
 			}
 		}
 
@@ -378,16 +375,16 @@ public class Component {
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PreBuild")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.loadInitialMetadata();
-				p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
+				p.init();
+				p.loadDefnsAndPrograms();
 			}
 		}
 
 		// Then load each Component PC program in order of appearance in result set.
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			PeopleCodeProg p = DefnCache.getProgram(prog);
-			p.loadInitialMetadata();
-			p.loadReferencedDefnsAndPrograms(0, "CompPCMode");
+			p.init();
+			p.loadDefnsAndPrograms();
 		}
 	}
 
@@ -398,15 +395,8 @@ public class Component {
 			cachedPage.getPagePC();
 			if(cachedPage.pageActivateProg != null) {
 				PeopleCodeProg pr = DefnCache.getProgram(cachedPage.pageActivateProg);
-				pr.loadInitialMetadata();
-
-				/**
-				 * TODO: Need to test this with components other than SSS_STUDENT_CENTER. I'm sure that loading
-				 * references is required, but with SSS_STUDENT_CENTER all references appear to have been loaded
-			     * previously; therefore, I can't confirm what mode should be used for loading here. Using
-				 * RecPCMode for the time being.
-				 */
-				pr.loadReferencedDefnsAndPrograms(0, "RecPCMode");
+				pr.init();
+				pr.loadDefnsAndPrograms();
 			}
 		}
 	}

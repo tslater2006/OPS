@@ -23,7 +23,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 	public abstract String getDescriptor();
 
 	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, String mode) throws Exception {
+		int recursionLevel, LFlag lflag) throws Exception {
 
     	if(t.flags.contains(TFlag.DECLARE)) {
         	t = stream.readNextToken();
@@ -56,7 +56,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
             this.referencedProgs.add(prog);
 
             // Load the program's initial metadata if it hasn't already been cached.
-			prog.loadInitialMetadata();
+			prog.init();
 		}
 
        if(t.flags.contains(TFlag.GLOBAL) || t.flags.contains(TFlag.COMPONENT) ||
@@ -82,7 +82,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
  	            referencedProgs.add(prog);
 
     	        // Load the program's initial metadata.
-				prog.loadInitialMetadata();
+				prog.init();
        		}
 		}
 
@@ -93,7 +93,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 		 * if this object represents either the root Component PC programs itself or one of the
 		 * programs referenced by it (recursion levels 0 and 1, respectively).
 		 */
-		if((mode.equals("RecPCMode") || (mode.equals("CompPCMode") && recursionLevel < 2)) &&
+		if((lflag == LFlag.RECORD || (lflag == LFlag.COMPONENT && recursionLevel < 2)) &&
 			t.flags.contains(TFlag.REFERENCE) && t.refObj.isRecordFieldRef) {
         	DefnCache.getRecord(t.refObj.RECNAME);
         }

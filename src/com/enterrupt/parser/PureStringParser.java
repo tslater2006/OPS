@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import java.lang.reflect.*;
 import java.util.EnumSet;
 
@@ -22,10 +22,10 @@ public class PureStringParser extends StringParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeProg prog) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) throws Exception {
 
-		String str = getString(prog);
-		prog.appendProgText(str);
+		String str = getString(stream);
+		stream.appendParsedText(str);
 
 		Token t = new Token(TFlag.PURE_STRING);
 		t.pureStrVal = str;

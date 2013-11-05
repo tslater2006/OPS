@@ -1,42 +1,29 @@
 package com.enterrupt.pt_objects;
 
-import java.sql.Blob;
-import java.sql.Clob;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import com.enterrupt.sql.StmtLibrary;
+import java.sql.*;
+import java.util.*;
 import java.io.InputStream;
-import java.lang.StringBuilder;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Base64;
+import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.BuildAssistant;
-import com.enterrupt.parser.Parser;
-import com.enterrupt.parser.Token;
-import com.enterrupt.parser.TFlag;
+import com.enterrupt.parser.*;
 import com.enterrupt.DefnCache;
 
 public abstract class PeopleCodeProg {
 
-    public String event;
-	public TreeMap<Integer, Reference> progRefsTable;
-
-	/** TODO: Byte cursor should be moved to a PeopleCodeByteStream class. */
     public byte[] progBytes;
-	public int byteCursorPos = 0;
 	protected String[] bindVals;
 	public Token[] progTokens;
+	public String parsedText;
+	public String event;
 
-	private StringBuilder progTextBuilder;
-	private boolean hasInitialMetadataBeenLoaded = false;
-	private boolean haveLoadedReferencedDefnsAndProgs = false;
 	protected ArrayList<PeopleCodeProg> referencedProgs;
 	protected HashMap<String, Boolean> importedAppPackages;
+	public TreeMap<Integer, Reference> progRefsTable;
+
+	private boolean hasInitialMetadataBeenLoaded = false;
+	private boolean haveLoadedReferencedDefnsAndProgs = false;
 
     protected PeopleCodeProg() {
 		this.progBytes = new byte[0];
@@ -47,6 +34,10 @@ public abstract class PeopleCodeProg {
 	public abstract String getDescriptor();
 	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
 		int recursionLevel, String mode) throws Exception;
+
+	public Reference getProgReference(int refNbr) {
+		return this.progRefsTable.get(refNbr);
+	}
 
 	public void loadInitialMetadata() throws Exception {
 
@@ -103,16 +94,14 @@ public abstract class PeopleCodeProg {
         pstmt.close();
 
 		/**
-		 * Parse the entire program into tokens. We'll find out what programs are
-		 * referenced by this one in the process. The final list of tokens will used
-		 * by the interpreter at runtime.
+		 * Parse the entire program into tokens.
 		 */
 		ArrayList<Token> tokenList = new ArrayList<Token>();
-		Parser p = new Parser(this);
+		PeopleCodeByteStream byteStream = new PeopleCodeByteStream(this);
+		Parser p = new Parser(byteStream);
 		Token t;
 
 		do {
-
 			t = p.parseNextToken();
 
 			// Discard comments.
@@ -120,97 +109,18 @@ public abstract class PeopleCodeProg {
 				continue;
 			}
 
-	       /**
-	        * I've been having an issue with the parser emitting an IDENTIFIER token immediately
-    	    * after a NUMBER token in LS_SS_PERS_SRCH.EMPLID.SearchInit, despite the fact that the identifier
-      		* name parsed out is empty. If the identifier is empty here, I'm going to parse the next token.
-      	  	* If it's another empty IDENTIFIER, I'll exit. Otherwise I'll let the interpreter continue.
-        	* TODO: Once I have more PeopleCode running through here, try to collect information about how
-       		* often this occurs, after which tokens, etc. I may be able to modify the NumberParser / other parser
-        	* objects accordingly.
-        	*/
-		/*	if(t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
-				t = p.parseNextToken();
-				if(t.flags.equals(EnumSet.of(TFlag.DISCARD, TFlag.IDENTIFIER))) {
-					System.out.println("[ERROR] Discarded two empty IDENTIFIER tokens in a row.");
-					System.exit(1);
-				}
-			}*/
-
 			if(!t.flags.contains(TFlag.DISCARD)) {
 				tokenList.add(t);
-		 	/*	System.out.print(t.flags);
-
-				if(t.flags.contains(TFlag.REFERENCE)) {
-					System.out.print("\t\t\t" + t.refObj.getValue());
-				}
-				if(t.flags.contains(TFlag.PURE_STRING)) {
-					System.out.print("\t\t\t" + t.pureStrVal);
-				}
-				if(t.flags.contains(TFlag.EMBEDDED_STRING)) {
-					System.out.print("\t\t\t" + t.embeddedStrVal);
-				}
-				if(t.flags.contains(TFlag.NUMBER)) {
-					System.out.print("\t\t\t" + t.numericVal);
-				}
-
-				System.out.println();*/
 			}
 		} while(!t.flags.contains(TFlag.END_OF_PROGRAM));
 
+		this.parsedText = byteStream.getParsedText();
 		this.progTokens = tokenList.toArray(new Token[0]);
-		//System.out.println(this.getProgText());
 
 		/**
 		 * TODO: Re-enable this at some point.
 		 */
 		//this.verifyEntireProgramText();
-	}
-
-	public void setByteCursorPos(int pos) {
-		this.byteCursorPos = pos;
-	}
-
-	public byte getCurrentByte() {
-		return this.progBytes[this.byteCursorPos];
-	}
-
-	public byte readNextByte() {
-		//System.out.printf("[READ] %d: 0x%02X\n", this.byteCursorPos, this.progBytes[this.byteCursorPos]);
-		return this.progBytes[this.byteCursorPos++];
-	}
-
-	public byte readAhead() {
-		if(this.byteCursorPos >= this.progBytes.length - 1) {
-			return -1;
-		}
-		return this.progBytes[this.byteCursorPos];
-	}
-
-	public void appendProgText(char c) {
-		if(this.progTextBuilder == null) {
-			this.progTextBuilder = new StringBuilder();
-		}
-		progTextBuilder.append(c);
-	}
-
-	public void appendProgText(String s) {
-		if(this.progTextBuilder == null) {
-			this.progTextBuilder = new StringBuilder();
-		}
-		progTextBuilder.append(s);
-	}
-
-	public String getProgText() {
-		return this.progTextBuilder.toString();
-	}
-
-	public void resetProgText() {
-		this.progTextBuilder = new StringBuilder();
-	}
-
-	public Reference getProgReference(int refNbr) {
-		return this.progRefsTable.get(refNbr);
 	}
 
     public void appendProgBytes(Blob blob) throws Exception {
@@ -268,7 +178,7 @@ public abstract class PeopleCodeProg {
 			MessageDigest crypt = MessageDigest.getInstance("SHA-1");
 
         	crypt.reset();
-        	crypt.update(this.getProgText().trim().getBytes());
+        	crypt.update(this.parsedText.trim().getBytes());
         	byte[] entDigest = crypt.digest();
     	    String entBase64 = Base64.encodeBase64String(entDigest);
 
@@ -279,7 +189,7 @@ public abstract class PeopleCodeProg {
 
 			if(!entBase64.equals(psBase64)) {
 				//System.out.println("[ERROR] PeopleCode program digests do not match.");
-				//System.out.println(this.getProgText().trim());
+				//System.out.println(this.parsedText.trim());
 				//System.out.println("===============");
 				//System.out.println(officialProgText.trim());
 				//System.out.println("===============");
@@ -383,19 +293,22 @@ public abstract class PeopleCodeProg {
 
     public Clob getProgTextClob() throws Exception {
 
-        PreparedStatement pstmt = null;
+        PreparedStatement pstmt;
         ResultSet rs;
         pstmt = StmtLibrary.getPSPCMTXT(this.bindVals[0], this.bindVals[1],
-                                                    this.bindVals[2], this.bindVals[3],
-                                                    this.bindVals[4], this.bindVals[5],
-                                                    this.bindVals[6], this.bindVals[7],
-                                                    this.bindVals[8], this.bindVals[9],
-                                                    this.bindVals[10], this.bindVals[11],
-                                                    this.bindVals[12], this.bindVals[13]);
+                                        this.bindVals[2], this.bindVals[3],
+                                        this.bindVals[4], this.bindVals[5],
+                                        this.bindVals[6], this.bindVals[7],
+                                        this.bindVals[8], this.bindVals[9],
+                                        this.bindVals[10], this.bindVals[11],
+                                        this.bindVals[12], this.bindVals[13]);
         rs = pstmt.executeQuery();
         if(rs.next()) {
             return rs.getClob("PCTEXT");
         }
+
+		rs.close();
+		pstmt.close();
         return null;
     }
 }

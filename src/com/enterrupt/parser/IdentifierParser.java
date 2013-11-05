@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 
 public class IdentifierParser extends StringParser {
 
@@ -15,13 +15,13 @@ public class IdentifierParser extends StringParser {
 		return this.b;
 	}
 
-	public Token parse(PeopleCodeProg prog) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) throws Exception {
 
-		prog.byteCursorPos--;	// current byte is 0x00, need to back up.
-		prog.byteCursorPos--;
-		String str = getString(prog);
+		stream.decrementCursor();	// current byte is 0x00, need to back up.
+		stream.decrementCursor();
+		String str = getString(stream);
 
-		prog.appendProgText(str);
+		stream.appendParsedText(str);
 
 		Token t = new Token(TFlag.IDENTIFIER);
 		t.identifierName = str;

@@ -1,16 +1,16 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import java.lang.StringBuilder;
 
 public abstract class StringParser extends ElementParser {
 
-    public String getString(PeopleCodeProg prog) {
+    public String getString(PeopleCodeByteStream stream) {
         byte b;
         StringBuilder builder = new StringBuilder();
 
-        while((b = prog.readNextByte()) != 0) {
-            prog.byteCursorPos++;       //skip 0
+        while((b = stream.readNextByte()) != 0) {
+            stream.incrementCursor();       //skip 0
             if(b == (byte) 10) {
                 builder.append('\n');
             } else {
@@ -18,7 +18,7 @@ public abstract class StringParser extends ElementParser {
             }
         }
 
-        prog.byteCursorPos++;
+		stream.incrementCursor();
         return builder.toString();
     }
 }

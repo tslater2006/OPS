@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import java.util.EnumSet;
 
 public class EmbeddedStringParser extends PureStringParser {
@@ -18,10 +18,10 @@ public class EmbeddedStringParser extends PureStringParser {
 		this(_b, _pre, _post, PFlags.SPACE_BEFORE_AND_AFTER);
 	}
 
-	public Token parse(PeopleCodeProg prog) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) throws Exception {
 
-		String str = this.pre + getString(prog).replace("\"", "\"\"") + this.post;
-		prog.appendProgText(str);
+		String str = this.pre + getString(stream).replace("\"", "\"\"") + this.post;
+		stream.appendParsedText(str);
 
 		Token t = new Token(TFlag.EMBEDDED_STRING);
 		t.embeddedStrVal = str;

@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 
 public class CommentParser extends ElementParser {
 
@@ -19,20 +19,20 @@ public class CommentParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeProg prog) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) throws Exception {
 
 		// Length byte is wide ANDed and cast to integer.
-		int commLen = (int) prog.readNextByte() & 0xff;
-		commLen = commLen + ((int) prog.readNextByte() & 0xff) * 256;
+		int commLen = (int) stream.readNextByte() & 0xff;
+		commLen = commLen + ((int) stream.readNextByte() & 0xff) * 256;
 
 		byte b;
-		for(int i=0; i < commLen && (prog.byteCursorPos < prog.progBytes.length); i++) {
-			b = prog.readNextByte();
+		for(int i=0; i < commLen && (stream.getCursorPos() < stream.getProgLenInBytes()); i++) {
+			b = stream.readNextByte();
 			if(b != 0) {
 				if(b == (byte) 10) {
-					prog.appendProgText('\n');
+					stream.appendParsedText('\n');
 				} else {
-					prog.appendProgText((char) b);
+					stream.appendParsedText((char) b);
 				}
 			}
 		}

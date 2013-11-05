@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 
 public class NumberParser extends ElementParser {
 
@@ -17,18 +17,18 @@ public class NumberParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeProg prog) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) throws Exception {
 
 		int dValue = 0;	 // decimal position from far right going left
 		String out_number = "";
 		int num_bytes = nBytes - 3;
 
-		prog.byteCursorPos++;	// skip first byte
-		dValue = (int) prog.readNextByte();
+		stream.incrementCursor();	// skip first byte
+		dValue = (int) stream.readNextByte();
 		long val = 0, fact = 1;
 
 		for(int i = 0; i < num_bytes; i++) {
-			val += fact * (long) (prog.readNextByte() & 0xff);
+			val += fact * (long) (stream.readNextByte() & 0xff);
 			fact = fact * (long) 256;
 		}
 
@@ -47,7 +47,7 @@ public class NumberParser extends ElementParser {
 			}
 		}
 
-		prog.appendProgText(out_number);
+		stream.appendParsedText(out_number);
 
 		Token t = new Token(TFlag.NUMBER);
 		t.numericVal = out_number;

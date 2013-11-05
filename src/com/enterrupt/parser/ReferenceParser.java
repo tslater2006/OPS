@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import com.enterrupt.pt_objects.Reference;
 
 public class ReferenceParser extends ElementParser {
@@ -16,12 +16,12 @@ public class ReferenceParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeProg prog) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) throws Exception {
 
-		int b1 = (int) (prog.readNextByte() & 0xff);
-		int b2 = (int) (prog.readNextByte() & 0xff);
+		int b1 = (int) (stream.readNextByte() & 0xff);
+		int b2 = (int) (stream.readNextByte() & 0xff);
 
-		Reference refObj = prog.getProgReference(b2 * 256 + b1 + 1);
+		Reference refObj = stream.getMappedReference(b2 * 256 + b1 + 1);
 		String ref = refObj.getValue();
 
 		if(ref == null) {
@@ -45,7 +45,7 @@ public class ReferenceParser extends ElementParser {
 			}
 		}
 
-		prog.appendProgText(ref);
+		stream.appendParsedText(ref);
 
 		Token t = new Token(TFlag.REFERENCE);
 		t.refObj = refObj;

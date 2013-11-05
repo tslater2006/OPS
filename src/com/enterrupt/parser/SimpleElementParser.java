@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import java.util.EnumSet;
 
 public class SimpleElementParser extends ElementParser {
@@ -24,9 +24,9 @@ public class SimpleElementParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeProg prog) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) throws Exception {
 
-		prog.appendProgText(t);
+		stream.appendParsedText(t);
 		return new Token(this.tflags);
 	}
 

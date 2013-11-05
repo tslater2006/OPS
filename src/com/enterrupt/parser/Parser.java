@@ -5,6 +5,7 @@ import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.pt_objects.Reference;
 import com.enterrupt.pt_objects.RecordPeopleCodeProg;
 import com.enterrupt.pt_objects.AppPackagePeopleCodeProg;
+import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.EnumSet;
@@ -15,7 +16,7 @@ public class Parser {
 	private static HashMap<Byte, ElementParser> parserTable;
 
 	private int nIndent = 0;
-	private PeopleCodeProg prog;
+	private PeopleCodeByteStream stream;
 	private boolean endDetected = false;
 	private boolean firstLine = true;
 	private boolean in_declare = false;
@@ -25,11 +26,10 @@ public class Parser {
 	private boolean wroteSpace = false;
 	private ElementParser lastParser = null;
 
-	public Parser(PeopleCodeProg prog) {
+	public Parser(PeopleCodeByteStream bstream) {
 
-		this.prog = prog;
-		this.prog.resetProgText();
-		this.prog.setByteCursorPos(37);			// Program begins at byte 37.
+		this.stream = bstream;
+		this.stream.setCursorPos(37);			// Program begins at byte 37.
 
 		if(allParsers == null) {
 
@@ -139,7 +139,7 @@ public class Parser {
 	public Token parseNextToken() throws Exception {
 
 		Token t = null;
-		byte b = prog.readNextByte();
+		byte b = this.stream.readNextByte();
 
 		if(b == (byte) 7) {
 			return new Token(EnumSet.of(TFlag.END_OF_PROGRAM, TFlag.END_OF_BLOCK));
@@ -181,9 +181,9 @@ public class Parser {
 								|| (lastParser.format == PFlags.SEMICOLON))
 				  		&&  (p.format & PFlags.COMMENT_ON_SAME_LINE) == 0)
 					|| ((p.format & PFlags.NEWLINE_BEFORE) > 0))
-					|| ((p.format & PFlags.NEWLINE_ONCE) > 0 && !did_newline && prog.readAhead() != (byte) 21)) {
+					|| ((p.format & PFlags.NEWLINE_ONCE) > 0 && !did_newline && this.stream.readAhead() != (byte) 21)) {
 
-				prog.appendProgText('\n');
+				this.stream.appendParsedText('\n');
 				startOfLine = true;
 				did_newline = true;
 			} else {
@@ -198,27 +198,27 @@ public class Parser {
 								   		   || ((p.format & PFlags.SPACE_BEFORE2) > 0)))
 					&& (p.format & PFlags.NO_SPACE_BEFORE) == 0) {
 
-					prog.appendProgText(' ');
+					this.stream.appendParsedText(' ');
 					wroteSpace = true;
 				}
 			}
 
 			if(startOfLine && p.writesNonBlank()) {
 				for(int i=0; i < nIndent + (and_indicator? 2 : 0); i++) {
-					prog.appendProgText("   ");
+					this.stream.appendParsedText("   ");
 				}
 			}
 		}
 
 		firstLine = false;
-		int initialByteCursorPos = this.prog.byteCursorPos;
+		int initialByteCursorPos = this.stream.getCursorPos();
 
-		t = p.parse(this.prog);
+		t = p.parse(this.stream);
 
 		wroteSpace = wroteSpace && !p.writesNonBlank();
 		in_declare = in_declare || (p.format & PFlags.IN_DECLARE) > 0;
 		startOfLine = startOfLine && !p.writesNonBlank();
-		did_newline = did_newline && (prog.byteCursorPos == initialByteCursorPos);
+		did_newline = did_newline && (this.stream.getCursorPos() == initialByteCursorPos);
 		and_indicator = (p.format & PFlags.AND_INDICATOR) > 0
 			|| (and_indicator && (p.format & PFlags.COMMENT_ON_SAME_LINE) != 0);
 		lastParser = p;

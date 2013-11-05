@@ -14,7 +14,7 @@ public class ComponentBuffer {
 	public static ScrollBuffer currSB;
 	public static ScrollBuffer compBuffer;
 
-	public static void init() {
+	static {
 		compBuffer = new ScrollBuffer(0, null, null);
 		currSB = compBuffer;
 	}

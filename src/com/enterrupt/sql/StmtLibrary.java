@@ -13,7 +13,7 @@ public class StmtLibrary {
 	private static Connection conn;
 	public static ArrayList<ENTStmt> emittedStmts;
 
-	public static void init() {
+	static {
 		emittedStmts = new ArrayList<ENTStmt>();
 
 		/**

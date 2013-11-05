@@ -19,35 +19,40 @@ public class RunTimeEnvironment {
 	public static HashMap<Integer, MemoryPtr> integerMemPool;
 	public static HashMap<String, MemoryPtr> stringMemPool;
 
-	public static void init() throws Exception {
+	static {
 
-		// Load static boolean literals.
-		TRUE = new BooleanPtr(new Boolean(true), MFlag.READ_ONLY);
-		FALSE = new BooleanPtr(new Boolean(false), MFlag.READ_ONLY);
+		try {
+			// Load static boolean literals.
+			TRUE = new BooleanPtr(new Boolean(true), MFlag.READ_ONLY);
+			FALSE = new BooleanPtr(new Boolean(false), MFlag.READ_ONLY);
 
-		// Create memory pools.
-		integerMemPool = new HashMap<Integer, MemoryPtr>();
-		stringMemPool = new HashMap<String, MemoryPtr>();
+			// Create memory pools.
+			integerMemPool = new HashMap<Integer, MemoryPtr>();
+			stringMemPool = new HashMap<String, MemoryPtr>();
 
-		// Load reserved words for definition literals.
-		defnReservedWordTable = new HashMap<String, Boolean>();
-		defnReservedWordTable.put("MenuName", true);
+			// Load reserved words for definition literals.
+			defnReservedWordTable = new HashMap<String, Boolean>();
+			defnReservedWordTable.put("MenuName", true);
 
-		// Load system variables.
-		systemVarTable = new HashMap<String, MemoryPtr>();
-		systemVarTable.put("%EmployeeId", new StringPtr(MFlag.READ_ONLY));
-		systemVarTable.put("%OperatorId", new StringPtr(MFlag.READ_ONLY));
-		systemVarTable.put("%Menu", new StringPtr(MFlag.READ_ONLY));
+			// Load system variables.
+			systemVarTable = new HashMap<String, MemoryPtr>();
+			systemVarTable.put("%EmployeeId", new StringPtr(MFlag.READ_ONLY));
+			systemVarTable.put("%OperatorId", new StringPtr(MFlag.READ_ONLY));
+			systemVarTable.put("%Menu", new StringPtr(MFlag.READ_ONLY));
 
-		// Load system function references.
-		systemFuncTable = new HashMap<String, Method>();
-		systemFuncTable.put("None", RunTimeEnvironment.class.getMethod("None"));
-		systemFuncTable.put("Hide", RunTimeEnvironment.class.getMethod("Hide"));
-		systemFuncTable.put("SetSearchDialogBehavior", RunTimeEnvironment.class.getMethod("SetSearchDialogBehavior"));
-		systemFuncTable.put("AllowEmplIdChg", RunTimeEnvironment.class.getMethod("AllowEmplIdChg"));
+			// Load system function references.
+			systemFuncTable = new HashMap<String, Method>();
+			systemFuncTable.put("None", RunTimeEnvironment.class.getMethod("None"));
+			systemFuncTable.put("Hide", RunTimeEnvironment.class.getMethod("Hide"));
+			systemFuncTable.put("SetSearchDialogBehavior", RunTimeEnvironment.class.getMethod("SetSearchDialogBehavior"));
+			systemFuncTable.put("AllowEmplIdChg", RunTimeEnvironment.class.getMethod("AllowEmplIdChg"));
 
-		// Initialize empty component buffer.
-		compBufferTable = new HashMap<String, MemoryPtr>();
+			// Initialize empty component buffer.
+			compBufferTable = new HashMap<String, MemoryPtr>();
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	public static MemoryPtr getFromMemoryPool(Integer val) {

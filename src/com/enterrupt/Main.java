@@ -12,10 +12,7 @@ public class Main {
     public static void main(String[] args) {
 
 		try {
-			StmtLibrary.init();
-			ComponentBuffer.init();
 
-			RunTimeEnvironment.init();
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%EmployeeId")).systemWrite("AA0001");
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%Menu")).systemWrite("SA_LEARNER_SERVICES");
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%OperatorId")).systemWrite("KADAMS");

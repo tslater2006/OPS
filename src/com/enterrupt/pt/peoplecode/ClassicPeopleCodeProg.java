@@ -20,9 +20,7 @@ import com.enterrupt.DefnCache;
 
 public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 
-	public abstract Clob getProgTextClob() throws Exception;
 	public abstract String getDescriptor();
-	protected abstract void progSpecific_loadInitialMetadata() throws Exception;
 
 	protected void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
 		int recursionLevel, String mode) throws Exception {

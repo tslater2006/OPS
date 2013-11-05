@@ -8,6 +8,9 @@ import java.util.TreeMap;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import com.enterrupt.sql.StmtLibrary;
 import java.io.InputStream;
 import java.lang.StringBuilder;
 import java.security.MessageDigest;
@@ -25,7 +28,7 @@ public abstract class PeopleCodeProg {
 	/** TODO: Byte cursor should be moved to a PeopleCodeByteStream class. */
     public byte[] progBytes;
 	public int byteCursorPos = 0;
-
+	protected String[] bindVals;
 	public Token[] progTokens;
 
 	private StringBuilder progTextBuilder;
@@ -57,15 +60,61 @@ public abstract class PeopleCodeProg {
 		return this.haveLoadedReferencedDefnsAndProgs;
 	}
 
-	protected abstract void progSpecific_loadInitialMetadata() throws Exception;
+	protected abstract void initBindVals();
 	protected abstract void typeSpecific_handleReferencedToken(Token t, PeopleCodeTokenStream stream,
 		int recursionLevel, String mode) throws Exception;
-	public abstract Clob getProgTextClob() throws Exception;
 	public abstract String getDescriptor();
 
 	public void loadInitialMetadata() throws Exception {
 
-		this.progSpecific_loadInitialMetadata();
+    	PreparedStatement pstmt;
+        ResultSet rs;
+
+        // Get program text.
+        pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(this.bindVals[0], this.bindVals[1],
+                                                    this.bindVals[2], this.bindVals[3],
+                                                    this.bindVals[4], this.bindVals[5],
+                                                    this.bindVals[6], this.bindVals[7],
+                                                    this.bindVals[8], this.bindVals[9],
+                                                    this.bindVals[10], this.bindVals[11],
+                                                    this.bindVals[12], this.bindVals[13]);
+        rs = pstmt.executeQuery();
+
+        /**
+         * Append the program bytecode; there could be multiple records
+         * for this program if the length exceeds 28,000 bytes. Note that
+         * the above query must be ordered by PROSEQ, otherwise these records
+         * will need to be pre-sorted before appending the BLOBs together.
+         */
+        int PROGLEN = -1;
+        while(rs.next()) {
+            PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
+            this.appendProgBytes(rs.getBlob("PROGTXT"));
+        }
+        rs.close();
+        pstmt.close();
+
+        if(this.progBytes.length != PROGLEN) {
+            System.out.println("[ERROR] Number of bytes in " + this.getDescriptor() + " ("
+                + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
+            System.exit(1);
+        }
+
+	    // Get program references.
+        pstmt = StmtLibrary.getPSPCMPROG_GetRefs(this.bindVals[0], this.bindVals[1],
+                                                    this.bindVals[2], this.bindVals[3],
+                                                    this.bindVals[4], this.bindVals[5],
+                                                    this.bindVals[6], this.bindVals[7],
+                                                    this.bindVals[8], this.bindVals[9],
+                                                    this.bindVals[10], this.bindVals[11],
+                                                    this.bindVals[12], this.bindVals[13]);
+        rs = pstmt.executeQuery();
+        while(rs.next()) {
+            this.progRefsTable.put(rs.getInt("NAMENUM"),
+                new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
+        }
+        rs.close();
+        pstmt.close();
 
 		/**
 		 * Parse the entire program into tokens. We'll find out what programs are
@@ -337,5 +386,23 @@ public abstract class PeopleCodeProg {
 
 		return pathParts.toArray(new String[0]);
 	}
+
+    public Clob getProgTextClob() throws Exception {
+
+        PreparedStatement pstmt = null;
+        ResultSet rs;
+        pstmt = StmtLibrary.getPSPCMTXT(this.bindVals[0], this.bindVals[1],
+                                                    this.bindVals[2], this.bindVals[3],
+                                                    this.bindVals[4], this.bindVals[5],
+                                                    this.bindVals[6], this.bindVals[7],
+                                                    this.bindVals[8], this.bindVals[9],
+                                                    this.bindVals[10], this.bindVals[11],
+                                                    this.bindVals[12], this.bindVals[13]);
+        rs = pstmt.executeQuery();
+        if(rs.next()) {
+            return rs.getClob("PCTXT");
+        }
+        return null;
+    }
 }
 

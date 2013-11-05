@@ -16,79 +16,26 @@ public class RecordPeopleCodeProg extends ClassicPeopleCodeProg {
 		this.RECNAME = recname;
 		this.FLDNAME = fldname;
 		this.event = event;
+		this.initBindVals();
 	}
+
+    protected void initBindVals() {
+
+        this.bindVals = new String[14];
+
+        this.bindVals[0] = PSDefn.RECORD;
+        this.bindVals[1] = this.RECNAME;
+        this.bindVals[2] = PSDefn.FIELD;
+        this.bindVals[3] = this.FLDNAME;
+		this.bindVals[4] = PSDefn.EVENT;
+		this.bindVals[5] = this.event;
+        for(int i = 6; i < this.bindVals.length; i+=2) {
+            this.bindVals[i] = "0";
+            this.bindVals[i+1] = PSDefn.NULL;
+        }
+    }
 
 	public String getDescriptor() {
 		return "RecordPC." + this.RECNAME + "." + this.FLDNAME + "." + this.event;
-	}
-
-	protected void progSpecific_loadInitialMetadata() throws Exception {
-
-        PreparedStatement pstmt = null;
-        ResultSet rs;
-
-        // Get program text.
-        pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(PSDefn.RECORD, this.RECNAME,
-                                                    PSDefn.FIELD, this.FLDNAME,
-                                                    PSDefn.EVENT, this.event,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL,
-                                                    "0", PSDefn.NULL);
-        rs = pstmt.executeQuery();
-
-		/**
-		 * Append the program bytecode; there could be multiple records
-		 * for this program if the length exceeds 28,000 bytes. Note that
-		 * the above query must be ordered by PROSEQ, otherwise these records
-		 * will need to be pre-sorted before appending the BLOBs together.
-	 	 */
-        int PROGLEN = -1;
-        while(rs.next()) {
-            PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
-            this.appendProgBytes(rs.getBlob("PROGTXT"));
-        }
-        rs.close();
-        pstmt.close();
-
-        if(this.progBytes.length != PROGLEN) {
-            System.out.println("[ERROR] Number of bytes in " + this.getDescriptor() + " ("
-                + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
-            System.exit(1);
-        }
-
-        // Get program references.
-        pstmt = StmtLibrary.getPSPCMPROG_GetRefs(PSDefn.RECORD, this.RECNAME,
-                                                 PSDefn.FIELD, this.FLDNAME,
-                                                 PSDefn.EVENT, this.event,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL,
-                                                 "0", PSDefn.NULL);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-            this.progRefsTable.put(rs.getInt("NAMENUM"),
-                new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
-        }
-        rs.close();
-        pstmt.close();
-	}
-
-	public Clob getProgTextClob() throws Exception {
-
-        PreparedStatement pstmt = null;
-        ResultSet rs;
-        pstmt = StmtLibrary.getPSPCMTXT(PSDefn.RECORD, this.RECNAME,
-                                        PSDefn.FIELD, this.FLDNAME,
-                                        PSDefn.EVENT, this.event,
-                                        "0", PSDefn.NULL,
-                                        "0", PSDefn.NULL,
-                                        "0", PSDefn.NULL,
-                                        "0", PSDefn.NULL);
-        rs = pstmt.executeQuery();
-        if(rs.next()) {
-            return rs.getClob("PCTEXT");
-		}
-		return null;
 	}
 }

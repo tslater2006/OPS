@@ -12,19 +12,16 @@ import com.enterrupt.DefnCache;
 public class Page {
 
     public String PNLNAME;
+
     public ArrayList<PgToken> subpages;
     public ArrayList<PgToken> secpages;
 	public ArrayList<PgToken> tokens;
-	private boolean hasPagePCBeenRetrieved;
-	public PeopleCodeProg pageActivateProg;
+	public PeopleCodeProg pageActivateProg = null;
+
+	private boolean hasDiscoveredPagePC = false;
 
     public Page(String pnlname) {
         this.PNLNAME = pnlname;
-        this.subpages = new ArrayList<PgToken>();
-        this.secpages = new ArrayList<PgToken>();
-		this.tokens = new ArrayList<PgToken>();
-		this.hasPagePCBeenRetrieved = false;
-		this.pageActivateProg = null;
     }
 
     public void init() throws Exception {
@@ -37,6 +34,10 @@ public class Page {
         rs.next(); // Do nothing with record for now.
         rs.close();
         pstmt.close();
+
+        this.subpages = new ArrayList<PgToken>();
+        this.secpages = new ArrayList<PgToken>();
+		this.tokens = new ArrayList<PgToken>();
 
         pstmt = StmtLibrary.getPSPNLFIELD(this.PNLNAME);
         rs = pstmt.executeQuery();
@@ -172,24 +173,22 @@ public class Page {
 		}
 	}
 
-	public void getPagePC() throws Exception {
+	public void discoverPagePC() throws Exception {
 
-		if(!this.hasPagePCBeenRetrieved) {
+		if(this.hasDiscoveredPagePC) { return; }
+		this.hasDiscoveredPagePC = true;
 
-			PreparedStatement pstmt;
-			ResultSet rs;
+		PreparedStatement pstmt;
+		ResultSet rs;
 
-			// Check to see if this page has any Page PeopleCode associated with it.
-            pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.PAGE, this.PNLNAME);
-            rs = pstmt.executeQuery();
-			while(rs.next()) {
-				PeopleCodeProg prog = new PagePeopleCodeProg(this.PNLNAME);
-				this.pageActivateProg = DefnCache.getProgram(prog);
-			}
-			rs.close();
-			pstmt.close();
-
-			this.hasPagePCBeenRetrieved = true;
+		// Check to see if this page has any Page PeopleCode associated with it.
+        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.PAGE, this.PNLNAME);
+        rs = pstmt.executeQuery();
+		while(rs.next()) {
+			PeopleCodeProg prog = new PagePeopleCodeProg(this.PNLNAME);
+			this.pageActivateProg = DefnCache.getProgram(prog);
 		}
+		rs.close();
+		pstmt.close();
 	}
 }

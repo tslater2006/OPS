@@ -18,12 +18,13 @@ import com.enterrupt.DefnCache;
 
 public class Component {
 
-    public ArrayList<Page> pages;
     private String PNLGRPNAME;
     private String MARKET;
     private String SEARCHRECNAME; // name of search record for this component
 
+    public ArrayList<Page> pages;
 	public ArrayList<ComponentPeopleCodeProg> orderedComponentProgs;
+
 	private boolean hasListOfComponentPCBeenRetrieved = false;
 
 	private class ScrollMarker {
@@ -43,7 +44,6 @@ public class Component {
     public Component(String pnlgrpname, String market) throws Exception {
         this.PNLGRPNAME = pnlgrpname;
         this.MARKET = market;
-        pages = new ArrayList<Page>();
 
         PreparedStatement pstmt;
         ResultSet rs;
@@ -55,10 +55,12 @@ public class Component {
         rs.close();
         pstmt.close();
 
+        this.pages = new ArrayList<Page>();
+
         pstmt = StmtLibrary.getPSPNLGROUP(this.PNLGRPNAME, this.MARKET);
         rs = pstmt.executeQuery();
         while(rs.next()) {
-			// all pages at the root of the component start at scroll level 0.
+			// All pages at the root of the component start at scroll level 0.
 			Page p = new Page(rs.getString("PNLNAME"));
             this.pages.add(p);
         }
@@ -74,57 +76,55 @@ public class Component {
 
     public void getListOfComponentPC() throws Exception {
 
-		if(!this.hasListOfComponentPCBeenRetrieved) {
+		if(this.hasListOfComponentPCBeenRetrieved) { return; }
+		this.hasListOfComponentPCBeenRetrieved = true;
 
-	        PreparedStatement pstmt;
-	  		ResultSet rs;
+        PreparedStatement pstmt;
+  		ResultSet rs;
 
-			this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
+		this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
 
-	        pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT, this.PNLGRPNAME,
+        pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT, this.PNLGRPNAME,
                                                         PSDefn.MARKET, this.MARKET);
-   	        rs = pstmt.executeQuery();
+        rs = pstmt.executeQuery();
 
-     	    while(rs.next()) {
+  	    while(rs.next()) {
 
-				String objectid3 = rs.getString("OBJECTID3").trim();
-				String objectval3 = rs.getString("OBJECTVALUE3").trim();
-				String objectid4 = rs.getString("OBJECTID4").trim();
-				String objectval4 = rs.getString("OBJECTVALUE4").trim();
-				String objectid5 = rs.getString("OBJECTID5").trim();
-				String objectval5 = rs.getString("OBJECTVALUE5").trim();
+			String objectid3 = rs.getString("OBJECTID3").trim();
+			String objectval3 = rs.getString("OBJECTVALUE3").trim();
+			String objectid4 = rs.getString("OBJECTID4").trim();
+			String objectval4 = rs.getString("OBJECTVALUE4").trim();
+			String objectid5 = rs.getString("OBJECTID5").trim();
+			String objectval5 = rs.getString("OBJECTVALUE5").trim();
 
-				PeopleCodeProg prog = null;
+			PeopleCodeProg prog = null;
 
-				// Example: SSS_STUDENT_CENTER.GBL.PreBuild
-				if(objectid3.equals(PSDefn.EVENT)) {
-					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
-						objectval3);
+			// Example: SSS_STUDENT_CENTER.GBL.PreBuild
+			if(objectid3.equals(PSDefn.EVENT)) {
+				prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+					objectval3);
 
-				// Example: SSS_STUDENT_CENTER.LS_SS_PERS_SRCH.SearchInit
-				} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.EVENT)) {
-					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
-						objectval3, objectval4);
+			// Example: SSS_STUDENT_CENTER.LS_SS_PERS_SRCH.SearchInit
+			} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.EVENT)) {
+				prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+					objectval3, objectval4);
 
-				// Example: SSS_STUDENT_CENTER.LS_DERIVED_SSS_SCL.SS_CLS_SCHED_LINK.FieldChange
-				} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.FIELD) &&
-							objectid5.equals(PSDefn.EVENT)) {
-					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
-						objectval3, objectval4, objectval5);
+			// Example: SSS_STUDENT_CENTER.LS_DERIVED_SSS_SCL.SS_CLS_SCHED_LINK.FieldChange
+			} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.FIELD) &&
+						objectid5.equals(PSDefn.EVENT)) {
+				prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+					objectval3, objectval4, objectval5);
 
-				} else {
-					System.out.println("[ERROR] Unexpected type of Component PC encountered.");
-					System.exit(1);
-				}
+			} else {
+				System.out.println("[ERROR] Unexpected type of Component PC encountered.");
+				System.exit(1);
+			}
 
-				prog = DefnCache.getProgram(prog);
-				this.orderedComponentProgs.add((ComponentPeopleCodeProg)prog);
-     	   	}
-      	   	rs.close();
-      	   	pstmt.close();
-
-			this.hasListOfComponentPCBeenRetrieved = true;
-		}
+			prog = DefnCache.getProgram(prog);
+			this.orderedComponentProgs.add((ComponentPeopleCodeProg)prog);
+   	   	}
+   	   	rs.close();
+   	   	pstmt.close();
     }
 
     public void loadAndRunRecordPConSearchRecord() throws Exception {
@@ -145,7 +145,6 @@ public class Component {
 	public void loadAndRunComponentPConSearchRecord() throws Exception {
 
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-
 			if(prog.RECNAME != null && prog.RECNAME.equals(this.SEARCHRECNAME)) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
@@ -188,6 +187,7 @@ public class Component {
 		for(Page p : this.pages) {
 			p.recursivelyLoadSecpages();
 		}
+
 		RecordPCListRequestBuffer.flushEntireTokenStream();
 	}
 
@@ -392,7 +392,7 @@ public class Component {
 
 		for(Page p : this.pages) {
 			Page cachedPage = DefnCache.getPage(p.PNLNAME);
-			cachedPage.getPagePC();
+			cachedPage.discoverPagePC();
 			if(cachedPage.pageActivateProg != null) {
 				PeopleCodeProg pr = DefnCache.getProgram(cachedPage.pageActivateProg);
 				pr.init();

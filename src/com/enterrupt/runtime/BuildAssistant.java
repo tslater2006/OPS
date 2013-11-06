@@ -189,6 +189,7 @@ public class BuildAssistant {
 		 * TODO: Re-enable when ready.
 		 */
 		boolean isCompStructureValid = false;
+		printComponentStructure();
 		//boolean isCompStructureValid = validateComponentStructure(componentObj, false);
 
 		DecimalFormat df = new DecimalFormat("0.0");
@@ -312,5 +313,46 @@ public class BuildAssistant {
 		} catch(java.io.IOException ioe) {
 			log.warn("Encountered IOException while attempting to close trace file.");
 		}
+	}
+
+	public static void printComponentStructure() {
+
+	    int indent = 0;
+        IStreamableBuffer buf;
+
+        ComponentBuffer.resetCursors();
+        while((buf = ComponentBuffer.next()) != null) {
+
+            if(buf instanceof ScrollBuffer) {
+
+                ScrollBuffer sbuf = (ScrollBuffer) buf;
+                indent = sbuf.scrollLevel * 3;
+
+				StringBuilder b = new StringBuilder();
+                for(int i=0; i<indent; i++){b.append(" ");}
+                b.append("Scroll - Level ").append(sbuf.scrollLevel).append("\tPrimary Record: ")
+                      .append(sbuf.primaryRecName);
+                for(int i=0; i<indent; i++){b.append(" ");}
+				log.info(b.toString());
+                log.info("=======================================================");
+
+            } else if(buf instanceof RecordBuffer) {
+
+                RecordBuffer rbuf = (RecordBuffer) buf;
+
+				StringBuilder b = new StringBuilder();
+                for(int i=0; i<indent; i++){b.append(" ");}
+               	b.append(" + ").append(rbuf.recName);
+				log.info(b.toString());
+
+            } else {
+                RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+
+				StringBuilder b = new StringBuilder();
+                for(int i=0; i<indent; i++){b.append(" ");}
+                b.append("   - ").append(fbuf.fldName);
+				log.info(b.toString());
+            }
+        }
 	}
 }

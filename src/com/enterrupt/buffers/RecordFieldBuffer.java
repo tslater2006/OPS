@@ -7,6 +7,7 @@ import java.lang.StringBuilder;
 import java.util.Collections;
 import com.enterrupt.DefnCache;
 import com.enterrupt.pt_objects.*;
+import com.enterrupt.runtime.*;
 
 public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFieldBuffer> {
 
@@ -25,9 +26,8 @@ public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFi
         this.parentRecordBuffer = parent;
 
         if(this.fldDefn == null) {
-            System.out.println("[ERROR] Field is not on the record. Likely on a subrecord. Subrecord traversal " +
-				"in RecordFieldBuffer not supported at this time.");
-            System.exit(1);
+			throw new EntVMachRuntimeException("Field not found on the record supplied. Likely on a subrecord. " +
+				"Subrecord traversal in RecordFieldBuffer not supported at this time.");
         }
     }
 

@@ -1,7 +1,7 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import java.lang.StringBuilder;
+import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
 public abstract class ElementParser {
 

@@ -1,8 +1,8 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeByteStream;
 import java.lang.reflect.*;
 import java.util.EnumSet;
+import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
 public class PureStringParser extends StringParser {
 

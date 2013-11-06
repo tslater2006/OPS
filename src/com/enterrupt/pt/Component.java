@@ -1,22 +1,16 @@
-package com.enterrupt.pt_objects;
+package com.enterrupt.pt;
 
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Stack;
-import java.sql.ResultSet;
-import java.util.HashMap;
-import java.sql.Blob;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import com.enterrupt.BuildAssistant;
+import java.sql.*;
+import java.util.*;
+import java.io.*;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
 import com.enterrupt.buffers.*;
-import com.enterrupt.DefnCache;
-import org.apache.logging.log4j.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.pt.peoplecode.*;
+import com.enterrupt.pt.pages.*;
+import org.apache.logging.log4j.*;
 
 public class Component {
 

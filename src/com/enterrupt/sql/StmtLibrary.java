@@ -1,13 +1,9 @@
 package com.enterrupt.sql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.DriverManager;
-import java.util.HashMap;
-import java.util.ArrayList;
-import com.enterrupt.interpreter.RunTimeEnvironment;
+import java.sql.*;
+import java.util.*;
 import com.enterrupt.types.*;
-import com.enterrupt.runtime.ExitCode;
+import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 
 public class StmtLibrary {

@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeByteStream;
+import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
 public class IdentifierParser extends StringParser {
 

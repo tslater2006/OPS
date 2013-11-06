@@ -1,4 +1,4 @@
-package com.enterrupt.pt_objects;
+package com.enterrupt.pt;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

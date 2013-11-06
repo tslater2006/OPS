@@ -1,14 +1,13 @@
-package com.enterrupt.pt_objects;
+package com.enterrupt.pt.peoplecode;
 
 import java.sql.*;
 import java.util.*;
 import java.io.InputStream;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.*;
-import com.enterrupt.DefnCache;
-import org.apache.logging.log4j.*;
+import com.enterrupt.pt.*;
 import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 public abstract class PeopleCodeProg {
 
@@ -16,7 +15,7 @@ public abstract class PeopleCodeProg {
 	public Token[] progTokens;
 
 	protected String[] bindVals;
-	protected String event;
+	public String event;
 	private String parsedText;
 
 	protected ArrayList<PeopleCodeProg> referencedProgs;

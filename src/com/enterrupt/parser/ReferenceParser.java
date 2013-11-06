@@ -1,7 +1,7 @@
 package com.enterrupt.parser;
 
-import com.enterrupt.pt_objects.PeopleCodeByteStream;
-import com.enterrupt.pt_objects.Reference;
+import com.enterrupt.pt.Reference;
+import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
 public class ReferenceParser extends ElementParser {
 

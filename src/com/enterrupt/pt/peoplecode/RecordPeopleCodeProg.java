@@ -1,10 +1,8 @@
-package com.enterrupt.pt_objects;
+package com.enterrupt.pt.peoplecode;
 
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
+import java.sql.*;
 import com.enterrupt.sql.StmtLibrary;
+import com.enterrupt.pt.*;
 
 public class RecordPeopleCodeProg extends ClassicPeopleCodeProg {
 

@@ -1,4 +1,6 @@
-package com.enterrupt.pt_objects;
+package com.enterrupt.pt.peoplecode;
+
+import com.enterrupt.pt.*;
 
 public class PeopleCodeByteStream {
 

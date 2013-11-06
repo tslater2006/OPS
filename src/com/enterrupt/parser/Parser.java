@@ -1,10 +1,8 @@
 package com.enterrupt.parser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.EnumSet;
+import java.util.*;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.pt_objects.PeopleCodeByteStream;
+import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 import org.apache.logging.log4j.*;
 
 public class Parser {

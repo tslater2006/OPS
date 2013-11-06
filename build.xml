@@ -8,7 +8,7 @@
 
 	<target name="build">
 		<mkdir dir="bin"/>
-		<javac srcdir="src" destdir="bin" debug="true" verbose="true">
+		<javac srcdir="src" destdir="bin" debug="true">
 			<compilerarg value="-Xlint:unchecked"/>
 			<classpath>
 				<fileset dir="lib">

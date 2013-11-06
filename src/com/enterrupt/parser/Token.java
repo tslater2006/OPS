@@ -2,7 +2,7 @@ package com.enterrupt.parser;
 
 import java.util.EnumSet;
 import java.math.BigDecimal;
-import com.enterrupt.pt_objects.Reference;
+import com.enterrupt.pt.Reference;
 
 public class Token {
 

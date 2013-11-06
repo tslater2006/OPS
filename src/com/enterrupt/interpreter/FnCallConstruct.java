@@ -4,7 +4,7 @@ import java.lang.reflect.*;
 import java.util.EnumSet;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.types.*;
-import com.enterrupt.pt_objects.PeopleCodeTokenStream;
+import com.enterrupt.pt.peoplecode.PeopleCodeTokenStream;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 

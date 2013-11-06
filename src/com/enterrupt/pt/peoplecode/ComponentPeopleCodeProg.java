@@ -1,6 +1,7 @@
-package com.enterrupt.pt_objects;
+package com.enterrupt.pt.peoplecode;
 
 import java.lang.StringBuilder;
+import com.enterrupt.pt.*;
 
 public class ComponentPeopleCodeProg extends ClassicPeopleCodeProg {
 

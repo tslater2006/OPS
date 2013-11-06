@@ -1,10 +1,8 @@
-package com.enterrupt.pt_objects;
+package com.enterrupt.pt.peoplecode;
 
-import com.enterrupt.parser.Parser;
-import com.enterrupt.parser.Token;
-import com.enterrupt.parser.TFlag;
-import com.enterrupt.DefnCache;
+import com.enterrupt.parser.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.pt.*;
 
 public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 

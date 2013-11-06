@@ -1,11 +1,8 @@
 package com.enterrupt.interpreter;
 
 import java.util.Stack;
-import com.enterrupt.parser.Token;
-import com.enterrupt.parser.TFlag;
-import com.enterrupt.parser.Parser;
-import com.enterrupt.pt_objects.PeopleCodeProg;
-import com.enterrupt.pt_objects.PeopleCodeTokenStream;
+import com.enterrupt.parser.*;
+import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.types.MemoryPtr;
 import org.apache.logging.log4j.*;
 

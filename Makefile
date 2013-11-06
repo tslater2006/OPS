@@ -1,6 +1,7 @@
 OCI_DIR=/usr/lib/oracle/12.1/client64/lib
 JAVA_D=-Duser.timezone=GMT -Djava.library.path=$(OCI_DIR) -Dlog4j.configurationFile=conf/log4j.xml
-TRACE_FILE=-Dtracefile=trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql
+#TRACE_FILE=-Dtracefile=trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql
+TRACE_FILE=-Dtracefile=trace/004_KADAMS_CLASS_SEARCH.tracesql
 IGNORE_STMTS_FILE=-Dignore_stmts_file=conf/ignore_stmts.conf
 JAVA_CP=bin:lib/*:$(OCI_DIR)/ojdbc7.jar
 JAVA_MAIN=com.enterrupt.Main

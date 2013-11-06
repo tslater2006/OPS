@@ -24,7 +24,7 @@ public class Main {
 			// TODO: Remove, should be generated during SQL processing.
 			RunTimeEnvironment.compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr());
 
-			Component c = new Component("SSS_STUDENT_CENTER", "GBL");
+			Component c = new Component("CLASS_SEARCH", "GBL");
 			Menu m = new Menu("SA_LEARNER_SERVICES");
 
 			c.loadSearchRecord();

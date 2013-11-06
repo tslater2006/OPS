@@ -21,27 +21,28 @@ public class ReferenceParser extends ElementParser {
 		int b1 = (int) (stream.readNextByte() & 0xff);
 		int b2 = (int) (stream.readNextByte() & 0xff);
 
-		Reference refObj = stream.getMappedReference(b2 * 256 + b1 + 1);
+		int refIdx = b2 * 256 + b1 + 1;
+		Reference refObj = stream.getMappedReference(refIdx);
+		if(refObj == null) {
+			throw new EntParseException("No reference is mapped to index " + refIdx + " on the "
+				+ "program underlying this stream.");
+		}
+
 		String ref = refObj.getValue();
 
-		if(ref == null) {
-			System.out.println("Unable to find reference number: " + b1);
-			System.exit(1);
-		} else {
-			/**
-			 * TODO: Understand what's going on here better.
-			 */
-			if(b == 74 && (ref.startsWith("Field.") ||
-						   ref.startsWith("Record.") ||
-						   ref.startsWith("Scroll."))) {
-				ref = ref.substring(ref.indexOf('.') + 1);
-			}
-			int p1 = ref.indexOf('.');
-			if(p1 > 0) {
-				String rec = ref.substring(0, p1);
-				if(b == (byte) 72) {
-					ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
-				}
+		/**
+		 * TODO: Understand what's going on here better.
+		 */
+		if(b == 74 && (ref.startsWith("Field.") ||
+					   ref.startsWith("Record.") ||
+					   ref.startsWith("Scroll."))) {
+			ref = ref.substring(ref.indexOf('.') + 1);
+		}
+		int p1 = ref.indexOf('.');
+		if(p1 > 0) {
+			String rec = ref.substring(0, p1);
+			if(b == (byte) 72) {
+				ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
 			}
 		}
 

@@ -145,10 +145,8 @@ public class Parser {
 
 		ElementParser p = parserTable.get(new Byte(b));
 		if(p == null) {
-			System.out.printf("[ERROR] Reached unimplementable byte: 0x%02X\n", b);
-			System.exit(1);
+			throw new EntParseException(String.format("Encountered unparseable byte: 0x%02X", b));
 		} else {
-
 			/* TODO: Fill out as needed. */
 			in_declare = (in_declare &&
 				!((lastParser != null && (lastParser.format & PFlags.NEWLINE_AFTER) > 0)

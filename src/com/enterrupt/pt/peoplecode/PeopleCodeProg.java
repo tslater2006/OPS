@@ -76,9 +76,8 @@ public abstract class PeopleCodeProg {
         	pstmt.close();
 
 	        if(this.progBytes.length != PROGLEN) {
-    	        System.out.println("[ERROR] Number of bytes in " + this.getDescriptor() + " ("
+    	        throw new EntVMachRuntimeException("Number of bytes in " + this.getDescriptor() + " ("
         	        + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
-        	    System.exit(1);
         	}
 
 			this.progRefsTable = new TreeMap<Integer, Reference>();
@@ -196,8 +195,7 @@ public abstract class PeopleCodeProg {
 			flag = LFlag.RECORD;
 
 		} else {
-			System.out.println("[ERROR] Unexpected type of root PeopleCode.");
-			System.exit(1);
+			throw new EntVMachRuntimeException("Unexpected type of root PeopleCode.");
 		}
 
 		this.recurseLoadDefnsAndPrograms(0, flag);

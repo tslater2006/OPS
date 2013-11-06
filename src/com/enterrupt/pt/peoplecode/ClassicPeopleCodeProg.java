@@ -4,6 +4,7 @@ import com.enterrupt.parser.Parser;
 import com.enterrupt.parser.Token;
 import com.enterrupt.parser.TFlag;
 import com.enterrupt.DefnCache;
+import com.enterrupt.runtime.*;
 
 public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 
@@ -12,10 +13,10 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream, int recursionLevel, LFlag lflag) {
 
     	if(t.flags.contains(TFlag.DECLARE)) {
+
         	t = stream.readNextToken();
             if(!t.flags.contains(TFlag.FUNCTION)) {
-            	System.out.println("[ERROR] Expected FUNCTION after DECLARES.");
-                System.exit(1);
+            	throw new EntVMachRuntimeException("Expected FUNCTION.");
             }
 
             // Name of the function.
@@ -23,8 +24,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 
             t = stream.readNextToken();
             if(!t.flags.contains(TFlag.PEOPLECODE)) {
-            	System.out.println("[ERROR] Expected PEOPLECODE after function name.");
-                System.exit(1);
+            	throw new EntVMachRuntimeException("Expected PEOPLECODE.");
             }
 
             t = stream.readNextToken();

@@ -129,8 +129,7 @@ public class Component {
 						objectval3, objectval4, objectval5);
 
 				} else {
-					System.out.println("[ERROR] Unexpected type of Component PC encountered.");
-					System.exit(1);
+					throw new EntVMachRuntimeException("Unexpected type of Component PC encountered.");
 				}
 
 				prog = DefnCache.getProgram(prog);
@@ -279,8 +278,8 @@ public class Component {
 			}
 
 			if(scrollMarkers.size() != 0) {
-				System.out.println("[ERROR] Scroll marker stack size exceeds 0 at the end of the page token stream.");
-				System.exit(1);
+				throw new EntVMachRuntimeException("Scroll marker stack size exceeds 0 " +
+					"at the end of the page token stream.");
 			}
 		}
 	}

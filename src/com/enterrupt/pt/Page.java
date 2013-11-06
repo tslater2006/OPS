@@ -102,8 +102,8 @@ public class Page {
 						this.tokens.add(pf);
 
 						if(pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
-							System.out.println("[WARNING] A generic field with either a blank RECNAME or FIELDNAME was encountered.");
-							System.exit(1);
+							throw new EntVMachRuntimeException("A generic field with either a blank RECNAME " +
+								"or FIELDNAME was encountered.");
 						}
             	}
         	}

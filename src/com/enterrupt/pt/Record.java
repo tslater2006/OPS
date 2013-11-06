@@ -51,8 +51,7 @@ public class Record {
 				this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
 				this.RECTYPE = rs.getInt("RECTYPE");
 			} else {
-				System.out.println("[ERROR] Expected record to be returned from PSRECDEFN query.");
-				System.exit(1);
+				throw new EntVMachRuntimeException("Expected record to be returned from PSRECDEFN query.");
 			}
         	rs.close();
         	pstmt.close();
@@ -94,8 +93,8 @@ public class Record {
 				}
 
 				if(fieldcount != i) {
-					System.out.println("[ERROR] Even after querying for subrecords, field count does not match that on PSRECDEFN.");
-					System.exit(1);
+					throw new EntVMachRuntimeException("Even after querying for subrecords, field count " +
+						"does not match that on PSRECDEFN.");
 				}
 			}
 

@@ -4,6 +4,7 @@ import com.enterrupt.BuildAssistant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import com.enterrupt.DefnCache;
+import com.enterrupt.runtime.*;
 
 public class PgTokenStream {
 
@@ -70,8 +71,7 @@ public class PgTokenStream {
 				}
 
 				if(!foundPrimaryRecName) {
-					System.out.println("[ERROR] Unable to find the primary record name for a scroll area.");
-					System.exit(1);
+					throw new EntVMachRuntimeException("Unable to find the scroll area's primary record name.");
 				}
 			}
 

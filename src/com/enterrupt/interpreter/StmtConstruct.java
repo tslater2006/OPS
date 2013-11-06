@@ -25,8 +25,7 @@ public class StmtConstruct {
 			if(resolvedToken.flags.contains(TFlag.FUNC_REF)) {
 				return;
 			} else {
-				System.out.println("[ERROR] Parsed semicolon, but a token other than FUNCTION preceded it.");
-				System.exit(1);
+				throw new EntInterpretException("A token other than FUNC_REF preceded SEMICOLON.");
 			}
 		}
 
@@ -40,14 +39,12 @@ public class StmtConstruct {
 
 			t = stream.readNextToken();
 			if(!t.flags.contains(TFlag.SEMICOLON)) {
-				System.out.println("[ERROR] Expected semicolon after assignment.");
-				System.exit(1);
+				throw new EntInterpretException("Expected SEMICOLON after assignment.");
 			}
 
 			return;
 		}
 
-		System.out.println("[ERROR] Encountered unexpected statement token.");
-		System.exit(1);
+		throw new EntInterpretException("Encountered unexpected statement token.");
 	}
 }

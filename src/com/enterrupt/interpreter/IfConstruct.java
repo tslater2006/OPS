@@ -12,15 +12,13 @@ public class IfConstruct {
 
 		// Detect: IF, EXPRESSION, THEN, STMT_LIST, END_IF
 		if(!stream.readNextToken().flags.contains(TFlag.IF)) {
-			System.out.println("[ERROR] Expected IF, did not parse.");
-			System.exit(1);
+			throw new EntInterpretException("Expected IF.");
 		}
 
 		ExprConstruct.interpret(stream);
 
 		if(!stream.readNextToken().flags.contains(TFlag.THEN)) {
-			System.out.println("[ERROR] Expected THEN, did not parse.");
-			System.exit(1);
+			throw new EntInterpretException("Expected THEN.");
 		}
 
 		// Get the value of the expression; expect boolean.
@@ -33,13 +31,11 @@ public class IfConstruct {
 		}
 
 		if(!stream.readNextToken().flags.contains(TFlag.END_IF)) {
-			System.out.println("[ERROR] Expected END_IF, did not parse.");
-			System.exit(1);
+			throw new EntInterpretException("Expected END_IF.");
 		}
 
 		if(!stream.readNextToken().flags.contains(TFlag.SEMICOLON)) {
-			System.out.println("[ERROR] Expected SEMICOLON, did not parse.");
-			System.exit(1);
+			throw new EntInterpretException("Expected SEMICOLON.");
 		}
 	}
 

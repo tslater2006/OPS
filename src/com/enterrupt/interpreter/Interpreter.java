@@ -59,8 +59,7 @@ public class Interpreter {
 
         // Detect: END_OF_PROGRAM
         if(!stream.readNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
-            System.out.println("[ERROR] Expected END_OF_PROGRAM");
-            System.exit(1);
+			throw new EntInterpretException("Expected END_OF_PROGRAM.");
         }
 	}
 }

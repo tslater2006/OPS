@@ -15,8 +15,7 @@ public class FnCallConstruct {
 	public static void interpret(PeopleCodeTokenStream stream, Method fnPtr) {
 
 	    if(!stream.readNextToken().flags.contains(TFlag.L_PAREN)) {
-    	    System.out.println("[ERROR] Expected L_PAREN");
-            System.exit(1);
+			throw new EntInterpretException("Expected L_PAREN.");
         }
 
 		/**
@@ -26,8 +25,7 @@ public class FnCallConstruct {
 		ExprConstruct.interpret(stream);
 
         if(!stream.readNextToken().flags.contains(TFlag.R_PAREN)) {
-            System.out.println("[ERROR] Expected R_PAREN");
-	        System.exit(1);
+			throw new EntInterpretException("Expected R_PAREN.");
         }
 
 		/**

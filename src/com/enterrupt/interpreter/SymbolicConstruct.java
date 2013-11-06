@@ -45,8 +45,7 @@ public class SymbolicConstruct {
 				return t;
 			}
 
-			System.out.println("[ERROR] Unable to resolve REFERENCE token.");
-			System.exit(1);
+			throw new EntInterpretException("Unable to resolve REFERENCE token.");
 		}
 
 		if(t.flags.contains(TFlag.PURE_STRING)) {
@@ -72,8 +71,7 @@ public class SymbolicConstruct {
 				return t;
 			}
 
-			System.out.println("[ERROR] Unable to resolve PURE_STRING token.");
-			System.exit(1);
+			throw new EntInterpretException("Unable to resolve PURE_STRING token.");
 		}
 
 		if(t.flags.contains(TFlag.NUMBER)) {
@@ -87,8 +85,8 @@ public class SymbolicConstruct {
 			}
 
 			// If not an integer, it must be a decimal.
-			System.out.println("[ERROR] Detected decimal number; need to create a BigDecimal memory pool and type.");
-			System.exit(1);
+			throw new EntInterpretException("Detected decimal number; need to create a BigDecimal " +
+				" memory pool and type.");
 		}
 
 		// Detect boolean true literal.
@@ -97,10 +95,6 @@ public class SymbolicConstruct {
 			return t;
 		}
 
-		System.out.println(t.flags);
-		System.out.println("[ERROR] Unexpected token encountered during SymbolicConstruct interpretation.");
-		System.exit(1);
-
-		return null;
+		throw new EntInterpretException("Unexpected token encountered during SymbolicConstruct interpretation.");
 	}
 }

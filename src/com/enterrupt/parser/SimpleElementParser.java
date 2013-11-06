@@ -24,7 +24,7 @@ public class SimpleElementParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) {
 
 		stream.appendParsedText(t);
 		return new Token(this.tflags);

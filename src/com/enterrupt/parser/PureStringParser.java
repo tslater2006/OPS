@@ -22,7 +22,7 @@ public class PureStringParser extends StringParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) {
 
 		String str = getString(stream);
 		stream.appendParsedText(str);

@@ -3,12 +3,12 @@ package com.enterrupt.pt_objects;
 import java.sql.*;
 import java.util.*;
 import java.io.InputStream;
-import java.security.MessageDigest;
-import org.apache.commons.codec.binary.Base64;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.parser.*;
 import com.enterrupt.DefnCache;
+import org.apache.logging.log4j.*;
+import com.enterrupt.runtime.*;
 
 public abstract class PeopleCodeProg {
 
@@ -23,6 +23,8 @@ public abstract class PeopleCodeProg {
 	protected HashMap<String, Boolean> importedAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
 
+	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
+
 	private boolean hasInitialized = false;
 	private boolean haveLoadedDefnsAndPrograms = false;
 
@@ -33,67 +35,77 @@ public abstract class PeopleCodeProg {
 	public abstract String getDescriptor();
 
 	protected abstract void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, LFlag lflag) throws Exception;
+		int recursionLevel, LFlag lflag);
 
 	public Reference getProgReference(int refNbr) {
 		return this.progRefsTable.get(refNbr);
 	}
 
-	public void init() throws Exception {
+	public void init() {
 
 		if(this.hasInitialized) { return; }
 		this.hasInitialized = true;
 
-    	PreparedStatement pstmt;
-        ResultSet rs;
+    	PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-        // Get program text.
-        pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(this.bindVals[0], this.bindVals[1],
-                                                    this.bindVals[2], this.bindVals[3],
-                                                    this.bindVals[4], this.bindVals[5],
-                                                    this.bindVals[6], this.bindVals[7],
-                                                    this.bindVals[8], this.bindVals[9],
-                                                    this.bindVals[10], this.bindVals[11],
-                                                    this.bindVals[12], this.bindVals[13]);
-        rs = pstmt.executeQuery();
+		try {
 
-        /**
-         * Append the program bytecode; there could be multiple records
-         * for this program if the length exceeds 28,000 bytes. Note that
-         * the above query must be ordered by PROSEQ, otherwise these records
-         * will need to be pre-sorted before appending the BLOBs together.
-         */
-        int PROGLEN = -1;
-        while(rs.next()) {
-            PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
-            this.appendProgBytes(rs.getBlob("PROGTXT"));
+	        // Get program text.
+    	    pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(this.bindVals[0], this.bindVals[1],
+        	                                            this.bindVals[2], this.bindVals[3],
+            	                                        this.bindVals[4], this.bindVals[5],
+                	                                    this.bindVals[6], this.bindVals[7],
+                    	                                this.bindVals[8], this.bindVals[9],
+                        	                            this.bindVals[10], this.bindVals[11],
+                            	                        this.bindVals[12], this.bindVals[13]);
+ 	        rs = pstmt.executeQuery();
+
+     	   /**
+        	* Append the program bytecode; there could be multiple records
+         	* for this program if the length exceeds 28,000 bytes. Note that
+ 	        * the above query must be ordered by PROSEQ, otherwise these records
+         	* will need to be pre-sorted before appending the BLOBs together.
+        	*/
+    	    int PROGLEN = -1;
+      	    while(rs.next()) {
+            	PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
+            	this.appendProgBytes(rs.getBlob("PROGTXT"));
+        	}
+        	rs.close();
+        	pstmt.close();
+
+	        if(this.progBytes.length != PROGLEN) {
+    	        System.out.println("[ERROR] Number of bytes in " + this.getDescriptor() + " ("
+        	        + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
+        	    System.exit(1);
+        	}
+
+			this.progRefsTable = new TreeMap<Integer, Reference>();
+
+	    	// Get program references.
+  		    pstmt = StmtLibrary.getPSPCMPROG_GetRefs(this.bindVals[0], this.bindVals[1],
+                                                     this.bindVals[2], this.bindVals[3],
+                                                     this.bindVals[4], this.bindVals[5],
+                                                     this.bindVals[6], this.bindVals[7],
+                                                     this.bindVals[8], this.bindVals[9],
+            	                                     this.bindVals[10], this.bindVals[11],
+                                                     this.bindVals[12], this.bindVals[13]);
+        	rs = pstmt.executeQuery();
+	        while(rs.next()) {
+    	        this.progRefsTable.put(rs.getInt("NAMENUM"),
+        	        new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
+        	}
+
+        } catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
         }
-        rs.close();
-        pstmt.close();
-
-        if(this.progBytes.length != PROGLEN) {
-            System.out.println("[ERROR] Number of bytes in " + this.getDescriptor() + " ("
-                + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
-            System.exit(1);
-        }
-
-		this.progRefsTable = new TreeMap<Integer, Reference>();
-
-	    // Get program references.
-        pstmt = StmtLibrary.getPSPCMPROG_GetRefs(this.bindVals[0], this.bindVals[1],
-                                                    this.bindVals[2], this.bindVals[3],
-                                                    this.bindVals[4], this.bindVals[5],
-                                                    this.bindVals[6], this.bindVals[7],
-                                                    this.bindVals[8], this.bindVals[9],
-                                                    this.bindVals[10], this.bindVals[11],
-                                                    this.bindVals[12], this.bindVals[13]);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-            this.progRefsTable.put(rs.getInt("NAMENUM"),
-                new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
-        }
-        rs.close();
-        pstmt.close();
 
 		/**
 		 * Parse the entire program into tokens.
@@ -120,14 +132,28 @@ public abstract class PeopleCodeProg {
 		this.progTokens = tokenList.toArray(new Token[0]);
 	}
 
-    public void appendProgBytes(Blob blob) throws Exception {
+    public void appendProgBytes(Blob blob) {
 
 		int b;
-		InputStream stream = blob.getBinaryStream();
+		InputStream stream = null;
 		ArrayList<Integer> bytes = new ArrayList<Integer>();
 
-		while((b = stream.read()) != -1) {
-			bytes.add(b);
+		try {
+			stream = blob.getBinaryStream();
+
+			while((b = stream.read()) != -1) {
+				bytes.add(b);
+			}
+		} catch(java.sql.SQLException sqle) {
+			log.fatal(sqle.getMessage(), sqle);
+			System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+		} catch(java.io.IOException ioe) {
+			log.fatal(ioe.getMessage(), ioe);
+			System.exit(ExitCode.FAILED_READ_FROM_BLOB_STREAM.getCode());
+		} finally {
+			try {
+				if(stream != null) { stream.close(); }
+			} catch(java.io.IOException ioe) {}
 		}
 
 		int startIdx;
@@ -154,7 +180,7 @@ public abstract class PeopleCodeProg {
 		this.progBytes = allBytes;
     }
 
-	public void loadDefnsAndPrograms() throws Exception {
+	public void loadDefnsAndPrograms() {
 
 		LFlag flag = null;
 		if(this instanceof ComponentPeopleCodeProg) {
@@ -177,7 +203,7 @@ public abstract class PeopleCodeProg {
 		this.recurseLoadDefnsAndPrograms(0, flag);
 	}
 
-	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag) throws Exception {
+	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag) {
 
 		if(this.haveLoadedDefnsAndPrograms) { return; }
 		this.haveLoadedDefnsAndPrograms = true;

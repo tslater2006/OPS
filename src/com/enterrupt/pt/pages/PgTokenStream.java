@@ -15,12 +15,12 @@ public class PgTokenStream {
 	private int prevOCCURSLEVEL = -1;
 	private HashMap<String, Boolean> loadedPageNames;
 
-	public PgTokenStream(String PNLNAME) throws Exception {
+	public PgTokenStream(String PNLNAME) {
 		this.p = DefnCache.getPage(PNLNAME);
 		this.loadedPageNames = new HashMap<String, Boolean>();
 	}
 
-	public PgToken next() throws Exception {
+	public PgToken next() {
 
 		// If the end of page token has been emitted, only emit null.
 		if(isClosed) {
@@ -112,7 +112,7 @@ public class PgTokenStream {
 		}
 	}
 
-	public PgToken readFromPfs() throws Exception {
+	public PgToken readFromPfs() {
 
 		PgToken tok = this.pfs.next();
 		if(tok == null) {

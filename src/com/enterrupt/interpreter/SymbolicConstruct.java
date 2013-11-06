@@ -16,7 +16,7 @@ public class SymbolicConstruct {
      * (i.e., StmtConstruct) may use the additional data (provided by the returned Token) to ensure that tokens
  	 * are being interpreted as expected.
 	 */
-	public static Token interpret(PeopleCodeTokenStream stream) throws Exception {
+	public static Token interpret(PeopleCodeTokenStream stream) {
 
 		Token t = stream.readNextToken();
 		MemoryPtr ptr = null;

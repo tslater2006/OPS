@@ -17,7 +17,7 @@ public class NumberParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) {
 
 		int dValue = 0;	 // decimal position from far right going left
 		String out_number = "";

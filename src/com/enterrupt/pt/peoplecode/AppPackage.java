@@ -3,10 +3,14 @@ package com.enterrupt.pt_objects;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import com.enterrupt.sql.StmtLibrary;
+import org.apache.logging.log4j.*;
+import com.enterrupt.runtime.*;
 
 public class AppPackage {
 
 	public String packageName;
+
+	private static Logger log = LogManager.getLogger(AppPackage.class.getName());
 
 	private boolean hasDiscoveredAppClassPC = false;
 
@@ -14,24 +18,33 @@ public class AppPackage {
 		this.packageName = pName;
 	}
 
-	public void discoverAppClassPC() throws Exception {
+	public void discoverAppClassPC() {
 
 		if(this.hasDiscoveredAppClassPC) { return; }
 		this.hasDiscoveredAppClassPC = true;
 
-        PreparedStatement pstmt;
-        ResultSet rs;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.APP_PACKAGE, this.packageName);
-        rs = pstmt.executeQuery();
+		try {
+	        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.APP_PACKAGE, this.packageName);
+   		    rs = pstmt.executeQuery();
 
-        /**
-         * TODO: BE VERY CAREFUL HERE; not only is this not ordered by PROGSEQ, but
-         * there may be multiple entries per program if it is greater than 28,000 bytes.
-         * Keep those considerations in mind before using the records returned here.
-         */
-        rs.next(); // Do nothing with records for now.
-        rs.close();
-        pstmt.close();
+	        /**
+    	     * TODO: BE VERY CAREFUL HERE; not only is this not ordered by PROGSEQ, but
+       		 * there may be multiple entries per program if it is greater than 28,000 bytes.
+	         * Keep those considerations in mind before using the records returned here.
+    	     */
+	        rs.next(); // Do nothing with records for now.
+
+        } catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
+        }
 	}
 }

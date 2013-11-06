@@ -10,9 +10,11 @@ import java.util.regex.Matcher;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 import java.util.HashMap;
-import com.enterrupt.buffers.ComponentBuffer;
+import com.enterrupt.buffers.*;
 import com.enterrupt.pt_objects.*;
 import com.enterrupt.sql.*;
+import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 public class BuildAssistant {
 
@@ -23,7 +25,104 @@ public class BuildAssistant {
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
 
-	public static void runValidationTests(Component componentObj) throws Exception {
+	private static Logger log = LogManager.getLogger(BuildAssistant.class.getName());
+
+	public static boolean validateComponentStructure(Component componentObj, boolean verboseFlag) {
+
+	    int indent = 0;
+        IStreamableBuffer buf;
+
+        File structureFile = new File("test/" + componentObj.PNLGRPNAME + ".structure");
+		BufferedReader reader = null;
+
+		try {
+	        reader = new BufferedReader(new FileReader(structureFile));
+		} catch(java.io.FileNotFoundException fnfe) {
+			log.fatal(fnfe.getMessage(), fnfe);
+			System.exit(ExitCode.COMP_STRUCTURE_FILE_NOT_FOUND.getCode());
+		}
+
+        String line = null;
+        String lineParts[];
+
+        ComponentBuffer.resetCursors();
+        while((buf = ComponentBuffer.next()) != null) {
+
+			try {
+	            line = reader.readLine().trim();
+			} catch(java.io.IOException ioe) {
+				log.fatal(ioe.getMessage(), ioe);
+				System.exit(ExitCode.FAILED_READ_FROM_COMP_STRUCT_FILE.getCode());
+			}
+
+            lineParts = line.split(";");
+
+            if(buf instanceof ScrollBuffer) {
+
+                ScrollBuffer sbuf = (ScrollBuffer) buf;
+                indent = sbuf.scrollLevel * 3;
+
+                if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
+                    Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
+                        (!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
+                            && Integer.parseInt(lineParts[1]) > 0)) {
+                    System.out.println("[ERROR] Incorrect/absent scroll token encountered during component structure validation.");
+                    System.exit(1);
+                }
+
+                if(verboseFlag) {
+                    for(int i=0; i<indent; i++){System.out.print(" ");}
+                    System.out.println("Scroll - Level " + sbuf.scrollLevel +
+                        "\tPrimary Record: " + sbuf.primaryRecName);
+                    for(int i=0; i<indent; i++){System.out.print(" ");}
+                    System.out.println("=======================================================");
+                }
+
+            } else if(buf instanceof RecordBuffer) {
+                RecordBuffer rbuf = (RecordBuffer) buf;
+
+                if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
+                    !lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
+                    System.out.println("[ERROR] Incorrect/absent record token encountered during component structure validation.");
+                    System.out.println(line);
+                    System.out.println(rbuf.recName);
+                    System.exit(1);
+                }
+
+                if(verboseFlag) {
+                    for(int i=0; i<indent; i++){System.out.print(" ");}
+                    System.out.println(" + " + rbuf.recName);
+                }
+
+            } else {
+                RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+
+                if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
+                    !lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
+                    System.out.println("[ERROR] Incorrect/absent field token encountered during component structure validation.");
+                    System.exit(1);
+                }
+               if(verboseFlag) {
+                    for(int i=0; i<indent; i++){System.out.print(" ");}
+                    System.out.println("   - " + fbuf.fldName);
+                }
+            }
+        }
+
+		try {
+	        if(!reader.readLine().trim().equals("END-COMPONENT-STRUCTURE")) {
+   	        	System.out.println("[ERROR] Expected END-COMPONENT-STRUCTURE in .structure file.");
+	            System.exit(1);
+        	}
+		} catch(java.io.IOException ioe) {
+            log.fatal(ioe.getMessage(), ioe);
+        	System.exit(ExitCode.FAILED_READ_FROM_COMP_STRUCT_FILE.getCode());
+        }
+
+        return true;
+	}
+
+	public static void runValidationTests(Component componentObj) {
 		openTraceFile();
 		loadIgnoredStmts();
 
@@ -92,7 +191,7 @@ public class BuildAssistant {
 			}
 		}
 
-		boolean isCompStructureValid = componentObj.validateComponentStructure(false);
+		boolean isCompStructureValid = validateComponentStructure(componentObj, false);
 
 		DecimalFormat df = new DecimalFormat("0.0");
 

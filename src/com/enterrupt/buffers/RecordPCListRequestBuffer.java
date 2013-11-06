@@ -79,7 +79,7 @@ public class RecordPCListRequestBuffer {
 		expandingStream.clear();
 	}
 
-	public static void flushUpTo(PgToken secpageTok) throws Exception {
+	public static void flushUpTo(PgToken secpageTok) {
 		flush(secpageTok);
 	}
 
@@ -87,11 +87,11 @@ public class RecordPCListRequestBuffer {
 	 * This should be run after all pages have been traversed
 	 * to ensure that all requests are flushed.
 	 */
-	public static void flushEntireTokenStream() throws Exception {
+	public static void flushEntireTokenStream() {
 		flush(null);
 	}
 
-	private static void flush(PgToken tok) throws Exception {
+	private static void flush(PgToken tok) {
 		Iterator<PgToken> iter = tokenStream.listIterator();
 		while(iter.hasNext()) {
 			PgToken t = iter.next();
@@ -109,7 +109,7 @@ public class RecordPCListRequestBuffer {
 		}
 	}
 
-	private static void issuePCListRequestForRecord(String RECNAME) throws Exception {
+	private static void issuePCListRequestForRecord(String RECNAME) {
 
 		// If the record is a system table, we can ignore it.
 		if(flushedRecordNames.get(RECNAME) == null &&

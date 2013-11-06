@@ -28,7 +28,7 @@ public class PgToken {
 		this.flags = EnumSet.copyOf(flagSet);
 	}
 
-	public boolean doesBelongInComponentStructure() throws Exception {
+	public boolean doesBelongInComponentStructure() {
 
 		// If RECNAME or FIELDNAME is empty, don't add.
 		if(this.RECNAME.length() == 0 || this.FIELDNAME.length() == 0) {

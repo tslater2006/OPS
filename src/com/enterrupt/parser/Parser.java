@@ -132,7 +132,7 @@ public class Parser {
 		this.stream.setCursorPos(37);			// Program begins at byte 37.
 	}
 
-	public Token parseNextToken() throws Exception {
+	public Token parseNextToken() {
 
 		Token t = null;
 		byte b = this.stream.readNextByte();

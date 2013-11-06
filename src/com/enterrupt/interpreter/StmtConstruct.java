@@ -7,7 +7,7 @@ import com.enterrupt.pt_objects.PeopleCodeTokenStream;
 
 public class StmtConstruct {
 
-	public static void interpret(PeopleCodeTokenStream stream) throws Exception {
+	public static void interpret(PeopleCodeTokenStream stream) {
 
 		Token t = stream.peekNextToken();
 

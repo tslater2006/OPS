@@ -6,7 +6,7 @@ import com.enterrupt.parser.Token;
 
 public class StmtListConstruct {
 
-	public static void interpret(PeopleCodeTokenStream stream) throws Exception {
+	public static void interpret(PeopleCodeTokenStream stream) {
 
 		while(true) {
 

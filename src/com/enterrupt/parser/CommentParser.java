@@ -19,7 +19,7 @@ public class CommentParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) {
 
 		// Length byte is wide ANDed and cast to integer.
 		int commLen = (int) stream.readNextByte() & 0xff;

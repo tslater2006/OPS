@@ -8,7 +8,7 @@ import com.enterrupt.pt_objects.PeopleCodeTokenStream;
 
 public class IfConstruct {
 
-	public static void interpret(PeopleCodeTokenStream stream) throws Exception {
+	public static void interpret(PeopleCodeTokenStream stream) {
 
 		// Detect: IF, EXPRESSION, THEN, STMT_LIST, END_IF
 		if(!stream.readNextToken().flags.contains(TFlag.IF)) {

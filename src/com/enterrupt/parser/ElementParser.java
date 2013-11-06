@@ -6,7 +6,7 @@ import java.lang.StringBuilder;
 public abstract class ElementParser {
 
     public int format;
-    public abstract Token parse(PeopleCodeByteStream stream) throws Exception;
+    public abstract Token parse(PeopleCodeByteStream stream);
     public abstract byte getStartByte();
 
     public int getFormat() {

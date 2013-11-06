@@ -19,7 +19,7 @@ public class ComponentBuffer {
 		currSB = compBuffer;
 	}
 
-	public static void addPageField(PgToken tok, int level, String primaryRecName) throws Exception {
+	public static void addPageField(PgToken tok, int level, String primaryRecName) {
 
 		// Ensure that we're pointing at the correct scroll buffer.
 		pointAtScroll(level, primaryRecName);

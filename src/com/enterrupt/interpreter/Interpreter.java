@@ -24,13 +24,13 @@ public class Interpreter {
 	}
 
 	public static void pushToCallStack(MemoryPtr p) {
-		System.out.println("[Push] [CallStack]\t" + (p == null ? "null" : p.flags.toString()));
+		//System.out.println("[Push] [CallStack]\t" + (p == null ? "null" : p.flags.toString()));
 		callStack.push(p);
 	}
 
 	public static MemoryPtr popFromCallStack() {
 		MemoryPtr p = callStack.pop();
-		System.out.println("[Pop] [CallStack]\t\t" + (p == null ? "null" : p.flags.toString()));
+		//System.out.println("[Pop] [CallStack]\t\t" + (p == null ? "null" : p.flags.toString()));
 		return p;
 	}
 
@@ -39,13 +39,13 @@ public class Interpreter {
 	}
 
 	public static void pushToRuntimeStack(MemoryPtr p) {
-		System.out.println("[Push] [RuntimeStack]\t" + (p == null ? "null" : p.flags.toString()));
+		//System.out.println("[Push] [RuntimeStack]\t" + (p == null ? "null" : p.flags.toString()));
 		runtimeStack.push(p);
 	}
 
 	public static MemoryPtr popFromRuntimeStack() {
 		MemoryPtr p = runtimeStack.pop();
-		System.out.println("[Pop] [RuntimeStack]\t\t" + (p == null ? "null" : p.flags.toString()));
+		//System.out.println("[Pop] [RuntimeStack]\t\t" + (p == null ? "null" : p.flags.toString()));
 		return p;
 	}
 
@@ -53,7 +53,7 @@ public class Interpreter {
 		return runtimeStack.peek();
 	}
 
-	public void run() throws Exception {
+	public void run() {
 
         StmtListConstruct.interpret(stream);
 

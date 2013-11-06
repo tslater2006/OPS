@@ -16,7 +16,7 @@ public class ReferenceParser extends ElementParser {
 		return b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) {
 
 		int b1 = (int) (stream.readNextByte() & 0xff);
 		int b2 = (int) (stream.readNextByte() & 0xff);

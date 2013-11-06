@@ -33,7 +33,7 @@ public class RecordBuffer implements IStreamableBuffer {
         this.fieldBuffers = new ArrayList<RecordFieldBuffer>();
     }
 
-    public void addPageField(String RECNAME, String FIELDNAME) throws Exception {
+    public void addPageField(String RECNAME, String FIELDNAME) {
 
         RecordFieldBuffer f = this.fieldBufferTable.get(FIELDNAME);
         if(f == null) {
@@ -44,7 +44,7 @@ public class RecordBuffer implements IStreamableBuffer {
         }
     }
 
-    public void expandEntireRecordIntoBuffer() throws Exception {
+    public void expandEntireRecordIntoBuffer() {
 
         if(!hasBeenExpanded) {
 

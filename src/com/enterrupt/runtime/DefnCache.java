@@ -17,7 +17,7 @@ public class DefnCache {
 		appPackages = new HashMap<String, AppPackage>();
 	}
 
-	public static Record getRecord(String RECNAME) throws Exception {
+	public static Record getRecord(String RECNAME) {
 
 		// Ignore requests for system records like PSXlATITEM.
 		if(RECNAME == null || RECNAME.length() == 0
@@ -34,7 +34,7 @@ public class DefnCache {
 		return r;
 	}
 
-	public static Page getPage(String PNLNAME) throws Exception {
+	public static Page getPage(String PNLNAME) {
 
 		if(PNLNAME.length() == 0) {
 			return null;
@@ -49,7 +49,7 @@ public class DefnCache {
 		return p;
 	}
 
-	public static AppPackage getAppPackage(String packageName) throws Exception {
+	public static AppPackage getAppPackage(String packageName) {
 
         AppPackage ap = appPackages.get(packageName);
         if(ap == null) {

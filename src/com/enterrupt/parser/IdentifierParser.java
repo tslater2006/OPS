@@ -15,7 +15,7 @@ public class IdentifierParser extends StringParser {
 		return this.b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) {
 
 		stream.decrementCursor();	// current byte is 0x00, need to back up.
 		stream.decrementCursor();

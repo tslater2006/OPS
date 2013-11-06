@@ -35,7 +35,7 @@ public class ScrollBuffer implements IStreamableBuffer {
         this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
     }
 
-    public void addPageField(PgToken tok) throws Exception {
+    public void addPageField(PgToken tok) {
 
         RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
         if(r == null) {

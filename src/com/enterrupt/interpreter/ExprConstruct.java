@@ -10,7 +10,7 @@ import com.enterrupt.pt_objects.PeopleCodeTokenStream;
  */
 public class ExprConstruct {
 
-	public static void interpret(PeopleCodeTokenStream stream) throws Exception {
+	public static void interpret(PeopleCodeTokenStream stream) {
 
 		/**
 		 * TODO: Immediately interpret a SymbolicConstruct.

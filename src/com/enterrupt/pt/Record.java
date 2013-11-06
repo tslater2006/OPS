@@ -9,6 +9,8 @@ import java.util.Map;
 import com.enterrupt.BuildAssistant;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.DefnCache;
+import org.apache.logging.log4j.*;
+import com.enterrupt.runtime.*;
 
 public class Record {
 
@@ -22,88 +24,96 @@ public class Record {
 	public HashMap<String, ArrayList<PeopleCodeProg>> recordProgsByFieldTable;
 	public ArrayList<PeopleCodeProg> orderedRecordProgs;
 
+	private static Logger log = LogManager.getLogger(Record.class.getName());
+
 	private boolean hasRecordPCBeenDiscovered = false;
 	private boolean hasBeenInitialized = false;
 
     public Record(String recname) {
         this.RECNAME = recname;
-    }
+	}
 
-    public void init() throws Exception {
+	public void init() {
 
 		if(this.hasBeenInitialized) { return; }
 		this.hasBeenInitialized = true;
 
-        PreparedStatement pstmt;
-        ResultSet rs;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-        pstmt = StmtLibrary.getPSRECDEFN(this.RECNAME);
-        rs = pstmt.executeQuery();
+		try {
+	        pstmt = StmtLibrary.getPSRECDEFN(this.RECNAME);
+    	    rs = pstmt.executeQuery();
 
-		int fieldcount = 0;
-		if(rs.next()) {
-			fieldcount = rs.getInt("FIELDCOUNT");
-			this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
-			this.RECTYPE = rs.getInt("RECTYPE");
-		} else {
-			System.out.println("[ERROR] Expected record to be returned from PSRECDEFN query.");
-			System.exit(1);
-		}
-        rs.close();
-        pstmt.close();
-
-        pstmt = StmtLibrary.getPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
-        rs = pstmt.executeQuery();
-
-		this.fieldTable = new HashMap<String, RecordField>();
-		this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
-
-		int i = 0;
-        while(rs.next()) {
-			RecordField f = new RecordField();
-			f.RECNAME = this.RECNAME;
-			f.FIELDNAME = rs.getString("FIELDNAME").trim();
-			f.USEEDIT = (byte) rs.getInt("USEEDIT");
-			f.FIELDNUM = rs.getInt("FIELDNUM");
-			this.fieldTable.put(f.FIELDNAME, f);
-			this.fldAndSubrecordTable.put(f.FIELDNUM, f);
-            i++;
-        }
-        rs.close();
-        pstmt.close();
-
-		this.subRecordNames = new ArrayList<String>();
-
-		/**
-		 * If the number of fields retrieved differs from the FIELDCOUNT for the record
- 		 * definition, we need to query for subrecords.
-		 */
-		if(fieldcount != i) {
-			pstmt = StmtLibrary.getSubrecordsUsingPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
-			rs = pstmt.executeQuery();
-
-			while(rs.next()) {
-				this.fldAndSubrecordTable.put(rs.getInt("FIELDNUM"), rs.getString("FIELDNAME"));
-				subRecordNames.add(rs.getString("FIELDNAME"));
-				i++;
-			}
-
-			if(fieldcount != i) {
-				System.out.println("[ERROR] Even after querying for subrecords, field count does not match that on PSRECDEFN.");
+			int fieldcount = 0;
+			if(rs.next()) {
+				fieldcount = rs.getInt("FIELDCOUNT");
+				this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
+				this.RECTYPE = rs.getInt("RECTYPE");
+			} else {
+				System.out.println("[ERROR] Expected record to be returned from PSRECDEFN query.");
 				System.exit(1);
 			}
-		}
+        	rs.close();
+        	pstmt.close();
 
-        pstmt = StmtLibrary.getPSDBFLDLBL(this.RECNAME);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-            // Do nothing with records for now.
+ 	       	pstmt = StmtLibrary.getPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
+       	 	rs = pstmt.executeQuery();
+
+			this.fieldTable = new HashMap<String, RecordField>();
+			this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
+
+			int i = 0;
+        	while(rs.next()) {
+				RecordField f = new RecordField();
+				f.RECNAME = this.RECNAME;
+				f.FIELDNAME = rs.getString("FIELDNAME").trim();
+				f.USEEDIT = (byte) rs.getInt("USEEDIT");
+				f.FIELDNUM = rs.getInt("FIELDNUM");
+				this.fieldTable.put(f.FIELDNAME, f);
+				this.fldAndSubrecordTable.put(f.FIELDNUM, f);
+            	i++;
+        	}
+        	rs.close();
+        	pstmt.close();
+
+			this.subRecordNames = new ArrayList<String>();
+
+			/**
+		 	 * If the number of fields retrieved differs from the FIELDCOUNT for the record
+ 		 	 * definition, we need to query for subrecords.
+		 	 */
+			if(fieldcount != i) {
+				pstmt = StmtLibrary.getSubrecordsUsingPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
+				rs = pstmt.executeQuery();
+
+				while(rs.next()) {
+					this.fldAndSubrecordTable.put(rs.getInt("FIELDNUM"), rs.getString("FIELDNAME"));
+					subRecordNames.add(rs.getString("FIELDNAME"));
+					i++;
+				}
+
+				if(fieldcount != i) {
+					System.out.println("[ERROR] Even after querying for subrecords, field count does not match that on PSRECDEFN.");
+					System.exit(1);
+				}
+			}
+
+        	pstmt = StmtLibrary.getPSDBFLDLBL(this.RECNAME);
+        	rs = pstmt.executeQuery();
+       		rs.next();       	// Do nothing with records for now.
+
+        } catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
         }
-        rs.close();
-        pstmt.close();
 
 		for(String subrecname : subRecordNames) {
-			//System.out.println("Loading subrecord : " + subrecname);
 			DefnCache.getRecord(subrecname);
 		}
 
@@ -119,39 +129,47 @@ public class Record {
 		}
     }
 
-	public void discoverRecordPC() throws Exception {
+	public void discoverRecordPC() {
 
 		if(this.hasRecordPCBeenDiscovered) { return; }
 		this.hasRecordPCBeenDiscovered = true;
 
-		PreparedStatement pstmt;
-        ResultSet rs;
+		PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-		this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
-		this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
+		try {
+			this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
+			this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
 
-        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
-        rs = pstmt.executeQuery();
+	        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
+    	    rs = pstmt.executeQuery();
 
-		while(rs.next()) {
+			while(rs.next()) {
 
-			PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
-				rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
-			prog = DefnCache.getProgram(prog);
+				PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
+					rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
+				prog = DefnCache.getProgram(prog);
 
-			ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
-				.get(rs.getString("OBJECTVALUE2"));
-			if(fieldProgList == null) {
-				fieldProgList = new ArrayList<PeopleCodeProg>();
+				ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
+					.get(rs.getString("OBJECTVALUE2"));
+				if(fieldProgList == null) {
+					fieldProgList = new ArrayList<PeopleCodeProg>();
+				}
+
+				fieldProgList.add(prog);
+				this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
+				this.orderedRecordProgs.add(prog);
 			}
 
-			fieldProgList.add(prog);
-			this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
-			this.orderedRecordProgs.add(prog);
-		}
-
-        rs.close();
-        pstmt.close();
+        } catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
+        }
 	}
 
 	public boolean isSubrecord() {
@@ -162,7 +180,7 @@ public class Record {
 		return this.RECTYPE == 2;
 	}
 
-	public ArrayList<RecordField> getExpandedFieldList() throws Exception {
+	public ArrayList<RecordField> getExpandedFieldList() {
 
 		ArrayList<RecordField> expandedFieldList = new ArrayList<RecordField>();
 

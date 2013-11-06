@@ -9,8 +9,7 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 
 	public abstract String getDescriptor();
 
-	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, LFlag lflag) throws Exception {
+	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream, int recursionLevel, LFlag lflag) {
 
     	if(t.flags.contains(TFlag.DECLARE)) {
         	t = stream.readNextToken();

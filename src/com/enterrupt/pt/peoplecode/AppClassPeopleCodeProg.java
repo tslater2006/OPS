@@ -11,7 +11,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	public String[] pathParts;
 	public AppPackage rootPackage;
 
-	public AppClassPeopleCodeProg(String[] path) throws Exception {
+	public AppClassPeopleCodeProg(String[] path) {
 		super();
 		this.pathParts = path;
 		this.event = "OnExecute";
@@ -65,7 +65,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	}
 
 	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, LFlag lflag) throws Exception {
+		int recursionLevel, LFlag lflag) {
 
 		/**
 		 * Detect application classes referenced as instance and property values in an object

@@ -15,15 +15,19 @@ import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
 import com.enterrupt.buffers.*;
 import com.enterrupt.DefnCache;
+import org.apache.logging.log4j.*;
+import com.enterrupt.runtime.*;
 
 public class Component {
 
-    private String PNLGRPNAME;
-    private String MARKET;
-    private String SEARCHRECNAME; // name of search record for this component
+    public String PNLGRPNAME;
+    public String MARKET;
+    public String SEARCHRECNAME; // name of search record for this component
 
     public ArrayList<Page> pages;
 	public ArrayList<ComponentPeopleCodeProg> orderedComponentProgs;
+
+	private static Logger log = LogManager.getLogger(Component.class.getName());
 
 	private boolean hasListOfComponentPCBeenRetrieved = false;
 
@@ -41,93 +45,109 @@ public class Component {
 		}
 	}
 
-    public Component(String pnlgrpname, String market) throws java.sql.SQLException {
+    public Component(String pnlgrpname, String market) {
+
         this.PNLGRPNAME = pnlgrpname;
         this.MARKET = market;
 
-        PreparedStatement pstmt;
-        ResultSet rs;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-        pstmt = StmtLibrary.getPSPNLGRPDEFN(this.PNLGRPNAME, this.MARKET);
-        rs = pstmt.executeQuery();
-        rs.next();
-        this.SEARCHRECNAME = rs.getString("SEARCHRECNAME");
-        rs.close();
-        pstmt.close();
+		try {
+	        pstmt = StmtLibrary.getPSPNLGRPDEFN(this.PNLGRPNAME, this.MARKET);
+    	    rs = pstmt.executeQuery();
+       		rs.next();
+        	this.SEARCHRECNAME = rs.getString("SEARCHRECNAME");
+        	rs.close();
+        	pstmt.close();
 
-        this.pages = new ArrayList<Page>();
+        	this.pages = new ArrayList<Page>();
 
-        pstmt = StmtLibrary.getPSPNLGROUP(this.PNLGRPNAME, this.MARKET);
-        rs = pstmt.executeQuery();
-        while(rs.next()) {
-			// All pages at the root of the component start at scroll level 0.
-			Page p = new Page(rs.getString("PNLNAME"));
-            this.pages.add(p);
-        }
-        rs.close();
-        pstmt.close();
+        	pstmt = StmtLibrary.getPSPNLGROUP(this.PNLGRPNAME, this.MARKET);
+        	rs = pstmt.executeQuery();
+        	while(rs.next()) {
+				// All pages at the root of the component start at scroll level 0.
+				Page p = new Page(rs.getString("PNLNAME"));
+            	this.pages.add(p);
+        	}
+		} catch(java.sql.SQLException sqle) {
+			log.fatal(sqle.getMessage(), sqle);
+			System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+		} finally {
+			try {
+				if(rs != null) { rs.close(); }
+				if(pstmt != null) { pstmt.close(); }
+			} catch(java.sql.SQLException sqle) {}
+		}
     }
 
-	public void loadSearchRecord() throws Exception {
-
+	public void loadSearchRecord() {
 		// Loads the search record and puts it in cache.
 		DefnCache.getRecord(this.SEARCHRECNAME);
     }
 
-    public void getListOfComponentPC() throws Exception {
+    public void getListOfComponentPC() {
 
 		if(this.hasListOfComponentPCBeenRetrieved) { return; }
 		this.hasListOfComponentPCBeenRetrieved = true;
 
-        PreparedStatement pstmt;
-  		ResultSet rs;
+        PreparedStatement pstmt = null;
+  		ResultSet rs = null;
 
-		this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
+		try {
+			this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
 
-        pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT, this.PNLGRPNAME,
+    	    pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT, this.PNLGRPNAME,
                                                         PSDefn.MARKET, this.MARKET);
-        rs = pstmt.executeQuery();
+       		rs = pstmt.executeQuery();
 
-  	    while(rs.next()) {
+  	    	while(rs.next()) {
 
-			String objectid3 = rs.getString("OBJECTID3").trim();
-			String objectval3 = rs.getString("OBJECTVALUE3").trim();
-			String objectid4 = rs.getString("OBJECTID4").trim();
-			String objectval4 = rs.getString("OBJECTVALUE4").trim();
-			String objectid5 = rs.getString("OBJECTID5").trim();
-			String objectval5 = rs.getString("OBJECTVALUE5").trim();
+				String objectid3 = rs.getString("OBJECTID3").trim();
+				String objectval3 = rs.getString("OBJECTVALUE3").trim();
+				String objectid4 = rs.getString("OBJECTID4").trim();
+				String objectval4 = rs.getString("OBJECTVALUE4").trim();
+				String objectid5 = rs.getString("OBJECTID5").trim();
+				String objectval5 = rs.getString("OBJECTVALUE5").trim();
 
-			PeopleCodeProg prog = null;
+				PeopleCodeProg prog = null;
 
-			// Example: SSS_STUDENT_CENTER.GBL.PreBuild
-			if(objectid3.equals(PSDefn.EVENT)) {
-				prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
-					objectval3);
+				// Example: SSS_STUDENT_CENTER.GBL.PreBuild
+				if(objectid3.equals(PSDefn.EVENT)) {
+					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+						objectval3);
 
-			// Example: SSS_STUDENT_CENTER.LS_SS_PERS_SRCH.SearchInit
-			} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.EVENT)) {
-				prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
-					objectval3, objectval4);
+				// Example: SSS_STUDENT_CENTER.LS_SS_PERS_SRCH.SearchInit
+				} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.EVENT)) {
+					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+						objectval3, objectval4);
 
-			// Example: SSS_STUDENT_CENTER.LS_DERIVED_SSS_SCL.SS_CLS_SCHED_LINK.FieldChange
-			} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.FIELD) &&
-						objectid5.equals(PSDefn.EVENT)) {
-				prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
-					objectval3, objectval4, objectval5);
+				// Example: SSS_STUDENT_CENTER.LS_DERIVED_SSS_SCL.SS_CLS_SCHED_LINK.FieldChange
+				} else if(objectid3.equals(PSDefn.RECORD) && objectid4.equals(PSDefn.FIELD) &&
+							objectid5.equals(PSDefn.EVENT)) {
+					prog = new ComponentPeopleCodeProg(this.PNLGRPNAME, this.MARKET,
+						objectval3, objectval4, objectval5);
 
-			} else {
-				System.out.println("[ERROR] Unexpected type of Component PC encountered.");
-				System.exit(1);
-			}
+				} else {
+					System.out.println("[ERROR] Unexpected type of Component PC encountered.");
+					System.exit(1);
+				}
 
-			prog = DefnCache.getProgram(prog);
-			this.orderedComponentProgs.add((ComponentPeopleCodeProg)prog);
-   	   	}
-   	   	rs.close();
-   	   	pstmt.close();
+				prog = DefnCache.getProgram(prog);
+				this.orderedComponentProgs.add((ComponentPeopleCodeProg)prog);
+   	   		}
+		} catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
+        }
     }
 
-    public void loadAndRunRecordPConSearchRecord() throws Exception {
+    public void loadAndRunRecordPConSearchRecord() {
 
 		Record recDefn = DefnCache.getRecord(this.SEARCHRECNAME);
 		recDefn.discoverRecordPC();
@@ -142,7 +162,7 @@ public class Component {
         }
     }
 
-	public void loadAndRunComponentPConSearchRecord() throws Exception {
+	public void loadAndRunComponentPConSearchRecord() {
 
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME != null && prog.RECNAME.equals(this.SEARCHRECNAME)) {
@@ -163,22 +183,28 @@ public class Component {
 	 * of the trace file.
 	 * TODO: Address the notes presented above.
 	 */
-	public void fillSearchRecord() throws Exception {
+	public void fillSearchRecord() {
 
-		PreparedStatement pstmt;
-		ResultSet rs;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-		pstmt = StmtLibrary.getSearchRecordFillQuery();
-		rs = pstmt.executeQuery();
+		try {
+			pstmt = StmtLibrary.getSearchRecordFillQuery();
+			rs = pstmt.executeQuery();
+			rs.next();   // Do nothing with records for now.
 
-		while(rs.next()) {
-			// Do nothing with records for now.
-		}
-		rs.close();
-		pstmt.close();
+        } catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
+        }
 	}
 
-	public void loadPages() throws Exception {
+	public void loadPages() {
 		for(Page p : this.pages) {
 			p.recursivelyLoadSubpages();
 		}
@@ -191,7 +217,7 @@ public class Component {
 		RecordPCListRequestBuffer.flushEntireTokenStream();
 	}
 
-	public void assembleComponentStructure() throws Exception {
+	public void assembleComponentStructure() {
 
 		PgToken tok;
 		PgTokenStream pfs;
@@ -259,84 +285,7 @@ public class Component {
 		}
 	}
 
-	public boolean validateComponentStructure(boolean verboseFlag) throws Exception {
-
-		int indent = 0;
-		IStreamableBuffer buf;
-
-		File structureFile = new File("test/" + this.PNLGRPNAME + ".structure");
-		BufferedReader reader = new BufferedReader(new FileReader(structureFile));
-		String line;
-		String lineParts[];
-
-		ComponentBuffer.resetCursors();
-		while((buf = ComponentBuffer.next()) != null) {
-
-			line = reader.readLine().trim();
-			lineParts = line.split(";");
-
-			if(buf instanceof ScrollBuffer) {
-
-				ScrollBuffer sbuf = (ScrollBuffer) buf;
-				indent = sbuf.scrollLevel * 3;
-
-				if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
-					Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
-						(!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
-							&& Integer.parseInt(lineParts[1]) > 0)) {
-					System.out.println("[ERROR] Incorrect/absent scroll token encountered during component structure verification.");
-					System.exit(1);
-				}
-
-				if(verboseFlag) {
-					for(int i=0; i<indent; i++){System.out.print(" ");}
-					System.out.println("Scroll - Level " + sbuf.scrollLevel +
-						"\tPrimary Record: " + sbuf.primaryRecName);
-					for(int i=0; i<indent; i++){System.out.print(" ");}
-					System.out.println("=======================================================");
-				}
-
-			} else if(buf instanceof RecordBuffer) {
-				RecordBuffer rbuf = (RecordBuffer) buf;
-
-				if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
-					!lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
-					System.out.println("[ERROR] Incorrect/absent record token encountered during component structure verification.");
-					System.out.println(line);
-					System.out.println(rbuf.recName);
-					System.exit(1);
-				}
-
-				if(verboseFlag) {
-					for(int i=0; i<indent; i++){System.out.print(" ");}
-					System.out.println(" + " + rbuf.recName);
-				}
-
-			} else {
-				RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
-
-				if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
-					!lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
-					System.out.println("[ERROR] Incorrect/absent field token encountered during component structure verification.");
-					System.exit(1);
-				}
-
-				if(verboseFlag) {
-					for(int i=0; i<indent; i++){System.out.print(" ");}
-					System.out.println("   - " + fbuf.fldName);
-				}
-			}
-		}
-
-		if(!reader.readLine().trim().equals("END-COMPONENT-STRUCTURE")) {
-			System.out.println("[ERROR] Expected END-COMPONENT-STRUCTURE in .structure file.");
-			System.exit(1);
-		}
-
-		return true;
-	}
-
-	public void loadAllRecordPCProgsAndReferencedDefns() throws Exception {
+	public void loadAllRecordPCProgsAndReferencedDefns() {
 
 		IStreamableBuffer buf;
 
@@ -360,7 +309,7 @@ public class Component {
 		}
 	}
 
-	public void loadAllComponentPCProgsAndReferencedDefns() throws Exception {
+	public void loadAllComponentPCProgsAndReferencedDefns() {
 
 		// Load the PostBuild event for the component first, if it exists.
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
@@ -388,7 +337,7 @@ public class Component {
 		}
 	}
 
-	public void loadAllPagePC() throws Exception {
+	public void loadAllPagePC() {
 
 		for(Page p : this.pages) {
 			Page cachedPage = DefnCache.getPage(p.PNLNAME);

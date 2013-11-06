@@ -18,7 +18,7 @@ public class EmbeddedStringParser extends PureStringParser {
 		this(_b, _pre, _post, PFlags.SPACE_BEFORE_AND_AFTER);
 	}
 
-	public Token parse(PeopleCodeByteStream stream) throws Exception {
+	public Token parse(PeopleCodeByteStream stream) {
 
 		String str = this.pre + getString(stream).replace("\"", "\"\"") + this.post;
 		stream.appendParsedText(str);

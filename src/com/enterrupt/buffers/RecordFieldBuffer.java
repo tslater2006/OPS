@@ -18,7 +18,7 @@ public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFi
 	// Used for reading.
 	private boolean hasEmittedSelf = false;
 
-    public RecordFieldBuffer(String r, String f, RecordBuffer parent) throws Exception {
+    public RecordFieldBuffer(String r, String f, RecordBuffer parent) {
         this.fldName = f;
         this.recDefn = DefnCache.getRecord(r);
         this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
@@ -31,7 +31,7 @@ public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFi
         }
     }
 
-    public void checkFieldBufferRules() throws Exception {
+    public void checkFieldBufferRules() {
 
         /**
          * If a level 0, non-derived record contains at least one field

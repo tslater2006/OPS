@@ -148,9 +148,10 @@ public class Component {
 
 		/**
 		 * Record PC should be loaded at this time only if the search record
-	 	 * contains one or more search keys.
+	 	 * contains one or more keys.
 		 */
-		if(!recDefn.hasSearchKeys()) {
+		if(!recDefn.hasAnyKeys()) {
+			log.debug("No keys on search record.");
 			return;
 		}
 
@@ -192,9 +193,9 @@ public class Component {
 
 		/**
 		 * Only fill the search record at this time if the record
-		 * contains search keys.
+		 * contains at least one key.
 		 */
-		if(!recDefn.hasSearchKeys()) {
+		if(!recDefn.hasAnyKeys()) {
 			return;
 		}
 

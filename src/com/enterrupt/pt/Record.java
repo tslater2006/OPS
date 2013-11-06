@@ -175,15 +175,14 @@ public class Record {
 	}
 
 	/**
-	 * TODO: This method may need to use the expanded field list (i.e., include subrecords)
-	 * when determining if the record contains search keys. Not enough data at this time
-	 * to conclude either way. Also, I may need to check for alternate search keys as well.
+	 * TODO: This method is tentative. It may need to use the expanded field list
+     * rather than the root field list. It also may be too expansive.
 	 */
-	public boolean hasSearchKeys() {
+	public boolean hasAnyKeys() {
 
 		for(Map.Entry<String, RecordField> cursor : this.fieldTable.entrySet()) {
 			RecordField rf = cursor.getValue();
-			if(rf.isSearchKey()) {
+			if(rf.isKey() || rf.isSearchKey() || rf.isAlternateSearchKey()) {
 				return true;
 			}
 		}

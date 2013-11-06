@@ -24,7 +24,7 @@ public class Main {
 			// TODO: Remove, should be generated during SQL processing.
 			RunTimeEnvironment.compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr());
 
-			Component c = new Component("CLASS_SEARCH", "GBL");
+			Component c = new Component(System.getProperty("ComponentToLoad"), "GBL");
 			Menu m = new Menu("SA_LEARNER_SERVICES");
 
 			c.loadSearchRecord();
@@ -38,10 +38,12 @@ public class Main {
 
 			c.assembleComponentStructure();
 
-			//c.loadAllRecordPCProgsAndReferencedDefns();
-			//c.loadAllComponentPCProgsAndReferencedDefns();
+			if(!c.PNLGRPNAME.equals("CLASS_SEARCH")) {
+				c.loadAllRecordPCProgsAndReferencedDefns();
+				c.loadAllComponentPCProgsAndReferencedDefns();
 
-			//c.loadAllPagePC();
+				c.loadAllPagePC();
+			}
 
 			BuildAssistant.runValidationTests(c);
 		} catch(EntVMachRuntimeException evmre) {

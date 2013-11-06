@@ -1,5 +1,7 @@
 package com.enterrupt.pt;
 
+import org.apache.logging.log4j.*;
+
 public class RecordField {
 
 	public String RECNAME;
@@ -10,6 +12,8 @@ public class RecordField {
 	private final byte KEY_FLAG = (byte) 1;
 	private final byte ALTERNATE_SEARCH_KEY_FLAG = (byte) 16;
 	private final byte SEARCH_KEY_FLAG = (byte) 2048;
+
+	private static Logger log = LogManager.getLogger(RecordField.class.getName());
 
 	public RecordField() {}
 

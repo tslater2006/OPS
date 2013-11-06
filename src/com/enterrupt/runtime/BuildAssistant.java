@@ -234,8 +234,12 @@ public class BuildAssistant {
 				ignoredStmts.put(line, true);
 			}
 			ignoreReader.close();
-		} catch(Exception ex) {
-			ex.printStackTrace();
+		} catch(java.io.FileNotFoundException fnfe) {
+			log.fatal(fnfe.getMessage(), fnfe);
+			System.exit(ExitCode.IGNORE_STMTS_FILE_NOT_FOUND.getCode());
+		} catch(java.io.IOException ioe) {
+			log.fatal(ioe.getMessage(), ioe);
+			System.exit(ExitCode.FAILED_READ_FROM_IGNORE_STMTS_FILE.getCode());
 		}
 	}
 
@@ -244,10 +248,10 @@ public class BuildAssistant {
 			File trace_file = new File(System.getProperty("tracefile"));
 			traceReader = new BufferedReader(new FileReader(trace_file));
 			currTraceLineNbr = 0;
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
-		}
+        } catch(java.io.FileNotFoundException fnfe) {
+            log.fatal(fnfe.getMessage(), fnfe);
+            System.exit(ExitCode.TRACE_FILE_NOT_FOUND.getCode());
+        }
 	}
 
 	public static PSStmt getNextSqlStmt() {
@@ -281,22 +285,24 @@ public class BuildAssistant {
 
 	public static String getNextTraceLine() {
 		String line = null;
+
 		try {
 			line = traceReader.readLine();
 			currTraceLineNbr++;
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
-		}
+        } catch(java.io.IOException ioe) {
+            log.fatal(ioe.getMessage(), ioe);
+            System.exit(ExitCode.FAILED_READ_FROM_TRACE_FILE.getCode());
+        }
+
 		return line;
 	}
 
 	public static void closeTraceFile() {
+
 		try {
 			traceReader.close();
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
+		} catch(java.io.IOException ioe) {
+			log.warn("Encountered IOException while attempting to close trace file.");
 		}
 	}
 }

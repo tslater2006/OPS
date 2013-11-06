@@ -7,12 +7,15 @@ import com.enterrupt.parser.Parser;
 import com.enterrupt.pt_objects.PeopleCodeProg;
 import com.enterrupt.pt_objects.PeopleCodeTokenStream;
 import com.enterrupt.types.MemoryPtr;
+import org.apache.logging.log4j.*;
 
 public class Interpreter {
 
 	private static Stack<MemoryPtr>	callStack;
 	private static Stack<MemoryPtr>	runtimeStack;
 	private PeopleCodeTokenStream stream;
+
+	private static Logger log = LogManager.getLogger(Interpreter.class.getName());
 
 	public Interpreter(PeopleCodeProg prog) {
 		this.stream = new PeopleCodeTokenStream(prog);
@@ -24,13 +27,13 @@ public class Interpreter {
 	}
 
 	public static void pushToCallStack(MemoryPtr p) {
-		//System.out.println("[Push] [CallStack]\t" + (p == null ? "null" : p.flags.toString()));
+		log.debug("Push\tCallStack\t" + (p == null ? "null" : p.flags.toString()));
 		callStack.push(p);
 	}
 
 	public static MemoryPtr popFromCallStack() {
 		MemoryPtr p = callStack.pop();
-		//System.out.println("[Pop] [CallStack]\t\t" + (p == null ? "null" : p.flags.toString()));
+		log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p.flags.toString()));
 		return p;
 	}
 
@@ -39,13 +42,13 @@ public class Interpreter {
 	}
 
 	public static void pushToRuntimeStack(MemoryPtr p) {
-		//System.out.println("[Push] [RuntimeStack]\t" + (p == null ? "null" : p.flags.toString()));
+		log.debug("Push\tRuntimeStack\t" + (p == null ? "null" : p.flags.toString()));
 		runtimeStack.push(p);
 	}
 
 	public static MemoryPtr popFromRuntimeStack() {
 		MemoryPtr p = runtimeStack.pop();
-		//System.out.println("[Pop] [RuntimeStack]\t\t" + (p == null ? "null" : p.flags.toString()));
+		log.debug("Pop\tRuntimeStack\t" + (p == null ? "null" : p.flags.toString()));
 		return p;
 	}
 

@@ -71,11 +71,13 @@ public class BuildAssistant {
                 }
 
                 if(verboseFlag) {
-                    for(int i=0; i<indent; i++){System.out.print(" ");}
-                    System.out.println("Scroll - Level " + sbuf.scrollLevel +
-                        "\tPrimary Record: " + sbuf.primaryRecName);
-                    for(int i=0; i<indent; i++){System.out.print(" ");}
-                    System.out.println("=======================================================");
+					StringBuilder b = new StringBuilder();
+                    for(int i=0; i<indent; i++){b.append(" ");}
+                    b.append("Scroll - Level ").append(sbuf.scrollLevel).append("\tPrimary Record: ")
+                        .append(sbuf.primaryRecName);
+                    for(int i=0; i<indent; i++){b.append(" ");}
+					log.info(b.toString());
+                    log.info("=======================================================");
                 }
 
             } else if(buf instanceof RecordBuffer) {
@@ -88,8 +90,10 @@ public class BuildAssistant {
                 }
 
                 if(verboseFlag) {
-                    for(int i=0; i<indent; i++){System.out.print(" ");}
-                    System.out.println(" + " + rbuf.recName);
+					StringBuilder b = new StringBuilder();
+                    for(int i=0; i<indent; i++){b.append(" ");}
+                   	b.append(" + ").append(rbuf.recName);
+					log.info(b.toString());
                 }
 
             } else {
@@ -101,8 +105,10 @@ public class BuildAssistant {
 						"during component structure validation.");
                 }
                if(verboseFlag) {
-                    for(int i=0; i<indent; i++){System.out.print(" ");}
-                    System.out.println("   - " + fbuf.fldName);
+					StringBuilder b = new StringBuilder();
+                    for(int i=0; i<indent; i++){b.append(" ");}
+                    b.append("   - ").append(fbuf.fldName);
+					log.info(b.toString());
                 }
             }
         }
@@ -146,11 +152,6 @@ public class BuildAssistant {
 		while((ps_stmt = getNextSqlStmt()) != null) {
 			numTraceStmts++;
 
-			/*if(ps_stmt.line_nbr == 1200) {
-				System.out.println(ps_stmt);
-				System.out.println(StmtLibrary.emittedStmts.get(curr_ent_stmt_idx));
-			}*/
-
 			if(inCoverageRegion) {
 				numCoverageAreaStmts++;
 			}
@@ -192,30 +193,33 @@ public class BuildAssistant {
 
 		DecimalFormat df = new DecimalFormat("0.0");
 
-		System.out.println("\nTRACE FILE VERIFICATION SUMMARY");
-		System.out.println("=======================================================================================");
-		System.out.println("Stmts in Ignore File:\t\t\t\t" + ignoredStmts.size());
-		System.out.println("Lines in trace file:\t\t\t\t" + (currTraceLineNbr - 1));
-		System.out.println("Total Trace Stmts / Total Ignored:\t\t" + (int)numTraceStmts +
+		log.info("============================================================================");
+		log.info("TRACE FILE VERIFICATION SUMMARY");
+		log.info("============================================================================");
+		log.info("Stmts in Ignore File:\t\t\t" + ignoredStmts.size());
+		log.info("Lines in trace file:\t\t\t" + (currTraceLineNbr - 1));
+		log.info("Total Trace Stmts / Total Ignored:\t\t" + (int)numTraceStmts +
 			"\t\t" + (int)numIgnoredTraceStmts);
-		System.out.println("Coverage Stmts / Coverage Stmts Ignored:\t" + (int)numCoverageAreaStmts +
+		log.info("Coverage Stmts / Coverage Stmts Ignored:\t" + (int)numCoverageAreaStmts +
 			"\t\t" + (int)numIgnoredCoverageAreaStmts);
-		System.out.println("Is Component Structure Valid?\t\t\t\t\t\t\t" +
+		log.info("Is Component Structure Valid?\t\t\t\t\t\t" +
 			(isCompStructureValid ? "YES" : "!!NO!!"));
-		System.out.println("Coverage Area Bounded?\t\t\t\t\t\t\t\t" + (inCoverageRegion ? "!!NO!!" : "YES"));
-		System.out.println("Coverage Area Start / End Line:\t\t\t" + "L_" + coverageStartLine + "\t\t" +
+		log.info("Coverage Area Bounded?\t\t\t\t\t\t\t" + (inCoverageRegion ? "!!NO!!" : "YES"));
+		log.info("Coverage Area Start / End Line:\t\t" + "L_" + coverageStartLine + "\t\t" +
 			"L_" + coverageEndLine);
-		System.out.println("Matches / Total Emitted:\t\t\t" + (int)numCoverageAreaMatches + "\t\t"
+		log.info("Matches / Total Emitted:\t\t\t" + (int)numCoverageAreaMatches + "\t\t"
 			+ totalEmittedStmts + "\t\t" + df.format((numCoverageAreaMatches / totalEmittedStmts) * 100.0) + "%");
-		System.out.println("% ENT Coverage of Area (- ignored):\t\t\t\t\t\t" +
+		log.info("% ENT Coverage of Area (- ignored):\t\t\t\t\t" +
 			df.format((numCoverageAreaMatches / (numCoverageAreaStmts - numIgnoredCoverageAreaStmts)) * 100.0) + "%");
-		System.out.println("% ENT Coverage of File (- ignored):\t\t\t\t\t\t" +
+		log.info("% ENT Coverage of File (- ignored):\t\t\t\t\t" +
 			df.format((numCoverageAreaMatches / (numTraceStmts - numIgnoredTraceStmts)) * 100.0) + "%");
-		System.out.print("First Unmatched Coverage Area Line Nbrs:\t" + firstUnmatchedTokenLineNbrs[0]);
+
+		StringBuilder b = new StringBuilder();
+		b.append("First Unmatched Coverage Area Line Nbrs:\t").append(firstUnmatchedTokenLineNbrs[0]);
 		for(int i=1; i < unmatched_size; i++) {
-			System.out.print(", " + firstUnmatchedTokenLineNbrs[i]);
+			b.append(", ").append(firstUnmatchedTokenLineNbrs[i]);
 		}
-		System.out.println("\n");
+		log.info(b.toString());
 
 		closeTraceFile();
 	}

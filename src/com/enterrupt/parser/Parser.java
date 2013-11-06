@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.EnumSet;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.pt_objects.PeopleCodeByteStream;
+import org.apache.logging.log4j.*;
 
 public class Parser {
 
@@ -22,6 +23,8 @@ public class Parser {
 	private boolean did_newline = false;
 	private boolean wroteSpace = false;
 	private ElementParser lastParser = null;
+
+	private static Logger log = LogManager.getLogger(Parser.class.getName());
 
 	static {
 		// Array of all available parsers.
@@ -141,7 +144,7 @@ public class Parser {
 			return new Token(EnumSet.of(TFlag.END_OF_PROGRAM, TFlag.END_OF_BLOCK));
 		}
 
-		//System.out.printf("Getting parser for byte: 0x%02X\n", b);
+		//log.debug(String.format("Parsing byte: 0x%02X", b));
 
 		ElementParser p = parserTable.get(new Byte(b));
 		if(p == null) {

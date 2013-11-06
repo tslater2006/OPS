@@ -213,8 +213,6 @@ public abstract class PeopleCodeProg {
 
         while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
 
-            //System.out.println(t.flags);
-
 			/**
 			 * TODO: Determine whether this belongs here or in ClassicPeopleCodeProg.
 			 * For now I'm assuming that imported packages are checked in both classic

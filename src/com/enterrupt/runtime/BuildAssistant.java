@@ -66,8 +66,8 @@ public class BuildAssistant {
                     Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
                         (!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
                             && Integer.parseInt(lineParts[1]) > 0)) {
-                    System.out.println("[ERROR] Incorrect/absent scroll token encountered during component structure validation.");
-                    System.exit(1);
+                    throw new EntVMachRuntimeException("Incorrect/absent scroll token encountered " +
+						"during component structure validation.");
                 }
 
                 if(verboseFlag) {
@@ -83,10 +83,8 @@ public class BuildAssistant {
 
                 if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
                     !lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
-                    System.out.println("[ERROR] Incorrect/absent record token encountered during component structure validation.");
-                    System.out.println(line);
-                    System.out.println(rbuf.recName);
-                    System.exit(1);
+                    throw new EntVMachRuntimeException("Incorrect/absent record token encountered " +
+						"during component structure validation.");
                 }
 
                 if(verboseFlag) {
@@ -99,8 +97,8 @@ public class BuildAssistant {
 
                 if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
                     !lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
-                    System.out.println("[ERROR] Incorrect/absent field token encountered during component structure validation.");
-                    System.exit(1);
+                    throw new EntVMachRuntimeException("Incorrect/absent field token encountered " +
+						"during component structure validation.");
                 }
                if(verboseFlag) {
                     for(int i=0; i<indent; i++){System.out.print(" ");}
@@ -111,8 +109,7 @@ public class BuildAssistant {
 
 		try {
 	        if(!reader.readLine().trim().equals("END-COMPONENT-STRUCTURE")) {
-   	        	System.out.println("[ERROR] Expected END-COMPONENT-STRUCTURE in .structure file.");
-	            System.exit(1);
+   	        	throw new EntVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
         	}
 		} catch(java.io.IOException ioe) {
             log.fatal(ioe.getMessage(), ioe);

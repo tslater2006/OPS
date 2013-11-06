@@ -28,8 +28,7 @@ public abstract class MemoryPtr<T> {
 		if(src.flags.contains(MFlag.STRING) && dest.flags.contains(MFlag.STRING)) {
 			((StringPtr) dest).write(((StringPtr) src).read());
 		} else {
-			System.out.println("[ERROR] Pointer types do not agree; unable to copy from source to destination.");
-			System.exit(1);
+			throw new EntDataTypeException("Pointer types do not agree; unable to copy from source to destination.");
 		}
 	}
 
@@ -42,10 +41,7 @@ public abstract class MemoryPtr<T> {
 		if(p1.flags.contains(MFlag.STRING) && p2.flags.contains(MFlag.STRING)) {
 			return ((StringPtr) p1).read().equals(((StringPtr) p2).read());
 		} else {
-			System.out.println("[ERROR] Unable to determine if pointer values are equal; types do not agree.");
-			System.exit(1);
+			throw new EntDataTypeException("Unable to determine if pointer values are equal; types do not agree.");
 		}
-
-		return false;
 	}
 }

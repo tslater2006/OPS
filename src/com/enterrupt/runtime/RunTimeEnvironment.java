@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.ArrayList;
 import com.enterrupt.types.*;
 import org.apache.logging.log4j.*;
-import com.enterrupt.runtime.ExitCode;
+import com.enterrupt.runtime.*;
 
 public class RunTimeEnvironment {
 
@@ -104,8 +104,7 @@ public class RunTimeEnvironment {
 
 		// Only supporting one argument for now.
 		if(args.size() != 1) {
-			System.out.println("[ERROR] Expected 1 argument for None()");
-			System.exit(1);
+			throw new EntVMachRuntimeException("Expected 1 argument for None().");
 		}
 
 		if(args.get(0).isEmpty()) {

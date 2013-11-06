@@ -32,8 +32,7 @@ public class BooleanPtr extends MemoryPtr<Boolean> {
 
 	public void write(Boolean val) {
 		if(this.flags.contains(MFlag.READ_ONLY)) {
-			System.out.println("[ERROR] Attempted to write to read-only location.");
-			System.exit(1);
+			throw new EntDataTypeException("Attempted to write to read-only location.");
 		}
 		this.b = val;
 	}

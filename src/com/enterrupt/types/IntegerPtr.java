@@ -32,8 +32,7 @@ public class IntegerPtr extends MemoryPtr<Integer> {
 
 	public void write(Integer val) {
 		if(this.flags.contains(MFlag.READ_ONLY)) {
-			System.out.println("[ERROR] Attempted to write to read-only location.");
-			System.exit(1);
+			throw new EntDataTypeException("Attempted to write to read-only location.");
 		}
 		this.i = val;
 	}
@@ -43,8 +42,6 @@ public class IntegerPtr extends MemoryPtr<Integer> {
 	}
 
 	public boolean isEmpty() {
-		System.out.println("[ERROR] Have not implemented isEmpty for IntegerPtr yet.");
-		System.exit(1);
-		return false;
+		throw new EntDataTypeException("Have not implemented isEmpty for IntegerPtr yet.");
 	}
 }

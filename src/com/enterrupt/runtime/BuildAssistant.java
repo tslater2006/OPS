@@ -168,6 +168,8 @@ public class BuildAssistant {
 
 					numCoverageAreaMatches++;
 
+					//log.debug(StmtLibrary.emittedStmts.get(curr_ent_stmt_idx));
+
 					if(curr_ent_stmt_idx == max_idx) {
 						inCoverageRegion = false;
 						coverageEndLine = ps_stmt.line_nbr;
@@ -183,7 +185,11 @@ public class BuildAssistant {
 			}
 		}
 
-		boolean isCompStructureValid = validateComponentStructure(componentObj, false);
+		/**
+		 * TODO: Re-enable when ready.
+		 */
+		boolean isCompStructureValid = false;
+		//boolean isCompStructureValid = validateComponentStructure(componentObj, false);
 
 		DecimalFormat df = new DecimalFormat("0.0");
 
@@ -214,6 +220,13 @@ public class BuildAssistant {
 			b.append(", ").append(firstUnmatchedTokenLineNbrs[i]);
 		}
 		log.info(b.toString());
+
+		/*if(curr_unmatched_idx < StmtLibrary.emittedStmts.size()) {
+			b = new StringBuilder();
+			b.append("First Unmatched ENT Stmt:\n");
+			b.append(StmtLibrary.emittedStmts.get(curr_unmatched_idx));
+			log.info(b.toString());
+		}*/
 
 		closeTraceFile();
 	}

@@ -38,10 +38,10 @@ public class Main {
 
 			c.assembleComponentStructure();
 
-			c.loadAllRecordPCProgsAndReferencedDefns();
-			c.loadAllComponentPCProgsAndReferencedDefns();
+			//c.loadAllRecordPCProgsAndReferencedDefns();
+			//c.loadAllComponentPCProgsAndReferencedDefns();
 
-			c.loadAllPagePC();
+			//c.loadAllPagePC();
 
 			BuildAssistant.runValidationTests(c);
 		} catch(EntVMachRuntimeException evmre) {

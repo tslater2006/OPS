@@ -51,6 +51,7 @@ public class Component {
 	        pstmt = StmtLibrary.getPSPNLGRPDEFN(this.PNLGRPNAME, this.MARKET);
     	    rs = pstmt.executeQuery();
        		rs.next();
+			log.debug("Component search record: {}", rs.getString("SEARCHRECNAME"));
         	this.SEARCHRECNAME = rs.getString("SEARCHRECNAME");
         	rs.close();
         	pstmt.close();
@@ -62,6 +63,7 @@ public class Component {
         	while(rs.next()) {
 				// All pages at the root of the component start at scroll level 0.
 				Page p = new Page(rs.getString("PNLNAME"));
+				log.debug("Component contains Page.{}", p.PNLNAME);
             	this.pages.add(p);
         	}
 		} catch(java.sql.SQLException sqle) {
@@ -143,16 +145,24 @@ public class Component {
     public void loadAndRunRecordPConSearchRecord() {
 
 		Record recDefn = DefnCache.getRecord(this.SEARCHRECNAME);
-		recDefn.discoverRecordPC();
 
-        for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
-            if(prog.event.equals("SearchInit")) {
+		/**
+		 * Record PC should be loaded at this time only if the search record
+	 	 * contains one or more search keys.
+		 */
+		if(!recDefn.hasSearchKeys()) {
+			return;
+		}
+
+		recDefn.discoverRecordPC();
+   	    for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
+       	    if(prog.event.equals("SearchInit")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
 				Interpreter interpreter = new Interpreter(p);
 				interpreter.run();
-            }
-        }
+       	    }
+       	}
     }
 
 	public void loadAndRunComponentPConSearchRecord() {
@@ -177,6 +187,16 @@ public class Component {
 	 * TODO: Address the notes presented above.
 	 */
 	public void fillSearchRecord() {
+
+		Record recDefn = DefnCache.getRecord(this.SEARCHRECNAME);
+
+		/**
+		 * Only fill the search record at this time if the record
+		 * contains search keys.
+		 */
+		if(!recDefn.hasSearchKeys()) {
+			return;
+		}
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

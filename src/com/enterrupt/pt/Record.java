@@ -205,5 +205,11 @@ public class Record {
 
 		return expandedFieldList;
 	}
+
+	public ArrayList<PeopleCodeProg> getRecordProgsForField(String FLDNAME) {
+
+		if(this.recordProgsByFieldTable == null) { return null; }
+		return this.recordProgsByFieldTable.get(FLDNAME);
+	}
 }
 

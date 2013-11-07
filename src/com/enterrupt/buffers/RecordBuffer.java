@@ -4,6 +4,7 @@ import java.util.*;
 import java.lang.StringBuilder;
 import com.enterrupt.pt.*;
 import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 public class RecordBuffer implements IStreamableBuffer {
 
@@ -17,6 +18,8 @@ public class RecordBuffer implements IStreamableBuffer {
 	// Used for reading.
 	private boolean hasEmittedSelf = false;
 	private int fieldBufferCursor = 0;
+
+	private Logger log = LogManager.getLogger(RecordBuffer.class.getName());
 
     public RecordBuffer(String r, int scrollLevel, String primaryRecName) {
         this.recName = r;

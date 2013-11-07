@@ -310,8 +310,7 @@ public class Component {
 			if(buf instanceof RecordFieldBuffer) {
 				RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
 
-				ArrayList<PeopleCodeProg> fieldProgs = fbuf.recDefn
-					.recordProgsByFieldTable.get(fbuf.fldName);
+				ArrayList<PeopleCodeProg> fieldProgs = fbuf.recDefn.getRecordProgsForField(fbuf.fldName);
 				if(fieldProgs != null) {
 
 					for(PeopleCodeProg prog : fieldProgs) {

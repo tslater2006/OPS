@@ -4,7 +4,7 @@ import com.enterrupt.pt.*;
 
 public class PeopleCodeByteStream {
 
-	private PeopleCodeProg prog;
+	public PeopleCodeProg prog;
 	private StringBuilder parsedTextBuilder;
 	private int cursorPos;
 

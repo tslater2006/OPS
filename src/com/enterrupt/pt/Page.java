@@ -81,6 +81,21 @@ public class Page {
 						this.subpages.add(pf);
 						this.tokens.add(pf);
                    		break;
+
+					case 12:
+					case 13:
+					case 14:
+					case 15:
+					case 16:
+					case 17:
+					case 21:
+					case 26:
+					case 29:
+					case 31: // pushbtn/links with various targets
+						pf.flags.add(AFlag.PUSHBTN_LINK);
+						this.tokens.add(pf);
+						break;
+
 	                case 18:
 						pf.flags.add(AFlag.PAGE);
 						pf.flags.add(AFlag.SECPAGE);

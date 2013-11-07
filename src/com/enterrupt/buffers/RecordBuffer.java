@@ -33,6 +33,8 @@ public class RecordBuffer implements IStreamableBuffer {
 		 * TODO: This may not be the correct approach.
 		 * Not sure if EFFDT should always be in the component buffer, or if
 		 * it should only be there if based on the presence of specific keys.
+		 * This may even need to be broader than EFFDT; i.e., if any level-0 record
+	 	 * contains keys, add them now.
 		 */
 		Record recDefn = DefnCache.getRecord(this.recName);
 		RecordField EFFDT = recDefn.fieldTable.get("EFFDT");

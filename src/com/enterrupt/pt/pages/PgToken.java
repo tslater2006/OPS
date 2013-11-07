@@ -13,9 +13,10 @@ public class PgToken {
 	public int OCCURSLEVEL;
 	public byte FIELDUSE;
 
+	private final byte DISP_CNTRL_FLAG = (byte) 8;
 	private final byte REL_DISP_FLAG = (byte) 16;
 
-	public String primaryRecName; 		// used for SCROLL_CHNG tokens.
+	public String primaryRecName; 		// used for SCROLL_START tokens.
 
 	public PgToken() {
 		this.flags = EnumSet.noneOf(AFlag.class);
@@ -29,6 +30,14 @@ public class PgToken {
 		this.flags = EnumSet.copyOf(flagSet);
 	}
 
+	public boolean isDisplayControl() {
+		return ((this.FIELDUSE & this.DISP_CNTRL_FLAG) > 0);
+	}
+
+	public boolean isRelatedDisplay() {
+		return ((this.FIELDUSE & this.REL_DISP_FLAG) > 0);
+	}
+
 	public boolean doesBelongInComponentStructure() {
 
 		// If RECNAME or FIELDNAME is empty, don't add.
@@ -37,7 +46,7 @@ public class PgToken {
 		}
 
 		// Related display fields should not be added.
-		if((this.FIELDUSE & this.REL_DISP_FLAG) > 0) {
+		if(isRelatedDisplay()) {
 			return false;
 		}
 
@@ -63,5 +72,18 @@ public class PgToken {
 		}
 
 		return true;
+	}
+
+	public String toString() {
+
+		StringBuilder b = new StringBuilder();
+		b.append("PgToken: ").append(this.flags);
+
+		if(this.RECNAME != null && this.RECNAME.length() > 0) { b.append(", ").append("RECNAME=").append(this.RECNAME); }
+		if(this.FIELDNAME != null && this.FIELDNAME.length() > 0) { b.append(", ").append("FIELDNAME=").append(this.FIELDNAME); }
+		if(this.SUBPNLNAME != null && this.SUBPNLNAME.length() > 0) { b.append(", ").append("SUBPNLNAME=").append(this.SUBPNLNAME); }
+		if(this.primaryRecName != null && this.primaryRecName.length() > 0) { b.append(", ").append("primaryRecName=").append(this.primaryRecName); }
+
+		return b.toString();
 	}
 }

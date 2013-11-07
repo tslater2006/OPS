@@ -3,6 +3,8 @@ package com.enterrupt.pt.pages;
 import java.util.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.buffers.*;
+import org.apache.logging.log4j.*;
 
 public class PgTokenStream {
 
@@ -13,6 +15,8 @@ public class PgTokenStream {
 	private boolean isClosed;
 	private int prevOCCURSLEVEL = -1;
 	private HashMap<String, Boolean> loadedPageNames;
+
+	private static Logger log = LogManager.getLogger(PgTokenStream.class.getName());
 
 	public PgTokenStream(String PNLNAME) {
 		this.p = DefnCache.getPage(PNLNAME);
@@ -55,21 +59,40 @@ public class PgTokenStream {
 			if(tok.flags.contains(AFlag.SCROLL_START)) {
 
 				int lookAheadCursor = this.cursor;
-				boolean foundPrimaryRecName = false;
+				String primaryRecNameCandidate = null;
 
 				while(lookAheadCursor < p.tokens.size()) {
 					PgToken lookToken = p.tokens.get(lookAheadCursor++);
 
-					// Ignore groupboxes while trying to find the primary record name.
-					if(!lookToken.flags.contains(AFlag.GROUPBOX)) {
-						tok.primaryRecName = lookToken.RECNAME;
-						foundPrimaryRecName = true;
+					// Stop looking once this scroll area has ended.
+					if(lookToken.OCCURSLEVEL < tok.OCCURSLEVEL) {
 						break;
+					}
+
+					// Ignore groupboxes and any field without a valid RECNAME.
+					if(!lookToken.flags.contains(AFlag.GROUPBOX) && lookToken.RECNAME != null
+						&& lookToken.RECNAME.length() > 0) {
+
+						/**
+						 * First priority is given to a RECNAME in the scroll area that *is not*
+						 * a child record of the current scroll buffer. However, this may not exist
+						 * (i.e., if there is only one field in the scroll area that has a RECNAME in the
+						 * buffer already). To prepare for that case, we must save the first RECNAME we come across
+						 * for potential use as the primary record name of this scroll area.
+						 */
+						if(ComponentBuffer.currSB.recBufferTable.get(lookToken.RECNAME) == null) {
+							primaryRecNameCandidate = lookToken.RECNAME;
+							break;
+						} else if(primaryRecNameCandidate == null) {
+							primaryRecNameCandidate = lookToken.RECNAME;
+						}
 					}
 				}
 
-				if(!foundPrimaryRecName) {
+				if(primaryRecNameCandidate == null) {
 					throw new EntVMachRuntimeException("Unable to find the scroll area's primary record name.");
+				} else {
+					tok.primaryRecName = primaryRecNameCandidate;
 				}
 			}
 

@@ -146,6 +146,7 @@ public class Parser {
 
 		ElementParser p = parserTable.get(new Byte(b));
 		if(p == null) {
+			log.debug(this.stream.prog.getDescriptor());
 			throw new EntParseException(String.format("Encountered unparseable byte: 0x%02X", b));
 		} else {
 			/* TODO: Fill out as needed. */

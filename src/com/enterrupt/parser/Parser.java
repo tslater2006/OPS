@@ -40,6 +40,7 @@ public class Parser {
 			new SimpleElementParser((byte) 12, EnumSet.of(TFlag.LT_OR_EQUAL), "<="),	// 0x0C
 			new SimpleElementParser((byte) 13, EnumSet.of(TFlag.LESS_THAN), "<"),		// 0x0D
 			new SimpleElementParser((byte) 14, EnumSet.of(TFlag.SUBTRACT), "-"), // 0x0E
+			new SimpleElementParser((byte) 15, EnumSet.of(TFlag.MULTIPLY), "*"), // 0x0F
 			new SimpleElementParser((byte) 16, EnumSet.of(TFlag.NOT_EQUAL), "<>"),	// 0x10
 			new NumberParser((byte) 17, 14),	// 0x11
 			new PureStringParser((byte) 18),									// 0x12 (System variable name)

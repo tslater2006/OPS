@@ -56,14 +56,6 @@ public class BuildAssistant {
                 ScrollBuffer sbuf = (ScrollBuffer) buf;
                 indent = sbuf.scrollLevel * 3;
 
-                if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
-                    Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
-                        (!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
-                            && Integer.parseInt(lineParts[1]) > 0)) {
-                    throw new EntVMachRuntimeException("Incorrect/absent scroll token encountered " +
-						"during component structure validation.");
-                }
-
                 if(verboseFlag) {
 					StringBuilder b = new StringBuilder();
                     for(int i=0; i<indent; i++){b.append(" ");}
@@ -74,14 +66,16 @@ public class BuildAssistant {
                     log.info("=======================================================");
                 }
 
-            } else if(buf instanceof RecordBuffer) {
-                RecordBuffer rbuf = (RecordBuffer) buf;
-
-                if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
-                    !lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
-                    throw new EntVMachRuntimeException("Incorrect/absent record token encountered " +
+                if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
+                    Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
+                        (!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
+                            && Integer.parseInt(lineParts[1]) > 0)) {
+                    throw new EntVMachRuntimeException("Incorrect/absent scroll token encountered " +
 						"during component structure validation.");
                 }
+
+            } else if(buf instanceof RecordBuffer) {
+                RecordBuffer rbuf = (RecordBuffer) buf;
 
                 if(verboseFlag) {
 					StringBuilder b = new StringBuilder();
@@ -90,19 +84,26 @@ public class BuildAssistant {
 					log.info(b.toString());
                 }
 
+                if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
+                    !lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
+                    throw new EntVMachRuntimeException("Incorrect/absent record token encountered " +
+						"during component structure validation.");
+                }
+
             } else {
                 RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
 
-                if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
-                    !lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
-                    throw new EntVMachRuntimeException("Incorrect/absent field token encountered " +
-						"during component structure validation.");
-                }
                if(verboseFlag) {
 					StringBuilder b = new StringBuilder();
                     for(int i=0; i<indent; i++){b.append(" ");}
                     b.append("   - ").append(fbuf.fldName);
 					log.info(b.toString());
+                }
+
+                if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
+                    !lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
+                    throw new EntVMachRuntimeException("Incorrect/absent field token encountered " +
+						"during component structure validation.");
                 }
             }
         }
@@ -185,12 +186,7 @@ public class BuildAssistant {
 			}
 		}
 
-		/**
-		 * TODO: Re-enable when ready.
-		 */
-		boolean isCompStructureValid = false;
-		printComponentStructure();
-		//boolean isCompStructureValid = validateComponentStructure(componentObj, false);
+		boolean isCompStructureValid = validateComponentStructure(componentObj, true);
 
 		DecimalFormat df = new DecimalFormat("0.0");
 

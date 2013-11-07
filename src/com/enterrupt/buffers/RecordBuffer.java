@@ -28,6 +28,17 @@ public class RecordBuffer implements IStreamableBuffer {
 
         this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
         this.fieldBuffers = new ArrayList<RecordFieldBuffer>();
+
+		/**
+		 * TODO: This may not be the correct approach.
+		 * Not sure if EFFDT should always be in the component buffer, or if
+		 * it should only be there if based on the presence of specific keys.
+		 */
+		Record recDefn = DefnCache.getRecord(this.recName);
+		RecordField EFFDT = recDefn.fieldTable.get("EFFDT");
+		if(EFFDT != null && EFFDT.isKey()) {
+			this.addPageField(this.recName, "EFFDT");
+		}
     }
 
     public void addPageField(String RECNAME, String FIELDNAME) {

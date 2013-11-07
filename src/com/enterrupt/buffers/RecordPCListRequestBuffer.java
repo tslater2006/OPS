@@ -4,6 +4,7 @@ import java.util.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.pages.*;
 import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 /**
  * This class abstracts away the process of expanding secpages
@@ -19,6 +20,8 @@ public class RecordPCListRequestBuffer {
 	private static LinkedList<PgToken> expandingStream;
 	private static HashMap<String, Boolean> flushedRecordNames;
 	private static Stack<PgToken> secpagesBeingExpanded;
+
+	private static Logger log = LogManager.getLogger(RecordPCListRequestBuffer.class.getName());
 
 	public static void init() {
 		tokenStream = new LinkedList<PgToken>();
@@ -78,7 +81,9 @@ public class RecordPCListRequestBuffer {
 	}
 
 	public static void flushUpTo(PgToken secpageTok) {
+		log.debug("Flushing up to SecPage.{}...", secpageTok.SUBPNLNAME);
 		flush(secpageTok);
+		log.debug("Done.");
 	}
 
 	/**
@@ -86,7 +91,20 @@ public class RecordPCListRequestBuffer {
 	 * to ensure that all requests are flushed.
 	 */
 	public static void flushEntireTokenStream() {
+
+		if(secpagesBeingExpanded.size() > 0) {
+			throw new EntVMachRuntimeException("Expected empty secpage stack before flushing remaining" +
+				"Record PC list requests.");
+		}
+
+		// There could be remaining tokens in the expanding stream; append to token stream to ensure
+		// they are flushed.
+		tokenStream.addAll(expandingStream);
+		expandingStream.clear();
+
+		log.debug("Flushing entire token stream...");
 		flush(null);
+		log.debug("Done.");
 	}
 
 	private static void flush(PgToken tok) {
@@ -114,6 +132,8 @@ public class RecordPCListRequestBuffer {
 				!PSDefn.isSystemRecord(RECNAME)) {
 
 			Record recDefn = DefnCache.getRecord(RECNAME);
+			log.debug("Issuing PC List Request for\t{}", recDefn.RECNAME);
+
 			recDefn.discoverRecordPC();
 			flushedRecordNames.put(RECNAME, true);
 

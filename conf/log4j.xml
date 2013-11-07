@@ -12,5 +12,6 @@
     	<Root level="all">
     		<AppenderRef ref="Console-Less"/>
     	</Root>
+		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
     </Loggers>
 </Configuration>

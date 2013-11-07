@@ -246,7 +246,7 @@ public class Component {
 
 			while((tok = pfs.next()) != null) {
 
-				log.debug(tok);
+				//log.debug(tok);
 
 				if(tok.flags.contains(AFlag.PAGE)) {
 					ScrollMarker sm = new ScrollMarker();

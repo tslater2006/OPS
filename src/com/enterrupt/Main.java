@@ -39,6 +39,7 @@ public class Main {
 			c.assembleComponentStructure();
 			c.loadAllRecordPCProgsAndReferencedDefns();
 
+
 			if(!c.PNLGRPNAME.equals("CLASS_SEARCH")) {
 				c.loadAllComponentPCProgsAndReferencedDefns();
 

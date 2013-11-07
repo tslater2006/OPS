@@ -186,7 +186,7 @@ public class BuildAssistant {
 			}
 		}
 
-		boolean isCompStructureValid = validateComponentStructure(componentObj, true);
+		boolean isCompStructureValid = validateComponentStructure(componentObj, false);
 
 		DecimalFormat df = new DecimalFormat("0.0");
 

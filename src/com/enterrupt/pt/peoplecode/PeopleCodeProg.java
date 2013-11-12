@@ -19,6 +19,7 @@ public abstract class PeopleCodeProg {
 	private String parsedText;
 
 	protected ArrayList<PeopleCodeProg> referencedProgs;
+	protected HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
 	protected HashMap<String, Boolean> importedAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
 
@@ -34,7 +35,7 @@ public abstract class PeopleCodeProg {
 	public abstract String getDescriptor();
 
 	protected abstract void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, LFlag lflag);
+		int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack);
 
 	public Reference getProgReference(int refNbr) {
 		return this.progRefsTable.get(refNbr);
@@ -42,7 +43,11 @@ public abstract class PeopleCodeProg {
 
 	public void init() {
 
-		if(this.hasInitialized) { return; }
+		if(this.hasInitialized) {
+			log.debug("Already initialized: {}", this.getDescriptor());
+			return; }
+
+		log.debug("Initializing {}...", this.getDescriptor());
 		this.hasInitialized = true;
 
     	PreparedStatement pstmt = null;
@@ -197,20 +202,46 @@ public abstract class PeopleCodeProg {
 			throw new EntVMachRuntimeException("Unexpected type of root PeopleCode.");
 		}
 
-		this.recurseLoadDefnsAndPrograms(0, flag);
+		this.recurseLoadDefnsAndPrograms(0, flag, new Stack<PeopleCodeProg>());
 	}
 
-	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag) {
+	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack) {
 
-		if(this.haveLoadedDefnsAndPrograms) { return; }
+		if(this.haveLoadedDefnsAndPrograms) {
+			log.debug("Already loaded ref defns/progs {}", this.getDescriptor());
+			return; }
+		log.debug("Loading ref defns/progs {}...", this.getDescriptor());
 		this.haveLoadedDefnsAndPrograms = true;
+
+		traceStack.push(this);
+
+		log.debug("*****************START TRACE******************");
+		for(PeopleCodeProg prog : traceStack) {
+			log.debug(prog.getDescriptor());
+		}
+		log.debug("*****************END TRACE******************");
 
  		Token t;
 		this.referencedProgs = new ArrayList<PeopleCodeProg>();
+		this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
         this.importedAppPackages = new HashMap<String, Boolean>();
+		HashMap<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
         PeopleCodeTokenStream stream = new PeopleCodeTokenStream(this);
 
         while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
+
+			/**
+			 * Detect function calls; if a call corresponds to a program referenced
+			 * in a previously seen DECLARE stmt, mark that program as having been called.
+			 */
+			if(t.flags.contains(TFlag.PURE_STRING)) {
+				Token l = stream.peekNextToken();
+				RecordPeopleCodeProg prog = this.recordProgFnCalls.get(t.pureStrVal);
+
+				if(l.flags.contains(TFlag.L_PAREN) && prog != null) {
+					confirmedRecordProgCalls.put(prog, true);
+				}
+			}
 
 			/**
 			 * TODO: Determine whether this belongs here or in ClassicPeopleCodeProg.
@@ -234,7 +265,7 @@ public abstract class PeopleCodeProg {
                 importedAppPackages.put(pathParts.get(0), true);
             }
 
-			this.subclassTokenHandler(t, stream, recursionLevel, lflag);
+			this.subclassTokenHandler(t, stream, recursionLevel, lflag, traceStack);
         }
 
         /**
@@ -252,12 +283,23 @@ public abstract class PeopleCodeProg {
 			 * directly referenced in the root Component PC program being loaded (which exists at recursion
 			 * level 0).
 			 */
-			if(lflag == LFlag.RECORD
+			if((lflag == LFlag.RECORD && recursionLevel < 3)
 				|| (lflag == LFlag.COMPONENT
 					&& (p instanceof AppClassPeopleCodeProg || recursionLevel == 0))) {
-	   	        p.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag);
+
+				/**
+				 * If this program is never actually called,
+				 * there is no reason to load its references at this time.
+				 */
+				if(p instanceof RecordPeopleCodeProg && confirmedRecordProgCalls.get(p) == null) {
+					continue;
+				}
+
+	   	        p.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag, traceStack);
 			}
         }
+
+		traceStack.pop();
 	}
 
 	/**

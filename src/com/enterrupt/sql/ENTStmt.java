@@ -12,6 +12,7 @@ import org.apache.logging.log4j.*;
 public class ENTStmt extends SQLStmt {
 
 	private static Logger log = LogManager.getLogger(ENTStmt.class.getName());
+	private static int stmtCounter = 0;
 
     public ENTStmt(String sql) {
         super(sql.trim());
@@ -24,6 +25,9 @@ public class ENTStmt extends SQLStmt {
    		    for(Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
          		pstmt.setString(cursor.getKey(), cursor.getValue());
         	}
+
+			log.debug("Stmt counter: {}", stmtCounter++);
+			log.debug(this);
         	StmtLibrary.emittedStmts.add(this);
         	return pstmt;
 

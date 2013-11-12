@@ -218,12 +218,13 @@ public class BuildAssistant {
 		}
 		log.info(b.toString());
 
-		/*if(curr_unmatched_idx < StmtLibrary.emittedStmts.size()) {
+		if(curr_ent_stmt_idx < StmtLibrary.emittedStmts.size()) {
+			log.debug(curr_ent_stmt_idx);
 			b = new StringBuilder();
 			b.append("First Unmatched ENT Stmt:\n");
-			b.append(StmtLibrary.emittedStmts.get(curr_unmatched_idx));
+			b.append(StmtLibrary.emittedStmts.get(curr_ent_stmt_idx));
 			log.info(b.toString());
-		}*/
+		}
 
 		closeTraceFile();
 	}

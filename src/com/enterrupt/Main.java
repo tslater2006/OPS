@@ -38,13 +38,8 @@ public class Main {
 
 			c.assembleComponentStructure();
 			c.loadAllRecordPCProgsAndReferencedDefns();
-
-
-			if(!c.PNLGRPNAME.equals("CLASS_SEARCH")) {
-				c.loadAllComponentPCProgsAndReferencedDefns();
-
-				c.loadAllPagePC();
-			}
+			c.loadAllComponentPCProgsAndReferencedDefns();
+			c.loadAllPagePC();
 
 			BuildAssistant.runValidationTests(c);
 		} catch(EntVMachRuntimeException evmre) {

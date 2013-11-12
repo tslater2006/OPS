@@ -1,14 +1,18 @@
 package com.enterrupt.pt.peoplecode;
 
+import java.util.*;
 import java.lang.StringBuilder;
 import com.enterrupt.parser.*;
 import com.enterrupt.runtime.*;
 import com.enterrupt.pt.*;
+import org.apache.logging.log4j.*;
 
 public class AppClassPeopleCodeProg extends PeopleCodeProg {
 
 	public String[] pathParts;
 	public AppPackage rootPackage;
+
+	private static Logger log = LogManager.getLogger(AppClassPeopleCodeProg.class.getName());
 
 	public AppClassPeopleCodeProg(String[] path) {
 		super();
@@ -55,7 +59,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	public String getDescriptor() {
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("AppPackagePC.");
+		sb.append("AppClassPC.");
 		for(int i = 0; i < this.pathParts.length; i++) {
 			sb.append(this.pathParts[i]).append(".");
 		}
@@ -64,7 +68,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	}
 
 	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, LFlag lflag) {
+		int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack) {
 
 		/**
 		 * Detect application classes referenced as instance and property values in an object
@@ -84,6 +88,9 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 				PeopleCodeProg prog = new AppClassPeopleCodeProg(path);
 				prog = DefnCache.getProgram(prog);
 
+				log.debug("Found reference to prog {} on prog {}.", prog.getDescriptor(),
+					this.getDescriptor());
+
 				referencedProgs.add(prog);
 
 				// Load the program's initial metadata.
@@ -98,7 +105,11 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 				 * this unconditionally is not interfering with the previous sections of the trace file.
 				 * TODO: keep this in mind.
 				 */
-				prog.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag);
+				//if(lflag == LFlag.COMPONENT) {
+					prog.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag, traceStack);
+				//}
+			} else {
+				//throw new EntVMachRuntimeException("Unknown token syntax following INSTANCE/PROPERTY.");
 			}
 		}
 	}

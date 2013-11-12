@@ -1,11 +1,10 @@
 package com.enterrupt.sql;
 
-import java.sql.Connection;
-import java.util.HashMap;
-import java.sql.PreparedStatement;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.sql.*;
+import java.util.*;
+import java.util.regex.*;
+import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 /**
  * @sql : bind tokens should be non-numeric (i.e., "?")
@@ -14,6 +13,8 @@ import java.util.regex.Matcher;
 public class SQLStmt {
     public String sql;
     public HashMap<Integer, String> bindVals;
+
+	private static Logger log = LogManager.getLogger(SQLStmt.class.getName());
 
     public SQLStmt(String sql) {
         this.sql = sql;
@@ -34,10 +35,17 @@ public class SQLStmt {
             return false;
         }
 
+//		log.debug("SQL stmt is: {}", this.sql);
+
         // Ensure bind value indices and values match those in the other statement.
         for(Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
+
+//			log.debug("Checking key {} with value {}.", cursor.getKey(), cursor.getValue());
+
             if(!cursor.getValue().equals(
                     otherStmt.bindVals.get(cursor.getKey()))) {
+				//log.debug("Other stmt for key {} has value {}.", cursor.getKey(), otherStmt.bindVals.get(cursor.getKey()));
+				//throw new EntVMachRuntimeException("Bindings differ.");
                 return false;
             }
         }

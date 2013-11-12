@@ -313,9 +313,14 @@ public class Component {
 				ArrayList<PeopleCodeProg> fieldProgs = fbuf.recDefn.getRecordProgsForField(fbuf.fldName);
 				if(fieldProgs != null) {
 
+					log.debug("Record:{} has Record PC programs, loading them and their refs now.",
+						fbuf.recDefn.RECNAME);
+
 					for(PeopleCodeProg prog : fieldProgs) {
 						PeopleCodeProg p = DefnCache.getProgram(prog);
+						log.debug("Root-level call to init {} taking place now.", p.getDescriptor());
 						p.init();
+						log.debug("Root-level call to load refs for {} taking place now.", p.getDescriptor());
 						p.loadDefnsAndPrograms();
 					}
 				}

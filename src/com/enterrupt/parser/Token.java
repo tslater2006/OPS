@@ -1,6 +1,6 @@
 package com.enterrupt.parser;
 
-import java.util.EnumSet;
+import java.util.*;
 import java.math.BigDecimal;
 import com.enterrupt.pt.Reference;
 
@@ -23,5 +23,27 @@ public class Token {
 
 	public Token(EnumSet<TFlag> flagSet) {
 		this.flags = EnumSet.copyOf(flagSet);
+	}
+
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append("Token ").append(this.flags);
+
+		if(this.flags.contains(TFlag.REFERENCE)) {
+			b.append(", refObj=").append(this.refObj.getValue());
+		}
+
+		if(this.flags.contains(TFlag.PURE_STRING)) {
+			b.append(", pureStrVal=").append(this.pureStrVal);
+		}
+
+		if(this.flags.contains(TFlag.IDENTIFIER)) {
+			b.append(", numericVal=").append(this.numericVal);
+		}
+
+		if(this.flags.contains(TFlag.EMBEDDED_STRING)) {
+			b.append(", embeddedStrVal=").append(this.embeddedStrVal);
+		}
+		return b.toString();
 	}
 }

@@ -12,9 +12,9 @@
     	<Root level="all">
     		<AppenderRef ref="Console-Less"/>
     	</Root>
-		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
-		<Logger name="com.enterrupt.sql.ENTStmt" level="WARN"/>
-		<Logger name="com.enterrupt.pt.peoplecode" level="WARN"/>
-		<Logger name="com.enterrupt.pt.Component" level="WARN"/>
+		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="ALL"/>
+		<Logger name="com.enterrupt.sql.ENTStmt" level="ALL"/>
+		<Logger name="com.enterrupt.pt.peoplecode" level="ALL"/>
+		<Logger name="com.enterrupt.pt.Component" level="ALL"/>
     </Loggers>
 </Configuration>

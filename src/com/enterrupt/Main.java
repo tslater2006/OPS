@@ -8,6 +8,10 @@ import com.enterrupt.parser.Parser;
 import com.enterrupt.buffers.ComponentBuffer;
 import org.apache.logging.log4j.*;
 
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+import com.enterrupt.antlr.*;
+
 public class Main {
 
 	private static Logger log = LogManager.getLogger(Main.class.getName());
@@ -15,6 +19,15 @@ public class Main {
     public static void main(String[] args) {
 
 		try {
+
+		ANTLRInputStream input = new ANTLRInputStream(System.in);
+		PeopleCodeLexer lexer = new PeopleCodeLexer(input);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		PeopleCodeParser parser = new PeopleCodeParser(tokens);
+		ParseTree tree = parser.r();
+
+		System.out.println(tree.toStringTree(parser));
+
 			Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
 
 			((StringPtr)RunTimeEnvironment.systemVarTable.get("%EmployeeId")).systemWrite("AA0001");

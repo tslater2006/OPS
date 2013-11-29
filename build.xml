@@ -6,7 +6,10 @@
 		<javac includeantruntime="false"/>
 	</presetdef>
 
-	<target name="build">
+	<property name="ANTLR_SRC_DIR" value="${basedir}/src/com/enterrupt/antlr"/>
+	<property name="ANTLR_JAR" value="${basedir}/lib/antlr-4.1-complete.jar"/>
+
+	<target name="build_all">
 		<mkdir dir="bin"/>
 		<javac srcdir="src" destdir="bin" debug="true">
 			<compilerarg value="-Xlint:unchecked"/>
@@ -16,6 +19,32 @@
 				</fileset>
 			</classpath>
 		</javac>
+	</target>
+
+	<target name="antlr">
+
+		<!-- Remove previously generated lexer and parser. -->
+		<delete>
+			<fileset dir="${ANTLR_SRC_DIR}" includes="*.java"/>
+		</delete>
+
+		<!-- Generate a lexer and parser for the PeopleCode grammar. -->
+		<exec executable="java">
+			<arg value="-jar"/>
+			<arg value="${ANTLR_JAR}"/>
+			<arg value="-lib"/>
+			<arg value="${basedir}/grammars"/>
+			<arg value="-o"/>
+			<arg value="${ANTLR_SRC_DIR}"/>
+			<arg value="-package"/>
+			<arg value="com.enterrupt.antlr"/>
+			<arg value="${basedir}/grammars/PeopleCode.g4"/>
+		</exec>
+
+		<!-- .tokens files not needed at runtime -->
+		<delete>
+			<fileset dir="${ANTLR_SRC_DIR}" includes="*.tokens"/>
+		</delete>
 	</target>
 
 	<target name="clean">

@@ -17,13 +17,78 @@ public class PeopleCodeBaseListener implements PeopleCodeListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterR(@NotNull PeopleCodeParser.RContext ctx) { }
+	@Override public void enterProgram(@NotNull PeopleCodeParser.ProgramContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitR(@NotNull PeopleCodeParser.RContext ctx) { }
+	@Override public void exitProgram(@NotNull PeopleCodeParser.ProgramContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterStmt(@NotNull PeopleCodeParser.StmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitStmt(@NotNull PeopleCodeParser.StmtContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterClassicProg(@NotNull PeopleCodeParser.ClassicProgContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitClassicProg(@NotNull PeopleCodeParser.ClassicProgContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterExpr(@NotNull PeopleCodeParser.ExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitExpr(@NotNull PeopleCodeParser.ExprContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterFn_call(@NotNull PeopleCodeParser.Fn_callContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitFn_call(@NotNull PeopleCodeParser.Fn_callContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterDefn_ref(@NotNull PeopleCodeParser.Defn_refContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitDefn_ref(@NotNull PeopleCodeParser.Defn_refContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

@@ -16,7 +16,7 @@ public abstract class PeopleCodeProg {
 
 	protected String[] bindVals;
 	public String event;
-	private String parsedText;
+	public String parsedText;
 
 	protected ArrayList<PeopleCodeProg> referencedProgs;
 	protected HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;

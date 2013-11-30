@@ -1,21 +1,31 @@
 package com.enterrupt.interpreter;
 
 import java.util.Stack;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import com.enterrupt.parser.*;
+import com.enterrupt.runtime.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.types.MemoryPtr;
 import org.apache.logging.log4j.*;
+
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+import com.enterrupt.antlr.*;
 
 public class Interpreter {
 
 	private static Stack<MemoryPtr>	callStack;
 	private static Stack<MemoryPtr>	runtimeStack;
 	private PeopleCodeTokenStream stream;
+	private PeopleCodeProg prog;
 
 	private static Logger log = LogManager.getLogger(Interpreter.class.getName());
 
 	public Interpreter(PeopleCodeProg prog) {
 		this.stream = new PeopleCodeTokenStream(prog);
+		this.prog = prog;
 
 		if(callStack == null || runtimeStack == null) {
 			callStack = new Stack<MemoryPtr>();
@@ -55,11 +65,31 @@ public class Interpreter {
 
 	public void run() {
 
-        StmtListConstruct.interpret(stream);
+		try {
+			InputStream progTextInputStream =
+				new ByteArrayInputStream(this.prog.parsedText.getBytes());
+
+			log.warn("====================================================");
+			log.warn(this.prog.parsedText);
+			log.warn("====================================================");
+
+	        ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
+	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
+	        CommonTokenStream tokens = new CommonTokenStream(lexer);
+	        PeopleCodeParser parser = new PeopleCodeParser(tokens);
+    	    ParseTree tree = parser.program();
+
+        	System.out.println(tree.toStringTree(parser));
+
+		} catch(java.io.IOException ioe) {
+			throw new EntVMachRuntimeException(ioe.getMessage());
+		}
+
+/*        StmtListConstruct.interpret(stream);
 
         // Detect: END_OF_PROGRAM
         if(!stream.readNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
 			throw new EntInterpretException("Expected END_OF_PROGRAM.");
-        }
+        }*/
 	}
 }

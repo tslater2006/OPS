@@ -1,5 +1,5 @@
 // Generated from /home/mquinn/evm/grammars/PeopleCode.g4 by ANTLR 4.1
-package com.enterrupt.antlr;
+package com.enterrupt.antlr4.generated;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -88,6 +88,8 @@ public class PeopleCodeParser extends Parser {
 		public StmtContext stmt(int i) {
 			return getRuleContext(StmtContext.class,i);
 		}
+		public TerminalNode SYSTEM_VAR() { return getToken(PeopleCodeParser.SYSTEM_VAR, 0); }
+		public TerminalNode CBUFFER_REF() { return getToken(PeopleCodeParser.CBUFFER_REF, 0); }
 		public List<StmtContext> stmt() {
 			return getRuleContexts(StmtContext.class);
 		}
@@ -110,21 +112,36 @@ public class PeopleCodeParser extends Parser {
 		enterRule(_localctx, 2, RULE_classicProg);
 		int _la;
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(17);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << CBUFFER_REF) | (1L << FN_NAME))) != 0)) {
+			setState(24);
+			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
 				{
-				{
-				setState(14); stmt();
-				}
-				}
-				setState(19);
+				setState(17);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			}
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << CBUFFER_REF) | (1L << FN_NAME))) != 0)) {
+					{
+					{
+					setState(14); stmt();
+					}
+					}
+					setState(19);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				}
+				}
+				break;
+
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(20); match(CBUFFER_REF);
+				setState(21); match(6);
+				setState(22); match(SYSTEM_VAR);
+				setState(23); match(8);
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -170,45 +187,45 @@ public class PeopleCodeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(35);
+			setState(41);
 			switch (_input.LA(1)) {
 			case 1:
 				{
-				setState(20); match(1);
-				setState(21); expr(0);
-				setState(22); match(10);
-				setState(26);
+				setState(26); match(1);
+				setState(27); expr(0);
+				setState(28); match(10);
+				setState(32);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << CBUFFER_REF) | (1L << FN_NAME))) != 0)) {
 					{
 					{
-					setState(23); stmt();
+					setState(29); stmt();
 					}
 					}
-					setState(28);
+					setState(34);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(29); match(9);
+				setState(35); match(9);
 				}
 				break;
 			case FN_NAME:
 				{
-				setState(31); fn_call();
+				setState(37); fn_call();
 				}
 				break;
 			case CBUFFER_REF:
 				{
-				setState(32); match(CBUFFER_REF);
-				setState(33); match(6);
-				setState(34); expr(0);
+				setState(38); match(CBUFFER_REF);
+				setState(39); match(6);
+				setState(40); expr(0);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			setState(37); match(8);
+			setState(43); match(8);
 			}
 		}
 		catch (RecognitionException re) {
@@ -267,45 +284,45 @@ public class PeopleCodeParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(46);
+			setState(52);
 			switch (_input.LA(1)) {
 			case FN_NAME:
 				{
-				setState(40); fn_call();
+				setState(46); fn_call();
 				}
 				break;
 			case CBUFFER_REF:
 				{
-				setState(41); match(CBUFFER_REF);
+				setState(47); match(CBUFFER_REF);
 				}
 				break;
 			case 7:
 				{
-				setState(42); defn_ref();
+				setState(48); defn_ref();
 				}
 				break;
 			case SYSTEM_VAR:
 				{
-				setState(43); match(SYSTEM_VAR);
+				setState(49); match(SYSTEM_VAR);
 				}
 				break;
 			case NUMBER:
 				{
-				setState(44); match(NUMBER);
+				setState(50); match(NUMBER);
 				}
 				break;
 			case BOOLEAN:
 				{
-				setState(45); match(BOOLEAN);
+				setState(51); match(BOOLEAN);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(53);
+			setState(59);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
 			while ( _alt!=2 && _alt!=-1 ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
@@ -314,16 +331,16 @@ public class PeopleCodeParser extends Parser {
 					{
 					_localctx = new ExprContext(_parentctx, _parentState, _p);
 					pushNewRecursionContext(_localctx, _startState, RULE_expr);
-					setState(48);
+					setState(54);
 					if (!(6 >= _localctx._p)) throw new FailedPredicateException(this, "6 >= $_p");
-					setState(49); match(6);
-					setState(50); expr(7);
+					setState(55); match(6);
+					setState(56); expr(7);
 					}
 					} 
 				}
-				setState(55);
+				setState(61);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
 			}
 			}
 		}
@@ -367,24 +384,24 @@ public class PeopleCodeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(56); match(FN_NAME);
-			setState(57); match(5);
-			setState(58); expr(0);
-			setState(63);
+			setState(62); match(FN_NAME);
+			setState(63); match(5);
+			setState(64); expr(0);
+			setState(69);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==4) {
 				{
 				{
-				setState(59); match(4);
-				setState(60); expr(0);
+				setState(65); match(4);
+				setState(66); expr(0);
 				}
 				}
-				setState(65);
+				setState(71);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(66); match(2);
+			setState(72); match(2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -420,9 +437,9 @@ public class PeopleCodeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(68); match(7);
-			setState(69); match(3);
-			setState(70); match(OBJECT_REF);
+			setState(74); match(7);
+			setState(75); match(3);
+			setState(76); match(OBJECT_REF);
 			}
 		}
 		catch (RecognitionException re) {
@@ -450,26 +467,27 @@ public class PeopleCodeParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\24K\4\2\t\2\4\3\t"+
+		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\24Q\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\3\2\3\3\7\3\22\n\3\f\3\16\3\25"+
-		"\13\3\3\4\3\4\3\4\3\4\7\4\33\n\4\f\4\16\4\36\13\4\3\4\3\4\3\4\3\4\3\4"+
-		"\3\4\5\4&\n\4\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5\5\61\n\5\3\5\3\5\3"+
-		"\5\7\5\66\n\5\f\5\16\59\13\5\3\6\3\6\3\6\3\6\3\6\7\6@\n\6\f\6\16\6C\13"+
-		"\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\2\b\2\4\6\b\n\f\2\2O\2\16\3\2\2\2\4\23"+
-		"\3\2\2\2\6%\3\2\2\2\b\60\3\2\2\2\n:\3\2\2\2\fF\3\2\2\2\16\17\5\4\3\2\17"+
-		"\3\3\2\2\2\20\22\5\6\4\2\21\20\3\2\2\2\22\25\3\2\2\2\23\21\3\2\2\2\23"+
-		"\24\3\2\2\2\24\5\3\2\2\2\25\23\3\2\2\2\26\27\7\3\2\2\27\30\5\b\5\2\30"+
-		"\34\7\f\2\2\31\33\5\6\4\2\32\31\3\2\2\2\33\36\3\2\2\2\34\32\3\2\2\2\34"+
-		"\35\3\2\2\2\35\37\3\2\2\2\36\34\3\2\2\2\37 \7\13\2\2 &\3\2\2\2!&\5\n\6"+
-		"\2\"#\7\20\2\2#$\7\b\2\2$&\5\b\5\2%\26\3\2\2\2%!\3\2\2\2%\"\3\2\2\2&\'"+
-		"\3\2\2\2\'(\7\n\2\2(\7\3\2\2\2)*\b\5\1\2*\61\5\n\6\2+\61\7\20\2\2,\61"+
-		"\5\f\7\2-\61\7\17\2\2.\61\7\16\2\2/\61\7\r\2\2\60)\3\2\2\2\60+\3\2\2\2"+
-		"\60,\3\2\2\2\60-\3\2\2\2\60.\3\2\2\2\60/\3\2\2\2\61\67\3\2\2\2\62\63\6"+
-		"\5\2\3\63\64\7\b\2\2\64\66\5\b\5\2\65\62\3\2\2\2\669\3\2\2\2\67\65\3\2"+
-		"\2\2\678\3\2\2\28\t\3\2\2\29\67\3\2\2\2:;\7\22\2\2;<\7\7\2\2<A\5\b\5\2"+
-		"=>\7\6\2\2>@\5\b\5\2?=\3\2\2\2@C\3\2\2\2A?\3\2\2\2AB\3\2\2\2BD\3\2\2\2"+
-		"CA\3\2\2\2DE\7\4\2\2E\13\3\2\2\2FG\7\t\2\2GH\7\5\2\2HI\7\21\2\2I\r\3\2"+
-		"\2\2\b\23\34%\60\67A";
+		"\13\3\3\3\3\3\3\3\3\3\5\3\33\n\3\3\4\3\4\3\4\3\4\7\4!\n\4\f\4\16\4$\13"+
+		"\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4,\n\4\3\4\3\4\3\5\3\5\3\5\3\5\3\5\3\5\3"+
+		"\5\5\5\67\n\5\3\5\3\5\3\5\7\5<\n\5\f\5\16\5?\13\5\3\6\3\6\3\6\3\6\3\6"+
+		"\7\6F\n\6\f\6\16\6I\13\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\2\b\2\4\6\b\n\f\2"+
+		"\2V\2\16\3\2\2\2\4\32\3\2\2\2\6+\3\2\2\2\b\66\3\2\2\2\n@\3\2\2\2\fL\3"+
+		"\2\2\2\16\17\5\4\3\2\17\3\3\2\2\2\20\22\5\6\4\2\21\20\3\2\2\2\22\25\3"+
+		"\2\2\2\23\21\3\2\2\2\23\24\3\2\2\2\24\33\3\2\2\2\25\23\3\2\2\2\26\27\7"+
+		"\20\2\2\27\30\7\b\2\2\30\31\7\17\2\2\31\33\7\n\2\2\32\23\3\2\2\2\32\26"+
+		"\3\2\2\2\33\5\3\2\2\2\34\35\7\3\2\2\35\36\5\b\5\2\36\"\7\f\2\2\37!\5\6"+
+		"\4\2 \37\3\2\2\2!$\3\2\2\2\" \3\2\2\2\"#\3\2\2\2#%\3\2\2\2$\"\3\2\2\2"+
+		"%&\7\13\2\2&,\3\2\2\2\',\5\n\6\2()\7\20\2\2)*\7\b\2\2*,\5\b\5\2+\34\3"+
+		"\2\2\2+\'\3\2\2\2+(\3\2\2\2,-\3\2\2\2-.\7\n\2\2.\7\3\2\2\2/\60\b\5\1\2"+
+		"\60\67\5\n\6\2\61\67\7\20\2\2\62\67\5\f\7\2\63\67\7\17\2\2\64\67\7\16"+
+		"\2\2\65\67\7\r\2\2\66/\3\2\2\2\66\61\3\2\2\2\66\62\3\2\2\2\66\63\3\2\2"+
+		"\2\66\64\3\2\2\2\66\65\3\2\2\2\67=\3\2\2\289\6\5\2\39:\7\b\2\2:<\5\b\5"+
+		"\2;8\3\2\2\2<?\3\2\2\2=;\3\2\2\2=>\3\2\2\2>\t\3\2\2\2?=\3\2\2\2@A\7\22"+
+		"\2\2AB\7\7\2\2BG\5\b\5\2CD\7\6\2\2DF\5\b\5\2EC\3\2\2\2FI\3\2\2\2GE\3\2"+
+		"\2\2GH\3\2\2\2HJ\3\2\2\2IG\3\2\2\2JK\7\4\2\2K\13\3\2\2\2LM\7\t\2\2MN\7"+
+		"\5\2\2NO\7\21\2\2O\r\3\2\2\2\t\23\32\"+\66=G";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {

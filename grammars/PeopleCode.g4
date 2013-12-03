@@ -2,7 +2,9 @@ grammar PeopleCode;
 
 program	: classicProg;		// TODO: Add appClassProg as possible option.
 
-classicProg : stmt* ;
+classicProg : stmt* 
+			| CBUFFER_REF '=' SYSTEM_VAR ';'
+			;
 
 stmt:	(
 			'If' expr 'Then' stmt* 'End-If'

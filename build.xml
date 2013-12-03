@@ -6,7 +6,7 @@
 		<javac includeantruntime="false"/>
 	</presetdef>
 
-	<property name="ANTLR_SRC_DIR" value="${basedir}/src/com/enterrupt/antlr"/>
+	<property name="ANTLR_SRC_DIR" value="${basedir}/src/com/enterrupt/antlr4/frontend"/>
 	<property name="ANTLR_JAR" value="${basedir}/lib/antlr-4.1-complete.jar"/>
 
 	<target name="build_all">
@@ -37,7 +37,7 @@
 			<arg value="-o"/>
 			<arg value="${ANTLR_SRC_DIR}"/>
 			<arg value="-package"/>
-			<arg value="com.enterrupt.antlr"/>
+			<arg value="com.enterrupt.antlr4.generated"/>
 			<arg value="${basedir}/grammars/PeopleCode.g4"/>
 		</exec>
 

@@ -1,5 +1,5 @@
 // Generated from /home/mquinn/evm/grammars/PeopleCode.g4 by ANTLR 4.1
-package com.enterrupt.antlr;
+package com.enterrupt.antlr4.generated;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 

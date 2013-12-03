@@ -11,8 +11,10 @@ import com.enterrupt.types.MemoryPtr;
 import org.apache.logging.log4j.*;
 
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.*;
-import com.enterrupt.antlr.*;
+import com.enterrupt.antlr4.*;
+import com.enterrupt.antlr4.generated.*;
 
 public class Interpreter {
 
@@ -77,6 +79,12 @@ public class Interpreter {
 	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
 	        CommonTokenStream tokens = new CommonTokenStream(lexer);
 	        PeopleCodeParser parser = new PeopleCodeParser(tokens);
+
+			parser.removeErrorListeners();
+			parser.addErrorListener(new ENTDiagErrorListener());
+			parser.getInterpreter()
+				.setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
+
     	    ParseTree tree = parser.program();
 
         	System.out.println(tree.toStringTree(parser));

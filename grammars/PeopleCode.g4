@@ -13,6 +13,8 @@ stmtList:	(stmt ';')* ;
 stmt	:	varDecl								# StmtVarDecl
 		|	ifConstruct							# StmtIf
 		|	evaluateConstruct					# StmtEvaluate
+		|	'Exit'								# StmtExit
+		|	'Break'								# StmtBreak
 		|	fnCall								# StmtFnCall
 		|	expr '=' expr						# StmtAssign
 		;
@@ -24,15 +26,16 @@ varTypeModifier		:	'Record' | 'string' ;
 
 ifConstruct	:	'If' expr 'Then' stmtList 'End-If' ;
 
-//evaluateConstruct	:	'Evaluate' expr ('When' expr stmtList)+ 'End-Evaluate' ;
-evaluateConstruct	:	'Evaluate' expr whenClause+ 'End-Evaluate' ;
+evaluateConstruct	:	'Evaluate' expr whenClause+ whenOtherClause? 'End-Evaluate' ;
 whenClause			:	'When' expr stmtList ;
+whenOtherClause		:	'When-Other' stmtList ;
 
 expr	:	'(' expr ')'						# ExprParenthesized
-		|	defnKeyword '.' OBJECT_ID			# ExprObjDefnRef
+		|	defnRef								# ExprDefnRef
 		|	literal								# ExprLiteral
-		|	OBJECT_ID ('.' OBJECT_ID)*			# ExprCompBufferRef
-		|	SYSTEM_VAR							# ExprSystemVar
+		|	compBufferRef						# ExprCompBufferRef
+		|	SYS_VAR_ID							# ExprSystemVar
+		|	VAR_ID								# ExprVar
 		|	fnCall								# ExprFnCall
 		|	expr '=' expr						# ExprComparison
 		;
@@ -40,11 +43,17 @@ expr	:	'(' expr ')'						# ExprParenthesized
 exprList:	expr (',' expr)* ;
 fnCall	:	FUNC_ID '(' exprList? ')' ;
 
-defnKeyword	:	'MenuName' | 'Component' ;
+defnRef		:	defnKeyword '.' OBJECT_ID ;
+defnKeyword	:	'MenuName' | 'Component' | 'Record' ;
+
+compBufferRef		:	OBJECT_ID ('.' OBJECT_ID)* ('.' bufferFldProperty)* ;
+bufferFldProperty	:	'Visible' ;	
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral
-		|	BooleanLiteral ;
+		|	booleanLiteral ;
+booleanLiteral	:	'True' | 'true' | 'False' | 'false' ;
+
 
 //*******************************************************//
 // Lexer Rules 									    	 //
@@ -52,11 +61,10 @@ literal	:	DecimalLiteral
 
 DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
-BooleanLiteral	:	'True' | 'true' | 'False' | 'false' ;
 
 VAR_ID		:	'&' [a-zA-Z_]+ ;
-OBJECT_ID	:	[A-Z] [A-Z_]* ;
+OBJECT_ID	:	[A-Z] [0-9A-Z_]* ;
 FUNC_ID		:	[a-zA-Z]+ ;
-SYSTEM_VAR	:	'%' [a-zA-Z]+ ;
+SYS_VAR_ID	:	'%' [a-zA-Z]+ ;
 COMMENT		:	'/*' .*? '*/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;

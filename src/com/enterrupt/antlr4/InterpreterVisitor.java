@@ -71,8 +71,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprObjDefnRef(PeopleCodeParser.ExprObjDefnRefContext ctx) {
-		MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(ctx.OBJECT_ID().getText());
+	public Void visitExprDefnRef(PeopleCodeParser.ExprDefnRefContext ctx) {
+		MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(ctx.defnRef().OBJECT_ID().getText());
 		setExprValue(ctx, ptr);
 		return null;
 	}
@@ -97,7 +97,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		MemoryPtr ptr = RunTimeEnvironment.systemVarTable.get(ctx.getText());
 		if(ptr == null) {
 			throw new EntInterpretException("Encountered a system variable reference " +
-				"that has not been implemented yet: " + ctx.SYSTEM_VAR().getText());
+				"that has not been implemented yet: " + ctx.SYS_VAR_ID().getText());
 		}
 		setExprValue(ctx, ptr);
 		return null;
@@ -179,9 +179,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				new Integer(ctx.IntegerLiteral().getText()));
 			setExprValue(ctx, ptr);
 
-		} else if(ctx.BooleanLiteral() != null) {
+		} else if(ctx.booleanLiteral() != null) {
 
-			String b = ctx.BooleanLiteral().getText();
+			String b = ctx.booleanLiteral().getText();
 			if(b.equals("True") || b.equals("true")) {
 				setExprValue(ctx, RunTimeEnvironment.TRUE);
 			} else {

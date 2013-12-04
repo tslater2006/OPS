@@ -52,8 +52,11 @@ public class ProgLoadSupervisor {
 
             log.debug("=== ProgLoadSupervisor =============================");
 			log.debug("Loading program: {}", prog.getDescriptor());
-            log.debug(prog.parsedText);
-            log.debug("====================================================");
+			String[] lines = prog.parsedText.split("\n");
+			for(int i = 0; i < lines.length; i++) {
+	            log.debug("{}:\t{}", i+1, lines[i]);
+    		}
+	        log.debug("====================================================");
 
         	ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
 	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);

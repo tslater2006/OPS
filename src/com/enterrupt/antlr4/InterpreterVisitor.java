@@ -28,23 +28,52 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return this.exprValues.get(node);
 	}
 
-	public Void visitIfStmt(PeopleCodeParser.IfStmtContext ctx) {
+	/**********************************************************
+	 * <stmt> alternative handlers.
+	 **********************************************************/
+
+	public Void visitStmtIf(PeopleCodeParser.StmtIfContext ctx) {
 
 		// Get value of conditional expression.
-		visit(ctx.expr());
-		boolean exprResult = ((BooleanPtr) getExprValue(ctx.expr())).read();
+		visit(ctx.ifConstruct().expr());
+		boolean exprResult = ((BooleanPtr) getExprValue(ctx.ifConstruct().expr())).read();
 
 		// If expression evaluates to true, visit the conditional body.
 		if(exprResult) {
-			visit(ctx.stmtList());
+			visit(ctx.ifConstruct().stmtList());
 		}
 
 		return null;
 	}
 
-	public Void visitParenthesizedExpr(PeopleCodeParser.ParenthesizedExprContext ctx) {
+	public Void visitStmtFnCall(PeopleCodeParser.StmtFnCallContext ctx) {
+		// Visit (execute) the fn call, but no need to save any return value.
+		visit(ctx.fnCall());
+		return null;
+	}
+
+	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
+		visit(ctx.expr(1));
+		MemoryPtr srcOperand = getExprValue(ctx.expr(1));
+		visit(ctx.expr(0));
+		MemoryPtr destOperand = getExprValue(ctx.expr(0));
+		MemoryPtr.copy(srcOperand, destOperand);
+		return null;
+	}
+
+	/**********************************************************
+	 * <expr> alternative handlers.
+	 **********************************************************/
+
+	public Void visitExprParenthesized(PeopleCodeParser.ExprParenthesizedContext ctx) {
 		visit(ctx.expr());
 		setExprValue(ctx, getExprValue(ctx.expr()));
+		return null;
+	}
+
+	public Void visitExprObjDefnRef(PeopleCodeParser.ExprObjDefnRefContext ctx) {
+		MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(ctx.OBJECT_ID().getText());
+		setExprValue(ctx, ptr);
 		return null;
 	}
 
@@ -54,31 +83,49 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitLiteral(PeopleCodeParser.LiteralContext ctx) {
-		if(ctx.IntegerLiteral() != null) {
-
-			MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(
-				new Integer(ctx.IntegerLiteral().getText()));
-			setExprValue(ctx, ptr);
-
-		} else if(ctx.BooleanLiteral() != null) {
-
-			String b = ctx.BooleanLiteral().getText();
-			if(b.equals("True") || b.equals("true")) {
-				setExprValue(ctx, RunTimeEnvironment.TRUE);
-			} else {
-				setExprValue(ctx, RunTimeEnvironment.FALSE);
-			}
-
-		} else if(ctx.DecimalLiteral() != null) {
-			throw new EntInterpretException("Encountered a decimal literal; need to create "
-				+ "a BigDecimal memory pool and type.");
-		} else {
-			throw new EntInterpretException("Unable to resolve literal to a terminal node.");
+	public Void visitExprCompBufferRef(PeopleCodeParser.ExprCompBufferRefContext ctx) {
+		MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
+		if(ptr == null) {
+			throw new EntInterpretException("Encountered a reference to an " +
+				"uninitialized component buffer field.");
 		}
-
+		setExprValue(ctx, ptr);
 		return null;
 	}
+
+	public Void visitExprSystemVar(PeopleCodeParser.ExprSystemVarContext ctx) {
+		MemoryPtr ptr = RunTimeEnvironment.systemVarTable.get(ctx.getText());
+		if(ptr == null) {
+			throw new EntInterpretException("Encountered a system variable reference " +
+				"that has not been implemented yet: " + ctx.SYSTEM_VAR().getText());
+		}
+		setExprValue(ctx, ptr);
+		return null;
+	}
+
+	public Void visitExprFnCall(PeopleCodeParser.ExprFnCallContext ctx) {
+		visit(ctx.fnCall());
+		setExprValue(ctx, getExprValue(ctx.fnCall()));
+		return null;
+	}
+
+	public Void visitExprComparison(PeopleCodeParser.ExprComparisonContext ctx) {
+		visit(ctx.expr(0));
+		MemoryPtr p1 = getExprValue(ctx.expr(0));
+		visit(ctx.expr(1));
+		MemoryPtr p2 = getExprValue(ctx.expr(1));
+
+		if(MemoryPtr.isEqual(p1, p2)) {
+			setExprValue(ctx, RunTimeEnvironment.TRUE);
+		} else {
+			setExprValue(ctx, RunTimeEnvironment.FALSE);
+		}
+		return null;
+	}
+
+	/**********************************************************
+	 * Primary rule handlers.
+	 **********************************************************/
 
 	public Void visitFnCall(PeopleCodeParser.FnCallContext ctx) {
 
@@ -125,55 +172,29 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitSystemVar(PeopleCodeParser.SystemVarContext ctx) {
+	public Void visitLiteral(PeopleCodeParser.LiteralContext ctx) {
+		if(ctx.IntegerLiteral() != null) {
 
-		MemoryPtr ptr = RunTimeEnvironment.systemVarTable.get(ctx.getText());
-		if(ptr == null) {
-			throw new EntInterpretException("Encountered a system variable reference " +
-				"that has not been implemented yet: " + ctx.SYSTEM_VAR().getText());
-		}
-		setExprValue(ctx, ptr);
-		return null;
-	}
+			MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(
+				new Integer(ctx.IntegerLiteral().getText()));
+			setExprValue(ctx, ptr);
 
-	public Void visitCBufferRef(PeopleCodeParser.CBufferRefContext ctx) {
+		} else if(ctx.BooleanLiteral() != null) {
 
-		MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
-		if(ptr == null) {
-			throw new EntInterpretException("Encountered a reference to an " +
-				"uninitialized component buffer field.");
-		}
-		setExprValue(ctx, ptr);
-		return null;
-	}
+			String b = ctx.BooleanLiteral().getText();
+			if(b.equals("True") || b.equals("true")) {
+				setExprValue(ctx, RunTimeEnvironment.TRUE);
+			} else {
+				setExprValue(ctx, RunTimeEnvironment.FALSE);
+			}
 
-	public Void visitObjDefnRef(PeopleCodeParser.ObjDefnRefContext ctx) {
-
-		MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(ctx.OBJECT_ID().getText());
-		setExprValue(ctx, ptr);
-		return null;
-	}
-
-	public Void visitAssignStmt(PeopleCodeParser.AssignStmtContext ctx) {
-		visit(ctx.expr(1));
-		MemoryPtr srcOperand = getExprValue(ctx.expr(1));
-		visit(ctx.expr(0));
-		MemoryPtr destOperand = getExprValue(ctx.expr(0));
-		MemoryPtr.copy(srcOperand, destOperand);
-		return null;
-	}
-
-	public Void visitComparison(PeopleCodeParser.ComparisonContext ctx) {
-		visit(ctx.expr(0));
-		MemoryPtr p1 = getExprValue(ctx.expr(0));
-		visit(ctx.expr(1));
-		MemoryPtr p2 = getExprValue(ctx.expr(1));
-
-		if(MemoryPtr.isEqual(p1, p2)) {
-			setExprValue(ctx, RunTimeEnvironment.TRUE);
+		} else if(ctx.DecimalLiteral() != null) {
+			throw new EntInterpretException("Encountered a decimal literal; need to create "
+				+ "a BigDecimal memory pool and type.");
 		} else {
-			setExprValue(ctx, RunTimeEnvironment.FALSE);
+			throw new EntInterpretException("Unable to resolve literal to a terminal node.");
 		}
+
 		return null;
 	}
 }

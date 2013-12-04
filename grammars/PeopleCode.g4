@@ -10,24 +10,23 @@ classicProg : stmtList ;
 
 stmtList:	stmt* ;
 
-stmt	:	ifStmt ';'?
-		|	stmtExpr
+stmt	:	ifConstruct ';'						# StmtIf
+		|	fnCall ';'							# StmtFnCall
+		|	expr '=' expr ';'					# StmtAssign
 	 	;
+ifConstruct	:	'If' expr 'Then' stmtList 'End-If' ;
 
-ifStmt		:	'If' expr 'Then' stmtList 'End-If' ;
-stmtExpr	:	expr ;
+expr	:	'(' expr ')'						# ExprParenthesized
+		|	ReservedDefnWord '.' OBJECT_ID		# ExprObjDefnRef
+		|	literal								# ExprLiteral
+		|	OBJECT_ID ('.' OBJECT_ID)*			# ExprCompBufferRef
+		|	SYSTEM_VAR							# ExprSystemVar
+		|	fnCall								# ExprFnCall
+		|	expr '=' expr						# ExprComparison
+		;
 
 exprList:	expr (',' expr)* ;
-
-expr	:	'(' expr ')'						# ParenthesizedExpr
-		|	ReservedDefnWord '.' OBJECT_ID		# ObjDefnRef
-		|	literal								# ExprLiteral
-		|	OBJECT_ID ('.' OBJECT_ID)*			# CBufferRef
-		|	SYSTEM_VAR							# SystemVar
-		|	FUNC_ID '(' exprList? ')' ';'?		# FnCall
-		|	expr '=' expr ';'					# AssignStmt
-		|	expr '=' expr						# Comparison
-		;
+fnCall	:	FUNC_ID '(' exprList? ')' ;
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral

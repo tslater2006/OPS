@@ -54,7 +54,8 @@ public class Interpreter {
 			InputStream progTextInputStream =
 				new ByteArrayInputStream(this.prog.parsedText.getBytes());
 
-			log.debug("====================================================");
+			log.debug("=== Interpreter ====================================");
+			log.debug("Interpreting program: {}", prog.getDescriptor());
 			log.debug(this.prog.parsedText);
 			log.debug("====================================================");
 

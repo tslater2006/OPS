@@ -50,7 +50,8 @@ public class ProgLoadSupervisor {
 	        InputStream progTextInputStream =
 			    new ByteArrayInputStream(prog.parsedText.getBytes());
 
-            log.debug("====================================================");
+            log.debug("=== ProgLoadSupervisor =============================");
+			log.debug("Loading program: {}", prog.getDescriptor());
             log.debug(prog.parsedText);
             log.debug("====================================================");
 

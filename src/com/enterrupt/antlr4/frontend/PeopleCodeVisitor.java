@@ -26,11 +26,25 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitVarDecl(@NotNull PeopleCodeParser.VarDeclContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#elseClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElseClause(@NotNull PeopleCodeParser.ElseClauseContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#classicProg}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitClassicProg(@NotNull PeopleCodeParser.ClassicProgContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprBoolean}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBoolean(@NotNull PeopleCodeParser.ExprBooleanContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#id}.
@@ -40,11 +54,25 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitId(@NotNull PeopleCodeParser.IdContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprBitwise}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprBitwise(@NotNull PeopleCodeParser.ExprBitwiseContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#whenClause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitWhenClause(@NotNull PeopleCodeParser.WhenClauseContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#forConstruct}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForConstruct(@NotNull PeopleCodeParser.ForConstructContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#varTypeModifier}.
@@ -59,13 +87,6 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIfConstruct(@NotNull PeopleCodeParser.IfConstructContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprComparison}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExprComparison(@NotNull PeopleCodeParser.ExprComparisonContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtExit}.
@@ -89,13 +110,6 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitExprList(@NotNull PeopleCodeParser.ExprListContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtAssign}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStmtAssign(@NotNull PeopleCodeParser.StmtAssignContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprParenthesized}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -103,11 +117,25 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitExprParenthesized(@NotNull PeopleCodeParser.ExprParenthesizedContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtAssign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmtAssign(@NotNull PeopleCodeParser.StmtAssignContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtFnCall}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitStmtFnCall(@NotNull PeopleCodeParser.StmtFnCallContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtFor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmtFor(@NotNull PeopleCodeParser.StmtForContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#evaluateConstruct}.
@@ -166,18 +194,18 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitStmtList(@NotNull PeopleCodeParser.StmtListContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#program}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitProgram(@NotNull PeopleCodeParser.ProgramContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#defnKeyword}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitDefnKeyword(@NotNull PeopleCodeParser.DefnKeywordContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#program}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProgram(@NotNull PeopleCodeParser.ProgramContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#varScopeModifier}.
@@ -199,6 +227,20 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExprId(@NotNull PeopleCodeParser.ExprIdContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprDynamicReference}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprDynamicReference(@NotNull PeopleCodeParser.ExprDynamicReferenceContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprEquality}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprEquality(@NotNull PeopleCodeParser.ExprEqualityContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#literal}.

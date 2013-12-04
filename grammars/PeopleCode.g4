@@ -12,6 +12,7 @@ stmtList:	(stmt ';')* ;
 
 stmt	:	varDecl								# StmtVarDecl
 		|	ifConstruct							# StmtIf
+		|	forConstruct						# StmtFor
 		|	evaluateConstruct					# StmtEvaluate
 		|	'Exit'								# StmtExit
 		|	'Break'								# StmtBreak
@@ -19,25 +20,32 @@ stmt	:	varDecl								# StmtVarDecl
 		|	expr '='<assoc=right> expr			# StmtAssign
 		;
 
-varDecl	:	varScopeModifier varTypeModifier VAR_ID ;
-
-varScopeModifier	:	'Global' | 'Component' | 'Local' ;
-varTypeModifier		:	'Record' | 'string' ;
-
-ifConstruct	:	'If' expr 'Then' stmtList 'End-If' ;
-
-evaluateConstruct	:	'Evaluate' expr whenClause+ whenOtherClause? 'End-Evaluate' ;
-whenClause			:	'When' expr stmtList ;
-whenOtherClause		:	'When-Other' stmtList ;
-
 expr	:	'(' expr ')'						# ExprParenthesized
 		|	literal								# ExprLiteral
 		|	id									# ExprId
 		| 	id '(' exprList? ')'				# ExprFnCall
-		|	expr '='<assoc=right> expr			# ExprComparison
+		|	'@' '(' expr ')'					# ExprDynamicReference
+		|	expr ('And') expr					# ExprBoolean
+		|	expr op=('<>'|'=') expr				# ExprEquality
+		|	expr ('|') expr						# ExprBitwise
 		;
 
 exprList:	expr (',' expr)* ;
+
+varDecl	:	varScopeModifier varTypeModifier VAR_ID (',' VAR_ID)* ;
+
+varScopeModifier	:	'Global' | 'Component' | 'Local' ;
+varTypeModifier		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer'
+					|	'Rowset' ;
+
+ifConstruct	:	'If' expr 'Then' stmtList elseClause? 'End-If' ;
+elseClause	:	'Else' stmtList ;
+
+forConstruct:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
+
+evaluateConstruct	:	'Evaluate' expr whenClause+ whenOtherClause? 'End-Evaluate' ;
+whenClause			:	'When' expr stmtList ;
+whenOtherClause		:	'When-Other' stmtList ;
 
 defnKeyword	:	'MenuName' | 'Component' | 'Record' ;
 
@@ -63,7 +71,8 @@ IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 StringLiteral	:	'"' ( ~'"' )* '"' ;
 
 VAR_ID		:	'&' [a-zA-Z_]+ ;
-SYS_VAR_ID	:	'%' [a-zA-Z]+ ;
+SYS_VAR_ID	:	'%' [a-zA-Z_]+ ;
 
+REM			:	'rem' ~[\r\n]* -> skip;
 COMMENT		:	'/*' .*? '*/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;

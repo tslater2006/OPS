@@ -88,7 +88,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprComparison(PeopleCodeParser.ExprComparisonContext ctx) {
+	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
 		visit(ctx.expr(0));
 		MemoryPtr p1 = getExprValue(ctx.expr(0));
 		visit(ctx.expr(1));

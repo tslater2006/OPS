@@ -59,18 +59,6 @@ public class SymbolicConstruct {
 				return t;
 			}
 
-			Token l = stream.peekNextToken();
-			Method m = null;
-
-			// Does the pure string refer to a system function?
-			if(l.flags.contains(TFlag.L_PAREN) &&
-				(m = RunTimeEnvironment.systemFuncTable.get(t.pureStrVal)) != null) {
-
-				t.flags.add(TFlag.FUNC_REF);
-				FnCallConstruct.interpret(stream, m);
-				return t;
-			}
-
 			throw new EntInterpretException("Unable to resolve PURE_STRING token.");
 		}
 

@@ -5,25 +5,9 @@ import com.enterrupt.parser.TFlag;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.runtime.*;
 
-/**
- * TODO: Remember to implement order of operations.
- * Possibly use something like Dijkstra's shunting yard algorithm.
- */
 public class ExprConstruct {
 
 	public static void interpret(PeopleCodeTokenStream stream) {
-
-		/**
-		 * TODO: Immediately interpret a SymbolicConstruct.
-		 * Then look ahead to see if any relational operators or mathematical
-		 * operators exist. If not, return.
-		 */
-
-		/**
-		 * TODO: Technically an Expression could be the next token we need to parse.
-		 * Can we detect that just by checking for parentheses before interpreting
-		 * a SymbolicConstruct?
-		 */
 
 		SymbolicConstruct.interpret(stream);
 

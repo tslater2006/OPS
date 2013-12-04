@@ -9,13 +9,6 @@ public class StmtConstruct {
 	public static void interpret(PeopleCodeTokenStream stream) {
 
 		Token t = stream.peekNextToken();
-
-		// Detect: IF
-		if(t.flags.contains(TFlag.IF)) {
-			IfConstruct.interpret(stream);
-			return;
-		}
-
 		Token resolvedToken = SymbolicConstruct.interpret(stream);
 		t = stream.readNextToken();
 

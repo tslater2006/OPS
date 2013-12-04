@@ -1,34 +1,47 @@
 grammar PeopleCode;
 
+//******************************************************//
+// Parser Rules 									    //
+//******************************************************//
+
 program	: classicProg;		// TODO: Add appClassProg as possible option.
 
-classicProg : stmt* ;
+classicProg : stmtList ;
 
-stmt:	(
-			'If' expr 'Then' stmt* 'End-If'
-		|	fn_call
-		|	CBUFFER_REF '=' expr				// assignment
-	 	) ';'
+stmtList:	(stmt ';')* ;
+
+stmt	:	ifStmt
+		|	assignStmt
+		|	stmtExpr
+	 	;
+
+ifStmt		:	'If' expr 'Then' stmtList 'End-If' ;
+assignStmt	:	expr '=' expr ;
+stmtExpr	:	expr ;
+
+exprList:	expr (',' expr)* ;
+
+expr	:	primary
+		|	expr '.' IDENTIFIER
+		|	expr '(' exprList? ')'		
+		|	expr '=' expr ~';'					// comparison
 		;
 
-expr	:	fn_call
-		|	expr '=' expr						// comparison
-		|	defn_ref							// i.e., MenuName.<?>
-		|	CBUFFER_REF
-		|	SYSTEM_VAR
-		|	NUMBER
-		|	BOOLEAN
-		;
+primary	:	'(' expr ')'
+		|	'MenuName'
+		|	literal
+		|	IDENTIFIER ;
 
-fn_call	:	FN_NAME '(' expr (',' expr)* ')' ;
+literal	:	IntegerLiteral
+		|	booleanLiteral ;
 
-defn_ref:	'MenuName' '.' OBJECT_REF;		// TODO: Add more reserved defn keywords
+booleanLiteral	:	'True' | 'true' | 'False' | 'false' ;
 
-BOOLEAN		:	'True' | 'true' | 'False' | 'false' ;
-NUMBER		:	[0-9]+ ;			// TODO: may need to exclude leading 0s.
-SYSTEM_VAR	:	'%' [a-zA-Z]+ ;
-CBUFFER_REF :	OBJECT_REF '.' OBJECT_REF ;		// TODO: this will need to be expanded to include multiple '.'
-OBJECT_REF	:	[A-Z_]+ ;
-FN_NAME		: 	[a-zA-Z]+ ;
+//*******************************************************//
+// Lexer Rules 									    	 //
+//*******************************************************//
+
+IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
+IDENTIFIER	:	'%'? [a-zA-Z_]+ ;
 COMMENT		:	'/*' .*? '*/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;	// skip spaces, tabs, newlines, \r (Windows)

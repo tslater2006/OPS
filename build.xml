@@ -37,7 +37,9 @@
 			<arg value="-o"/>
 			<arg value="${ANTLR_SRC_DIR}"/>
 			<arg value="-package"/>
-			<arg value="com.enterrupt.antlr4.generated"/>
+			<arg value="com.enterrupt.antlr4.frontend"/>
+			<arg value="-visitor"/>
+			<arg value="-no-listener"/>
 			<arg value="${basedir}/grammars/PeopleCode.g4"/>
 		</exec>
 

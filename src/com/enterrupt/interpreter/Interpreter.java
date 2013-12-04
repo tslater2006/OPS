@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.*;
 import com.enterrupt.antlr4.*;
-import com.enterrupt.antlr4.generated.*;
+import com.enterrupt.antlr4.frontend.*;
 
 public class Interpreter {
 
@@ -86,6 +86,8 @@ public class Interpreter {
 				.setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
 
     	    ParseTree tree = parser.program();
+			InterpreterVisitor interpreter = new InterpreterVisitor();
+			interpreter.visit(tree);
 
         	System.out.println(tree.toStringTree(parser));
 

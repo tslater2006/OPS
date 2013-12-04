@@ -2,9 +2,7 @@ grammar PeopleCode;
 
 program	: classicProg;		// TODO: Add appClassProg as possible option.
 
-classicProg : stmt* 
-			| CBUFFER_REF '=' SYSTEM_VAR ';'
-			;
+classicProg : stmt* ;
 
 stmt:	(
 			'If' expr 'Then' stmt* 'End-If'
@@ -15,8 +13,8 @@ stmt:	(
 
 expr	:	fn_call
 		|	expr '=' expr						// comparison
-		|	CBUFFER_REF
 		|	defn_ref							// i.e., MenuName.<?>
+		|	CBUFFER_REF
 		|	SYSTEM_VAR
 		|	NUMBER
 		|	BOOLEAN

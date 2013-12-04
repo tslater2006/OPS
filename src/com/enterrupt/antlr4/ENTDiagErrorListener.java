@@ -20,13 +20,25 @@ public class ENTDiagErrorListener extends DiagnosticErrorListener {
 							String msg,
 							RecognitionException ex) {
 
+		// If ANTLR reports that it is switching from SLL(*) to ALL(*) parsing,
+		// that is not an error; no need to throw an exception here.
+		if(msg.startsWith("reportAttemptingFullContext")) {
+			return;
+		}
+
+		// If ANTLR reports that a full-context prediction returned a unique result,
+		// that is not an error; no need to throw an exception here.
+		if(msg.startsWith("reportContextSensitivity")) {
+			return;
+		}
+
 		List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
 		Collections.reverse(stack);
 		StringBuilder builder = new StringBuilder();
 		builder.append("line ").append(line);
 		builder.append(":").append(charPositionInLine);
 		builder.append(" at ").append(offendingSymbol);
-		builder.append(": ").append( msg);
+		builder.append(": ").append(msg);
 		builder.append(". Rule stack: ").append(stack);
 		throw new EntVMachRuntimeException(builder.toString(), ex);
 	}

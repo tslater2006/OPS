@@ -26,13 +26,6 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitVarDecl(@NotNull PeopleCodeParser.VarDeclContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#elseClause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitElseClause(@NotNull PeopleCodeParser.ElseClauseContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#classicProg}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -54,20 +47,6 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitId(@NotNull PeopleCodeParser.IdContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprBitwise}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExprBitwise(@NotNull PeopleCodeParser.ExprBitwiseContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#whenClause}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitWhenClause(@NotNull PeopleCodeParser.WhenClauseContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#forConstruct}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -87,6 +66,13 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitIfConstruct(@NotNull PeopleCodeParser.IfConstructContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprConcatenate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprConcatenate(@NotNull PeopleCodeParser.ExprConcatenateContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtExit}.
@@ -159,11 +145,11 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitBooleanLiteral(@NotNull PeopleCodeParser.BooleanLiteralContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#whenOtherClause}.
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprStaticReference}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitWhenOtherClause(@NotNull PeopleCodeParser.WhenOtherClauseContext ctx);
+	T visitExprStaticReference(@NotNull PeopleCodeParser.ExprStaticReferenceContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtBreak}.

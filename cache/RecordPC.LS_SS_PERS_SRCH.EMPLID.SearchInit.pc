@@ -1,0 +1,7 @@
+/* MQUINN */
+If None(LS_SS_PERS_SRCH.EMPLID) Then
+   LS_SS_PERS_SRCH.EMPLID = %EmployeeId;
+End-If;
+Hide(LS_SS_PERS_SRCH.EMPLID);
+SetSearchDialogBehavior(0);
+AllowEmplIdChg( True);

@@ -16,18 +16,19 @@ stmt	:	varDecl								# StmtVarDecl
 		|	evaluateConstruct					# StmtEvaluate
 		|	'Exit'								# StmtExit
 		|	'Break'								# StmtBreak
-		|	id '(' exprList? ')'				# StmtFnCall
 		|	expr '='<assoc=right> expr			# StmtAssign
+		|	expr '(' exprList? ')'				# StmtFnCall
 		;
 
 expr	:	'(' expr ')'						# ExprParenthesized
+		|	'@' '(' expr ')'					# ExprDynamicReference
 		|	literal								# ExprLiteral
 		|	id									# ExprId
-		| 	id '(' exprList? ')'				# ExprFnCall
-		|	'@' '(' expr ')'					# ExprDynamicReference
+		|	expr '.' id							# ExprStaticReference
+		| 	expr '(' exprList? ')'				# ExprFnCall
 		|	expr ('And') expr					# ExprBoolean
 		|	expr op=('<>'|'=') expr				# ExprEquality
-		|	expr ('|') expr						# ExprBitwise
+		|	expr ('|') expr						# ExprConcatenate
 		;
 
 exprList:	expr (',' expr)* ;
@@ -38,16 +39,14 @@ varScopeModifier	:	'Global' | 'Component' | 'Local' ;
 varTypeModifier		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer'
 					|	'Rowset' ;
 
-ifConstruct	:	'If' expr 'Then' stmtList elseClause? 'End-If' ;
-elseClause	:	'Else' stmtList ;
+ifConstruct	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
 
 forConstruct:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
 
-evaluateConstruct	:	'Evaluate' expr whenClause+ whenOtherClause? 'End-Evaluate' ;
-whenClause			:	'When' expr stmtList ;
-whenOtherClause		:	'When-Other' stmtList ;
+evaluateConstruct	:	'Evaluate' expr ('When' expr stmtList)+
+						('When-Other' stmtList)? 'End-Evaluate' ;
 
-defnKeyword	:	'MenuName' | 'Component' | 'Record' ;
+defnKeyword	:	'MenuName' | 'Component' | 'Record' | 'Field' ;
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral
@@ -58,7 +57,7 @@ literal	:	DecimalLiteral
 booleanLiteral	:	'True' | 'true' | 'False' | 'false' ;
 definitionLiteral : defnKeyword '.' GENERIC_ID ;
 
-id	:	SYS_VAR_ID | VAR_ID ('.' GENERIC_ID)* | GENERIC_ID ('.' GENERIC_ID)* ;
+id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
 
 //*******************************************************//
 // Lexer Rules 									    	 //

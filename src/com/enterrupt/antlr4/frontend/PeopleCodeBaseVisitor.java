@@ -34,14 +34,6 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitElseClause(@NotNull PeopleCodeParser.ElseClauseContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
 	@Override public T visitClassicProg(@NotNull PeopleCodeParser.ClassicProgContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -66,22 +58,6 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitExprBitwise(@NotNull PeopleCodeParser.ExprBitwiseContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
-	@Override public T visitWhenClause(@NotNull PeopleCodeParser.WhenClauseContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
 	@Override public T visitForConstruct(@NotNull PeopleCodeParser.ForConstructContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -99,6 +75,14 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
 	@Override public T visitIfConstruct(@NotNull PeopleCodeParser.IfConstructContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitExprConcatenate(@NotNull PeopleCodeParser.ExprConcatenateContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -186,7 +170,7 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitWhenOtherClause(@NotNull PeopleCodeParser.WhenOtherClauseContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExprStaticReference(@NotNull PeopleCodeParser.ExprStaticReferenceContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

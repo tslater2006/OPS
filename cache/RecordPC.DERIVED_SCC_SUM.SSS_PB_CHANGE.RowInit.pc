@@ -1,0 +1,47 @@
+Local integer &cnt_StdntList, &i;
+Local Field &fld;
+Local Rowset &rs_StdntList;
+Local string &curr_ID, &prev_ID;
+
+
+
+/*  advisee dropdown  */
+If %Menu = MenuName.SSR_ADVISEE_OVRD Then
+
+   &fld = GetField(DERIVED_SCC_SUM.SSR_ADVISEE_LIST);
+
+   &rs_StdntList = CreateRowset(Record.SSR_ADVISEE_VW);
+   &cnt_StdntList = &rs_StdntList.Fill("where ADVISOR_ID=:1", %EmployeeId);
+
+   Evaluate &cnt_StdntList
+   When 0
+
+   When 1
+      &fld.Visible = False;
+
+   When-Other
+      &rs_StdntList.Sort(SSR_ADVISEE_VW.EMPLID, "A");
+      /*	build the advisee list dropdown	*/
+      &fld.ClearDropDownList();
+
+      &prev_ID = "";
+      For &i = 1 To &cnt_StdntList
+
+         &curr_ID = &rs_StdntList(&i).SSR_ADVISEE_VW.EMPLID.Value;
+         If &curr_ID = &prev_ID Then
+         Else
+            &fld.AddDropDownItem(&curr_ID, &rs_StdntList(&i).GetRecord(Record.SSR_ADVISEE_VW).GetField(Field.NAME).Value);
+            &prev_ID = &curr_ID;
+
+            If &curr_ID = PEOPLE_SRCH.EMPLID Then
+               &fld.Value = &curr_ID;
+            End-If;
+         End-If;
+
+      End-For;
+
+   End-Evaluate;
+
+Else
+   DERIVED_SCC_SUM.SSR_ADVISEE_LIST.Visible = False;
+End-If;

@@ -32,6 +32,15 @@ public class EntDiagErrorListener extends DiagnosticErrorListener {
 			return;
 		}
 
+		//TODO: Explain
+		if(msg.startsWith("reportAmbiguity d=2 (stmt): ambigAlts={7, 8}")) {
+			return;
+		}
+
+		if(msg.startsWith("reportAmbiguity d=6 (expr): ambigAlts={1, 2}")) {
+			return;
+		}
+
 		List<String> stack = ((Parser)recognizer).getRuleInvocationStack();
 		Collections.reverse(stack);
 		StringBuilder builder = new StringBuilder();

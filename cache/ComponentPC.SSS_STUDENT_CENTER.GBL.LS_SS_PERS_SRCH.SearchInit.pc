@@ -1,0 +1,3 @@
+If %Menu = MenuName.SA_LEARNER_SERVICES Then
+   LS_SS_PERS_SRCH.EMPLID = %EmployeeId;
+End-If;

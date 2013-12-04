@@ -1,0 +1,4 @@
+If %Mode = %Action_Add Then
+   SCC_PERS_SA_VW.EMPLID.SetDefault();
+   SCC_PERS_SA_VW.EMPLID.Value = "NEW";
+End-If;

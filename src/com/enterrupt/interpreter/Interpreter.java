@@ -1,8 +1,7 @@
 package com.enterrupt.interpreter;
 
 import java.util.Stack;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import com.enterrupt.parser.*;
 import com.enterrupt.runtime.*;
@@ -21,6 +20,7 @@ public class Interpreter {
 	private PeopleCodeTokenStream stream;
 	private PeopleCodeProg prog;
 	private static Stack<MemoryPtr>	callStack;
+	private static boolean writeToFile = true;
 
 	private static Logger log = LogManager.getLogger(Interpreter.class.getName());
 
@@ -61,6 +61,13 @@ public class Interpreter {
                 log.debug("{}:\t{}", i+1, lines[i]);
             }
 
+			if(this.writeToFile) {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(
+					new File("/home/mquinn/evm/cache/" + this.prog.getDescriptor() + ".pc")));
+				writer.write(this.prog.parsedText);
+				writer.close();
+			}
+
 	        ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
 	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
 	        CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -76,6 +83,13 @@ public class Interpreter {
 	        log.debug(">>> Parse Tree >>>>>>>>>>>>");
             log.debug(tree.toStringTree(parser));
             log.debug("====================================================");
+
+			if(this.writeToFile) {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(
+					new File("/home/mquinn/evm/cache/" + this.prog.getDescriptor() + ".tree")));
+				writer.write(tree.toStringTree(parser));
+				writer.close();
+			}
 
 			InterpreterVisitor interpreter = new InterpreterVisitor();
 			interpreter.visit(tree);

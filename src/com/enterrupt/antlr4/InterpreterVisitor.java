@@ -40,7 +40,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// If expression evaluates to true, visit the conditional body.
 		if(exprResult) {
-			visit(ctx.ifConstruct().stmtList());
+			visit(ctx.ifConstruct().stmtList(0));
 		}
 
 		return null;
@@ -48,11 +48,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitStmtFnCall(PeopleCodeParser.StmtFnCallContext ctx) {
 		// Visit (execute) the fn call, but no need to save any return value.
-		this.executeFnCall(ctx.id(), ctx.exprList(), ctx);
+		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
 		return null;
 	}
 
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
+		log.debug("Executing assignment: {}", ctx.getText());
 		visit(ctx.expr(1));
 		MemoryPtr srcOperand = getExprValue(ctx.expr(1));
 		visit(ctx.expr(0));
@@ -84,11 +85,22 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitExprFnCall(PeopleCodeParser.ExprFnCallContext ctx) {
-		this.executeFnCall(ctx.id(), ctx.exprList(), ctx);
+		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
+		return null;
+	}
+
+	public Void visitExprStaticReference(PeopleCodeParser.ExprStaticReferenceContext ctx) {
+		MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
+		if(ptr == null) {
+			throw new EntInterpretException("Encountered a reference to an " +
+				"uninitialized component buffer field:" + ctx.getText());
+		}
+		setExprValue(ctx, ptr);
 		return null;
 	}
 
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
+		log.debug("Executing comparison: {}", ctx.getText());
 		visit(ctx.expr(0));
 		MemoryPtr p1 = getExprValue(ctx.expr(0));
 		visit(ctx.expr(1));
@@ -120,12 +132,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 			throw new EntInterpretException("Need to support references to non-system vars.");
 		} else {
-			MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
-			if(ptr == null) {
-				throw new EntInterpretException("Encountered a reference to an " +
-					"uninitialized component buffer field.");
-			}
-			setExprValue(ctx, ptr);
+			/**
+			 * TODO: What about GENERIC_ID?
+			 */
 		}
 		return null;
 	}
@@ -167,7 +176,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * Shared functions.
 	 **********************************************************/
 
-	private void executeFnCall(PeopleCodeParser.IdContext idCtx,
+	private void executeFnCall(PeopleCodeParser.ExprContext exprCtx,
 						       PeopleCodeParser.ExprListContext exprListCtx,
 							   ParseTree fnCtx) {
 
@@ -181,10 +190,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		// Get function reference using reflection.
-		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(idCtx.getText());
+		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(exprCtx.getText());
 		if(fnPtr == null) {
 			throw new EntInterpretException("Encountered attempt to call unimplemented " +
-				"system function: " + idCtx.getText());
+				"system function: " + exprCtx.getText());
 		}
 
 		// Invoke function.

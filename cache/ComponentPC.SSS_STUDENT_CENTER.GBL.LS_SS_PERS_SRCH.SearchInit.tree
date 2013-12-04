@@ -1,0 +1,1 @@
+(program (classicProg (stmtList (stmt (ifConstruct If (expr (expr (id %Menu)) = (expr (literal (definitionLiteral (defnKeyword MenuName) . SA_LEARNER_SERVICES)))) Then (stmtList (stmt (expr (expr (id LS_SS_PERS_SRCH)) . (id EMPLID)) = (expr (id %EmployeeId))) ;) End-If)) ;)))

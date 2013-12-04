@@ -15,6 +15,7 @@ public class ProgLoadSupervisor {
 	private PeopleCodeProg rootProg;
 	private Stack<PeopleCodeProg> loadStack;
 	private LFlag lflag;
+	private boolean writeToFile = true;
 
 	private Logger log = LogManager.getLogger(ProgLoadSupervisor.class.getName());
 
@@ -57,6 +58,13 @@ public class ProgLoadSupervisor {
 	            log.debug("{}:\t{}", i+1, lines[i]);
     		}
 
+            if(this.writeToFile) {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(
+                    new File("/home/mquinn/evm/cache/" + prog.getDescriptor() + ".pc")));
+                writer.write(prog.parsedText);
+                writer.close();
+            }
+
         	ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
 	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
     	    CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -72,6 +80,13 @@ public class ProgLoadSupervisor {
 			log.debug(">>> Parse Tree >>>>>>>>>>>>");
             log.debug(tree.toStringTree(parser));
 	        log.debug("====================================================");
+
+            if(this.writeToFile) {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(
+                    new File("/home/mquinn/evm/cache/" + prog.getDescriptor() + ".tree")));
+                writer.write(tree.toStringTree(parser));
+                writer.close();
+            }
 
 	        ProgLoaderVisitor progLoader = new ProgLoaderVisitor();
     	    progLoader.visit(tree);

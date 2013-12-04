@@ -15,7 +15,7 @@ stmt	:	varDecl								# StmtVarDecl
 		|	evaluateConstruct					# StmtEvaluate
 		|	'Exit'								# StmtExit
 		|	'Break'								# StmtBreak
-		|	fnCall								# StmtFnCall
+		|	expr '(' exprList? ')'				# StmtFnCall
 		|	expr '=' expr						# StmtAssign
 		;
 
@@ -31,41 +31,37 @@ whenClause			:	'When' expr stmtList ;
 whenOtherClause		:	'When-Other' stmtList ;
 
 expr	:	'(' expr ')'						# ExprParenthesized
-		|	defnRef								# ExprDefnRef
 		|	literal								# ExprLiteral
-		|	bufferRef							# ExprDataBuffer
-		|	SYS_VAR_ID							# ExprSystemVar
-		|	VAR_ID								# ExprVar
-		|	fnCall								# ExprFnCall
+		|	id									# ExprId
+		|	expr '.' id							# ExprId
+		| 	expr '(' exprList? ')'				# ExprFnCall
 		|	expr '=' expr						# ExprComparison
 		;
 
 exprList:	expr (',' expr)* ;
-fnCall	:	FUNC_ID '(' exprList? ')' ;
 
-defnRef		:	defnKeyword '.' BUFFER_ID ;
 defnKeyword	:	'MenuName' | 'Component' | 'Record' ;
-
-bufferRef   :   BUFFER_ID
-            |   (BUFFER_ID | VAR_ID) ('.' BUFFER_ID)+ ('.' bufferFldProperty)? ;
-bufferFldProperty	:	'Visible' ;	
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral
+		|	definitionLiteral
 		|	booleanLiteral ;
 booleanLiteral	:	'True' | 'true' | 'False' | 'false' ;
+definitionLiteral : defnKeyword '.' GENERIC_ID ;
 
+id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
 
 //*******************************************************//
 // Lexer Rules 									    	 //
 //*******************************************************//
 
+GENERIC_ID		:	[a-zA-Z] [0-9a-zA-Z_]* ;	
+
 DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 
 VAR_ID		:	'&' [a-zA-Z_]+ ;
-BUFFER_ID	:	[A-Z] [0-9A-Z_]* ;
-FUNC_ID		:	[a-zA-Z]+ ;
 SYS_VAR_ID	:	'%' [a-zA-Z]+ ;
+
 COMMENT		:	'/*' .*? '*/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;

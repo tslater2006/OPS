@@ -48,7 +48,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitStmtFnCall(PeopleCodeParser.StmtFnCallContext ctx) {
 		// Visit (execute) the fn call, but no need to save any return value.
-		visit(ctx.fnCall());
+		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
 		return null;
 	}
 
@@ -71,41 +71,32 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprDefnRef(PeopleCodeParser.ExprDefnRefContext ctx) {
-		MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(ctx.defnRef().BUFFER_ID().getText());
-		setExprValue(ctx, ptr);
-		return null;
-	}
-
 	public Void visitExprLiteral(PeopleCodeParser.ExprLiteralContext ctx) {
 		visit(ctx.literal());
 		setExprValue(ctx, getExprValue(ctx.literal()));
 		return null;
 	}
 
-	public Void visitExprDataBuffer(PeopleCodeParser.ExprDataBufferContext ctx) {
-		MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
-		if(ptr == null) {
-			throw new EntInterpretException("Encountered a reference to an " +
-				"uninitialized component buffer field.");
-		}
-		setExprValue(ctx, ptr);
-		return null;
-	}
+	public Void visitExprId(PeopleCodeParser.ExprIdContext ctx) {
 
-	public Void visitExprSystemVar(PeopleCodeParser.ExprSystemVarContext ctx) {
-		MemoryPtr ptr = RunTimeEnvironment.systemVarTable.get(ctx.getText());
-		if(ptr == null) {
-			throw new EntInterpretException("Encountered a system variable reference " +
-				"that has not been implemented yet: " + ctx.SYS_VAR_ID().getText());
+		if(ctx.expr() != null) {
+
+			MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
+			if(ptr == null) {
+				throw new EntInterpretException("Encountered a reference to an " +
+					"uninitialized component buffer field.");
+			}
+			setExprValue(ctx, ptr);
+		} else {
+			visit(ctx.id());
+			setExprValue(ctx, getExprValue(ctx.id()));
 		}
-		setExprValue(ctx, ptr);
+
 		return null;
 	}
 
 	public Void visitExprFnCall(PeopleCodeParser.ExprFnCallContext ctx) {
-		visit(ctx.fnCall());
-		setExprValue(ctx, getExprValue(ctx.fnCall()));
+		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
 		return null;
 	}
 
@@ -127,53 +118,32 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * Primary rule handlers.
 	 **********************************************************/
 
-	public Void visitFnCall(PeopleCodeParser.FnCallContext ctx) {
+	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
-		// null is used to separate call frames.
-		Interpreter.pushToCallStack(null);
+		if(ctx.SYS_VAR_ID() != null) {
+			MemoryPtr ptr = RunTimeEnvironment.systemVarTable.get(ctx.getText());
+			if(ptr == null) {
+				throw new EntInterpretException("Encountered a system variable reference " +
+					"that has not been implemented yet: " + ctx.getText());
+			}
+			setExprValue(ctx, ptr);
 
-		// move args from runtime stack to call stack.
-		for(PeopleCodeParser.ExprContext exprCtx : ctx.exprList().expr()) {
-			visit(exprCtx);
-			Interpreter.pushToCallStack(getExprValue(exprCtx));
+		} else if(ctx.VAR_ID() != null) {
+
+			throw new EntInterpretException("Need to support references to non-system vars.");
 		}
-
-		// Get function reference using reflection.
-		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(ctx.FUNC_ID().getText());
-		if(fnPtr == null) {
-			throw new EntInterpretException("Encountered attempt to call unimplemented " +
-				"system function: " + ctx.FUNC_ID().getText());
-		}
-
-		// Invoke function.
-        try {
-            fnPtr.invoke(RunTimeEnvironment.class);
-        } catch(java.lang.IllegalAccessException iae) {
-            log.fatal(iae.getMessage(), iae);
-            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-        } catch(java.lang.reflect.InvocationTargetException ite) {
-            log.fatal(ite.getMessage(), ite);
-            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-        }
-
-		/**
-		 * Pop the first value from the call stack. If it's null, the function
-		 * did not emit a return value. If it's non-null, the next item on the stack
-		 * must be the null separator (PeopleCode funcs can only return 1 value).
-		 */
-	    MemoryPtr retPtr = Interpreter.popFromCallStack();
-		setExprValue(ctx, retPtr);
-
-		if(retPtr != null && (Interpreter.popFromCallStack() != null)) {
-			throw new EntInterpretException("More than one return value was found on " +
-				"the call stack.");
-		}
-
 		return null;
 	}
 
 	public Void visitLiteral(PeopleCodeParser.LiteralContext ctx) {
-		if(ctx.IntegerLiteral() != null) {
+
+		if(ctx.definitionLiteral() != null) {
+
+			MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(
+				ctx.definitionLiteral().GENERIC_ID().getText());
+			setExprValue(ctx, ptr);
+
+		} else if(ctx.IntegerLiteral() != null) {
 
 			MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(
 				new Integer(ctx.IntegerLiteral().getText()));
@@ -196,5 +166,54 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		return null;
+	}
+
+	/**********************************************************
+	 * Shared functions.
+	 **********************************************************/
+
+	private void executeFnCall(PeopleCodeParser.ExprContext exprCtx,
+						       PeopleCodeParser.ExprListContext exprListCtx,
+							   ParseTree fnCtx) {
+
+		// null is used to separate call frames.
+		Interpreter.pushToCallStack(null);
+
+		// move args from runtime stack to call stack.
+		for(PeopleCodeParser.ExprContext argCtx : exprListCtx.expr()) {
+			visit(argCtx);
+			Interpreter.pushToCallStack(getExprValue(argCtx));
+		}
+
+		// Get function reference using reflection.
+		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(exprCtx.getText());
+		if(fnPtr == null) {
+			throw new EntInterpretException("Encountered attempt to call unimplemented " +
+				"system function: " + exprCtx.getText());
+		}
+
+		// Invoke function.
+        try {
+            fnPtr.invoke(RunTimeEnvironment.class);
+        } catch(java.lang.IllegalAccessException iae) {
+            log.fatal(iae.getMessage(), iae);
+            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
+        } catch(java.lang.reflect.InvocationTargetException ite) {
+            log.fatal(ite.getMessage(), ite);
+            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
+        }
+
+		/**
+		 * Pop the first value from the call stack. If it's null, the function
+		 * did not emit a return value. If it's non-null, the next item on the stack
+		 * must be the null separator (PeopleCode funcs can only return 1 value).
+		 */
+	    MemoryPtr retPtr = Interpreter.popFromCallStack();
+		setExprValue(fnCtx, retPtr);
+
+		if(retPtr != null && (Interpreter.popFromCallStack() != null)) {
+			throw new EntInterpretException("More than one return value was found on " +
+				"the call stack.");
+		}
 	}
 }

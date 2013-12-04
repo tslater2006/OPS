@@ -51,12 +51,11 @@ public class ProgLoadSupervisor {
 			    new ByteArrayInputStream(prog.parsedText.getBytes());
 
             log.debug("=== ProgLoadSupervisor =============================");
-			log.debug("Loading program: {}", prog.getDescriptor());
+			log.debug("Loading {}", prog.getDescriptor());
 			String[] lines = prog.parsedText.split("\n");
 			for(int i = 0; i < lines.length; i++) {
 	            log.debug("{}:\t{}", i+1, lines[i]);
     		}
-	        log.debug("====================================================");
 
         	ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
 	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
@@ -69,10 +68,13 @@ public class ProgLoadSupervisor {
 	    	    .setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
 
 	        ParseTree tree = parser.program();
+
+			log.debug(">>> Parse Tree >>>>>>>>>>>>");
+            log.debug(tree.toStringTree(parser));
+	        log.debug("====================================================");
+
 	        ProgLoaderVisitor progLoader = new ProgLoaderVisitor();
     	    progLoader.visit(tree);
-
-            log.debug(tree.toStringTree(parser));
 
 	    } catch(java.io.IOException ioe) {
             throw new EntVMachRuntimeException(ioe.getMessage());

@@ -54,10 +54,12 @@ public class Interpreter {
 			InputStream progTextInputStream =
 				new ByteArrayInputStream(this.prog.parsedText.getBytes());
 
-			log.debug("=== Interpreter ====================================");
-			log.debug("Interpreting program: {}", prog.getDescriptor());
-			log.debug(this.prog.parsedText);
-			log.debug("====================================================");
+            log.debug("=== Interpreter =============================");
+            log.debug("Interpreting {}", prog.getDescriptor());
+            String[] lines = this.prog.parsedText.split("\n");
+            for(int i = 0; i < lines.length; i++) {
+                log.debug("{}:\t{}", i+1, lines[i]);
+            }
 
 	        ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
 	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
@@ -70,10 +72,13 @@ public class Interpreter {
 				.setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
 
     	    ParseTree tree = parser.program();
+
+	        log.debug(">>> Parse Tree >>>>>>>>>>>>");
+            log.debug(tree.toStringTree(parser));
+            log.debug("====================================================");
+
 			InterpreterVisitor interpreter = new InterpreterVisitor();
 			interpreter.visit(tree);
-
-        	log.debug(tree.toStringTree(parser));
 
 		} catch(java.io.IOException ioe) {
 			throw new EntVMachRuntimeException(ioe.getMessage());

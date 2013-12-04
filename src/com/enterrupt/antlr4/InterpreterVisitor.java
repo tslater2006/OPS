@@ -48,7 +48,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitStmtFnCall(PeopleCodeParser.StmtFnCallContext ctx) {
 		// Visit (execute) the fn call, but no need to save any return value.
-		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
+		this.executeFnCall(ctx.id(), ctx.exprList(), ctx);
 		return null;
 	}
 
@@ -78,25 +78,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitExprId(PeopleCodeParser.ExprIdContext ctx) {
-
-		if(ctx.expr() != null) {
-
-			MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
-			if(ptr == null) {
-				throw new EntInterpretException("Encountered a reference to an " +
-					"uninitialized component buffer field.");
-			}
-			setExprValue(ctx, ptr);
-		} else {
-			visit(ctx.id());
-			setExprValue(ctx, getExprValue(ctx.id()));
-		}
-
+		visit(ctx.id());
+		setExprValue(ctx, getExprValue(ctx.id()));
 		return null;
 	}
 
 	public Void visitExprFnCall(PeopleCodeParser.ExprFnCallContext ctx) {
-		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
+		this.executeFnCall(ctx.id(), ctx.exprList(), ctx);
 		return null;
 	}
 
@@ -131,6 +119,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		} else if(ctx.VAR_ID() != null) {
 
 			throw new EntInterpretException("Need to support references to non-system vars.");
+		} else {
+			MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
+			if(ptr == null) {
+				throw new EntInterpretException("Encountered a reference to an " +
+					"uninitialized component buffer field.");
+			}
+			setExprValue(ctx, ptr);
 		}
 		return null;
 	}
@@ -172,7 +167,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * Shared functions.
 	 **********************************************************/
 
-	private void executeFnCall(PeopleCodeParser.ExprContext exprCtx,
+	private void executeFnCall(PeopleCodeParser.IdContext idCtx,
 						       PeopleCodeParser.ExprListContext exprListCtx,
 							   ParseTree fnCtx) {
 
@@ -186,10 +181,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		// Get function reference using reflection.
-		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(exprCtx.getText());
+		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(idCtx.getText());
 		if(fnPtr == null) {
 			throw new EntInterpretException("Encountered attempt to call unimplemented " +
-				"system function: " + exprCtx.getText());
+				"system function: " + idCtx.getText());
 		}
 
 		// Invoke function.

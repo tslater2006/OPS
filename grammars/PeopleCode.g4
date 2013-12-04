@@ -15,8 +15,8 @@ stmt	:	varDecl								# StmtVarDecl
 		|	evaluateConstruct					# StmtEvaluate
 		|	'Exit'								# StmtExit
 		|	'Break'								# StmtBreak
-		|	expr '(' exprList? ')'				# StmtFnCall
-		|	expr '=' expr						# StmtAssign
+		|	id '(' exprList? ')'				# StmtFnCall
+		|	expr '='<assoc=right> expr			# StmtAssign
 		;
 
 varDecl	:	varScopeModifier varTypeModifier VAR_ID ;
@@ -33,9 +33,8 @@ whenOtherClause		:	'When-Other' stmtList ;
 expr	:	'(' expr ')'						# ExprParenthesized
 		|	literal								# ExprLiteral
 		|	id									# ExprId
-		|	expr '.' id							# ExprId
-		| 	expr '(' exprList? ')'				# ExprFnCall
-		|	expr '=' expr						# ExprComparison
+		| 	id '(' exprList? ')'				# ExprFnCall
+		|	expr '='<assoc=right> expr			# ExprComparison
 		;
 
 exprList:	expr (',' expr)* ;
@@ -45,11 +44,13 @@ defnKeyword	:	'MenuName' | 'Component' | 'Record' ;
 literal	:	DecimalLiteral
 		|	IntegerLiteral
 		|	definitionLiteral
-		|	booleanLiteral ;
+		|	StringLiteral
+		|	booleanLiteral
+		;
 booleanLiteral	:	'True' | 'true' | 'False' | 'false' ;
 definitionLiteral : defnKeyword '.' GENERIC_ID ;
 
-id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
+id	:	SYS_VAR_ID | VAR_ID ('.' GENERIC_ID)* | GENERIC_ID ('.' GENERIC_ID)* ;
 
 //*******************************************************//
 // Lexer Rules 									    	 //
@@ -59,6 +60,7 @@ GENERIC_ID		:	[a-zA-Z] [0-9a-zA-Z_]* ;
 
 DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
+StringLiteral	:	'"' ( ~'"' )* '"' ;
 
 VAR_ID		:	'&' [a-zA-Z_]+ ;
 SYS_VAR_ID	:	'%' [a-zA-Z]+ ;

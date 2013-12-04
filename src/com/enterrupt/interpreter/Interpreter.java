@@ -54,9 +54,9 @@ public class Interpreter {
 			InputStream progTextInputStream =
 				new ByteArrayInputStream(this.prog.parsedText.getBytes());
 
-			log.warn("====================================================");
-			log.warn(this.prog.parsedText);
-			log.warn("====================================================");
+			log.debug("====================================================");
+			log.debug(this.prog.parsedText);
+			log.debug("====================================================");
 
 	        ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
 	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
@@ -72,7 +72,7 @@ public class Interpreter {
 			InterpreterVisitor interpreter = new InterpreterVisitor();
 			interpreter.visit(tree);
 
-        	System.out.println(tree.toStringTree(parser));
+        	log.debug(tree.toStringTree(parser));
 
 		} catch(java.io.IOException ioe) {
 			throw new EntVMachRuntimeException(ioe.getMessage());

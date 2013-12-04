@@ -4,7 +4,7 @@ grammar PeopleCode;
 // Parser Rules 									    //
 //******************************************************//
 
-program	: classicProg;		// TODO: Add appClassProg as possible option.
+program	: classicProg;
 
 classicProg : stmtList ;
 

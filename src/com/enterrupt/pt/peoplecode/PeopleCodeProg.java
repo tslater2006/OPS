@@ -22,6 +22,7 @@ public abstract class PeopleCodeProg {
 	protected HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
 	protected HashMap<String, Boolean> importedAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
+	public HashMap<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
 
 	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
@@ -185,56 +186,39 @@ public abstract class PeopleCodeProg {
 
 	public void loadDefnsAndPrograms() {
 
-		LFlag flag = null;
-		if(this instanceof ComponentPeopleCodeProg) {
-			flag = LFlag.COMPONENT;
+//		this.recurseLoadDefnsAndPrograms(0, flag, new Stack<PeopleCodeProg>());
 
-         /**
-          * TODO: Need to test this with components other than SSS_STUDENT_CENTER. I'm sure that loading
-          * references for pages is required, but with SSS_STUDENT_CENTER all references appear to have been loaded
-          * previously by the time pages are loaded; therefore, I can't confirm what mode
-		  * should be used for loading here. Using RECORD for pages for the time being.
- 	      */
-		} else if(this instanceof PagePeopleCodeProg || this instanceof RecordPeopleCodeProg) {
-			flag = LFlag.RECORD;
-
-		} else {
-			throw new EntVMachRuntimeException("Unexpected type of root PeopleCode.");
-		}
-
-		this.recurseLoadDefnsAndPrograms(0, flag, new Stack<PeopleCodeProg>());
+		ProgLoadSupervisor supervisor = new ProgLoadSupervisor(this);
+		supervisor.start();
 	}
 
-	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack) {
+	public boolean haveDefnsAndProgsBeenLoaded() {
 
 		if(this.haveLoadedDefnsAndPrograms) {
 			log.debug("Already loaded ref defns/progs {}", this.getDescriptor());
-			return; }
-		log.debug("Loading ref defns/progs {}...", this.getDescriptor());
-		this.haveLoadedDefnsAndPrograms = true;
+			return true;
+		} else {
+			log.debug("Loading ref defns/progs {}...", this.getDescriptor());
 
-		traceStack.push(this);
+			this.referencedProgs = new ArrayList<PeopleCodeProg>();
+			this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
+        	this.importedAppPackages = new HashMap<String, Boolean>();
+			this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
 
-		log.debug("*****************START TRACE******************");
-		for(PeopleCodeProg prog : traceStack) {
-			log.debug(prog.getDescriptor());
+			this.haveLoadedDefnsAndPrograms = true;
+			return false;
 		}
-		log.debug("*****************END TRACE******************");
+	}
 
- 		Token t;
-		this.referencedProgs = new ArrayList<PeopleCodeProg>();
-		this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
-        this.importedAppPackages = new HashMap<String, Boolean>();
-		HashMap<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
-        PeopleCodeTokenStream stream = new PeopleCodeTokenStream(this);
-
+	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack) {
+/*
         while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
-
+*/
 			/**
 			 * Detect function calls; if a call corresponds to a program referenced
 			 * in a previously seen DECLARE stmt, mark that program as having been called.
 			 */
-			if(t.flags.contains(TFlag.PURE_STRING)) {
+/*			if(t.flags.contains(TFlag.PURE_STRING)) {
 				Token l = stream.peekNextToken();
 				RecordPeopleCodeProg prog = this.recordProgFnCalls.get(t.pureStrVal);
 
@@ -242,13 +226,13 @@ public abstract class PeopleCodeProg {
 					confirmedRecordProgCalls.put(prog, true);
 				}
 			}
-
+*/
 			/**
 			 * TODO: Determine whether this belongs here or in ClassicPeopleCodeProg.
 			 * For now I'm assuming that imported packages are checked in both classic
 			 * and app package programs.
 			 */
-            if(t.flags.contains(TFlag.IMPORT)) {
+  /*          if(t.flags.contains(TFlag.IMPORT)) {
 
                 ArrayList<String> pathParts = new ArrayList<String>();
 
@@ -267,15 +251,15 @@ public abstract class PeopleCodeProg {
 
 			this.subclassTokenHandler(t, stream, recursionLevel, lflag, traceStack);
         }
-
+*/
         /**
          * All programs referenced by this program must have their referenced
          * definitions and programs loaded now.
          */
-        for(PeopleCodeProg prog : referencedProgs) {
+  /*      for(PeopleCodeProg prog : referencedProgs) {
 			PeopleCodeProg p = DefnCache.getProgram(prog);
 			p.init();
-
+*/
 			/**
 			 * In Record PC mode, referenced defns and progs should be recursively loaded indefinitely.
 			 * In Component PC mode, all App Package PC programs must be permitted to load their references
@@ -283,15 +267,15 @@ public abstract class PeopleCodeProg {
 			 * directly referenced in the root Component PC program being loaded (which exists at recursion
 			 * level 0).
 			 */
-			if((lflag == LFlag.RECORD && recursionLevel < 3)
+/*			if((lflag == LFlag.RECORD && recursionLevel < 3)
 				|| (lflag == LFlag.COMPONENT
 					&& (p instanceof AppClassPeopleCodeProg || recursionLevel == 0))) {
-
+*/
 				/**
 				 * If this program is never actually called,
 				 * there is no reason to load its references at this time.
 				 */
-				if(p instanceof RecordPeopleCodeProg && confirmedRecordProgCalls.get(p) == null) {
+/*				if(p instanceof RecordPeopleCodeProg && confirmedRecordProgCalls.get(p) == null) {
 					continue;
 				}
 
@@ -299,7 +283,7 @@ public abstract class PeopleCodeProg {
 			}
         }
 
-		traceStack.pop();
+		traceStack.pop();*/
 	}
 
 	/**

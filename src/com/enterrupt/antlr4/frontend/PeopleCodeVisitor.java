@@ -26,13 +26,6 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitBufferFldProperty(@NotNull PeopleCodeParser.BufferFldPropertyContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#compBufferRef}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompBufferRef(@NotNull PeopleCodeParser.CompBufferRefContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#varDecl}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -122,6 +115,13 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExprParenthesized(@NotNull PeopleCodeParser.ExprParenthesizedContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprDataBuffer}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprDataBuffer(@NotNull PeopleCodeParser.ExprDataBufferContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtFnCall}.
@@ -229,11 +229,11 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitStmtIf(@NotNull PeopleCodeParser.StmtIfContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprCompBufferRef}.
+	 * Visit a parse tree produced by {@link PeopleCodeParser#bufferRef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprCompBufferRef(@NotNull PeopleCodeParser.ExprCompBufferRefContext ctx);
+	T visitBufferRef(@NotNull PeopleCodeParser.BufferRefContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#literal}.

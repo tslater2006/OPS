@@ -34,14 +34,6 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitCompBufferRef(@NotNull PeopleCodeParser.CompBufferRefContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
 	@Override public T visitVarDecl(@NotNull PeopleCodeParser.VarDeclContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -139,6 +131,14 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
 	@Override public T visitExprParenthesized(@NotNull PeopleCodeParser.ExprParenthesizedContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitExprDataBuffer(@NotNull PeopleCodeParser.ExprDataBufferContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -266,7 +266,7 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitExprCompBufferRef(@NotNull PeopleCodeParser.ExprCompBufferRefContext ctx) { return visitChildren(ctx); }
+	@Override public T visitBufferRef(@NotNull PeopleCodeParser.BufferRefContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

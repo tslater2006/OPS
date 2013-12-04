@@ -18,7 +18,7 @@ public class PeopleCodeLexer extends Lexer {
 		T__25=1, T__24=2, T__23=3, T__22=4, T__21=5, T__20=6, T__19=7, T__18=8, 
 		T__17=9, T__16=10, T__15=11, T__14=12, T__13=13, T__12=14, T__11=15, T__10=16, 
 		T__9=17, T__8=18, T__7=19, T__6=20, T__5=21, T__4=22, T__3=23, T__2=24, 
-		T__1=25, T__0=26, DecimalLiteral=27, IntegerLiteral=28, VAR_ID=29, OBJECT_ID=30, 
+		T__1=25, T__0=26, DecimalLiteral=27, IntegerLiteral=28, VAR_ID=29, BUFFER_ID=30, 
 		FUNC_ID=31, SYS_VAR_ID=32, COMMENT=33, WS=34;
 	public static String[] modeNames = {
 		"DEFAULT_MODE"
@@ -30,13 +30,13 @@ public class PeopleCodeLexer extends Lexer {
 		"'When'", "'true'", "'Component'", "'Global'", "'If'", "'False'", "'End-Evaluate'", 
 		"'.'", "')'", "'Record'", "'='", "';'", "'End-If'", "'Exit'", "'Break'", 
 		"'Local'", "'string'", "'MenuName'", "'Then'", "DecimalLiteral", "IntegerLiteral", 
-		"VAR_ID", "OBJECT_ID", "FUNC_ID", "SYS_VAR_ID", "COMMENT", "WS"
+		"VAR_ID", "BUFFER_ID", "FUNC_ID", "SYS_VAR_ID", "COMMENT", "WS"
 	};
 	public static final String[] ruleNames = {
 		"T__25", "T__24", "T__23", "T__22", "T__21", "T__20", "T__19", "T__18", 
 		"T__17", "T__16", "T__15", "T__14", "T__13", "T__12", "T__11", "T__10", 
 		"T__9", "T__8", "T__7", "T__6", "T__5", "T__4", "T__3", "T__2", "T__1", 
-		"T__0", "DecimalLiteral", "IntegerLiteral", "VAR_ID", "OBJECT_ID", "FUNC_ID", 
+		"T__0", "DecimalLiteral", "IntegerLiteral", "VAR_ID", "BUFFER_ID", "FUNC_ID", 
 		"SYS_VAR_ID", "COMMENT", "WS"
 	};
 

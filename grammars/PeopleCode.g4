@@ -33,7 +33,7 @@ whenOtherClause		:	'When-Other' stmtList ;
 expr	:	'(' expr ')'						# ExprParenthesized
 		|	defnRef								# ExprDefnRef
 		|	literal								# ExprLiteral
-		|	compBufferRef						# ExprCompBufferRef
+		|	bufferRef							# ExprDataBuffer
 		|	SYS_VAR_ID							# ExprSystemVar
 		|	VAR_ID								# ExprVar
 		|	fnCall								# ExprFnCall
@@ -43,10 +43,11 @@ expr	:	'(' expr ')'						# ExprParenthesized
 exprList:	expr (',' expr)* ;
 fnCall	:	FUNC_ID '(' exprList? ')' ;
 
-defnRef		:	defnKeyword '.' OBJECT_ID ;
+defnRef		:	defnKeyword '.' BUFFER_ID ;
 defnKeyword	:	'MenuName' | 'Component' | 'Record' ;
 
-compBufferRef		:	OBJECT_ID ('.' OBJECT_ID)* ('.' bufferFldProperty)* ;
+bufferRef   :   BUFFER_ID
+            |   (BUFFER_ID | VAR_ID) ('.' BUFFER_ID)+ ('.' bufferFldProperty)? ;
 bufferFldProperty	:	'Visible' ;	
 
 literal	:	DecimalLiteral
@@ -63,7 +64,7 @@ DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 
 VAR_ID		:	'&' [a-zA-Z_]+ ;
-OBJECT_ID	:	[A-Z] [0-9A-Z_]* ;
+BUFFER_ID	:	[A-Z] [0-9A-Z_]* ;
 FUNC_ID		:	[a-zA-Z]+ ;
 SYS_VAR_ID	:	'%' [a-zA-Z]+ ;
 COMMENT		:	'/*' .*? '*/' -> skip;

@@ -72,7 +72,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitExprDefnRef(PeopleCodeParser.ExprDefnRefContext ctx) {
-		MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(ctx.defnRef().OBJECT_ID().getText());
+		MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(ctx.defnRef().BUFFER_ID().getText());
 		setExprValue(ctx, ptr);
 		return null;
 	}
@@ -83,7 +83,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprCompBufferRef(PeopleCodeParser.ExprCompBufferRefContext ctx) {
+	public Void visitExprDataBuffer(PeopleCodeParser.ExprDataBufferContext ctx) {
 		MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
 		if(ptr == null) {
 			throw new EntInterpretException("Encountered a reference to an " +

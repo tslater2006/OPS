@@ -11,7 +11,7 @@ import com.enterrupt.runtime.*;
  * including ambiguous grammar alternatives. Every exception received
  * here is wrapped as an Enterrupt exception and bubbled up.
  */
-public class ENTDiagErrorListener extends DiagnosticErrorListener {
+public class EntDiagErrorListener extends DiagnosticErrorListener {
 
 	@Override
 	public void syntaxError(Recognizer<?, ?> recognizer,

@@ -1,4 +1,4 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.antlr4;
 
 import com.enterrupt.runtime.EntVMachRuntimeException;
 

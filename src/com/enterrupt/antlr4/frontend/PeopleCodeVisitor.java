@@ -12,39 +12,11 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#assignStmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAssignStmt(@NotNull PeopleCodeParser.AssignStmtContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#stmtList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStmtList(@NotNull PeopleCodeParser.StmtListContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#stmtExpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitStmtExpr(@NotNull PeopleCodeParser.StmtExprContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#program}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitProgram(@NotNull PeopleCodeParser.ProgramContext ctx);
-
-	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#primary}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrimary(@NotNull PeopleCodeParser.PrimaryContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#stmt}.
@@ -61,18 +33,60 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitClassicProg(@NotNull PeopleCodeParser.ClassicProgContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#booleanLiteral}.
+	 * Visit a parse tree produced by {@link PeopleCodeParser#CBufferRef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBooleanLiteral(@NotNull PeopleCodeParser.BooleanLiteralContext ctx);
+	T visitCBufferRef(@NotNull PeopleCodeParser.CBufferRefContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#expr}.
+	 * Visit a parse tree produced by {@link PeopleCodeParser#Comparison}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr(@NotNull PeopleCodeParser.ExprContext ctx);
+	T visitComparison(@NotNull PeopleCodeParser.ComparisonContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#stmtList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmtList(@NotNull PeopleCodeParser.StmtListContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ObjDefnRef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitObjDefnRef(@NotNull PeopleCodeParser.ObjDefnRefContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#program}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProgram(@NotNull PeopleCodeParser.ProgramContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#SystemVar}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSystemVar(@NotNull PeopleCodeParser.SystemVarContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ParenthesizedExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParenthesizedExpr(@NotNull PeopleCodeParser.ParenthesizedExprContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#AssignStmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssignStmt(@NotNull PeopleCodeParser.AssignStmtContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#ifStmt}.
@@ -89,9 +103,23 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitLiteral(@NotNull PeopleCodeParser.LiteralContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#FnCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFnCall(@NotNull PeopleCodeParser.FnCallContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#exprList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExprList(@NotNull PeopleCodeParser.ExprListContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprLiteral(@NotNull PeopleCodeParser.ExprLiteralContext ctx);
 }

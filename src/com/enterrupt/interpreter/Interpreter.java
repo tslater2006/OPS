@@ -18,21 +18,19 @@ import com.enterrupt.antlr4.frontend.*;
 
 public class Interpreter {
 
-	private static Stack<MemoryPtr>	callStack;
-	private static Stack<MemoryPtr>	runtimeStack;
 	private PeopleCodeTokenStream stream;
 	private PeopleCodeProg prog;
+	private static Stack<MemoryPtr>	callStack;
 
 	private static Logger log = LogManager.getLogger(Interpreter.class.getName());
+
+	static {
+		callStack = new Stack<MemoryPtr>();
+	}
 
 	public Interpreter(PeopleCodeProg prog) {
 		this.stream = new PeopleCodeTokenStream(prog);
 		this.prog = prog;
-
-		if(callStack == null || runtimeStack == null) {
-			callStack = new Stack<MemoryPtr>();
-			runtimeStack = new Stack<MemoryPtr>();
-		}
 	}
 
 	public static void pushToCallStack(MemoryPtr p) {
@@ -48,21 +46,6 @@ public class Interpreter {
 
 	public static MemoryPtr peekAtCallStack() {
 		return callStack.peek();
-	}
-
-	public static void pushToRuntimeStack(MemoryPtr p) {
-		log.debug("Push\tRuntimeStack\t" + (p == null ? "null" : p.flags.toString()));
-		runtimeStack.push(p);
-	}
-
-	public static MemoryPtr popFromRuntimeStack() {
-		MemoryPtr p = runtimeStack.pop();
-		log.debug("Pop\tRuntimeStack\t" + (p == null ? "null" : p.flags.toString()));
-		return p;
-	}
-
-	public static MemoryPtr peekAtRuntimeStack() {
-		return runtimeStack.peek();
 	}
 
 	public void run() {
@@ -81,7 +64,7 @@ public class Interpreter {
 	        PeopleCodeParser parser = new PeopleCodeParser(tokens);
 
 			parser.removeErrorListeners();
-			parser.addErrorListener(new ENTDiagErrorListener());
+			parser.addErrorListener(new EntDiagErrorListener());
 			parser.getInterpreter()
 				.setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
 
@@ -94,12 +77,5 @@ public class Interpreter {
 		} catch(java.io.IOException ioe) {
 			throw new EntVMachRuntimeException(ioe.getMessage());
 		}
-
-/*        StmtListConstruct.interpret(stream);
-
-        // Detect: END_OF_PROGRAM
-        if(!stream.readNextToken().flags.contains(TFlag.END_OF_PROGRAM)) {
-			throw new EntInterpretException("Expected END_OF_PROGRAM.");
-        }*/
 	}
 }

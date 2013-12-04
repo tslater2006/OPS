@@ -15,21 +15,21 @@ public class PeopleCodeParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__13=1, T__12=2, T__11=3, T__10=4, T__9=5, T__8=6, T__7=7, T__6=8, T__5=9, 
-		T__4=10, T__3=11, T__2=12, T__1=13, T__0=14, IntegerLiteral=15, IDENTIFIER=16, 
-		COMMENT=17, WS=18;
+		T__8=1, T__7=2, T__6=3, T__5=4, T__4=5, T__3=6, T__2=7, T__1=8, T__0=9, 
+		ReservedDefnWord=10, DecimalLiteral=11, IntegerLiteral=12, BooleanLiteral=13, 
+		OBJECT_ID=14, FUNC_ID=15, SYSTEM_VAR=16, COMMENT=17, WS=18;
 	public static final String[] tokenNames = {
-		"<INVALID>", "'True'", "'If'", "'False'", "')'", "'.'", "','", "'('", 
-		"'='", "'false'", "';'", "'End-If'", "'MenuName'", "'true'", "'Then'", 
-		"IntegerLiteral", "IDENTIFIER", "COMMENT", "WS"
+		"<INVALID>", "'If'", "')'", "'.'", "','", "'('", "'='", "';'", "'End-If'", 
+		"'Then'", "'MenuName'", "DecimalLiteral", "IntegerLiteral", "BooleanLiteral", 
+		"OBJECT_ID", "FUNC_ID", "SYSTEM_VAR", "COMMENT", "WS"
 	};
 	public static final int
 		RULE_program = 0, RULE_classicProg = 1, RULE_stmtList = 2, RULE_stmt = 3, 
-		RULE_ifStmt = 4, RULE_assignStmt = 5, RULE_stmtExpr = 6, RULE_exprList = 7, 
-		RULE_expr = 8, RULE_primary = 9, RULE_literal = 10, RULE_booleanLiteral = 11;
+		RULE_ifStmt = 4, RULE_stmtExpr = 5, RULE_exprList = 6, RULE_expr = 7, 
+		RULE_literal = 8;
 	public static final String[] ruleNames = {
-		"program", "classicProg", "stmtList", "stmt", "ifStmt", "assignStmt", 
-		"stmtExpr", "exprList", "expr", "primary", "literal", "booleanLiteral"
+		"program", "classicProg", "stmtList", "stmt", "ifStmt", "stmtExpr", "exprList", 
+		"expr", "literal"
 	};
 
 	@Override
@@ -69,7 +69,7 @@ public class PeopleCodeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(24); classicProg();
+			setState(18); classicProg();
 			}
 		}
 		catch (RecognitionException re) {
@@ -104,7 +104,7 @@ public class PeopleCodeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(26); stmtList();
+			setState(20); stmtList();
 			}
 		}
 		catch (RecognitionException re) {
@@ -143,17 +143,16 @@ public class PeopleCodeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(33);
+			setState(25);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << 2) | (1L << 3) | (1L << 7) | (1L << 9) | (1L << 12) | (1L << 13) | (1L << IntegerLiteral) | (1L << IDENTIFIER))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << 5) | (1L << ReservedDefnWord) | (1L << DecimalLiteral) | (1L << IntegerLiteral) | (1L << BooleanLiteral) | (1L << OBJECT_ID) | (1L << FUNC_ID) | (1L << SYSTEM_VAR))) != 0)) {
 				{
 				{
-				setState(28); stmt();
-				setState(29); match(10);
+				setState(22); stmt();
 				}
 				}
-				setState(35);
+				setState(27);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -177,9 +176,6 @@ public class PeopleCodeParser extends Parser {
 		public StmtExprContext stmtExpr() {
 			return getRuleContext(StmtExprContext.class,0);
 		}
-		public AssignStmtContext assignStmt() {
-			return getRuleContext(AssignStmtContext.class,0);
-		}
 		public StmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -194,29 +190,39 @@ public class PeopleCodeParser extends Parser {
 	public final StmtContext stmt() throws RecognitionException {
 		StmtContext _localctx = new StmtContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_stmt);
+		int _la;
 		try {
-			setState(39);
-			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
+			setState(33);
+			switch (_input.LA(1)) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(36); ifStmt();
+				setState(28); ifStmt();
+				setState(30);
+				_la = _input.LA(1);
+				if (_la==7) {
+					{
+					setState(29); match(7);
+					}
+				}
+
 				}
 				break;
-
-			case 2:
+			case 5:
+			case ReservedDefnWord:
+			case DecimalLiteral:
+			case IntegerLiteral:
+			case BooleanLiteral:
+			case OBJECT_ID:
+			case FUNC_ID:
+			case SYSTEM_VAR:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(37); assignStmt();
+				setState(32); stmtExpr();
 				}
 				break;
-
-			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(38); stmtExpr();
-				}
-				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -254,51 +260,11 @@ public class PeopleCodeParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(41); match(2);
-			setState(42); expr(0);
-			setState(43); match(14);
-			setState(44); stmtList();
-			setState(45); match(11);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class AssignStmtContext extends ParserRuleContext {
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public AssignStmtContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_assignStmt; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitAssignStmt(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final AssignStmtContext assignStmt() throws RecognitionException {
-		AssignStmtContext _localctx = new AssignStmtContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_assignStmt);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(47); expr(0);
-			setState(48); match(8);
-			setState(49); expr(0);
+			setState(35); match(1);
+			setState(36); expr(0);
+			setState(37); match(9);
+			setState(38); stmtList();
+			setState(39); match(8);
 			}
 		}
 		catch (RecognitionException re) {
@@ -329,11 +295,11 @@ public class PeopleCodeParser extends Parser {
 
 	public final StmtExprContext stmtExpr() throws RecognitionException {
 		StmtExprContext _localctx = new StmtExprContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_stmtExpr);
+		enterRule(_localctx, 10, RULE_stmtExpr);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(51); expr(0);
+			setState(41); expr(0);
 			}
 		}
 		catch (RecognitionException re) {
@@ -367,23 +333,23 @@ public class PeopleCodeParser extends Parser {
 
 	public final ExprListContext exprList() throws RecognitionException {
 		ExprListContext _localctx = new ExprListContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_exprList);
+		enterRule(_localctx, 12, RULE_exprList);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(53); expr(0);
-			setState(58);
+			setState(43); expr(0);
+			setState(48);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==6) {
+			while (_la==4) {
 				{
 				{
-				setState(54); match(6);
-				setState(55); expr(0);
+				setState(44); match(4);
+				setState(45); expr(0);
 				}
 				}
-				setState(60);
+				setState(50);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -402,28 +368,109 @@ public class PeopleCodeParser extends Parser {
 
 	public static class ExprContext extends ParserRuleContext {
 		public int _p;
-		public PrimaryContext primary() {
-			return getRuleContext(PrimaryContext.class,0);
-		}
-		public ExprListContext exprList() {
-			return getRuleContext(ExprListContext.class,0);
-		}
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public TerminalNode IDENTIFIER() { return getToken(PeopleCodeParser.IDENTIFIER, 0); }
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
 		public ExprContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
 		public ExprContext(ParserRuleContext parent, int invokingState, int _p) {
 			super(parent, invokingState);
 			this._p = _p;
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
+	 
+		public ExprContext() { }
+		public void copyFrom(ExprContext ctx) {
+			super.copyFrom(ctx);
+			this._p = ctx._p;
+		}
+	}
+	public static class ObjDefnRefContext extends ExprContext {
+		public TerminalNode OBJECT_ID() { return getToken(PeopleCodeParser.OBJECT_ID, 0); }
+		public TerminalNode ReservedDefnWord() { return getToken(PeopleCodeParser.ReservedDefnWord, 0); }
+		public ObjDefnRefContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitExpr(this);
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitObjDefnRef(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class SystemVarContext extends ExprContext {
+		public TerminalNode SYSTEM_VAR() { return getToken(PeopleCodeParser.SYSTEM_VAR, 0); }
+		public SystemVarContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitSystemVar(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ParenthesizedExprContext extends ExprContext {
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
+		}
+		public ParenthesizedExprContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitParenthesizedExpr(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class AssignStmtContext extends ExprContext {
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public AssignStmtContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitAssignStmt(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class CBufferRefContext extends ExprContext {
+		public List<TerminalNode> OBJECT_ID() { return getTokens(PeopleCodeParser.OBJECT_ID); }
+		public TerminalNode OBJECT_ID(int i) {
+			return getToken(PeopleCodeParser.OBJECT_ID, i);
+		}
+		public CBufferRefContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitCBufferRef(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExprLiteralContext extends ExprContext {
+		public LiteralContext literal() {
+			return getRuleContext(LiteralContext.class,0);
+		}
+		public ExprLiteralContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitExprLiteral(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class FnCallContext extends ExprContext {
+		public ExprListContext exprList() {
+			return getRuleContext(ExprListContext.class,0);
+		}
+		public TerminalNode FUNC_ID() { return getToken(PeopleCodeParser.FUNC_ID, 0); }
+		public FnCallContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitFnCall(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ComparisonContext extends ExprContext {
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public ComparisonContext(ExprContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitComparison(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -433,79 +480,146 @@ public class PeopleCodeParser extends Parser {
 		int _parentState = getState();
 		ExprContext _localctx = new ExprContext(_ctx, _parentState, _p);
 		ExprContext _prevctx = _localctx;
-		int _startState = 16;
+		int _startState = 14;
 		enterRecursionRule(_localctx, RULE_expr);
 		int _la;
 		try {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			{
-			setState(62); primary();
+			setState(78);
+			switch (_input.LA(1)) {
+			case 5:
+				{
+				_localctx = new ParenthesizedExprContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+
+				setState(52); match(5);
+				setState(53); expr(0);
+				setState(54); match(2);
+				}
+				break;
+			case ReservedDefnWord:
+				{
+				_localctx = new ObjDefnRefContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(56); match(ReservedDefnWord);
+				setState(57); match(3);
+				setState(58); match(OBJECT_ID);
+				}
+				break;
+			case DecimalLiteral:
+			case IntegerLiteral:
+			case BooleanLiteral:
+				{
+				_localctx = new ExprLiteralContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(59); literal();
+				}
+				break;
+			case OBJECT_ID:
+				{
+				_localctx = new CBufferRefContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(60); match(OBJECT_ID);
+				setState(65);
+				_errHandler.sync(this);
+				_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+				while ( _alt!=2 && _alt!=-1 ) {
+					if ( _alt==1 ) {
+						{
+						{
+						setState(61); match(3);
+						setState(62); match(OBJECT_ID);
+						}
+						} 
+					}
+					setState(67);
+					_errHandler.sync(this);
+					_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+				}
+				}
+				break;
+			case SYSTEM_VAR:
+				{
+				_localctx = new SystemVarContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(68); match(SYSTEM_VAR);
+				}
+				break;
+			case FUNC_ID:
+				{
+				_localctx = new FnCallContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+				setState(69); match(FUNC_ID);
+				setState(70); match(5);
+				setState(72);
+				_la = _input.LA(1);
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 5) | (1L << ReservedDefnWord) | (1L << DecimalLiteral) | (1L << IntegerLiteral) | (1L << BooleanLiteral) | (1L << OBJECT_ID) | (1L << FUNC_ID) | (1L << SYSTEM_VAR))) != 0)) {
+					{
+					setState(71); exprList();
+					}
+				}
+
+				setState(74); match(2);
+				setState(76);
+				switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+				case 1:
+					{
+					setState(75); match(7);
+					}
+					break;
+				}
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(80);
+			setState(90);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,9,_ctx);
 			while ( _alt!=2 && _alt!=-1 ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					setState(78);
-					switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
+					setState(88);
+					switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
 					case 1:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState, _p);
+						_localctx = new ComparisonContext(new ExprContext(_parentctx, _parentState, _p));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(64);
-						if (!(3 >= _localctx._p)) throw new FailedPredicateException(this, "3 >= $_p");
-						setState(65); match(5);
-						setState(66); match(IDENTIFIER);
+						setState(80);
+						if (!(1 >= _localctx._p)) throw new FailedPredicateException(this, "1 >= $_p");
+						setState(81); match(6);
+						setState(82); expr(2);
 						}
 						break;
 
 					case 2:
 						{
-						_localctx = new ExprContext(_parentctx, _parentState, _p);
+						_localctx = new AssignStmtContext(new ExprContext(_parentctx, _parentState, _p));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(67);
+						setState(83);
 						if (!(2 >= _localctx._p)) throw new FailedPredicateException(this, "2 >= $_p");
-						setState(68); match(7);
-						setState(70);
-						_la = _input.LA(1);
-						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << 3) | (1L << 7) | (1L << 9) | (1L << 12) | (1L << 13) | (1L << IntegerLiteral) | (1L << IDENTIFIER))) != 0)) {
-							{
-							setState(69); exprList();
-							}
-						}
-
-						setState(72); match(4);
-						}
-						break;
-
-					case 3:
-						{
-						_localctx = new ExprContext(_parentctx, _parentState, _p);
-						pushNewRecursionContext(_localctx, _startState, RULE_expr);
-						setState(73);
-						if (!(1 >= _localctx._p)) throw new FailedPredicateException(this, "1 >= $_p");
-						setState(74); match(8);
-						setState(75); expr(0);
-						setState(76);
-						_la = _input.LA(1);
-						if ( _la <= 0 || (_la==10) ) {
-						_errHandler.recoverInline(this);
-						}
-						consume();
+						setState(84); match(6);
+						setState(85); expr(0);
+						setState(86); match(7);
 						}
 						break;
 					}
 					} 
 				}
-				setState(82);
+				setState(92);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,9,_ctx);
 			}
 			}
 		}
@@ -520,81 +634,10 @@ public class PeopleCodeParser extends Parser {
 		return _localctx;
 	}
 
-	public static class PrimaryContext extends ParserRuleContext {
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
-		}
-		public TerminalNode IDENTIFIER() { return getToken(PeopleCodeParser.IDENTIFIER, 0); }
-		public LiteralContext literal() {
-			return getRuleContext(LiteralContext.class,0);
-		}
-		public PrimaryContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitPrimary(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final PrimaryContext primary() throws RecognitionException {
-		PrimaryContext _localctx = new PrimaryContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_primary);
-		try {
-			setState(90);
-			switch (_input.LA(1)) {
-			case 7:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(83); match(7);
-				setState(84); expr(0);
-				setState(85); match(4);
-				}
-				break;
-			case 12:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(87); match(12);
-				}
-				break;
-			case 1:
-			case 3:
-			case 9:
-			case 13:
-			case IntegerLiteral:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(88); literal();
-				}
-				break;
-			case IDENTIFIER:
-				enterOuterAlt(_localctx, 4);
-				{
-				setState(89); match(IDENTIFIER);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
 	public static class LiteralContext extends ParserRuleContext {
 		public TerminalNode IntegerLiteral() { return getToken(PeopleCodeParser.IntegerLiteral, 0); }
-		public BooleanLiteralContext booleanLiteral() {
-			return getRuleContext(BooleanLiteralContext.class,0);
-		}
+		public TerminalNode DecimalLiteral() { return getToken(PeopleCodeParser.DecimalLiteral, 0); }
+		public TerminalNode BooleanLiteral() { return getToken(PeopleCodeParser.BooleanLiteral, 0); }
 		public LiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -608,62 +651,14 @@ public class PeopleCodeParser extends Parser {
 
 	public final LiteralContext literal() throws RecognitionException {
 		LiteralContext _localctx = new LiteralContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_literal);
-		try {
-			setState(94);
-			switch (_input.LA(1)) {
-			case IntegerLiteral:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(92); match(IntegerLiteral);
-				}
-				break;
-			case 1:
-			case 3:
-			case 9:
-			case 13:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(93); booleanLiteral();
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class BooleanLiteralContext extends ParserRuleContext {
-		public BooleanLiteralContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_booleanLiteral; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof PeopleCodeVisitor ) return ((PeopleCodeVisitor<? extends T>)visitor).visitBooleanLiteral(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final BooleanLiteralContext booleanLiteral() throws RecognitionException {
-		BooleanLiteralContext _localctx = new BooleanLiteralContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_booleanLiteral);
+		enterRule(_localctx, 16, RULE_literal);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(96);
+			setState(93);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << 1) | (1L << 3) | (1L << 9) | (1L << 13))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << DecimalLiteral) | (1L << IntegerLiteral) | (1L << BooleanLiteral))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
@@ -682,46 +677,44 @@ public class PeopleCodeParser extends Parser {
 
 	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
 		switch (ruleIndex) {
-		case 8: return expr_sempred((ExprContext)_localctx, predIndex);
+		case 7: return expr_sempred((ExprContext)_localctx, predIndex);
 		}
 		return true;
 	}
 	private boolean expr_sempred(ExprContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: return 3 >= _localctx._p;
+		case 0: return 1 >= _localctx._p;
 
 		case 1: return 2 >= _localctx._p;
-
-		case 2: return 1 >= _localctx._p;
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\24e\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4"+
-		"\f\t\f\4\r\t\r\3\2\3\2\3\3\3\3\3\4\3\4\3\4\7\4\"\n\4\f\4\16\4%\13\4\3"+
-		"\5\3\5\3\5\5\5*\n\5\3\6\3\6\3\6\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\b\3\b\3"+
-		"\t\3\t\3\t\7\t;\n\t\f\t\16\t>\13\t\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n"+
-		"\5\nI\n\n\3\n\3\n\3\n\3\n\3\n\3\n\7\nQ\n\n\f\n\16\nT\13\n\3\13\3\13\3"+
-		"\13\3\13\3\13\3\13\3\13\5\13]\n\13\3\f\3\f\5\fa\n\f\3\r\3\r\3\r\2\16\2"+
-		"\4\6\b\n\f\16\20\22\24\26\30\2\4\3\2\f\f\6\2\3\3\5\5\13\13\17\17d\2\32"+
-		"\3\2\2\2\4\34\3\2\2\2\6#\3\2\2\2\b)\3\2\2\2\n+\3\2\2\2\f\61\3\2\2\2\16"+
-		"\65\3\2\2\2\20\67\3\2\2\2\22?\3\2\2\2\24\\\3\2\2\2\26`\3\2\2\2\30b\3\2"+
-		"\2\2\32\33\5\4\3\2\33\3\3\2\2\2\34\35\5\6\4\2\35\5\3\2\2\2\36\37\5\b\5"+
-		"\2\37 \7\f\2\2 \"\3\2\2\2!\36\3\2\2\2\"%\3\2\2\2#!\3\2\2\2#$\3\2\2\2$"+
-		"\7\3\2\2\2%#\3\2\2\2&*\5\n\6\2\'*\5\f\7\2(*\5\16\b\2)&\3\2\2\2)\'\3\2"+
-		"\2\2)(\3\2\2\2*\t\3\2\2\2+,\7\4\2\2,-\5\22\n\2-.\7\20\2\2./\5\6\4\2/\60"+
-		"\7\r\2\2\60\13\3\2\2\2\61\62\5\22\n\2\62\63\7\n\2\2\63\64\5\22\n\2\64"+
-		"\r\3\2\2\2\65\66\5\22\n\2\66\17\3\2\2\2\67<\5\22\n\289\7\b\2\29;\5\22"+
-		"\n\2:8\3\2\2\2;>\3\2\2\2<:\3\2\2\2<=\3\2\2\2=\21\3\2\2\2><\3\2\2\2?@\b"+
-		"\n\1\2@A\5\24\13\2AR\3\2\2\2BC\6\n\2\3CD\7\7\2\2DQ\7\22\2\2EF\6\n\3\3"+
-		"FH\7\t\2\2GI\5\20\t\2HG\3\2\2\2HI\3\2\2\2IJ\3\2\2\2JQ\7\6\2\2KL\6\n\4"+
-		"\3LM\7\n\2\2MN\5\22\n\2NO\n\2\2\2OQ\3\2\2\2PB\3\2\2\2PE\3\2\2\2PK\3\2"+
-		"\2\2QT\3\2\2\2RP\3\2\2\2RS\3\2\2\2S\23\3\2\2\2TR\3\2\2\2UV\7\t\2\2VW\5"+
-		"\22\n\2WX\7\6\2\2X]\3\2\2\2Y]\7\16\2\2Z]\5\26\f\2[]\7\22\2\2\\U\3\2\2"+
-		"\2\\Y\3\2\2\2\\Z\3\2\2\2\\[\3\2\2\2]\25\3\2\2\2^a\7\21\2\2_a\5\30\r\2"+
-		"`^\3\2\2\2`_\3\2\2\2a\27\3\2\2\2bc\t\3\2\2c\31\3\2\2\2\n#)<HPR\\`";
+		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\24b\4\2\t\2\4\3\t"+
+		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\3\2\3\2\3\3"+
+		"\3\3\3\4\7\4\32\n\4\f\4\16\4\35\13\4\3\5\3\5\5\5!\n\5\3\5\5\5$\n\5\3\6"+
+		"\3\6\3\6\3\6\3\6\3\6\3\7\3\7\3\b\3\b\3\b\7\b\61\n\b\f\b\16\b\64\13\b\3"+
+		"\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\7\tB\n\t\f\t\16\tE\13\t"+
+		"\3\t\3\t\3\t\3\t\5\tK\n\t\3\t\3\t\5\tO\n\t\5\tQ\n\t\3\t\3\t\3\t\3\t\3"+
+		"\t\3\t\3\t\3\t\7\t[\n\t\f\t\16\t^\13\t\3\n\3\n\3\n\2\13\2\4\6\b\n\f\16"+
+		"\20\22\2\3\3\2\r\17f\2\24\3\2\2\2\4\26\3\2\2\2\6\33\3\2\2\2\b#\3\2\2\2"+
+		"\n%\3\2\2\2\f+\3\2\2\2\16-\3\2\2\2\20P\3\2\2\2\22_\3\2\2\2\24\25\5\4\3"+
+		"\2\25\3\3\2\2\2\26\27\5\6\4\2\27\5\3\2\2\2\30\32\5\b\5\2\31\30\3\2\2\2"+
+		"\32\35\3\2\2\2\33\31\3\2\2\2\33\34\3\2\2\2\34\7\3\2\2\2\35\33\3\2\2\2"+
+		"\36 \5\n\6\2\37!\7\t\2\2 \37\3\2\2\2 !\3\2\2\2!$\3\2\2\2\"$\5\f\7\2#\36"+
+		"\3\2\2\2#\"\3\2\2\2$\t\3\2\2\2%&\7\3\2\2&\'\5\20\t\2\'(\7\13\2\2()\5\6"+
+		"\4\2)*\7\n\2\2*\13\3\2\2\2+,\5\20\t\2,\r\3\2\2\2-\62\5\20\t\2./\7\6\2"+
+		"\2/\61\5\20\t\2\60.\3\2\2\2\61\64\3\2\2\2\62\60\3\2\2\2\62\63\3\2\2\2"+
+		"\63\17\3\2\2\2\64\62\3\2\2\2\65\66\b\t\1\2\66\67\7\7\2\2\678\5\20\t\2"+
+		"89\7\4\2\29Q\3\2\2\2:;\7\f\2\2;<\7\5\2\2<Q\7\20\2\2=Q\5\22\n\2>C\7\20"+
+		"\2\2?@\7\5\2\2@B\7\20\2\2A?\3\2\2\2BE\3\2\2\2CA\3\2\2\2CD\3\2\2\2DQ\3"+
+		"\2\2\2EC\3\2\2\2FQ\7\22\2\2GH\7\21\2\2HJ\7\7\2\2IK\5\16\b\2JI\3\2\2\2"+
+		"JK\3\2\2\2KL\3\2\2\2LN\7\4\2\2MO\7\t\2\2NM\3\2\2\2NO\3\2\2\2OQ\3\2\2\2"+
+		"P\65\3\2\2\2P:\3\2\2\2P=\3\2\2\2P>\3\2\2\2PF\3\2\2\2PG\3\2\2\2Q\\\3\2"+
+		"\2\2RS\6\t\2\3ST\7\b\2\2T[\5\20\t\2UV\6\t\3\3VW\7\b\2\2WX\5\20\t\2XY\7"+
+		"\t\2\2Y[\3\2\2\2ZR\3\2\2\2ZU\3\2\2\2[^\3\2\2\2\\Z\3\2\2\2\\]\3\2\2\2]"+
+		"\21\3\2\2\2^\\\3\2\2\2_`\t\2\2\2`\23\3\2\2\2\f\33 #\62CJNPZ\\";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {

@@ -17,18 +17,22 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	evaluateConstruct					# StmtEvaluate
 		|	'Exit'								# StmtExit
 		|	'Break'								# StmtBreak
-		|	expr '=' expr						# StmtAssign
+		|	'Error' expr						# StmtError
+		|	'Warning' expr						# StmtWarning
+		|	expr '=' expr						# StmtAssign	// Must be higher than fn call to properly resolve '=' ambiguity.
 		|	expr '(' exprList? ')'				# StmtFnCall
 		;
 
 expr	:	'(' expr ')'								# ExprParenthesized
-		|	'@' '(' expr ')'							# ExprDynamicReference
-		|	'Not'<assoc=right> expr						# ExprNot
-		|	'create' appClassPath '(' exprList? ')'		# ExprCreate
 		|	literal										# ExprLiteral
 		|	id											# ExprId
+		|	'@'<assoc=right> '(' expr ')'				# ExprDynamicReference
+		|	'-'<assoc=right> expr						# ExprNegate
+		|	'Not'<assoc=right> expr						# ExprNot
+		|	'create' appClassPath '(' exprList? ')'		# ExprCreate
 		|	expr '.' id									# ExprStaticReference
 		| 	expr '(' exprList? ')'						# ExprFnCall
+		|	expr ('+'|'-') expr							# ExprAddSub
 		|	expr ('='|'<>') expr						# ExprEquality	// splitting symbols out may affect parsing
 		|	expr (
 					'And'<assoc=right>
@@ -91,6 +95,6 @@ DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 StringLiteral	:	'"' ( ~'"' )* '"' ;
 
-REM			:	[rR][eE][mM] .*? ';' -> skip;
+REM			:	WS [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT		:	'/*' .*? '*/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;

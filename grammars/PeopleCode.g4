@@ -11,7 +11,7 @@ stmtList:	(stmt ';')* stmt? ;	 // The last/only statement doesn't need a semicol
 // Semicolons are optional after some PeopleCode stmt constructs.
 stmt	:	appClassImport						# StmtAppClassImport
 		|	funcImport							# StmtFuncImport
-		|	varDecl								# StmtVarDecl
+		|	varDeclaration						# StmtVarDeclaration
 		|	ifConstruct							# StmtIf
 		|	forConstruct						# StmtFor
 		|	evaluateConstruct					# StmtEvaluate
@@ -23,28 +23,30 @@ stmt	:	appClassImport						# StmtAppClassImport
 
 expr	:	'(' expr ')'								# ExprParenthesized
 		|	'@' '(' expr ')'							# ExprDynamicReference
+		|	'Not'<assoc=right> expr						# ExprNot
 		|	'create' appClassPath '(' exprList? ')'		# ExprCreate
 		|	literal										# ExprLiteral
 		|	id											# ExprId
 		|	expr '.' id									# ExprStaticReference
 		| 	expr '(' exprList? ')'						# ExprFnCall
-		|	expr ('='|'<>') expr						# ExprEquality
+		|	expr ('='|'<>') expr						# ExprEquality	// splitting symbols out may affect parsing
 		|	expr (
 					'And'<assoc=right>
 				|	'Or'<assoc=right>
-			) expr										# ExprBoolean
+			) expr										# ExprBoolean // order: Not, And, then Or
 		|	expr '|' expr								# ExprConcatenate
 		;
 
 exprList:	expr (',' expr)* ;
 
-varDecl	:	varScopeModifier varTypeModifier VAR_ID (',' VAR_ID)* ;
+varDeclaration	:	varScope varType varDeclarator (',' varDeclarator)* ;
+varDeclarator	:	VAR_ID ('=' expr)? ;
 
-varScopeModifier	:	'Global' | 'Component' | 'Local' ;
-varTypeModifier		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer' | 'number'
-					|	'Rowset' 
-					|	appClassPath
-					;
+varScope	:	'Global' | 'Component' | 'Local' ;
+varType		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer' | 'number'
+			|	'Rowset' 
+			|	appClassPath
+			;
 
 appClassImport	:	'import' appClassPath ;
 appClassPath	:	GENERIC_ID (':' GENERIC_ID)* ;
@@ -81,14 +83,14 @@ id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
 // Lexer Rules 									    	 //
 //*******************************************************//
 
-VAR_ID		:	'&' [a-zA-Z_]+ ;
-SYS_VAR_ID	:	'%' [a-zA-Z_]+ ;
+VAR_ID		:	'&' GENERIC_ID ;
+SYS_VAR_ID	:	'%' GENERIC_ID ;
 GENERIC_ID	:	[a-zA-Z] [0-9a-zA-Z_]* ;	
 
 DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 StringLiteral	:	'"' ( ~'"' )* '"' ;
 
-REM			:	'rem' .*? ';' -> skip;
+REM			:	[rR][eE][mM] .*? ';' -> skip;
 COMMENT		:	'/*' .*? '*/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;

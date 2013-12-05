@@ -11,6 +11,7 @@ stmtList:	(stmt ';')* stmt? ;	 // The last/only statement doesn't need a semicol
 // Semicolons are optional after some PeopleCode stmt constructs.
 stmt	:	appClassImport						# StmtAppClassImport
 		|	funcImport							# StmtFuncImport
+		|	funcDeclaration						# StmtFuncDeclaration
 		|	varDeclaration						# StmtVarDeclaration
 		|	ifStmt								# StmtIf
 		|	forStmt								# StmtFor
@@ -30,7 +31,7 @@ expr	:	'(' expr ')'								# ExprParenthesized
 		|	'@'<assoc=right> '(' expr ')'				# ExprDynamicReference
 		|	'-'<assoc=right> expr						# ExprNegate
 		|	'Not'<assoc=right> expr						# ExprNot
-		|	'create' appClassPath '(' exprList? ')'		# ExprCreate
+		|	createInvocation							# ExprCreate
 		|	expr '.' id									# ExprStaticReference
 		|	expr '[' expr ']'							# ExprArrayIndex
 		| 	expr '(' exprList? ')'						# ExprFnCall
@@ -52,6 +53,7 @@ varDeclarator	:	VAR_ID ('=' expr)? ;
 varScope	:	'Global' | 'Component' | 'Local' ;
 varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field'
 			|	'integer' | 'number' | 'Rowset' | 'date' | 'Row' | appClassPath
+			|	GENERIC_ID	// for objects (i.e., Address)
 			;
 
 appClassImport	:	'import' appClassPath ;
@@ -61,6 +63,8 @@ funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
 event		:	'FieldFormula' ;
 
+funcDeclaration :   'Function' GENERIC_ID '(' ')' ';' stmtList 'End-Function' ;
+
 ifStmt	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
 
 forStmt	:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
@@ -69,6 +73,9 @@ evaluateStmt	:	'Evaluate' expr ('When' '='? expr stmtList)+
 						('When-Other' stmtList)? 'End-Evaluate' ;
 
 tryCatchStmt	:	'try' stmtList 'catch' 'Exception' VAR_ID stmtList 'end-try' ;
+
+// the object name could be the fully resolved app class path or just the class name.
+createInvocation:	'create' (appClassPath | GENERIC_ID) '(' exprList? ')' ;
 
 defnType	:	'Component' | 'Panel' | 'RecName' | 'Scroll' | 'HTML'
 			|	'MenuName' | 'BarName' | 'ItemName' | 'CompIntfc' | 'Image'

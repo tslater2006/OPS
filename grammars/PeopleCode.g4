@@ -10,7 +10,8 @@ classicProg : stmtList ;
 
 stmtList:	(stmt ';')* ;
 
-stmt	:	varDecl								# StmtVarDecl
+stmt	:	funcImport							# StmtFuncImport
+		|	varDecl								# StmtVarDecl
 		|	ifConstruct							# StmtIf
 		|	forConstruct						# StmtFor
 		|	evaluateConstruct					# StmtEvaluate
@@ -27,7 +28,7 @@ expr	:	'(' expr ')'						# ExprParenthesized
 		|	expr '.' id							# ExprStaticReference
 		| 	expr '(' exprList? ')'				# ExprFnCall
 		|	expr ('And') expr					# ExprBoolean
-		|	expr op=('<>'|'=') expr				# ExprEquality
+		|	expr relop expr						# ExprEquality
 		|	expr ('|') expr						# ExprConcatenate
 		;
 
@@ -36,17 +37,23 @@ exprList:	expr (',' expr)* ;
 varDecl	:	varScopeModifier varTypeModifier VAR_ID (',' VAR_ID)* ;
 
 varScopeModifier	:	'Global' | 'Component' | 'Local' ;
-varTypeModifier		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer'
+varTypeModifier		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer' | 'number'
 					|	'Rowset' ;
+
+funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' defnPath event ;
+defnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
+event		:	'FieldFormula' ;
 
 ifConstruct	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
 
 forConstruct:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
 
-evaluateConstruct	:	'Evaluate' expr ('When' expr stmtList)+
+evaluateConstruct	:	'Evaluate' expr ('When' relop? expr stmtList)+
 						('When-Other' stmtList)? 'End-Evaluate' ;
 
-defnKeyword	:	'MenuName' | 'Component' | 'Record' | 'Field' ;
+defnKeyword	:	'MenuName' | 'Component' | 'Record' | 'Field' | 'Panel' ;
+
+relop	:	'=' | '<>' ;
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral

@@ -32,12 +32,14 @@ public class EntDiagErrorListener extends DiagnosticErrorListener {
 			return;
 		}
 
-		//TODO: Explain
-		if(msg.startsWith("reportAmbiguity d=2 (stmt): ambigAlts={7, 8}")) {
-			return;
-		}
-
-		if(msg.startsWith("reportAmbiguity d=6 (expr): ambigAlts={1, 2}")) {
+		/**
+		 * The PeopleCode grammar is ambiguous with regard to assignment and
+		 * comparison statements - both use '=' as the operator. Exceptions
+		 * related to this ambiguity can be ignored; I've ordered the rules such
+		 * that the correct action will be taken when ANTLR chooses the first alternative.
+		 */
+		if(msg.startsWith("reportAmbiguity d=2 (stmt): ambigAlts={8, 9}")
+			|| msg.startsWith("reportAmbiguity d=6 (expr): ambigAlts={1, 2}")) {
 			return;
 		}
 

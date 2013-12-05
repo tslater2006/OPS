@@ -6,8 +6,9 @@ grammar PeopleCode;
 
 program	:	stmtList ;
 
-stmtList:	(stmt ';')* ;
+stmtList:	(stmt ';')* stmt? ;	 // The last/only statement doesn't need a semicolon.
 
+// Semicolons are optional after some PeopleCode stmt constructs.
 stmt	:	appClassImport						# StmtAppClassImport
 		|	funcImport							# StmtFuncImport
 		|	varDecl								# StmtVarDecl
@@ -16,7 +17,7 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	evaluateConstruct					# StmtEvaluate
 		|	'Exit'								# StmtExit
 		|	'Break'								# StmtBreak
-		|	expr '='<assoc=right> expr			# StmtAssign
+		|	expr '=' expr						# StmtAssign
 		|	expr '(' exprList? ')'				# StmtFnCall
 		;
 
@@ -27,9 +28,12 @@ expr	:	'(' expr ')'								# ExprParenthesized
 		|	id											# ExprId
 		|	expr '.' id									# ExprStaticReference
 		| 	expr '(' exprList? ')'						# ExprFnCall
-		|	expr ('And') expr							# ExprBoolean
-		|	expr relop expr								# ExprEquality
-		|	expr ('|') expr								# ExprConcatenate
+		|	expr ('='|'<>') expr						# ExprEquality
+		|	expr (
+					'And'<assoc=right>
+				|	'Or'<assoc=right>
+			) expr										# ExprBoolean
+		|	expr '|' expr								# ExprConcatenate
 		;
 
 exprList:	expr (',' expr)* ;
@@ -53,7 +57,7 @@ ifConstruct	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
 
 forConstruct:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
 
-evaluateConstruct	:	'Evaluate' expr ('When' relop? expr stmtList)+
+evaluateConstruct	:	'Evaluate' expr ('When' '='? expr stmtList)+
 						('When-Other' stmtList)? 'End-Evaluate' ;
 
 defnType	:	'Component' | 'Panel' | 'RecName' | 'Scroll' | 'HTML'
@@ -61,8 +65,6 @@ defnType	:	'Component' | 'Panel' | 'RecName' | 'Scroll' | 'HTML'
 			|	'Interlink' | 'StyleSheet' | 'FileLayout' | 'Page' | 'PanelGroup'
 			|	'Message' | 'BusProcess' | 'BusEvent' | 'BusActivity' | 'Field'
 			|	'Record' | 'Operation' | 'SQL' ;
-
-relop	:	'=' | '<>' ;
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral
@@ -87,6 +89,6 @@ DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 StringLiteral	:	'"' ( ~'"' )* '"' ;
 
-REM			:	'rem' ~[\r\n]* -> skip;
+REM			:	'rem' .*? ';' -> skip;
 COMMENT		:	'/*' .*? '*/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;

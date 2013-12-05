@@ -18,14 +18,6 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitDefinitionLiteral(@NotNull PeopleCodeParser.DefinitionLiteralContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
 	@Override public T visitFuncImport(@NotNull PeopleCodeParser.FuncImportContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -50,7 +42,7 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitClassicProg(@NotNull PeopleCodeParser.ClassicProgContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExprBoolean(@NotNull PeopleCodeParser.ExprBooleanContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -58,7 +50,7 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitExprBoolean(@NotNull PeopleCodeParser.ExprBooleanContext ctx) { return visitChildren(ctx); }
+	@Override public T visitStmtAppClassImport(@NotNull PeopleCodeParser.StmtAppClassImportContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -138,6 +130,14 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
+	@Override public T visitAppClassPath(@NotNull PeopleCodeParser.AppClassPathContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
 	@Override public T visitStmtAssign(@NotNull PeopleCodeParser.StmtAssignContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -170,7 +170,23 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
+	@Override public T visitRecDefnPath(@NotNull PeopleCodeParser.RecDefnPathContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
 	@Override public T visitEvaluateConstruct(@NotNull PeopleCodeParser.EvaluateConstructContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitAppClassImport(@NotNull PeopleCodeParser.AppClassImportContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -186,7 +202,7 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitBooleanLiteral(@NotNull PeopleCodeParser.BooleanLiteralContext ctx) { return visitChildren(ctx); }
+	@Override public T visitDefnLiteral(@NotNull PeopleCodeParser.DefnLiteralContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -234,6 +250,14 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
+	@Override public T visitDefnType(@NotNull PeopleCodeParser.DefnTypeContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
 	@Override public T visitStmtFuncImport(@NotNull PeopleCodeParser.StmtFuncImportContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -242,7 +266,7 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitDefnKeyword(@NotNull PeopleCodeParser.DefnKeywordContext ctx) { return visitChildren(ctx); }
+	@Override public T visitBoolLiteral(@NotNull PeopleCodeParser.BoolLiteralContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -298,7 +322,7 @@ public class PeopleCodeBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitDefnPath(@NotNull PeopleCodeParser.DefnPathContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExprCreate(@NotNull PeopleCodeParser.ExprCreateContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

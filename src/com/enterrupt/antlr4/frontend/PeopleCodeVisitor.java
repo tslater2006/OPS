@@ -12,13 +12,6 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#definitionLiteral}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDefinitionLiteral(@NotNull PeopleCodeParser.DefinitionLiteralContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#funcImport}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -40,18 +33,18 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitVarDecl(@NotNull PeopleCodeParser.VarDeclContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#classicProg}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitClassicProg(@NotNull PeopleCodeParser.ClassicProgContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprBoolean}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExprBoolean(@NotNull PeopleCodeParser.ExprBooleanContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtAppClassImport}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStmtAppClassImport(@NotNull PeopleCodeParser.StmtAppClassImportContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#id}.
@@ -117,6 +110,13 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitExprList(@NotNull PeopleCodeParser.ExprListContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#appClassPath}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAppClassPath(@NotNull PeopleCodeParser.AppClassPathContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtAssign}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -145,11 +145,25 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitStmtFor(@NotNull PeopleCodeParser.StmtForContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#recDefnPath}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRecDefnPath(@NotNull PeopleCodeParser.RecDefnPathContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#evaluateConstruct}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitEvaluateConstruct(@NotNull PeopleCodeParser.EvaluateConstructContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#appClassImport}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAppClassImport(@NotNull PeopleCodeParser.AppClassImportContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprFnCall}.
@@ -159,11 +173,11 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitExprFnCall(@NotNull PeopleCodeParser.ExprFnCallContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#booleanLiteral}.
+	 * Visit a parse tree produced by {@link PeopleCodeParser#defnLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBooleanLiteral(@NotNull PeopleCodeParser.BooleanLiteralContext ctx);
+	T visitDefnLiteral(@NotNull PeopleCodeParser.DefnLiteralContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprStaticReference}.
@@ -201,6 +215,13 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitStmtList(@NotNull PeopleCodeParser.StmtListContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link PeopleCodeParser#defnType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefnType(@NotNull PeopleCodeParser.DefnTypeContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#StmtFuncImport}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -208,11 +229,11 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitStmtFuncImport(@NotNull PeopleCodeParser.StmtFuncImportContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#defnKeyword}.
+	 * Visit a parse tree produced by {@link PeopleCodeParser#boolLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDefnKeyword(@NotNull PeopleCodeParser.DefnKeywordContext ctx);
+	T visitBoolLiteral(@NotNull PeopleCodeParser.BoolLiteralContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#program}.
@@ -257,11 +278,11 @@ public interface PeopleCodeVisitor<T> extends ParseTreeVisitor<T> {
 	T visitExprEquality(@NotNull PeopleCodeParser.ExprEqualityContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link PeopleCodeParser#defnPath}.
+	 * Visit a parse tree produced by {@link PeopleCodeParser#ExprCreate}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDefnPath(@NotNull PeopleCodeParser.DefnPathContext ctx);
+	T visitExprCreate(@NotNull PeopleCodeParser.ExprCreateContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link PeopleCodeParser#literal}.

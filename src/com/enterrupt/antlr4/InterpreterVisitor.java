@@ -141,10 +141,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitLiteral(PeopleCodeParser.LiteralContext ctx) {
 
-		if(ctx.definitionLiteral() != null) {
+		if(ctx.defnLiteral() != null) {
 
 			MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(
-				ctx.definitionLiteral().GENERIC_ID().getText());
+				ctx.defnLiteral().GENERIC_ID().getText());
 			setExprValue(ctx, ptr);
 
 		} else if(ctx.IntegerLiteral() != null) {
@@ -153,9 +153,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				new Integer(ctx.IntegerLiteral().getText()));
 			setExprValue(ctx, ptr);
 
-		} else if(ctx.booleanLiteral() != null) {
+		} else if(ctx.boolLiteral() != null) {
 
-			String b = ctx.booleanLiteral().getText();
+			String b = ctx.boolLiteral().getText();
 			if(b.equals("True") || b.equals("true")) {
 				setExprValue(ctx, RunTimeEnvironment.TRUE);
 			} else {

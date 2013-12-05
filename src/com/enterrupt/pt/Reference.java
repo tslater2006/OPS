@@ -15,6 +15,10 @@ public class Reference {
 
 	static {
 
+		/**
+		 * TODO: REMOVE THIS. The ANTLR grammar should be
+		 * the authoritative source (see definitionLiteral rule).
+		 */
 		refReservedWords = new String[] {"Component", "Panel", "RecName", "Scroll",
                          "MenuName", "BarName", "ItemName", "CompIntfc",
                          "Image", "Interlink", "StyleSheet", "FileLayout",

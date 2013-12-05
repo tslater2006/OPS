@@ -4,13 +4,12 @@ grammar PeopleCode;
 // Parser Rules 									    //
 //******************************************************//
 
-program	: classicProg;
-
-classicProg : stmtList ;
+program	:	stmtList ;
 
 stmtList:	(stmt ';')* ;
 
-stmt	:	funcImport							# StmtFuncImport
+stmt	:	appClassImport						# StmtAppClassImport
+		|	funcImport							# StmtFuncImport
 		|	varDecl								# StmtVarDecl
 		|	ifConstruct							# StmtIf
 		|	forConstruct						# StmtFor
@@ -21,15 +20,16 @@ stmt	:	funcImport							# StmtFuncImport
 		|	expr '(' exprList? ')'				# StmtFnCall
 		;
 
-expr	:	'(' expr ')'						# ExprParenthesized
-		|	'@' '(' expr ')'					# ExprDynamicReference
-		|	literal								# ExprLiteral
-		|	id									# ExprId
-		|	expr '.' id							# ExprStaticReference
-		| 	expr '(' exprList? ')'				# ExprFnCall
-		|	expr ('And') expr					# ExprBoolean
-		|	expr relop expr						# ExprEquality
-		|	expr ('|') expr						# ExprConcatenate
+expr	:	'(' expr ')'								# ExprParenthesized
+		|	'@' '(' expr ')'							# ExprDynamicReference
+		|	'create' appClassPath '(' exprList? ')'		# ExprCreate
+		|	literal										# ExprLiteral
+		|	id											# ExprId
+		|	expr '.' id									# ExprStaticReference
+		| 	expr '(' exprList? ')'						# ExprFnCall
+		|	expr ('And') expr							# ExprBoolean
+		|	expr relop expr								# ExprEquality
+		|	expr ('|') expr								# ExprConcatenate
 		;
 
 exprList:	expr (',' expr)* ;
@@ -38,10 +38,15 @@ varDecl	:	varScopeModifier varTypeModifier VAR_ID (',' VAR_ID)* ;
 
 varScopeModifier	:	'Global' | 'Component' | 'Local' ;
 varTypeModifier		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer' | 'number'
-					|	'Rowset' ;
+					|	'Rowset' 
+					|	appClassPath
+					;
 
-funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' defnPath event ;
-defnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
+appClassImport	:	'import' appClassPath ;
+appClassPath	:	GENERIC_ID (':' GENERIC_ID)* ;
+
+funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
+recDefnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
 event		:	'FieldFormula' ;
 
 ifConstruct	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
@@ -51,18 +56,22 @@ forConstruct:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
 evaluateConstruct	:	'Evaluate' expr ('When' relop? expr stmtList)+
 						('When-Other' stmtList)? 'End-Evaluate' ;
 
-defnKeyword	:	'MenuName' | 'Component' | 'Record' | 'Field' | 'Panel' ;
+defnType	:	'Component' | 'Panel' | 'RecName' | 'Scroll' | 'HTML'
+			|	'MenuName' | 'BarName' | 'ItemName' | 'CompIntfc' | 'Image'
+			|	'Interlink' | 'StyleSheet' | 'FileLayout' | 'Page' | 'PanelGroup'
+			|	'Message' | 'BusProcess' | 'BusEvent' | 'BusActivity' | 'Field'
+			|	'Record' | 'Operation' | 'SQL' ;
 
 relop	:	'=' | '<>' ;
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral
-		|	definitionLiteral
+		|	defnLiteral
 		|	StringLiteral
-		|	booleanLiteral
+		|	boolLiteral
 		;
-booleanLiteral	:	'True' | 'true' | 'False' | 'false' ;
-definitionLiteral : defnKeyword '.' GENERIC_ID ;
+boolLiteral	:	'True' | 'true' | 'False' | 'false' ;
+defnLiteral : defnType '.' GENERIC_ID ;
 
 id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
 
@@ -70,14 +79,13 @@ id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
 // Lexer Rules 									    	 //
 //*******************************************************//
 
-GENERIC_ID		:	[a-zA-Z] [0-9a-zA-Z_]* ;	
+VAR_ID		:	'&' [a-zA-Z_]+ ;
+SYS_VAR_ID	:	'%' [a-zA-Z_]+ ;
+GENERIC_ID	:	[a-zA-Z] [0-9a-zA-Z_]* ;	
 
 DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 StringLiteral	:	'"' ( ~'"' )* '"' ;
-
-VAR_ID		:	'&' [a-zA-Z_]+ ;
-SYS_VAR_ID	:	'%' [a-zA-Z_]+ ;
 
 REM			:	'rem' ~[\r\n]* -> skip;
 COMMENT		:	'/*' .*? '*/' -> skip;

@@ -1,0 +1,87 @@
+Declare Function FERPA_SRVC_IND_CHECK PeopleCode FUNCLIB_CS.SRVC_IND_NEG FieldFormula;
+
+Local string &EMPLID;
+
+If %PanelGroup = PanelGroup.DRIVERS_LICENSE Or
+
+%PanelGroup = PanelGroup.LANGUAGES Or
+      %PanelGroup = PanelGroup.LICENSES_CERTIFS Or
+      %PanelGroup = PanelGroup.EMERGENCY_CONTACT Or
+
+
+(%PanelGroup = PanelGroup.ADM_PRS_DELETE Or
+      %PanelGroup = PanelGroup.ADM_APP_DELETE) Or
+
+%Component = Component.SSS_ADVISEE_LIST Then
+
+   Hide(DERIVED_CS.SRVC_IND_NEG);
+   Hide(DERIVED_CS.SRVC_IND_POS);
+   Hide(DERIVED_CS.FERPA_FLAG);
+   Hide(SA_LBL_WRK.DECEASED_LBL);
+Else
+   Evaluate %Page
+   When Page.ACCOUNT_SF
+      &EMPLID = ACCOUNT_VW.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   When Page.CSH_OFF_PMNT
+      &EMPLID = CSH_OFF_RECEIPT.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   When Page.GRP_QUICK_POST
+
+   When Page.WRITEOFF_QCK_POST
+      &EMPLID = QUICK_POST_TBL.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   When = Page.ENRL_REQUEST
+
+   When = Page.QUICK_ENROLL3
+      &EMPLID = GetRowset(Scroll.ENRL_REQ_DETAIL)(1).ENRL_REQ_DETAIL.EMPLID.Value;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   When Page.SSS_CRSE_OFFER_DTL
+      &EMPLID = DERIVED_SSE_K3.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break
+   When Page.SFA_SAP_STDNT
+
+   When Page.SFA_SAP_STDNT2
+
+   When Page.SFA_SAP_STDNT3
+
+   When Page.SFA_SAP_STDNT4
+      &EMPLID = SFA_SAP_FATRM_V.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   When Page.SFA_SAP_STDNT_SIM
+      &EMPLID = SFA_SAP_RPTHSVW.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   When Page.SCC_STG_CONST_STG
+
+   When Page.SCC_STG_CONST_DTLS
+
+   When Page.SCC_STG_PARTICIP
+
+   When Page.SCC_STG_ADDITION
+
+   When Page.SCC_STG_REGIONAL
+
+   When Page.SAD_APPL_STG
+
+   When Page.SAD_GENM_ATTACH
+
+   When Page.SAD_STG_TEST
+
+   When Page.SCC_EXT_ACAD_DATA
+      &EMPLID = SCC_STG_CONSTIT.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   When-Other
+      &EMPLID = SCC_PERS_SA_VW.EMPLID;
+      SCC_SI_DATA_WRK.EMPLID.Value = &EMPLID;
+      Break;
+   End-Evaluate;
+   FERPA_SRVC_IND_CHECK(&EMPLID);
+End-If;

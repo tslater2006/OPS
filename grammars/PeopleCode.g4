@@ -6,7 +6,8 @@ grammar PeopleCode;
 
 program	:	stmtList ;
 
-stmtList:	(stmt ';')* stmt? ;	 // The last/only statement doesn't need a semicolon.
+// Multiple semicolons may be present; the last/only statement may not have a semicolon.
+stmtList:	(stmt ';'+)* stmt? ;	 
 
 // Semicolons are optional after some PeopleCode stmt constructs.
 stmt	:	appClassImport						# StmtAppClassImport
@@ -15,6 +16,7 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	varDeclaration						# StmtVarDeclaration
 		|	ifStmt								# StmtIf
 		|	forStmt								# StmtFor
+		|	whileStmt							# StmtWhile
 		|	evaluateStmt						# StmtEvaluate
 		|	tryCatchStmt						# StmtTryCatch
 		|	'Exit'								# StmtExit
@@ -33,7 +35,7 @@ expr	:	'(' expr ')'								# ExprParenthesized
 		|	'Not'<assoc=right> expr						# ExprNot
 		|	createInvocation							# ExprCreate
 		|	expr '.' id									# ExprStaticReference
-		|	expr '[' expr ']'							# ExprArrayIndex
+		|	expr '[' exprList ']'						# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i, &j]
 		| 	expr '(' exprList? ')'						# ExprFnCall
 		|	expr ('+'|'-') expr							# ExprAddSub
 		|	expr ('<'|'<='|'>'|'>=') expr				# ExprComparison
@@ -63,11 +65,14 @@ funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
 event		:	'FieldFormula' ;
 
-funcDeclaration :   'Function' GENERIC_ID '(' ')' ';' stmtList 'End-Function' ;
+funcDeclaration :   'Function' GENERIC_ID formalParams? ';'? stmtList 'End-Function' ;
+formalParams	:	'(' ')' ;
 
-ifStmt	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
+ifStmt	:	'If' expr 'Then' stmtList ('Else' ';'? stmtList)? 'End-If' ;
 
-forStmt	:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
+forStmt	:	'For' VAR_ID '=' expr 'To' expr ('Step' expr)? stmtList 'End-For' ;
+
+whileStmt	:	'While' expr ';'? stmtList 'End-While' ;
 
 evaluateStmt	:	'Evaluate' expr ('When' '='? expr stmtList)+
 						('When-Other' stmtList)? 'End-Evaluate' ;

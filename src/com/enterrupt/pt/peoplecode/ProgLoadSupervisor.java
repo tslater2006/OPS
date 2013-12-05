@@ -44,6 +44,7 @@ public class ProgLoadSupervisor {
 
 		PeopleCodeProg prog = this.loadStack.peek();
 		if(prog.haveDefnsAndProgsBeenLoaded()) {
+			this.loadStack.pop();
 			return;
 		}
 

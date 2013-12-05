@@ -31,8 +31,10 @@ expr	:	'(' expr ')'								# ExprParenthesized
 		|	'Not'<assoc=right> expr						# ExprNot
 		|	'create' appClassPath '(' exprList? ')'		# ExprCreate
 		|	expr '.' id									# ExprStaticReference
+		|	expr '[' expr ']'							# ExprArrayIndex
 		| 	expr '(' exprList? ')'						# ExprFnCall
 		|	expr ('+'|'-') expr							# ExprAddSub
+		|	expr ('<'|'<='|'>'|'>=') expr				# ExprComparison
 		|	expr ('='|'<>') expr						# ExprEquality	// splitting symbols out may affect parsing
 		|	expr (
 					'And'<assoc=right>
@@ -47,13 +49,12 @@ varDeclaration	:	varScope varType varDeclarator (',' varDeclarator)* ;
 varDeclarator	:	VAR_ID ('=' expr)? ;
 
 varScope	:	'Global' | 'Component' | 'Local' ;
-varType		:	'Record' | 'string' | 'boolean' | 'Field' | 'integer' | 'number'
-			|	'Rowset' 
-			|	appClassPath
+varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field'
+			|	'integer' | 'number' | 'Rowset' | 'date' | 'Row' | appClassPath
 			;
 
 appClassImport	:	'import' appClassPath ;
-appClassPath	:	GENERIC_ID (':' GENERIC_ID)* ;
+appClassPath	:	GENERIC_ID (':' GENERIC_ID)+ ;
 
 funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
@@ -96,5 +97,6 @@ IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 StringLiteral	:	'"' ( ~'"' )* '"' ;
 
 REM			:	WS [rR][eE][mM] WS .*? ';' -> skip;
-COMMENT		:	'/*' .*? '*/' -> skip;
+COMMENT_1	:	'/*' .*? '*/' -> skip;
+COMMENT_2	:	'<*' .*? '*>' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;

@@ -35,20 +35,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitStmtIf(PeopleCodeParser.StmtIfContext ctx) {
 
 		// Get value of conditional expression.
-		visit(ctx.ifConstruct().expr());
-		boolean exprResult = ((BooleanPtr) getExprValue(ctx.ifConstruct().expr())).read();
+		visit(ctx.ifStmt().expr());
+		boolean exprResult = ((BooleanPtr) getExprValue(ctx.ifStmt().expr())).read();
 
 		// If expression evaluates to true, visit the conditional body.
 		if(exprResult) {
-			visit(ctx.ifConstruct().stmtList(0));
+			visit(ctx.ifStmt().stmtList(0));
 		}
 
-		return null;
-	}
-
-	public Void visitStmtFnCall(PeopleCodeParser.StmtFnCallContext ctx) {
-		// Visit (execute) the fn call, but no need to save any return value.
-		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
 		return null;
 	}
 
@@ -85,7 +79,47 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitExprFnCall(PeopleCodeParser.ExprFnCallContext ctx) {
-		this.executeFnCall(ctx.expr(), ctx.exprList(), ctx);
+
+		// null is used to separate call frames.
+		Interpreter.pushToCallStack(null);
+
+		// move args from runtime stack to call stack.
+		for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
+			visit(argCtx);
+			Interpreter.pushToCallStack(getExprValue(argCtx));
+		}
+
+		// Get function reference using reflection.
+		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(ctx.expr().getText());
+		if(fnPtr == null) {
+			throw new EntInterpretException("Encountered attempt to call unimplemented " +
+				"system function: " + ctx.expr().getText());
+		}
+
+		// Invoke function.
+        try {
+            fnPtr.invoke(RunTimeEnvironment.class);
+        } catch(java.lang.IllegalAccessException iae) {
+            log.fatal(iae.getMessage(), iae);
+            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
+        } catch(java.lang.reflect.InvocationTargetException ite) {
+            log.fatal(ite.getMessage(), ite);
+            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
+        }
+
+		/**
+		 * Pop the first value from the call stack. If it's null, the function
+		 * did not emit a return value. If it's non-null, the next item on the stack
+		 * must be the null separator (PeopleCode funcs can only return 1 value).
+		 */
+	    MemoryPtr retPtr = Interpreter.popFromCallStack();
+		setExprValue(ctx, retPtr);
+
+		if(retPtr != null && (Interpreter.popFromCallStack() != null)) {
+			throw new EntInterpretException("More than one return value was found on " +
+				"the call stack.");
+		}
+
 		return null;
 	}
 
@@ -170,54 +204,5 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		return null;
-	}
-
-	/**********************************************************
-	 * Shared functions.
-	 **********************************************************/
-
-	private void executeFnCall(PeopleCodeParser.ExprContext exprCtx,
-						       PeopleCodeParser.ExprListContext exprListCtx,
-							   ParseTree fnCtx) {
-
-		// null is used to separate call frames.
-		Interpreter.pushToCallStack(null);
-
-		// move args from runtime stack to call stack.
-		for(PeopleCodeParser.ExprContext argCtx : exprListCtx.expr()) {
-			visit(argCtx);
-			Interpreter.pushToCallStack(getExprValue(argCtx));
-		}
-
-		// Get function reference using reflection.
-		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(exprCtx.getText());
-		if(fnPtr == null) {
-			throw new EntInterpretException("Encountered attempt to call unimplemented " +
-				"system function: " + exprCtx.getText());
-		}
-
-		// Invoke function.
-        try {
-            fnPtr.invoke(RunTimeEnvironment.class);
-        } catch(java.lang.IllegalAccessException iae) {
-            log.fatal(iae.getMessage(), iae);
-            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-        } catch(java.lang.reflect.InvocationTargetException ite) {
-            log.fatal(ite.getMessage(), ite);
-            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-        }
-
-		/**
-		 * Pop the first value from the call stack. If it's null, the function
-		 * did not emit a return value. If it's non-null, the next item on the stack
-		 * must be the null separator (PeopleCode funcs can only return 1 value).
-		 */
-	    MemoryPtr retPtr = Interpreter.popFromCallStack();
-		setExprValue(fnCtx, retPtr);
-
-		if(retPtr != null && (Interpreter.popFromCallStack() != null)) {
-			throw new EntInterpretException("More than one return value was found on " +
-				"the call stack.");
-		}
 	}
 }

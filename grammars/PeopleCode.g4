@@ -12,15 +12,16 @@ stmtList:	(stmt ';')* stmt? ;	 // The last/only statement doesn't need a semicol
 stmt	:	appClassImport						# StmtAppClassImport
 		|	funcImport							# StmtFuncImport
 		|	varDeclaration						# StmtVarDeclaration
-		|	ifConstruct							# StmtIf
-		|	forConstruct						# StmtFor
-		|	evaluateConstruct					# StmtEvaluate
+		|	ifStmt								# StmtIf
+		|	forStmt								# StmtFor
+		|	evaluateStmt						# StmtEvaluate
+		|	tryCatchStmt						# StmtTryCatch
 		|	'Exit'								# StmtExit
 		|	'Break'								# StmtBreak
 		|	'Error' expr						# StmtError
 		|	'Warning' expr						# StmtWarning
 		|	expr '=' expr						# StmtAssign	// Must be higher than fn call to properly resolve '=' ambiguity.
-		|	expr '(' exprList? ')'				# StmtFnCall
+		|	expr								# StmtExpr		// For fn calls; the value of expr is not assigned to anything.
 		;
 
 expr	:	'(' expr ')'								# ExprParenthesized
@@ -60,12 +61,14 @@ funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
 event		:	'FieldFormula' ;
 
-ifConstruct	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
+ifStmt	:	'If' expr 'Then' stmtList ('Else' stmtList)? 'End-If' ;
 
-forConstruct:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
+forStmt	:	'For' VAR_ID '=' expr 'To' expr stmtList 'End-For' ;
 
-evaluateConstruct	:	'Evaluate' expr ('When' '='? expr stmtList)+
+evaluateStmt	:	'Evaluate' expr ('When' '='? expr stmtList)+
 						('When-Other' stmtList)? 'End-Evaluate' ;
+
+tryCatchStmt	:	'try' stmtList 'catch' 'Exception' VAR_ID stmtList 'end-try' ;
 
 defnType	:	'Component' | 'Panel' | 'RecName' | 'Scroll' | 'HTML'
 			|	'MenuName' | 'BarName' | 'ItemName' | 'CompIntfc' | 'Image'

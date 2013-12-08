@@ -75,6 +75,7 @@ public class ProgLoadSupervisor {
 	        parser.addErrorListener(new EntDiagErrorListener());
     	    parser.getInterpreter()
 	    	    .setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
+			parser.setErrorHandler(new EntErrorStrategy());
 
 	        ParseTree tree = parser.program();
 

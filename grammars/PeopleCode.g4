@@ -16,7 +16,7 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	varDeclaration						# StmtVarDeclaration
 		|	ifStmt								# StmtIf
 		|	forStmt								# StmtFor
-		|	whileStmt							# StmtWhile
+//		|	whileStmt							# StmtWhile
 		|	evaluateStmt						# StmtEvaluate
 		|	tryCatchStmt						# StmtTryCatch
 		|	'Exit'								# StmtExit
@@ -37,6 +37,7 @@ expr	:	'(' expr ')'								# ExprParenthesized
 		|	expr '.' id									# ExprStaticReference
 		|	expr '[' exprList ']'						# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i, &j]
 		| 	expr '(' exprList? ')'						# ExprFnCall
+		|	expr ('*'|'/') expr							# ExprMulDiv
 		|	expr ('+'|'-') expr							# ExprAddSub
 		|	expr ('<'|'<='|'>'|'>=') expr				# ExprComparison
 		|	expr ('='|'<>') expr						# ExprEquality	// splitting symbols out may affect parsing
@@ -94,7 +95,7 @@ literal	:	DecimalLiteral
 		|	StringLiteral
 		|	boolLiteral
 		;
-boolLiteral	:	'True' | 'true' | 'False' | 'false' ;
+boolLiteral	:	'True' | 'False' ;
 defnLiteral : defnType '.' GENERIC_ID ;
 
 id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;

@@ -15,7 +15,7 @@
 		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
 		<Logger name="com.enterrupt.sql.ENTStmt" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode" level="WARN"/>
-		<Logger name="com.enterrupt.pt.peoplecode.ProgLoadSupervisor" level="ALL"/>
+		<Logger name="com.enterrupt.pt.peoplecode.ProgLoadSupervisor" level="all"/>
 		<Logger name="com.enterrupt.pt.Component" level="WARN"/>
     </Loggers>
 </Configuration>

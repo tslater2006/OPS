@@ -16,7 +16,7 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	varDeclaration						# StmtVarDeclaration
 		|	ifStmt								# StmtIf
 		|	forStmt								# StmtFor
-//		|	whileStmt							# StmtWhile
+		|	whileStmt							# StmtWhile
 		|	evaluateStmt						# StmtEvaluate
 		|	tryCatchStmt						# StmtTryCatch
 		|	'Exit'								# StmtExit

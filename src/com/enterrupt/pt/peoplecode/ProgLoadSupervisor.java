@@ -67,7 +67,7 @@ public class ProgLoadSupervisor {
             }
 
         	ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
-	        PeopleCodeLexer lexer = new PeopleCodeLexer(input);
+	        NoErrorTolerancePeopleCodeLexer lexer = new NoErrorTolerancePeopleCodeLexer(input);
     	    CommonTokenStream tokens = new CommonTokenStream(lexer);
         	PeopleCodeParser parser = new PeopleCodeParser(tokens);
 

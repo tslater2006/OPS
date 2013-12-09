@@ -16,39 +16,6 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream, int recursionLevel, LFlag lflag,
 		Stack<PeopleCodeProg> traceStack) {
 
-       if(t.flags.contains(TFlag.GLOBAL) || t.flags.contains(TFlag.COMPONENT) ||
-       		t.flags.contains(TFlag.LOCAL)) {
-
-            /**
-             * If the first token of the variable's type is a package
-             * name seen in this program, and the look ahead token is a COLON,
-             * we need to parse out the app class reference and load its OnExecute program.
-             */
-			t = stream.readNextToken();
-            Token l = stream.peekNextToken();
-
-             if(t.flags.contains(TFlag.PURE_STRING)
-             	&& l.flags.contains(TFlag.COLON)
-                && importedAppPackages.get(t.pureStrVal) != null) {
-
-				String[] path = this.getAppClassPathFromStream(t, stream);
-
-            	PeopleCodeProg prog = new AppClassPeopleCodeProg(path);
-				prog = DefnCache.getProgram(prog);
-
- 	            referencedProgs.add(prog);
-
-    	        // Load the program's initial metadata.
-				prog.init();
-
-				log.debug("Loading defns/progs for {} with parent {}",
-					prog.getDescriptor(), this.getDescriptor());
-				prog.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag, traceStack);
-       		} else {
-				//TODO: throw new EntVMachRuntimeException("Unknown token syntax following GLOBAL/COMPONENT/LOCAL.");
-			}
-		}
-
 		if(t.flags.contains(TFlag.CREATE)) {
 
 			t = stream.readNextToken();

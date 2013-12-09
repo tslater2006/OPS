@@ -33,6 +33,38 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	/**
+	 * When a variable declaration in a non-app class program references
+	 * an object in an app class, we need to parse out the app class reference and
+	 * load that program's OnExecute program.
+	 */
+	public Void visitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
+
+		/**
+		 * Only take action when source program is classic (not app class).
+		 * TODO: This will need to change when I reorganize the peoplecode package.
+		 */
+		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
+			return null;
+		}
+
+		if(ctx.varType().appClassPath() != null) {
+			ArrayList<String> appClassParts = new ArrayList<String>();
+			for(TerminalNode id : ctx.varType().appClassPath().GENERIC_ID()) {
+				appClassParts.add(id.getText());
+			}
+			PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+				new String[appClassParts.size()]));
+			prog = DefnCache.getProgram(prog);
+			this.srcProg.referencedProgs.add(prog);
+
+			// Load the referenced program's initial metadata.
+			prog.init();
+		}
+
+		return null;
+	}
+
+	/**
 	 * Detect references to externally-defined functions. We make note of the
 	 * referenced program at this time; later, once we've counted any and all
 	 * function calls to this and other functions defined in the referenced program,

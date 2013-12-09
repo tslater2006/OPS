@@ -3,7 +3,7 @@ package com.enterrupt.pt.peoplecode;
 import java.lang.StringBuilder;
 import com.enterrupt.pt.*;
 
-public class PagePeopleCodeProg extends ClassicPeopleCodeProg {
+public class PagePeopleCodeProg extends PeopleCodeProg {
 
 	public String PNLNAME;
 

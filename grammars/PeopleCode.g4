@@ -1,5 +1,9 @@
 grammar PeopleCode;
 
+@lexer::members {
+	public static final int REFERENCES = 1;
+}
+
 //******************************************************//
 // Parser Rules 									    //
 //******************************************************//
@@ -116,3 +120,6 @@ REM			:	WS [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1	:	'/*' .*? '*/' -> skip;
 COMMENT_2	:	'<*' .*? '*>' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;
+
+// Reference indices are emitted on a separate channel.
+ENT_REF_IDX	:	'#ENTREF{' IntegerLiteral '}' -> channel(REFERENCES) ;

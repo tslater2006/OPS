@@ -90,8 +90,8 @@ public class ProgLoadSupervisor {
                 writer.close();
             }
 
-	        ProgLoaderVisitor progLoader = new ProgLoaderVisitor(prog);
-    	    progLoader.visit(tree);
+			ParseTreeWalker walker = new ParseTreeWalker();
+			walker.walk(new ProgLoadListener(prog, loadStack.size()-1, tokens), tree);
 
 	    } catch(java.io.IOException ioe) {
             throw new EntVMachRuntimeException(ioe.getMessage());

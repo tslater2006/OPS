@@ -39,7 +39,7 @@
 			<arg value="-package"/>
 			<arg value="com.enterrupt.antlr4.frontend"/>
 			<arg value="-visitor"/>
-			<arg value="-no-listener"/>
+			<arg value="-listener"/>
 			<arg value="${basedir}/grammars/PeopleCode.g4"/>
 		</exec>
 

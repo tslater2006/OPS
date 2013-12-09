@@ -4,7 +4,7 @@ import java.sql.*;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.pt.*;
 
-public class RecordPeopleCodeProg extends ClassicPeopleCodeProg {
+public class RecordPeopleCodeProg extends PeopleCodeProg {
 
 	public String RECNAME;
 	public String FLDNAME;

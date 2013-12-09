@@ -37,9 +37,6 @@ public abstract class PeopleCodeProg {
 
 	public abstract String getDescriptor();
 
-	protected abstract void subclassTokenHandler(Token t, PeopleCodeTokenStream stream,
-		int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack);
-
 	public Reference getProgReference(int refNbr) {
 		return this.progRefsTable.get(refNbr);
 	}
@@ -187,9 +184,6 @@ public abstract class PeopleCodeProg {
     }
 
 	public void loadDefnsAndPrograms() {
-
-//		this.recurseLoadDefnsAndPrograms(0, flag, new Stack<PeopleCodeProg>());
-
 		ProgLoadSupervisor supervisor = new ProgLoadSupervisor(this);
 		supervisor.start();
 	}

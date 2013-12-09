@@ -3,7 +3,7 @@ package com.enterrupt.pt.peoplecode;
 import java.lang.StringBuilder;
 import com.enterrupt.pt.*;
 
-public class ComponentPeopleCodeProg extends ClassicPeopleCodeProg {
+public class ComponentPeopleCodeProg extends PeopleCodeProg {
 
 	public String PNLGRPNAME;
 	public String MARKET;

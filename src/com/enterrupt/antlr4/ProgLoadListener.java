@@ -8,24 +8,32 @@ import org.antlr.v4.runtime.tree.*;
 import com.enterrupt.interpreter.*;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
+import com.enterrupt.pt.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.antlr4.frontend.*;
 
-public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
+public class ProgLoadListener extends PeopleCodeBaseListener {
 
+	private int recurseLvl;
 	private PeopleCodeProg srcProg;
+	private BufferedTokenStream tokens;
+	private Map<Integer, Void> refIndicesSeen;
 
-	private static Logger log = LogManager.getLogger(ProgLoaderVisitor.class.getName());
+	private static Logger log = LogManager.getLogger(ProgLoadListener.class.getName());
 
-	public ProgLoaderVisitor(PeopleCodeProg srcProg) {
+	public ProgLoadListener(PeopleCodeProg srcProg, int recurseLvl, BufferedTokenStream tokens) {
 		this.srcProg = srcProg;
+		this.tokens = tokens;
+		this.recurseLvl = recurseLvl;
+		this.refIndicesSeen = new HashMap<Integer, Void>();
 	}
 
 	/**
 	 * When an app package/class is imported, load the root package's defn
 	 * and save the package path for use during potential class resolution later.
 	 */
-	public Void visitAppClassImport(PeopleCodeParser.AppClassImportContext ctx) {
+	@Override
+	public void exitAppClassImport(PeopleCodeParser.AppClassImportContext ctx) {
 		if(ctx.appPkgPath() != null) {
 			String rootPkgName = ctx.appPkgPath().GENERIC_ID(0).getText();
 			DefnCache.getAppPackage(rootPkgName);
@@ -43,8 +51,6 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			pathsToClass.add(new AppPackagePath(ctx.appClassPath().getText()));
 			this.srcProg.importedAppClasses.put(appClassName, pathsToClass);
 		}
-
-		return null;
 	}
 
 	/**
@@ -52,14 +58,11 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * an object in an app class, we need to parse out the app class reference and
 	 * load that program's OnExecute PeopleCode segment.
 	 */
-	public Void visitVarType(PeopleCodeParser.VarTypeContext ctx) {
+	@Override
+	public void exitVarType(PeopleCodeParser.VarTypeContext ctx) {
 
-		/**
-		 * Only take action when source program is classic (not app class).
-		 * TODO: This will need to change when I reorganize the peoplecode package.
-		 */
-		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
-			return null;
+		if(this.srcProg instanceof AppClassPeopleCodeProg) {
+			return;
 		}
 		List<String> appClassParts = null;
 
@@ -72,13 +75,6 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 		} else if(ctx.GENERIC_ID() != null) {
 			appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
 			//log.debug("(1) Class name resolved: {} in {}", appClassParts, ctx.getText());
-		} else if(ctx.varType() != null) {
-			/**
-			 * It's possible that the nested varType refers to an app class; we need
-			 * to visit that node to ensure that we check its type.
-			 */
-			//log.debug("(2) Nested varType found, calling visit(): {}", ctx.getText());
-			visit(ctx.varType());
 		}
 
 		// Don't error out if null, since var type may be other than an app class.
@@ -91,8 +87,6 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			// Load the referenced program's initial metadata.
 			prog.init();
 		}
-
-		return null;
 	}
 
 	/**
@@ -101,14 +95,11 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * function calls to this and other functions defined in the referenced program,
 	 * that program will itself be loaded, provided that the number of references is > 0.
 	 */
-	public Void visitExtFuncImport(PeopleCodeParser.ExtFuncImportContext ctx) {
+	@Override
+	public void exitExtFuncImport(PeopleCodeParser.ExtFuncImportContext ctx) {
 
-		/**
-		 * Only take action when source program is classic (not app class).
-		 * TODO: This will need to change when I reorganize the peoplecode package.
-		 */
-		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
-			return null;
+		if(this.srcProg instanceof AppClassPeopleCodeProg) {
+			return;
 		}
 
 		String fnName = ctx.GENERIC_ID().getText();
@@ -127,8 +118,6 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// Load the prog's initial metadata if it hasn't already been cached.
 		prog.init();
-
-		return null;
 	}
 
 	/**
@@ -136,13 +125,11 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * we need to load the app class OnExecute program corresponding to the class
 	 * instance being created.
 	 */
-	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
-		/**
-		 * Only take action when source program is classic (not app class).
-		 * TODO: This will need to change when I reorganize the peoplecode package.
-		 */
-		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
-			return null;
+	@Override
+	public void exitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
+
+		if(this.srcProg instanceof AppClassPeopleCodeProg) {
+			return;
 		}
 		List<String> appClassParts = null;
 
@@ -170,8 +157,6 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// Load the referenced program's initial metadata.
 		prog.init();
-
-		return null;
 	}
 
 	/**
@@ -180,10 +165,8 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * as having at least one call to it. Calls to index into a rowset using
 	 * PeopleCode's "(<int>)" syntax should be ignored here.
 	 */
-	public Void visitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
-
-		// Ensure that preceding expressions have this function called on them if applicable.
-		visit(ctx.expr());
+	@Override
+	public void exitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
 
 		PeopleCodeParser.IdContext id = null;
 
@@ -195,7 +178,7 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			 * i.e., "&arr.Push(%Menu)", we can ignore it; methods cannot be the subject
 			 * of "Declare" stmts.
 			 */
-			return null;
+			return;
 		} else if(ctx.expr() instanceof PeopleCodeParser.ExprFnOrRowsetCallContext) {
 			/**
 			 * If a function call is the expr on which this fn/rowset call operates on,
@@ -203,7 +186,7 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			 * the name of the function was already processed by the explicit call to
 			 * visit(ctx.expr()) above.
 			 */
-			return null;
+			return;
 		} else {
 			throw new EntVMachRuntimeException("Encountered unexpected expression type "+
 				"preceding a function call or rowset index call: " + ctx.expr().getText());
@@ -230,8 +213,33 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 				srcProg.confirmedRecordProgCalls.put(referencedProg, true);
 			}
 		}
+	}
 
-		return null;
+	@Override
+	public void enterEveryRule(ParserRuleContext ctx) {
+		int tokPos = ctx.getStart().getTokenIndex();
+		List<Token> refChannel = tokens.getHiddenTokensToLeft(tokPos,
+			PeopleCodeLexer.REFERENCES);
+		Token refTok;
+
+		if(refChannel != null && (refTok = refChannel.get(0)) != null) {
+			String text = refTok.getText();
+			int refIdx = Integer.parseInt(text.substring(8, text.length() - 1));
+
+			/**
+			 * If we've already seen this reference, no need to process it again.
+			 */
+			if(!this.refIndicesSeen.containsKey(refIdx)) {
+				Reference refObj = this.srcProg.progRefsTable.get(refIdx);
+
+				if(refObj.isRecordFieldRef
+					&& ((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
+							|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2))) {
+					DefnCache.getRecord(refObj.RECNAME);
+				}
+				this.refIndicesSeen.put(refIdx, null);
+			}
+		}
 	}
 
 	/************************************************************************/

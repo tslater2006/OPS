@@ -46,6 +46,11 @@ public class ReferenceParser extends ElementParser {
 			}
 		}
 
+		/**
+		 * Before emitting the reference text, emit the reference index.
+		 * This is required during component loading.
+		 */
+		stream.appendParsedText("#ENTREF{"+refIdx+"}");
 		stream.appendParsedText(ref);
 
 		Token t = new Token(TFlag.REFERENCE);

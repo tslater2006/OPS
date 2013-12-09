@@ -20,7 +20,7 @@ public abstract class PeopleCodeProg {
 
 	public ArrayList<PeopleCodeProg> referencedProgs;
 	public HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
-	public HashMap<String, Boolean> importedAppPackages;
+	public HashMap<String, Boolean> importedRootAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
 	public HashMap<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
 
@@ -202,7 +202,7 @@ public abstract class PeopleCodeProg {
 
 			this.referencedProgs = new ArrayList<PeopleCodeProg>();
 			this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
-        	this.importedAppPackages = new HashMap<String, Boolean>();
+        	this.importedRootAppPackages = new HashMap<String, Boolean>();
 			this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
 
 			this.haveLoadedDefnsAndPrograms = true;
@@ -251,17 +251,6 @@ public abstract class PeopleCodeProg {
 		traceStack.pop();*/
 	}
 
-	/**
-	* CRITICAL TODO: I've seen an instance where a LOCAL token was followed by a single
-    * PURE_STRING containing just the name of the app class in the bytecode, without the packages
-    * specified before it, even though in App Designer it was displayed in text with the packages
-    * before it. This was causing Enterrupt to not load the app class. I can't reproduce the issue
-    * at the moment because messing with the program in App Designer caused App Designer to
-    * store the whole path in the bytecode. In order to resolve this in the future, I'll need
-    * to keep a list of terminal app classes in a hash table, mapped to the matching preceding path.
-    * In the event of duplicate class names with different paths, I've verified that the whole path
-    * will appear in the variable declaration bytecode.
-    */
 	protected String[] getAppClassPathFromStream(Token t, PeopleCodeTokenStream stream) {
 
     	ArrayList<String> pathParts = new ArrayList<String>();

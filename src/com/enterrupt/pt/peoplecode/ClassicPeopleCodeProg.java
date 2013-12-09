@@ -16,34 +16,6 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream, int recursionLevel, LFlag lflag,
 		Stack<PeopleCodeProg> traceStack) {
 
-		if(t.flags.contains(TFlag.CREATE)) {
-
-			t = stream.readNextToken();
-            Token l = stream.peekNextToken();
-
-             if(t.flags.contains(TFlag.PURE_STRING)
-             	&& l.flags.contains(TFlag.COLON)
-                && importedAppPackages.get(t.pureStrVal) != null) {
-
-				String[] path = this.getAppClassPathFromStream(t, stream);
-
-            	PeopleCodeProg prog = new AppClassPeopleCodeProg(path);
-				prog = DefnCache.getProgram(prog);
-
- 	            referencedProgs.add(prog);
-
-    	        // Load the program's initial metadata.
-				prog.init();
-
-				//log.debug(java.util.Arrays.toString(path));
-				log.debug("(create) Loading defns/progs for {} with parent {}",
-					prog.getDescriptor(), this.getDescriptor());
-				prog.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag, traceStack);
-       		} else {
-				//TODO: throw new EntVMachRuntimeException("Unknown token syntax following CREATE.");
-			}
-		}
-
 		/**
 		 * References to records should always be loaded when the root program is a Record PC prog.
 		 * If the root program is a Component PC prog, references to records should only be loaded

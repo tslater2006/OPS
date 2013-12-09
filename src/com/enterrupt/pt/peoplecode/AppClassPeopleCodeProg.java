@@ -81,7 +81,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 
 			if(t.flags.contains(TFlag.PURE_STRING)
 				&& l.flags.contains(TFlag.COLON)
-				&& importedAppPackages.get(t.pureStrVal) != null) {
+				&& importedRootAppPackages.get(t.pureStrVal) != null) {
 
 				String[] path = this.getAppClassPathFromStream(t, stream);
 

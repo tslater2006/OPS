@@ -22,13 +22,19 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	/**
-	 * When an app package is imported, load the package's definition and note
-	 * that it was imported.
+	 * When an app package/class is imported, load the root package's defin
+	 * and note that it was imported.
+	 * NOTE: This method will need to support wildcard imports.
 	 */
 	public Void visitAppClassImport(PeopleCodeParser.AppClassImportContext ctx) {
-		String appPkgName = ctx.appClassPath().GENERIC_ID(0).getText();
-		DefnCache.getAppPackage(appPkgName);
-		this.srcProg.importedAppPackages.put(appPkgName, true);
+		String rootPkgName = null;
+		if(ctx.appPkgPath() != null) {
+			rootPkgName = ctx.appPkgPath().GENERIC_ID(0).getText();
+		} else {
+			rootPkgName = ctx.appClassPath().GENERIC_ID(0).getText();
+		}
+		DefnCache.getAppPackage(rootPkgName);
+		this.srcProg.importedRootAppPackages.put(rootPkgName, true);
 		return null;
 	}
 
@@ -59,6 +65,14 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 
 			// Load the referenced program's initial metadata.
 			prog.init();
+		} else {
+			/**
+			 * TODO: Need to handle GENERIC_ID and resolve varType
+			 * in order to check if it is either an appClassPath or
+			 * a GENERIC_ID. GENERIC_IDs must be checked against the list
+			 * of root app packages - if a match is found, create the program and
+			 * load it, otherwise throw an exception.
+			 */
 		}
 
 		return null;
@@ -96,6 +110,43 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// Load the prog's initial metadata if it hasn't already been cached.
 		prog.init();
+
+		return null;
+	}
+
+	/**
+	 * Detect create stmts, which reference app classes. Upon encountering one,
+	 * we need to load the app class OnExecute program corresponding to the class
+	 * instance being created.
+	 */
+	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
+		/**
+		 * Only take action when source program is classic (not app class).
+		 * TODO: This will need to change when I reorganize the peoplecode package.
+		 */
+		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
+			return null;
+		}
+
+		if(ctx.appClassPath() != null) {
+			ArrayList<String> appClassParts = new ArrayList<String>();
+			for(TerminalNode id : ctx.appClassPath().GENERIC_ID()) {
+				appClassParts.add(id.getText());
+			}
+			PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+				new String[appClassParts.size()]));
+			prog = DefnCache.getProgram(prog);
+			this.srcProg.referencedProgs.add(prog);
+
+			// Load the referenced program's initial metadata.
+			prog.init();
+		} else {
+			/**
+			 * TODO: Find the package path for this class,
+			 * create the corresponding program if a match is found, throw
+			 * an exception otherwise.
+			 */
+		}
 
 		return null;
 	}

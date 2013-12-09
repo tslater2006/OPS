@@ -59,7 +59,8 @@ varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field'
 			|	GENERIC_ID	// for objects (i.e., Address)
 			;
 
-appClassImport	:	'import' appClassPath ;
+appClassImport	:	'import' (appPkgPath|appClassPath) ;
+appPkgPath		:	GENERIC_ID (':' GENERIC_ID)* ':' '*' ;
 appClassPath	:	GENERIC_ID (':' GENERIC_ID)+ ;
 
 extFuncImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
@@ -80,8 +81,7 @@ evaluateStmt	:	'Evaluate' expr ('When' '='? expr stmtList)+
 
 tryCatchStmt	:	'try' stmtList 'catch' 'Exception' VAR_ID stmtList 'end-try' ;
 
-// the object name could be the fully resolved app class path or just the class name.
-createInvocation:	'create' (appClassPath | GENERIC_ID) '(' exprList? ')' ;
+createInvocation:	'create' (appClassPath|GENERIC_ID) '(' exprList? ')' ;
 
 defnType	:	'Component' | 'Panel' | 'RecName' | 'Scroll' | 'HTML'
 			|	'MenuName' | 'BarName' | 'ItemName' | 'CompIntfc' | 'Image'

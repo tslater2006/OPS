@@ -11,7 +11,7 @@ stmtList:	(stmt ';'+)* stmt? ;
 
 // Semicolons are optional after some PeopleCode stmt constructs.
 stmt	:	appClassImport						# StmtAppClassImport
-		|	funcImport							# StmtFuncImport
+		|	extFuncImport						# StmtExternalFuncImport
 		|	funcDeclaration						# StmtFuncDeclaration
 		|	varDeclaration						# StmtVarDeclaration
 		|	ifStmt								# StmtIf
@@ -62,7 +62,7 @@ varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field'
 appClassImport	:	'import' appClassPath ;
 appClassPath	:	GENERIC_ID (':' GENERIC_ID)+ ;
 
-funcImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
+extFuncImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
 event		:	'FieldFormula' ;
 

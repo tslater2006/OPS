@@ -22,6 +22,41 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	/**
+	 * Detect references to externally-defined functions. We make note of the
+	 * referenced program at this time; later, once we've counted any and all
+	 * function calls to this and other functions defined in the referenced program,
+	 * that program will itself be loaded, provided that the number of references is > 0.
+	 */
+	public Void visitStmtExternalFuncImport(
+		PeopleCodeParser.StmtExternalFuncImportContext ctx) {
+
+		// Expecting RECNAME.FIELDNAME
+		if(ctx.extFuncImport().recDefnPath().GENERIC_ID().size() != 2) {
+			throw new EntVMachRuntimeException("Expected exactly two parts (<RECNAME>." +
+				"<FLDNAME>) in external function import statement: " + ctx.getText());
+		}
+
+		String fnName = ctx.extFuncImport().GENERIC_ID().getText();
+		String recname = ctx.extFuncImport().recDefnPath().GENERIC_ID(0).getText();
+		String fldname = ctx.extFuncImport().recDefnPath().GENERIC_ID(1).getText();
+
+		// Load the record defn it it hasn't already been cached.
+		DefnCache.getRecord(recname);
+
+		PeopleCodeProg prog = new RecordPeopleCodeProg(recname, fldname,
+			ctx.extFuncImport().event().getText());
+		prog = DefnCache.getProgram(prog);
+
+		this.srcProg.referencedProgs.add(prog);
+		this.srcProg.recordProgFnCalls.put(fnName, (RecordPeopleCodeProg)prog);
+
+		// Load the prog's initial metadata if it hasn't already been cached.
+		prog.init();
+
+		return null;
+	}
+
+	/**
 	 * Detect function (*not* method) calls; if a call corresponds to a
 	 * function referenced in a previously seen "Declare" stmt, mark that program
 	 * as having at least one call to it. Calls to index into a rowset using

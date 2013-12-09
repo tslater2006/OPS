@@ -16,41 +16,6 @@ public abstract class ClassicPeopleCodeProg extends PeopleCodeProg {
 	protected void subclassTokenHandler(Token t, PeopleCodeTokenStream stream, int recursionLevel, LFlag lflag,
 		Stack<PeopleCodeProg> traceStack) {
 
-    	if(t.flags.contains(TFlag.DECLARE)) {
-
-        	t = stream.readNextToken();
-            if(!t.flags.contains(TFlag.FUNCTION)) {
-            	throw new EntVMachRuntimeException("Expected FUNCTION.");
-            }
-
-            // Name of the function.
-            t = stream.readNextToken();
-			String fnName = t.pureStrVal;
-
-            t = stream.readNextToken();
-            if(!t.flags.contains(TFlag.PEOPLECODE)) {
-            	throw new EntVMachRuntimeException("Expected PEOPLECODE.");
-            }
-
-            t = stream.readNextToken();
-            Reference refObj = t.refObj;
-
-            t = stream.readNextToken();
-            String event = t.pureStrVal;
-
-            // Load the record definition if it hasn't already been cached.
-            DefnCache.getRecord(refObj.RECNAME);
-
-            PeopleCodeProg prog = new RecordPeopleCodeProg(refObj.RECNAME, refObj.REFNAME, event);
-            prog = DefnCache.getProgram(prog);
-
-			this.referencedProgs.add(prog);
-			this.recordProgFnCalls.put(fnName, (RecordPeopleCodeProg)prog);
-
-            // Load the program's initial metadata if it hasn't already been cached.
-			prog.init();
-		}
-
        if(t.flags.contains(TFlag.GLOBAL) || t.flags.contains(TFlag.COMPONENT) ||
        		t.flags.contains(TFlag.LOCAL)) {
 

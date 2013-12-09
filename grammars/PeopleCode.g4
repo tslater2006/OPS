@@ -55,8 +55,8 @@ varDeclarator	:	VAR_ID ('=' expr)? ;
 
 varScope	:	'Global' | 'Component' | 'Local' ;
 varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field' | 'any'
-			|	'integer' | 'number' | 'Rowset' | 'date' | 'Row' | 'Grid' | appClassPath
-			|	GENERIC_ID	// for app class names w/o paths (i.e., "Address" for "EO:CA:Address")
+			|	'integer' | 'number' | 'Rowset' | 'date' | 'Row' | 'Grid' | 'GridColumn'
+			|	appClassPath | GENERIC_ID	// for app class names w/o paths (i.e., "Address" for "EO:CA:Address")
 			;
 
 appClassImport	:	'import' (appPkgPath|appClassPath) ;
@@ -65,14 +65,14 @@ appClassPath	:	GENERIC_ID (':' GENERIC_ID)+ ;
 
 extFuncImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID '.' GENERIC_ID ;
-event		:	'FieldFormula' ;
+event		:	'FieldFormula' | 'FieldChange' ;
 
-funcDeclaration :   'Function' GENERIC_ID formalParams? ';'? stmtList 'End-Function' ;
-formalParams	:	'(' ')' ;
+funcDeclaration :   'Function' GENERIC_ID formalParamList? ';'? stmtList 'End-Function' ;
+formalParamList	:	'(' (VAR_ID (',' VAR_ID)* )? ')' ;
 
 ifStmt	:	'If' expr 'Then' ';'? stmtList ('Else' ';'? stmtList)? 'End-If' ;
 
-forStmt	:	'For' VAR_ID '=' expr 'To' expr ('Step' expr)? stmtList 'End-For' ;
+forStmt	:	'For' VAR_ID '=' expr 'To' expr (';' | ('Step' expr))? stmtList 'End-For' ;
 
 whileStmt	:	'While' expr ';'? stmtList 'End-While' ;
 

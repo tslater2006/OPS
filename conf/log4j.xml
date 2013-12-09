@@ -16,6 +16,7 @@
 		<Logger name="com.enterrupt.sql.ENTStmt" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode.ProgLoadSupervisor" level="all"/>
+		<Logger name="com.enterrupt.pt.peoplecode.AppPackage" level="all"/>
 		<Logger name="com.enterrupt.pt.Component" level="WARN"/>
     </Loggers>
 </Configuration>

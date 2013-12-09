@@ -258,7 +258,7 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			for(AppPackagePath importedPkgPath : this.srcProg.importedAppPackagePaths) {
 				AppPackage pkg = DefnCache.getAppPackage(importedPkgPath.getRootPkgName());
 				Map<String, Void> appClassesInPath = pkg.getClassesInPath(importedPkgPath);
-				if(appClassesInPath.get(appClassName) != null) {
+				if(appClassesInPath.containsKey(appClassName)) {
 					if(authoritativePath == null) {
 						authoritativePath = importedPkgPath;
 					} else {
@@ -276,7 +276,8 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 			appClassParts.add(appClassName);
 		} else {
-			throw new EntVMachRuntimeException("Unable to resolve authoritative path to class name.");
+			throw new EntVMachRuntimeException("Unable to resolve authoritative path to class name (" + 
+				appClassName + ").");
 		}
 
 		return appClassParts;

@@ -10,28 +10,44 @@ import java.util.*;
 public class AppPackage {
 
 	public String rootPkgName;
-	private Map<String, SubPackage> subPkgs;
-	public Map<String, Void> classesInRootPkg;
+	public PackageTreeNode rootPkgNode;
 
 	private static Logger log = LogManager.getLogger(AppPackage.class.getName());
 
 	private boolean hasDiscoveredAppClassPC = false;
 
-	private class SubPackage {
-		public String subPkgName;
-		public Map<String, SubPackage> subPkgs;
-		public Map<String, Void> classesInPkg;
-		public SubPackage(String name) {
-			this.subPkgName = name;
-			this.subPkgs = new HashMap<String, SubPackage>();
-			this.classesInPkg = new HashMap<String, Void>();
+	private class PackageTreeNode {
+		public String pkgName;
+		public Map<String, PackageTreeNode> subPkgs;
+		public Map<String, Void> classNames;
+		public PackageTreeNode(String name) {
+			this.pkgName = name;
+			this.subPkgs = new HashMap<String, PackageTreeNode>();
+			this.classNames = new HashMap<String, Void>();
+		}
+
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("Package: ").append(this.pkgName).append("\n");
+			builder.append(" - Classes: ");
+			for(Map.Entry<String, Void> entry : this.classNames.entrySet()) {
+				builder.append(entry.getKey()).append(", ");
+			}
+			builder.append("\nSubpackages:\n");
+			for(Map.Entry<String, PackageTreeNode> entry : this.subPkgs.entrySet()) {
+				String subTreeStr = entry.getValue().toString();
+				String[] lines = subTreeStr.split("\n");
+				for(String line : lines) {
+					builder.append("     ").append(line).append("\n");
+				}
+			}
+			return builder.toString();
 		}
 	}
 
 	public AppPackage(String pName) {
 		this.rootPkgName = pName;
-		this.subPkgs = new HashMap<String, SubPackage>();
-		this.classesInRootPkg = new HashMap<String, Void>();
+		this.rootPkgNode = new PackageTreeNode(this.rootPkgName);
 	}
 
 	public void discoverAppClassPC() {
@@ -61,6 +77,9 @@ public class AppPackage {
 				}
 				this.addToSubpkgTree(pkgEntryParts);
 			}
+
+			log.debug("\n\n\nPackage tree: \n{}\n\n\n", this.rootPkgNode);
+
         } catch(java.sql.SQLException sqle) {
             log.fatal(sqle.getMessage(), sqle);
             System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
@@ -74,38 +93,31 @@ public class AppPackage {
 
   	public Map<String, Void> getClassesInPath(AppPackagePath pkgPath) {
 
-		if(!pkgPath.parts[0].equals(this.rootPkgName)) {
-			throw new EntVMachRuntimeException("The app package path provided belongs to " +
-				"a root package other than this one.");
+		PackageTreeNode currNode = this.rootPkgNode;
+
+		if(!pkgPath.parts[0].equals(this.rootPkgNode.pkgName)) {
+			throw new EntVMachRuntimeException("The app package path provided (" +
+				pkgPath + ") does not match the root package name (" + this.rootPkgName + ").");
 		}
 
-		// If path just contains root package name, return root-level classes.
-		if(pkgPath.parts.length == 1) {
-			return this.classesInRootPkg;
-		}
+		for(int i = 1; i < pkgPath.parts.length; i++) {
 
-		// Otherwise, descend the subpackage tree according to the path.
-		SubPackage subPkg = null;
-		for(String part : pkgPath.parts) {
-			if(subPkg == null) {
-				subPkg = this.subPkgs.get(part);
-			} else {
-				subPkg = subPkg.subPkgs.get(part);
-			}
+			currNode = currNode.subPkgs.get(pkgPath.parts[i]);
 
-			if(subPkg == null) {
-				throw new EntVMachRuntimeException("The path provided cannot be resolved " +
-					"in the context of this app package.");
+			if(currNode == null) {
+				throw new EntVMachRuntimeException("The app package path provided (" +
+					pkgPath + ") does not resolve in the context of this package (" + this.rootPkgName + ").");
 			}
 		}
 
-		return subPkg.classesInPkg;
+		log.debug("Classes in path: {}", currNode.classNames);
+		return currNode.classNames;
     }
 
 	private void addToSubpkgTree(String[][] pkgEntryParts) {
 
 		int expectedSubPkgId = 105;
-		SubPackage parentSubPkg = null;
+		PackageTreeNode currNode = this.rootPkgNode;
 
 		for(int i = 0; i < pkgEntryParts.length; i++) {
 			int id = Integer.parseInt(pkgEntryParts[i][0]);
@@ -115,37 +127,21 @@ public class AppPackage {
 			// save it at the root level or in the last traversed subpackage.
 			if(id == expectedSubPkgId && id < 107) {
 
-				SubPackage subPkg;
-				if(parentSubPkg == null) {
-					subPkg = this.subPkgs.get(val);
-					if(subPkg == null) {
-						subPkg = new SubPackage(val);
-						this.subPkgs.put(val, subPkg);
-					}
-				} else {
-					subPkg = parentSubPkg.subPkgs.get(val);
-					if(subPkg == null) {
-						subPkg = new SubPackage(val);
-						parentSubPkg.subPkgs.put(val, subPkg);
-					}
+				PackageTreeNode node = currNode.subPkgs.get(val);
+				if(node == null) {
+					node = new PackageTreeNode(val);
+					currNode.subPkgs.put(val, node);
 				}
-				parentSubPkg = subPkg;
+
+				currNode = node;
 				expectedSubPkgId++;
 				continue;
 			}
 
 			// We've reached the app class; is either root or in a sub package.
+			// Once we've reached the app class field, we can stop looping.
 			if(id == 107) {
-				if(parentSubPkg == null) {
-					this.classesInRootPkg.put(val, null);
-				} else {
-					parentSubPkg.classesInPkg.put(val, null);
-				}
-				break;
-			}
-
-			// Once we reach the event field, we can stop.
-			if(id == Integer.parseInt(PSDefn.EVENT)) {
+				currNode.classNames.put(val, null);
 				break;
 			}
 

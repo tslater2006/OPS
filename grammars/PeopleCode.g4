@@ -70,7 +70,7 @@ event		:	'FieldFormula' ;
 funcDeclaration :   'Function' GENERIC_ID formalParams? ';'? stmtList 'End-Function' ;
 formalParams	:	'(' ')' ;
 
-ifStmt	:	'If' expr 'Then' stmtList ('Else' ';'? stmtList)? 'End-If' ;
+ifStmt	:	'If' expr 'Then' ';'? stmtList ('Else' ';'? stmtList)? 'End-If' ;
 
 forStmt	:	'For' VAR_ID '=' expr 'To' expr ('Step' expr)? stmtList 'End-For' ;
 

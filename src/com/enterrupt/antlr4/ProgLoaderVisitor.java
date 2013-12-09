@@ -80,12 +80,6 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			return null;
 		}
 
-		// Expecting RECNAME.FIELDNAME
-		if(ctx.recDefnPath().GENERIC_ID().size() != 2) {
-			throw new EntVMachRuntimeException("Expected exactly two parts (<RECNAME>." +
-				"<FLDNAME>) in external function import statement: " + ctx.getText());
-		}
-
 		String fnName = ctx.GENERIC_ID().getText();
 		String recname = ctx.recDefnPath().GENERIC_ID(0).getText();
 		String fldname = ctx.recDefnPath().GENERIC_ID(1).getText();

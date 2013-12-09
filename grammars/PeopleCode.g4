@@ -63,7 +63,7 @@ appClassImport	:	'import' appClassPath ;
 appClassPath	:	GENERIC_ID (':' GENERIC_ID)+ ;
 
 extFuncImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
-recDefnPath	:	GENERIC_ID ('.' GENERIC_ID)* ;
+recDefnPath	:	GENERIC_ID '.' GENERIC_ID ;
 event		:	'FieldFormula' ;
 
 funcDeclaration :   'Function' GENERIC_ID formalParams? ';'? stmtList 'End-Function' ;

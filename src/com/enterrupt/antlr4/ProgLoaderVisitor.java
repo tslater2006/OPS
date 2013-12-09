@@ -22,6 +22,17 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	/**
+	 * When an app package is imported, load the package's definition and note
+	 * that it was imported.
+	 */
+	public Void visitAppClassImport(PeopleCodeParser.AppClassImportContext ctx) {
+		String appPkgName = ctx.appClassPath().GENERIC_ID(0).getText();
+		DefnCache.getAppPackage(appPkgName);
+		this.srcProg.importedAppPackages.put(appPkgName, true);
+		return null;
+	}
+
+	/**
 	 * Detect references to externally-defined functions. We make note of the
 	 * referenced program at this time; later, once we've counted any and all
 	 * function calls to this and other functions defined in the referenced program,

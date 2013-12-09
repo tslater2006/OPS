@@ -214,29 +214,7 @@ public abstract class PeopleCodeProg {
 /*
         while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
 */
-			/**
-			 * TODO: Determine whether this belongs here or in ClassicPeopleCodeProg.
-			 * For now I'm assuming that imported packages are checked in both classic
-			 * and app package programs.
-			 */
-  /*          if(t.flags.contains(TFlag.IMPORT)) {
-
-                ArrayList<String> pathParts = new ArrayList<String>();
-
-                // Path is variable length.
-                do {
-                    t = stream.readNextToken();
-                    pathParts.add(t.pureStrVal);
-                    t = stream.readNextToken();
-                } while(t.flags.contains(TFlag.COLON));
-
-                // Load the app package (get list of all programs within) if not already cached.
-                DefnCache.getAppPackage(pathParts.get(0));
-
-                importedAppPackages.put(pathParts.get(0), true);
-            }
-
-			this.subclassTokenHandler(t, stream, recursionLevel, lflag, traceStack);
+/*			this.subclassTokenHandler(t, stream, recursionLevel, lflag, traceStack);
         }
 */
         /**

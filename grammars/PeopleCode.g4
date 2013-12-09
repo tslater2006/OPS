@@ -54,9 +54,9 @@ varDeclaration	:	varScope varType varDeclarator (',' varDeclarator)* ;
 varDeclarator	:	VAR_ID ('=' expr)? ;
 
 varScope	:	'Global' | 'Component' | 'Local' ;
-varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field'
-			|	'integer' | 'number' | 'Rowset' | 'date' | 'Row' | appClassPath
-			|	GENERIC_ID	// for objects (i.e., Address)
+varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field' | 'any'
+			|	'integer' | 'number' | 'Rowset' | 'date' | 'Row' | 'Grid' | appClassPath
+			|	GENERIC_ID	// for app class names w/o paths (i.e., "Address" for "EO:CA:Address")
 			;
 
 appClassImport	:	'import' (appPkgPath|appClassPath) ;

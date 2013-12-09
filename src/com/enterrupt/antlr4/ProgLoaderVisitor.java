@@ -22,28 +22,37 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	/**
-	 * When an app package/class is imported, load the root package's defin
-	 * and note that it was imported.
-	 * NOTE: This method will need to support wildcard imports.
+	 * When an app package/class is imported, load the root package's defn
+	 * and save the package path for use during potential class resolution later.
 	 */
 	public Void visitAppClassImport(PeopleCodeParser.AppClassImportContext ctx) {
-		String rootPkgName = null;
 		if(ctx.appPkgPath() != null) {
-			rootPkgName = ctx.appPkgPath().GENERIC_ID(0).getText();
+			String rootPkgName = ctx.appPkgPath().GENERIC_ID(0).getText();
+			DefnCache.getAppPackage(rootPkgName);
+			this.srcProg.importedAppPackagePaths.add(new AppPackagePath(
+				ctx.appPkgPath().getText()));
 		} else {
-			rootPkgName = ctx.appClassPath().GENERIC_ID(0).getText();
+			String rootPkgName = ctx.appClassPath().GENERIC_ID(0).getText();
+			DefnCache.getAppPackage(rootPkgName);
+			String appClassName = ctx.appClassPath().GENERIC_ID(
+				ctx.appClassPath().GENERIC_ID().size() - 1).getText();
+			List<AppPackagePath> pathsToClass = this.srcProg.importedAppClasses.get(appClassName);
+			if(pathsToClass == null) {
+				pathsToClass = new ArrayList<AppPackagePath>();
+			}
+			pathsToClass.add(new AppPackagePath(ctx.appClassPath().getText()));
+			this.srcProg.importedAppClasses.put(appClassName, pathsToClass);
 		}
-		DefnCache.getAppPackage(rootPkgName);
-		this.srcProg.importedRootAppPackages.put(rootPkgName, true);
+
 		return null;
 	}
 
 	/**
-	 * When a variable declaration in a non-app class program references
+	 * When a variable type in a variable declaration in a non-app class program references
 	 * an object in an app class, we need to parse out the app class reference and
-	 * load that program's OnExecute program.
+	 * load that program's OnExecute PeopleCode segment.
 	 */
-	public Void visitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
+	public Void visitVarType(PeopleCodeParser.VarTypeContext ctx) {
 
 		/**
 		 * Only take action when source program is classic (not app class).
@@ -52,12 +61,28 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
 			return null;
 		}
+		List<String> appClassParts = null;
 
-		if(ctx.varType().appClassPath() != null) {
-			ArrayList<String> appClassParts = new ArrayList<String>();
-			for(TerminalNode id : ctx.varType().appClassPath().GENERIC_ID()) {
+		if(ctx.appClassPath() != null) {
+			appClassParts = new ArrayList<String>();
+			for(TerminalNode id : ctx.appClassPath().GENERIC_ID()) {
 				appClassParts.add(id.getText());
 			}
+			//log.debug("(0) Path found: {} in {}", appClassParts, ctx.getText());
+		} else if(ctx.GENERIC_ID() != null) {
+			appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
+			//log.debug("(1) Class name resolved: {} in {}", appClassParts, ctx.getText());
+		} else if(ctx.varType() != null) {
+			/**
+			 * It's possible that the nested varType refers to an app class; we need
+			 * to visit that node to ensure that we check its type.
+			 */
+			//log.debug("(2) Nested varType found, calling visit(): {}", ctx.getText());
+			visit(ctx.varType());
+		}
+
+		// Don't error out if null, since var type may be other than an app class.
+		if(appClassParts != null) {
 			PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
 				new String[appClassParts.size()]));
 			prog = DefnCache.getProgram(prog);
@@ -65,14 +90,6 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 
 			// Load the referenced program's initial metadata.
 			prog.init();
-		} else {
-			/**
-			 * TODO: Need to handle GENERIC_ID and resolve varType
-			 * in order to check if it is either an appClassPath or
-			 * a GENERIC_ID. GENERIC_IDs must be checked against the list
-			 * of root app packages - if a match is found, create the program and
-			 * load it, otherwise throw an exception.
-			 */
 		}
 
 		return null;
@@ -127,26 +144,32 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
 			return null;
 		}
+		List<String> appClassParts = null;
 
 		if(ctx.appClassPath() != null) {
-			ArrayList<String> appClassParts = new ArrayList<String>();
+			/**
+			 * This invocation of 'create' includes the full path to the app class object
+			 * being instantiated.
+			 */
+			appClassParts = new ArrayList<String>();
 			for(TerminalNode id : ctx.appClassPath().GENERIC_ID()) {
 				appClassParts.add(id.getText());
 			}
-			PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
-				new String[appClassParts.size()]));
-			prog = DefnCache.getProgram(prog);
-			this.srcProg.referencedProgs.add(prog);
-
-			// Load the referenced program's initial metadata.
-			prog.init();
 		} else {
 			/**
-			 * TODO: Find the package path for this class,
-			 * create the corresponding program if a match is found, throw
-			 * an exception otherwise.
+			 * This invocation of 'create' is creating an instance of an app class,
+			 * but we only have the app class name.
 			 */
+			appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
 		}
+
+		PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+			new String[appClassParts.size()]));
+		prog = DefnCache.getProgram(prog);
+		this.srcProg.referencedProgs.add(prog);
+
+		// Load the referenced program's initial metadata.
+		prog.init();
 
 		return null;
 	}
@@ -158,6 +181,8 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * PeopleCode's "(<int>)" syntax should be ignored here.
 	 */
 	public Void visitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
+
+		// Ensure that preceding expressions have this function called on them if applicable.
 		visit(ctx.expr());
 
 		PeopleCodeParser.IdContext id = null;
@@ -207,5 +232,53 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		return null;
+	}
+
+	/************************************************************************/
+	/** shared functions ****************************************************/
+	/************************************************************************/
+
+	/**
+	 * We first search for the class name in the table of app class imports.
+	 * If no entry exists there, we scan the package imports for a match.
+	 */
+	private List<String> resolveAppClassToFullPath(String appClassName) {
+		AppPackagePath authoritativePath = null;
+		List<AppPackagePath> pkgList = this.srcProg.importedAppClasses.get(appClassName);
+		List<String> appClassParts = null;
+
+		if(pkgList != null) {
+			if(pkgList.size() > 1) {
+				throw new EntVMachRuntimeException("Found multiple discrete app class imports " +
+					"for an app class; unable to resolve authoritative package path.");
+			} else {
+				authoritativePath = pkgList.get(0);
+			}
+		} else {
+			for(AppPackagePath importedPkgPath : this.srcProg.importedAppPackagePaths) {
+				AppPackage pkg = DefnCache.getAppPackage(importedPkgPath.getRootPkgName());
+				Map<String, Void> appClassesInPath = pkg.getClassesInPath(importedPkgPath);
+				if(appClassesInPath.get(appClassName) != null) {
+					if(authoritativePath == null) {
+						authoritativePath = importedPkgPath;
+					} else {
+						throw new EntVMachRuntimeException("Found multiple discrete app pkg " +
+							"imports for an app class; unable to resolve authoritative package path.");
+					}
+				}
+			}
+		}
+
+		if(authoritativePath != null) {
+			appClassParts = new ArrayList<String>();
+			for(String part : authoritativePath.parts) {
+				appClassParts.add(part);
+			}
+			appClassParts.add(appClassName);
+		} else {
+			throw new EntVMachRuntimeException("Unable to resolve authoritative path to class name.");
+		}
+
+		return appClassParts;
 	}
 }

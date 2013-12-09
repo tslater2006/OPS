@@ -30,11 +30,11 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
          * with based on the length provided and knowledge of OBJECTID constants.
          */
         int pathPartIdx = 0;
-        int nextObjectId = 105; // 105 through 107 == App Class
+        int nextObjectId = 105; // 105 through 106 == subpackage
         this.bindVals = new String[14];
         for(int i = 0; i < this.bindVals.length; i+=2) {
             if(i == 0) {
-                this.bindVals[0] = "104"; // 104 == App Package
+                this.bindVals[0] = "104"; // 104 == root App Package
                 this.bindVals[1] = pathParts[pathPartIdx++];
             } else if(pathPartIdx == (pathParts.length - 1)) {
                 this.bindVals[i] = "107"; // 107 == final App Class in hierarchy

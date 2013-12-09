@@ -56,7 +56,7 @@ public class DefnCache {
         if(ap == null) {
             ap = new AppPackage(packageName);
             ap.discoverAppClassPC();
-            appPackages.put(ap.packageName, ap);
+            appPackages.put(ap.rootPkgName, ap);
         }
         return ap;
 	}

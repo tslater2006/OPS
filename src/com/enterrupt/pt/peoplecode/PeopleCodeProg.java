@@ -23,6 +23,8 @@ public abstract class PeopleCodeProg {
 	public HashMap<String, Boolean> importedRootAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
 	public HashMap<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
+	public HashMap<String, List<AppPackagePath>> importedAppClasses;
+	public List<AppPackagePath> importedAppPackagePaths;
 
 	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
@@ -204,6 +206,8 @@ public abstract class PeopleCodeProg {
 			this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
         	this.importedRootAppPackages = new HashMap<String, Boolean>();
 			this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
+			this.importedAppClasses = new HashMap<String, List<AppPackagePath>>();
+			this.importedAppPackagePaths = new ArrayList<AppPackagePath>();
 
 			this.haveLoadedDefnsAndPrograms = true;
 			return false;

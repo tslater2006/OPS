@@ -27,25 +27,25 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	expr								# StmtExpr		// For fn calls; the value of expr is not assigned to anything.
 		;
 
-expr	:	'(' expr ')'								# ExprParenthesized
-		|	literal										# ExprLiteral
-		|	id											# ExprId
-		|	'@'<assoc=right> '(' expr ')'				# ExprDynamicReference
-		|	'-'<assoc=right> expr						# ExprNegate
-		|	'Not'<assoc=right> expr						# ExprNot
-		|	createInvocation							# ExprCreate
-		|	expr '.' id									# ExprStaticReference
-		|	expr '[' exprList ']'						# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i, &j]
-		| 	expr '(' exprList? ')'						# ExprFnCall
-		|	expr ('*'|'/') expr							# ExprMulDiv
-		|	expr ('+'|'-') expr							# ExprAddSub
-		|	expr ('<'|'<='|'>'|'>=') expr				# ExprComparison
-		|	expr ('='|'<>') expr						# ExprEquality	// splitting symbols out may affect parsing
+expr	:	'(' expr ')'					# ExprParenthesized
+		|	'@' '(' expr ')'				# ExprDynamicReference
+		|	literal							# ExprLiteral
+		|	id								# ExprId
+		|	createInvocation				# ExprCreate
+		|	expr '.' id						# ExprMethodOrStaticRef
+		|	expr '[' exprList ']'			# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i, &j]
+		| 	expr '(' exprList? ')'			# ExprFnOrRowsetCall
+		|	'-' expr						# ExprNegate
+		|	'Not' expr						# ExprNot
+		|	expr ('*'|'/') expr				# ExprMulDiv
+		|	expr ('+'|'-') expr				# ExprAddSub
+		|	expr ('<'|'<='|'>'|'>=') expr	# ExprComparison
+		|	expr ('='|'<>') expr			# ExprEquality	// splitting symbols out may affect parsing
 		|	expr (
 					'And'<assoc=right>
 				|	'Or'<assoc=right>
-			) expr										# ExprBoolean // order: Not, And, then Or
-		|	expr '|' expr								# ExprConcatenate
+			) expr							# ExprBoolean // order: Not, And, then Or
+		|	expr '|' expr					# ExprConcatenate
 		;
 
 exprList:	expr (',' expr)* ;

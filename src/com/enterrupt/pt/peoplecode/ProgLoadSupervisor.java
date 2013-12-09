@@ -54,10 +54,10 @@ public class ProgLoadSupervisor {
 
             log.debug("=== ProgLoadSupervisor =============================");
 			log.debug("Loading {}", prog.getDescriptor());
-			String[] lines = prog.parsedText.split("\n");
+/*			String[] lines = prog.parsedText.split("\n");
 			for(int i = 0; i < lines.length; i++) {
 	            log.debug("{}:\t{}", i+1, lines[i]);
-    		}
+    		}*/
 
             if(this.writeToFile) {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(
@@ -80,7 +80,7 @@ public class ProgLoadSupervisor {
 	        ParseTree tree = parser.program();
 
 			log.debug(">>> Parse Tree >>>>>>>>>>>>");
-            log.debug(tree.toStringTree(parser));
+            //log.debug(tree.toStringTree(parser));
 	        log.debug("====================================================");
 
             if(this.writeToFile) {
@@ -90,7 +90,7 @@ public class ProgLoadSupervisor {
                 writer.close();
             }
 
-	        ProgLoaderVisitor progLoader = new ProgLoaderVisitor();
+	        ProgLoaderVisitor progLoader = new ProgLoaderVisitor(prog);
     	    progLoader.visit(tree);
 
 	    } catch(java.io.IOException ioe) {

@@ -78,7 +78,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprFnCall(PeopleCodeParser.ExprFnCallContext ctx) {
+	public Void visitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
 
 		// null is used to separate call frames.
 		Interpreter.pushToCallStack(null);
@@ -123,7 +123,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprStaticReference(PeopleCodeParser.ExprStaticReferenceContext ctx) {
+	public Void visitExprMethodOrStaticRef(
+					PeopleCodeParser.ExprMethodOrStaticRefContext ctx) {
 		MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
 		if(ptr == null) {
 			throw new EntInterpretException("Encountered a reference to an " +

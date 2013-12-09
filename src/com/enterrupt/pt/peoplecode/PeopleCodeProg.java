@@ -18,9 +18,9 @@ public abstract class PeopleCodeProg {
 	public String event;
 	public String parsedText;
 
-	protected ArrayList<PeopleCodeProg> referencedProgs;
-	protected HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
-	protected HashMap<String, Boolean> importedAppPackages;
+	public ArrayList<PeopleCodeProg> referencedProgs;
+	public HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
+	public HashMap<String, Boolean> importedAppPackages;
 	public TreeMap<Integer, Reference> progRefsTable;
 	public HashMap<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
 
@@ -213,19 +213,6 @@ public abstract class PeopleCodeProg {
 	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack) {
 /*
         while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
-*/
-			/**
-			 * Detect function calls; if a call corresponds to a program referenced
-			 * in a previously seen DECLARE stmt, mark that program as having been called.
-			 */
-/*			if(t.flags.contains(TFlag.PURE_STRING)) {
-				Token l = stream.peekNextToken();
-				RecordPeopleCodeProg prog = this.recordProgFnCalls.get(t.pureStrVal);
-
-				if(l.flags.contains(TFlag.L_PAREN) && prog != null) {
-					confirmedRecordProgCalls.put(prog, true);
-				}
-			}
 */
 			/**
 			 * TODO: Determine whether this belongs here or in ClassicPeopleCodeProg.

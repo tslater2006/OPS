@@ -78,7 +78,7 @@ public class AppPackage {
 				this.addToSubpkgTree(pkgEntryParts);
 			}
 
-			log.debug("\n\n\nPackage tree: \n{}\n\n\n", this.rootPkgNode);
+			//log.debug("\n\n\nPackage tree: \n{}\n\n\n", this.rootPkgNode);
 
         } catch(java.sql.SQLException sqle) {
             log.fatal(sqle.getMessage(), sqle);
@@ -90,29 +90,6 @@ public class AppPackage {
             } catch(java.sql.SQLException sqle) {}
         }
 	}
-
-  	public Map<String, Void> getClassesInPath(AppPackagePath pkgPath) {
-
-		PackageTreeNode currNode = this.rootPkgNode;
-
-		if(!pkgPath.parts[0].equals(this.rootPkgNode.pkgName)) {
-			throw new EntVMachRuntimeException("The app package path provided (" +
-				pkgPath + ") does not match the root package name (" + this.rootPkgName + ").");
-		}
-
-		for(int i = 1; i < pkgPath.parts.length; i++) {
-
-			currNode = currNode.subPkgs.get(pkgPath.parts[i]);
-
-			if(currNode == null) {
-				throw new EntVMachRuntimeException("The app package path provided (" +
-					pkgPath + ") does not resolve in the context of this package (" + this.rootPkgName + ").");
-			}
-		}
-
-		log.debug("Classes in path: {}", currNode.classNames);
-		return currNode.classNames;
-    }
 
 	private void addToSubpkgTree(String[][] pkgEntryParts) {
 
@@ -150,4 +127,27 @@ public class AppPackage {
 				"from database: " + id);
 		}
 	}
+
+  	public Map<String, Void> getClassesInPath(AppPackagePath pkgPath) {
+
+		PackageTreeNode currNode = this.rootPkgNode;
+
+		if(!pkgPath.parts[0].equals(this.rootPkgNode.pkgName)) {
+			throw new EntVMachRuntimeException("The app package path provided (" +
+				pkgPath + ") does not match the root package name (" + this.rootPkgName + ").");
+		}
+
+		for(int i = 1; i < pkgPath.parts.length; i++) {
+
+			currNode = currNode.subPkgs.get(pkgPath.parts[i]);
+
+			if(currNode == null) {
+				throw new EntVMachRuntimeException("The app package path provided (" +
+					pkgPath + ") does not resolve in the context of this package (" + this.rootPkgName + ").");
+			}
+		}
+
+		//log.debug("Classes in path: {}", currNode.classNames);
+		return currNode.classNames;
+    }
 }

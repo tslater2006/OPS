@@ -17,7 +17,7 @@ public class AppPackagePath {
 		 * Remove the last part of the path. If it's a package path,
 		 * the last part will be a wildcard ('*'). Otherwise, it's an app
 		 * class path, in which case the last part will be the name of
-		 * an app class.
+		 * an app class. We only want package (and subpackage) names here.
 		 */
 		this.parts = new String[pathParts.length - 1];
 		for(int i=0; i < this.parts.length; i++) {

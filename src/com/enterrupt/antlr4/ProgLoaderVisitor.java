@@ -27,24 +27,31 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * function calls to this and other functions defined in the referenced program,
 	 * that program will itself be loaded, provided that the number of references is > 0.
 	 */
-	public Void visitStmtExternalFuncImport(
-		PeopleCodeParser.StmtExternalFuncImportContext ctx) {
+	public Void visitExtFuncImport(PeopleCodeParser.ExtFuncImportContext ctx) {
+
+		/**
+		 * Only take action when source program is classic (not app class).
+		 * TODO: This will need to change when I reorganize the peoplecode package.
+		 */
+		if(!(this.srcProg instanceof ClassicPeopleCodeProg)) {
+			return null;
+		}
 
 		// Expecting RECNAME.FIELDNAME
-		if(ctx.extFuncImport().recDefnPath().GENERIC_ID().size() != 2) {
+		if(ctx.recDefnPath().GENERIC_ID().size() != 2) {
 			throw new EntVMachRuntimeException("Expected exactly two parts (<RECNAME>." +
 				"<FLDNAME>) in external function import statement: " + ctx.getText());
 		}
 
-		String fnName = ctx.extFuncImport().GENERIC_ID().getText();
-		String recname = ctx.extFuncImport().recDefnPath().GENERIC_ID(0).getText();
-		String fldname = ctx.extFuncImport().recDefnPath().GENERIC_ID(1).getText();
+		String fnName = ctx.GENERIC_ID().getText();
+		String recname = ctx.recDefnPath().GENERIC_ID(0).getText();
+		String fldname = ctx.recDefnPath().GENERIC_ID(1).getText();
 
 		// Load the record defn it it hasn't already been cached.
 		DefnCache.getRecord(recname);
 
 		PeopleCodeProg prog = new RecordPeopleCodeProg(recname, fldname,
-			ctx.extFuncImport().event().getText());
+			ctx.event().getText());
 		prog = DefnCache.getProgram(prog);
 
 		this.srcProg.referencedProgs.add(prog);
@@ -107,10 +114,7 @@ public class ProgLoaderVisitor extends PeopleCodeBaseVisitor<Void> {
 			 * we load that program later.
 			 */
 			if(referencedProg != null) {
-				log.debug("In Scope: {}", id.GENERIC_ID().getText());
 				srcProg.confirmedRecordProgCalls.put(referencedProg, true);
-			} else {
-				log.debug("System Scope: {}", id.GENERIC_ID().getText());
 			}
 		}
 

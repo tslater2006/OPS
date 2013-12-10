@@ -26,10 +26,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     }
 
     private PeopleCodeProg getVarTypeProg(ParseTree node) {
-        if(this.varTypeProgs.get(node) == null) {
-            throw new EntVMachRuntimeException("No program was found for the requested variable " +
-                "type node: " + node.getText());
-        }
         return this.varTypeProgs.get(node);
     }
 
@@ -75,7 +71,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	 */
 	@Override
 	public void exitInstance(PeopleCodeParser.InstanceContext ctx) {
-		if(ctx.varType().appClassPath() != null || ctx.varType().GENERIC_ID() != null) {
+		if(this.getVarTypeProg(ctx.varType()) != null) {
 			this.handlePropOrInstanceAppClassRef(this.getVarTypeProg(ctx.varType()));
 		}
 	}
@@ -86,7 +82,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	 */
 	@Override
 	public void exitProperty(PeopleCodeParser.PropertyContext ctx) {
-		if(ctx.varType().appClassPath() != null || ctx.varType().GENERIC_ID() != null) {
+		if(this.getVarTypeProg(ctx.varType()) != null) {
 			this.handlePropOrInstanceAppClassRef(this.getVarTypeProg(ctx.varType()));
 		}
 	}
@@ -110,12 +106,22 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		} else if(ctx.GENERIC_ID() != null) {
 			appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
 			//log.debug("(1) Class name resolved: {} in {}", appClassParts, ctx.getText());
+		} else if(ctx.varType() != null) {
+			// if the nested variable type has a program attached to it, bubble it up
+			// before exiting.
+			PeopleCodeProg prog;
+			if((prog = this.getVarTypeProg(ctx.varType())) != null) {
+				this.setVarTypeProg(ctx, prog);
+			}
+			return;
 		} else {
+			// this variable doesn't refer to an app class, so no need to continue.
 			return;
 		}
 
 		PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
 			new String[appClassParts.size()]));
+		this.setVarTypeProg(ctx, prog);
 
 		/**
 		 * App class programs should not have all their variable types loaded, just
@@ -128,9 +134,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 			// Load the referenced program's initial metadata.
 			prog.init();
-		} else {
-			// The exitInstance/exitProperty methods need a reference to the resolved prog.
-			this.setVarTypeProg(ctx, prog);
 		}
 	}
 
@@ -347,6 +350,13 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		// Load the referenced program's initial metadata.
 		prog.init();
 
+		/**
+	     * I added this call when I learned that when PT encounters a referenced
+		 * object in an app class, it recursively loads that app class's references
+	     * immediately. Thus I added this call. It's possible that this call may
+		 * need to be locked down to instances when the root program is a Component PC prog
+		 * if issues with Record PC loading surface later on. TODO: Keep this in mind.
+		 */
 		// Load the program's referenced defns and programs immediately.
 		supervisor.loadImmediately(prog);
 	}

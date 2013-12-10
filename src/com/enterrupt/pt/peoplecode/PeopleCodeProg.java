@@ -112,6 +112,7 @@ public abstract class PeopleCodeProg {
 
 		/**
 		 * Parse the entire program into tokens.
+		 * TODO: Remove this once ANTLR has been fully integrated.
 		 */
 		ArrayList<Token> tokenList = new ArrayList<Token>();
 		PeopleCodeByteStream byteStream = new PeopleCodeByteStream(this);
@@ -206,63 +207,6 @@ public abstract class PeopleCodeProg {
 			this.haveLoadedDefnsAndPrograms = true;
 			return false;
 		}
-	}
-
-	protected void recurseLoadDefnsAndPrograms(int recursionLevel, LFlag lflag, Stack<PeopleCodeProg> traceStack) {
-/*
-        while(!(t = stream.readNextToken()).flags.contains(TFlag.END_OF_PROGRAM)) {
-*/
-/*			this.subclassTokenHandler(t, stream, recursionLevel, lflag, traceStack);
-        }
-*/
-        /**
-         * All programs referenced by this program must have their referenced
-         * definitions and programs loaded now.
-         */
-  /*      for(PeopleCodeProg prog : referencedProgs) {
-			PeopleCodeProg p = DefnCache.getProgram(prog);
-			p.init();
-*/
-			/**
-			 * In Record PC mode, referenced defns and progs should be recursively loaded indefinitely.
-			 * In Component PC mode, all App Package PC programs must be permitted to load their references
-			 * recursively; for all other program types, their references should be loaded only if they are
-			 * directly referenced in the root Component PC program being loaded (which exists at recursion
-			 * level 0).
-			 */
-/*			if((lflag == LFlag.RECORD && recursionLevel < 3)
-				|| (lflag == LFlag.COMPONENT
-					&& (p instanceof AppClassPeopleCodeProg || recursionLevel == 0))) {
-*/
-				/**
-				 * If this program is never actually called,
-				 * there is no reason to load its references at this time.
-				 */
-/*				if(p instanceof RecordPeopleCodeProg && confirmedRecordProgCalls.get(p) == null) {
-					continue;
-				}
-
-	   	        p.recurseLoadDefnsAndPrograms(recursionLevel+1, lflag, traceStack);
-			}
-        }
-
-		traceStack.pop();*/
-	}
-
-	protected String[] getAppClassPathFromStream(Token t, PeopleCodeTokenStream stream) {
-
-    	ArrayList<String> pathParts = new ArrayList<String>();
-        pathParts.add(t.pureStrVal);        // add the package name to the path.
-        stream.readNextToken();     		// skip over COLON
-
-        // Path is variable length.
-        do {
-        	t = stream.readNextToken();
-            pathParts.add(t.pureStrVal);
-            t = stream.readNextToken();
-        } while(t.flags.contains(TFlag.COLON));
-
-		return pathParts.toArray(new String[0]);
 	}
 }
 

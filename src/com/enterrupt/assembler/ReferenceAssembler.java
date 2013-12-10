@@ -31,19 +31,26 @@ public class ReferenceAssembler extends ElementAssembler {
 		String ref = refObj.getValue();
 
 		/**
-		 * TODO: Understand what's going on here better.
+		 * If the reference refers to a data buffer or component buffer
+		 * chained to an expression before it using the dot (".") operator,
+		 * we need to strip the defn type (Field,Record,Scroll) from the reference.
 		 */
 		if(b == 74 && (ref.startsWith("Field.") ||
-					   ref.startsWith("Record.") ||
-					   ref.startsWith("Scroll."))) {
+				ref.startsWith("Record.") || ref.startsWith("Scroll."))) {
 			ref = ref.substring(ref.indexOf('.') + 1);
 		}
+
+		/**
+		 * TODO: Reach a better understanding of the purpose of this.
+		 * If the exception below is ever encountered, setup a hidden parser channel
+		 * and emit the before and after reference string for analysis.
+		 */
 		int p1 = ref.indexOf('.');
-		if(p1 > 0) {
+		if(b == (byte) 72 && p1 > 0) {
 			String rec = ref.substring(0, p1);
-			if(b == (byte) 72) {
-				ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
-			}
+			ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
+			throw new EntAssembleException("Encountered byte 72 during assembly of reference text; "
+				+ "investigate this.");
 		}
 
 		/**

@@ -107,12 +107,6 @@ tryCatchStmt	:	'try' stmtList 'catch' 'Exception' VAR_ID stmtList 'end-try' ;
 
 createInvocation:	'create' (appClassPath|GENERIC_ID) '(' exprList? ')' ;
 
-defnType	:	'Component' | 'Panel' | 'RecName' | 'Scroll' | 'HTML'
-			|	'MenuName' | 'BarName' | 'ItemName' | 'CompIntfc' | 'Image'
-			|	'Interlink' | 'StyleSheet' | 'FileLayout' | 'Page' | 'PanelGroup'
-			|	'Message' | 'BusProcess' | 'BusEvent' | 'BusActivity' | 'Field'
-			|	'Record' | 'Operation' | 'SQL' ;
-
 literal	:	DecimalLiteral
 		|	IntegerLiteral
 		|	defnLiteral
@@ -123,6 +117,31 @@ boolLiteral	:	'True' | 'False' ;
 defnLiteral : defnType '.' GENERIC_ID ;
 
 id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
+
+// IMPORTANT: Keep this list synchronized with the one in PSDefn.
+defnType	:	'BarName'
+			|	'BusActivity'
+			|	'BusEvent'
+			|	'BusProcess'
+			|	'CompIntfc'
+			|	'Component'
+			|	'Field'
+			|	'FileLayout'
+			|	'HTML'
+			|	'Image'
+			|	'Interlink'
+			|	'ItemName'
+			|	'MenuName'
+			|	'Message'
+			|	'Operation'
+			|	'Page'
+			|	'Panel'
+			|	'PanelGroup'  
+			| 	'RecName'
+			|	'Record'
+			|	'Scroll'
+			|	'SQL'
+			|	'StyleSheet' ;
 
 //*******************************************************//
 // Lexer Rules 									    	 //

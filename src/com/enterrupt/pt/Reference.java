@@ -10,28 +10,6 @@ public class Reference {
 	private String processedRef;
 	public boolean isRecordFieldRef = false;
 
-    public static final String[] refReservedWords;
-	public static HashMap<String, String> refReservedWordsTable;
-
-	static {
-
-		/**
-		 * TODO: REMOVE THIS. The ANTLR grammar should be
-		 * the authoritative source (see definitionLiteral rule).
-		 */
-		refReservedWords = new String[] {"Component", "Panel", "RecName", "Scroll",
-                         "MenuName", "BarName", "ItemName", "CompIntfc",
-                         "Image", "Interlink", "StyleSheet", "FileLayout",
-                         "Page", "PanelGroup", "Message", "BusProcess",
-                         "BusEvent", "BusActivity", "Field", "Record",
-                         "Operation", "SQL", "HTML"};
-
-		refReservedWordsTable = new HashMap<String, String>();
-		for(String s : refReservedWords) {
-			refReservedWordsTable.put(s.toUpperCase(), s);
-		}
-	}
-
 	public Reference(String recname, String refname) {
 
 		this.processedRef = "";
@@ -41,9 +19,9 @@ public class Reference {
 		 * camelcase equivalent and set the appropriate flag.
 		 */
 		boolean containsKeyword = false;
-		if(refReservedWordsTable.get(recname) != null) {
+		if(PSDefn.defnLiteralReservedWordsTable.get(recname) != null) {
 			// remember: this assigns the value (which is camelcase) rather than the key (which is upper).
-			recname = refReservedWordsTable.get(recname);
+			recname = PSDefn.defnLiteralReservedWordsTable.get(recname);
 			containsKeyword = true;
 		}
 

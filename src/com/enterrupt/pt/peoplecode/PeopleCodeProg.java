@@ -208,5 +208,9 @@ public abstract class PeopleCodeProg {
 			return false;
 		}
 	}
+
+	public String toString() {
+		return this.getDescriptor();
+	}
 }
 

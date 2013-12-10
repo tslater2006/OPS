@@ -38,7 +38,7 @@ public class EntDiagErrorListener extends DiagnosticErrorListener {
 		 * related to this ambiguity can be ignored; I've ordered the rules such
 		 * that the correct action will be taken when ANTLR chooses the first alternative.
 		 */
-		if(msg.startsWith("reportAmbiguity d=4 (stmt): ambigAlts={18, 19}")
+		if(msg.startsWith("reportAmbiguity d=4 (stmt): ambigAlts={20, 21}")
 			|| msg.startsWith("reportAmbiguity d=9 (expr): ambigAlts={1, 2}")
 			|| msg.startsWith("reportAmbiguity d=27 (funcDeclaration): ambigAlts={1, 2}")
 			|| msg.startsWith("reportAmbiguity d=21 (classBlock): ambigAlts={1, 2}")) {

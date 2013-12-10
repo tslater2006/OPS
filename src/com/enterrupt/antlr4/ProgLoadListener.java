@@ -72,6 +72,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	@Override
 	public void exitInstance(PeopleCodeParser.InstanceContext ctx) {
 		if(this.getVarTypeProg(ctx.varType()) != null) {
+			log.debug(">>> Instance: {}", ctx.getText());
 			this.handlePropOrInstanceAppClassRef(this.getVarTypeProg(ctx.varType()));
 		}
 	}
@@ -83,7 +84,27 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	@Override
 	public void exitProperty(PeopleCodeParser.PropertyContext ctx) {
 		if(this.getVarTypeProg(ctx.varType()) != null) {
+			log.debug(">>> Property: {}", ctx.getText());
 			this.handlePropOrInstanceAppClassRef(this.getVarTypeProg(ctx.varType()));
+		}
+	}
+
+	/**
+	 * If a variable declaration is seen in a non-app class program, note the reference
+	 * and initialize the program.
+	 */
+	@Override
+	public void exitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
+		if(!(this.srcProg instanceof AppClassPeopleCodeProg) && this.getVarTypeProg(ctx.varType()) != null) {
+			PeopleCodeProg prog = this.getVarTypeProg(ctx.varType());
+			prog = DefnCache.getProgram(prog);
+			this.srcProg.referencedProgs.add(prog);
+
+			// Load the referenced program's initial metadata.
+			prog.init();
+
+			// Load the program's referenced defns and programs immediately.
+			this.supervisor.loadImmediately(prog);
 		}
 	}
 
@@ -96,44 +117,29 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	public void exitVarType(PeopleCodeParser.VarTypeContext ctx) {
 
 		List<String> appClassParts = null;
+		PeopleCodeProg prog;
 
 		if(ctx.appClassPath() != null) {
 			appClassParts = new ArrayList<String>();
 			for(TerminalNode id : ctx.appClassPath().GENERIC_ID()) {
 				appClassParts.add(id.getText());
 			}
+	        prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+    	        new String[appClassParts.size()]));
+			this.setVarTypeProg(ctx, prog);
 			//log.debug("(0) Path found: {} in {}", appClassParts, ctx.getText());
 		} else if(ctx.GENERIC_ID() != null) {
 			appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
+	        prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+    	        new String[appClassParts.size()]));
+			this.setVarTypeProg(ctx, prog);
 			//log.debug("(1) Class name resolved: {} in {}", appClassParts, ctx.getText());
 		} else if(ctx.varType() != null) {
 			// if the nested variable type has a program attached to it, bubble it up
 			// before exiting.
-			PeopleCodeProg prog;
 			if((prog = this.getVarTypeProg(ctx.varType())) != null) {
 				this.setVarTypeProg(ctx, prog);
 			}
-			return;
-		} else {
-			// this variable doesn't refer to an app class, so no need to continue.
-			return;
-		}
-
-		PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
-			new String[appClassParts.size()]));
-		this.setVarTypeProg(ctx, prog);
-
-		/**
-		 * App class programs should not have all their variable types loaded, just
-		 * those that appear in their instance/property statements. All other programs
-	 	 * should load object var types at any point in the program.
-		 */
-		if(!(this.srcProg instanceof AppClassPeopleCodeProg)) {
-			prog = DefnCache.getProgram(prog);
-			this.srcProg.referencedProgs.add(prog);
-
-			// Load the referenced program's initial metadata.
-			prog.init();
 		}
 	}
 
@@ -205,6 +211,9 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 		// Load the referenced program's initial metadata.
 		prog.init();
+
+		// Load the program's referenced defns and programs immediately.
+		this.supervisor.loadImmediately(prog);
 	}
 
 	/**
@@ -216,6 +225,9 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	@Override
 	public void exitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
 
+		if(this.srcProg instanceof AppClassPeopleCodeProg) {
+			return;
+		}
 		PeopleCodeParser.IdContext id = null;
 
 		if(ctx.expr() instanceof PeopleCodeParser.ExprIdContext) {
@@ -265,6 +277,11 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 	@Override
 	public void enterEveryRule(ParserRuleContext ctx) {
+
+		if(this.srcProg instanceof AppClassPeopleCodeProg) {
+			return;
+		}
+
 		int tokPos = ctx.getStart().getTokenIndex();
 		List<Token> refChannel = tokens.getHiddenTokensToLeft(tokPos,
 			PeopleCodeLexer.REFERENCES);
@@ -358,6 +375,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		 * if issues with Record PC loading surface later on. TODO: Keep this in mind.
 		 */
 		// Load the program's referenced defns and programs immediately.
+		log.debug("IMMEDIATELY LOADING {}. Load stack: {}", prog.getDescriptor(),
+			this.supervisor.loadStack);
 		supervisor.loadImmediately(prog);
 	}
 }

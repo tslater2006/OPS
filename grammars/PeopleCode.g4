@@ -18,6 +18,8 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	extFuncImport						# StmtExternalFuncImport
 		|	classDeclaration					# StmtClassDeclaration
 		|	methodImpl							# StmtMethodImpl
+		|	getImpl								# StmtGetImpl
+		|	setImpl								# StmtSetImpl
 		|	funcDeclaration						# StmtFuncDeclaration
 		|	varDeclaration						# StmtVarDeclaration
 		|	ifStmt								# StmtIf
@@ -47,8 +49,8 @@ expr	:	'(' expr ')'					# ExprParenthesized
 		|	'Not' expr						# ExprNot
 		|	expr ('*'|'/') expr				# ExprMulDiv
 		|	expr ('+'|'-') expr				# ExprAddSub
-		|	expr ('<'|'<='|'>'|'>=') expr	# ExprComparison
-		|	expr ('='|'<>') expr			# ExprEquality	// splitting symbols out may affect parsing
+		|	expr ('<='|'>='|'<'|'>') expr	# ExprComparison
+		|	expr ('='|'<>') expr			# ExprEquality
 		|	expr (
 					'And'<assoc=right>
 				|	'Or'<assoc=right>
@@ -63,8 +65,8 @@ varDeclarator	:	VAR_ID ('=' expr)? ;
 
 varScope	:	'Global' | 'Component' | 'Local' ;
 varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean'
-			|	'Field' | 'any' | 'datetime'|	'integer' | 'number'
-			| 	'Rowset' | 'date' | 'Row' | 'Grid' | 'GridColumn' | 'SQL'
+			|	'Field' | 'any' | 'datetime'|	'integer' | 'number' | 'time'
+			| 	'Rowset' | 'date' | 'Row' | 'Grid' | 'GridColumn' | 'SQL' | 'ApiObject'
 			|	appClassPath | GENERIC_ID	// for app class names w/o paths (i.e., "Address" for "EO:CA:Address")
 			;
 
@@ -84,6 +86,8 @@ property			:	'property' varType GENERIC_ID 'get'? 'set'? 'readonly'? ;
 instance			:	'instance' varType VAR_ID (',' VAR_ID)* ;
 
 methodImpl			:	'method' GENERIC_ID stmtList 'end-method' ;
+getImpl				:	'get' GENERIC_ID stmtList 'end-get' ;
+setImpl				:	'set' GENERIC_ID stmtList 'end-set' ;
 
 funcDeclaration :   'Function' GENERIC_ID formalParamList? returnType? ';'? stmtList 'End-Function' ;
 formalParamList	:	'(' ')' | '(' VAR_ID paramType? (',' VAR_ID paramType? )* ')' ;
@@ -96,7 +100,7 @@ forStmt	:	'For' VAR_ID '=' expr 'To' expr (';' | ('Step' expr))? stmtList 'End-F
 
 whileStmt	:	'While' expr ';'? stmtList 'End-While' ;
 
-evaluateStmt	:	'Evaluate' expr ('When' '='? expr stmtList)+
+evaluateStmt	:	'Evaluate' expr ('When' ('='|'>')? expr stmtList)+
 						('When-Other' stmtList)? 'End-Evaluate' ;
 
 tryCatchStmt	:	'try' stmtList 'catch' 'Exception' VAR_ID stmtList 'end-try' ;
@@ -135,7 +139,7 @@ StringLiteral	:	'"' ( ~'"' )* '"' ;
 REM			:	WS [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1	:	'/*' .*? '*/' -> skip;
 COMMENT_2	:	'<*' .*? '*>' -> skip;
-COMMENT_3	:	'/+' .*? '+/' -> skip;
+COMMENT_3	:	'/+' .*? '+/' ';'? -> skip;
 WS			:	[ \t\r\n]+ -> skip ;
 
 // Reference indices are emitted on a separate channel.

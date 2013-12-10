@@ -13,9 +13,9 @@ import org.apache.logging.log4j.*;
 public class ProgLoadSupervisor {
 
 	private PeopleCodeProg rootProg;
-	private Stack<PeopleCodeProg> loadStack;
 	private LFlag lflag;
 	private boolean writeToFile = true;
+	public Stack<PeopleCodeProg> loadStack;
 
 	private Logger log = LogManager.getLogger(ProgLoadSupervisor.class.getName());
 
@@ -54,10 +54,11 @@ public class ProgLoadSupervisor {
 		}
 
 		try {
+
 	        InputStream progTextInputStream =
 			    new ByteArrayInputStream(prog.parsedText.getBytes());
 
-            log.debug("=== ProgLoadSupervisor =============================");
+//            log.debug("=== ProgLoadSupervisor =============================");
 			log.debug("Loading {}", prog.getDescriptor());
 /*			String[] lines = prog.parsedText.split("\n");
 			for(int i = 0; i < lines.length; i++) {
@@ -84,12 +85,12 @@ public class ProgLoadSupervisor {
 
 	        ParseTree tree = parser.program();
 
-			log.debug(">>> Parse Tree >>>>>>>>>>>>");
+/*			log.debug(">>> Parse Tree >>>>>>>>>>>>");
 			if(prog instanceof AppClassPeopleCodeProg) {
 				log.debug(tree.toStringTree(parser));
 			}
 	        log.debug("====================================================");
-
+*/
             if(this.writeToFile) {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(
                     new File("/home/mquinn/evm/cache/" + prog.getDescriptor() + ".tree")));

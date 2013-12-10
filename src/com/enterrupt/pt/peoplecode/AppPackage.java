@@ -139,9 +139,19 @@ public class AppPackage {
 
 		for(int i = 1; i < pkgPath.parts.length; i++) {
 
-			currNode = currNode.subPkgs.get(pkgPath.parts[i]);
+			PackageTreeNode newCurrNode = currNode.subPkgs.get(pkgPath.parts[i]);
 
-			if(currNode == null) {
+			if(newCurrNode != null) {
+				currNode = newCurrNode;
+			} else if(currNode.classNames.containsKey(pkgPath.parts[i])) {
+				/**
+				 * Apparently in PS it is possible to "import $Pkg:$Subpkg:$Class:*",
+				 * which makes no sense to me at all. This check will catch instances
+				 * where the last part of the path is actually a class name rather than
+			 	 * a subpackage name.
+				 */
+				return currNode.classNames;
+			} else {
 				throw new EntVMachRuntimeException("The app package path provided (" +
 					pkgPath + ") does not resolve in the context of this package (" + this.rootPkgName + ").");
 			}

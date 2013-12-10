@@ -5,12 +5,12 @@ import com.enterrupt.pt.*;
 public class PeopleCodeByteStream {
 
 	public PeopleCodeProg prog;
-	private StringBuilder parsedTextBuilder;
+	private StringBuilder assembledTextBuilder;
 	private int cursorPos;
 
 	public PeopleCodeByteStream(PeopleCodeProg prog) {
 		this.prog = prog;
-		this.parsedTextBuilder = new StringBuilder();
+		this.assembledTextBuilder = new StringBuilder();
 	}
 
 	public void setCursorPos(int pos) {
@@ -48,15 +48,15 @@ public class PeopleCodeByteStream {
 		return this.prog.progRefsTable.get(idx);
 	}
 
-	public void appendParsedText(char c) {
-        this.parsedTextBuilder.append(c);
+	public void appendAssembledText(char c) {
+        this.assembledTextBuilder.append(c);
 	}
 
-	public void appendParsedText(String s) {
-		this.parsedTextBuilder.append(s);
+	public void appendAssembledText(String s) {
+		this.assembledTextBuilder.append(s);
 	}
 
-	public String getParsedText() {
-		return this.parsedTextBuilder.toString();
+	public String getAssembledText() {
+		return this.assembledTextBuilder.toString();
 	}
 }

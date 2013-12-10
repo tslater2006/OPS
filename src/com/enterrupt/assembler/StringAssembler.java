@@ -1,9 +1,9 @@
-package com.enterrupt.parser;
+package com.enterrupt.assembler;
 
 import java.lang.StringBuilder;
 import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
-public abstract class StringParser extends ElementParser {
+public abstract class StringAssembler extends ElementAssembler {
 
     public String getString(PeopleCodeByteStream stream) {
         byte b;

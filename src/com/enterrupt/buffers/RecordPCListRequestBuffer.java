@@ -116,7 +116,7 @@ public class RecordPCListRequestBuffer {
 				break;
 			}
 
-			if(t.flags.contains(AFlag.SECPAGE)) {
+			if(t.flags.contains(PFlag.SECPAGE)) {
 				continue;
 			}
 

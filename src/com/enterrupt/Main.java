@@ -4,8 +4,6 @@ import com.enterrupt.sql.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
-import com.enterrupt.parser.Parser;
-import com.enterrupt.buffers.ComponentBuffer;
 import org.apache.logging.log4j.*;
 
 public class Main {

@@ -1,6 +1,6 @@
-package com.enterrupt.parser;
+package com.enterrupt.assembler;
 
-public class PFlags {
+public class AFlag {
 
 	public static final int PUNCTUATION = 0x0;
 	public static final int SPACE_BEFORE = 0x1;

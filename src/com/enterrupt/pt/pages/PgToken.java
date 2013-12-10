@@ -6,7 +6,7 @@ import com.enterrupt.runtime.*;
 
 public class PgToken {
 
-	public EnumSet<AFlag> flags;
+	public EnumSet<PFlag> flags;
 	public String RECNAME;
 	public String FIELDNAME;
 	public String SUBPNLNAME;
@@ -19,14 +19,14 @@ public class PgToken {
 	public String primaryRecName; 		// used for SCROLL_START tokens.
 
 	public PgToken() {
-		this.flags = EnumSet.noneOf(AFlag.class);
+		this.flags = EnumSet.noneOf(PFlag.class);
 	}
 
-	public PgToken(AFlag flag) {
+	public PgToken(PFlag flag) {
 		this.flags = EnumSet.of(flag);
 	}
 
-	public PgToken(EnumSet<AFlag> flagSet) {
+	public PgToken(EnumSet<PFlag> flagSet) {
 		this.flags = EnumSet.copyOf(flagSet);
 	}
 

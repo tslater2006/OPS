@@ -40,11 +40,11 @@ public class PgTokenStream {
 
 			// Changes in scroll level must be reported to the receiver.
 			if(tok.OCCURSLEVEL < this.prevOCCURSLEVEL) {
-				tok.flags.add(AFlag.SCROLL_LVL_DECREMENT);
+				tok.flags.add(PFlag.SCROLL_LVL_DECREMENT);
 			}
 
 			// If this is a subpage or secpage, expand it in-place to its constituent tokens.
-			if(tok.flags.contains(AFlag.PAGE)) {
+			if(tok.flags.contains(PFlag.PAGE)) {
 				if(this.loadedPageNames.get(tok.SUBPNLNAME) == null) {
 					this.pfs = new PgTokenStream(tok.SUBPNLNAME);
 					this.loadedPageNames.put(tok.SUBPNLNAME, true);
@@ -56,7 +56,7 @@ public class PgTokenStream {
 			}
 
 			// If this is a scroll bar / grid / scroll area, find its primary record name.
-			if(tok.flags.contains(AFlag.SCROLL_START)) {
+			if(tok.flags.contains(PFlag.SCROLL_START)) {
 
 				int lookAheadCursor = this.cursor;
 				String primaryRecNameCandidate = null;
@@ -70,7 +70,7 @@ public class PgTokenStream {
 					}
 
 					// Ignore groupboxes and any field without a valid RECNAME.
-					if(!lookToken.flags.contains(AFlag.GROUPBOX) && lookToken.RECNAME != null
+					if(!lookToken.flags.contains(PFlag.GROUPBOX) && lookToken.RECNAME != null
 						&& lookToken.RECNAME.length() > 0) {
 
 						/**
@@ -101,7 +101,7 @@ public class PgTokenStream {
 			 * This token should be emitted immediately after the preemptively loaded page, so remind the cursor
 			 * by 1 to ensure that it gets picked up again later.
 			 */
-			if(tok.SUBPNLNAME.length() > 0 && !tok.flags.contains(AFlag.PAGE)) {
+			if(tok.SUBPNLNAME.length() > 0 && !tok.flags.contains(PFlag.PAGE)) {
 				if(this.loadedPageNames.get(tok.SUBPNLNAME) == null) {
 					this.pfs = new PgTokenStream(tok.SUBPNLNAME);
 					this.loadedPageNames.put(tok.SUBPNLNAME, true);
@@ -115,7 +115,7 @@ public class PgTokenStream {
 					 * Note that prevOCCURSLEVEL is not saved before returning here; we're going to pick
 					 * up where we left off later so the prevOCCURSLEVEL must not be changed.
 				 	 */
-					PgToken preemptivePgToken = new PgToken(AFlag.PAGE);
+					PgToken preemptivePgToken = new PgToken(PFlag.PAGE);
 					preemptivePgToken.SUBPNLNAME = tok.SUBPNLNAME;
 					return preemptivePgToken;
 				}
@@ -127,7 +127,7 @@ public class PgTokenStream {
 		} else {
 			// Before null is emitted, tell the receiver that this page has ended.
 			PgToken endTok = new PgToken();
-			endTok.flags.add(AFlag.END_OF_PAGE);
+			endTok.flags.add(PFlag.END_OF_PAGE);
 			this.isClosed = true;
 			return endTok;
 		}

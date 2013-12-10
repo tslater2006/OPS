@@ -13,7 +13,6 @@ import org.apache.logging.log4j.*;
 public class ProgLoadSupervisor {
 
 	private PeopleCodeProg rootProg;
-	private LFlag lflag;
 	private boolean writeToFile = true;
 	public Stack<PeopleCodeProg> loadStack;
 
@@ -22,14 +21,6 @@ public class ProgLoadSupervisor {
 	public ProgLoadSupervisor(PeopleCodeProg prog) {
 		this.rootProg = prog;
 		this.loadStack = new Stack<PeopleCodeProg>();
-
-        if(prog instanceof ComponentPeopleCodeProg) {
-            this.lflag = LFlag.COMPONENT;
-        } else if(prog instanceof PagePeopleCodeProg || prog instanceof RecordPeopleCodeProg) {
-            this.lflag = LFlag.RECORD;
-        } else {
-            throw new EntVMachRuntimeException("Unexpected type of root PeopleCode.");
-        }
 	}
 
 	public void start() {
@@ -56,11 +47,11 @@ public class ProgLoadSupervisor {
 		try {
 
 	        InputStream progTextInputStream =
-			    new ByteArrayInputStream(prog.parsedText.getBytes());
+			    new ByteArrayInputStream(prog.programText.getBytes());
 
 //            log.debug("=== ProgLoadSupervisor =============================");
 			log.debug("Loading {}", prog.getDescriptor());
-/*			String[] lines = prog.parsedText.split("\n");
+/*			String[] lines = prog.programText.split("\n");
 			for(int i = 0; i < lines.length; i++) {
 	            log.debug("{}:\t{}", i+1, lines[i]);
     		}*/
@@ -68,7 +59,7 @@ public class ProgLoadSupervisor {
             if(this.writeToFile) {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(
                     new File("/home/mquinn/evm/cache/" + prog.getDescriptor() + ".pc")));
-                writer.write(prog.parsedText);
+                writer.write(prog.programText);
                 writer.close();
             }
 
@@ -119,7 +110,8 @@ public class ProgLoadSupervisor {
 				 * references should be loaded only if they are directly referenced in
 				 * the root Component PC program being loaded (recursion level 0).
 				 */
-	        	if((this.rootProg instanceof RecordPeopleCodeProg && recurseLvl < 3)
+	        	if(((this.rootProg instanceof RecordPeopleCodeProg
+						|| this.rootProg instanceof PagePeopleCodeProg) && recurseLvl < 3)
                 	|| (this.rootProg instanceof ComponentPeopleCodeProg
 	                    && (refProg instanceof AppClassPeopleCodeProg
 							|| recurseLvl == 0))) {

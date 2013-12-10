@@ -18,6 +18,11 @@ public class AppPackagePath {
 		 * the last part will be a wildcard ('*'). Otherwise, it's an app
 		 * class path, in which case the last part will be the name of
 		 * an app class. We only want package (and subpackage) names here.
+		 * NOTE: Exceptions to this can occur; apparently in PS it is possible
+		 * to "import $PkgName:$SpkgName:$ClassName:*", which is ridiculous. Code
+	 	 * in the package path traversal method in AppClassPeopleCodeProg has been
+		 * modified to handle this situation, *but code using this class should not
+		 * assume that the path parts array always points to a subpackage.*
 		 */
 		this.parts = new String[pathParts.length - 1];
 		for(int i=0; i < this.parts.length; i++) {

@@ -1,12 +1,12 @@
-package com.enterrupt.parser;
+package com.enterrupt.assembler;
 
 import java.lang.StringBuilder;
 import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
-public abstract class ElementParser {
+public abstract class ElementAssembler {
 
     public int format;
-    public abstract Token parse(PeopleCodeByteStream stream);
+    public abstract void assemble(PeopleCodeByteStream stream);
     public abstract byte getStartByte();
 
     public int getFormat() {

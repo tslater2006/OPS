@@ -1,6 +1,6 @@
 package com.enterrupt.pt.pages;
 
-public enum AFlag {
+public enum PFlag {
 
 	PAGE,
 	SUBPAGE,

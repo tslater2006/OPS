@@ -1,22 +1,22 @@
-package com.enterrupt.parser;
+package com.enterrupt.assembler;
 
 import com.enterrupt.pt.Reference;
 import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
-public class ReferenceParser extends ElementParser {
+public class ReferenceAssembler extends ElementAssembler {
 
 	byte b;
 
-	public ReferenceParser(byte _b) {
+	public ReferenceAssembler(byte _b) {
 		this.b = _b;
-		this.format = PFlags.SPACE_BEFORE_AND_AFTER;
+		this.format = AFlag.SPACE_BEFORE_AND_AFTER;
 	}
 
 	public byte getStartByte() {
 		return b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) {
+	public void assemble(PeopleCodeByteStream stream) {
 
 		int b1 = (int) (stream.readNextByte() & 0xff);
 		int b2 = (int) (stream.readNextByte() & 0xff);
@@ -24,7 +24,7 @@ public class ReferenceParser extends ElementParser {
 		int refIdx = b2 * 256 + b1 + 1;
 		Reference refObj = stream.getMappedReference(refIdx);
 		if(refObj == null) {
-			throw new EntParseException("No reference is mapped to index " + refIdx + " on the "
+			throw new EntAssembleException("No reference is mapped to index " + refIdx + " on the "
 				+ "program underlying this stream.");
 		}
 
@@ -50,11 +50,7 @@ public class ReferenceParser extends ElementParser {
 		 * Before emitting the reference text, emit the reference index.
 		 * This is required during component loading.
 		 */
-		stream.appendParsedText("#ENTREF{"+refIdx+"}");
-		stream.appendParsedText(ref);
-
-		Token t = new Token(TFlag.REFERENCE);
-		t.refObj = refObj;
-		return t;
+		stream.appendAssembledText("#ENTREF{"+refIdx+"}");
+		stream.appendAssembledText(ref);
 	}
 }

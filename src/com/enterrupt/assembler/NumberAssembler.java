@@ -1,23 +1,23 @@
-package com.enterrupt.parser;
+package com.enterrupt.assembler;
 
 import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
 
-public class NumberParser extends ElementParser {
+public class NumberAssembler extends ElementAssembler {
 
 	byte b;
 	int nBytes;
 
-	public NumberParser(byte _b, int _nBytes) {
+	public NumberAssembler(byte _b, int _nBytes) {
 		b = _b;
 		nBytes = _nBytes;
-		format = PFlags.SPACE_BEFORE | PFlags.NO_SPACE_AFTER;
+		format = AFlag.SPACE_BEFORE | AFlag.NO_SPACE_AFTER;
 	}
 
 	public byte getStartByte() {
 		return b;
 	}
 
-	public Token parse(PeopleCodeByteStream stream) {
+	public void assemble(PeopleCodeByteStream stream) {
 
 		int dValue = 0;	 // decimal position from far right going left
 		String out_number = "";
@@ -47,10 +47,6 @@ public class NumberParser extends ElementParser {
 			}
 		}
 
-		stream.appendParsedText(out_number);
-
-		Token t = new Token(TFlag.NUMBER);
-		t.numericVal = out_number;
-		return t;
+		stream.appendAssembledText(out_number);
 	}
 }

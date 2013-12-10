@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.*;
 import java.io.*;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.parser.Parser;
 import com.enterrupt.interpreter.Interpreter;
 import com.enterrupt.buffers.*;
 import com.enterrupt.runtime.*;
@@ -28,11 +27,11 @@ public class Component {
 	private class ScrollMarker {
 		public String primaryRecName;
 		public int scrollLevel;
-		public AFlag src;
+		public PFlag src;
 
 		public ScrollMarker() {}
 
-		public ScrollMarker(int s, String p, AFlag a) {
+		public ScrollMarker(int s, String p, PFlag a) {
 			this.scrollLevel = s;
 			this.primaryRecName = p;
 			this.src = a;
@@ -242,40 +241,40 @@ public class Component {
 			pfs = new PgTokenStream(p.PNLNAME);
 
 			Stack<ScrollMarker> scrollMarkers = new Stack<ScrollMarker>();
-			scrollMarkers.push(new ScrollMarker(0, null, AFlag.PAGE));
+			scrollMarkers.push(new ScrollMarker(0, null, PFlag.PAGE));
 
 			while((tok = pfs.next()) != null) {
 
 				//log.debug(tok);
 
-				if(tok.flags.contains(AFlag.PAGE)) {
+				if(tok.flags.contains(PFlag.PAGE)) {
 					ScrollMarker sm = new ScrollMarker();
-					sm.src = AFlag.PAGE;
+					sm.src = PFlag.PAGE;
 					sm.primaryRecName = scrollMarkers.peek().primaryRecName;
 					sm.scrollLevel = scrollMarkers.peek().scrollLevel;
 					scrollMarkers.push(sm);
 					continue;
 				}
 
-				if(tok.flags.contains(AFlag.END_OF_PAGE)) {
-					while(scrollMarkers.peek().src == AFlag.SCROLL_START) {
+				if(tok.flags.contains(PFlag.END_OF_PAGE)) {
+					while(scrollMarkers.peek().src == PFlag.SCROLL_START) {
 						scrollMarkers.pop(); // pop interim scroll levels.
 					}
 					scrollMarkers.pop();		// pop the matching page.
 					continue;
 				}
 
-				if(tok.flags.contains(AFlag.SCROLL_START)) {
+				if(tok.flags.contains(PFlag.SCROLL_START)) {
 
 					// This scroll may appear right after an unended scroll; if so, pop the previous one.
 					ScrollMarker topSm = scrollMarkers.peek();
-					if(topSm.src == AFlag.SCROLL_START &&
+					if(topSm.src == PFlag.SCROLL_START &&
 						!tok.primaryRecName.equals(topSm.primaryRecName)) {
 						scrollMarkers.pop();
 					}
 
 					ScrollMarker sm = new ScrollMarker();
-					sm.src = AFlag.SCROLL_START;
+					sm.src = PFlag.SCROLL_START;
 					sm.primaryRecName = tok.primaryRecName;
 					sm.scrollLevel = scrollMarkers.peek().scrollLevel + tok.OCCURSLEVEL;
 					scrollMarkers.push(sm);
@@ -283,7 +282,7 @@ public class Component {
 				}
 
 				// Remember: don't "continue" here, since SCROLL_LVL_DECREMENT can be attached to regular fields.
-				if(tok.flags.contains(AFlag.SCROLL_LVL_DECREMENT)) {
+				if(tok.flags.contains(PFlag.SCROLL_LVL_DECREMENT)) {
 					scrollMarkers.pop();
 				}
 

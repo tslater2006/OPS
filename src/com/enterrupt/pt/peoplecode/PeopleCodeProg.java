@@ -4,19 +4,17 @@ import java.sql.*;
 import java.util.*;
 import java.io.InputStream;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.parser.*;
+import com.enterrupt.assembler.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 
 public abstract class PeopleCodeProg {
 
-    public byte[] progBytes;
-	public Token[] progTokens;
-
 	protected String[] bindVals;
 	public String event;
-	public String parsedText;
+	public String programText;
+    public byte[] progBytes;
 
 	public ArrayList<PeopleCodeProg> referencedProgs;
 	public HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
@@ -37,17 +35,12 @@ public abstract class PeopleCodeProg {
 
 	public abstract String getDescriptor();
 
-	public Reference getProgReference(int refNbr) {
-		return this.progRefsTable.get(refNbr);
-	}
-
 	public void init() {
 
 		if(this.hasInitialized) {
-			log.debug("Already initialized: {}", this.getDescriptor());
-			return; }
+			return;
+		}
 
-		log.debug("Initializing {}...", this.getDescriptor());
 		this.hasInitialized = true;
 
     	PreparedStatement pstmt = null;
@@ -111,29 +104,12 @@ public abstract class PeopleCodeProg {
         }
 
 		/**
-		 * Parse the entire program into tokens.
-		 * TODO: Remove this once ANTLR has been fully integrated.
+		 * Assemble the text of the program from its constituent bytecode.
 		 */
-		ArrayList<Token> tokenList = new ArrayList<Token>();
 		PeopleCodeByteStream byteStream = new PeopleCodeByteStream(this);
-		Parser p = new Parser(byteStream);
-		Token t;
-
-		do {
-			t = p.parseNextToken();
-
-			// Discard comments.
-			if(t.flags.contains(TFlag.COMMENT)) {
-				continue;
-			}
-
-			if(!t.flags.contains(TFlag.DISCARD)) {
-				tokenList.add(t);
-			}
-		} while(!t.flags.contains(TFlag.END_OF_PROGRAM));
-
-		this.parsedText = byteStream.getParsedText();
-		this.progTokens = tokenList.toArray(new Token[0]);
+		Assembler a = new Assembler(byteStream);
+		a.assemble();
+		this.programText = byteStream.getAssembledText();
 	}
 
     public void appendProgBytes(Blob blob) {
@@ -192,11 +168,8 @@ public abstract class PeopleCodeProg {
 	public boolean haveDefnsAndProgsBeenLoaded() {
 
 		if(this.haveLoadedDefnsAndPrograms) {
-			log.debug("Already loaded ref defns/progs {}", this.getDescriptor());
 			return true;
 		} else {
-			log.debug("Loading ref defns/progs {}...", this.getDescriptor());
-
 			this.referencedProgs = new ArrayList<PeopleCodeProg>();
 			this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
         	this.importedRootAppPackages = new HashMap<String, Boolean>();
@@ -207,6 +180,10 @@ public abstract class PeopleCodeProg {
 			this.haveLoadedDefnsAndPrograms = true;
 			return false;
 		}
+	}
+
+	public Reference getReference(int refNbr) {
+		return this.progRefsTable.get(refNbr);
 	}
 
 	public String toString() {

@@ -3,7 +3,6 @@ package com.enterrupt.interpreter;
 import java.util.Stack;
 import java.io.*;
 import java.nio.charset.Charset;
-import com.enterrupt.parser.*;
 import com.enterrupt.runtime.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.types.MemoryPtr;
@@ -17,7 +16,6 @@ import com.enterrupt.antlr4.frontend.*;
 
 public class Interpreter {
 
-	private PeopleCodeTokenStream stream;
 	private PeopleCodeProg prog;
 	private static Stack<MemoryPtr>	callStack;
 	private static boolean writeToFile = true;
@@ -29,7 +27,6 @@ public class Interpreter {
 	}
 
 	public Interpreter(PeopleCodeProg prog) {
-		this.stream = new PeopleCodeTokenStream(prog);
 		this.prog = prog;
 	}
 
@@ -52,11 +49,11 @@ public class Interpreter {
 
 		try {
 			InputStream progTextInputStream =
-				new ByteArrayInputStream(this.prog.parsedText.getBytes());
+				new ByteArrayInputStream(this.prog.programText.getBytes());
 
             log.debug("=== Interpreter =============================");
             log.debug("Interpreting {}", prog.getDescriptor());
-            String[] lines = this.prog.parsedText.split("\n");
+            String[] lines = this.prog.programText.split("\n");
             for(int i = 0; i < lines.length; i++) {
                 log.debug("{}:\t{}", i+1, lines[i]);
             }
@@ -64,7 +61,7 @@ public class Interpreter {
 			if(this.writeToFile) {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(
 					new File("/home/mquinn/evm/cache/" + this.prog.getDescriptor() + ".pc")));
-				writer.write(this.prog.parsedText);
+				writer.write(this.prog.programText);
 				writer.close();
 			}
 

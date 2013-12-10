@@ -72,12 +72,12 @@ public class Page {
 					case 0:	 	// text (on page, linked to msg set/nbr, not in component or page buffer)
 						break;
 					case 2:
-						pf.flags.add(AFlag.GROUPBOX);
+						pf.flags.add(PFlag.GROUPBOX);
 						this.tokens.add(pf);
 						break;
     	            case 11:
-						pf.flags.add(AFlag.PAGE);
-						pf.flags.add(AFlag.SUBPAGE);
+						pf.flags.add(PFlag.PAGE);
+						pf.flags.add(PFlag.SUBPAGE);
 						this.subpages.add(pf);
 						this.tokens.add(pf);
                    		break;
@@ -92,13 +92,13 @@ public class Page {
 					case 26:
 					case 29:
 					case 31: // pushbtn/links with various targets
-						pf.flags.add(AFlag.PUSHBTN_LINK);
+						pf.flags.add(PFlag.PUSHBTN_LINK);
 						this.tokens.add(pf);
 						break;
 
 	                case 18:
-						pf.flags.add(AFlag.PAGE);
-						pf.flags.add(AFlag.SECPAGE);
+						pf.flags.add(PFlag.PAGE);
+						pf.flags.add(PFlag.SECPAGE);
             	        this.secpages.add(pf);
 						this.tokens.add(pf);
 						break;
@@ -106,12 +106,12 @@ public class Page {
 					case 10: // scroll bar
 					case 19: // grid
         			case 27: // scroll area
-						pf.flags.add(AFlag.SCROLL_START);
+						pf.flags.add(PFlag.SCROLL_START);
 						this.tokens.add(pf);
 						break;
 
 		      		default:
-						pf.flags.add(AFlag.GENERIC);
+						pf.flags.add(PFlag.GENERIC);
 						this.tokens.add(pf);
 
 						if(pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
@@ -160,18 +160,18 @@ public class Page {
 		// Recursively expand/search subpages for secpages.
 		for(PgToken tok : loadedPage.tokens) {
 
-			if(tok.flags.contains(AFlag.SUBPAGE)) {
+			if(tok.flags.contains(PFlag.SUBPAGE)) {
 				p = DefnCache.getPage(tok.SUBPNLNAME);
 				p.recursivelyLoadSecpages();
 
-			} else if(tok.flags.contains(AFlag.SECPAGE)) {
+			} else if(tok.flags.contains(PFlag.SECPAGE)) {
 
 				/**
 				 * Create a new PgToken instead of using the current one,
 				 * otherwise there could be issues if the same token is submitted twice,
 				 * which is valid because secpages can appear on multiple pages.
 				 */
-				PgToken marker = new PgToken(AFlag.SECPAGE);
+				PgToken marker = new PgToken(PFlag.SECPAGE);
 				marker.SUBPNLNAME = tok.SUBPNLNAME;
 				secpageMarkers.add(marker);
 				RecordPCListRequestBuffer.queueSecpageToken(marker);

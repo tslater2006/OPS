@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.*;
 import java.io.*;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.interpreter.Interpreter;
 import com.enterrupt.buffers.*;
 import com.enterrupt.runtime.*;
 import com.enterrupt.pt.peoplecode.*;

@@ -1,4 +1,4 @@
-package com.enterrupt.interpreter;
+package com.enterrupt.runtime;
 
 import java.util.Stack;
 import java.io.*;

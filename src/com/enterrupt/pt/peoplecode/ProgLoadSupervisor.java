@@ -40,6 +40,11 @@ public class ProgLoadSupervisor {
 		}
 	}
 
+	public void loadImmediately(PeopleCodeProg prog) {
+		this.loadStack.push(prog);
+		this.loadTopOfStack();
+	}
+
 	public void loadTopOfStack() {
 
 		PeopleCodeProg prog = this.loadStack.peek();
@@ -95,7 +100,7 @@ public class ProgLoadSupervisor {
 			ParseTreeWalker walker = new ParseTreeWalker();
 
 			int recurseLvl = loadStack.size() - 1;
-			walker.walk(new ProgLoadListener(prog, recurseLvl, tokens), tree);
+			walker.walk(new ProgLoadListener(prog, recurseLvl, this, tokens), tree);
 
 	        /**
     	     * All programs referenced by this program must have their referenced

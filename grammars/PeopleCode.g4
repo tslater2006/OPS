@@ -80,7 +80,7 @@ classDeclaration	:	'class' GENERIC_ID classBlock* 'end-class' ;
 classBlock			:	'private'? ((method | constant | property | instance) ';')+ ;
 method				:	'method' GENERIC_ID formalParamList returnType? ;
 constant			:	'Constant' VAR_ID '=' expr ;
-property			:	'property' varType GENERIC_ID 'get'? 'set'? ;
+property			:	'property' varType GENERIC_ID 'get'? 'set'? 'readonly'? ;
 instance			:	'instance' varType VAR_ID (',' VAR_ID)* ;
 
 methodImpl			:	'method' GENERIC_ID stmtList 'end-method' ;

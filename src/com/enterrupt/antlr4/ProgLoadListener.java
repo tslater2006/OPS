@@ -16,15 +16,31 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 	private int recurseLvl;
 	private PeopleCodeProg srcProg;
+	private ProgLoadSupervisor supervisor;
 	private BufferedTokenStream tokens;
 	private Map<Integer, Void> refIndicesSeen;
+    private ParseTreeProperty<PeopleCodeProg> varTypeProgs = new ParseTreeProperty<PeopleCodeProg>();
+
+    private void setVarTypeProg(ParseTree node, PeopleCodeProg prog) {
+        this.varTypeProgs.put(node, prog);
+    }
+
+    private PeopleCodeProg getVarTypeProg(ParseTree node) {
+        if(this.varTypeProgs.get(node) == null) {
+            throw new EntVMachRuntimeException("No program was found for the requested variable " +
+                "type node: " + node.getText());
+        }
+        return this.varTypeProgs.get(node);
+    }
 
 	private static Logger log = LogManager.getLogger(ProgLoadListener.class.getName());
 
-	public ProgLoadListener(PeopleCodeProg srcProg, int recurseLvl, BufferedTokenStream tokens) {
+	public ProgLoadListener(PeopleCodeProg srcProg, int recurseLvl,
+			ProgLoadSupervisor supervisor,  BufferedTokenStream tokens) {
 		this.srcProg = srcProg;
 		this.tokens = tokens;
 		this.recurseLvl = recurseLvl;
+		this.supervisor = supervisor;
 		this.refIndicesSeen = new HashMap<Integer, Void>();
 	}
 
@@ -54,6 +70,28 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	}
 
 	/**
+	 * If a property statment in an App Class program references another app class object,
+	 * immediately load the program containing that app class.
+	 */
+	@Override
+	public void exitInstance(PeopleCodeParser.InstanceContext ctx) {
+		if(ctx.varType().appClassPath() != null || ctx.varType().GENERIC_ID() != null) {
+			this.handlePropOrInstanceAppClassRef(this.getVarTypeProg(ctx.varType()));
+		}
+	}
+
+	/**
+	 * If an instance statment in an App Class program references another app class object,
+	 * immediately load the program containing that app class.
+	 */
+	@Override
+	public void exitProperty(PeopleCodeParser.PropertyContext ctx) {
+		if(ctx.varType().appClassPath() != null || ctx.varType().GENERIC_ID() != null) {
+			this.handlePropOrInstanceAppClassRef(this.getVarTypeProg(ctx.varType()));
+		}
+	}
+
+	/**
 	 * When a variable type in a variable declaration in a non-app class program references
 	 * an object in an app class, we need to parse out the app class reference and
 	 * load that program's OnExecute PeopleCode segment.
@@ -61,9 +99,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	@Override
 	public void exitVarType(PeopleCodeParser.VarTypeContext ctx) {
 
-		if(this.srcProg instanceof AppClassPeopleCodeProg) {
-			return;
-		}
 		List<String> appClassParts = null;
 
 		if(ctx.appClassPath() != null) {
@@ -75,17 +110,27 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		} else if(ctx.GENERIC_ID() != null) {
 			appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
 			//log.debug("(1) Class name resolved: {} in {}", appClassParts, ctx.getText());
+		} else {
+			return;
 		}
 
-		// Don't error out if null, since var type may be other than an app class.
-		if(appClassParts != null) {
-			PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
-				new String[appClassParts.size()]));
+		PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+			new String[appClassParts.size()]));
+
+		/**
+		 * App class programs should not have all their variable types loaded, just
+		 * those that appear in their instance/property statements. All other programs
+	 	 * should load object var types at any point in the program.
+		 */
+		if(!(this.srcProg instanceof AppClassPeopleCodeProg)) {
 			prog = DefnCache.getProgram(prog);
 			this.srcProg.referencedProgs.add(prog);
 
 			// Load the referenced program's initial metadata.
 			prog.init();
+		} else {
+			// The exitInstance/exitProperty methods need a reference to the resolved prog.
+			this.setVarTypeProg(ctx, prog);
 		}
 	}
 
@@ -289,5 +334,20 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		}
 
 		return appClassParts;
+	}
+
+	/**
+	 * This method should be called to immediately load programs referenced in an App Class
+	 * program within a property or instance statement.
+	 */
+	private void handlePropOrInstanceAppClassRef(PeopleCodeProg prog) {
+		prog = DefnCache.getProgram(prog);
+		this.srcProg.referencedProgs.add(prog);
+
+		// Load the referenced program's initial metadata.
+		prog.init();
+
+		// Load the program's referenced defns and programs immediately.
+		supervisor.loadImmediately(prog);
 	}
 }

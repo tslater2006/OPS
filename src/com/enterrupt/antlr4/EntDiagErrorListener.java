@@ -40,7 +40,7 @@ public class EntDiagErrorListener extends DiagnosticErrorListener {
 		 */
 		if(msg.startsWith("reportAmbiguity d=4 (stmt): ambigAlts={18, 19}")
 			|| msg.startsWith("reportAmbiguity d=9 (expr): ambigAlts={1, 2}")
-			|| msg.startsWith("reportAmbiguity d=26 (funcDeclaration): ambigAlts={1, 2}")
+			|| msg.startsWith("reportAmbiguity d=27 (funcDeclaration): ambigAlts={1, 2}")
 			|| msg.startsWith("reportAmbiguity d=21 (classBlock): ambigAlts={1, 2}")) {
 			return;
 		}

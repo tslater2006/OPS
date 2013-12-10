@@ -299,7 +299,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 				if(refObj.isRecordFieldRef
 					&& ((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
-							|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2))) {
+							|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2)
+							|| (srcProg instanceof PagePeopleCodeProg))) {
 					DefnCache.getRecord(refObj.RECNAME);
 				}
 				this.refIndicesSeen.put(refIdx, null);

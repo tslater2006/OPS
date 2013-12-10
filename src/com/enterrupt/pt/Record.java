@@ -46,7 +46,7 @@ public class Record {
 				this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
 				this.RECTYPE = rs.getInt("RECTYPE");
 			} else {
-				throw new EntVMachRuntimeException("Expected record to be returned from PSRECDEFN query.");
+				throw new EntVMachRuntimeException("Expected record to be returned from PSRECDEFN query: " + this.RECNAME);
 			}
         	rs.close();
         	pstmt.close();

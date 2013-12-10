@@ -16,6 +16,8 @@ stmtList:	(stmt ';'+)* stmt? ;
 // Semicolons are optional after some PeopleCode stmt constructs.
 stmt	:	appClassImport						# StmtAppClassImport
 		|	extFuncImport						# StmtExternalFuncImport
+		|	classDeclaration					# StmtClassDeclaration
+		|	methodImpl							# StmtMethodImpl
 		|	funcDeclaration						# StmtFuncDeclaration
 		|	varDeclaration						# StmtVarDeclaration
 		|	ifStmt								# StmtIf
@@ -28,6 +30,7 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	'Error' expr						# StmtError
 		|	'Warning' expr						# StmtWarning
 		|	'Return' expr?						# StmtReturn
+		|	'throw' expr						# StmtThrow
 		|	expr '=' expr						# StmtAssign	// Must be higher than fn call to properly resolve '=' ambiguity.
 		|	expr								# StmtExpr		// For fn calls; the value of expr is not assigned to anything.
 		;
@@ -72,6 +75,15 @@ appClassPath	:	GENERIC_ID (':' GENERIC_ID)+ ;
 extFuncImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID '.' GENERIC_ID ;
 event		:	'FieldFormula' | 'FieldChange' ;
+
+classDeclaration	:	'class' GENERIC_ID classBlock* 'end-class' ;
+classBlock			:	'private'? ((method | constant | property | instance) ';')+ ;
+method				:	'method' GENERIC_ID formalParamList returnType? ;
+constant			:	'Constant' VAR_ID '=' expr ;
+property			:	'property' varType GENERIC_ID 'get'? 'set'? ;
+instance			:	'instance' varType VAR_ID (',' VAR_ID)* ;
+
+methodImpl			:	'method' GENERIC_ID stmtList 'end-method' ;
 
 funcDeclaration :   'Function' GENERIC_ID formalParamList? returnType? ';'? stmtList 'End-Function' ;
 formalParamList	:	'(' ')' | '(' VAR_ID paramType? (',' VAR_ID paramType? )* ')' ;
@@ -123,6 +135,7 @@ StringLiteral	:	'"' ( ~'"' )* '"' ;
 REM			:	WS [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1	:	'/*' .*? '*/' -> skip;
 COMMENT_2	:	'<*' .*? '*>' -> skip;
+COMMENT_3	:	'/+' .*? '+/' -> skip;
 WS			:	[ \t\r\n]+ -> skip ;
 
 // Reference indices are emitted on a separate channel.

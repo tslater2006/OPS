@@ -80,7 +80,9 @@ public class ProgLoadSupervisor {
 	        ParseTree tree = parser.program();
 
 			log.debug(">>> Parse Tree >>>>>>>>>>>>");
-            //log.debug(tree.toStringTree(parser));
+			if(prog instanceof AppClassPeopleCodeProg) {
+				log.debug(tree.toStringTree(parser));
+			}
 	        log.debug("====================================================");
 
             if(this.writeToFile) {

@@ -27,12 +27,13 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	'Break'								# StmtBreak
 		|	'Error' expr						# StmtError
 		|	'Warning' expr						# StmtWarning
+		|	'Return' expr?						# StmtReturn
 		|	expr '=' expr						# StmtAssign	// Must be higher than fn call to properly resolve '=' ambiguity.
 		|	expr								# StmtExpr		// For fn calls; the value of expr is not assigned to anything.
 		;
 
 expr	:	'(' expr ')'					# ExprParenthesized
-		|	'@' '(' expr ')'				# ExprDynamicReference
+		|	'@' expr						# ExprDynamicReference
 		|	literal							# ExprLiteral
 		|	id								# ExprId
 		|	createInvocation				# ExprCreate
@@ -58,8 +59,9 @@ varDeclaration	:	varScope varType varDeclarator (',' varDeclarator)* ;
 varDeclarator	:	VAR_ID ('=' expr)? ;
 
 varScope	:	'Global' | 'Component' | 'Local' ;
-varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean' | 'Field' | 'any'
-			|	'integer' | 'number' | 'Rowset' | 'date' | 'Row' | 'Grid' | 'GridColumn'
+varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean'
+			|	'Field' | 'any' | 'datetime'|	'integer' | 'number'
+			| 	'Rowset' | 'date' | 'Row' | 'Grid' | 'GridColumn' | 'SQL'
 			|	appClassPath | GENERIC_ID	// for app class names w/o paths (i.e., "Address" for "EO:CA:Address")
 			;
 
@@ -71,8 +73,10 @@ extFuncImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
 recDefnPath	:	GENERIC_ID '.' GENERIC_ID ;
 event		:	'FieldFormula' | 'FieldChange' ;
 
-funcDeclaration :   'Function' GENERIC_ID formalParamList? ';'? stmtList 'End-Function' ;
-formalParamList	:	'(' (VAR_ID (',' VAR_ID)* )? ')' ;
+funcDeclaration :   'Function' GENERIC_ID formalParamList? returnType? ';'? stmtList 'End-Function' ;
+formalParamList	:	'(' ')' | '(' VAR_ID paramType? (',' VAR_ID paramType? )* ')' ;
+paramType		:	'As' varType ;
+returnType		:	'Returns' varType ;
 
 ifStmt	:	'If' expr 'Then' ';'? stmtList ('Else' ';'? stmtList)? 'End-If' ;
 
@@ -110,7 +114,7 @@ id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
 
 VAR_ID		:	'&' GENERIC_ID ;
 SYS_VAR_ID	:	'%' GENERIC_ID ;
-GENERIC_ID	:	[a-zA-Z] [0-9a-zA-Z_]* ;	
+GENERIC_ID	:	[a-zA-Z] [0-9a-zA-Z_#]* ;	
 
 DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;

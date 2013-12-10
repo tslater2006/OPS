@@ -91,8 +91,44 @@ public class ProgLoadSupervisor {
             }
 
 			ParseTreeWalker walker = new ParseTreeWalker();
-			walker.walk(new ProgLoadListener(prog, loadStack.size()-1, tokens), tree);
 
+			int recurseLvl = loadStack.size() - 1;
+			walker.walk(new ProgLoadListener(prog, recurseLvl, tokens), tree);
+
+	        /**
+    	     * All programs referenced by this program must have their referenced
+        	 * definitions and programs loaded now.
+        	 */
+			for(PeopleCodeProg refProg : prog.referencedProgs) {
+            	refProg = DefnCache.getProgram(refProg);
+	            refProg.init();
+
+				/**
+				 * In Record PC mode, referenced defns and progs should be loaded
+				 * recursively up to three levels deep. In Component PC mode, all App
+				 * Package PC programs must be be permitted to load their references
+				 * recursively with no limit; for all other program types, their
+				 * references should be loaded only if they are directly referenced in
+				 * the root Component PC program being loaded (recursion level 0).
+				 */
+	        	if((this.rootProg instanceof RecordPeopleCodeProg && recurseLvl < 3)
+                	|| (this.rootProg instanceof ComponentPeopleCodeProg
+	                    && (refProg instanceof AppClassPeopleCodeProg
+							|| recurseLvl == 0))) {
+
+					/**
+					 * If the program is never actually called, there is
+				   	 * no reason to load its references at this time.
+					 */
+					if(refProg instanceof RecordPeopleCodeProg &&
+						prog.confirmedRecordProgCalls.get(refProg) == null) {
+						continue;
+					}
+
+					loadStack.push(refProg);
+					this.loadTopOfStack();
+            	}
+        	}
 	    } catch(java.io.IOException ioe) {
             throw new EntVMachRuntimeException(ioe.getMessage());
         }

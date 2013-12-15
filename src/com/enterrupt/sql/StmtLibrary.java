@@ -22,8 +22,11 @@ public class StmtLibrary {
 		 * to use the thin client rather than the full OCI client. Look into this issue eventually.
 		 */
 		try {
+			String dbSID = System.getProperty("DbSID");
+			String dbIP = System.getProperty("DbIP");
+			String dbDriver = System.getProperty("DbDriver");
 			conn = DriverManager.getConnection(
-				"jdbc:oracle:oci:@//10.0.1.88:1521/ENTCSDEV", "SYSADM", "SYSADM");
+				dbDriver + ":@//" + dbIP +":1521/" + dbSID, "SYSADM", "SYSADM");
 
 		} catch(java.sql.SQLException sqle) {
 			log.fatal(sqle.getMessage(), sqle);

@@ -21,8 +21,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	private MemoryPtr getExprValue(ParseTree node) {
 		if(this.exprValues.get(node) == null) {
+
+			int lineNbr = -1;
+			Object obj = node.getPayload();
+			if(obj instanceof Token) {
+				lineNbr = ((Token)node.getPayload()).getLine();
+			} else if(obj instanceof ParserRuleContext) {
+				lineNbr = ((ParserRuleContext)node.getPayload()).getStart().getLine();
+			} else {
+				throw new EntVMachRuntimeException("Unexpected payload type.");
+			}
+
 			throw new EntInterpretException("Encountered attempt to get the value of an expression " +
-				"that has yet to be evaluated", node.getText(), ((Token)(node.getPayload())).getLine());
+				"that has yet to be evaluated", node.getText(), lineNbr);
 		}
 		return this.exprValues.get(node);
 	}
@@ -42,6 +53,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			visit(ctx.ifStmt().stmtList(0));
 		}
 
+		return null;
+	}
+
+	public Void visitStmtEvaluate(PeopleCodeParser.StmtEvaluateContext ctx) {
+		/** TODO: IMPLEMENT */
 		return null;
 	}
 
@@ -79,13 +95,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
 
+		/**
+		 * TODO: Support rowset indexing; assuming function calls for now.
+		 */
+
+
 		// null is used to separate call frames.
 		Interpreter.pushToCallStack(null);
 
-		// move args from runtime stack to call stack.
-		for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
-			visit(argCtx);
-			Interpreter.pushToCallStack(getExprValue(argCtx));
+		// if args exist, move args from runtime stack to call stack.
+		if(ctx.exprList() != null) {
+			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
+				visit(argCtx);
+				Interpreter.pushToCallStack(getExprValue(argCtx));
+			}
 		}
 
 		// Get function reference using reflection.

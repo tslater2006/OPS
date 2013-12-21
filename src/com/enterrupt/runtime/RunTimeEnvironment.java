@@ -41,6 +41,7 @@ public class RunTimeEnvironment {
 			systemVarTable.put("%EmployeeId", new StringPtr(MFlag.READ_ONLY));
 			systemVarTable.put("%OperatorId", new StringPtr(MFlag.READ_ONLY));
 			systemVarTable.put("%Menu", new StringPtr(MFlag.READ_ONLY));
+			systemVarTable.put("%Component", new StringPtr(MFlag.READ_ONLY));
 
 			// Load system function references.
 			systemFuncTable = new HashMap<String, Method>();
@@ -48,6 +49,7 @@ public class RunTimeEnvironment {
 			systemFuncTable.put("Hide", RunTimeEnvironment.class.getMethod("Hide"));
 			systemFuncTable.put("SetSearchDialogBehavior", RunTimeEnvironment.class.getMethod("SetSearchDialogBehavior"));
 			systemFuncTable.put("AllowEmplIdChg", RunTimeEnvironment.class.getMethod("AllowEmplIdChg"));
+			systemFuncTable.put("IsModalComponent", RunTimeEnvironment.class.getMethod("IsModalComponent"));
 
 			// Initialize empty component buffer.
 			compBufferTable = new HashMap<String, StringPtr>();
@@ -139,6 +141,11 @@ public class RunTimeEnvironment {
 	}
 
 	public static void AllowEmplIdChg() {
+		getArgsFromCallStack();
+		// Not yet implemented.
+	}
+
+	public static void IsModalComponent() {
 		getArgsFromCallStack();
 		// Not yet implemented.
 	}

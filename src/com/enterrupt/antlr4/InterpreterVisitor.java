@@ -112,7 +112,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		// Get function reference using reflection.
-		Method fnPtr = Environment.systemFuncTable.get(ctx.expr().getText());
+		Method fnPtr = Environment.getSystemFunc(ctx.expr().getText());
 		if(fnPtr == null) {
 			throw new EntInterpretException("Encountered attempt to call unimplemented " +
 				"system function", ctx.expr().getText(), ctx.expr().getStart().getLine());
@@ -206,7 +206,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
 		if(ctx.SYS_VAR_ID() != null) {
-			MemoryPtr ptr = Environment.systemVarTable.get(ctx.getText());
+			MemoryPtr ptr = Environment.getSystemVar(ctx.getText());
 			if(ptr == null) {
 				throw new EntInterpretException("Encountered a system variable reference " +
 					"that has not been implemented yet", ctx.getText(), ctx.getStart().getLine());

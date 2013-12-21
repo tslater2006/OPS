@@ -32,7 +32,7 @@ public class GlobalFnLibrary {
      * Return true if none of the specified fields contain a value, return false
      * if one or more contain a value.
      */
-    public static void None() {
+    public static void PT_None() {
 
         ArrayList<MemoryPtr> args = getArgsFromCallStack();
 
@@ -46,17 +46,17 @@ public class GlobalFnLibrary {
         InterpretSupervisor.pushToCallStack(Environment.TRUE);
     }
 
-    public static void Hide() {
+    public static void PT_Hide() {
         getArgsFromCallStack();
         // Not yet implemented.
     }
 
-    public static void SetSearchDialogBehavior() {
+    public static void PT_SetSearchDialogBehavior() {
         getArgsFromCallStack();
         // Not yet implemented.
     }
 
-    public static void AllowEmplIdChg() {
+    public static void PT_AllowEmplIdChg() {
         getArgsFromCallStack();
         // Not yet implemented.
     }
@@ -65,7 +65,7 @@ public class GlobalFnLibrary {
      * TODO: Return true if DoModalComponent
      * has been previously called; requires more research.
      */
-    public static void IsModalComponent() {
+    public static void PT_IsModalComponent() {
 
         ArrayList<MemoryPtr> args = getArgsFromCallStack();
 

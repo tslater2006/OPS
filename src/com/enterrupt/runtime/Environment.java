@@ -11,13 +11,15 @@ public class Environment {
 	public static BooleanPtr TRUE;
 	public static BooleanPtr FALSE;
 
-	public static HashMap<String, MemoryPtr> systemVarTable;
+	private static HashMap<String, MemoryPtr> systemVarTable;
 	private static HashMap<String, StringPtr> compBufferTable;
-	public static HashMap<String, Method> systemFuncTable;
-	public static HashMap<String, Boolean> defnReservedWordTable;
+	private static HashMap<String, Method> systemFuncTable;
 
-	public static HashMap<Integer, MemoryPtr> integerMemPool;
-	public static HashMap<String, MemoryPtr> stringMemPool;
+	private static HashMap<Integer, MemoryPtr> integerMemPool;
+	private static HashMap<String, MemoryPtr> stringMemPool;
+
+	private static String[] supportedGlobalVars = {"%EmployeeId", "%OperatorId", "%Menu",
+					"%Component"};
 
 	private static Logger log = LogManager.getLogger(Environment.class.getName());
 
@@ -28,28 +30,24 @@ public class Environment {
 			TRUE = new BooleanPtr(new Boolean(true), MFlag.READ_ONLY);
 			FALSE = new BooleanPtr(new Boolean(false), MFlag.READ_ONLY);
 
-			// Create memory pools.
+			// Create memory pools for supported data types.
 			integerMemPool = new HashMap<Integer, MemoryPtr>();
 			stringMemPool = new HashMap<String, MemoryPtr>();
 
-			// Load reserved words for definition literals.
-			defnReservedWordTable = new HashMap<String, Boolean>();
-			defnReservedWordTable.put("MenuName", true);
-
-			// Load system variables.
+			// Allocate space for system vars, mark each as read-only.
 			systemVarTable = new HashMap<String, MemoryPtr>();
-			systemVarTable.put("%EmployeeId", new StringPtr(MFlag.READ_ONLY));
-			systemVarTable.put("%OperatorId", new StringPtr(MFlag.READ_ONLY));
-			systemVarTable.put("%Menu", new StringPtr(MFlag.READ_ONLY));
-			systemVarTable.put("%Component", new StringPtr(MFlag.READ_ONLY));
+			for(String varName : supportedGlobalVars) {
+				systemVarTable.put(varName, new StringPtr(MFlag.READ_ONLY));
+			}
 
-			// Load system function references.
+			/// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
+			Method[] methods = GlobalFnLibrary.class.getMethods();
 			systemFuncTable = new HashMap<String, Method>();
-			systemFuncTable.put("None", GlobalFnLibrary.class.getMethod("None"));
-			systemFuncTable.put("Hide", GlobalFnLibrary.class.getMethod("Hide"));
-			systemFuncTable.put("SetSearchDialogBehavior", GlobalFnLibrary.class.getMethod("SetSearchDialogBehavior"));
-			systemFuncTable.put("AllowEmplIdChg", GlobalFnLibrary.class.getMethod("AllowEmplIdChg"));
-			systemFuncTable.put("IsModalComponent", GlobalFnLibrary.class.getMethod("IsModalComponent"));
+			for(Method m : methods) {
+				if(m.getName().indexOf("PT_") == 0) {
+					systemFuncTable.put(m.getName().substring(3), GlobalFnLibrary.class.getMethod(m.getName()));
+				}
+			}
 
 			// Initialize empty component buffer.
 			compBufferTable = new HashMap<String, StringPtr>();
@@ -79,6 +77,10 @@ public class Environment {
 
 	public static MemoryPtr getSystemVar(String var) {
 		return systemVarTable.get(var);
+	}
+
+	public static Method getSystemFunc(String func) {
+		return systemFuncTable.get(func);
 	}
 
 	public static MemoryPtr getFromMemoryPool(Integer val) {

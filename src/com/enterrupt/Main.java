@@ -16,12 +16,9 @@ public class Main {
 
 			Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
 
-			((StringPtr)RunTimeEnvironment.systemVarTable.get("%EmployeeId")).systemWrite("AA0001");
-			((StringPtr)RunTimeEnvironment.systemVarTable.get("%Menu")).systemWrite("SA_LEARNER_SERVICES");
-			((StringPtr)RunTimeEnvironment.systemVarTable.get("%OperatorId")).systemWrite("KADAMS");
-
-			// TODO: Remove, should be generated during SQL processing.
-			RunTimeEnvironment.compBufferTable.put("LS_SS_PERS_SRCH.EMPLID", new StringPtr());
+			RunTimeEnvironment.setSystemVar("%EmployeeId", "AA0001");
+			RunTimeEnvironment.setSystemVar("%Menu", "SA_LEARNER_SERVICES");
+			RunTimeEnvironment.setSystemVar("%OperatorId", "KADAMS");
 
 			Component c = new Component(System.getProperty("ComponentToLoad"), "GBL");
 			Menu m = new Menu("SA_LEARNER_SERVICES");

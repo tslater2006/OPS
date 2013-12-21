@@ -12,7 +12,7 @@ public class RunTimeEnvironment {
 	public static BooleanPtr FALSE;
 
 	public static HashMap<String, MemoryPtr> systemVarTable;
-	public static HashMap<String, MemoryPtr> compBufferTable;
+	private static HashMap<String, StringPtr> compBufferTable;
 	public static HashMap<String, Method> systemFuncTable;
 	public static HashMap<String, Boolean> defnReservedWordTable;
 
@@ -50,12 +50,28 @@ public class RunTimeEnvironment {
 			systemFuncTable.put("AllowEmplIdChg", RunTimeEnvironment.class.getMethod("AllowEmplIdChg"));
 
 			// Initialize empty component buffer.
-			compBufferTable = new HashMap<String, MemoryPtr>();
+			compBufferTable = new HashMap<String, StringPtr>();
 
         } catch(java.lang.NoSuchMethodException nsme) {
             log.fatal(nsme.getMessage(), nsme);
             System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());
         }
+	}
+
+	public static void setCompBufferEntry(String recordField, StringPtr ptr) {
+		compBufferTable.put(recordField, ptr);
+	}
+
+	public static StringPtr getCompBufferEntry(String recordField) {
+		return compBufferTable.get(recordField);
+	}
+
+	public static void setSystemVar(String var, String value) {
+		((StringPtr)systemVarTable.get(var)).systemWrite(value);
+	}
+
+	public static MemoryPtr getSystemVar(String var) {
+		return systemVarTable.get(var);
 	}
 
 	public static MemoryPtr getFromMemoryPool(Integer val) {

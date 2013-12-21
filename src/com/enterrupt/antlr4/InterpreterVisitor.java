@@ -22,7 +22,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private MemoryPtr getExprValue(ParseTree node) {
 		if(this.exprValues.get(node) == null) {
 			throw new EntInterpretException("Encountered attempt to get the value of an expression " +
-				"that has yet to be evaluated: " + node.getText());
+				"that has yet to be evaluated", node.getText(), ((Token)(node.getPayload())).getLine());
 		}
 		return this.exprValues.get(node);
 	}
@@ -92,7 +92,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(ctx.expr().getText());
 		if(fnPtr == null) {
 			throw new EntInterpretException("Encountered attempt to call unimplemented " +
-				"system function: " + ctx.expr().getText());
+				"system function", ctx.expr().getText(), ctx.expr().getStart().getLine());
 		}
 
 		// Invoke function.
@@ -115,7 +115,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		setExprValue(ctx, retPtr);
 
 		if(retPtr != null && (Interpreter.popFromCallStack() != null)) {
-			throw new EntInterpretException("More than one return value was found on " +
+			throw new EntVMachRuntimeException("More than one return value was found on " +
 				"the call stack.");
 		}
 
@@ -124,10 +124,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprMethodOrStaticRef(
 					PeopleCodeParser.ExprMethodOrStaticRefContext ctx) {
-		MemoryPtr ptr = RunTimeEnvironment.compBufferTable.get(ctx.getText());
+
+		MemoryPtr ptr = RunTimeEnvironment.getCompBufferEntry(ctx.getText());
 		if(ptr == null) {
 			throw new EntInterpretException("Encountered a reference to an " +
-				"uninitialized component buffer field:" + ctx.getText());
+				"uninitialized component buffer field", ctx.getText(),
+				ctx.getStart().getLine());
 		}
 		setExprValue(ctx, ptr);
 		return null;
@@ -158,13 +160,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			MemoryPtr ptr = RunTimeEnvironment.systemVarTable.get(ctx.getText());
 			if(ptr == null) {
 				throw new EntInterpretException("Encountered a system variable reference " +
-					"that has not been implemented yet: " + ctx.getText());
+					"that has not been implemented yet", ctx.getText(), ctx.getStart().getLine());
 			}
 			setExprValue(ctx, ptr);
 
 		} else if(ctx.VAR_ID() != null) {
 
-			throw new EntInterpretException("Need to support references to non-system vars.");
+			throw new EntVMachRuntimeException("Need to support references to non-system vars.");
 		} else {
 			/**
 			 * TODO: What about GENERIC_ID?
@@ -197,10 +199,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 
 		} else if(ctx.DecimalLiteral() != null) {
-			throw new EntInterpretException("Encountered a decimal literal; need to create "
+			throw new EntVMachRuntimeException("Encountered a decimal literal; need to create "
 				+ "a BigDecimal memory pool and type.");
 		} else {
-			throw new EntInterpretException("Unable to resolve literal to a terminal node.");
+			throw new EntVMachRuntimeException("Unable to resolve literal to a terminal node.");
 		}
 
 		return null;

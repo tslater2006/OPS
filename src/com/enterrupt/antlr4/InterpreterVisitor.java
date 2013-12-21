@@ -101,18 +101,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 
 		// null is used to separate call frames.
-		Interpreter.pushToCallStack(null);
+		InterpretSupervisor.pushToCallStack(null);
 
 		// if args exist, move args from runtime stack to call stack.
 		if(ctx.exprList() != null) {
 			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 				visit(argCtx);
-				Interpreter.pushToCallStack(getExprValue(argCtx));
+				InterpretSupervisor.pushToCallStack(getExprValue(argCtx));
 			}
 		}
 
 		// Get function reference using reflection.
-		Method fnPtr = RunTimeEnvironment.systemFuncTable.get(ctx.expr().getText());
+		Method fnPtr = Environment.systemFuncTable.get(ctx.expr().getText());
 		if(fnPtr == null) {
 			throw new EntInterpretException("Encountered attempt to call unimplemented " +
 				"system function", ctx.expr().getText(), ctx.expr().getStart().getLine());
@@ -120,7 +120,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// Invoke function.
         try {
-            fnPtr.invoke(RunTimeEnvironment.class);
+            fnPtr.invoke(Environment.class);
         } catch(java.lang.IllegalAccessException iae) {
             log.fatal(iae.getMessage(), iae);
             System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
@@ -134,10 +134,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * did not emit a return value. If it's non-null, the next item on the stack
 		 * must be the null separator (PeopleCode funcs can only return 1 value).
 		 */
-	    MemoryPtr retPtr = Interpreter.popFromCallStack();
+	    MemoryPtr retPtr = InterpretSupervisor.popFromCallStack();
 		setExprValue(ctx, retPtr);
 
-		if(retPtr != null && (Interpreter.popFromCallStack() != null)) {
+		if(retPtr != null && (InterpretSupervisor.popFromCallStack() != null)) {
 			throw new EntVMachRuntimeException("More than one return value was found on " +
 				"the call stack.");
 		}
@@ -148,7 +148,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitExprMethodOrStaticRef(
 					PeopleCodeParser.ExprMethodOrStaticRefContext ctx) {
 
-		MemoryPtr ptr = RunTimeEnvironment.getCompBufferEntry(ctx.getText());
+		MemoryPtr ptr = Environment.getCompBufferEntry(ctx.getText());
 		if(ptr == null) {
 			throw new EntInterpretException("Encountered a reference to an " +
 				"uninitialized component buffer field", ctx.getText(),
@@ -166,9 +166,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		MemoryPtr result;
 		if(MemoryPtr.isEqual(p1, p2)) {
-			result = RunTimeEnvironment.TRUE;
+			result = Environment.TRUE;
 		} else {
-			result = RunTimeEnvironment.FALSE;
+			result = Environment.FALSE;
 		}
 		setExprValue(ctx, result);
 		log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
@@ -206,7 +206,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
 		if(ctx.SYS_VAR_ID() != null) {
-			MemoryPtr ptr = RunTimeEnvironment.systemVarTable.get(ctx.getText());
+			MemoryPtr ptr = Environment.systemVarTable.get(ctx.getText());
 			if(ptr == null) {
 				throw new EntInterpretException("Encountered a system variable reference " +
 					"that has not been implemented yet", ctx.getText(), ctx.getStart().getLine());
@@ -228,13 +228,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.defnLiteral() != null) {
 
-			MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(
+			MemoryPtr ptr = Environment.getFromMemoryPool(
 				ctx.defnLiteral().GENERIC_ID().getText());
 			setExprValue(ctx, ptr);
 
 		} else if(ctx.IntegerLiteral() != null) {
 
-			MemoryPtr ptr = RunTimeEnvironment.getFromMemoryPool(
+			MemoryPtr ptr = Environment.getFromMemoryPool(
 				new Integer(ctx.IntegerLiteral().getText()));
 			setExprValue(ctx, ptr);
 
@@ -242,9 +242,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 			String b = ctx.boolLiteral().getText();
 			if(b.equals("True") || b.equals("true")) {
-				setExprValue(ctx, RunTimeEnvironment.TRUE);
+				setExprValue(ctx, Environment.TRUE);
 			} else {
-				setExprValue(ctx, RunTimeEnvironment.FALSE);
+				setExprValue(ctx, Environment.FALSE);
 			}
 
 		} else if(ctx.DecimalLiteral() != null) {

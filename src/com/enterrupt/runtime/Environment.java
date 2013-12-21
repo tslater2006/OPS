@@ -6,7 +6,7 @@ import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 
-public class RunTimeEnvironment {
+public class Environment {
 
 	public static BooleanPtr TRUE;
 	public static BooleanPtr FALSE;
@@ -19,7 +19,7 @@ public class RunTimeEnvironment {
 	public static HashMap<Integer, MemoryPtr> integerMemPool;
 	public static HashMap<String, MemoryPtr> stringMemPool;
 
-	private static Logger log = LogManager.getLogger(RunTimeEnvironment.class.getName());
+	private static Logger log = LogManager.getLogger(Environment.class.getName());
 
 	static {
 
@@ -45,11 +45,11 @@ public class RunTimeEnvironment {
 
 			// Load system function references.
 			systemFuncTable = new HashMap<String, Method>();
-			systemFuncTable.put("None", RunTimeEnvironment.class.getMethod("None"));
-			systemFuncTable.put("Hide", RunTimeEnvironment.class.getMethod("Hide"));
-			systemFuncTable.put("SetSearchDialogBehavior", RunTimeEnvironment.class.getMethod("SetSearchDialogBehavior"));
-			systemFuncTable.put("AllowEmplIdChg", RunTimeEnvironment.class.getMethod("AllowEmplIdChg"));
-			systemFuncTable.put("IsModalComponent", RunTimeEnvironment.class.getMethod("IsModalComponent"));
+			systemFuncTable.put("None", GlobalFnLibrary.class.getMethod("None"));
+			systemFuncTable.put("Hide", GlobalFnLibrary.class.getMethod("Hide"));
+			systemFuncTable.put("SetSearchDialogBehavior", GlobalFnLibrary.class.getMethod("SetSearchDialogBehavior"));
+			systemFuncTable.put("AllowEmplIdChg", GlobalFnLibrary.class.getMethod("AllowEmplIdChg"));
+			systemFuncTable.put("IsModalComponent", GlobalFnLibrary.class.getMethod("IsModalComponent"));
 
 			// Initialize empty component buffer.
 			compBufferTable = new HashMap<String, StringPtr>();
@@ -99,69 +99,5 @@ public class RunTimeEnvironment {
 		p = new StringPtr(val, MFlag.READ_ONLY);
 		stringMemPool.put(val, p);
 		return p;
-	}
-
-	public static ArrayList<MemoryPtr> getArgsFromCallStack() {
-
-		ArrayList<MemoryPtr> args = new ArrayList<MemoryPtr>();
-		MemoryPtr p;
-		while((p = Interpreter.peekAtCallStack()) != null) {
-			args.add(Interpreter.popFromCallStack());
-		}
-
-		// The last argument appears at the top of the stack,
-	    // so we need to reverse the argument list here before returning it.
-		Collections.reverse(args);
-		return args;
-	}
-
-	/**
-	 * TODO: The PS documentation states that 0 in a required numeric field should return false.
-	 * Return true if none of the specified fields contain a value, return false
-	 * if one or more contain a value.
-	 */
-	public static void None() {
-
-		ArrayList<MemoryPtr> args = getArgsFromCallStack();
-
-		for(MemoryPtr arg : args) {
-			if(!arg.isEmpty()) {
-				Interpreter.pushToCallStack(FALSE);
-				return;
-			}
-		}
-
-		Interpreter.pushToCallStack(TRUE);
-	}
-
-	public static void Hide() {
-		getArgsFromCallStack();
-		// Not yet implemented.
-	}
-
-	public static void SetSearchDialogBehavior() {
-		getArgsFromCallStack();
-		// Not yet implemented.
-	}
-
-	public static void AllowEmplIdChg() {
-		getArgsFromCallStack();
-		// Not yet implemented.
-	}
-
-	/**
-	 * TODO: Return true if DoModalComponent
-	 * has been previously called; requires more research.
-	 */
-	public static void IsModalComponent() {
-
-		ArrayList<MemoryPtr> args = getArgsFromCallStack();
-
-		// Expecting no arguments.
-		if(args.size() != 0) {
-			throw new EntVMachRuntimeException("IsModalComponent expects no arguments; at least one provided.");
-		}
-
-		Interpreter.pushToCallStack(FALSE);
 	}
 }

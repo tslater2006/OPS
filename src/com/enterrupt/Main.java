@@ -16,12 +16,12 @@ public class Main {
 
 			Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
 
-			RunTimeEnvironment.setSystemVar("%Component", System.getProperty("ComponentToLoad"));
-			RunTimeEnvironment.setSystemVar("%EmployeeId", "AA0001");
-			RunTimeEnvironment.setSystemVar("%Menu", "SA_LEARNER_SERVICES");
-			RunTimeEnvironment.setSystemVar("%OperatorId", "KADAMS");
+			Environment.setSystemVar("%Component", System.getProperty("ComponentToLoad"));
+			Environment.setSystemVar("%EmployeeId", "AA0001");
+			Environment.setSystemVar("%Menu", "SA_LEARNER_SERVICES");
+			Environment.setSystemVar("%OperatorId", "KADAMS");
 
-			Component c = new Component(((StringPtr)RunTimeEnvironment.getSystemVar("%Component")).read(), "GBL");
+			Component c = new Component(((StringPtr)Environment.getSystemVar("%Component")).read(), "GBL");
 			Menu m = new Menu("SA_LEARNER_SERVICES");
 
 			c.loadSearchRecord();

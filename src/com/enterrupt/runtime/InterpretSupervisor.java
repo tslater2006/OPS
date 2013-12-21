@@ -14,19 +14,19 @@ import org.antlr.v4.runtime.tree.*;
 import com.enterrupt.antlr4.*;
 import com.enterrupt.antlr4.frontend.*;
 
-public class Interpreter {
+public class InterpretSupervisor {
 
 	private PeopleCodeProg prog;
 	private static Stack<MemoryPtr>	callStack;
 	private static boolean writeToFile = true;
 
-	private static Logger log = LogManager.getLogger(Interpreter.class.getName());
+	private static Logger log = LogManager.getLogger(InterpretSupervisor.class.getName());
 
 	static {
 		callStack = new Stack<MemoryPtr>();
 	}
 
-	public Interpreter(PeopleCodeProg prog) {
+	public InterpretSupervisor(PeopleCodeProg prog) {
 		this.prog = prog;
 	}
 
@@ -51,7 +51,7 @@ public class Interpreter {
 			InputStream progTextInputStream =
 				new ByteArrayInputStream(this.prog.programText.getBytes());
 
-            log.debug("=== Interpreter =============================");
+            log.debug("=== InterpretSupervisor =============================");
             log.debug("Interpreting {}", prog.getDescriptor());
             String[] lines = this.prog.programText.split("\n");
             for(int i = 0; i < lines.length; i++) {

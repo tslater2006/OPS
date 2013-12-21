@@ -13,7 +13,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
 
+	private InterpretSupervisor supervisor;
 	private ParseTreeProperty<MemoryPtr> exprValues = new ParseTreeProperty<MemoryPtr>();
+
+	public InterpreterVisitor(InterpretSupervisor s) {
+		this.supervisor = s;
+	}
 
 	private void setExprValue(ParseTree node, MemoryPtr ptr) {
 		this.exprValues.put(node, ptr);
@@ -99,15 +104,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * TODO: Support rowset indexing; assuming function calls for now.
 		 */
 
-
 		// null is used to separate call frames.
-		InterpretSupervisor.pushToCallStack(null);
+		Environment.pushToCallStack(null);
 
 		// if args exist, move args from runtime stack to call stack.
 		if(ctx.exprList() != null) {
 			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 				visit(argCtx);
-				InterpretSupervisor.pushToCallStack(getExprValue(argCtx));
+				Environment.pushToCallStack(getExprValue(argCtx));
 			}
 		}
 
@@ -134,10 +138,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * did not emit a return value. If it's non-null, the next item on the stack
 		 * must be the null separator (PeopleCode funcs can only return 1 value).
 		 */
-	    MemoryPtr retPtr = InterpretSupervisor.popFromCallStack();
+	    MemoryPtr retPtr = Environment.popFromCallStack();
 		setExprValue(ctx, retPtr);
 
-		if(retPtr != null && (InterpretSupervisor.popFromCallStack() != null)) {
+		if(retPtr != null && (Environment.popFromCallStack() != null)) {
 			throw new EntVMachRuntimeException("More than one return value was found on " +
 				"the call stack.");
 		}
@@ -228,13 +232,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.defnLiteral() != null) {
 
-			MemoryPtr ptr = Environment.getFromMemoryPool(
+			MemoryPtr ptr = Environment.getFromLiteralPool(
 				ctx.defnLiteral().GENERIC_ID().getText());
 			setExprValue(ctx, ptr);
 
 		} else if(ctx.IntegerLiteral() != null) {
 
-			MemoryPtr ptr = Environment.getFromMemoryPool(
+			MemoryPtr ptr = Environment.getFromLiteralPool(
 				new Integer(ctx.IntegerLiteral().getText()));
 			setExprValue(ctx, ptr);
 

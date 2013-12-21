@@ -16,52 +16,49 @@ import com.enterrupt.antlr4.frontend.*;
 
 public class InterpretSupervisor {
 
-	private PeopleCodeProg prog;
-	private static Stack<MemoryPtr>	callStack;
-	private static boolean writeToFile = true;
+	private PeopleCodeProg rootProg;
+	private Stack<ExecutionContext> contextStack;
+	private boolean writeToFile = true;
 
 	private static Logger log = LogManager.getLogger(InterpretSupervisor.class.getName());
 
-	static {
-		callStack = new Stack<MemoryPtr>();
-	}
-
 	public InterpretSupervisor(PeopleCodeProg prog) {
-		this.prog = prog;
-	}
-
-	public static void pushToCallStack(MemoryPtr p) {
-		log.debug("Push\tCallStack\t" + (p == null ? "null" : p.flags.toString()));
-		callStack.push(p);
-	}
-
-	public static MemoryPtr popFromCallStack() {
-		MemoryPtr p = callStack.pop();
-		log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p.flags.toString()));
-		return p;
-	}
-
-	public static MemoryPtr peekAtCallStack() {
-		return callStack.peek();
+		this.rootProg = prog;
+		this.contextStack = new Stack<ExecutionContext>();
 	}
 
 	public void run() {
 
+		ExecutionContext initialCtx = new ProgramExecContext(this.rootProg);
+		this.contextStack.push(initialCtx);
+		this.runTopOfStack();
+
+		if(this.contextStack.size() != 0) {
+			throw new EntVMachRuntimeException("Expected context stack to be empty.");
+		}
+
+		if(Environment.getCallStackSize() != 0) {
+			throw new EntVMachRuntimeException("Expected call stack to be empty.");
+		}
+	}
+
+	private void runTopOfStack() {
+
 		try {
 			InputStream progTextInputStream =
-				new ByteArrayInputStream(this.prog.programText.getBytes());
+				new ByteArrayInputStream(this.rootProg.programText.getBytes());
 
             log.debug("=== InterpretSupervisor =============================");
-            log.debug("Interpreting {}", prog.getDescriptor());
-            String[] lines = this.prog.programText.split("\n");
+            log.debug("Interpreting {}", this.rootProg.getDescriptor());
+            String[] lines = this.rootProg.programText.split("\n");
             for(int i = 0; i < lines.length; i++) {
                 log.debug("{}:\t{}", i+1, lines[i]);
             }
 
 			if(this.writeToFile) {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(
-					new File("/home/mquinn/evm/cache/" + this.prog.getDescriptor() + ".pc")));
-				writer.write(this.prog.programText);
+					new File("/home/mquinn/evm/cache/" + this.rootProg.getDescriptor() + ".pc")));
+				writer.write(this.rootProg.programText);
 				writer.close();
 			}
 
@@ -84,16 +81,36 @@ public class InterpretSupervisor {
 
 			if(this.writeToFile) {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(
-					new File("/home/mquinn/evm/cache/" + this.prog.getDescriptor() + ".tree")));
+					new File("/home/mquinn/evm/cache/" + this.rootProg.getDescriptor() + ".tree")));
 				writer.write(tree.toStringTree(parser));
 				writer.close();
 			}
 
-			InterpreterVisitor interpreter = new InterpreterVisitor();
+			InterpreterVisitor interpreter = new InterpreterVisitor(this);
 			interpreter.visit(tree);
 
 		} catch(java.io.IOException ioe) {
 			throw new EntVMachRuntimeException(ioe.getMessage());
 		}
+
+		contextStack.pop();
 	}
 }
+
+class ExecutionContext {
+
+	public ExecutionContext() {}
+}
+
+class ProgramExecContext extends ExecutionContext {
+
+	private PeopleCodeProg prog;
+
+	public ProgramExecContext(PeopleCodeProg p) {
+		this.prog = p;
+	}
+}
+
+class FunctionExecContext extends ExecutionContext {}
+class GlobalExecContext extends ExecutionContext {}
+class ComponentExecContext extends ExecutionContext {}

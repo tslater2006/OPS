@@ -13,8 +13,8 @@ public class GlobalFnLibrary {
 
         ArrayList<MemoryPtr> args = new ArrayList<MemoryPtr>();
         MemoryPtr p;
-        while((p = InterpretSupervisor.peekAtCallStack()) != null) {
-            args.add(InterpretSupervisor.popFromCallStack());
+        while((p = Environment.peekAtCallStack()) != null) {
+            args.add(Environment.popFromCallStack());
         }
 
         // The last argument appears at the top of the stack,
@@ -38,12 +38,12 @@ public class GlobalFnLibrary {
 
         for(MemoryPtr arg : args) {
             if(!arg.isEmpty()) {
-                InterpretSupervisor.pushToCallStack(Environment.FALSE);
+                Environment.pushToCallStack(Environment.FALSE);
                 return;
             }
         }
 
-        InterpretSupervisor.pushToCallStack(Environment.TRUE);
+        Environment.pushToCallStack(Environment.TRUE);
     }
 
     public static void PT_Hide() {
@@ -74,6 +74,6 @@ public class GlobalFnLibrary {
             throw new EntVMachRuntimeException("IsModalComponent expects no arguments.");
         }
 
-        InterpretSupervisor.pushToCallStack(Environment.FALSE);
+        Environment.pushToCallStack(Environment.FALSE);
     }
 }

@@ -12,11 +12,13 @@ public class Environment {
 	public static BooleanPtr FALSE;
 
 	private static HashMap<String, MemoryPtr> systemVarTable;
-	private static HashMap<String, StringPtr> compBufferTable;
 	private static HashMap<String, Method> systemFuncTable;
+	private static HashMap<String, StringPtr> compBufferTable;
 
-	private static HashMap<Integer, MemoryPtr> integerMemPool;
-	private static HashMap<String, MemoryPtr> stringMemPool;
+	private static HashMap<Integer, MemoryPtr> integerLiteralPool;
+	private static HashMap<String, MemoryPtr> stringLiteralPool;
+
+    private static Stack<MemoryPtr> callStack;
 
 	private static String[] supportedGlobalVars = {"%EmployeeId", "%OperatorId", "%Menu",
 					"%Component"};
@@ -31,8 +33,8 @@ public class Environment {
 			FALSE = new BooleanPtr(new Boolean(false), MFlag.READ_ONLY);
 
 			// Create memory pools for supported data types.
-			integerMemPool = new HashMap<Integer, MemoryPtr>();
-			stringMemPool = new HashMap<String, MemoryPtr>();
+			integerLiteralPool = new HashMap<Integer, MemoryPtr>();
+			stringLiteralPool = new HashMap<String, MemoryPtr>();
 
 			// Allocate space for system vars, mark each as read-only.
 			systemVarTable = new HashMap<String, MemoryPtr>();
@@ -52,10 +54,32 @@ public class Environment {
 			// Initialize empty component buffer.
 			compBufferTable = new HashMap<String, StringPtr>();
 
+			// Initialize the call stack.
+			callStack = new Stack<MemoryPtr>();
+
         } catch(java.lang.NoSuchMethodException nsme) {
             log.fatal(nsme.getMessage(), nsme);
             System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());
         }
+	}
+
+    public static void pushToCallStack(MemoryPtr p) {
+        log.debug("Push\tCallStack\t" + (p == null ? "null" : p.flags.toString()));
+        callStack.push(p);
+    }
+
+    public static MemoryPtr popFromCallStack() {
+        MemoryPtr p = callStack.pop();
+        log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p.flags.toString()));
+        return p;
+    }
+
+    public static MemoryPtr peekAtCallStack() {
+        return callStack.peek();
+    }
+
+	public static int getCallStackSize() {
+		return callStack.size();
 	}
 
 	public static void setCompBufferEntry(String recordField, StringPtr ptr) {
@@ -83,23 +107,23 @@ public class Environment {
 		return systemFuncTable.get(func);
 	}
 
-	public static MemoryPtr getFromMemoryPool(Integer val) {
-		MemoryPtr p = integerMemPool.get(val);
+	public static MemoryPtr getFromLiteralPool(Integer val) {
+		MemoryPtr p = integerLiteralPool.get(val);
 		if(p != null) {
 			return p;
 		}
 		p = new IntegerPtr(val, MFlag.READ_ONLY);
-		integerMemPool.put(val, p);
+		integerLiteralPool.put(val, p);
 		return p;
 	}
 
-	public static MemoryPtr getFromMemoryPool(String val) {
-		MemoryPtr p = stringMemPool.get(val);
+	public static MemoryPtr getFromLiteralPool(String val) {
+		MemoryPtr p = stringLiteralPool.get(val);
 		if(p != null) {
 			return p;
 		}
 		p = new StringPtr(val, MFlag.READ_ONLY);
-		stringMemPool.put(val, p);
+		stringLiteralPool.put(val, p);
 		return p;
 	}
 }

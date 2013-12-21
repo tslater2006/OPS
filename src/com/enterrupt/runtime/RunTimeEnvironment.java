@@ -65,7 +65,12 @@ public class RunTimeEnvironment {
 	}
 
 	public static StringPtr getCompBufferEntry(String recordField) {
-		return compBufferTable.get(recordField);
+		StringPtr ptr = compBufferTable.get(recordField);
+		if(ptr == null) {
+			ptr = new StringPtr();
+			setCompBufferEntry(recordField, ptr);
+		}
+		return ptr;
 	}
 
 	public static void setSystemVar(String var, String value) {
@@ -111,23 +116,22 @@ public class RunTimeEnvironment {
 	}
 
 	/**
-	 * TODO: Support arbitrary argument list.
 	 * TODO: The PS documentation states that 0 in a required numeric field should return false.
+	 * Return true if none of the specified fields contain a value, return false
+	 * if one or more contain a value.
 	 */
 	public static void None() {
 
 		ArrayList<MemoryPtr> args = getArgsFromCallStack();
 
-		// Only supporting one argument for now.
-		if(args.size() != 1) {
-			throw new EntVMachRuntimeException("Expected 1 argument for None().");
+		for(MemoryPtr arg : args) {
+			if(!arg.isEmpty()) {
+				Interpreter.pushToCallStack(FALSE);
+				return;
+			}
 		}
 
-		if(args.get(0).isEmpty()) {
-			Interpreter.pushToCallStack(TRUE);
-		} else {
-			Interpreter.pushToCallStack(FALSE);
-		}
+		Interpreter.pushToCallStack(TRUE);
 	}
 
 	public static void Hide() {

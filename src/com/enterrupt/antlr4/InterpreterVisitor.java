@@ -175,6 +175,30 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitExprBoolean(PeopleCodeParser.ExprBooleanContext ctx) {
+
+		if(ctx.op.getText().equals("Or")) {
+			visit(ctx.expr(0));
+			BooleanPtr lhs = (BooleanPtr)getExprValue(ctx.expr(0));
+
+			/**
+			 * Short-circuit evaluation: if lhs is true, this expression is true,
+			 * otherwise evaluate rhs and bubble up its value.
+			 */
+			if(lhs.read()) {
+				setExprValue(ctx, lhs);
+			} else {
+				visit(ctx.expr(1));
+				setExprValue(ctx, getExprValue(ctx.expr(1)));
+			}
+		} else {
+			throw new EntInterpretException("Unsupported boolean comparison operation",
+				ctx.getText(), ctx.getStart().getLine());
+		}
+
+		return null;
+	}
+
 	/**********************************************************
 	 * Primary rule handlers.
 	 **********************************************************/

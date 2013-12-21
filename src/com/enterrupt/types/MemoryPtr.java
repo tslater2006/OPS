@@ -22,6 +22,7 @@ public abstract class MemoryPtr<T> {
 	public abstract void write(T val);
 	public abstract void systemWrite(T val);
 	public abstract boolean isEmpty();
+	public abstract String toString();
 
 	public static void copy(MemoryPtr src, MemoryPtr dest) {
 

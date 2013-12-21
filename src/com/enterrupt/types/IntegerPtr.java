@@ -44,4 +44,8 @@ public class IntegerPtr extends MemoryPtr<Integer> {
 	public boolean isEmpty() {
 		throw new EntDataTypeException("Have not implemented isEmpty for IntegerPtr yet.");
 	}
+
+	public String toString() {
+		return i.toString();
+	}
 }

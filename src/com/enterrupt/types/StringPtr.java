@@ -44,4 +44,8 @@ public class StringPtr extends MemoryPtr<String> {
 	public boolean isEmpty() {
 		return this.s == null;
 	}
+
+	public String toString() {
+		return "\"" + this.s + "\"";
+	}
 }

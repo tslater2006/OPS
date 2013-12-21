@@ -159,17 +159,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
-		log.debug("Executing comparison: {}", ctx.getText());
 		visit(ctx.expr(0));
 		MemoryPtr p1 = getExprValue(ctx.expr(0));
 		visit(ctx.expr(1));
 		MemoryPtr p2 = getExprValue(ctx.expr(1));
 
+		MemoryPtr result;
 		if(MemoryPtr.isEqual(p1, p2)) {
-			setExprValue(ctx, RunTimeEnvironment.TRUE);
+			result = RunTimeEnvironment.TRUE;
 		} else {
-			setExprValue(ctx, RunTimeEnvironment.FALSE);
+			result = RunTimeEnvironment.FALSE;
 		}
+		setExprValue(ctx, result);
+		log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
 		return null;
 	}
 

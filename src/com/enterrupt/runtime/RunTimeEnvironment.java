@@ -145,8 +145,19 @@ public class RunTimeEnvironment {
 		// Not yet implemented.
 	}
 
+	/**
+	 * TODO: Return true if DoModalComponent
+	 * has been previously called; requires more research.
+	 */
 	public static void IsModalComponent() {
-		getArgsFromCallStack();
-		// Not yet implemented.
+
+		ArrayList<MemoryPtr> args = getArgsFromCallStack();
+
+		// Expecting no arguments.
+		if(args.size() != 0) {
+			throw new EntVMachRuntimeException("IsModalComponent expects no arguments; at least one provided.");
+		}
+
+		Interpreter.pushToCallStack(FALSE);
 	}
 }

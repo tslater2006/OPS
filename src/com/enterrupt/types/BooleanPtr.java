@@ -44,4 +44,9 @@ public class BooleanPtr extends MemoryPtr<Boolean> {
 	public boolean isEmpty() {
 		return false;
 	}
+
+	public String toString() {
+		if(this.b) { return "True"; }
+		return "False";
+	}
 }

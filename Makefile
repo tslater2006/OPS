@@ -5,7 +5,7 @@ TRACE_FILE=trace/005_KADAMS_SSR_SSENRL_LIST.tracesql
 #TRACE_FILE=trace/006_KADAMS_SSR_SSENRL_ADD.tracesql
 
 JAVA_D=-Duser.timezone=GMT -Dlog4j.configurationFile=conf/log4j.xml -DComponentToLoad=$(COMPONENT) \
--Dtracefile=$(TRACE_FILE) -Dignore_stmts_file=conf/ignore_stmts.conf
+-Dtracefile=$(TRACE_FILE) -Dignore_stmts_file=conf/ignore_stmts.conf -DcacheProgText=true
 
 JAVA_CP=bin:lib/*:$(OCI_DIR)/ojdbc7.jar
 

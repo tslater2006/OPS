@@ -2,12 +2,17 @@ package com.enterrupt.pt.peoplecode;
 
 import java.sql.*;
 import java.util.*;
-import java.io.InputStream;
+import java.io.*;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.assembler.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.tree.*;
+import com.enterrupt.antlr4.*;
+import com.enterrupt.antlr4.frontend.*;
 
 public abstract class PeopleCodeProg {
 
@@ -15,6 +20,8 @@ public abstract class PeopleCodeProg {
 	public String event;
 	public String programText;
     public byte[] progBytes;
+	public CommonTokenStream tokenStream;
+	public ParseTree parseTree;
 
 	public ArrayList<PeopleCodeProg> referencedProgs;
 	public HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
@@ -188,6 +195,62 @@ public abstract class PeopleCodeProg {
 
 	public String toString() {
 		return this.getDescriptor();
+	}
+
+	public void lexAndParse() {
+
+		/**
+		 * There's no need to lex and parse the program multiple times.
+		 */
+		if(this.parseTree != null && this.tokenStream != null) {
+			return;
+		}
+
+		log.debug("Lexing and parsing: {}", this.getDescriptor());
+
+		try {
+			/**
+			 * Write program text to cache if necessary.
+			 */
+			if(System.getProperty("cacheProgText").equals("true")) {
+    	    	BufferedWriter writer = new BufferedWriter(new FileWriter(
+        	    	new File("/home/mquinn/evm/cache/" + this.getDescriptor() + ".pc")));
+            	writer.write(this.programText);
+	            writer.close();
+    	    }
+
+		    InputStream progTextInputStream =
+    	    	new ByteArrayInputStream(this.programText.getBytes());
+			ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
+  			NoErrorTolerancePeopleCodeLexer lexer =
+				new NoErrorTolerancePeopleCodeLexer(input);
+	        this.tokenStream = new CommonTokenStream(lexer);
+    	    PeopleCodeParser parser = new PeopleCodeParser(this.tokenStream);
+
+	        parser.removeErrorListeners();
+    	    parser.addErrorListener(new EntDiagErrorListener());
+        	parser.getInterpreter()
+		        .setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
+    	    parser.setErrorHandler(new EntErrorStrategy());
+
+        	this.parseTree = parser.program();
+
+        	//log.debug(">>> Parse Tree >>>>>>>>>>>>");
+    	    //log.debug(this.parseTree.toStringTree(parser));
+	        //log.debug("====================================================");
+
+	    } catch(java.io.IOException ioe) {
+            throw new EntVMachRuntimeException(ioe.getMessage());
+        }
+	}
+
+	public void logProgTextWithLineNbrs() {
+
+		log.debug("=== " + this.getDescriptor() + " =============================");
+        String[] lines = this.programText.split("\n");
+        for(int i = 0; i < lines.length; i++) {
+	        log.debug("{}:\t{}", i+1, lines[i]);
+        }
 	}
 }
 

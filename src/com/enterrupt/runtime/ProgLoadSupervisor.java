@@ -1,15 +1,12 @@
 package com.enterrupt.runtime;
 
 import java.io.*;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
-import com.enterrupt.antlr4.*;
-import com.enterrupt.antlr4.frontend.*;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import com.enterrupt.runtime.*;
 import java.util.*;
+import com.enterrupt.antlr4.*;
+import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.pt.peoplecode.*;
+import org.antlr.v4.runtime.tree.*;
 
 public class ProgLoadSupervisor {
 
@@ -45,93 +42,47 @@ public class ProgLoadSupervisor {
 			return;
 		}
 
-		try {
+		prog.lexAndParse();
+		int recurseLvl = loadStack.size() - 1;
 
-	        InputStream progTextInputStream =
-			    new ByteArrayInputStream(prog.programText.getBytes());
+		ParseTreeWalker walker = new ParseTreeWalker();
+		walker.walk(new ProgLoadListener(prog, recurseLvl, this,
+			prog.tokenStream), prog.parseTree);
 
-//            log.debug("=== ProgLoadSupervisor =============================");
-			log.debug("Loading {}", prog.getDescriptor());
-/*			String[] lines = prog.programText.split("\n");
-			for(int i = 0; i < lines.length; i++) {
-	            log.debug("{}:\t{}", i+1, lines[i]);
-    		}*/
+	    /**
+    	 * All programs referenced by this program must have their referenced
+         * definitions and programs loaded now.
+         */
+		for(PeopleCodeProg refProg : prog.referencedProgs) {
+           	refProg = DefnCache.getProgram(refProg);
+	        refProg.init();
 
-            if(this.writeToFile) {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(
-                    new File("/home/mquinn/evm/cache/" + prog.getDescriptor() + ".pc")));
-                writer.write(prog.programText);
-                writer.close();
-            }
-
-        	ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
-	        NoErrorTolerancePeopleCodeLexer lexer = new NoErrorTolerancePeopleCodeLexer(input);
-    	    CommonTokenStream tokens = new CommonTokenStream(lexer);
-        	PeopleCodeParser parser = new PeopleCodeParser(tokens);
-
-	        parser.removeErrorListeners();
-	        parser.addErrorListener(new EntDiagErrorListener());
-    	    parser.getInterpreter()
-	    	    .setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
-			parser.setErrorHandler(new EntErrorStrategy());
-
-	        ParseTree tree = parser.program();
-
-/*			log.debug(">>> Parse Tree >>>>>>>>>>>>");
-			if(prog instanceof AppClassPeopleCodeProg) {
-				log.debug(tree.toStringTree(parser));
-			}
-	        log.debug("====================================================");
-*/
-            if(this.writeToFile) {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(
-                    new File("/home/mquinn/evm/cache/" + prog.getDescriptor() + ".tree")));
-                writer.write(tree.toStringTree(parser));
-                writer.close();
-            }
-
-			ParseTreeWalker walker = new ParseTreeWalker();
-
-			int recurseLvl = loadStack.size() - 1;
-			walker.walk(new ProgLoadListener(prog, recurseLvl, this, tokens), tree);
-
-	        /**
-    	     * All programs referenced by this program must have their referenced
-        	 * definitions and programs loaded now.
-        	 */
-			for(PeopleCodeProg refProg : prog.referencedProgs) {
-            	refProg = DefnCache.getProgram(refProg);
-	            refProg.init();
+			/**
+			 * In Record PC mode, referenced defns and progs should be loaded
+			 * recursively up to three levels deep. In Component PC mode, all App
+			 * Package PC programs must be be permitted to load their references
+			 * recursively with no limit; for all other program types, their
+			 * references should be loaded only if they are directly referenced in
+			 * the root Component PC program being loaded (recursion level 0).
+			 */
+	        if(((this.rootProg instanceof RecordPeopleCodeProg
+					|| this.rootProg instanceof PagePeopleCodeProg) && recurseLvl < 3)
+               	|| (this.rootProg instanceof ComponentPeopleCodeProg
+	                && (refProg instanceof AppClassPeopleCodeProg
+						|| recurseLvl == 0))) {
 
 				/**
-				 * In Record PC mode, referenced defns and progs should be loaded
-				 * recursively up to three levels deep. In Component PC mode, all App
-				 * Package PC programs must be be permitted to load their references
-				 * recursively with no limit; for all other program types, their
-				 * references should be loaded only if they are directly referenced in
-				 * the root Component PC program being loaded (recursion level 0).
+				 * If the program is never actually called, there is
+			   	 * no reason to load its references at this time.
 				 */
-	        	if(((this.rootProg instanceof RecordPeopleCodeProg
-						|| this.rootProg instanceof PagePeopleCodeProg) && recurseLvl < 3)
-                	|| (this.rootProg instanceof ComponentPeopleCodeProg
-	                    && (refProg instanceof AppClassPeopleCodeProg
-							|| recurseLvl == 0))) {
+				if(refProg instanceof RecordPeopleCodeProg &&
+					prog.confirmedRecordProgCalls.get(refProg) == null) {
+					continue;
+				}
 
-					/**
-					 * If the program is never actually called, there is
-				   	 * no reason to load its references at this time.
-					 */
-					if(refProg instanceof RecordPeopleCodeProg &&
-						prog.confirmedRecordProgCalls.get(refProg) == null) {
-						continue;
-					}
-
-					loadStack.push(refProg);
-					this.loadTopOfStack();
-            	}
-        	}
-	    } catch(java.io.IOException ioe) {
-            throw new EntVMachRuntimeException(ioe.getMessage());
+				loadStack.push(refProg);
+				this.loadTopOfStack();
+            }
         }
 
 		loadStack.pop();

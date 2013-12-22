@@ -5,6 +5,7 @@ import java.lang.reflect.*;
 import com.enterrupt.types.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.misc.Interval;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.frontend.*;
@@ -15,8 +16,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	private InterpretSupervisor supervisor;
 	private ParseTreeProperty<MemoryPtr> exprValues = new ParseTreeProperty<MemoryPtr>();
+	private int traceStmtLineNbr = 1;
+	private CommonTokenStream tokens;
 
-	public InterpreterVisitor(InterpretSupervisor s) {
+	public InterpreterVisitor(CommonTokenStream t, InterpretSupervisor s) {
+		this.tokens = t;
 		this.supervisor = s;
 	}
 
@@ -43,6 +47,32 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return this.exprValues.get(node);
 	}
 
+	private void logStmt(ParserRuleContext ctx) {
+		StringBuffer line = new StringBuffer();
+		Interval interval = ctx.getSourceInterval();
+
+		int i = interval.a;
+		while(i <= interval.b) {
+			Token t = tokens.get(i);
+			if(t.getChannel() == PeopleCodeLexer.REFERENCES) { i++; continue; }
+			if(t.getText().contains("\n")) { break; }
+			line.append(t.getText());
+			i++;
+		}
+
+		// Get any and all trailing semicolons.
+		while(i < tokens.size()) {
+			if(tokens.get(i).getText().equals(";")) {
+				line.append(";");
+				i++;
+			} else {
+				break;
+			}
+		}
+
+		log.info("   {}: {}", this.traceStmtLineNbr++, line.toString());
+	}
+
 	/**********************************************************
 	 * <stmt> alternative handlers.
 	 **********************************************************/
@@ -61,11 +91,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitStmtEvaluate(PeopleCodeParser.StmtEvaluateContext ctx) {
-		/** TODO: IMPLEMENT */
-		return null;
-	}
-
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
 		log.debug("Executing assignment: {}", ctx.getText());
 		visit(ctx.expr(1));
@@ -73,6 +98,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		visit(ctx.expr(0));
 		MemoryPtr destOperand = getExprValue(ctx.expr(0));
 		MemoryPtr.copy(srcOperand, destOperand);
+		return null;
+	}
+
+	public Void visitStmtExpr(PeopleCodeParser.StmtExprContext ctx) {
+		this.logStmt(ctx);
+		visit(ctx.expr());
 		return null;
 	}
 
@@ -277,7 +308,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			i++;
 		}
 
-		if(ctx.varType().GENERIC_ID() != null) {
+/*		if(ctx.varType().GENERIC_ID() != null) {
 			throw new EntVMachRuntimeException("Declaring non-path-prefixed object vars " +
 				"is not yet supported.");
 		} else if(ctx.varType().appClassPath() != null) {
@@ -287,8 +318,33 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			throw new EntVMachRuntimeException("Declaring array object vars " +
 				"is not yet supported.");
 		} else {
+		}*/
+
+		return null;
+	}
+
+	public Void visitEvaluateStmt(PeopleCodeParser.EvaluateStmtContext ctx) {
+		this.logStmt(ctx);
+
+		visit(ctx.expr());
+
+		List<PeopleCodeParser.WhenBranchContext> branches = ctx.whenBranch();
+		for(PeopleCodeParser.WhenBranchContext branchCtx : branches) {
+			visit(branchCtx);
 		}
 
+		if(ctx.whenOtherBranch() != null) {
+			visit(ctx.whenOtherBranch());
+		}
+
+		return null;
+	}
+
+	public Void visitWhenBranch(PeopleCodeParser.WhenBranchContext ctx) {
+		/**
+	     * TODO: Only log if branch expression evaluates to true.
+		 */
+		this.logStmt(ctx);
 		return null;
 	}
 }

@@ -39,7 +39,14 @@ public class InterpretSupervisor {
 	private void runTopOfStack() {
 
 		this.rootProg.lexAndParse();
-		InterpreterVisitor interpreter = new InterpreterVisitor(this);
+
+		String descriptor = this.rootProg.getDescriptor();
+		descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
+
+  		log.info("  >>> start     Nest=00  {}", descriptor);
+		log.info(">>>>> Begin {} level 0 row 0", descriptor);
+		InterpreterVisitor interpreter = new InterpreterVisitor(
+			this.rootProg.tokenStream, this);
 		interpreter.visit(this.rootProg.parseTree);
 
 		contextStack.pop();

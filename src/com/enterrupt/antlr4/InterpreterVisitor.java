@@ -260,4 +260,35 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		return null;
 	}
+
+	public Void visitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
+
+		String scope = ctx.varScope().getText();
+
+		List<PeopleCodeParser.VarDeclaratorContext> varsToDeclare = ctx.varDeclarator();
+		String[] ids = new String[varsToDeclare.size()];
+		int i = 0;
+		for(PeopleCodeParser.VarDeclaratorContext idCtx : varsToDeclare) {
+			ids[i] = idCtx.VAR_ID().getText();
+			if(idCtx.expr() != null) {
+				throw new EntVMachRuntimeException("Initialization during var declaration is " +
+					"not yet supported.");
+			}
+			i++;
+		}
+
+		if(ctx.varType().GENERIC_ID() != null) {
+			throw new EntVMachRuntimeException("Declaring non-path-prefixed object vars " +
+				"is not yet supported.");
+		} else if(ctx.varType().appClassPath() != null) {
+			throw new EntVMachRuntimeException("Declaring app class object vars " +
+				"is not yet supported.");
+		} else if(ctx.varType().varType() != null) {
+			throw new EntVMachRuntimeException("Declaring array object vars " +
+				"is not yet supported.");
+		} else {
+		}
+
+		return null;
+	}
 }

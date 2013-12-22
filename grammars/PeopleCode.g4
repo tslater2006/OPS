@@ -102,7 +102,7 @@ forStmt	:	'For' VAR_ID '=' expr 'To' expr (';' | ('Step' expr))? stmtList 'End-F
 whileStmt	:	'While' expr ';'? stmtList 'End-While' ;
 
 evaluateStmt	:	'Evaluate' expr whenBranch+ whenOtherBranch? 'End-Evaluate' ;
-whenBranch		:	'When' ('='|'>')? expr stmtList ;
+whenBranch		:	'When' (op='='|op='>')? expr stmtList ;
 whenOtherBranch	:	'When-Other' stmtList ;
 
 tryCatchStmt	:	'try' stmtList 'catch' 'Exception' VAR_ID stmtList 'end-try' ;

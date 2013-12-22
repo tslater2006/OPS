@@ -10,6 +10,17 @@ import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.frontend.*;
 
+class EvaluateConstruct {
+	public MemoryPtr baseExpr;
+	public boolean trueBranchExprSeen = false;
+	public boolean breakSeen = false;
+	public EvaluateConstruct(MemoryPtr p) { this.baseExpr = p; }
+}
+
+enum InterruptFlag {
+	BREAK, CONTINUE
+}
+
 public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
@@ -18,6 +29,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private ParseTreeProperty<MemoryPtr> exprValues = new ParseTreeProperty<MemoryPtr>();
 	private int traceStmtLineNbr = 1;
 	private CommonTokenStream tokens;
+	private Stack<EvaluateConstruct> evalConstructStack = new Stack<EvaluateConstruct>();
+	private InterruptFlag interrupt;
 
 	public InterpreterVisitor(CommonTokenStream t, InterpretSupervisor s) {
 		this.tokens = t;
@@ -88,6 +101,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			visit(ctx.ifStmt().stmtList(0));
 		}
 
+		return null;
+	}
+
+	public Void visitStmtBreak(PeopleCodeParser.StmtBreakContext ctx) {
+		this.interrupt = InterruptFlag.BREAK;
 		return null;
 	}
 
@@ -327,24 +345,61 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.logStmt(ctx);
 
 		visit(ctx.expr());
+		EvaluateConstruct evalConstruct = new EvaluateConstruct(
+			getExprValue(ctx.expr()));
+		this.evalConstructStack.push(evalConstruct);
 
 		List<PeopleCodeParser.WhenBranchContext> branches = ctx.whenBranch();
 		for(PeopleCodeParser.WhenBranchContext branchCtx : branches) {
 			visit(branchCtx);
+			if(this.interrupt == InterruptFlag.BREAK) {
+				evalConstruct.breakSeen = true;
+				this.interrupt = null;
+				break;
+			}
 		}
 
-		if(ctx.whenOtherBranch() != null) {
+		if(!evalConstruct.breakSeen && ctx.whenOtherBranch() != null) {
 			visit(ctx.whenOtherBranch());
 		}
+
+		this.evalConstructStack.pop();
 
 		return null;
 	}
 
 	public Void visitWhenBranch(PeopleCodeParser.WhenBranchContext ctx) {
+
+		if(ctx.op != null) {
+			throw new EntVMachRuntimeException("Encountered relational op in when "+
+				"branch, not yet supported.");
+		}
+
+		EvaluateConstruct evalConstruct = this.evalConstructStack.peek();
+		MemoryPtr p1 = evalConstruct.baseExpr;
+		visit(ctx.expr());
+		MemoryPtr p2 = getExprValue(ctx.expr());
+
 		/**
-	     * TODO: Only log if branch expression evaluates to true.
+		 * If a previous branch evaluated to true and we're here, that means
+		 * execution continues to fall through all branches until either a break
+		 * is seen, or the evaluate construct ends.
 		 */
-		this.logStmt(ctx);
+		if(evalConstruct.trueBranchExprSeen || MemoryPtr.isEqual(p1, p2)) {
+			if(!evalConstruct.trueBranchExprSeen) {
+				// Only log the first true branch expr seen.
+				this.logStmt(ctx);
+			}
+			evalConstruct.trueBranchExprSeen = true;
+			visit(ctx.stmtList());
+		}
+
+		return null;
+	}
+
+	public Void visitWhenOtherBranch(PeopleCodeParser.WhenOtherBranchContext ctx) {
+		visit(ctx.stmtList());
 		return null;
 	}
 }
+

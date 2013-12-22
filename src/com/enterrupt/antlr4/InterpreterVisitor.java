@@ -18,7 +18,7 @@ class EvaluateConstruct {
 }
 
 enum InterruptFlag {
-	BREAK, CONTINUE
+	BREAK
 }
 
 public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
@@ -27,7 +27,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	private InterpretSupervisor supervisor;
 	private ParseTreeProperty<MemoryPtr> exprValues = new ParseTreeProperty<MemoryPtr>();
-	private int traceStmtLineNbr = 1;
 	private CommonTokenStream tokens;
 	private Stack<EvaluateConstruct> evalConstructStack = new Stack<EvaluateConstruct>();
 	private InterruptFlag interrupt;
@@ -83,7 +82,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		}
 
-		log.info("   {}: {}", this.traceStmtLineNbr++, line.toString());
+		log.info("   -: {}", line.toString());
 	}
 
 	/**********************************************************
@@ -91,6 +90,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	 **********************************************************/
 
 	public Void visitStmtIf(PeopleCodeParser.StmtIfContext ctx) {
+		this.logStmt(ctx);
 
 		// Get value of conditional expression.
 		visit(ctx.ifStmt().expr());
@@ -105,12 +105,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitStmtBreak(PeopleCodeParser.StmtBreakContext ctx) {
+		this.logStmt(ctx);
 		this.interrupt = InterruptFlag.BREAK;
 		return null;
 	}
 
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
-		log.debug("Executing assignment: {}", ctx.getText());
+		this.logStmt(ctx);
 		visit(ctx.expr(1));
 		MemoryPtr srcOperand = getExprValue(ctx.expr(1));
 		visit(ctx.expr(0));
@@ -398,6 +399,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitWhenOtherBranch(PeopleCodeParser.WhenOtherBranchContext ctx) {
+		this.logStmt(ctx);
 		visit(ctx.stmtList());
 		return null;
 	}

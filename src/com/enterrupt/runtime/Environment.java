@@ -42,6 +42,9 @@ public class Environment {
 				systemVarTable.put(varName, new StringPtr(MFlag.READ_ONLY));
 			}
 
+			// Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
+			systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));
+
 			/// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
 			Method[] methods = GlobalFnLibrary.class.getMethods();
 			systemFuncTable = new HashMap<String, Method>();

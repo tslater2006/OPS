@@ -158,6 +158,7 @@ public class Component {
        	    if(prog.event.equals("SearchInit")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
+				p.loadDefnsAndPrograms();
 				InterpretSupervisor interpreter = new InterpretSupervisor(p);
 				interpreter.run();
        	    }

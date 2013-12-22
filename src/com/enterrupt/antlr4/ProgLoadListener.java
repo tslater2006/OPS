@@ -215,6 +215,12 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		this.supervisor.loadImmediately(prog);
 	}
 
+	@Override
+	public void enterFuncDeclaration(PeopleCodeParser.FuncDeclarationContext ctx) {
+		//log.debug("Token idx: {}", this.tokens.index());
+		//System.exit(1);
+	}
+
 	/**
 	 * Detect function (*not* method) calls; if a call corresponds to a
 	 * function referenced in a previously seen "Declare" stmt, mark that program

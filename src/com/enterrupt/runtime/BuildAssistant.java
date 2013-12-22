@@ -23,6 +23,10 @@ public class BuildAssistant {
 
 	public static boolean validateComponentStructure(Component componentObj, boolean verboseFlag) {
 
+		if(componentObj.PNLGRPNAME.equals("SSR_SSENRL_LIST")) {
+			return false;
+		}
+
 	    int indent = 0;
         IStreamableBuffer buf;
 

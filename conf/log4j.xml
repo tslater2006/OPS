@@ -13,7 +13,7 @@
     		<AppenderRef ref="Console-Less"/>
     	</Root>
 		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
-		<Logger name="com.enterrupt.sql.ENTStmt" level="warn"/>
+		<Logger name="com.enterrupt.sql.ENTStmt" level="all"/>
 		<Logger name="com.enterrupt.pt.peoplecode" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode.ProgLoadSupervisor" level="all"/>
 		<Logger name="com.enterrupt.pt.Component" level="WARN"/>

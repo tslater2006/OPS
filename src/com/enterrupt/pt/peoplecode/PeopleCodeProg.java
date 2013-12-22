@@ -23,13 +23,14 @@ public abstract class PeopleCodeProg {
 	public CommonTokenStream tokenStream;
 	public ParseTree parseTree;
 
-	public ArrayList<PeopleCodeProg> referencedProgs;
-	public HashMap<String, RecordPeopleCodeProg> recordProgFnCalls;
-	public HashMap<String, Boolean> importedRootAppPackages;
-	public TreeMap<Integer, Reference> progRefsTable;
-	public HashMap<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
-	public HashMap<String, List<AppPackagePath>> importedAppClasses;
+	public List<PeopleCodeProg> referencedProgs;
+	public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
+	public Map<String, Boolean> importedRootAppPackages;
+	public Map<Integer, Reference> progRefsTable;
+	public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
+	public Map<String, List<AppPackagePath>> importedAppClasses;
 	public List<AppPackagePath> importedAppPackagePaths;
+	public Map<String, ParseTree> methodEntryPoints;
 
 	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
@@ -244,13 +245,15 @@ public abstract class PeopleCodeProg {
         }
 	}
 
-	public void logProgTextWithLineNbrs() {
+	public void saveMethodEntryPoint(String methodName, ParseTree entryPoint) {
+		if(this.methodEntryPoints == null) {
+			this.methodEntryPoints = new HashMap<String, ParseTree>();
+		}
+		this.methodEntryPoints.put(methodName, entryPoint);
+	}
 
-		log.debug("=== " + this.getDescriptor() + " =============================");
-        String[] lines = this.programText.split("\n");
-        for(int i = 0; i < lines.length; i++) {
-	        log.debug("{}:\t{}", i+1, lines[i]);
-        }
+	public ParseTree getMethodEntryPoint(String methodName) {
+		return this.methodEntryPoints.get(methodName);
 	}
 }
 

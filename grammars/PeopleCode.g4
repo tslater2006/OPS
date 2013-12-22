@@ -2,6 +2,7 @@ grammar PeopleCode;
 
 @lexer::members {
 	public static final int REFERENCES = 1;
+	public static final int WHITESPACE = 2;
 }
 
 //******************************************************//
@@ -159,7 +160,7 @@ REM			:	WS [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1	:	'/*' .*? '*/' -> skip;
 COMMENT_2	:	'<*' .*? '*>' -> skip;
 COMMENT_3	:	'/+' .*? '+/' ';'? -> skip;
-WS			:	[ \t\r\n]+ -> skip ;
+WS			:	[ \t\r\n]+ -> channel(WHITESPACE);
 
 // Reference indices are emitted on a separate channel.
 ENT_REF_IDX	:	'#ENTREF{' IntegerLiteral '}' -> channel(REFERENCES) ;

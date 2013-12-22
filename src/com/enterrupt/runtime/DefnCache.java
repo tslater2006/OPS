@@ -70,4 +70,8 @@ public class DefnCache {
 		}
 		return p;
 	}
+
+	public static PeopleCodeProg getProgram(String progDescriptor) {
+		return programs.get(progDescriptor);
+	}
 }

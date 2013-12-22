@@ -215,10 +215,13 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		this.supervisor.loadImmediately(prog);
 	}
 
+	/**
+	 * Save method entry points in the parse tree for lookup during
+	 * interpretation later.
+	 */
 	@Override
-	public void enterFuncDeclaration(PeopleCodeParser.FuncDeclarationContext ctx) {
-		//log.debug("Token idx: {}", this.tokens.index());
-		//System.exit(1);
+	public void enterMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
+		this.srcProg.saveMethodEntryPoint(ctx.GENERIC_ID().getText(), ctx);
 	}
 
 	/**

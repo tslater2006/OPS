@@ -14,6 +14,38 @@ public class PSDefn {
 	public static final String NULL = " ";
 	public static HashMap<String, String> defnLiteralReservedWordsTable;
 
+	/**
+	 * These are the allowed bit flags for the 4-bit Actions bit mask,
+	 * which defines which modes a component can be run in. In App Designer,
+	 * open a component, go to File > Definition Properties, then click the
+	 * Use tab; these flags map to the four Actions checkboxes.
+	 */
+	public static final byte ACTIONS_Add = 0x1;
+	public static final byte ACTIONS_UpdateDisplay = 0x2;
+	public static final byte ACTIONS_UpdateDisplayAll = 0x4;
+	public static final byte ACTIONS_Correction = 0x8;
+
+	/**
+	 * These are the allowed values for the primary action to be
+	 * taken when opening a component. In App Designer, open a component,
+	 * go to File > Definition Properties, then click the Internet tab;
+	 * these values map to the Primary Action radio buttons.
+	 */
+	public static final int PRIMARYACTION_New = 0;
+	public static final int PRIMARYACTION_Search = 1;
+	public static final int PRIMARYACTION_KeywordSearch = 2;
+
+	/**
+	 * These are the allowed values for the default search action to be taken
+	 * when opening a component in search mode. In App Designer, open a component,
+	 * go to File > Definition Properties, then click the Internet tab; these
+	 * values map to the Default Search Action dropdown values, which appear
+	 * based on the selected Actions checkboxes on the Use tab.
+	 */
+	public static final int DFLTACTION_UpdateDisplay = 1;
+	public static final int DFLTACTION_UpdateDisplayAll = 2;
+	public static final int DFLTACTION_Correction = 3;
+
 	private static HashMap<String, Boolean> systemRecords;
 
 	/**

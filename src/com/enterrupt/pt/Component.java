@@ -14,7 +14,13 @@ public class Component {
 
     public String PNLGRPNAME;
     public String MARKET;
-    public String SEARCHRECNAME; // name of search record for this component
+	public String ADDSRCHRECNAME; // search record used when in add mode
+    public String SEARCHRECNAME; // name of non-add search record for this component
+	public int ACTIONS;			// 4-bit mask of allowed component modes
+	public int PRIMARYACTION;	// 0 - 2: New, Search, Keyword Search
+	public int DFLTACTION;		// 0 - 3: The mode used when PRIMARYACTION is Search
+
+	private String searchRecordToUse;	// based on mode component is running in.
 
     public ArrayList<Page> pages;
 	public ArrayList<ComponentPeopleCodeProg> orderedComponentProgs;
@@ -49,10 +55,26 @@ public class Component {
 	        pstmt = StmtLibrary.getPSPNLGRPDEFN(this.PNLGRPNAME, this.MARKET);
     	    rs = pstmt.executeQuery();
        		rs.next();
-			log.debug("Component search record: {}", rs.getString("SEARCHRECNAME"));
+			this.ADDSRCHRECNAME = rs.getString("ADDSRCHRECNAME");
         	this.SEARCHRECNAME = rs.getString("SEARCHRECNAME");
-        	rs.close();
+     		this.ACTIONS = rs.getInt("ACTIONS");
+			this.PRIMARYACTION = rs.getInt("PRIMARYACTION");
+			this.DFLTACTION = rs.getInt("DFLTACTION");
+		   	rs.close();
         	pstmt.close();
+
+			/**
+			 * Select the search record to use based on the mode
+	  		 * the component should open in.
+			 */
+			if(this.PRIMARYACTION == PSDefn.PRIMARYACTION_New) {
+				this.searchRecordToUse = this.ADDSRCHRECNAME;
+			} else if(this.PRIMARYACTION == PSDefn.PRIMARYACTION_Search) {
+				this.searchRecordToUse = this.SEARCHRECNAME;
+			} else {
+				throw new EntVMachRuntimeException("Unable to select search record " +
+					"due to unknown Primary Action value.");
+			}
 
         	this.pages = new ArrayList<Page>();
 
@@ -77,7 +99,7 @@ public class Component {
 
 	public void loadSearchRecord() {
 		// Loads the search record and puts it in cache.
-		DefnCache.getRecord(this.SEARCHRECNAME);
+		DefnCache.getRecord(this.searchRecordToUse);
     }
 
     public void getListOfComponentPC() {
@@ -142,7 +164,7 @@ public class Component {
 
     public void loadAndRunRecordPConSearchRecord() {
 
-		Record recDefn = DefnCache.getRecord(this.SEARCHRECNAME);
+		Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
 
 		/**
 		 * Record PC should be loaded at this time only if the search record
@@ -168,7 +190,7 @@ public class Component {
 	public void loadAndRunComponentPConSearchRecord() {
 
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-			if(prog.RECNAME != null && prog.RECNAME.equals(this.SEARCHRECNAME)) {
+			if(prog.RECNAME != null && prog.RECNAME.equals(this.searchRecordToUse)) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
 				p.loadDefnsAndPrograms();
@@ -188,7 +210,7 @@ public class Component {
 	 */
 	public void fillSearchRecord() {
 
-		Record recDefn = DefnCache.getRecord(this.SEARCHRECNAME);
+		Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
 
 		/**
 		 * Only fill the search record at this time if the record

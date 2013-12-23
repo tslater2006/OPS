@@ -14,11 +14,11 @@ public class TraceFileVerifier {
 	private static String currTraceLine = "";
 	private static int currTraceLineNbr = 0;
 	private static BufferedReader traceFileReader;
-	private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern;
+	private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern, pcBeginPattern;
 
 	private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
 	private static int numEmissionMatches, numSQLEmissionMatches, numPCEmissionMatches;
-	private static int numTracePCStmts, numTraceSQLStmts, numTraceSQLStmtsIgnored;
+	private static int numTraceSQLStmts, numTraceSQLStmtsIgnored;
 
 	private static Logger log = LogManager.getLogger(TraceFileVerifier.class.getName());
 
@@ -26,7 +26,8 @@ public class TraceFileVerifier {
 		ignoredStmts = new HashMap<String, Boolean>();
 		sqlTokenPattern = Pattern.compile("\\sStmt=(.*)");
 		bindValPattern = Pattern.compile("\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
-		pcStartPattern = Pattern.compile("\\s>>> start\\s+Nest=(\\d+)\\s+([A-Za-z\\._0-9]+)");
+		pcStartPattern = Pattern.compile("\\s+>>>\\s+start\\s+Nest=(\\d+)\\s+([A-Za-z\\._0-9]+)");
+		pcBeginPattern = Pattern.compile("\\s>>>>>\\s+Begin\\s+([A-Za-z\\._0-9]+)\\s+level\\s+(\\d+)\\s+row\\s+(\\d+)");
 
 		/**
 	 	 * Open trace file for reading.
@@ -98,7 +99,7 @@ public class TraceFileVerifier {
 			// Increment emission-specific counter.
 			if(evmEmission instanceof ENTStmt) {
 				numSQLEmissionMatches++;
-			} else if(evmEmission instanceof PCStart) {
+			} else {
 				numPCEmissionMatches++;
 			}
 		} else {
@@ -144,10 +145,17 @@ public class TraceFileVerifier {
 
 			Matcher pcStartMatcher = pcStartPattern.matcher(currTraceLine);
 			if(pcStartMatcher.find()) {
-				numTracePCStmts++;
 				// We don't want the next call to check this line again.
 				currTraceLine = getNextTraceLine();
 				return new PCStart(pcStartMatcher.group(1), pcStartMatcher.group(2));
+			}
+
+			Matcher pcBeginMatcher = pcBeginPattern.matcher(currTraceLine);
+			if(pcBeginMatcher.find()) {
+				// We don't want the next call to check this line again.
+				currTraceLine = getNextTraceLine();
+				return new PCBegin(pcBeginMatcher.group(1), pcBeginMatcher.group(2),
+							pcBeginMatcher.group(3));
 			}
         } while((currTraceLine = getNextTraceLine()) != null);
 
@@ -190,7 +198,6 @@ public class TraceFileVerifier {
 		log.info("SQL Stmts in Ignore File:\t\t{}", ignoredStmts.size());
 		log.info("SQL Stmts Seen (Total / Ignored):\t{}\t\t{}", numTraceSQLStmts,
 			numTraceSQLStmtsIgnored);
-		log.info("PC Exec Stmts Seen:\t\t{}", numTracePCStmts);
 		log.info("Matched SQL Emissions:\t\t\t{}", numSQLEmissionMatches);
 		log.info("Matched PC Emissions:\t\t\t{}", numPCEmissionMatches);
 		log.info("Total Matched Emissions:\t\t\t{}", numEmissionMatches);

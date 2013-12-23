@@ -168,8 +168,8 @@ public abstract class PeopleCodeProg {
 		this.progBytes = allBytes;
     }
 
-	public void loadDefnsAndPrograms() {
-		ProgLoadSupervisor supervisor = new ProgLoadSupervisor(this);
+	public void loadDefnsAndPrograms(LoadGranularity loadGranularity) {
+		ProgLoadSupervisor supervisor = new ProgLoadSupervisor(this, loadGranularity);
 		supervisor.start();
 	}
 

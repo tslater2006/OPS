@@ -181,7 +181,7 @@ public class Component {
        	    if(prog.event.equals("SearchInit")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
-				p.loadDefnsAndPrograms();
+				p.loadDefnsAndPrograms(LoadGranularity.DEEP);
 				InterpretSupervisor interpreter = new InterpretSupervisor(p);
 				interpreter.run();
        	    }
@@ -194,7 +194,7 @@ public class Component {
 			if(prog.RECNAME != null && prog.RECNAME.equals(this.searchRecordToUse)) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
-				p.loadDefnsAndPrograms();
+				p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 				InterpretSupervisor interpreter = new InterpretSupervisor(p);
 				interpreter.run();
 			}
@@ -343,7 +343,7 @@ public class Component {
 						log.debug("Root-level call to init {} taking place now.", p.getDescriptor());
 						p.init();
 						log.debug("Root-level call to load refs for {} taking place now.", p.getDescriptor());
-						p.loadDefnsAndPrograms();
+						p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 					}
 				}
 			}
@@ -357,7 +357,7 @@ public class Component {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PostBuild")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
-				p.loadDefnsAndPrograms();
+				p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 			}
 		}
 
@@ -366,7 +366,7 @@ public class Component {
 			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PreBuild")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
-				p.loadDefnsAndPrograms();
+				p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 			}
 		}
 
@@ -374,7 +374,7 @@ public class Component {
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			PeopleCodeProg p = DefnCache.getProgram(prog);
 			p.init();
-			p.loadDefnsAndPrograms();
+			p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 		}
 	}
 
@@ -386,7 +386,7 @@ public class Component {
 			if(cachedPage.pageActivateProg != null) {
 				PeopleCodeProg pr = DefnCache.getProgram(cachedPage.pageActivateProg);
 				pr.init();
-				pr.loadDefnsAndPrograms();
+				pr.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 			}
 		}
 	}

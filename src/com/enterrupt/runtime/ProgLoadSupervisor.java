@@ -10,14 +10,24 @@ import org.antlr.v4.runtime.tree.*;
 
 public class ProgLoadSupervisor {
 
+	/**
+	 * It appears that the defn and program loading process differs based
+	 * on the purpose of the load; if the defns being loaded are about to
+	 * be interpreted, more defns and progs must be loaded than usual. Use DEEP
+	 * if a program being loaded is about to be run, and SHALLOW if the program won't
+	 * be run immediately.
+	 */
+	public LoadGranularity loadGranularity;
+
 	private PeopleCodeProg rootProg;
 	private boolean writeToFile = true;
 	public Stack<PeopleCodeProg> loadStack;
 
 	private Logger log = LogManager.getLogger(ProgLoadSupervisor.class.getName());
 
-	public ProgLoadSupervisor(PeopleCodeProg prog) {
+	public ProgLoadSupervisor(PeopleCodeProg prog, LoadGranularity lg) {
 		this.rootProg = prog;
+		this.loadGranularity = lg;
 		this.loadStack = new Stack<PeopleCodeProg>();
 	}
 
@@ -35,6 +45,8 @@ public class ProgLoadSupervisor {
 	}
 
 	public void loadTopOfStack() {
+
+		//log.debug("ProgLoadSupervisor stack: {}", this.loadStack);
 
 		PeopleCodeProg prog = this.loadStack.peek();
 		if(prog.haveDefnsAndProgsBeenLoaded()) {

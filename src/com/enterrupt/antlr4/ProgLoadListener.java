@@ -94,7 +94,14 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	 */
 	@Override
 	public void exitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
-		if(!(this.srcProg instanceof AppClassPeopleCodeProg) && this.getVarTypeProg(ctx.varType()) != null) {
+
+		if(this.srcProg instanceof AppClassPeopleCodeProg &&
+			this.supervisor.loadGranularity ==
+				LoadGranularity.SHALLOW) {
+			return;
+		}
+
+	    if(this.getVarTypeProg(ctx.varType()) != null) {
 			PeopleCodeProg prog = this.getVarTypeProg(ctx.varType());
 			prog = DefnCache.getProgram(prog);
 			this.srcProg.referencedProgs.add(prog);
@@ -102,8 +109,11 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 			// Load the referenced program's initial metadata.
 			prog.init();
 
-			// Load the program's referenced defns and programs immediately.
-			this.supervisor.loadImmediately(prog);
+			if(this.supervisor.loadGranularity ==
+				LoadGranularity.SHALLOW) {
+				// Load the program's referenced defns and programs immediately.
+				this.supervisor.loadImmediately(prog);
+			}
 		}
 	}
 
@@ -286,7 +296,9 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	@Override
 	public void enterEveryRule(ParserRuleContext ctx) {
 
-		if(this.srcProg instanceof AppClassPeopleCodeProg) {
+		if(this.srcProg instanceof AppClassPeopleCodeProg &&
+			this.supervisor.loadGranularity ==
+				LoadGranularity.SHALLOW) {
 			return;
 		}
 
@@ -308,7 +320,10 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 				if(refObj.isRecordFieldRef
 					&& ((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
 							|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2)
-							|| (srcProg instanceof PagePeopleCodeProg))) {
+							|| (srcProg instanceof PagePeopleCodeProg)
+							|| (srcProg instanceof AppClassPeopleCodeProg
+								&& this.supervisor.loadGranularity ==
+									LoadGranularity.DEEP))) {
 					DefnCache.getRecord(refObj.RECNAME);
 				}
 				this.refIndicesSeen.put(refIdx, null);

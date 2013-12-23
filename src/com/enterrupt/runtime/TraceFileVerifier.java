@@ -180,6 +180,8 @@ public class TraceFileVerifier {
 			numTraceSQLStmtsIgnored);
 		log.info("Matched EVM Emissions:\t\t\t{}", numEmissionMatches);
 		log.info("Matched SQL Emissions:\t\t\t{}", numSQLEmissionMatches);
+		log.info("Component Structure Valid?\t\t\t\t{}",
+			ComponentStructureVerifier.hasBeenVerified ? "YES" : "!!NO!!");
 		log.info("Coverage Area Bounded?\t\t\t\t{}",
 			mismatchFlag ? "!!NO!!" : "YES");
 		log.info("Coverage Area (Start / End Lines):\tL_{}\t\tL_{}",

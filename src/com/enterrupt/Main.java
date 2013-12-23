@@ -34,6 +34,8 @@ public class Main {
 			c.loadPages();
 
 			c.assembleComponentStructure();
+			ComponentStructureVerifier.verify();
+
 			c.loadAllRecordPCProgsAndReferencedDefns();
 			c.loadAllComponentPCProgsAndReferencedDefns();
 			c.loadAllPagePC();

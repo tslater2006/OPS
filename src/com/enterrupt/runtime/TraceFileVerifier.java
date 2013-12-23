@@ -14,7 +14,8 @@ public class TraceFileVerifier {
 	private static String currTraceLine = "";
 	private static int currTraceLineNbr = 0;
 	private static BufferedReader traceFileReader;
-	private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern, pcBeginPattern;
+	private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
+		pcBeginPattern, pcInstrPattern;
 
 	private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
 	private static int numEmissionMatches, numSQLEmissionMatches, numPCEmissionMatches;
@@ -28,6 +29,9 @@ public class TraceFileVerifier {
 		bindValPattern = Pattern.compile("\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
 		pcStartPattern = Pattern.compile("\\s+>>>\\s+start\\s+Nest=(\\d+)\\s+([A-Za-z\\._0-9]+)");
 		pcBeginPattern = Pattern.compile("\\s>>>>>\\s+Begin\\s+([A-Za-z\\._0-9]+)\\s+level\\s+(\\d+)\\s+row\\s+(\\d+)");
+
+		// Note: this pattern excludes any and all trailing semicolons.
+		pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?)[;]*$");
 
 		/**
 	 	 * Open trace file for reading.
@@ -63,7 +67,11 @@ public class TraceFileVerifier {
 
 	public static void submitEmission(IEmission evmEmission) {
 
-		log.debug(evmEmission);
+		if(evmEmission instanceof ENTStmt) {
+			//log.debug(evmEmission);
+		} else {
+			log.debug(evmEmission);
+		}
 
 		IEmission traceEmission;
 		if(coverageAreaStartLineNbr == 0) {
@@ -156,6 +164,13 @@ public class TraceFileVerifier {
 				currTraceLine = getNextTraceLine();
 				return new PCBegin(pcBeginMatcher.group(1), pcBeginMatcher.group(2),
 							pcBeginMatcher.group(3));
+			}
+
+			Matcher pcInstrMatcher = pcInstrPattern.matcher(currTraceLine);
+			if(pcInstrMatcher.find()) {
+				// We don't want the next call to check this line again.
+				currTraceLine = getNextTraceLine();
+				return new PCInstruction(pcInstrMatcher.group(1));
 			}
         } while((currTraceLine = getNextTraceLine()) != null);
 

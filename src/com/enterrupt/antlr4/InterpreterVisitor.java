@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import org.antlr.v4.runtime.misc.Interval;
 import com.enterrupt.runtime.*;
+import com.enterrupt.trace.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.frontend.*;
 
@@ -59,7 +60,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return this.exprValues.get(node);
 	}
 
-	private void logStmt(ParserRuleContext ctx) {
+	private void emitStmt(ParserRuleContext ctx) {
 		StringBuffer line = new StringBuffer();
 		Interval interval = ctx.getSourceInterval();
 
@@ -72,17 +73,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			i++;
 		}
 
-		// Get any and all trailing semicolons.
-		while(i < tokens.size()) {
-			if(tokens.get(i).getText().equals(";")) {
-				line.append(";");
-				i++;
-			} else {
-				break;
-			}
-		}
+		TraceFileVerifier.submitEmission(new PCInstruction(line.toString()));
+	}
 
-		log.info("   -: {}", line.toString());
+	private void emitStmt(String str) {
+		TraceFileVerifier.submitEmission(new PCInstruction(str));
 	}
 
 	/**********************************************************
@@ -90,7 +85,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	 **********************************************************/
 
 	public Void visitStmtIf(PeopleCodeParser.StmtIfContext ctx) {
-		this.logStmt(ctx);
+		this.emitStmt(ctx);
 
 		// Get value of conditional expression.
 		visit(ctx.ifStmt().expr());
@@ -101,17 +96,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			visit(ctx.ifStmt().stmtList(0));
 		}
 
+		this.emitStmt("End-If");
+
 		return null;
 	}
 
 	public Void visitStmtBreak(PeopleCodeParser.StmtBreakContext ctx) {
-		this.logStmt(ctx);
+		this.emitStmt(ctx);
 		this.interrupt = InterruptFlag.BREAK;
 		return null;
 	}
 
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
-		this.logStmt(ctx);
+		this.emitStmt(ctx);
 		visit(ctx.expr(1));
 		MemoryPtr srcOperand = getExprValue(ctx.expr(1));
 		visit(ctx.expr(0));
@@ -121,7 +118,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitStmtExpr(PeopleCodeParser.StmtExprContext ctx) {
-		this.logStmt(ctx);
+		this.emitStmt(ctx);
 		visit(ctx.expr());
 		return null;
 	}
@@ -343,7 +340,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitEvaluateStmt(PeopleCodeParser.EvaluateStmtContext ctx) {
-		this.logStmt(ctx);
+		this.emitStmt(ctx);
 
 		visit(ctx.expr());
 		EvaluateConstruct evalConstruct = new EvaluateConstruct(
@@ -388,8 +385,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 */
 		if(evalConstruct.trueBranchExprSeen || MemoryPtr.isEqual(p1, p2)) {
 			if(!evalConstruct.trueBranchExprSeen) {
-				// Only log the first true branch expr seen.
-				this.logStmt(ctx);
+				// Only emit the first true branch expr seen.
+				this.emitStmt(ctx);
 			}
 			evalConstruct.trueBranchExprSeen = true;
 			visit(ctx.stmtList());
@@ -399,7 +396,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitWhenOtherBranch(PeopleCodeParser.WhenOtherBranchContext ctx) {
-		this.logStmt(ctx);
+		this.emitStmt(ctx);
 		visit(ctx.stmtList());
 		return null;
 	}

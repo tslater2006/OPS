@@ -4,6 +4,7 @@ import java.util.Stack;
 import java.io.*;
 import java.nio.charset.Charset;
 import com.enterrupt.runtime.*;
+import com.enterrupt.trace.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.types.MemoryPtr;
 import org.apache.logging.log4j.*;
@@ -43,8 +44,8 @@ public class InterpretSupervisor {
 		String descriptor = this.rootProg.getDescriptor();
 		descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
-  		log.info("  >>> start     Nest=00  {}", descriptor);
-		log.info(">>>>> Begin {} level 0 row 0", descriptor);
+		//TraceFileVerifier.submitEmission(new PCStart("00", descriptor));
+		//TraceFileVerifier.submitEmission(">>>>> Begin "+descriptor+" level 0 row 0");
 		InterpreterVisitor interpreter = new InterpreterVisitor(
 			this.rootProg.tokenStream, this);
 		interpreter.visit(this.rootProg.parseTree);

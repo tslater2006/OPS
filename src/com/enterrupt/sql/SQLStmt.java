@@ -4,13 +4,14 @@ import java.sql.*;
 import java.util.*;
 import java.util.regex.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.trace.IEmission;
 import org.apache.logging.log4j.*;
 
 /**
  * @sql : bind tokens should be non-numeric (i.e., "?")
  *        to ensure equals() works correctly.
  */
-public class SQLStmt {
+public class SQLStmt implements IEmission {
     public String sql;
     public HashMap<Integer, String> bindVals;
 

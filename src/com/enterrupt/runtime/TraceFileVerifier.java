@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.regex.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.sql.*;
+import com.enterrupt.trace.*;
 
 public class TraceFileVerifier {
 
@@ -13,11 +14,11 @@ public class TraceFileVerifier {
 	private static String currTraceLine = "";
 	private static int currTraceLineNbr = 0;
 	private static BufferedReader traceFileReader;
-	private static Pattern sqlTokenPattern, bindValPattern;
+	private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern;
 
 	private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
-	private static int numEmissionMatches, numSQLEmissionMatches;
-	private static int numTraceSQLStmts, numTraceSQLStmtsIgnored;
+	private static int numEmissionMatches, numSQLEmissionMatches, numPeopleCodeEmissionMatches;
+	private static int numTracePCStmts, numTraceSQLStmts, numTraceSQLStmtsIgnored;
 
 	private static Logger log = LogManager.getLogger(TraceFileVerifier.class.getName());
 
@@ -25,6 +26,7 @@ public class TraceFileVerifier {
 		ignoredStmts = new HashMap<String, Boolean>();
 		sqlTokenPattern = Pattern.compile("\\sStmt=(.*)");
 		bindValPattern = Pattern.compile("\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
+		pcStartPattern = Pattern.compile("\\s>>> start\\s+Nest=(\\d+)\\s+([A-Za-z\\._0-9]+)");
 
 		/**
 	 	 * Open trace file for reading.
@@ -58,18 +60,23 @@ public class TraceFileVerifier {
         }
 	}
 
-	public static void submitEmission(Object evmEmission) {
+	public static void submitEmission(IEmission evmEmission) {
 
-		Object traceEmission;
+		log.debug(evmEmission);
+
+		IEmission traceEmission;
 		if(coverageAreaStartLineNbr == 0) {
 			/**
 			 * If this is the first emission being matched, seek
-			 * to the match in the trace file.
+			 * to the match in the trace file. It is assumed that the first
+			 * EVM emission is a SQL statement due to the need to get component
+			 * metadata; if this routine is used to check tracefiles that have been
+			 * generated with a non-empty cache, this assumption may not be valid.
 			 */
 			do {
 				traceEmission = getNextTraceEmission();
 			} while(traceEmission != null &&
-					!((ENTStmt)evmEmission).equals((PSStmt)traceEmission));
+					!evmEmission.equals(traceEmission));
 
 			if(traceEmission != null) {
 				coverageAreaStartLineNbr = currTraceLineNbr;
@@ -86,27 +93,25 @@ public class TraceFileVerifier {
 				"emission match is possible.");
 		}
 
-		if(evmEmission instanceof ENTStmt &&
-			traceEmission instanceof PSStmt) {
-				ENTStmt entStmt = (ENTStmt) evmEmission;
-				PSStmt psStmt = (PSStmt) traceEmission;
+		if(evmEmission.equals(traceEmission)) {
 
-				if(entStmt.equals(psStmt)) {
-					numSQLEmissionMatches++;
-				} else {
-					log.fatal("EVM emitted: {}", entStmt);
-					log.fatal("Trace file expects: {}", psStmt);
-					throw new EntVMachRuntimeException("SQL emission mismatch.");
-				}
+			// Increment emission-specific counter.
+			if(evmEmission instanceof ENTStmt) {
+				numSQLEmissionMatches++;
+			} else if(evmEmission instanceof PCStart) {
+				numPeopleCodeEmissionMatches++;
+			}
 		} else {
-			throw new EntVMachRuntimeException("Unexpected combination of emission "+
-				"types encountered during trace file verification.");
+			log.fatal("=== Emission Mismatch! =======================");
+			log.fatal("EVM emitted: {}", evmEmission);
+			log.fatal("Trace file expects: {}", traceEmission);
+			throw new EntVMachRuntimeException("Emission mismatch.");
 		}
 
 		numEmissionMatches++;
 	}
 
-	private static Object getNextTraceEmission() {
+	private static IEmission getNextTraceEmission() {
 		do {
             Matcher sqlMatcher = sqlTokenPattern.matcher(currTraceLine);
             if(sqlMatcher.find()) {
@@ -132,11 +137,14 @@ public class TraceFileVerifier {
                 }
 
                 return ps_stmt; // statement has no bind values.
-            }
+			}
 
-			/**
-			 * TODO: Check for PeopleCode statement execution.
-		     */
+/*			Matcher pcStartMatcher = pcStartPattern.matcher(currTraceLine);
+			if(pcStartMatcher.find()) {
+				numTracePCStmts++;
+				return new PCStart(pcStartMatcher.group(1), pcStartMatcher.group(2));
+			}*/
+
         } while((currTraceLine = getNextTraceLine()) != null);
 
         return null;

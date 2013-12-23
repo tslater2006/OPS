@@ -38,12 +38,14 @@ public class Main {
 			c.loadAllComponentPCProgsAndReferencedDefns();
 			c.loadAllPagePC();
 
-			BuildAssistant.runValidationTests(c);
+			TraceFileVerifier.logVerificationSummary(false);
 		} catch(EntVMachRuntimeException evmre) {
 			log.fatal(evmre.getMessage(), evmre);
+			TraceFileVerifier.logVerificationSummary(true);
 			System.exit(ExitCode.ENT_VIRTUAL_MACH_RUNTIME_EXCEPTION.getCode());
 		} catch(Exception ex) {
 			log.fatal(ex.getMessage(), ex);
+			TraceFileVerifier.logVerificationSummary(true);
 			System.exit(ExitCode.GENERIC_FAILURE.getCode());
 		}
     }
@@ -51,6 +53,7 @@ public class Main {
 	private static class ENTShutdownHook extends Thread {
 		public void run() {
 			StmtLibrary.disconnect();
+			TraceFileVerifier.closeTraceFile();
 		}
 	}
 }

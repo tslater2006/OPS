@@ -26,7 +26,7 @@ public class ENTStmt extends SQLStmt {
          		pstmt.setString(cursor.getKey(), cursor.getValue());
         	}
 
-        	BuildAssistant.emissions.add(this);
+			TraceFileVerifier.submitEmission(this);
         	return pstmt;
 
 		} catch(java.sql.SQLException sqle) {

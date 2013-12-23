@@ -98,8 +98,9 @@ public class Component {
     }
 
 	public void loadSearchRecord() {
-		// Loads the search record and puts it in cache.
-		DefnCache.getRecord(this.searchRecordToUse);
+		// Loads the search records and puts their defns into cache.
+		DefnCache.getRecord(this.SEARCHRECNAME);
+		DefnCache.getRecord(this.ADDSRCHRECNAME);
     }
 
     public void getListOfComponentPC() {

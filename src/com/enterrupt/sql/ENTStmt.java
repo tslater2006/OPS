@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import com.enterrupt.runtime.ExitCode;
+import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 
 public class ENTStmt extends SQLStmt {
@@ -26,9 +26,7 @@ public class ENTStmt extends SQLStmt {
          		pstmt.setString(cursor.getKey(), cursor.getValue());
         	}
 
-			log.debug("Stmt counter: {}", stmtCounter++);
-			log.debug(this);
-        	StmtLibrary.emittedStmts.add(this);
+        	BuildAssistant.emissions.add(this);
         	return pstmt;
 
 		} catch(java.sql.SQLException sqle) {

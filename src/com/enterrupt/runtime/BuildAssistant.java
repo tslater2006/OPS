@@ -18,6 +18,11 @@ public class BuildAssistant {
 	private static String currentTraceLine = "";
 	private static HashMap<String, Boolean> ignoredStmts;
 	private static int currTraceLineNbr = 0;
+	public static List<Object> emissions;
+
+	static {
+		emissions = new ArrayList<Object>();
+	}
 
 	private static Logger log = LogManager.getLogger(BuildAssistant.class.getName());
 
@@ -130,7 +135,7 @@ public class BuildAssistant {
 
 		PSStmt ps_stmt;
 
-		int totalEmittedStmts = StmtLibrary.emittedStmts.size();
+		int totalEmittedStmts = emissions.size();
 		int curr_ent_stmt_idx = 0;
 		int max_idx = totalEmittedStmts - 1;
 
@@ -164,7 +169,7 @@ public class BuildAssistant {
 			}
 
 			if(curr_ent_stmt_idx <= max_idx) {
-				if(ps_stmt.equals(StmtLibrary.emittedStmts.get(curr_ent_stmt_idx))) {
+				if(ps_stmt.equals(emissions.get(curr_ent_stmt_idx))) {
 					if(curr_ent_stmt_idx == 0) {
 						inCoverageRegion = true;
 						coverageStartLine = ps_stmt.line_nbr;
@@ -172,8 +177,6 @@ public class BuildAssistant {
 					}
 
 					numCoverageAreaMatches++;
-
-					//log.debug(StmtLibrary.emittedStmts.get(curr_ent_stmt_idx));
 
 					if(curr_ent_stmt_idx == max_idx) {
 						inCoverageRegion = false;
@@ -222,11 +225,11 @@ public class BuildAssistant {
 		}
 		log.info(b.toString());
 
-		if(curr_ent_stmt_idx < StmtLibrary.emittedStmts.size()) {
+		if(curr_ent_stmt_idx < emissions.size()) {
 			log.debug(curr_ent_stmt_idx);
 			b = new StringBuilder();
 			b.append("First Unmatched ENT Stmt:\n");
-			b.append(StmtLibrary.emittedStmts.get(curr_ent_stmt_idx));
+			b.append(emissions.get(curr_ent_stmt_idx));
 			log.info(b.toString());
 		}
 

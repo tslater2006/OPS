@@ -9,18 +9,9 @@ import org.apache.logging.log4j.*;
 public class StmtLibrary {
 
 	private static Connection conn;
-	public static ArrayList<ENTStmt> emittedStmts;
-
 	private static Logger log = LogManager.getLogger(StmtLibrary.class.getName());
 
 	static {
-		emittedStmts = new ArrayList<ENTStmt>();
-
-		/**
-		 * TODO: When I use "jdbc:oracle:thin", the EVM will only work intermittently.
-		 * Setting it to "jdbc:oracle:oci" seems to work all the time. Ideally I would like
-		 * to use the thin client rather than the full OCI client. Look into this issue eventually.
-		 */
 		try {
 			String dbSID = System.getProperty("DbSID");
 			String dbIP = System.getProperty("DbIP");

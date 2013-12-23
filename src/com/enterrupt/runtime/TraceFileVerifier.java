@@ -17,7 +17,7 @@ public class TraceFileVerifier {
 	private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern;
 
 	private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
-	private static int numEmissionMatches, numSQLEmissionMatches, numPeopleCodeEmissionMatches;
+	private static int numEmissionMatches, numSQLEmissionMatches, numPCEmissionMatches;
 	private static int numTracePCStmts, numTraceSQLStmts, numTraceSQLStmtsIgnored;
 
 	private static Logger log = LogManager.getLogger(TraceFileVerifier.class.getName());
@@ -99,7 +99,7 @@ public class TraceFileVerifier {
 			if(evmEmission instanceof ENTStmt) {
 				numSQLEmissionMatches++;
 			} else if(evmEmission instanceof PCStart) {
-				numPeopleCodeEmissionMatches++;
+				numPCEmissionMatches++;
 			}
 		} else {
 			log.fatal("=== Emission Mismatch! =======================");
@@ -112,6 +112,9 @@ public class TraceFileVerifier {
 	}
 
 	private static IEmission getNextTraceEmission() {
+
+		// do-while because we want to check the line returned from the prior call
+		// to getNextTraceLine().
 		do {
             Matcher sqlMatcher = sqlTokenPattern.matcher(currTraceLine);
             if(sqlMatcher.find()) {
@@ -139,12 +142,13 @@ public class TraceFileVerifier {
                 return ps_stmt; // statement has no bind values.
 			}
 
-/*			Matcher pcStartMatcher = pcStartPattern.matcher(currTraceLine);
+			Matcher pcStartMatcher = pcStartPattern.matcher(currTraceLine);
 			if(pcStartMatcher.find()) {
 				numTracePCStmts++;
+				// We don't want the next call to check this line again.
+				currTraceLine = getNextTraceLine();
 				return new PCStart(pcStartMatcher.group(1), pcStartMatcher.group(2));
-			}*/
-
+			}
         } while((currTraceLine = getNextTraceLine()) != null);
 
         return null;
@@ -186,8 +190,10 @@ public class TraceFileVerifier {
 		log.info("SQL Stmts in Ignore File:\t\t{}", ignoredStmts.size());
 		log.info("SQL Stmts Seen (Total / Ignored):\t{}\t\t{}", numTraceSQLStmts,
 			numTraceSQLStmtsIgnored);
-		log.info("Matched EVM Emissions:\t\t\t{}", numEmissionMatches);
+		log.info("PC Exec Stmts Seen:\t\t{}", numTracePCStmts);
 		log.info("Matched SQL Emissions:\t\t\t{}", numSQLEmissionMatches);
+		log.info("Matched PC Emissions:\t\t\t{}", numPCEmissionMatches);
+		log.info("Total Matched Emissions:\t\t\t{}", numEmissionMatches);
 		log.info("Component Structure Valid?\t\t\t\t{}",
 			ComponentStructureVerifier.hasBeenVerified ? "YES" : "!!NO!!");
 		log.info("Coverage Area Bounded?\t\t\t\t{}",

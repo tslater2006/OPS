@@ -323,7 +323,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 							|| (srcProg instanceof PagePeopleCodeProg)
 							|| (srcProg instanceof AppClassPeopleCodeProg
 								&& this.supervisor.loadGranularity ==
-									LoadGranularity.DEEP))) {
+									LoadGranularity.DEEP && recurseLvl < 2))) {
 					DefnCache.getRecord(refObj.RECNAME);
 				}
 				this.refIndicesSeen.put(refIdx, null);

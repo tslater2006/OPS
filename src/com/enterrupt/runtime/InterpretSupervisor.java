@@ -44,7 +44,7 @@ public class InterpretSupervisor {
 		String descriptor = this.rootProg.getDescriptor();
 		descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
-		//TraceFileVerifier.submitEmission(new PCStart("00", descriptor));
+		TraceFileVerifier.submitEmission(new PCStart("00", descriptor));
 		//TraceFileVerifier.submitEmission(">>>>> Begin "+descriptor+" level 0 row 0");
 		InterpreterVisitor interpreter = new InterpreterVisitor(
 			this.rootProg.tokenStream, this);

@@ -13,6 +13,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	public String[] pathParts;
 	public AppPackage rootPackage;
 	public Map<String, ParseTree> methodEntryPoints;
+	public Map<String, List<String>> methodFormalParams;
 	public Map<String, Void> instanceIdTable;
 
 	private static Logger log = LogManager.getLogger(AppClassPeopleCodeProg.class.getName());
@@ -24,6 +25,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		this.initBindVals();
 		this.rootPackage = DefnCache.getAppPackage(this.bindVals[1]);
 		this.methodEntryPoints = new HashMap<String, ParseTree>();
+		this.methodFormalParams = new HashMap<String, List<String>>();
 		this.instanceIdTable = new HashMap<String, Void>();
 	}
 
@@ -85,5 +87,17 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	 */
 	public void addInstanceIdentifier(String id) {
 		this.instanceIdTable.put(id, null);
+	}
+
+	/**
+	 * TODO: Save type information here.
+	 */
+	public void addFormalParamForMethod(String methodName, String paramId) {
+		List<String> paramList = this.methodFormalParams.get(methodName);
+		if(paramList == null) {
+			paramList = new ArrayList<String>();
+			this.methodFormalParams.put(methodName, paramList);
+		}
+		paramList.add(paramId);
 	}
 }

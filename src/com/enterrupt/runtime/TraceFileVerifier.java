@@ -15,7 +15,7 @@ public class TraceFileVerifier {
 	private static int currTraceLineNbr = 0;
 	private static BufferedReader traceFileReader;
 	private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
-		pcBeginPattern, pcInstrPattern;
+		pcBeginPattern, pcInstrPattern, pcEndPattern;
 
 	private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
 	private static int numEmissionMatches, numSQLEmissionMatches, numPCEmissionMatches;
@@ -29,6 +29,7 @@ public class TraceFileVerifier {
 		bindValPattern = Pattern.compile("\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
 		pcStartPattern = Pattern.compile("\\s+>>>\\s+(start|start-ext)\\s+Nest=(\\d+)\\s+([A-Za-z_0-9]*?)\\s+([A-Za-z\\._0-9]+)");
 		pcBeginPattern = Pattern.compile("\\s>>>>>\\s+Begin\\s+([A-Za-z\\._0-9]+)\\s+level\\s+(\\d+)\\s+row\\s+(\\d+)");
+		pcEndPattern = Pattern.compile("\\s+<<<\\s(end|end-ext)\\s+Nest=(\\d+)\\s+([A-Za-z0-9]*?)\\s+([A-Za-z\\._0-9]+)");
 
 		// Note: this pattern excludes any and all trailing semicolons.
 		pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?)[;]*$");
@@ -172,6 +173,14 @@ public class TraceFileVerifier {
 				// We don't want the next call to check this line again.
 				currTraceLine = getNextTraceLine();
 				return new PCInstruction(pcInstrMatcher.group(1));
+			}
+
+			Matcher pcEndMatcher = pcEndPattern.matcher(currTraceLine);
+			if(pcEndMatcher.find()) {
+				// We don't want the next call to check this line again.
+				currTraceLine = getNextTraceLine();
+				return new PCEnd(pcEndMatcher.group(1), pcEndMatcher.group(2),
+							pcEndMatcher.group(3), pcEndMatcher.group(4));
 			}
         } while((currTraceLine = getNextTraceLine()) != null);
 

@@ -34,6 +34,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private ParseTreeProperty<MemPointer> memPointers;
 	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
+	private IEmission lastEmission;
 
 	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
 
@@ -82,11 +83,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			i++;
 		}
 
-		TraceFileVerifier.submitEmission(new PCInstruction(line.toString()));
+		IEmission e = new PCInstruction(line.toString());
+		TraceFileVerifier.submitEmission(e);
+		this.lastEmission = e;
 	}
 
 	private void emitStmt(String str) {
-		TraceFileVerifier.submitEmission(new PCInstruction(str));
+		IEmission e = new PCInstruction(str);
+		TraceFileVerifier.submitEmission(e);
+		this.lastEmission = e;
+	}
+
+	private void repeatLastEmission() {
+		TraceFileVerifier.submitEmission(this.lastEmission);
 	}
 
 	public Void visitProgram(PeopleCodeParser.ProgramContext ctx) {
@@ -320,13 +329,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
 		this.emitStmt(ctx);
 
-		/**
-		 * TODO: Add a method-local ref envi to the current execution context;
-		 * any arguments passed to the method should be entered into this
-		 * referencing environment.
-		 */
+		RefEnvi localRefEnvi = new LocalRefEnvi(LocalRefEnvi.Type.METHOD_LOCAL);
+		List<String> formalParams = ((AppClassPeopleCodeProg)eCtx.prog).methodFormalParams.
+			get(ctx.GENERIC_ID().getText());
 
+		for(String formalParamId : formalParams) {
+			localRefEnvi.declareVar(formalParamId, Environment.popFromCallStack());
+		}
+
+		eCtx.pushRefEnvi(localRefEnvi);
 		visit(ctx.stmtList());
+		eCtx.popRefEnvi();
+
+		this.emitStmt("end-method");
 		return null;
 	}
 
@@ -516,6 +531,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			ExecContext constructorCtx = new AppClassObjExecContext(appClassObj,
 				constructorName);
 			this.supervisor.runImmediately(constructorCtx);
+			this.repeatLastEmission();
 		}
 		return null;
 	}

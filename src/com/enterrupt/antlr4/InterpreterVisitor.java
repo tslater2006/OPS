@@ -80,6 +80,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		TraceFileVerifier.submitEmission(new PCInstruction(str));
 	}
 
+	public Void visitProgram(PeopleCodeParser.ProgramContext ctx) {
+		this.supervisor.pushRefEnvi(new RefEnvi("ProgramLocal"));
+		visit(ctx.stmtList());
+		this.supervisor.popRefEnvi();
+		return null;
+	}
+
 	/**********************************************************
 	 * <stmt> alternative handlers.
 	 **********************************************************/
@@ -265,12 +272,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			setExprValue(ctx, ptr);
 
 		} else if(ctx.VAR_ID() != null) {
-
-			throw new EntVMachRuntimeException("Need to support references to non-system vars.");
+			MemoryPtr ptr = this.supervisor.resolveIdentifierToPtr(ctx.getText());
 		} else {
-			/**
-			 * TODO: What about GENERIC_ID?
-			 */
+			throw new EntVMachRuntimeException("Need to support GENERIC_IDs as identifiers.");
 		}
 		return null;
 	}
@@ -324,17 +328,23 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			i++;
 		}
 
-/*		if(ctx.varType().GENERIC_ID() != null) {
-			throw new EntVMachRuntimeException("Declaring non-path-prefixed object vars " +
-				"is not yet supported.");
+		if(ctx.varType().varType() != null) {
+			//throw new EntVMachRuntimeException("Declaring array object vars " +
+			//	"is not yet supported.");
 		} else if(ctx.varType().appClassPath() != null) {
-			throw new EntVMachRuntimeException("Declaring app class object vars " +
-				"is not yet supported.");
-		} else if(ctx.varType().varType() != null) {
-			throw new EntVMachRuntimeException("Declaring array object vars " +
-				"is not yet supported.");
+			//throw new EntVMachRuntimeException("Declaring app class object vars " +
+			//	"is not yet supported.");
 		} else {
-		}*/
+/*			String id = ctx.varType().GENERIC_ID().getText();
+			switch(id) {
+				case "Record":
+					this.assignVarToCorrectRefEnvi(scope, id);
+					break;
+				default:
+					throw new EntVMachRuntimeException("Unexpected variable type (" +
+						id + ") encountered in declaration.");
+			}*/
+		}
 
 		return null;
 	}
@@ -399,6 +409,23 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.emitStmt(ctx);
 		visit(ctx.stmtList());
 		return null;
+	}
+
+	private void assignVarToCorrectRefEnvi(String scope, String id) {
+		switch(scope) {
+			case "Local":
+				this.supervisor.assignLocalVar(id, null);
+				break;
+			case "Component":
+				RefEnvi.assignComponentVar(id, null);
+				break;
+			case "Global":
+				RefEnvi.assignGlobalVar(id, null);
+				break;
+			default:
+				throw new EntVMachRuntimeException("Encountered unexpected variable " +
+					" scope: " + scope);
+		}
 	}
 }
 

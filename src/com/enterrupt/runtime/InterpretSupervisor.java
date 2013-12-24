@@ -1,6 +1,6 @@
 package com.enterrupt.runtime;
 
-import java.util.Stack;
+import java.util.*;
 import java.io.*;
 import java.nio.charset.Charset;
 import com.enterrupt.runtime.*;
@@ -13,23 +13,21 @@ import com.enterrupt.antlr4.*;
 public class InterpretSupervisor {
 
 	private PeopleCodeProg rootProg;
-	private Stack<ExecutionContext> contextStack;
+	private LinkedList<RefEnvi> localRefEnviStack;
 
 	private static Logger log = LogManager.getLogger(InterpretSupervisor.class.getName());
 
 	public InterpretSupervisor(PeopleCodeProg prog) {
 		this.rootProg = prog;
-		this.contextStack = new Stack<ExecutionContext>();
+		this.localRefEnviStack = new LinkedList<RefEnvi>();
 	}
 
 	public void run() {
 
-		ExecutionContext initialCtx = new ProgramExecContext(this.rootProg);
-		this.contextStack.push(initialCtx);
 		this.runTopOfStack();
 
-		if(this.contextStack.size() != 0) {
-			throw new EntVMachRuntimeException("Expected context stack to be empty.");
+		if(this.localRefEnviStack.size() != 0) {
+			throw new EntVMachRuntimeException("Expected ref envi stack to be empty.");
 		}
 
 		if(Environment.getCallStackSize() != 0) {
@@ -49,25 +47,47 @@ public class InterpretSupervisor {
 		InterpreterVisitor interpreter = new InterpreterVisitor(
 			this.rootProg.tokenStream, this);
 		interpreter.visit(this.rootProg.parseTree);
+	}
 
-		contextStack.pop();
+	public void pushRefEnvi(RefEnvi r) {
+		// Place the ref envi at the front of the linked list.
+		this.localRefEnviStack.push(r);
+	}
+
+	public void popRefEnvi() {
+		// Remove the ref envi at the front of the linked list.
+		this.localRefEnviStack.pop();
+	}
+
+	public void assignLocalVar(String id, MemoryPtr ptr) {
+		// Assign var to topmost ref envi on the stack (front of the linked list).
+		this.localRefEnviStack.peekFirst().assignLocalVar(id, ptr);
+	}
+
+	public MemoryPtr resolveIdentifierToPtr(String id) {
+
+		/**
+		 * Search through the stack of local referencing environments;
+		 * most recently pushed referencing environments get first priority,
+		 * so search from front of list (stack) to back.
+		 */
+		for(RefEnvi envi : this.localRefEnviStack) {
+			if(envi.isLocalVarDeclared(id)) {
+				return envi.resolveLocalVar(id);
+			}
+		}
+
+		// If id is not in any local ref envis, check the Component envi.
+		if(RefEnvi.isComponentVarDeclared(id)) {
+			return RefEnvi.resolveComponentVar(id);
+		}
+
+		// If id is still not resolved, check the Global envi.
+		if(RefEnvi.isGlobalVarDeclared(id)) {
+			return RefEnvi.resolveGlobalVar(id);
+		}
+
+		throw new EntVMachRuntimeException("Unable to resolve identifier (" +
+			id + ") to pointer after checking all referencing environments.");
 	}
 }
-
-class ExecutionContext {
-
-	public ExecutionContext() {}
-}
-
-class ProgramExecContext extends ExecutionContext {
-
-	private PeopleCodeProg prog;
-
-	public ProgramExecContext(PeopleCodeProg p) {
-		this.prog = p;
-	}
-}
-
-class FunctionExecContext extends ExecutionContext {}
-class GlobalExecContext extends ExecutionContext {}
-class ComponentExecContext extends ExecutionContext {}

@@ -2,26 +2,26 @@ package com.enterrupt.scope;
 
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.types.*;
 
 public class AppClassObjExecContext extends ExecContext {
 
 	public String methodName;
 
-	public AppClassObjExecContext(AppClassPeopleCodeProg p,
-				AppClassObjRefEnvi r, String m) {
-
-		super(p);
-		this.pushRefEnvi(r);
+	public AppClassObjExecContext(PTAppClassObject obj, String m) {
+		super(obj.progDefn);
+		this.methodName = m;
+		this.pushRefEnvi(obj.persistentRefEnvi);
 
 		/**
 		 * Resolve method or function name to parse tree node.
 		 */
-		if(!p.methodEntryPoints.containsKey(this.methodName)) {
+		if(!obj.progDefn.methodEntryPoints.containsKey(this.methodName)) {
 			throw new EntVMachRuntimeException("Unable to resolve method or function " +
-				"name ( " + this.methodName + ") to a parse tree node for program: " +
-				p.getDescriptor());
+				"name (" + this.methodName + ") to a parse tree node for program: " +
+				obj.progDefn.getDescriptor());
 		}
 
-		this.startNode = p.methodEntryPoints.get(this.methodName);
+		this.startNode = obj.progDefn.methodEntryPoints.get(this.methodName);
 	}
 }

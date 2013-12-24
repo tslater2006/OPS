@@ -5,11 +5,15 @@ import java.lang.StringBuilder;
 import com.enterrupt.runtime.*;
 import com.enterrupt.pt.*;
 import org.apache.logging.log4j.*;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
 
 public class AppClassPeopleCodeProg extends PeopleCodeProg {
 
 	public String[] pathParts;
 	public AppPackage rootPackage;
+	public Map<String, ParseTree> methodEntryPoints;
+	public Map<String, Void> instanceIdTable;
 
 	private static Logger log = LogManager.getLogger(AppClassPeopleCodeProg.class.getName());
 
@@ -19,6 +23,12 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		this.event = "OnExecute";
 		this.initBindVals();
 		this.rootPackage = DefnCache.getAppPackage(this.bindVals[1]);
+		this.methodEntryPoints = new HashMap<String, ParseTree>();
+		this.instanceIdTable = new HashMap<String, Void>();
+	}
+
+	public String getClassName() {
+		return this.pathParts[this.pathParts.length - 1];
 	}
 
 	protected void initBindVals() {
@@ -64,5 +74,16 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		}
 		sb.append(this.event);
 		return sb.toString();
+	}
+
+    public void saveMethodEntryPoint(String methodName, ParseTree entryPoint) {
+        this.methodEntryPoints.put(methodName, entryPoint);
+	}
+
+	/**
+	 * TODO: Save type information here in place of Void.
+	 */
+	public void addInstanceIdentifier(String id) {
+		this.instanceIdTable.put(id, null);
 	}
 }

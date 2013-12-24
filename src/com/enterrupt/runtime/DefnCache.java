@@ -3,6 +3,7 @@ package com.enterrupt.runtime;
 import java.util.HashMap;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.peoplecode.*;
+import org.apache.logging.log4j.*;
 
 public class DefnCache {
 
@@ -10,6 +11,8 @@ public class DefnCache {
 	private static HashMap<String, PeopleCodeProg> programs;
 	private static HashMap<String, Page> pages;
 	private static HashMap<String, AppPackage> appPackages;
+
+	private static Logger log = LogManager.getLogger(DefnCache.class.getName());
 
 	static {
 		records = new HashMap<String, Record>();
@@ -62,7 +65,6 @@ public class DefnCache {
 	}
 
 	public static PeopleCodeProg getProgram(PeopleCodeProg prog) {
-
 		PeopleCodeProg p = programs.get(prog.getDescriptor());
 		if(p == null) {
 			p = prog;

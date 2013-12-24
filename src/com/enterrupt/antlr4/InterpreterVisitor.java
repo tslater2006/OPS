@@ -194,6 +194,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// if args exist, move args from runtime stack to call stack.
 		if(ctx.exprList() != null) {
+			visit(ctx.exprList());
 			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 				visit(argCtx);
 				Environment.pushToCallStack(getMemPointer(argCtx));
@@ -315,6 +316,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	/**********************************************************
 	 * Primary rule handlers.
 	 **********************************************************/
+
+	public Void visitMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
+		this.emitStmt(ctx);
+
+		/**
+		 * TODO: Add a method-local ref envi to the current execution context;
+		 * any arguments passed to the method should be entered into this
+		 * referencing environment.
+		 */
+
+		visit(ctx.stmtList());
+		return null;
+	}
 
 	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
@@ -465,7 +479,44 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
-		setMemPointer(ctx, new MemPointer());
+
+		AppClassPeopleCodeProg appClassProg;
+		if(ctx.appClassPath() != null) {
+			appClassProg = (AppClassPeopleCodeProg)DefnCache.getProgram(("AppClassPC." +
+				ctx.appClassPath().getText() + ".OnExecute").replaceAll(":","."));
+		} else {
+			throw new EntVMachRuntimeException("Encountered create invocation without " +
+				"app class prefix; need to support this by resolving path to class.");
+		}
+
+		PTAppClassObject appClassObj = new PTAppClassObject(appClassProg);
+		setMemPointer(ctx, new MemPointer(appClassObj));
+
+		/**
+	     * Check for constructor; call it if it exists.
+		 * TODO: If issues arise with this, I probably need to check the method
+		 * declaration to ensure that the constructor (if it exists) is only called
+	     * when the appropriate number of arguments are supplied.
+		 */
+		String constructorName = appClassProg.getClassName();
+		if(appClassProg.methodEntryPoints.containsKey(constructorName)) {
+
+			/**
+			 * Load arguments to constructor onto call stack if
+			 * args have been provided.
+			 */
+			if(ctx.exprList() != null) {
+				visit(ctx.exprList());
+				for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
+					visit(argCtx);
+	                Environment.pushToCallStack(getMemPointer(argCtx));
+				}
+			}
+
+			ExecContext constructorCtx = new AppClassObjExecContext(appClassObj,
+				constructorName);
+			this.supervisor.runImmediately(constructorCtx);
+		}
 		return null;
 	}
 

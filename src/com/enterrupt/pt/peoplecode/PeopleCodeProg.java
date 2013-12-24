@@ -30,7 +30,6 @@ public abstract class PeopleCodeProg {
 	public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
 	public Map<String, List<AppPackagePath>> importedAppClasses;
 	public List<AppPackagePath> importedAppPackagePaths;
-	public Map<String, ParseTree> methodEntryPoints;
 
 	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
@@ -243,17 +242,6 @@ public abstract class PeopleCodeProg {
 	    } catch(java.io.IOException ioe) {
             throw new EntVMachRuntimeException(ioe.getMessage());
         }
-	}
-
-	public void saveMethodEntryPoint(String methodName, ParseTree entryPoint) {
-		if(this.methodEntryPoints == null) {
-			this.methodEntryPoints = new HashMap<String, ParseTree>();
-		}
-		this.methodEntryPoints.put(methodName, entryPoint);
-	}
-
-	public ParseTree getMethodEntryPoint(String methodName) {
-		return this.methodEntryPoints.get(methodName);
 	}
 }
 

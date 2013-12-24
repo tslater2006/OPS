@@ -41,10 +41,23 @@ public class InterpretSupervisor {
 
 		context.prog.lexAndParse();
 
+		String methodOrFuncName = "";
+		if(context instanceof ProgramExecContext &&
+			((ProgramExecContext)context).funcName != null) {
+			methodOrFuncName = ((ProgramExecContext)context).funcName;
+		}
+		if(context instanceof AppClassObjExecContext &&
+			((AppClassObjExecContext)context).methodName != null) {
+			methodOrFuncName = ((AppClassObjExecContext)context).methodName;
+		}
+
 		String descriptor = context.prog.getDescriptor();
 		descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
-		TraceFileVerifier.submitEmission(new PCStart("start", "00", "", descriptor));
+		TraceFileVerifier.submitEmission(new PCStart(
+			(execContextStack.size() == 1 ? "start" : "start-ext"),
+			String.format("%02d", execContextStack.size() - 1),
+			methodOrFuncName, descriptor));
 		TraceFileVerifier.submitEmission(new PCBegin(descriptor, "0", "0"));
 		InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
 		interpreter.visit(context.startNode);
@@ -55,6 +68,11 @@ public class InterpretSupervisor {
 		}
 
 		execContextStack.pop();
+	}
+
+	public void runImmediately(ExecContext eCtx) {
+		execContextStack.push(eCtx);
+		this.runTopOfStack();
 	}
 
 	public ExecContext getThisExecContext() {

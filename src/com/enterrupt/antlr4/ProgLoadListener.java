@@ -239,7 +239,22 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	 */
 	@Override
 	public void enterMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
-		this.srcProg.saveMethodEntryPoint(ctx.GENERIC_ID().getText(), ctx);
+		((AppClassPeopleCodeProg)this.srcProg)
+			.saveMethodEntryPoint(ctx.GENERIC_ID().getText(), ctx);
+	}
+
+	/**
+	 * Instance variable names must be saved now so that when a PTAppClassObject
+	 * is created, it can initialize its referencing environment with all of the
+	 * class's instance variables.
+	 * TODO: Also need to save type, public/private, etc.
+	 */
+	@Override
+	public void enterInstance(PeopleCodeParser.InstanceContext ctx) {
+		for(TerminalNode id : ctx.VAR_ID()) {
+			((AppClassPeopleCodeProg)this.srcProg)
+				.addInstanceIdentifier(id.getText());
+		}
 	}
 
 	/**

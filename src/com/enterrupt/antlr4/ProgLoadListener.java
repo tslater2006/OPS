@@ -351,18 +351,25 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 			 * If we've already seen this reference, no need to process it again.
 			 */
 			if(!this.refIndicesSeen.containsKey(refIdx)) {
-				Reference refObj = this.srcProg.progRefsTable.get(refIdx);
 
-				if(refObj.isRecordFieldRef
-					&& ((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
-							|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2)
-							|| (srcProg instanceof PagePeopleCodeProg)
-							|| (srcProg instanceof AppClassPeopleCodeProg
-								&& this.supervisor.loadGranularity ==
-									LoadGranularity.DEEP && recurseLvl < 2))) {
-					DefnCache.getRecord(refObj.RECNAME);
-				}
+				Reference refObj = this.srcProg.progRefsTable.get(refIdx);
 				this.refIndicesSeen.put(refIdx, null);
+
+				// Only load record field references (i.e., not Record.TERM_TBL)
+				if(!refObj.isRecordFieldRef) {
+					return;
+				}
+				srcProg.noteReferencedRecname(refObj.RECNAME);
+
+				if((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
+					|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2)
+					|| (srcProg instanceof PagePeopleCodeProg)
+					|| (srcProg instanceof AppClassPeopleCodeProg
+							&& this.supervisor.loadGranularity ==
+								LoadGranularity.DEEP && recurseLvl < 2)) {
+					DefnCache.getRecord(refObj.RECNAME);
+					srcProg.markReferencedRecname(refObj.RECNAME);
+				}
 			}
 		}
 	}

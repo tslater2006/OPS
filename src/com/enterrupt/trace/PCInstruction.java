@@ -24,6 +24,6 @@ public class PCInstruction implements IEmission {
 	}
 
 	public String toString() {
-		return this.instruction;
+		return "-: " + this.instruction;
 	}
 }

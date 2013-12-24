@@ -194,9 +194,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
 
-		/**
-		 * TODO: Support rowset indexing; assuming function calls for now.
-		 */
+		visit(ctx.expr());
 
 		// null is used to separate call frames.
 		Environment.pushToCallStack(null);
@@ -210,23 +208,55 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		}
 
-		// Get function reference using reflection.
-		Method fnPtr = Environment.getSystemFunc(ctx.expr().getText());
-		if(fnPtr == null) {
-			throw new EntInterpretException("Encountered attempt to call unimplemented " +
-				"system function", ctx.expr().getText(), ctx.expr().getStart().getLine());
-		}
+		Method fnPtr;
+		if(ctx.expr() instanceof PeopleCodeParser.ExprIdContext) {
 
-		// Invoke function.
-        try {
-            fnPtr.invoke(Environment.class);
-        } catch(java.lang.IllegalAccessException iae) {
-            log.fatal(iae.getMessage(), iae);
-            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-        } catch(java.lang.reflect.InvocationTargetException ite) {
-            log.fatal(ite.getMessage(), ite);
-            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-        }
+			PeopleCodeParser.ExprIdContext exprCtx =
+				(PeopleCodeParser.ExprIdContext)ctx.expr();
+
+			if(exprCtx.id().GENERIC_ID() != null) {
+				/**
+				 * This is a system function, i.e. CreateRecord; get
+				 * a reference to the function using reflection.
+				 */
+				fnPtr = Environment.getSystemFunc(exprCtx.id().GENERIC_ID().getText());
+
+				// Invoke function.
+		        try {
+        		    fnPtr.invoke(Environment.class);
+		        } catch(java.lang.IllegalAccessException iae) {
+        		    log.fatal(iae.getMessage(), iae);
+		            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
+		        } catch(java.lang.reflect.InvocationTargetException ite) {
+        		    log.fatal(ite.getMessage(), ite);
+		            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
+        		}
+
+			} else if(exprCtx.id().VAR_ID() != null) {
+				/**
+				 * This is an index into a rowset, i.e. &rs(1)
+				 */
+				throw new EntVMachRuntimeException("Rowset indexing is not supported " +
+					"at this time.");
+			} else if(exprCtx.id().SYS_VAR_ID() != null) {
+				 throw new EntVMachRuntimeException("Did not expect system var " +
+					"to immediately function expression list.");
+			} else {
+				throw new EntVMachRuntimeException("Encountered unknown ExprIdContext " +
+					"immediately preceding the expression list of a function call.");
+			}
+		} else if(ctx.expr() instanceof
+					PeopleCodeParser.ExprMethodOrStaticRefContext) {
+			/**
+			 * TODO: Dereference expr memory pointer to object and call
+			 * method.
+			 */
+			throw new EntVMachRuntimeException("TODO: Dereference expr memory ptr.");
+		} else {
+			throw new EntInterpretException("Encountered unexpected expr type " +
+				"preceding function call", ctx.expr().getText(),
+					ctx.expr().getStart().getLine());
+		}
 
 		/**
 		 * Pop the first value from the call stack. If it's null, the function

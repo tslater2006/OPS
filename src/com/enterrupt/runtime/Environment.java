@@ -8,17 +8,17 @@ import org.apache.logging.log4j.*;
 
 public class Environment {
 
-	public static BooleanPtr TRUE;
-	public static BooleanPtr FALSE;
+	public static MemPointer TRUE;
+	public static MemPointer FALSE;
 
-	private static HashMap<String, MemoryPtr> systemVarTable;
+	private static HashMap<String, MemPointer> systemVarTable;
 	private static HashMap<String, Method> systemFuncTable;
-	private static HashMap<String, StringPtr> compBufferTable;
+	private static HashMap<String, MemPointer> compBufferTable;
 
-	private static HashMap<Integer, MemoryPtr> integerLiteralPool;
-	private static HashMap<String, MemoryPtr> stringLiteralPool;
+	private static HashMap<Integer, MemPointer> integerLiteralPool;
+	private static HashMap<String, MemPointer> stringLiteralPool;
 
-    private static Stack<MemoryPtr> callStack;
+    private static Stack<MemPointer> callStack;
 
 	private static String[] supportedGlobalVars = {"%EmployeeId", "%OperatorId", "%Menu",
 					"%Component"};
@@ -29,17 +29,20 @@ public class Environment {
 
 		try {
 			// Load static boolean literals.
-			TRUE = new BooleanPtr(new Boolean(true), MFlag.READ_ONLY);
-			FALSE = new BooleanPtr(new Boolean(false), MFlag.READ_ONLY);
+			TRUE = new MemPointer(new PTBoolean(new Boolean(true)),
+				EnumSet.of(MFlag.READ_ONLY));
+			FALSE = new MemPointer(new PTBoolean(new Boolean(false)),
+				EnumSet.of(MFlag.READ_ONLY));
 
 			// Create memory pools for supported data types.
-			integerLiteralPool = new HashMap<Integer, MemoryPtr>();
-			stringLiteralPool = new HashMap<String, MemoryPtr>();
+			integerLiteralPool = new HashMap<Integer, MemPointer>();
+			stringLiteralPool = new HashMap<String, MemPointer>();
 
 			// Allocate space for system vars, mark each as read-only.
-			systemVarTable = new HashMap<String, MemoryPtr>();
+			systemVarTable = new HashMap<String, MemPointer>();
 			for(String varName : supportedGlobalVars) {
-				systemVarTable.put(varName, new StringPtr(MFlag.READ_ONLY));
+				systemVarTable.put(varName, new MemPointer(
+					new PTString(), EnumSet.of(MFlag.READ_ONLY)));
 			}
 
 			// Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
@@ -55,10 +58,10 @@ public class Environment {
 			}
 
 			// Initialize empty component buffer.
-			compBufferTable = new HashMap<String, StringPtr>();
+			compBufferTable = new HashMap<String, MemPointer>();
 
 			// Initialize the call stack.
-			callStack = new Stack<MemoryPtr>();
+			callStack = new Stack<MemPointer>();
 
         } catch(java.lang.NoSuchMethodException nsme) {
             log.fatal(nsme.getMessage(), nsme);
@@ -66,18 +69,18 @@ public class Environment {
         }
 	}
 
-    public static void pushToCallStack(MemoryPtr p) {
-        log.debug("Push\tCallStack\t" + (p == null ? "null" : p.flags.toString()));
+    public static void pushToCallStack(MemPointer p) {
+        log.debug("Push\tCallStack\t" + (p == null ? "null" : p));
         callStack.push(p);
     }
 
-    public static MemoryPtr popFromCallStack() {
-        MemoryPtr p = callStack.pop();
-        log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p.flags.toString()));
+    public static MemPointer popFromCallStack() {
+        MemPointer p = callStack.pop();
+        log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p));
         return p;
     }
 
-    public static MemoryPtr peekAtCallStack() {
+    public static MemPointer peekAtCallStack() {
         return callStack.peek();
     }
 
@@ -85,24 +88,24 @@ public class Environment {
 		return callStack.size();
 	}
 
-	public static void setCompBufferEntry(String recordField, StringPtr ptr) {
+	public static void setCompBufferEntry(String recordField, MemPointer ptr) {
 		compBufferTable.put(recordField, ptr);
 	}
 
-	public static StringPtr getCompBufferEntry(String recordField) {
-		StringPtr ptr = compBufferTable.get(recordField);
+	public static MemPointer getCompBufferEntry(String recordField) {
+		MemPointer ptr = compBufferTable.get(recordField);
 		if(ptr == null) {
-			ptr = new StringPtr();
+			ptr = new MemPointer(new PTString());
 			setCompBufferEntry(recordField, ptr);
 		}
 		return ptr;
 	}
 
 	public static void setSystemVar(String var, String value) {
-		((StringPtr)systemVarTable.get(var)).systemWrite(value);
+		systemVarTable.get(var).systemAssign(new PTString(value));
 	}
 
-	public static MemoryPtr getSystemVar(String var) {
+	public static MemPointer getSystemVar(String var) {
 		return systemVarTable.get(var);
 	}
 
@@ -110,22 +113,22 @@ public class Environment {
 		return systemFuncTable.get(func);
 	}
 
-	public static MemoryPtr getFromLiteralPool(Integer val) {
-		MemoryPtr p = integerLiteralPool.get(val);
+	public static MemPointer getFromLiteralPool(Integer val) {
+		MemPointer p = integerLiteralPool.get(val);
 		if(p != null) {
 			return p;
 		}
-		p = new IntegerPtr(val, MFlag.READ_ONLY);
+		p = new MemPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY));
 		integerLiteralPool.put(val, p);
 		return p;
 	}
 
-	public static MemoryPtr getFromLiteralPool(String val) {
-		MemoryPtr p = stringLiteralPool.get(val);
+	public static MemPointer getFromLiteralPool(String val) {
+		MemPointer p = stringLiteralPool.get(val);
 		if(p != null) {
 			return p;
 		}
-		p = new StringPtr(val, MFlag.READ_ONLY);
+		p = new MemPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY));
 		stringLiteralPool.put(val, p);
 		return p;
 	}

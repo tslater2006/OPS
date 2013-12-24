@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 import com.enterrupt.runtime.*;
 import com.enterrupt.trace.*;
 import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.types.MemoryPtr;
+import com.enterrupt.types.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.*;
 
@@ -59,12 +59,12 @@ public class InterpretSupervisor {
 		this.localRefEnviStack.pop();
 	}
 
-	public void assignLocalVar(String id, MemoryPtr ptr) {
+	public void declareLocalVar(String id, MemPointer ptr) {
 		// Assign var to topmost ref envi on the stack (front of the linked list).
-		this.localRefEnviStack.peekFirst().assignLocalVar(id, ptr);
+		this.localRefEnviStack.peekFirst().declareLocalVar(id, ptr);
 	}
 
-	public MemoryPtr resolveIdentifierToPtr(String id) {
+	public MemPointer resolveIdentifierToPtr(String id) {
 
 		/**
 		 * Search through the stack of local referencing environments;

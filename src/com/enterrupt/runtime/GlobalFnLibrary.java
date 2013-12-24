@@ -12,10 +12,10 @@ public class GlobalFnLibrary {
     /** Utility functions                */
     /*************************************/
 
-    private static ArrayList<MemoryPtr> getArgsFromCallStack() {
+    private static ArrayList<MemPointer> getArgsFromCallStack() {
 
-        ArrayList<MemoryPtr> args = new ArrayList<MemoryPtr>();
-        MemoryPtr p;
+        ArrayList<MemPointer> args = new ArrayList<MemPointer>();
+        MemPointer p;
         while((p = Environment.peekAtCallStack()) != null) {
             args.add(Environment.popFromCallStack());
         }
@@ -31,19 +31,27 @@ public class GlobalFnLibrary {
     /*************************************/
 
     /**
-     * TODO: The PS documentation states that 0 in a required numeric field should re$
+     * TODO: The PS documentation states that 0 in a required numeric field should be
+	 * considered as not containing a value.
      * Return true if none of the specified fields contain a value, return false
      * if one or more contain a value.
      */
     public static void PT_None() {
 
-        ArrayList<MemoryPtr> args = getArgsFromCallStack();
+        ArrayList<MemPointer> args = getArgsFromCallStack();
 
-        for(MemoryPtr arg : args) {
-            if(!arg.isEmpty()) {
-                Environment.pushToCallStack(Environment.FALSE);
-                return;
-            }
+        for(MemPointer arg : args) {
+			PTDataType ptdt = arg.dereference();
+
+			if(ptdt instanceof PTString) {
+				if(((PTString)ptdt).value() != null) {
+	                Environment.pushToCallStack(Environment.FALSE);
+	                return;
+				}
+			} else {
+				throw new EntVMachRuntimeException("Unexpected data type passed " +
+					"to global function None().");
+			}
         }
 
         Environment.pushToCallStack(Environment.TRUE);
@@ -70,7 +78,7 @@ public class GlobalFnLibrary {
      */
     public static void PT_IsModalComponent() {
 
-        ArrayList<MemoryPtr> args = getArgsFromCallStack();
+        ArrayList<MemPointer> args = getArgsFromCallStack();
 
         // Expecting no arguments.
         if(args.size() != 0) {
@@ -82,15 +90,15 @@ public class GlobalFnLibrary {
 
 	public static void PT_CreateRecord() {
 
-        ArrayList<MemoryPtr> args = getArgsFromCallStack();
+        ArrayList<MemPointer> args = getArgsFromCallStack();
 
-		if(args.size() != 1 || (!(args.get(0) instanceof StringPtr))) {
+		if(args.size() != 1 || (!(args.get(0).dereference() instanceof PTString))) {
 			throw new EntVMachRuntimeException("Expected single StringPtr arg to CreateRecord.");
 		}
 
-		RecordPtr ptr = new RecordPtr(DefnCache.getRecord(
-			((StringPtr)args.get(0)).read()));
+		PTRecord recObj = new PTRecord(DefnCache.getRecord(
+			((PTString)args.get(0).dereference()).value()));
 
-		Environment.pushToCallStack(ptr);
+		Environment.pushToCallStack(new MemPointer(recObj));
 	}
 }

@@ -13,10 +13,10 @@ import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.frontend.*;
 
 class EvaluateConstruct {
-	public MemoryPtr baseExpr;
+	public PTDataType baseExpr;
 	public boolean trueBranchExprSeen = false;
 	public boolean breakSeen = false;
-	public EvaluateConstruct(MemoryPtr p) { this.baseExpr = p; }
+	public EvaluateConstruct(PTDataType p) { this.baseExpr = p; }
 }
 
 enum InterruptFlag {
@@ -28,7 +28,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
 
 	private InterpretSupervisor supervisor;
-	private ParseTreeProperty<MemoryPtr> exprValues = new ParseTreeProperty<MemoryPtr>();
+	private ParseTreeProperty<MemPointer> memPointers = new ParseTreeProperty<MemPointer>();
 	private CommonTokenStream tokens;
 	private Stack<EvaluateConstruct> evalConstructStack = new Stack<EvaluateConstruct>();
 	private InterruptFlag interrupt;
@@ -38,12 +38,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.supervisor = s;
 	}
 
-	private void setExprValue(ParseTree node, MemoryPtr ptr) {
-		this.exprValues.put(node, ptr);
+	private void setMemPointer(ParseTree node, MemPointer ptr) {
+		this.memPointers.put(node, ptr);
 	}
 
-	private MemoryPtr getExprValue(ParseTree node) {
-		if(this.exprValues.get(node) == null) {
+	private MemPointer getMemPointer(ParseTree node) {
+		if(this.memPointers.get(node) == null) {
 
 			int lineNbr = -1;
 			Object obj = node.getPayload();
@@ -55,10 +55,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				throw new EntVMachRuntimeException("Unexpected payload type.");
 			}
 
-			throw new EntInterpretException("Encountered attempt to get the value of an expression " +
-				"that has yet to be evaluated", node.getText(), lineNbr);
+			throw new EntInterpretException("Attempted to get the memory pointer for " +
+				"for a node, encountered null: ", node.getText(), lineNbr);
 		}
-		return this.exprValues.get(node);
+
+		return this.memPointers.get(node);
 	}
 
 	private void emitStmt(ParserRuleContext ctx) {
@@ -97,7 +98,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// Get value of conditional expression.
 		visit(ctx.ifStmt().expr());
-		boolean exprResult = ((BooleanPtr) getExprValue(ctx.ifStmt().expr())).read();
+		boolean exprResult = ((PTBoolean) getMemPointer(ctx.ifStmt()
+			.expr()).dereference()).value();
 
 		// If expression evaluates to true, visit the conditional body.
 		if(exprResult) {
@@ -118,10 +120,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
 		this.emitStmt(ctx);
 		visit(ctx.expr(1));
-		MemoryPtr srcOperand = getExprValue(ctx.expr(1));
+		MemPointer target = getMemPointer(ctx.expr(1));
 		visit(ctx.expr(0));
-		MemoryPtr destOperand = getExprValue(ctx.expr(0));
-		MemoryPtr.copy(srcOperand, destOperand);
+		MemPointer pointer = getMemPointer(ctx.expr(0));
+		pointer.assign(target.dereference());
 		return null;
 	}
 
@@ -137,13 +139,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprParenthesized(PeopleCodeParser.ExprParenthesizedContext ctx) {
 		visit(ctx.expr());
-		setExprValue(ctx, getExprValue(ctx.expr()));
+		setMemPointer(ctx, getMemPointer(ctx.expr()));
 		return null;
 	}
 
 	public Void visitExprLiteral(PeopleCodeParser.ExprLiteralContext ctx) {
 		visit(ctx.literal());
-		setExprValue(ctx, getExprValue(ctx.literal()));
+		setMemPointer(ctx, getMemPointer(ctx.literal()));
 		return null;
 	}
 
@@ -155,7 +157,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 */
 		if(ctx.id().SYS_VAR_ID() != null ||
 			ctx.id().VAR_ID() != null) {
-			setExprValue(ctx, getExprValue(ctx.id()));
+			setMemPointer(ctx, getMemPointer(ctx.id()));
 		}
 		return null;
 	}
@@ -173,7 +175,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		if(ctx.exprList() != null) {
 			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 				visit(argCtx);
-				Environment.pushToCallStack(getExprValue(argCtx));
+				Environment.pushToCallStack(getMemPointer(argCtx));
 			}
 		}
 
@@ -200,10 +202,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * did not emit a return value. If it's non-null, the next item on the stack
 		 * must be the null separator (PeopleCode funcs can only return 1 value).
 		 */
-	    MemoryPtr retPtr = Environment.popFromCallStack();
-		setExprValue(ctx, retPtr);
+	    MemPointer ptr = Environment.popFromCallStack();
+		setMemPointer(ctx, ptr);
 
-		if(retPtr != null && (Environment.popFromCallStack() != null)) {
+		if(ptr != null && (Environment.popFromCallStack() != null)) {
 			throw new EntVMachRuntimeException("More than one return value was found on " +
 				"the call stack.");
 		}
@@ -223,20 +225,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				((PeopleCodeParser.ExprIdContext)ctx.expr())
 					.id().getText().toUpperCase())) {
 
-            MemoryPtr ptr = Environment.getFromLiteralPool(
+            MemPointer ptr = Environment.getFromLiteralPool(
                 ctx.id().getText());
-   	        setExprValue(ctx, ptr);
+   	        setMemPointer(ctx, ptr);
 		} else {
 			/**
 			 * Otherwise, assume component buffer reference.
 			 */
-			MemoryPtr ptr = Environment.getCompBufferEntry(ctx.getText());
+			MemPointer ptr = Environment.getCompBufferEntry(ctx.getText());
 			if(ptr == null) {
 				throw new EntInterpretException("Encountered a reference to an " +
 					"uninitialized component buffer field", ctx.getText(),
 					ctx.getStart().getLine());
 			}
-			setExprValue(ctx, ptr);
+			setMemPointer(ctx, ptr);
 		}
 
 		return null;
@@ -244,18 +246,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
 		visit(ctx.expr(0));
-		MemoryPtr p1 = getExprValue(ctx.expr(0));
+		PTDataType p1 = getMemPointer(ctx.expr(0)).dereference();
 		visit(ctx.expr(1));
-		MemoryPtr p2 = getExprValue(ctx.expr(1));
+		PTDataType p2 = getMemPointer(ctx.expr(1)).dereference();
 
-		MemoryPtr result;
-		if(MemoryPtr.isEqual(p1, p2)) {
+		MemPointer result;
+		if(p1.equals(p2)) {
 			result = Environment.TRUE;
 		} else {
 			result = Environment.FALSE;
 		}
-		setExprValue(ctx, result);
-		log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
+		setMemPointer(ctx, result);
+		log.debug("Compared for equality: {}, result={}", ctx.getText(), result.dereference());
 		return null;
 	}
 
@@ -263,17 +265,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.op.getText().equals("Or")) {
 			visit(ctx.expr(0));
-			BooleanPtr lhs = (BooleanPtr)getExprValue(ctx.expr(0));
+			PTBoolean lhs = (PTBoolean)getMemPointer(ctx.expr(0)).dereference();
 
 			/**
 			 * Short-circuit evaluation: if lhs is true, this expression is true,
 			 * otherwise evaluate rhs and bubble up its value.
 			 */
-			if(lhs.read()) {
-				setExprValue(ctx, lhs);
+			if(lhs.value()) {
+				setMemPointer(ctx, Environment.TRUE);
 			} else {
 				visit(ctx.expr(1));
-				setExprValue(ctx, getExprValue(ctx.expr(1)));
+				setMemPointer(ctx, getMemPointer(ctx.expr(1)));
 			}
 		} else {
 			throw new EntInterpretException("Unsupported boolean comparison operation",
@@ -290,15 +292,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
 		if(ctx.SYS_VAR_ID() != null) {
-			MemoryPtr ptr = Environment.getSystemVar(ctx.getText());
+			MemPointer ptr = Environment.getSystemVar(ctx.getText());
 			if(ptr == null) {
 				throw new EntInterpretException("Encountered a system variable reference " +
 					"that has not been implemented yet", ctx.getText(), ctx.getStart().getLine());
 			}
-			setExprValue(ctx, ptr);
+			setMemPointer(ctx, ptr);
 
 		} else if(ctx.VAR_ID() != null) {
-			MemoryPtr ptr = this.supervisor.resolveIdentifierToPtr(ctx.getText());
+			MemPointer ptr = this.supervisor.resolveIdentifierToPtr(ctx.getText());
+			setMemPointer(ctx, ptr);
 		}
 
 		return null;
@@ -308,17 +311,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.IntegerLiteral() != null) {
 
-			MemoryPtr ptr = Environment.getFromLiteralPool(
+			MemPointer ptr = Environment.getFromLiteralPool(
 				new Integer(ctx.IntegerLiteral().getText()));
-			setExprValue(ctx, ptr);
+			setMemPointer(ctx, ptr);
 
 		} else if(ctx.BoolLiteral() != null) {
 
 			String b = ctx.BoolLiteral().getText();
 			if(b.equals("True") || b.equals("true")) {
-				setExprValue(ctx, Environment.TRUE);
+				setMemPointer(ctx, Environment.TRUE);
 			} else {
-				setExprValue(ctx, Environment.FALSE);
+				setMemPointer(ctx, Environment.FALSE);
 			}
 
 		} else if(ctx.DecimalLiteral() != null) {
@@ -354,8 +357,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			//throw new EntVMachRuntimeException("Declaring app class object vars " +
 			//	"is not yet supported.");
 		} else {
-/*			String id = ctx.varType().GENERIC_ID().getText();
-			switch(id) {
+			String type = ctx.varType().GENERIC_ID().getText();
+			for(String id : ids) {
+				this.declareVar(scope, id, new MemPointer());
+			}
+			/*switch(id) {
 				case "Record":
 					this.assignVarToCorrectRefEnvi(scope, id);
 					break;
@@ -373,7 +379,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 		EvaluateConstruct evalConstruct = new EvaluateConstruct(
-			getExprValue(ctx.expr()));
+			getMemPointer(ctx.expr()).dereference());
 		this.evalConstructStack.push(evalConstruct);
 
 		List<PeopleCodeParser.WhenBranchContext> branches = ctx.whenBranch();
@@ -403,16 +409,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		EvaluateConstruct evalConstruct = this.evalConstructStack.peek();
-		MemoryPtr p1 = evalConstruct.baseExpr;
+		PTDataType p1 = evalConstruct.baseExpr;
 		visit(ctx.expr());
-		MemoryPtr p2 = getExprValue(ctx.expr());
+		PTDataType p2 = getMemPointer(ctx.expr()).dereference();
 
 		/**
 		 * If a previous branch evaluated to true and we're here, that means
 		 * execution continues to fall through all branches until either a break
 		 * is seen, or the evaluate construct ends.
 		 */
-		if(evalConstruct.trueBranchExprSeen || MemoryPtr.isEqual(p1, p2)) {
+		if(evalConstruct.trueBranchExprSeen || p1.equals(p2)) {
 			if(!evalConstruct.trueBranchExprSeen) {
 				// Only emit the first true branch expr seen.
 				this.emitStmt(ctx);
@@ -430,16 +436,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	private void assignVarToCorrectRefEnvi(String scope, String id) {
+	private void declareVar(String scope, String id, MemPointer ptr) {
 		switch(scope) {
 			case "Local":
-				this.supervisor.assignLocalVar(id, null);
+				this.supervisor.declareLocalVar(id, ptr);
 				break;
 			case "Component":
-				RefEnvi.assignComponentVar(id, null);
+				RefEnvi.declareComponentVar(id, ptr);
 				break;
 			case "Global":
-				RefEnvi.assignGlobalVar(id, null);
+				RefEnvi.declareGlobalVar(id, ptr);
 				break;
 			default:
 				throw new EntVMachRuntimeException("Encountered unexpected variable " +

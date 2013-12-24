@@ -48,6 +48,13 @@ public class MemPointer {
 	}
 
 	public String toString() {
-		return this.flags.toString();
+		StringBuilder builder = new StringBuilder();
+		if(target == null) {
+			builder.append("@NULL");
+		} else {
+			builder.append(this.target.toString());
+		}
+		builder.append(this.flags.toString());
+		return builder.toString();
 	}
 }

@@ -104,9 +104,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		// If expression evaluates to true, visit the conditional body.
 		if(exprResult) {
 			visit(ctx.ifStmt().stmtList(0));
+			this.emitStmt("End-If");
 		}
-
-		this.emitStmt("End-If");
 
 		return null;
 	}

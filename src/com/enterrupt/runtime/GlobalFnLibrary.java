@@ -26,34 +26,50 @@ public class GlobalFnLibrary {
         return args;
     }
 
+	/**
+	 * This is a shared function used by logical PeopleCode functions (tests for
+	 * blank values).
+     * TODO: The PS documentation states that 0 in a required numeric field should be
+	 * considered as not containing a value.
+	 */
+	private static boolean doesContainValue(PTDataType ptdt) {
+		if(ptdt instanceof PTString) {
+			return ((PTString)ptdt).value() != null;
+		} else {
+			throw new EntVMachRuntimeException("Unexpected data type passed " +
+				"to global function None().");
+		}
+	}
+
 	/*************************************/
     /** Global system functions          */
     /*************************************/
 
     /**
-     * TODO: The PS documentation states that 0 in a required numeric field should be
-	 * considered as not containing a value.
      * Return true if none of the specified fields contain a value, return false
      * if one or more contain a value.
      */
     public static void PT_None() {
-
-        ArrayList<MemPointer> args = getArgsFromCallStack();
-
-        for(MemPointer arg : args) {
-			PTDataType ptdt = arg.dereference();
-
-			if(ptdt instanceof PTString) {
-				if(((PTString)ptdt).value() != null) {
-	                Environment.pushToCallStack(Environment.FALSE);
-	                return;
-				}
-			} else {
-				throw new EntVMachRuntimeException("Unexpected data type passed " +
-					"to global function None().");
+        for(MemPointer arg : getArgsFromCallStack()) {
+			if(doesContainValue(arg.dereference())) {
+	        	Environment.pushToCallStack(Environment.FALSE);
+	            return;
 			}
         }
+        Environment.pushToCallStack(Environment.TRUE);
+    }
 
+	/**
+	 * Return true if all of the specified fields contain a value, return false
+	 * if one or more do not.
+	 */
+    public static void PT_All() {
+        for(MemPointer arg : getArgsFromCallStack()) {
+			if(!doesContainValue(arg.dereference())) {
+	        	Environment.pushToCallStack(Environment.FALSE);
+	            return;
+			}
+        }
         Environment.pushToCallStack(Environment.TRUE);
     }
 

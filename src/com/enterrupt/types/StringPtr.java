@@ -2,27 +2,27 @@ package com.enterrupt.types;
 
 import java.util.EnumSet;
 
-public class StringPtr extends MemoryPtr<String> {
+public class StringPtr extends PrimitivePtr<String> {
 
 	private String s;
 
 	public StringPtr() {
-		super(MFlag.STRING);
-		this.s = null;
-	}
-
-	public StringPtr(MFlag f) {
-		super(EnumSet.of(MFlag.STRING, f));
+		super();
 		this.s = null;
 	}
 
 	public StringPtr(String initial) {
-		super(MFlag.STRING);
+		super();
 		this.s = initial;
 	}
 
+	public StringPtr(MFlag f) {
+		super(f);
+		this.s = null;
+	}
+
 	public StringPtr(String initial, MFlag f) {
-		super(EnumSet.of(MFlag.STRING, f));
+		super(f);
 		this.s = initial;
 	}
 

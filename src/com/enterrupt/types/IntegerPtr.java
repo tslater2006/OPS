@@ -2,27 +2,27 @@ package com.enterrupt.types;
 
 import java.util.EnumSet;
 
-public class IntegerPtr extends MemoryPtr<Integer> {
+public class IntegerPtr extends PrimitivePtr<Integer> {
 
 	private Integer i;
 
 	public IntegerPtr() {
-		super(MFlag.INTEGER);
-		this.i = 0;
-	}
-
-	public IntegerPtr(MFlag f) {
-		super(EnumSet.of(MFlag.INTEGER, f));
+		super();
 		this.i = 0;
 	}
 
 	public IntegerPtr(Integer initial) {
-		super(MFlag.INTEGER);
+		super();
 		this.i = initial;
 	}
 
+	public IntegerPtr(MFlag f) {
+		super(f);
+		this.i = 0;
+	}
+
 	public IntegerPtr(Integer initial, MFlag f) {
-		super(EnumSet.of(MFlag.INTEGER, f));
+		super(f);
 		this.i = initial;
 	}
 

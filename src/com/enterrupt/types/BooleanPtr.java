@@ -2,27 +2,27 @@ package com.enterrupt.types;
 
 import java.util.EnumSet;
 
-public class BooleanPtr extends MemoryPtr<Boolean> {
+public class BooleanPtr extends PrimitivePtr<Boolean> {
 
 	private Boolean b;
 
 	public BooleanPtr() {
-		super(MFlag.BOOLEAN);
-		this.b = false;
-	}
-
-	public BooleanPtr(MFlag f) {
-		super(EnumSet.of(MFlag.BOOLEAN, f));
+		super();
 		this.b = false;
 	}
 
 	public BooleanPtr(Boolean initial) {
-		super(MFlag.BOOLEAN);
+		super();
 		this.b = initial;
 	}
 
+	public BooleanPtr(MFlag f) {
+		super(f);
+		this.b = false;
+	}
+
 	public BooleanPtr(Boolean initial, MFlag f) {
-		super(EnumSet.of(MFlag.BOOLEAN, f));
+		super(f);
 		this.b = initial;
 	}
 

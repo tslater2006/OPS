@@ -2,8 +2,11 @@ package com.enterrupt.runtime;
 
 import java.util.*;
 import com.enterrupt.types.*;
+import org.apache.logging.log4j.*;
 
 public class GlobalFnLibrary {
+
+	private static Logger log = LogManager.getLogger(GlobalFnLibrary.class.getName());
 
 	/*************************************/
     /** Utility functions                */
@@ -76,4 +79,18 @@ public class GlobalFnLibrary {
 
         Environment.pushToCallStack(Environment.FALSE);
     }
+
+	public static void PT_CreateRecord() {
+
+        ArrayList<MemoryPtr> args = getArgsFromCallStack();
+
+		if(args.size() != 1 || (!(args.get(0) instanceof StringPtr))) {
+			throw new EntVMachRuntimeException("Expected single StringPtr arg to CreateRecord.");
+		}
+
+		RecordPtr ptr = new RecordPtr(DefnCache.getRecord(
+			((StringPtr)args.get(0)).read()));
+
+		Environment.pushToCallStack(ptr);
+	}
 }

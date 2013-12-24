@@ -4,11 +4,13 @@ import java.util.*;
 import java.lang.reflect.*;
 import com.enterrupt.types.*;
 import com.enterrupt.pt.*;
+import com.enterrupt.pt.peoplecode.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import org.antlr.v4.runtime.misc.Interval;
 import com.enterrupt.runtime.*;
 import com.enterrupt.trace.*;
+import com.enterrupt.scope.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.frontend.*;
 
@@ -25,17 +27,22 @@ enum InterruptFlag {
 
 public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
-	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
-
-	private InterpretSupervisor supervisor;
-	private ParseTreeProperty<MemPointer> memPointers = new ParseTreeProperty<MemPointer>();
+	private ExecContext eCtx;
 	private CommonTokenStream tokens;
-	private Stack<EvaluateConstruct> evalConstructStack = new Stack<EvaluateConstruct>();
+	private InterpretSupervisor supervisor;
+
+	private ParseTreeProperty<MemPointer> memPointers;
+	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
 
-	public InterpreterVisitor(CommonTokenStream t, InterpretSupervisor s) {
-		this.tokens = t;
+	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
+
+	public InterpreterVisitor(ExecContext e, InterpretSupervisor s) {
+		this.eCtx = e;
+		this.tokens = e.prog.tokenStream;
 		this.supervisor = s;
+		this.memPointers = new ParseTreeProperty<MemPointer>();
+		this.evalConstructStack = new Stack<EvaluateConstruct>();
 	}
 
 	private void setMemPointer(ParseTree node, MemPointer ptr) {
@@ -83,9 +90,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitProgram(PeopleCodeParser.ProgramContext ctx) {
-		this.supervisor.pushRefEnvi(new RefEnvi("ProgramLocal"));
+
+		/**
+		 * App class programs do not get a fresh ref envi b/c they
+		 * are always loaded to manipulate an existing object's ref envi, which
+		 * has already been placed on the ref envi stack for this exec context. All
+		 * other programs get a fresh program-local referencing environment.
+		 */
+		if(!(this.eCtx.prog instanceof AppClassPeopleCodeProg)) {
+			this.eCtx.pushRefEnvi(new LocalRefEnvi(LocalRefEnvi.Type.PROGRAM_LOCAL));
+		}
+
 		visit(ctx.stmtList());
-		this.supervisor.popRefEnvi();
+		this.eCtx.popRefEnvi();
 		return null;
 	}
 
@@ -310,7 +327,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			setMemPointer(ctx, ptr);
 
 		} else if(ctx.VAR_ID() != null) {
-			MemPointer ptr = this.supervisor.resolveIdentifierToPtr(ctx.getText());
+			MemPointer ptr = eCtx.resolveIdentifier(ctx.getText());
 			setMemPointer(ctx, ptr);
 		}
 
@@ -455,7 +472,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private void declareVar(String scope, String id, MemPointer ptr) {
 		switch(scope) {
 			case "Local":
-				this.supervisor.declareLocalVar(id, ptr);
+				eCtx.declareLocalVar(id, ptr);
 				break;
 			case "Component":
 				RefEnvi.declareComponentVar(id, ptr);

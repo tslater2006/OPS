@@ -1,11 +1,10 @@
-package com.enterrupt.runtime;
+package com.enterrupt.scope;
 
 import java.util.*;
 import com.enterrupt.types.*;
+import com.enterrupt.runtime.*;
 
-public class RefEnvi {
-
-	private String desc;
+public abstract class RefEnvi {
 
 	private static Map<String, MemPointer> globalSymbolTable;
 	private static Map<String, MemPointer> componentSymbolTable;
@@ -15,32 +14,9 @@ public class RefEnvi {
 		componentSymbolTable = new HashMap<String, MemPointer>();
 	}
 
-	private Map<String, MemPointer> localSymbolTable;
-
-	public RefEnvi(String desc) {
-		this.desc = desc;
-		this.localSymbolTable = new HashMap<String, MemPointer>();
-	}
-
-	/******************************************/
-    /** Local ref environment operations.     */
-	/******************************************/
-
-	public void declareLocalVar(String id, MemPointer ptr) {
-		if(this.isLocalVarDeclared(id)) {
-			throw new EntVMachRuntimeException("Encountered attempt to re-declare " +
-				" variable (" + id + ") in local ref envi.");
-		}
-		this.localSymbolTable.put(id, ptr);
-	}
-
-	public MemPointer resolveLocalVar(String id) {
-		return this.localSymbolTable.get(id);
-	}
-
-	public boolean isLocalVarDeclared(String id) {
-		return this.localSymbolTable.containsKey(id);
-	}
+	public abstract void declareVar(String id, MemPointer ptr);
+	public abstract MemPointer resolveVar(String id);
+	public abstract boolean isIdResolvable(String id);
 
 	/******************************************/
     /** Global ref environment operations.    */

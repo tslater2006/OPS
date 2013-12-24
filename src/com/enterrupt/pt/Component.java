@@ -6,6 +6,7 @@ import java.io.*;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.buffers.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.scope.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.pt.pages.*;
 import org.apache.logging.log4j.*;
@@ -182,7 +183,8 @@ public class Component {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
 				p.loadDefnsAndPrograms(LoadGranularity.DEEP);
-				InterpretSupervisor interpreter = new InterpretSupervisor(p);
+				ExecContext eCtx = new ProgramExecContext(p);
+				InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
 				interpreter.run();
        	    }
        	}
@@ -195,7 +197,8 @@ public class Component {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
 				p.init();
 				p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
-				InterpretSupervisor interpreter = new InterpretSupervisor(p);
+				ExecContext eCtx = new ProgramExecContext(p);
+				InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
 				interpreter.run();
 			}
 		}

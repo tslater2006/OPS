@@ -3,6 +3,7 @@ package com.enterrupt.antlr4;
 import java.util.*;
 import java.lang.reflect.*;
 import com.enterrupt.types.*;
+import com.enterrupt.pt.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import org.antlr.v4.runtime.misc.Interval;
@@ -148,7 +149,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprId(PeopleCodeParser.ExprIdContext ctx) {
 		visit(ctx.id());
-		setExprValue(ctx, getExprValue(ctx.id()));
+		/**
+		 * GENERIC_IDs could be reserved words (i.e., MenuName);
+		 * do not attempt to bubble up any values for them at this time.
+		 */
+		if(ctx.id().SYS_VAR_ID() != null ||
+			ctx.id().VAR_ID() != null) {
+			setExprValue(ctx, getExprValue(ctx.id()));
+		}
 		return null;
 	}
 
@@ -205,14 +213,32 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprMethodOrStaticRef(
 					PeopleCodeParser.ExprMethodOrStaticRefContext ctx) {
+		visit(ctx.expr());
 
-		MemoryPtr ptr = Environment.getCompBufferEntry(ctx.getText());
-		if(ptr == null) {
-			throw new EntInterpretException("Encountered a reference to an " +
-				"uninitialized component buffer field", ctx.getText(),
-				ctx.getStart().getLine());
+		/**
+		 * Detect defn literals (i.e., MenuName.SA_LEARNER_SERVICES)
+		 */
+		if(ctx.expr() instanceof PeopleCodeParser.ExprIdContext &&
+			PSDefn.defnLiteralReservedWordsTable.containsKey(
+				((PeopleCodeParser.ExprIdContext)ctx.expr())
+					.id().getText().toUpperCase())) {
+
+            MemoryPtr ptr = Environment.getFromLiteralPool(
+                ctx.id().getText());
+   	        setExprValue(ctx, ptr);
+		} else {
+			/**
+			 * Otherwise, assume component buffer reference.
+			 */
+			MemoryPtr ptr = Environment.getCompBufferEntry(ctx.getText());
+			if(ptr == null) {
+				throw new EntInterpretException("Encountered a reference to an " +
+					"uninitialized component buffer field", ctx.getText(),
+					ctx.getStart().getLine());
+			}
+			setExprValue(ctx, ptr);
 		}
-		setExprValue(ctx, ptr);
+
 		return null;
 	}
 
@@ -273,29 +299,22 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		} else if(ctx.VAR_ID() != null) {
 			MemoryPtr ptr = this.supervisor.resolveIdentifierToPtr(ctx.getText());
-		} else {
-			throw new EntVMachRuntimeException("Need to support GENERIC_IDs as identifiers.");
 		}
+
 		return null;
 	}
 
 	public Void visitLiteral(PeopleCodeParser.LiteralContext ctx) {
 
-		if(ctx.defnLiteral() != null) {
-
-			MemoryPtr ptr = Environment.getFromLiteralPool(
-				ctx.defnLiteral().GENERIC_ID().getText());
-			setExprValue(ctx, ptr);
-
-		} else if(ctx.IntegerLiteral() != null) {
+		if(ctx.IntegerLiteral() != null) {
 
 			MemoryPtr ptr = Environment.getFromLiteralPool(
 				new Integer(ctx.IntegerLiteral().getText()));
 			setExprValue(ctx, ptr);
 
-		} else if(ctx.boolLiteral() != null) {
+		} else if(ctx.BoolLiteral() != null) {
 
-			String b = ctx.boolLiteral().getText();
+			String b = ctx.BoolLiteral().getText();
 			if(b.equals("True") || b.equals("true")) {
 				setExprValue(ctx, Environment.TRUE);
 			} else {
@@ -314,7 +333,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
 
-		String scope = ctx.varScope().getText();
+		String scope = ctx.varScope.getText();
 
 		List<PeopleCodeParser.VarDeclaratorContext> varsToDeclare = ctx.varDeclarator();
 		String[] ids = new String[varsToDeclare.size()];

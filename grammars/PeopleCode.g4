@@ -14,7 +14,6 @@ program	:	stmtList ;
 // Multiple semicolons may be present; the last/only statement may not have a semicolon.
 stmtList:	(stmt ';'+)* stmt? ;	 
 
-// Semicolons are optional after some PeopleCode stmt constructs.
 stmt	:	appClassImport						# StmtAppClassImport
 		|	extFuncImport						# StmtExternalFuncImport
 		|	classDeclaration					# StmtClassDeclaration
@@ -61,15 +60,13 @@ expr	:	'(' expr ')'					# ExprParenthesized
 
 exprList:	expr (',' expr)* ;
 
-varDeclaration	:	varScope varType varDeclarator (',' varDeclarator)* ;
+varDeclaration	:	varScope=GENERIC_ID varType varDeclarator (',' varDeclarator)* ;
 varDeclarator	:	VAR_ID ('=' expr)? ;
 
-varScope	:	'Global' | 'Component' | 'Local' ;
-varType		:	'array' ('of' varType)? | 'Record' | 'string' | 'boolean'
-			|	'Field' | 'any' | 'datetime'|	'integer' | 'number' | 'time'
-			| 	'Rowset' | 'date' | 'Row' | 'Grid' | 'GridColumn' | 'SQL' | 'ApiObject'
-			|	appClassPath | GENERIC_ID	// for app class names w/o paths (i.e., "Address" for "EO:CA:Address")
-			;
+// - varType catches multi-dimensional arrays (i.e., "array of array of Record")
+// - GENERIC_ID catches both primitive (i.e, "any", "integer") and complex (i.e., "Record")
+//   types, in addition to app class names without path prefixes (i.e., "Address" for "EO:CA:Address")
+varType		:	'array' ('of' varType)? | appClassPath | GENERIC_ID	;
 
 appClassImport	:	'import' (appPkgPath|appClassPath) ;
 appPkgPath		:	GENERIC_ID (':' GENERIC_ID)* ':' '*' ;
@@ -111,51 +108,24 @@ createInvocation:	'create' (appClassPath|GENERIC_ID) '(' exprList? ')' ;
 
 literal	:	DecimalLiteral
 		|	IntegerLiteral
-		|	defnLiteral
 		|	StringLiteral
-		|	boolLiteral
+		|	BoolLiteral
 		;
-boolLiteral	:	'True' | 'False' ;
-defnLiteral : defnType '.' GENERIC_ID ;
 
 id	:	SYS_VAR_ID | VAR_ID | GENERIC_ID ;
-
-// IMPORTANT: Keep this list synchronized with the one in PSDefn.
-defnType	:	'BarName'
-			|	'BusActivity'
-			|	'BusEvent'
-			|	'BusProcess'
-			|	'CompIntfc'
-			|	'Component'
-			|	'Field'
-			|	'FileLayout'
-			|	'HTML'
-			|	'Image'
-			|	'Interlink'
-			|	'ItemName'
-			|	'MenuName'
-			|	'Message'
-			|	'Operation'
-			|	'Page'
-			|	'Panel'
-			|	'PanelGroup'  
-			| 	'RecName'
-			|	'Record'
-			|	'Scroll'
-			|	'SQL'
-			|	'StyleSheet' ;
 
 //*******************************************************//
 // Lexer Rules 									    	 //
 //*******************************************************//
 
-VAR_ID		:	'&' GENERIC_ID ;
-SYS_VAR_ID	:	'%' GENERIC_ID ;
-GENERIC_ID	:	[a-zA-Z] [0-9a-zA-Z_#]* ;	
-
 DecimalLiteral	:	IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral	:	'0' | '1'..'9' '0'..'9'* ;
 StringLiteral	:	'"' ( ~'"' )* '"' ;
+BoolLiteral		: 	'True' | 'False' ;
+
+VAR_ID		:	'&' GENERIC_ID ;
+SYS_VAR_ID	:	'%' GENERIC_ID ;
+GENERIC_ID	:	[a-zA-Z] [0-9a-zA-Z_#]* ;
 
 REM			:	WS [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1	:	'/*' .*? '*/' -> skip;

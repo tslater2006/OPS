@@ -138,11 +138,19 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 			this.setVarTypeProg(ctx, prog);
 			//log.debug("(0) Path found: {} in {}", appClassParts, ctx.getText());
 		} else if(ctx.GENERIC_ID() != null) {
-			appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
-	        prog = new AppClassPeopleCodeProg(appClassParts.toArray(
-    	        new String[appClassParts.size()]));
-			this.setVarTypeProg(ctx, prog);
-			//log.debug("(1) Class name resolved: {} in {}", appClassParts, ctx.getText());
+
+			/**
+			 * The GENERIC_ID could be a primitive or complex var type; if it is,
+			 * don't consider it to be an app class (technically "date", "Record",
+			 * etc. are allowable app class names, keep this in mind if issues arise).
+			 */
+			if(!PSDefn.varTypesTable.containsKey(ctx.GENERIC_ID().getText())) {
+				appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
+		        prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+    		        new String[appClassParts.size()]));
+				this.setVarTypeProg(ctx, prog);
+				//log.debug("(1) Class name resolved: {} in {}", appClassParts, ctx.getText());
+			}
 		} else if(ctx.varType() != null) {
 			// if the nested variable type has a program attached to it, bubble it up
 			// before exiting.

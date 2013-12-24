@@ -1,6 +1,6 @@
 package com.enterrupt.pt;
 
-import java.util.HashMap;
+import java.util.*;
 
 public class PSDefn {
 
@@ -12,7 +12,8 @@ public class PSDefn {
 	public static final String APP_PACKAGE = "104";
 	public static final String PAGE = "9";
 	public static final String NULL = " ";
-	public static HashMap<String, String> defnLiteralReservedWordsTable;
+	public static Map<String, String> defnLiteralReservedWordsTable;
+	public static Map<String, Void> varTypesTable;
 
 	/**
 	 * These are the allowed bit flags for the 4-bit Actions bit mask,
@@ -48,10 +49,6 @@ public class PSDefn {
 
 	private static HashMap<String, Boolean> systemRecords;
 
-	/**
-	 * IMPORTANT: Keep this list synchronized with the one in
-	 * PeopleCode.g4.
-	 */
 	private static final String[] defnLiteralReservedWords = new String[]{
 		"BarName",
 		"BusActivity",
@@ -78,15 +75,40 @@ public class PSDefn {
 		"StyleSheet"
 	};
 
+	private static final String[] varTypes = new String[] {
+		"any",
+		"boolean",
+		"date",
+		"datetime",
+		"integer",
+		"number",
+		"string",
+		"time",
+		"ApiObject",
+		"Field",
+		"Grid",
+		"GridColumn",
+		"Record",
+		"Row",
+		"Rowset",
+		"SQL"
+	};
+
 	static {
 		systemRecords = new HashMap<String, Boolean>();
 		systemRecords.put("PSXLATITEM", true);
 
+		// Index defn literal reserved words for O(1) lookup.
 		defnLiteralReservedWordsTable = new HashMap<String, String>();
 		for(String s : defnLiteralReservedWords) {
             defnLiteralReservedWordsTable.put(s.toUpperCase(), s);
         }
 
+		// Index var types for O(1) lookup.
+		varTypesTable = new HashMap<String, Void>();
+		for(String s : varTypes) {
+            varTypesTable.put(s, null);
+        }
 	}
 
 	public static boolean isSystemRecord(String RECNAME) {

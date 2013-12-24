@@ -2,12 +2,16 @@ package com.enterrupt.trace;
 
 public class PCStart implements IEmission {
 
+	public String startTag;
 	public String nest;
+	public String methodName;
 	public String progDescriptor;
 
-	public PCStart(String nest, String progDescriptor) {
-		this.nest = nest;
-		this.progDescriptor = progDescriptor;
+	public PCStart(String s, String n, String m, String p) {
+		this.startTag = s;
+		this.nest = n;
+		this.methodName = m;
+		this.progDescriptor = p;
 	}
 
 	public boolean equals(Object obj) {
@@ -19,8 +23,10 @@ public class PCStart implements IEmission {
 			return false;
 
 		PCStart other = (PCStart)obj;
-		if(this.nest.equals(other.nest) &&
-			this.progDescriptor.equals(other.progDescriptor)) {
+		if(this.startTag.equals(other.startTag)
+			&& this.nest.equals(other.nest)
+			&& this.methodName.equals(other.methodName)
+			&& this.progDescriptor.equals(other.progDescriptor)) {
 			return true;
 		}
 		return false;
@@ -28,8 +34,10 @@ public class PCStart implements IEmission {
 
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(">>> start     Nest=").append(this.nest);
-		builder.append("  ").append(this.progDescriptor);
+		builder.append(">>> ").append(this.startTag);
+		builder.append("     Nest=").append(this.nest);
+		builder.append(" ").append(this.methodName);
+		builder.append(" ").append(this.progDescriptor);
 		return builder.toString();
 	}
 }

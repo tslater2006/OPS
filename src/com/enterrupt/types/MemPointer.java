@@ -38,7 +38,7 @@ public class MemPointer {
 
 	public void systemAssign(PTDataType operand) {
 		/**
-	     * Check for type coherence, but disregard READ_ONLY flag.
+	     * TODO: Check for type coherence, but disregard READ_ONLY flag.
 		 */
 		this.target = operand;
 	}

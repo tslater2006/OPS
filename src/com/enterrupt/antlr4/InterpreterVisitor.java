@@ -101,10 +101,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		boolean exprResult = ((PTBoolean) getMemPointer(ctx.ifStmt()
 			.expr()).dereference()).value();
 
-		// If expression evaluates to true, visit the conditional body.
+		// If expression evaluates to true, visit the conditional body;
+		// otherwise, visit the Else body if it exists.
 		if(exprResult) {
 			visit(ctx.ifStmt().stmtList(0));
 			this.emitStmt("End-If");
+		} else {
+			if(ctx.ifStmt().stmtList(1) != null) {
+				visit(ctx.ifStmt().stmtList(1));
+			}
 		}
 
 		return null;
@@ -209,6 +214,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				"the call stack.");
 		}
 
+		return null;
+	}
+
+	public Void visitExprCreate(PeopleCodeParser.ExprCreateContext ctx) {
+		visit(ctx.createInvocation());
+		setMemPointer(ctx, getMemPointer(ctx.createInvocation()));
 		return null;
 	}
 
@@ -349,25 +360,26 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			i++;
 		}
 
+		/**
+		 * TODO: Convert all calls to new MemPointer to include
+		 * declared type, in order to enforce type coherence.
+		 */
 		if(ctx.varType().varType() != null) {
 			//throw new EntVMachRuntimeException("Declaring array object vars " +
 			//	"is not yet supported.");
 		} else if(ctx.varType().appClassPath() != null) {
-			//throw new EntVMachRuntimeException("Declaring app class object vars " +
-			//	"is not yet supported.");
+			/**
+			 * TODO: Will need to get the app class corresponding to the path
+			 * and somehow provide that to MemPointer for type enforcement.
+			 */
+			for(String id : ids) {
+				this.declareVar(scope, id, new MemPointer());
+			}
 		} else {
 			String type = ctx.varType().GENERIC_ID().getText();
 			for(String id : ids) {
 				this.declareVar(scope, id, new MemPointer());
 			}
-			/*switch(id) {
-				case "Record":
-					this.assignVarToCorrectRefEnvi(scope, id);
-					break;
-				default:
-					throw new EntVMachRuntimeException("Unexpected variable type (" +
-						id + ") encountered in declaration.");
-			}*/
 		}
 
 		return null;
@@ -432,6 +444,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitWhenOtherBranch(PeopleCodeParser.WhenOtherBranchContext ctx) {
 		this.emitStmt(ctx);
 		visit(ctx.stmtList());
+		return null;
+	}
+
+	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
+		setMemPointer(ctx, new MemPointer());
 		return null;
 	}
 

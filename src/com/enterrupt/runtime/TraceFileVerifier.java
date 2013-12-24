@@ -27,7 +27,7 @@ public class TraceFileVerifier {
 		ignoredStmts = new HashMap<String, Boolean>();
 		sqlTokenPattern = Pattern.compile("\\sStmt=(.*)");
 		bindValPattern = Pattern.compile("\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
-		pcStartPattern = Pattern.compile("\\s+>>>\\s+start\\s+Nest=(\\d+)\\s+([A-Za-z\\._0-9]+)");
+		pcStartPattern = Pattern.compile("\\s+>>>\\s+(start|start-ext)\\s+Nest=(\\d+)\\s+([A-Za-z_0-9]*?)\\s+([A-Za-z\\._0-9]+)");
 		pcBeginPattern = Pattern.compile("\\s>>>>>\\s+Begin\\s+([A-Za-z\\._0-9]+)\\s+level\\s+(\\d+)\\s+row\\s+(\\d+)");
 
 		// Note: this pattern excludes any and all trailing semicolons.
@@ -155,7 +155,8 @@ public class TraceFileVerifier {
 			if(pcStartMatcher.find()) {
 				// We don't want the next call to check this line again.
 				currTraceLine = getNextTraceLine();
-				return new PCStart(pcStartMatcher.group(1), pcStartMatcher.group(2));
+				return new PCStart(pcStartMatcher.group(1), pcStartMatcher.group(2),
+					pcStartMatcher.group(3), pcStartMatcher.group(4));
 			}
 
 			Matcher pcBeginMatcher = pcBeginPattern.matcher(currTraceLine);

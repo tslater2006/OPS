@@ -77,6 +77,7 @@ public class PSDefn {
 
 	private static final String[] varTypes = new String[] {
 		"any",
+		"array",
 		"boolean",
 		"date",
 		"datetime",

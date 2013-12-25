@@ -63,10 +63,12 @@ exprList:	expr (',' expr)* ;
 varDeclaration	:	varScope=GENERIC_ID varType varDeclarator (',' varDeclarator)* ;
 varDeclarator	:	VAR_ID ('=' expr)? ;
 
-// - varType catches multi-dimensional arrays (i.e., "array of array of Record")
-// - GENERIC_ID catches both primitive (i.e, "any", "integer") and complex (i.e., "Record")
-//   types, in addition to app class names without path prefixes (i.e., "Address" for "EO:CA:Address")
-varType		:	'array' ('of' varType)? | appClassPath | GENERIC_ID	;
+// - The first alt catches primitive types (i.e., "any", "integer"), complex types
+//   (i.e., "Record"), arrays of any dimension (i.e., "array of array of Record"),
+//   and app class names without path prefixes (i.e., "Address" for "EO:CA:Address").
+// - Note: the 'of' clause is only valid after "array" - I'm opting to enforce this
+//   at runtime rather than syntactically.
+varType		:	GENERIC_ID ('of' varType)? | appClassPath ;
 
 appClassImport	:	'import' (appPkgPath|appClassPath) ;
 appPkgPath		:	GENERIC_ID (':' GENERIC_ID)* ':' '*' ;

@@ -435,7 +435,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		/**
 	     * I added this call when I learned that when PT encounters a referenced
 		 * object in an app class, it recursively loads that app class's references
-	     * immediately. Thus I added this call. It's possible that this call may
+	     * immediately. It's possible that this call may
 		 * need to be locked down to instances when the root program is a Component PC prog
 		 * if issues with Record PC loading surface later on. TODO: Keep this in mind.
 		 */

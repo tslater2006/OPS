@@ -1,11 +1,13 @@
 package com.enterrupt.types;
 
 import java.util.EnumSet;
+import com.enterrupt.pt.peoplecode.*;
 
 public class MemPointer {
 
 	private EnumSet<MFlag> flags;
-	private PTDataType target = null;
+	private PTDataType target;
+	public AppClassPeopleCodeProg appClassTypeProg;
 
 	public MemPointer() {}
 
@@ -23,6 +25,15 @@ public class MemPointer {
 		this.flags = fSet;
 	}
 
+	/**
+	 * Pointers to app class objects enforce type coherence by only
+	 * accepting PTAppClassObjects with a matching prog defn.
+	 */
+	public MemPointer(AppClassPeopleCodeProg p) {
+		this.flags = EnumSet.of(MFlag.APP_CLASS_OBJ);
+		this.appClassTypeProg = p;
+	}
+
 	public boolean isInitialized() {
 		return target == null;
 	}
@@ -33,7 +44,8 @@ public class MemPointer {
 		 * if target is null, check flags before assigning. Throw EntDataTypeException
 		 * if mismatch. Also prevent if this is marked as read-only.
 		 */
-		this.target = operand;
+		throw new EntDataTypeException("Need to enforce type coherence.");
+//		this.target = operand;
 	}
 
 	public void systemAssign(PTDataType operand) {

@@ -408,6 +408,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
 
+		visit(ctx.varType());
+
 		String scope = ctx.varScope.getText();
 
 		List<PeopleCodeParser.VarDeclaratorContext> varsToDeclare = ctx.varDeclarator();
@@ -422,28 +424,35 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			i++;
 		}
 
-		/**
-		 * TODO: Convert all calls to new MemPointer to include
-		 * declared type, in order to enforce type coherence.
-		 */
-		if(ctx.varType().varType() != null) {
-			//throw new EntVMachRuntimeException("Declaring array object vars " +
-			//	"is not yet supported.");
-		} else if(ctx.varType().appClassPath() != null) {
-			/**
-			 * TODO: Will need to get the app class corresponding to the path
-			 * and somehow provide that to MemPointer for type enforcement.
-			 */
-			for(String id : ids) {
-				this.declareVar(scope, id, new MemPointer());
-			}
+		log.debug("Declaring identifiers ({}) with scope {} and type {}.",
+			ids, scope, ctx.varType().getText());
+		this.declareIdentifiers(scope, ids, getMemPointer(ctx.varType()));
+
+		return null;
+	}
+
+	public Void visitVarType(PeopleCodeParser.VarTypeContext ctx) {
+
+		if(ctx.appClassPath() != null) {
+			visit(ctx.appClassPath());
+			setMemPointer(ctx, getMemPointer(ctx.appClassPath()));
 		} else {
-			String type = ctx.varType().GENERIC_ID().getText();
-			for(String id : ids) {
-				this.declareVar(scope, id, new MemPointer());
+			if(ctx.varType() != null) {
+				visit(ctx.varType());
+				throw new EntVMachRuntimeException("Need to support 'of' clauses" +
+					"in varType.");
+			}
+			String typeStr = ctx.GENERIC_ID().getText();
+			switch(typeStr) {
+				/**
+				 * CRITICAL: DON'T ACTUALLY ASSIGN TO PTR's TARGET:
+				 * just set the flag on the MemPointer indicating what it accepts.
+				 */
+				default:
+					throw new EntVMachRuntimeException("Unexpected data type: " +
+						typeStr);
 			}
 		}
-
 		return null;
 	}
 
@@ -509,19 +518,28 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitAppClassPath(PeopleCodeParser.AppClassPathContext ctx) {
+		AppClassPeopleCodeProg progDefn =
+			(AppClassPeopleCodeProg)DefnCache.getProgram(("AppClassPC." +
+				ctx.getText() + ".OnExecute").replaceAll(":","."));
+		setMemPointer(ctx, new MemPointer(progDefn));
+		return null;
+	}
+
 	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
 
-		AppClassPeopleCodeProg appClassProg;
+		MemPointer ptr;
 		if(ctx.appClassPath() != null) {
-			appClassProg = (AppClassPeopleCodeProg)DefnCache.getProgram(("AppClassPC." +
-				ctx.appClassPath().getText() + ".OnExecute").replaceAll(":","."));
+			visit(ctx.appClassPath());
+			ptr = getMemPointer(ctx.appClassPath());
 		} else {
 			throw new EntVMachRuntimeException("Encountered create invocation without " +
 				"app class prefix; need to support this by resolving path to class.");
 		}
 
-		PTAppClassObject appClassObj = new PTAppClassObject(appClassProg);
-		setMemPointer(ctx, new MemPointer(appClassObj));
+		PTAppClassObject newObj = new PTAppClassObject(ptr.appClassTypeProg);
+		ptr.assign(newObj);
+		setMemPointer(ctx, ptr);
 
 		/**
 	     * Check for constructor; call it if it exists.
@@ -529,8 +547,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * declaration to ensure that the constructor (if it exists) is only called
 	     * when the appropriate number of arguments are supplied.
 		 */
-		String constructorName = appClassProg.getClassName();
-		if(appClassProg.methodEntryPoints.containsKey(constructorName)) {
+		String constructorName = ptr.appClassTypeProg.getClassName();
+		if(ptr.appClassTypeProg.methodEntryPoints.containsKey(constructorName)) {
 
 			/**
 			 * Load arguments to constructor onto call stack if
@@ -544,24 +562,35 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				}
 			}
 
-			ExecContext constructorCtx = new AppClassObjExecContext(appClassObj,
+			ExecContext constructorCtx = new AppClassObjExecContext(newObj,
 				constructorName);
 			this.supervisor.runImmediately(constructorCtx);
 			this.repeatLastEmission();
 		}
+
 		return null;
 	}
 
-	private void declareVar(String scope, String id, MemPointer ptr) {
+	private void declareIdentifiers(String scope, String[] ids, MemPointer ptr) {
+
+		if(ids.length > 1) {
+			/**
+			 * TODO: Create copies of the data type for each ids
+			 * in the array.
+			 */
+			throw new EntVMachRuntimeException("No support for declaring " +
+				"multiple ids at once.");
+		}
+
 		switch(scope) {
 			case "Local":
-				eCtx.declareLocalVar(id, ptr);
+				eCtx.declareLocalVar(ids[0], ptr);
 				break;
 			case "Component":
-				RefEnvi.declareComponentVar(id, ptr);
+				RefEnvi.declareComponentVar(ids[0], ptr);
 				break;
 			case "Global":
-				RefEnvi.declareGlobalVar(id, ptr);
+				RefEnvi.declareGlobalVar(ids[0], ptr);
 				break;
 			default:
 				throw new EntVMachRuntimeException("Encountered unexpected variable " +

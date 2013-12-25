@@ -42,9 +42,9 @@ expr	:	'(' expr ')'					# ExprParenthesized
 		|	literal							# ExprLiteral
 		|	id								# ExprId
 		|	createInvocation				# ExprCreate
-		|	expr '.' id						# ExprMethodOrStaticRef
+		|	expr '.' id						# ExprDotAccess
 		|	expr '[' exprList ']'			# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i][&j]
-		| 	expr '(' exprList? ')'			# ExprFnOrRowsetCall
+		| 	expr '(' exprList? ')'			# ExprFnOrIdxCall
 		|	'-' expr						# ExprNegate
 		|	'Not' expr						# ExprNot
 		|	expr ('*'|'/') expr				# ExprMulDiv

@@ -277,7 +277,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	 * PeopleCode's "(<int>)" syntax should be ignored here.
 	 */
 	@Override
-	public void exitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
+	public void exitExprFnOrIdxCall(PeopleCodeParser.ExprFnOrIdxCallContext ctx) {
 
 		if(this.srcProg instanceof AppClassPeopleCodeProg) {
 			return;
@@ -286,14 +286,14 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 		if(ctx.expr() instanceof PeopleCodeParser.ExprIdContext) {
 			id = ((PeopleCodeParser.ExprIdContext)ctx.expr()).id();
-		} else if(ctx.expr() instanceof PeopleCodeParser.ExprMethodOrStaticRefContext) {
+		} else if(ctx.expr() instanceof PeopleCodeParser.ExprDotAccessContext) {
 			/**
 		     * If a method call is the expr on which this fn/rowset call operates on,
 			 * i.e., "&arr.Push(%Menu)", we can ignore it; methods cannot be the subject
 			 * of "Declare" stmts.
 			 */
 			return;
-		} else if(ctx.expr() instanceof PeopleCodeParser.ExprFnOrRowsetCallContext) {
+		} else if(ctx.expr() instanceof PeopleCodeParser.ExprFnOrIdxCallContext) {
 			/**
 			 * If a function call is the expr on which this fn/rowset call operates on,
 			 * i.e., "GetRowset(Scroll.ENRL_REQ_DETAIL)(1)", we can ignore it;

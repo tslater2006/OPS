@@ -192,7 +192,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprFnOrRowsetCall(PeopleCodeParser.ExprFnOrRowsetCallContext ctx) {
+	public Void visitExprFnOrIdxCall(PeopleCodeParser.ExprFnOrIdxCallContext ctx) {
 
 		visit(ctx.expr());
 
@@ -246,7 +246,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 					"immediately preceding the expression list of a function call.");
 			}
 		} else if(ctx.expr() instanceof
-					PeopleCodeParser.ExprMethodOrStaticRefContext) {
+					PeopleCodeParser.ExprDotAccessContext) {
 
 			/**
 			 * Call the method name in .id() on the memory pointer represented
@@ -254,8 +254,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			 * TODO: Will need to support method calls on objects other than
 			 * app class objects (i.e., Fields, Records, etc.).
 			 */
-			PeopleCodeParser.ExprMethodOrStaticRefContext exprCtx =
-				(PeopleCodeParser.ExprMethodOrStaticRefContext)ctx.expr();
+			PeopleCodeParser.ExprDotAccessContext exprCtx =
+				(PeopleCodeParser.ExprDotAccessContext)ctx.expr();
 
 			String methodName = exprCtx.id().getText();
 			MemPointer objPointer = getMemPointer(exprCtx.expr());
@@ -308,8 +308,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitExprMethodOrStaticRef(
-					PeopleCodeParser.ExprMethodOrStaticRefContext ctx) {
+	public Void visitExprDotAccess(
+					PeopleCodeParser.ExprDotAccessContext ctx) {
 		visit(ctx.expr());
 
 		/**

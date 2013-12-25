@@ -437,21 +437,33 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			visit(ctx.appClassPath());
 			setMemPointer(ctx, getMemPointer(ctx.appClassPath()));
 		} else {
+
+			MemPointer nestedTypePtr = null;
 			if(ctx.varType() != null) {
+				if(!ctx.GENERIC_ID().getText().equals("array")) {
+					throw new EntVMachRuntimeException("Encountered non-array var " +
+						"type preceding 'of' clause: " + ctx.getText());
+				}
 				visit(ctx.varType());
-				throw new EntVMachRuntimeException("Need to support 'of' clauses" +
-					"in varType.");
+				nestedTypePtr = getMemPointer(ctx.varType());
 			}
-			String typeStr = ctx.GENERIC_ID().getText();
-			switch(typeStr) {
-				/**
-				 * CRITICAL: DON'T ACTUALLY ASSIGN TO PTR's TARGET:
-				 * just set the flag on the MemPointer indicating what it accepts.
-				 */
+
+			MemPointer ptr;
+			switch(ctx.GENERIC_ID().getText()) {
+				case "array":
+					// no need for flag here; it's set to ARRAY in constructor.
+					ptr = new MemPointer(nestedTypePtr);	break;
+				case "string":
+					ptr = new MemPointer(MFlag.STRING);		break;
+				case "date":
+					ptr = new MemPointer(MFlag.DATE);		break;
+				case "integer":
+					ptr = new MemPointer(MFlag.INTEGER);	break;
 				default:
 					throw new EntVMachRuntimeException("Unexpected data type: " +
-						typeStr);
+						ctx.GENERIC_ID().getText());
 			}
+			setMemPointer(ctx, ptr);
 		}
 		return null;
 	}

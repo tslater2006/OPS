@@ -8,21 +8,27 @@ public class MemPointer {
 	private EnumSet<MFlag> flags;
 	private PTDataType target;
 	public AppClassPeopleCodeProg appClassTypeProg;
+	public MemPointer nestedTypePtr;
 
 	public MemPointer() {}
 
-	public MemPointer(PTDataType trgt) {
-		this.target = trgt;
-		this.flags = EnumSet.noneOf(MFlag.class);
+	public MemPointer(MFlag f) {
+		this.flags = EnumSet.of(f);
 	}
 
     public MemPointer(EnumSet<MFlag> fSet) {
         this.flags = fSet;
     }
 
-	public MemPointer(PTDataType trgt, EnumSet<MFlag> fSet) {
-		this.target = trgt;
-		this.flags = fSet;
+	/**
+	 * Pointers to arrays enforce type coherence by checking that
+	 * the other object itself is array, then comparing either 1) their
+	 * base types or 2) the types of their constituent arrays (i.e.,
+	 * "array of array of string"
+	 */
+	public MemPointer(MemPointer p) {
+		this.flags = EnumSet.of(MFlag.ARRAY);
+		this.nestedTypePtr = p;
 	}
 
 	/**
@@ -32,6 +38,16 @@ public class MemPointer {
 	public MemPointer(AppClassPeopleCodeProg p) {
 		this.flags = EnumSet.of(MFlag.APP_CLASS_OBJ);
 		this.appClassTypeProg = p;
+	}
+
+	public MemPointer(PTDataType trgt) {
+		this.target = trgt;
+		this.flags = EnumSet.noneOf(MFlag.class);
+	}
+
+	public MemPointer(PTDataType trgt, EnumSet<MFlag> fSet) {
+		this.target = trgt;
+		this.flags = fSet;
 	}
 
 	public boolean isInitialized() {

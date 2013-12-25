@@ -43,7 +43,7 @@ expr	:	'(' expr ')'					# ExprParenthesized
 		|	id								# ExprId
 		|	createInvocation				# ExprCreate
 		|	expr '.' id						# ExprMethodOrStaticRef
-		|	expr '[' exprList ']'			# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i, &j]
+		|	expr '[' exprList ']'			# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i][&j]
 		| 	expr '(' exprList? ')'			# ExprFnOrRowsetCall
 		|	'-' expr						# ExprNegate
 		|	'Not' expr						# ExprNot

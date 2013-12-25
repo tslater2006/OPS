@@ -30,7 +30,6 @@ public abstract class PeopleCodeProg {
 	public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
 	public Map<String, List<AppPackagePath>> importedAppClasses;
 	public List<AppPackagePath> importedAppPackagePaths;
-	public Map<String, Boolean> referencedRecnameLoadStatusTable;
 
 	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
@@ -174,7 +173,6 @@ public abstract class PeopleCodeProg {
 	}
 
 	public boolean haveDefnsAndProgsBeenLoaded() {
-
 		if(this.haveLoadedDefnsAndPrograms) {
 			return true;
 		} else {
@@ -243,23 +241,6 @@ public abstract class PeopleCodeProg {
 	    } catch(java.io.IOException ioe) {
             throw new EntVMachRuntimeException(ioe.getMessage());
         }
-	}
-
-	public void noteReferencedRecname(String recname) {
-		if(this.referencedRecnameLoadStatusTable == null) {
-			this.referencedRecnameLoadStatusTable = new HashMap<String, Boolean>();
-		}
-
-		/**
-		 * Don't overwrite the entry, as it could be marked as loaded previously.
-		 */
-		if(!this.referencedRecnameLoadStatusTable.containsKey(recname)) {
-			this.referencedRecnameLoadStatusTable.put(recname, false);
-		}
-	}
-
-	public void markReferencedRecname(String recname) {
-		this.referencedRecnameLoadStatusTable.put(recname, true);
 	}
 }
 

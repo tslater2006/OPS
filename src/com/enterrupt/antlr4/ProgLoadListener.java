@@ -359,7 +359,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 				if(!refObj.isRecordFieldRef) {
 					return;
 				}
-				srcProg.noteReferencedRecname(refObj.RECNAME);
 
 				if((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
 					|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2)
@@ -368,7 +367,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 							&& this.supervisor.loadGranularity ==
 								LoadGranularity.DEEP && recurseLvl < 2)) {
 					DefnCache.getRecord(refObj.RECNAME);
-					srcProg.markReferencedRecname(refObj.RECNAME);
 				}
 			}
 		}

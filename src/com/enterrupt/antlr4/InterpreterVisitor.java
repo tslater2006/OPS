@@ -247,11 +247,39 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		} else if(ctx.expr() instanceof
 					PeopleCodeParser.ExprMethodOrStaticRefContext) {
+
 			/**
-			 * TODO: Dereference expr memory pointer to object and call
-			 * method.
+			 * Call the method name in .id() on the memory pointer represented
+			 * by .expr().
+			 * TODO: Will need to support method calls on objects other than
+			 * app class objects (i.e., Fields, Records, etc.).
 			 */
-			throw new EntVMachRuntimeException("TODO: Dereference expr memory ptr.");
+			PeopleCodeParser.ExprMethodOrStaticRefContext exprCtx =
+				(PeopleCodeParser.ExprMethodOrStaticRefContext)ctx.expr();
+
+			String methodName = exprCtx.id().getText();
+			MemPointer objPointer = getMemPointer(exprCtx.expr());
+			PTAppClassObject obj = (PTAppClassObject)objPointer.dereference();
+
+			/**
+			 * Record field references beyond a certain recursion level
+			 * in app class programs have their constituent record defns
+			 * loaded lazily. Before executing the app class method, check
+			 * if any of the references within programs referenced by the app class
+			 * have yet to have their record defns loaded (note that they may
+			 * already be loaded anyway if they were referenced elsewhere).
+			 */
+			for(PeopleCodeProg p : obj.progDefn.referencedProgs) {
+				for(Map.Entry<Integer, Reference> cursor : p.progRefsTable.entrySet()) {
+					if(cursor.getValue().isRecordFieldRef) {
+						DefnCache.getRecord(cursor.getValue().RECNAME);
+					}
+				}
+			}
+
+			ExecContext methodCtx = new AppClassObjExecContext(obj, methodName);
+			this.supervisor.runImmediately(methodCtx);
+
 		} else {
 			throw new EntInterpretException("Encountered unexpected expr type " +
 				"preceding function call", ctx.expr().getText(),
@@ -363,8 +391,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		List<String> formalParams = ((AppClassPeopleCodeProg)eCtx.prog).methodFormalParams.
 			get(ctx.GENERIC_ID().getText());
 
-		for(String formalParamId : formalParams) {
-			localRefEnvi.declareVar(formalParamId, Environment.popFromCallStack());
+		if(formalParams != null) {
+			for(String formalParamId : formalParams) {
+				localRefEnvi.declareVar(formalParamId, Environment.popFromCallStack());
+			}
 		}
 
 		eCtx.pushRefEnvi(localRefEnvi);
@@ -384,7 +414,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 					"that has not been implemented yet", ctx.getText(), ctx.getStart().getLine());
 			}
 			setMemPointer(ctx, ptr);
-
 		} else if(ctx.VAR_ID() != null) {
 			MemPointer ptr = eCtx.resolveIdentifier(ctx.getText());
 			setMemPointer(ctx, ptr);

@@ -69,7 +69,7 @@ public class TraceFileVerifier {
 	public static void submitEmission(IEmission evmEmission) {
 
 		if(evmEmission instanceof ENTStmt) {
-			//log.debug(evmEmission);
+			log.debug(evmEmission);
 		} else {
 			log.debug(evmEmission);
 		}

@@ -33,6 +33,6 @@ public class PTAppClassObject implements PTDataType {
     }
 
 	public String toString() {
-		return persistentRefEnvi.toString();
+		return "PTAppClassObject:" + progDefn.getDescriptor();
 	}
 }

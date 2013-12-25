@@ -10,10 +10,10 @@ public class Environment {
 
 	public static MemPointer TRUE;
 	public static MemPointer FALSE;
+	public static MemPointer DEFN_LITERAL;
 
 	private static HashMap<String, MemPointer> systemVarTable;
 	private static HashMap<String, Method> systemFuncTable;
-	private static HashMap<String, MemPointer> compBufferTable;
 
 	private static HashMap<Integer, MemPointer> integerLiteralPool;
 	private static HashMap<String, MemPointer> stringLiteralPool;
@@ -32,6 +32,9 @@ public class Environment {
 			TRUE = new MemPointer(new PTBoolean(new Boolean(true)),
 				EnumSet.of(MFlag.READ_ONLY));
 			FALSE = new MemPointer(new PTBoolean(new Boolean(false)),
+				EnumSet.of(MFlag.READ_ONLY));
+
+			DEFN_LITERAL = new MemPointer(new PTDefnLiteral(),
 				EnumSet.of(MFlag.READ_ONLY));
 
 			// Create memory pools for supported data types.
@@ -56,9 +59,6 @@ public class Environment {
 					systemFuncTable.put(m.getName().substring(3), GlobalFnLibrary.class.getMethod(m.getName()));
 				}
 			}
-
-			// Initialize empty component buffer.
-			compBufferTable = new HashMap<String, MemPointer>();
 
 			// Initialize the call stack.
 			callStack = new Stack<MemPointer>();
@@ -88,25 +88,17 @@ public class Environment {
 		return callStack.size();
 	}
 
-	public static void setCompBufferEntry(String recordField, MemPointer ptr) {
-		compBufferTable.put(recordField, ptr);
-	}
-
-	public static MemPointer getCompBufferEntry(String recordField) {
-		MemPointer ptr = compBufferTable.get(recordField);
-		if(ptr == null) {
-			ptr = new MemPointer(new PTString());
-			setCompBufferEntry(recordField, ptr);
-		}
-		return ptr;
-	}
-
 	public static void setSystemVar(String var, String value) {
 		systemVarTable.get(var).systemAssign(new PTString(value));
 	}
 
 	public static MemPointer getSystemVar(String var) {
-		return systemVarTable.get(var);
+		MemPointer ptr = systemVarTable.get(var);
+		if(ptr == null) {
+			throw new EntVMachRuntimeException("Attempted to access a system var "
+			 + "that is undefined: " + var);
+		}
+		return ptr;
 	}
 
 	public static Method getSystemFunc(String func) {
@@ -115,21 +107,19 @@ public class Environment {
 
 	public static MemPointer getFromLiteralPool(Integer val) {
 		MemPointer p = integerLiteralPool.get(val);
-		if(p != null) {
-			return p;
+		if(p == null) {
+			p = new MemPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY));
+			integerLiteralPool.put(val, p);
 		}
-		p = new MemPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY));
-		integerLiteralPool.put(val, p);
 		return p;
 	}
 
 	public static MemPointer getFromLiteralPool(String val) {
 		MemPointer p = stringLiteralPool.get(val);
-		if(p != null) {
-			return p;
+		if(p == null) {
+			p = new MemPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY));
+			stringLiteralPool.put(val, p);
 		}
-		p = new MemPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY));
-		stringLiteralPool.put(val, p);
 		return p;
 	}
 }

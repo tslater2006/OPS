@@ -20,6 +20,10 @@ public class PTAppClassObject implements PTDataType {
 		}
 	}
 
+	public MemPointer access(String s) {
+		throw new EntDataTypeException("Need to implement access() for PTAppClassObject.java");
+	}
+
 	public boolean equals(Object obj) {
         if(obj == this)
             return true;
@@ -36,3 +40,4 @@ public class PTAppClassObject implements PTDataType {
 		return "PTAppClassObject:" + progDefn.getDescriptor();
 	}
 }
+

@@ -5,14 +5,25 @@ import java.util.*;
 
 public class PTRecord implements PTDataType {
 
-	private Map<String, PTField> fields;
+	public Record recDefn;
+	private Map<String, MemPointer> fields;
 
-	public PTRecord(Record recDefn) {
-		fields = new HashMap<String, PTField>();
+	public PTRecord(Record r) {
+		this.recDefn = r;
+		this.fields = new HashMap<String, MemPointer>();
 
-		for(Map.Entry<String, RecordField> cursor : recDefn.fieldTable.entrySet()) {
-			this.fields.put(cursor.getKey(), null);
+		for(Map.Entry<String, RecordField> cursor : r.fieldTable.entrySet()) {
+			this.fields.put(cursor.getKey(), new MemPointer(new PTField()));
 		}
+	}
+
+	public MemPointer access(String s) {
+		MemPointer ptr = this.fields.get(s);
+		if(ptr == null) {
+			throw new EntDataTypeException("Call to access(s) on PTRecord with " +
+				" s=" + s + " did not match any fields.");
+		}
+		return ptr;
 	}
 
 	public boolean equals(Object obj) {

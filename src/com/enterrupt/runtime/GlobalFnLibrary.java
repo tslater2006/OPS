@@ -33,11 +33,14 @@ public class GlobalFnLibrary {
 	 * considered as not containing a value.
 	 */
 	private static boolean doesContainValue(PTDataType ptdt) {
-		if(ptdt instanceof PTString) {
+		if(ptdt instanceof PTField
+				&& ((PTField)ptdt).valuePtr.dereference() instanceof PTString) {
+			return ((PTString)((PTField)ptdt).valuePtr.dereference()).value() != null;
+		} else if(ptdt instanceof PTString) {
 			return ((PTString)ptdt).value() != null;
 		} else {
 			throw new EntVMachRuntimeException("Unexpected data type passed " +
-				"to global function None().");
+				"to doesContainValue(ptdt).");
 		}
 	}
 

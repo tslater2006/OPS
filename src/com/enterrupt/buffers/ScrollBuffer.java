@@ -4,6 +4,7 @@ import java.util.*;
 import java.lang.StringBuilder;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.pages.*;
+import com.enterrupt.types.*;
 
 public class ScrollBuffer implements IStreamableBuffer {
 
@@ -13,6 +14,13 @@ public class ScrollBuffer implements IStreamableBuffer {
 
     public HashMap<String, RecordBuffer> recBufferTable;
     public ArrayList<RecordBuffer> orderedRecBuffers;
+
+	/**
+	 * TODO: I need to figure out how I'm going to integrate this
+	 * with the buffer objects/concepts I've written to-date. Punting
+	 * for now.
+	 */
+	public Map<String, MemPointer> recEntryTable;
 
     public HashMap<String, ScrollBuffer> scrollBufferTable;
     public ArrayList<ScrollBuffer> orderedScrollBuffers;
@@ -31,6 +39,7 @@ public class ScrollBuffer implements IStreamableBuffer {
         this.orderedRecBuffers = new ArrayList<RecordBuffer>();
         this.scrollBufferTable = new HashMap<String, ScrollBuffer>();
         this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
+		this.recEntryTable = new HashMap<String, MemPointer>();
     }
 
     public void addPageField(PgToken tok) {

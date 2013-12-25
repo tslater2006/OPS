@@ -141,8 +141,11 @@ public class StmtLibrary {
 	 */
 	public static PreparedStatement getSearchRecordFillQuery() {
 		// I hardcoded: "PS_LS_SS_PERS_SRCH", "EMPLID", the value for EMPLID, "OPRID", and the value for OPRID.
-		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '" +
+/**		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '" +
 			((PTString)Environment.getCompBufferEntry("LS_SS_PERS_SRCH.EMPLID").dereference()).value() + "%' AND OPRID=? ORDER BY EMPLID");
+*/
+		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '"
+			+ "AA0001%' AND OPRID=? ORDER BY EMPLID");
 		stmt.bindVals.put(1, ((PTString)Environment.getSystemVar("%OperatorId").dereference()).value());
 		return stmt.generatePreparedStmt(conn);
 	}

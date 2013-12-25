@@ -3,6 +3,7 @@ package com.enterrupt.antlr4;
 import java.util.*;
 import java.lang.reflect.*;
 import com.enterrupt.types.*;
+import com.enterrupt.buffers.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.peoplecode.*;
 import org.antlr.v4.runtime.*;
@@ -47,27 +48,26 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	private void setMemPointer(ParseTree node, MemPointer ptr) {
+		if(ptr == null) {
+			throw new EntVMachRuntimeException("Attempted to set the memory pointer to null " +
+				"for a node: " + node.getText());
+		}
 		this.memPointers.put(node, ptr);
 	}
 
 	private MemPointer getMemPointer(ParseTree node) {
 		if(this.memPointers.get(node) == null) {
-
-			int lineNbr = -1;
-			Object obj = node.getPayload();
-			if(obj instanceof Token) {
-				lineNbr = ((Token)node.getPayload()).getLine();
-			} else if(obj instanceof ParserRuleContext) {
-				lineNbr = ((ParserRuleContext)node.getPayload()).getStart().getLine();
-			} else {
-				throw new EntVMachRuntimeException("Unexpected payload type.");
-			}
-
-			throw new EntInterpretException("Attempted to get the memory pointer for " +
-				"for a node, encountered null: ", node.getText(), lineNbr);
+			throw new EntVMachRuntimeException("Attempted to get the memory pointer for " +
+				"for a node, encountered null: " + node.getText());
 		}
-
 		return this.memPointers.get(node);
+	}
+
+	// Bubble-up operations should not fail in the event of nulls, unlike normal accesses.
+	private void bubbleUpMemPointer(ParseTree src, ParseTree dest) {
+		if(this.memPointers.get(src) != null) {
+			this.memPointers.put(dest, this.memPointers.get(src));
+		}
 	}
 
 	private void emitStmt(ParserRuleContext ctx) {
@@ -169,26 +169,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprParenthesized(PeopleCodeParser.ExprParenthesizedContext ctx) {
 		visit(ctx.expr());
-		setMemPointer(ctx, getMemPointer(ctx.expr()));
+		bubbleUpMemPointer(ctx.expr(), ctx);
 		return null;
 	}
 
 	public Void visitExprLiteral(PeopleCodeParser.ExprLiteralContext ctx) {
 		visit(ctx.literal());
-		setMemPointer(ctx, getMemPointer(ctx.literal()));
+		bubbleUpMemPointer(ctx.literal(), ctx);
 		return null;
 	}
 
 	public Void visitExprId(PeopleCodeParser.ExprIdContext ctx) {
 		visit(ctx.id());
-		/**
-		 * GENERIC_IDs could be reserved words (i.e., MenuName);
-		 * do not attempt to bubble up any values for them at this time.
-		 */
-		if(ctx.id().SYS_VAR_ID() != null ||
-			ctx.id().VAR_ID() != null) {
-			setMemPointer(ctx, getMemPointer(ctx.id()));
-		}
+		bubbleUpMemPointer(ctx.id(), ctx);
 		return null;
 	}
 
@@ -223,7 +216,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 				// Invoke function.
 		        try {
-        		    fnPtr.invoke(Environment.class);
+        		    fnPtr.invoke(GlobalFnLibrary.class);
 		        } catch(java.lang.IllegalAccessException iae) {
         		    log.fatal(iae.getMessage(), iae);
 		            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
@@ -292,7 +285,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * must be the null separator (PeopleCode funcs can only return 1 value).
 		 */
 	    MemPointer ptr = Environment.popFromCallStack();
-		setMemPointer(ctx, ptr);
+
+		if(ptr != null) {
+			setMemPointer(ctx, ptr);
+		}
 
 		if(ptr != null && (Environment.popFromCallStack() != null)) {
 			throw new EntVMachRuntimeException("More than one return value was found on " +
@@ -304,37 +300,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprCreate(PeopleCodeParser.ExprCreateContext ctx) {
 		visit(ctx.createInvocation());
-		setMemPointer(ctx, getMemPointer(ctx.createInvocation()));
+		bubbleUpMemPointer(ctx.createInvocation(), ctx);
 		return null;
 	}
 
 	public Void visitExprDotAccess(
 					PeopleCodeParser.ExprDotAccessContext ctx) {
+
 		visit(ctx.expr());
+		visit(ctx.id());
 
-		/**
-		 * Detect defn literals (i.e., MenuName.SA_LEARNER_SERVICES)
-		 */
-		if(ctx.expr() instanceof PeopleCodeParser.ExprIdContext &&
-			PSDefn.defnLiteralReservedWordsTable.containsKey(
-				((PeopleCodeParser.ExprIdContext)ctx.expr())
-					.id().getText().toUpperCase())) {
-
-            MemPointer ptr = Environment.getFromLiteralPool(
-                ctx.id().getText());
-   	        setMemPointer(ctx, ptr);
-		} else {
-			/**
-			 * Otherwise, assume component buffer reference.
-			 */
-			MemPointer ptr = Environment.getCompBufferEntry(ctx.getText());
-			if(ptr == null) {
-				throw new EntInterpretException("Encountered a reference to an " +
-					"uninitialized component buffer field", ctx.getText(),
-					ctx.getStart().getLine());
-			}
-			setMemPointer(ctx, ptr);
-		}
+		MemPointer exprPtr = getMemPointer(ctx.expr());
+		MemPointer accessedPtr = exprPtr.dereference().access(ctx.id().getText());
+		setMemPointer(ctx, accessedPtr);
 
 		return null;
 	}
@@ -409,16 +387,29 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.SYS_VAR_ID() != null) {
 			MemPointer ptr = Environment.getSystemVar(ctx.getText());
-			if(ptr == null) {
-				throw new EntInterpretException("Encountered a system variable reference " +
-					"that has not been implemented yet", ctx.getText(), ctx.getStart().getLine());
-			}
 			setMemPointer(ctx, ptr);
+
 		} else if(ctx.VAR_ID() != null) {
 			MemPointer ptr = eCtx.resolveIdentifier(ctx.getText());
 			setMemPointer(ctx, ptr);
-		}
 
+		} else if(ctx.GENERIC_ID() != null) {
+			if(PSDefn.defnLiteralReservedWordsTable.containsKey(
+				ctx.GENERIC_ID().getText().toUpperCase())) {
+				/**
+				 * Detect defn literal reserved words (i.e.,
+				 * "Menu" in "Menu.SA_LEARNER_SERVICES").
+				 */
+				setMemPointer(ctx, Environment.DEFN_LITERAL);
+
+			} else if(((PTRecord)ComponentBuffer.searchRecordPtr.dereference()).recDefn
+						.RECNAME.equals(ctx.GENERIC_ID().getText())) {
+				/**
+				 * Detect references to search record buffer.
+				 */
+				setMemPointer(ctx, ComponentBuffer.searchRecordPtr);
+			}
+		}
 		return null;
 	}
 

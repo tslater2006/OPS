@@ -5,9 +5,16 @@ import java.util.*;
 
 public class PTField implements PTDataType {
 
-	public PTField() {}
+	public MemPointer valuePtr;
 
-	  public boolean equals(Object obj) {
+	public PTField() {
+		/**
+		 * TODO: Determine type based on field metadata.
+		 */
+		this.valuePtr = new MemPointer(new PTString());
+	}
+
+	public boolean equals(Object obj) {
         if(obj == this)
             return true;
         if(obj == null)
@@ -18,6 +25,10 @@ public class PTField implements PTDataType {
         PTField other = (PTField)obj;
 		throw new EntDataTypeException("equals() for PTField not yet implemented.");
     }
+
+	public MemPointer access(String s) {
+		throw new EntDataTypeException("Need to implement access() for PTField.");
+	}
 
 	public String toString() {
 		return "";

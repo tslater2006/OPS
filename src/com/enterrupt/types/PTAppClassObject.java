@@ -21,7 +21,16 @@ public class PTAppClassObject implements PTDataType {
 	}
 
 	public MemPointer access(String s) {
-		throw new EntDataTypeException("Need to implement access() for PTAppClassObject.java");
+		if(!progDefn.methodEntryPoints.containsKey(s)) {
+			throw new EntDataTypeException("Call to access(s) on " +
+				"PTAppClassObject found no methods for s="+s);
+		}
+
+		/**
+		 * TODO: Eliminate unnecessary allocation by having the underlying
+		 * program definition create these pointers during initialization.
+		 */
+        return new MemPointer(new PTCallable(new AppClassObjExecContext(this, s)));
 	}
 
 	public boolean equals(Object obj) {

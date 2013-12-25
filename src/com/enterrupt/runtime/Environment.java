@@ -4,6 +4,7 @@ import java.util.*;
 import java.lang.reflect.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.scope.*;
 import org.apache.logging.log4j.*;
 
 public class Environment {
@@ -13,7 +14,7 @@ public class Environment {
 	public static MemPointer DEFN_LITERAL;
 
 	private static HashMap<String, MemPointer> systemVarTable;
-	private static HashMap<String, Method> systemFuncTable;
+	private static HashMap<String, MemPointer> systemFuncTable;
 
 	private static HashMap<Integer, MemPointer> integerLiteralPool;
 	private static HashMap<String, MemPointer> stringLiteralPool;
@@ -53,10 +54,12 @@ public class Environment {
 
 			/// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
 			Method[] methods = GlobalFnLibrary.class.getMethods();
-			systemFuncTable = new HashMap<String, Method>();
+			systemFuncTable = new HashMap<String, MemPointer>();
 			for(Method m : methods) {
 				if(m.getName().indexOf("PT_") == 0) {
-					systemFuncTable.put(m.getName().substring(3), GlobalFnLibrary.class.getMethod(m.getName()));
+					systemFuncTable.put(m.getName().substring(3),
+						new MemPointer(new PTSysFunc(
+							GlobalFnLibrary.class.getMethod(m.getName()))));
 				}
 			}
 
@@ -101,7 +104,7 @@ public class Environment {
 		return ptr;
 	}
 
-	public static Method getSystemFunc(String func) {
+	public static MemPointer getSystemFuncPtr(String func) {
 		return systemFuncTable.get(func);
 	}
 

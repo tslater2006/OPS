@@ -189,6 +189,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 
+		PTDataType ptdt = getMemPointer(ctx.expr()).dereference();
+
+		if(!(ptdt instanceof PTCallable || ptdt instanceof PTSysFunc)) {
+			throw new EntVMachRuntimeException("Encountered non-callable data type "
+				+ "in visit to fn or idx call node; this may be an unimplemented "
+				+ "rowset indexing (i.e., &rs(1)) attempt.");
+		}
+
 		// null is used to separate call frames.
 		Environment.pushToCallStack(null);
 
@@ -201,58 +209,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		}
 
-		Method fnPtr;
-		if(ctx.expr() instanceof PeopleCodeParser.ExprIdContext) {
 
-			PeopleCodeParser.ExprIdContext exprCtx =
-				(PeopleCodeParser.ExprIdContext)ctx.expr();
-
-			if(exprCtx.id().GENERIC_ID() != null) {
-				/**
-				 * This is a system function, i.e. CreateRecord; get
-				 * a reference to the function using reflection.
-				 */
-				fnPtr = Environment.getSystemFunc(exprCtx.id().GENERIC_ID().getText());
-
-				// Invoke function.
-		        try {
-        		    fnPtr.invoke(GlobalFnLibrary.class);
-		        } catch(java.lang.IllegalAccessException iae) {
-        		    log.fatal(iae.getMessage(), iae);
-		            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-		        } catch(java.lang.reflect.InvocationTargetException ite) {
-        		    log.fatal(ite.getMessage(), ite);
-		            System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-        		}
-
-			} else if(exprCtx.id().VAR_ID() != null) {
-				/**
-				 * This is an index into a rowset, i.e. &rs(1)
-				 */
-				throw new EntVMachRuntimeException("Rowset indexing is not supported " +
-					"at this time.");
-			} else if(exprCtx.id().SYS_VAR_ID() != null) {
-				 throw new EntVMachRuntimeException("Did not expect system var " +
-					"to immediately function expression list.");
-			} else {
-				throw new EntVMachRuntimeException("Encountered unknown ExprIdContext " +
-					"immediately preceding the expression list of a function call.");
-			}
-		} else if(ctx.expr() instanceof
-					PeopleCodeParser.ExprDotAccessContext) {
-
-			/**
-			 * Call the method name in .id() on the memory pointer represented
-			 * by .expr().
-			 * TODO: Will need to support method calls on objects other than
-			 * app class objects (i.e., Fields, Records, etc.).
-			 */
-			PeopleCodeParser.ExprDotAccessContext exprCtx =
-				(PeopleCodeParser.ExprDotAccessContext)ctx.expr();
-
-			String methodName = exprCtx.id().getText();
-			MemPointer objPointer = getMemPointer(exprCtx.expr());
-			PTAppClassObject obj = (PTAppClassObject)objPointer.dereference();
+		if(ptdt instanceof PTSysFunc) {
+			((PTSysFunc)ptdt).invoke();
+		} else {
+			ExecContext eCtx = ((PTCallable)ptdt).eCtx;
 
 			/**
 			 * Record field references beyond a certain recursion level
@@ -262,21 +223,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			 * have yet to have their record defns loaded (note that they may
 			 * already be loaded anyway if they were referenced elsewhere).
 			 */
-			for(PeopleCodeProg p : obj.progDefn.referencedProgs) {
+			for(PeopleCodeProg p : eCtx.prog.referencedProgs) {
 				for(Map.Entry<Integer, Reference> cursor : p.progRefsTable.entrySet()) {
 					if(cursor.getValue().isRecordFieldRef) {
 						DefnCache.getRecord(cursor.getValue().RECNAME);
 					}
 				}
 			}
-
-			ExecContext methodCtx = new AppClassObjExecContext(obj, methodName);
-			this.supervisor.runImmediately(methodCtx);
-
-		} else {
-			throw new EntInterpretException("Encountered unexpected expr type " +
-				"preceding function call", ctx.expr().getText(),
-					ctx.expr().getStart().getLine());
+			this.supervisor.runImmediately(eCtx);
 		}
 
 		/**
@@ -285,7 +239,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * must be the null separator (PeopleCode funcs can only return 1 value).
 		 */
 	    MemPointer ptr = Environment.popFromCallStack();
-
 		if(ptr != null) {
 			setMemPointer(ctx, ptr);
 		}
@@ -394,7 +347,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			setMemPointer(ctx, ptr);
 
 		} else if(ctx.GENERIC_ID() != null) {
-			if(PSDefn.defnLiteralReservedWordsTable.containsKey(
+
+			/**
+			 * IMPORTANT NOTE: I believe it is possible to override system functions.
+			 * The checks on GENERIC_ID below should be run in order of lowest scope
+			 * to highest scope for this reason.
+			 */
+			if(((PTRecord)ComponentBuffer.searchRecordPtr.dereference()).recDefn
+						.RECNAME.equals(ctx.GENERIC_ID().getText())) {
+				/**
+				 * Detect references to search record buffer.
+				 */
+				setMemPointer(ctx, ComponentBuffer.searchRecordPtr);
+
+			} else if(PSDefn.defnLiteralReservedWordsTable.containsKey(
 				ctx.GENERIC_ID().getText().toUpperCase())) {
 				/**
 				 * Detect defn literal reserved words (i.e.,
@@ -402,12 +368,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				 */
 				setMemPointer(ctx, Environment.DEFN_LITERAL);
 
-			} else if(((PTRecord)ComponentBuffer.searchRecordPtr.dereference()).recDefn
-						.RECNAME.equals(ctx.GENERIC_ID().getText())) {
+			} else if(Environment.getSystemFuncPtr(ctx.GENERIC_ID().getText()) != null) {
 				/**
-				 * Detect references to search record buffer.
+				 * Detect system function references.
 				 */
-				setMemPointer(ctx, ComponentBuffer.searchRecordPtr);
+				setMemPointer(ctx, Environment.getSystemFuncPtr(
+						ctx.GENERIC_ID().getText()));
 			}
 		}
 		return null;

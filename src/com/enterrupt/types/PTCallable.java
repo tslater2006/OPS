@@ -13,7 +13,7 @@ public class PTCallable implements PTDataType {
 		this.eCtx = e;
 	}
 
-	public MemPointer access(String s) {
+	public Pointer access(String s) {
 		throw new EntDataTypeException("Encountered illegal access(s) call on "
 			+ "a PTCallable object.");
 	}

@@ -168,7 +168,8 @@ public class Component {
     public void loadAndRunRecordPConSearchRecord() {
 
 		Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
-		ComponentBuffer.searchRecordPtr = new MemPointer(new PTRecord(recDefn));
+		ComponentBuffer.searchRecordPtr = new CBufferPointer(
+			new PTCBufferRecord(recDefn));
 
 		/**
 		 * Record PC should be loaded at this time only if the search record

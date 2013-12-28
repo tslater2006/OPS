@@ -37,7 +37,7 @@ public abstract class ExecContext {
 		this.refEnviStack.pop();
 	}
 
-    public void declareLocalVar(String id, MemPointer p) {
+    public void declareLocalVar(String id, Pointer p) {
         RefEnvi topMostRefEnvi = this.refEnviStack.peekFirst();
 		if(!(topMostRefEnvi instanceof LocalRefEnvi)) {
 			throw new EntVMachRuntimeException("Attempted to declare a local variable " +
@@ -46,7 +46,7 @@ public abstract class ExecContext {
         topMostRefEnvi.declareVar(id, p);
     }
 
-    public MemPointer resolveIdentifier(String id) {
+    public Pointer resolveIdentifier(String id) {
 
         /**
          * Search through the stack of referencing environments;

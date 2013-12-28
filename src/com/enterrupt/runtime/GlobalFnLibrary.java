@@ -12,10 +12,10 @@ public class GlobalFnLibrary {
     /** Utility functions                */
     /*************************************/
 
-    private static ArrayList<MemPointer> getArgsFromCallStack() {
+    private static ArrayList<Pointer> getArgsFromCallStack() {
 
-        ArrayList<MemPointer> args = new ArrayList<MemPointer>();
-        MemPointer p;
+        ArrayList<Pointer> args = new ArrayList<Pointer>();
+        Pointer p;
         while((p = Environment.peekAtCallStack()) != null) {
             args.add(Environment.popFromCallStack());
         }
@@ -29,8 +29,8 @@ public class GlobalFnLibrary {
 	/**
 	 * This is a shared function used by logical PeopleCode functions (tests for
 	 * blank values).
-     * TODO: The PS documentation states that 0 in a required numeric field should be
-	 * considered as not containing a value.
+	 * IMPORTANT: Use this: http://it.toolbox.com/blogs/spread-knowledge/understanding-blanknull-field-values-for-using-with-all-and-none-peoplecode-functions-40672
+	 * as a reference for null/blank rules with PeopleSoft data types.
 	 */
 	private static boolean doesContainValue(PTDataType ptdt) {
 		if(ptdt instanceof PTField
@@ -53,7 +53,7 @@ public class GlobalFnLibrary {
      * if one or more contain a value.
      */
     public static void PT_None() {
-        for(MemPointer arg : getArgsFromCallStack()) {
+        for(Pointer arg : getArgsFromCallStack()) {
 			if(doesContainValue(arg.dereference())) {
 	        	Environment.pushToCallStack(Environment.FALSE);
 	            return;
@@ -67,7 +67,7 @@ public class GlobalFnLibrary {
 	 * if one or more do not.
 	 */
     public static void PT_All() {
-        for(MemPointer arg : getArgsFromCallStack()) {
+        for(Pointer arg : getArgsFromCallStack()) {
 			if(!doesContainValue(arg.dereference())) {
 	        	Environment.pushToCallStack(Environment.FALSE);
 	            return;
@@ -97,7 +97,7 @@ public class GlobalFnLibrary {
      */
     public static void PT_IsModalComponent() {
 
-        ArrayList<MemPointer> args = getArgsFromCallStack();
+        ArrayList<Pointer> args = getArgsFromCallStack();
 
         // Expecting no arguments.
         if(args.size() != 0) {
@@ -109,15 +109,15 @@ public class GlobalFnLibrary {
 
 	public static void PT_CreateRecord() {
 
-        ArrayList<MemPointer> args = getArgsFromCallStack();
+        ArrayList<Pointer> args = getArgsFromCallStack();
 
 		if(args.size() != 1 || (!(args.get(0).dereference() instanceof PTString))) {
 			throw new EntVMachRuntimeException("Expected single StringPtr arg to CreateRecord.");
 		}
 
-		PTRecord recObj = new PTRecord(DefnCache.getRecord(
+		PTRecord recObj = new PTFreeRecord(DefnCache.getRecord(
 			((PTString)args.get(0).dereference()).value()));
 
-		Environment.pushToCallStack(new MemPointer(recObj));
+		Environment.pushToCallStack(new StdPointer(recObj));
 	}
 }

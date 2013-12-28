@@ -32,7 +32,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private CommonTokenStream tokens;
 	private InterpretSupervisor supervisor;
 
-	private ParseTreeProperty<MemPointer> memPointers;
+	private ParseTreeProperty<Pointer> pointers;
 	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
 	private IEmission lastEmission;
@@ -43,30 +43,30 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.eCtx = e;
 		this.tokens = e.prog.tokenStream;
 		this.supervisor = s;
-		this.memPointers = new ParseTreeProperty<MemPointer>();
+		this.pointers = new ParseTreeProperty<Pointer>();
 		this.evalConstructStack = new Stack<EvaluateConstruct>();
 	}
 
-	private void setMemPointer(ParseTree node, MemPointer ptr) {
+	private void setPointer(ParseTree node, Pointer ptr) {
 		if(ptr == null) {
 			throw new EntVMachRuntimeException("Attempted to set the memory pointer to null " +
 				"for a node: " + node.getText());
 		}
-		this.memPointers.put(node, ptr);
+		this.pointers.put(node, ptr);
 	}
 
-	private MemPointer getMemPointer(ParseTree node) {
-		if(this.memPointers.get(node) == null) {
+	private Pointer getPointer(ParseTree node) {
+		if(this.pointers.get(node) == null) {
 			throw new EntVMachRuntimeException("Attempted to get the memory pointer for " +
 				"for a node, encountered null: " + node.getText());
 		}
-		return this.memPointers.get(node);
+		return this.pointers.get(node);
 	}
 
 	// Bubble-up operations should not fail in the event of nulls, unlike normal accesses.
-	private void bubbleUpMemPointer(ParseTree src, ParseTree dest) {
-		if(this.memPointers.get(src) != null) {
-			this.memPointers.put(dest, this.memPointers.get(src));
+	private void bubbleUpPointer(ParseTree src, ParseTree dest) {
+		if(this.pointers.get(src) != null) {
+			this.pointers.put(dest, this.pointers.get(src));
 		}
 	}
 
@@ -124,7 +124,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// Get value of conditional expression.
 		visit(ctx.ifStmt().expr());
-		boolean exprResult = ((PTBoolean) getMemPointer(ctx.ifStmt()
+		boolean exprResult = ((PTBoolean) getPointer(ctx.ifStmt()
 			.expr()).dereference()).value();
 
 		// If expression evaluates to true, visit the conditional body;
@@ -150,10 +150,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
 		this.emitStmt(ctx);
 		visit(ctx.expr(1));
-		MemPointer target = getMemPointer(ctx.expr(1));
+		Pointer target = getPointer(ctx.expr(1));
 		visit(ctx.expr(0));
-		MemPointer pointer = getMemPointer(ctx.expr(0));
-		pointer.assign(target.dereference());
+		Pointer destPtr = getPointer(ctx.expr(0));
+		destPtr.assign(target.dereference());
 		return null;
 	}
 
@@ -169,19 +169,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprParenthesized(PeopleCodeParser.ExprParenthesizedContext ctx) {
 		visit(ctx.expr());
-		bubbleUpMemPointer(ctx.expr(), ctx);
+		bubbleUpPointer(ctx.expr(), ctx);
 		return null;
 	}
 
 	public Void visitExprLiteral(PeopleCodeParser.ExprLiteralContext ctx) {
 		visit(ctx.literal());
-		bubbleUpMemPointer(ctx.literal(), ctx);
+		bubbleUpPointer(ctx.literal(), ctx);
 		return null;
 	}
 
 	public Void visitExprId(PeopleCodeParser.ExprIdContext ctx) {
 		visit(ctx.id());
-		bubbleUpMemPointer(ctx.id(), ctx);
+		bubbleUpPointer(ctx.id(), ctx);
 		return null;
 	}
 
@@ -189,7 +189,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 
-		PTDataType ptdt = getMemPointer(ctx.expr()).dereference();
+		PTDataType ptdt = getPointer(ctx.expr()).dereference();
 
 		if(!(ptdt instanceof PTCallable || ptdt instanceof PTSysFunc)) {
 			throw new EntVMachRuntimeException("Encountered non-callable data type "
@@ -205,7 +205,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			visit(ctx.exprList());
 			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 				visit(argCtx);
-				Environment.pushToCallStack(getMemPointer(argCtx));
+				Environment.pushToCallStack(getPointer(argCtx));
 			}
 		}
 
@@ -238,9 +238,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * did not emit a return value. If it's non-null, the next item on the stack
 		 * must be the null separator (PeopleCode funcs can only return 1 value).
 		 */
-	    MemPointer ptr = Environment.popFromCallStack();
+	    Pointer ptr = Environment.popFromCallStack();
 		if(ptr != null) {
-			setMemPointer(ctx, ptr);
+			setPointer(ctx, ptr);
 		}
 
 		if(ptr != null && (Environment.popFromCallStack() != null)) {
@@ -253,7 +253,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprCreate(PeopleCodeParser.ExprCreateContext ctx) {
 		visit(ctx.createInvocation());
-		bubbleUpMemPointer(ctx.createInvocation(), ctx);
+		bubbleUpPointer(ctx.createInvocation(), ctx);
 		return null;
 	}
 
@@ -263,26 +263,26 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		visit(ctx.expr());
 		visit(ctx.id());
 
-		MemPointer exprPtr = getMemPointer(ctx.expr());
-		MemPointer accessedPtr = exprPtr.dereference().access(ctx.id().getText());
-		setMemPointer(ctx, accessedPtr);
+		Pointer exprPtr = getPointer(ctx.expr());
+		Pointer accessedPtr = exprPtr.dereference().access(ctx.id().getText());
+		setPointer(ctx, accessedPtr);
 
 		return null;
 	}
 
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
 		visit(ctx.expr(0));
-		PTDataType p1 = getMemPointer(ctx.expr(0)).dereference();
+		PTDataType p1 = getPointer(ctx.expr(0)).dereference();
 		visit(ctx.expr(1));
-		PTDataType p2 = getMemPointer(ctx.expr(1)).dereference();
+		PTDataType p2 = getPointer(ctx.expr(1)).dereference();
 
-		MemPointer result;
+		Pointer result;
 		if(p1.equals(p2)) {
 			result = Environment.TRUE;
 		} else {
 			result = Environment.FALSE;
 		}
-		setMemPointer(ctx, result);
+		setPointer(ctx, result);
 		log.debug("Compared for equality: {}, result={}", ctx.getText(), result.dereference());
 		return null;
 	}
@@ -291,17 +291,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.op.getText().equals("Or")) {
 			visit(ctx.expr(0));
-			PTBoolean lhs = (PTBoolean)getMemPointer(ctx.expr(0)).dereference();
+			PTBoolean lhs = (PTBoolean)getPointer(ctx.expr(0)).dereference();
 
 			/**
 			 * Short-circuit evaluation: if lhs is true, this expression is true,
 			 * otherwise evaluate rhs and bubble up its value.
 			 */
 			if(lhs.value()) {
-				setMemPointer(ctx, Environment.TRUE);
+				setPointer(ctx, Environment.TRUE);
 			} else {
 				visit(ctx.expr(1));
-				setMemPointer(ctx, getMemPointer(ctx.expr(1)));
+				setPointer(ctx, getPointer(ctx.expr(1)));
 			}
 		} else {
 			throw new EntInterpretException("Unsupported boolean comparison operation",
@@ -339,12 +339,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
 		if(ctx.SYS_VAR_ID() != null) {
-			MemPointer ptr = Environment.getSystemVar(ctx.getText());
-			setMemPointer(ctx, ptr);
+			Pointer ptr = Environment.getSystemVar(ctx.getText());
+			setPointer(ctx, ptr);
 
 		} else if(ctx.VAR_ID() != null) {
-			MemPointer ptr = eCtx.resolveIdentifier(ctx.getText());
-			setMemPointer(ctx, ptr);
+			Pointer ptr = eCtx.resolveIdentifier(ctx.getText());
+			setPointer(ctx, ptr);
 
 		} else if(ctx.GENERIC_ID() != null) {
 
@@ -358,7 +358,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				/**
 				 * Detect references to search record buffer.
 				 */
-				setMemPointer(ctx, ComponentBuffer.searchRecordPtr);
+				setPointer(ctx, ComponentBuffer.searchRecordPtr);
 
 			} else if(PSDefn.defnLiteralReservedWordsTable.containsKey(
 				ctx.GENERIC_ID().getText().toUpperCase())) {
@@ -366,13 +366,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				 * Detect defn literal reserved words (i.e.,
 				 * "Menu" in "Menu.SA_LEARNER_SERVICES").
 				 */
-				setMemPointer(ctx, Environment.DEFN_LITERAL);
+				setPointer(ctx, Environment.DEFN_LITERAL);
 
 			} else if(Environment.getSystemFuncPtr(ctx.GENERIC_ID().getText()) != null) {
 				/**
 				 * Detect system function references.
 				 */
-				setMemPointer(ctx, Environment.getSystemFuncPtr(
+				setPointer(ctx, Environment.getSystemFuncPtr(
 						ctx.GENERIC_ID().getText()));
 			}
 		}
@@ -383,17 +383,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.IntegerLiteral() != null) {
 
-			MemPointer ptr = Environment.getFromLiteralPool(
+			Pointer ptr = Environment.getFromLiteralPool(
 				new Integer(ctx.IntegerLiteral().getText()));
-			setMemPointer(ctx, ptr);
+			setPointer(ctx, ptr);
 
 		} else if(ctx.BoolLiteral() != null) {
 
 			String b = ctx.BoolLiteral().getText();
 			if(b.equals("True") || b.equals("true")) {
-				setMemPointer(ctx, Environment.TRUE);
+				setPointer(ctx, Environment.TRUE);
 			} else {
-				setMemPointer(ctx, Environment.FALSE);
+				setPointer(ctx, Environment.FALSE);
 			}
 
 		} else if(ctx.DecimalLiteral() != null) {
@@ -422,11 +422,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			log.debug("Declaring identifier ({}) with scope {} and type {}.",
 				idCtx.VAR_ID().getText(), scope, ctx.varType().getText());
 			/**
-			 * IMPORTANT: The MemPointer must cloned for each variable, otherwise
+			 * IMPORTANT: The Pointer must cloned for each variable, otherwise
 			 * each identifier will point to the same target.
 			 */
 			this.declareIdentifier(scope, idCtx.VAR_ID().getText(),
-				getMemPointer(ctx.varType()).clone());
+				getPointer(ctx.varType()));
 		}
 		return null;
 	}
@@ -435,39 +435,38 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.appClassPath() != null) {
 			visit(ctx.appClassPath());
-			setMemPointer(ctx, getMemPointer(ctx.appClassPath()));
+			setPointer(ctx, getPointer(ctx.appClassPath()));
 		} else {
 
-			MemPointer nestedTypePtr = null;
+			Pointer nestedTypePtr = null;
 			if(ctx.varType() != null) {
 				if(!ctx.GENERIC_ID().getText().equals("array")) {
 					throw new EntVMachRuntimeException("Encountered non-array var " +
 						"type preceding 'of' clause: " + ctx.getText());
 				}
 				visit(ctx.varType());
-				nestedTypePtr = getMemPointer(ctx.varType());
+				nestedTypePtr = getPointer(ctx.varType());
 			}
 
-			MemPointer ptr;
+			Pointer ptr;
 			switch(ctx.GENERIC_ID().getText()) {
 				case "array":
-					// no need for flag here; it's set to ARRAY in constructor.
-					ptr = new MemPointer(nestedTypePtr);	break;
+					ptr = new ArrayPointer(nestedTypePtr);		break;
 				case "string":
-					ptr = new MemPointer(MFlag.STRING);		break;
+					ptr = new StdPointer(MFlag.STRING);			break;
 				case "date":
-					ptr = new MemPointer(MFlag.DATE);		break;
+					ptr = new StdPointer(MFlag.DATE);			break;
 				case "integer":
-					ptr = new MemPointer(MFlag.INTEGER);	break;
+					ptr = new StdPointer(MFlag.INTEGER);		break;
 				case "Record":
-					ptr = new MemPointer(MFlag.RECORD);		break;
+					ptr = new StdPointer(MFlag.RECORD);			break;
 				case "Rowset":
-					ptr = new MemPointer(MFlag.ROWSET);		break;
+					ptr = new StdPointer(MFlag.ROWSET);			break;
 				default:
 					throw new EntVMachRuntimeException("Unexpected data type: " +
 						ctx.GENERIC_ID().getText());
 			}
-			setMemPointer(ctx, ptr);
+			setPointer(ctx, ptr);
 		}
 		return null;
 	}
@@ -477,7 +476,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 		EvaluateConstruct evalConstruct = new EvaluateConstruct(
-			getMemPointer(ctx.expr()).dereference());
+			getPointer(ctx.expr()).dereference());
 		this.evalConstructStack.push(evalConstruct);
 
 		List<PeopleCodeParser.WhenBranchContext> branches = ctx.whenBranch();
@@ -509,7 +508,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		EvaluateConstruct evalConstruct = this.evalConstructStack.peek();
 		PTDataType p1 = evalConstruct.baseExpr;
 		visit(ctx.expr());
-		PTDataType p2 = getMemPointer(ctx.expr()).dereference();
+		PTDataType p2 = getPointer(ctx.expr()).dereference();
 
 		/**
 		 * If a previous branch evaluated to true and we're here, that means
@@ -538,24 +537,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		AppClassPeopleCodeProg progDefn =
 			(AppClassPeopleCodeProg)DefnCache.getProgram(("AppClassPC." +
 				ctx.getText() + ".OnExecute").replaceAll(":","."));
-		setMemPointer(ctx, new MemPointer(progDefn));
+		setPointer(ctx, new AppClassObjPointer(progDefn));
 		return null;
 	}
 
 	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
 
-		MemPointer ptr;
+		AppClassObjPointer ptr;
 		if(ctx.appClassPath() != null) {
 			visit(ctx.appClassPath());
-			ptr = getMemPointer(ctx.appClassPath());
+			ptr = (AppClassObjPointer) getPointer(ctx.appClassPath());
 		} else {
 			throw new EntVMachRuntimeException("Encountered create invocation without " +
 				"app class prefix; need to support this by resolving path to class.");
 		}
 
-		PTAppClassObject newObj = new PTAppClassObject(ptr.appClassTypeProg);
+		PTAppClassObject newObj = new PTAppClassObject(ptr.progDefn);
 		ptr.assign(newObj);
-		setMemPointer(ctx, ptr);
+		setPointer(ctx, ptr);
 
 		/**
 	     * Check for constructor; call it if it exists.
@@ -563,8 +562,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * declaration to ensure that the constructor (if it exists) is only called
 	     * when the appropriate number of arguments are supplied.
 		 */
-		String constructorName = ptr.appClassTypeProg.getClassName();
-		if(ptr.appClassTypeProg.methodEntryPoints.containsKey(constructorName)) {
+		String constructorName = ptr.progDefn.getClassName();
+		if(ptr.progDefn.methodEntryPoints.containsKey(constructorName)) {
 
 			/**
 			 * Load arguments to constructor onto call stack if
@@ -574,7 +573,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				visit(ctx.exprList());
 				for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 					visit(argCtx);
-	                Environment.pushToCallStack(getMemPointer(argCtx));
+	                Environment.pushToCallStack(getPointer(argCtx));
 				}
 			}
 
@@ -587,7 +586,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	private void declareIdentifier(String scope, String id, MemPointer ptr) {
+	private void declareIdentifier(String scope, String id, Pointer ptr) {
 		switch(scope) {
 			case "Local":
 				eCtx.declareLocalVar(id, ptr);

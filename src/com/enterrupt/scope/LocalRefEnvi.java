@@ -11,18 +11,18 @@ public class LocalRefEnvi extends RefEnvi {
 	}
 
 	private LocalRefEnvi.Type type;
-	private Map<String, MemPointer> localSymbolTable;
+	private Map<String, Pointer> localSymbolTable;
 
 	public LocalRefEnvi(LocalRefEnvi.Type t) {
 		this.type = t;
-		this.localSymbolTable = new HashMap<String, MemPointer>();
+		this.localSymbolTable = new HashMap<String, Pointer>();
 	}
 
 	/******************************************/
     /** Local ref environment operations.     */
 	/******************************************/
 
-	public void declareVar(String id, MemPointer ptr) {
+	public void declareVar(String id, Pointer ptr) {
 		if(this.isIdResolvable(id)) {
 			throw new EntVMachRuntimeException("Encountered attempt to re-declare " +
 				" variable (" + id + ") in local ref envi.");
@@ -30,7 +30,7 @@ public class LocalRefEnvi extends RefEnvi {
 		this.localSymbolTable.put(id, ptr);
 	}
 
-	public MemPointer resolveVar(String id) {
+	public Pointer resolveVar(String id) {
 		return this.localSymbolTable.get(id);
 	}
 

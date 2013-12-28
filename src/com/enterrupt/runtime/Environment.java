@@ -9,17 +9,17 @@ import org.apache.logging.log4j.*;
 
 public class Environment {
 
-	public static MemPointer TRUE;
-	public static MemPointer FALSE;
-	public static MemPointer DEFN_LITERAL;
+	public static Pointer TRUE;
+	public static Pointer FALSE;
+	public static Pointer DEFN_LITERAL;
 
-	private static HashMap<String, MemPointer> systemVarTable;
-	private static HashMap<String, MemPointer> systemFuncTable;
+	private static HashMap<String, Pointer> systemVarTable;
+	private static HashMap<String, Pointer> systemFuncTable;
 
-	private static HashMap<Integer, MemPointer> integerLiteralPool;
-	private static HashMap<String, MemPointer> stringLiteralPool;
+	private static HashMap<Integer, Pointer> integerLiteralPool;
+	private static HashMap<String, Pointer> stringLiteralPool;
 
-    private static Stack<MemPointer> callStack;
+    private static Stack<Pointer> callStack;
 
 	private static String[] supportedGlobalVars = {"%EmployeeId", "%OperatorId", "%Menu",
 					"%Component"};
@@ -30,23 +30,23 @@ public class Environment {
 
 		try {
 			// Load static boolean literals.
-			TRUE = new MemPointer(new PTBoolean(new Boolean(true)),
-				EnumSet.of(MFlag.READ_ONLY));
-			FALSE = new MemPointer(new PTBoolean(new Boolean(false)),
-				EnumSet.of(MFlag.READ_ONLY));
+			TRUE = new StdPointer(new PTBoolean(new Boolean(true)),
+				EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
+			FALSE = new StdPointer(new PTBoolean(new Boolean(false)),
+				EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
 
-			DEFN_LITERAL = new MemPointer(new PTDefnLiteral(),
+			DEFN_LITERAL = new StdPointer(new PTDefnLiteral(),
 				EnumSet.of(MFlag.READ_ONLY));
 
 			// Create memory pools for supported data types.
-			integerLiteralPool = new HashMap<Integer, MemPointer>();
-			stringLiteralPool = new HashMap<String, MemPointer>();
+			integerLiteralPool = new HashMap<Integer, Pointer>();
+			stringLiteralPool = new HashMap<String, Pointer>();
 
 			// Allocate space for system vars, mark each as read-only.
-			systemVarTable = new HashMap<String, MemPointer>();
+			systemVarTable = new HashMap<String, Pointer>();
 			for(String varName : supportedGlobalVars) {
-				systemVarTable.put(varName, new MemPointer(
-					new PTString(), EnumSet.of(MFlag.READ_ONLY)));
+				systemVarTable.put(varName, new StdPointer(
+					new PTString(), EnumSet.of(MFlag.READ_ONLY, MFlag.STRING)));
 			}
 
 			// Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
@@ -54,17 +54,17 @@ public class Environment {
 
 			/// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
 			Method[] methods = GlobalFnLibrary.class.getMethods();
-			systemFuncTable = new HashMap<String, MemPointer>();
+			systemFuncTable = new HashMap<String, Pointer>();
 			for(Method m : methods) {
 				if(m.getName().indexOf("PT_") == 0) {
 					systemFuncTable.put(m.getName().substring(3),
-						new MemPointer(new PTSysFunc(
+						new StdPointer(new PTSysFunc(
 							GlobalFnLibrary.class.getMethod(m.getName()))));
 				}
 			}
 
 			// Initialize the call stack.
-			callStack = new Stack<MemPointer>();
+			callStack = new Stack<Pointer>();
 
         } catch(java.lang.NoSuchMethodException nsme) {
             log.fatal(nsme.getMessage(), nsme);
@@ -72,18 +72,18 @@ public class Environment {
         }
 	}
 
-    public static void pushToCallStack(MemPointer p) {
+    public static void pushToCallStack(Pointer p) {
         log.debug("Push\tCallStack\t" + (p == null ? "null" : p));
         callStack.push(p);
     }
 
-    public static MemPointer popFromCallStack() {
-        MemPointer p = callStack.pop();
+    public static Pointer popFromCallStack() {
+        Pointer p = callStack.pop();
         log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p));
         return p;
     }
 
-    public static MemPointer peekAtCallStack() {
+    public static Pointer peekAtCallStack() {
         return callStack.peek();
     }
 
@@ -92,11 +92,11 @@ public class Environment {
 	}
 
 	public static void setSystemVar(String var, String value) {
-		systemVarTable.get(var).systemAssign(new PTString(value));
+		((StdPointer)systemVarTable.get(var)).systemAssign(new PTString(value));
 	}
 
-	public static MemPointer getSystemVar(String var) {
-		MemPointer ptr = systemVarTable.get(var);
+	public static Pointer getSystemVar(String var) {
+		Pointer ptr = systemVarTable.get(var);
 		if(ptr == null) {
 			throw new EntVMachRuntimeException("Attempted to access a system var "
 			 + "that is undefined: " + var);
@@ -104,23 +104,23 @@ public class Environment {
 		return ptr;
 	}
 
-	public static MemPointer getSystemFuncPtr(String func) {
+	public static Pointer getSystemFuncPtr(String func) {
 		return systemFuncTable.get(func);
 	}
 
-	public static MemPointer getFromLiteralPool(Integer val) {
-		MemPointer p = integerLiteralPool.get(val);
+	public static Pointer getFromLiteralPool(Integer val) {
+		Pointer p = integerLiteralPool.get(val);
 		if(p == null) {
-			p = new MemPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY));
+			p = new StdPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY));
 			integerLiteralPool.put(val, p);
 		}
 		return p;
 	}
 
-	public static MemPointer getFromLiteralPool(String val) {
-		MemPointer p = stringLiteralPool.get(val);
+	public static Pointer getFromLiteralPool(String val) {
+		Pointer p = stringLiteralPool.get(val);
 		if(p == null) {
-			p = new MemPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY));
+			p = new StdPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY));
 			stringLiteralPool.put(val, p);
 		}
 		return p;

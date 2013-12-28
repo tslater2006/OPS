@@ -20,7 +20,7 @@ public class ScrollBuffer implements IStreamableBuffer {
 	 * with the buffer objects/concepts I've written to-date. Punting
 	 * for now.
 	 */
-	public Map<String, MemPointer> recEntryTable;
+	public Map<String, CBufferPointer> recEntryTable;
 
     public HashMap<String, ScrollBuffer> scrollBufferTable;
     public ArrayList<ScrollBuffer> orderedScrollBuffers;
@@ -39,7 +39,7 @@ public class ScrollBuffer implements IStreamableBuffer {
         this.orderedRecBuffers = new ArrayList<RecordBuffer>();
         this.scrollBufferTable = new HashMap<String, ScrollBuffer>();
         this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
-		this.recEntryTable = new HashMap<String, MemPointer>();
+		this.recEntryTable = new HashMap<String, CBufferPointer>();
     }
 
     public void addPageField(PgToken tok) {

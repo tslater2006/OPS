@@ -16,11 +16,11 @@ public class PTAppClassObject implements PTDataType {
 		this.persistentRefEnvi = new AppClassObjRefEnvi();
 
 		for(Map.Entry<String, Void> cursor : prog.instanceIdTable.entrySet()) {
-			this.persistentRefEnvi.declareVar(cursor.getKey(), new MemPointer());
+			this.persistentRefEnvi.declareVar(cursor.getKey(), new StdPointer());
 		}
 	}
 
-	public MemPointer access(String s) {
+	public Pointer access(String s) {
 		if(!progDefn.methodEntryPoints.containsKey(s)) {
 			throw new EntDataTypeException("Call to access(s) on " +
 				"PTAppClassObject found no methods for s="+s);
@@ -30,7 +30,7 @@ public class PTAppClassObject implements PTDataType {
 		 * TODO: Eliminate unnecessary allocation by having the underlying
 		 * program definition create these pointers during initialization.
 		 */
-        return new MemPointer(new PTCallable(new AppClassObjExecContext(this, s)));
+        return new StdPointer(new PTCallable(new AppClassObjExecContext(this, s)));
 	}
 
 	public boolean equals(Object obj) {

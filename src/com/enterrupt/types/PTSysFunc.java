@@ -26,7 +26,7 @@ public class PTSysFunc implements PTDataType {
         }
 	}
 
-	public MemPointer access(String s) {
+	public Pointer access(String s) {
 		throw new EntDataTypeException("Illegal call to access(s) on " +
 			"PTSysFunc; s=" + s);
 	}

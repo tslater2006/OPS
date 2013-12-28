@@ -6,17 +6,17 @@ import com.enterrupt.runtime.*;
 
 public class AppClassObjRefEnvi extends RefEnvi {
 
-	private Map<String, MemPointer> instanceSymbolTable;
+	private Map<String, Pointer> instanceSymbolTable;
 
 	public AppClassObjRefEnvi() {
-		this.instanceSymbolTable = new HashMap<String, MemPointer>();
+		this.instanceSymbolTable = new HashMap<String, Pointer>();
 	}
 
 	/******************************************/
     /** Instance ref environment operations.  */
 	/******************************************/
 
-	public void declareVar(String id, MemPointer ptr) {
+	public void declareVar(String id, Pointer ptr) {
 		if(this.isIdResolvable(id)) {
 			throw new EntVMachRuntimeException("Encountered attempt to re-declare " +
 				" variable (" + id + ") in local ref envi.");
@@ -24,7 +24,7 @@ public class AppClassObjRefEnvi extends RefEnvi {
 		this.instanceSymbolTable.put(id, ptr);
 	}
 
-	public MemPointer resolveVar(String id) {
+	public Pointer resolveVar(String id) {
 		return this.instanceSymbolTable.get(id);
 	}
 

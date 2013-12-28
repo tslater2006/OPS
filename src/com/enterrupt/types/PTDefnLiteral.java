@@ -13,7 +13,7 @@ public class PTDefnLiteral implements PTDataType {
 	 * resolve to the string itself; i.e., Menu.SA_LEARNER_SERVICES
 	 * resolves to "SA_LEARNER_SERVICES".
 	 */
-	public MemPointer access(String s) {
+	public Pointer access(String s) {
 		return Environment.getFromLiteralPool(s);
 	}
 

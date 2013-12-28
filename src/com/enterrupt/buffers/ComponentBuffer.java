@@ -13,7 +13,7 @@ public class ComponentBuffer {
 	public static int currScrollLevel;
 	public static ScrollBuffer currSB;
 	public static ScrollBuffer compBuffer;
-	public static MemPointer searchRecordPtr;
+	public static CBufferPointer searchRecordPtr;
 
 	private static Logger log = LogManager.getLogger(ComponentBuffer.class.getName());
 

@@ -65,6 +65,7 @@ public class StdPointer extends Pointer {
 	}
 
 	public boolean typeCheck(PTDataType o) {
-		return (o instanceof PTString && this.flags.contains(MFlag.STRING));
+		return (o instanceof PTString && this.flags.contains(MFlag.STRING))
+			|| (o instanceof PTFreeRecord && this.flags.contains(MFlag.RECORD));
 	}
 }

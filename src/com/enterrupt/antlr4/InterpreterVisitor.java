@@ -153,7 +153,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		Pointer target = getPointer(ctx.expr(1));
 		visit(ctx.expr(0));
 		Pointer destPtr = getPointer(ctx.expr(0));
-		destPtr.assign(target.dereference());
+
+		/**
+		 * Detect assignments to component buffer fields; i.e.,
+		 * RECORD.FIELD = "4" should write "4" to the data type pointed
+		 * to by the field, not the field itself.
+		 */
+		if(destPtr instanceof CBufferPointer &&
+			destPtr.dereference() instanceof PTCBufferField) {
+			PTCBufferField fld = (PTCBufferField) destPtr.dereference();
+			fld.valuePtr.assign(target.dereference());
+		} else {
+			destPtr.assign(target.dereference());
+		}
+
 		return null;
 	}
 

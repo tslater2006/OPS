@@ -111,7 +111,8 @@ public class Environment {
 	public static Pointer getFromLiteralPool(Integer val) {
 		Pointer p = integerLiteralPool.get(val);
 		if(p == null) {
-			p = new StdPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY));
+			p = new StdPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY,
+						MFlag.INTEGER));
 			integerLiteralPool.put(val, p);
 		}
 		return p;
@@ -120,7 +121,8 @@ public class Environment {
 	public static Pointer getFromLiteralPool(String val) {
 		Pointer p = stringLiteralPool.get(val);
 		if(p == null) {
-			p = new StdPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY));
+			p = new StdPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY,
+						MFlag.STRING));
 			stringLiteralPool.put(val, p);
 		}
 		return p;

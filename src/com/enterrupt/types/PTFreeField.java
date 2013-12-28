@@ -5,8 +5,6 @@ import java.util.*;
 
 public class PTFreeField extends PTField implements PTDataType {
 
-	public Pointer valuePtr;
-
 	public PTFreeField() {
 		/**
 		 * TODO: Determine type based on field metadata.

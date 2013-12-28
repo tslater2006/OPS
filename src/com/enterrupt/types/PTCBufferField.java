@@ -5,8 +5,6 @@ import java.util.*;
 
 public class PTCBufferField extends PTField implements PTDataType {
 
-	public Pointer valuePtr;
-
 	public PTCBufferField() {
 		/**
 		 * TODO: Determine type based on field metadata.

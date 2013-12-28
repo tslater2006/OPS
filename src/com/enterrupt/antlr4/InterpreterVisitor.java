@@ -413,21 +413,21 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		String scope = ctx.varScope.getText();
 
 		List<PeopleCodeParser.VarDeclaratorContext> varsToDeclare = ctx.varDeclarator();
-		String[] ids = new String[varsToDeclare.size()];
-		int i = 0;
 		for(PeopleCodeParser.VarDeclaratorContext idCtx : varsToDeclare) {
-			ids[i] = idCtx.VAR_ID().getText();
 			if(idCtx.expr() != null) {
 				throw new EntVMachRuntimeException("Initialization during var declaration is " +
 					"not yet supported.");
 			}
-			i++;
+
+			log.debug("Declaring identifier ({}) with scope {} and type {}.",
+				idCtx.VAR_ID().getText(), scope, ctx.varType().getText());
+			/**
+			 * IMPORTANT: The MemPointer must cloned for each variable, otherwise
+			 * each identifier will point to the same target.
+			 */
+			this.declareIdentifier(scope, idCtx.VAR_ID().getText(),
+				getMemPointer(ctx.varType()).clone());
 		}
-
-		log.debug("Declaring identifiers ({}) with scope {} and type {}.",
-			ids, scope, ctx.varType().getText());
-		this.declareIdentifiers(scope, ids, getMemPointer(ctx.varType()));
-
 		return null;
 	}
 
@@ -459,6 +459,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 					ptr = new MemPointer(MFlag.DATE);		break;
 				case "integer":
 					ptr = new MemPointer(MFlag.INTEGER);	break;
+				case "Record":
+					ptr = new MemPointer(MFlag.RECORD);		break;
+				case "Rowset":
+					ptr = new MemPointer(MFlag.ROWSET);		break;
 				default:
 					throw new EntVMachRuntimeException("Unexpected data type: " +
 						ctx.GENERIC_ID().getText());
@@ -583,26 +587,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	private void declareIdentifiers(String scope, String[] ids, MemPointer ptr) {
-
-		if(ids.length > 1) {
-			/**
-			 * TODO: Create copies of the data type for each ids
-			 * in the array.
-			 */
-			throw new EntVMachRuntimeException("No support for declaring " +
-				"multiple ids at once.");
-		}
-
+	private void declareIdentifier(String scope, String id, MemPointer ptr) {
 		switch(scope) {
 			case "Local":
-				eCtx.declareLocalVar(ids[0], ptr);
+				eCtx.declareLocalVar(id, ptr);
 				break;
 			case "Component":
-				RefEnvi.declareComponentVar(ids[0], ptr);
+				RefEnvi.declareComponentVar(id, ptr);
 				break;
 			case "Global":
-				RefEnvi.declareGlobalVar(ids[0], ptr);
+				RefEnvi.declareGlobalVar(id, ptr);
 				break;
 			default:
 				throw new EntVMachRuntimeException("Encountered unexpected variable " +

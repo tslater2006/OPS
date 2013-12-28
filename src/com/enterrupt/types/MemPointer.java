@@ -5,12 +5,26 @@ import com.enterrupt.pt.peoplecode.*;
 
 public class MemPointer {
 
-	private EnumSet<MFlag> flags;
-	private PTDataType target;
+	/**
+	 * IMPORTANT: Class fields added to / modified in
+	 * this block must be accompanied by the appropriate
+	 * changes in the clone() method.
+	 */
+	public EnumSet<MFlag> flags;
+	public PTDataType target;
 	public AppClassPeopleCodeProg appClassTypeProg;
 	public MemPointer nestedTypePtr;
 
 	public MemPointer() {}
+
+	public MemPointer clone() {
+		MemPointer p = new MemPointer();
+		p.flags = this.flags;
+		p.target = this.target;
+		p.appClassTypeProg = this.appClassTypeProg;
+		p.nestedTypePtr = this.nestedTypePtr;
+		return p;
+	}
 
 	public MemPointer(MFlag f) {
 		this.flags = EnumSet.of(f);

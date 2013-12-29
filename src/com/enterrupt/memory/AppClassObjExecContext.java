@@ -1,4 +1,4 @@
-package com.enterrupt.scope;
+package com.enterrupt.memory;
 
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.runtime.*;

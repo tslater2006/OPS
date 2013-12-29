@@ -1,4 +1,4 @@
-package com.enterrupt.scope;
+package com.enterrupt.memory;
 
 import java.util.*;
 import com.enterrupt.types.*;

@@ -4,7 +4,7 @@ import java.util.*;
 import java.lang.reflect.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
-import com.enterrupt.scope.*;
+import com.enterrupt.memory.*;
 import org.apache.logging.log4j.*;
 
 public class Environment {

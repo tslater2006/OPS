@@ -1,4 +1,4 @@
-package com.enterrupt.types;
+package com.enterrupt.memory;
 
 public enum MFlag {
 	READ_ONLY, CBUFFER,

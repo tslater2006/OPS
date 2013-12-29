@@ -5,6 +5,7 @@ import java.lang.StringBuilder;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.pages.*;
 import com.enterrupt.types.*;
+import com.enterrupt.memory.*;
 
 public class ScrollBuffer implements IStreamableBuffer {
 

@@ -3,8 +3,8 @@ package com.enterrupt.types;
 import com.enterrupt.pt.*;
 import java.util.*;
 import com.enterrupt.types.*;
+import com.enterrupt.memory.*;
 import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.scope.*;
 
 public class PTAppClassObject implements PTDataType {
 

@@ -1,5 +1,7 @@
 package com.enterrupt.types;
 
+import com.enterrupt.memory.*;
+
 public abstract class PTPrimitive<T> implements PTDataType {
 	public abstract T value();
     public abstract String toString();

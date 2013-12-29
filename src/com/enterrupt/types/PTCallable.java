@@ -3,7 +3,7 @@ package com.enterrupt.types;
 import com.enterrupt.pt.*;
 import java.util.*;
 import com.enterrupt.runtime.*;
-import com.enterrupt.scope.*;
+import com.enterrupt.memory.*;
 
 public class PTCallable implements PTDataType {
 

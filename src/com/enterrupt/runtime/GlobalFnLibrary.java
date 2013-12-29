@@ -3,6 +3,7 @@ package com.enterrupt.runtime;
 import java.util.*;
 import com.enterrupt.types.*;
 import org.apache.logging.log4j.*;
+import com.enterrupt.memory.*;
 
 public class GlobalFnLibrary {
 

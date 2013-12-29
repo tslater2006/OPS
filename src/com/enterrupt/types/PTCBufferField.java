@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
+import com.enterrupt.memory.*;
 
 public class PTCBufferField extends PTField implements PTDataType {
 

@@ -3,6 +3,7 @@ package com.enterrupt.types;
 import com.enterrupt.runtime.*;
 import java.lang.reflect.*;
 import org.apache.logging.log4j.*;
+import com.enterrupt.memory.*;
 
 public class PTSysFunc implements PTDataType {
 

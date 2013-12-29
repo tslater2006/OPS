@@ -3,6 +3,7 @@ package com.enterrupt.antlr4;
 import java.util.*;
 import java.lang.reflect.*;
 import com.enterrupt.types.*;
+import com.enterrupt.memory.*;
 import com.enterrupt.buffers.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.peoplecode.*;
@@ -11,7 +12,6 @@ import org.antlr.v4.runtime.tree.*;
 import org.antlr.v4.runtime.misc.Interval;
 import com.enterrupt.runtime.*;
 import com.enterrupt.trace.*;
-import com.enterrupt.scope.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.frontend.*;
 

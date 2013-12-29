@@ -1,6 +1,7 @@
-package com.enterrupt.types;
+package com.enterrupt.memory;
 
 import java.util.EnumSet;
+import com.enterrupt.types.*;
 
 public class CBufferPointer extends Pointer {
 

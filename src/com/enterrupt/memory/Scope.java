@@ -4,26 +4,26 @@ import java.util.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
 
-public class RefEnvi {
+public class Scope {
 
-	public enum Type {
+	public enum Lvl {
 		GLOBAL, COMPONENT,
 		PROGRAM_LOCAL, FUNCTION_LOCAL, METHOD_LOCAL,
 		APP_CLASS_OBJ_INSTANCE
 	}
 
-	private RefEnvi.Type type;
+	private Scope.Lvl level;
 	private Map<String, Pointer> symbolTable;
 
-	public RefEnvi(RefEnvi.Type t) {
-		this.type = t;
+	public Scope(Scope.Lvl l) {
+		this.level = l;
 		this.symbolTable = new HashMap<String, Pointer>();
 	}
 
 	public void declareVar(String id, Pointer ptr) {
 		if(this.isIdResolvable(id)) {
 			throw new EntVMachRuntimeException("Encountered attempt to re-declare " +
-				" variable (" + id + ") in ref envi of type " + this.type);
+				" variable (" + id + ") in scope level " + this.level);
 		}
 		this.symbolTable.put(id, ptr);
 	}

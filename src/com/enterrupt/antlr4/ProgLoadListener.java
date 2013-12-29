@@ -260,7 +260,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 	/**
 	 * Instance variable names must be saved now so that when a PTAppClassObject
-	 * is created, it can initialize its referencing environment with all of the
+	 * is created, it can initialize its scope with all of the
 	 * class's instance variables.
 	 * TODO: Also need to save type, public/private, etc.
 	 */

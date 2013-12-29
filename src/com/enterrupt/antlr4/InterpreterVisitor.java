@@ -101,17 +101,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitProgram(PeopleCodeParser.ProgramContext ctx) {
 
 		/**
-		 * App class programs do not get a fresh ref envi b/c they
-		 * are always loaded to manipulate an existing object's ref envi, which
-		 * has already been placed on the ref envi stack for this exec context. All
-		 * other programs get a fresh program-local referencing environment.
+		 * App class programs do not get a fresh scope b/c they
+		 * are always loaded to manipulate an existing object's scope, which
+		 * has already been placed on the scope stack for this exec context. All
+		 * other programs get a fresh program-local scope.
 		 */
 		if(!(this.eCtx.prog instanceof AppClassPeopleCodeProg)) {
-			this.eCtx.pushRefEnvi(new RefEnvi(RefEnvi.Type.PROGRAM_LOCAL));
+			this.eCtx.pushScope(new Scope(Scope.Lvl.PROGRAM_LOCAL));
 		}
 
 		visit(ctx.stmtList());
-		this.eCtx.popRefEnvi();
+		this.eCtx.popScope();
 		return null;
 	}
 
@@ -331,19 +331,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
 		this.emitStmt(ctx);
 
-		RefEnvi localRefEnvi = new RefEnvi(RefEnvi.Type.METHOD_LOCAL);
+		Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
 		List<String> formalParams = ((AppClassPeopleCodeProg)eCtx.prog).methodFormalParams.
 			get(ctx.GENERIC_ID().getText());
 
 		if(formalParams != null) {
 			for(String formalParamId : formalParams) {
-				localRefEnvi.declareVar(formalParamId, Environment.popFromCallStack());
+				localScope.declareVar(formalParamId, Environment.popFromCallStack());
 			}
 		}
 
-		eCtx.pushRefEnvi(localRefEnvi);
+		eCtx.pushScope(localScope);
 		visit(ctx.stmtList());
-		eCtx.popRefEnvi();
+		eCtx.popScope();
 
 		this.emitStmt("end-method");
 		return null;
@@ -610,10 +610,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				eCtx.declareLocalVar(id, ptr);
 				break;
 			case "Component":
-				Environment.componentRefEnvi.declareVar(id, ptr);
+				Environment.componentScope.declareVar(id, ptr);
 				break;
 			case "Global":
-				Environment.globalRefEnvi.declareVar(id, ptr);
+				Environment.globalScope.declareVar(id, ptr);
 				break;
 			default:
 				throw new EntVMachRuntimeException("Encountered unexpected variable " +

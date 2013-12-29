@@ -13,8 +13,8 @@ public class Environment {
 	public static Pointer FALSE;
 	public static Pointer DEFN_LITERAL;
 
-	public static RefEnvi globalRefEnvi;
-	public static RefEnvi componentRefEnvi;
+	public static Scope globalScope;
+	public static Scope componentScope;
 
 	private static HashMap<String, Pointer> systemVarTable;
 	private static HashMap<String, Pointer> systemFuncTable;
@@ -40,9 +40,9 @@ public class Environment {
 		DEFN_LITERAL = new StdPointer(new PTDefnLiteral(),
 			EnumSet.of(MFlag.READ_ONLY));
 
-		// Setup global and component referencing environments.
-		globalRefEnvi = new RefEnvi(RefEnvi.Type.GLOBAL);
-		componentRefEnvi = new RefEnvi(RefEnvi.Type.COMPONENT);
+		// Setup global and component scopes.
+		globalScope = new Scope(Scope.Lvl.GLOBAL);
+		componentScope = new Scope(Scope.Lvl.COMPONENT);
 
 		// Create memory pools for supported data types.
 		integerLiteralPool = new HashMap<Integer, Pointer>();

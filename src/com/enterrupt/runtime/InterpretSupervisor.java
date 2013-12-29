@@ -63,15 +63,15 @@ public class InterpretSupervisor {
 		interpreter.visit(context.startNode);
 
 		if(context instanceof ProgramExecContext &&
-			context.refEnviStack.size() > 0) {
-			throw new EntVMachRuntimeException("Expected all ref envi ptrs in the " +
+			context.scopeStack.size() > 0) {
+			throw new EntVMachRuntimeException("Expected all scope ptrs in the " +
 				"ProgramExecContext to be popped.");
 		}
 
 		if(context instanceof AppClassObjExecContext &&
-			context.refEnviStack.size() > 1) {
-			throw new EntVMachRuntimeException("Expected all ref envi ptrs except " +
-				"for the underlying object's persistent ref envi to be popped.");
+			context.scopeStack.size() > 1) {
+			throw new EntVMachRuntimeException("Expected all scope ptrs except " +
+				"for the underlying object's instance scope to be popped.");
 		}
 
 		TraceFileVerifier.submitEmission(new PCEnd(

@@ -11,61 +11,53 @@ public abstract class ExecContext {
 
 	public PeopleCodeProg prog;
 	public ParseTree startNode;
-
-	/**
-	 * For typical programs (Record, Page, Component), this stack will consist
-	 * of a ProgramLocal ref envi at the bottom and an optional FunctionLocal ref
-	 * envi at the top. For app class programs, this stack will consist of a reference
-	 * to an AppClassObject ref envi at the bottom for the object being modified
-	 * and an optional MethodLocal ref envi at the top.
-	 */
-	public LinkedList<RefEnvi> refEnviStack;
+	public LinkedList<Scope> scopeStack;
 
 	public ExecContext(PeopleCodeProg p) {
 		this.prog = p;
 		this.startNode = p.parseTree;
-		this.refEnviStack = new LinkedList<RefEnvi>();
+		this.scopeStack = new LinkedList<Scope>();
 	}
 
-	public void pushRefEnvi(RefEnvi r) {
-		// Place the ref envi at the front of the linked list.
-		this.refEnviStack.push(r);
+	public void pushScope(Scope s) {
+		// Place the scope at the front of the linked list.
+		this.scopeStack.push(s);
 	}
 
-	public void popRefEnvi() {
-		// Remove the ref envi from the front of the linked list.
-		this.refEnviStack.pop();
+	public void popScope() {
+		// Remove the scope from the front of the linked list.
+		this.scopeStack.pop();
 	}
 
     public void declareLocalVar(String id, Pointer p) {
-        RefEnvi topMostRefEnvi = this.refEnviStack.peekFirst();
-        topMostRefEnvi.declareVar(id, p);
+        Scope topMostScope = this.scopeStack.peekFirst();
+        topMostScope.declareVar(id, p);
     }
 
     public Pointer resolveIdentifier(String id) {
 
         /**
-         * Search through the stack of referencing environments;
-         * most recently pushed referencing environments get first priority,
+         * Search through the stack of scopes;
+         * most recently pushed scopes get first priority,
          * so search from front of list (stack) to back.
          */
-        for(RefEnvi envi : this.refEnviStack) {
-            if(envi.isIdResolvable(id)) {
-                return envi.resolveVar(id);
+        for(Scope scope : this.scopeStack) {
+            if(scope.isIdResolvable(id)) {
+                return scope.resolveVar(id);
             }
         }
 
-        // If id is not in any local ref envis, check the Component envi.
-        if(Environment.componentRefEnvi.isIdResolvable(id)) {
-            return Environment.componentRefEnvi.resolveVar(id);
+        // If id is not in any local scopes, check the Component scope.
+        if(Environment.componentScope.isIdResolvable(id)) {
+            return Environment.componentScope.resolveVar(id);
         }
 
-        // If id is still not resolved, check the Global envi.
-        if(Environment.globalRefEnvi.isIdResolvable(id)) {
-            return Environment.globalRefEnvi.resolveVar(id);
+        // If id is still not resolved, check the Global scope.
+        if(Environment.globalScope.isIdResolvable(id)) {
+            return Environment.globalScope.resolveVar(id);
         }
 
         throw new EntVMachRuntimeException("Unable to resolve identifier (" +
-            id + ") to pointer after checking all referencing environments.");
+            id + ") to pointer after checking all scopes.");
     }
 }

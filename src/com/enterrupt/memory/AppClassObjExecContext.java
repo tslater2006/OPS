@@ -11,7 +11,7 @@ public class AppClassObjExecContext extends ExecContext {
 	public AppClassObjExecContext(PTAppClassObject obj, String m) {
 		super(obj.progDefn);
 		this.methodName = m;
-		this.pushRefEnvi(obj.objRefEnvi);
+		this.pushScope(obj.objScope);
 
 		/**
 		 * Resolve method or function name to parse tree node.

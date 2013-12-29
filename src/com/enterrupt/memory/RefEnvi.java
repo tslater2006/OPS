@@ -4,58 +4,35 @@ import java.util.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
 
-public abstract class RefEnvi {
+public class RefEnvi {
 
-	private static Map<String, Pointer> globalSymbolTable;
-	private static Map<String, Pointer> componentSymbolTable;
-
-	static {
-		globalSymbolTable = new HashMap<String, Pointer>();
-		componentSymbolTable = new HashMap<String, Pointer>();
+	public enum Type {
+		GLOBAL, COMPONENT,
+		PROGRAM_LOCAL, FUNCTION_LOCAL, METHOD_LOCAL,
+		APP_CLASS_OBJ_INSTANCE
 	}
 
-	public abstract void declareVar(String id, Pointer ptr);
-	public abstract Pointer resolveVar(String id);
-	public abstract boolean isIdResolvable(String id);
+	private RefEnvi.Type type;
+	private Map<String, Pointer> symbolTable;
 
-	/******************************************/
-    /** Global ref environment operations.    */
-	/******************************************/
+	public RefEnvi(RefEnvi.Type t) {
+		this.type = t;
+		this.symbolTable = new HashMap<String, Pointer>();
+	}
 
-	public static void declareGlobalVar(String id, Pointer ptr) {
-		if(isGlobalVarDeclared(id)) {
+	public void declareVar(String id, Pointer ptr) {
+		if(this.isIdResolvable(id)) {
 			throw new EntVMachRuntimeException("Encountered attempt to re-declare " +
-				" variable (" + id + ") in global ref envi.");
+				" variable (" + id + ") in ref envi of type " + this.type);
 		}
-		globalSymbolTable.put(id, ptr);
+		this.symbolTable.put(id, ptr);
 	}
 
-	public static Pointer resolveGlobalVar(String id) {
-		return globalSymbolTable.get(id);
+	public Pointer resolveVar(String id) {
+		return this.symbolTable.get(id);
 	}
 
-	public static boolean isGlobalVarDeclared(String id) {
-		return globalSymbolTable.containsKey(id);
+	public boolean isIdResolvable(String id) {
+		return this.symbolTable.containsKey(id);
 	}
-
-	/******************************************/
-    /** Component ref environment operations. */
-	/******************************************/
-
-	public static void declareComponentVar(String id, Pointer ptr) {
-		if(isComponentVarDeclared(id)) {
-			throw new EntVMachRuntimeException("Encountered attempt to re-declare " +
-				" variable (" + id + ") in component ref envi.");
-		}
-		componentSymbolTable.put(id, ptr);
-	}
-
-	public static Pointer resolveComponentVar(String id) {
-		return componentSymbolTable.get(id);
-	}
-
-	public static boolean isComponentVarDeclared(String id) {
-		return componentSymbolTable.containsKey(id);
-	}
-
 }

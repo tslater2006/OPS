@@ -13,6 +13,9 @@ public class Environment {
 	public static Pointer FALSE;
 	public static Pointer DEFN_LITERAL;
 
+	public static RefEnvi globalRefEnvi;
+	public static RefEnvi componentRefEnvi;
+
 	private static HashMap<String, Pointer> systemVarTable;
 	private static HashMap<String, Pointer> systemFuncTable;
 
@@ -28,30 +31,37 @@ public class Environment {
 
 	static {
 
+		// Load static boolean literals.
+		TRUE = new StdPointer(new PTBoolean(new Boolean(true)),
+			EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
+		FALSE = new StdPointer(new PTBoolean(new Boolean(false)),
+			EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
+
+		DEFN_LITERAL = new StdPointer(new PTDefnLiteral(),
+			EnumSet.of(MFlag.READ_ONLY));
+
+		// Setup global and component referencing environments.
+		globalRefEnvi = new RefEnvi(RefEnvi.Type.GLOBAL);
+		componentRefEnvi = new RefEnvi(RefEnvi.Type.COMPONENT);
+
+		// Create memory pools for supported data types.
+		integerLiteralPool = new HashMap<Integer, Pointer>();
+		stringLiteralPool = new HashMap<String, Pointer>();
+
+		// Allocate space for system vars, mark each as read-only.
+		systemVarTable = new HashMap<String, Pointer>();
+		for(String varName : supportedGlobalVars) {
+			systemVarTable.put(varName, new StdPointer(
+				new PTString(), EnumSet.of(MFlag.READ_ONLY, MFlag.STRING)));
+		}
+
+		// Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
+		systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));
+
+		// Initialize the call stack.
+		callStack = new Stack<Pointer>();
+
 		try {
-			// Load static boolean literals.
-			TRUE = new StdPointer(new PTBoolean(new Boolean(true)),
-				EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
-			FALSE = new StdPointer(new PTBoolean(new Boolean(false)),
-				EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
-
-			DEFN_LITERAL = new StdPointer(new PTDefnLiteral(),
-				EnumSet.of(MFlag.READ_ONLY));
-
-			// Create memory pools for supported data types.
-			integerLiteralPool = new HashMap<Integer, Pointer>();
-			stringLiteralPool = new HashMap<String, Pointer>();
-
-			// Allocate space for system vars, mark each as read-only.
-			systemVarTable = new HashMap<String, Pointer>();
-			for(String varName : supportedGlobalVars) {
-				systemVarTable.put(varName, new StdPointer(
-					new PTString(), EnumSet.of(MFlag.READ_ONLY, MFlag.STRING)));
-			}
-
-			// Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
-			systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));
-
 			/// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
 			Method[] methods = GlobalFnLibrary.class.getMethods();
 			systemFuncTable = new HashMap<String, Pointer>();
@@ -62,10 +72,6 @@ public class Environment {
 							GlobalFnLibrary.class.getMethod(m.getName()))));
 				}
 			}
-
-			// Initialize the call stack.
-			callStack = new Stack<Pointer>();
-
         } catch(java.lang.NoSuchMethodException nsme) {
             log.fatal(nsme.getMessage(), nsme);
             System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());

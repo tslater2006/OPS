@@ -107,7 +107,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * other programs get a fresh program-local referencing environment.
 		 */
 		if(!(this.eCtx.prog instanceof AppClassPeopleCodeProg)) {
-			this.eCtx.pushRefEnvi(new LocalRefEnvi(LocalRefEnvi.Type.PROGRAM_LOCAL));
+			this.eCtx.pushRefEnvi(new RefEnvi(RefEnvi.Type.PROGRAM_LOCAL));
 		}
 
 		visit(ctx.stmtList());
@@ -331,7 +331,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
 		this.emitStmt(ctx);
 
-		RefEnvi localRefEnvi = new LocalRefEnvi(LocalRefEnvi.Type.METHOD_LOCAL);
+		RefEnvi localRefEnvi = new RefEnvi(RefEnvi.Type.METHOD_LOCAL);
 		List<String> formalParams = ((AppClassPeopleCodeProg)eCtx.prog).methodFormalParams.
 			get(ctx.GENERIC_ID().getText());
 
@@ -610,10 +610,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				eCtx.declareLocalVar(id, ptr);
 				break;
 			case "Component":
-				RefEnvi.declareComponentVar(id, ptr);
+				Environment.componentRefEnvi.declareVar(id, ptr);
 				break;
 			case "Global":
-				RefEnvi.declareGlobalVar(id, ptr);
+				Environment.globalRefEnvi.declareVar(id, ptr);
 				break;
 			default:
 				throw new EntVMachRuntimeException("Encountered unexpected variable " +

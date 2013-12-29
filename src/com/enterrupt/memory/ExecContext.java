@@ -39,10 +39,6 @@ public abstract class ExecContext {
 
     public void declareLocalVar(String id, Pointer p) {
         RefEnvi topMostRefEnvi = this.refEnviStack.peekFirst();
-		if(!(topMostRefEnvi instanceof LocalRefEnvi)) {
-			throw new EntVMachRuntimeException("Attempted to declare a local variable " +
-				"when no local referencing environment is available.");
-		}
         topMostRefEnvi.declareVar(id, p);
     }
 
@@ -60,13 +56,13 @@ public abstract class ExecContext {
         }
 
         // If id is not in any local ref envis, check the Component envi.
-        if(RefEnvi.isComponentVarDeclared(id)) {
-            return RefEnvi.resolveComponentVar(id);
+        if(Environment.componentRefEnvi.isIdResolvable(id)) {
+            return Environment.componentRefEnvi.resolveVar(id);
         }
 
         // If id is still not resolved, check the Global envi.
-        if(RefEnvi.isGlobalVarDeclared(id)) {
-            return RefEnvi.resolveGlobalVar(id);
+        if(Environment.globalRefEnvi.isIdResolvable(id)) {
+            return Environment.globalRefEnvi.resolveVar(id);
         }
 
         throw new EntVMachRuntimeException("Unable to resolve identifier (" +

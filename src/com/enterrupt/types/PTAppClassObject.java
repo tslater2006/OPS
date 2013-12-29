@@ -9,14 +9,14 @@ import com.enterrupt.pt.peoplecode.*;
 public class PTAppClassObject implements PTDataType {
 
 	public AppClassPeopleCodeProg progDefn;
-	public AppClassObjRefEnvi persistentRefEnvi;
+	public RefEnvi objRefEnvi;
 
 	public PTAppClassObject(AppClassPeopleCodeProg prog) {
 		this.progDefn = prog;
-		this.persistentRefEnvi = new AppClassObjRefEnvi();
+		this.objRefEnvi = new RefEnvi(RefEnvi.Type.APP_CLASS_OBJ_INSTANCE);
 
 		for(Map.Entry<String, Void> cursor : prog.instanceIdTable.entrySet()) {
-			this.persistentRefEnvi.declareVar(cursor.getKey(), new StdPointer());
+			this.objRefEnvi.declareVar(cursor.getKey(), new StdPointer());
 		}
 	}
 

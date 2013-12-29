@@ -89,9 +89,6 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		this.instanceIdTable.put(id, null);
 	}
 
-	/**
-	 * TODO: Save type information here.
-	 */
 	public void addFormalParamForMethod(String methodName, String paramId) {
 		List<String> paramList = this.methodFormalParams.get(methodName);
 		if(paramList == null) {

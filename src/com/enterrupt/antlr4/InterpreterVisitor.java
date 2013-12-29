@@ -450,7 +450,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			visit(ctx.appClassPath());
 			setPointer(ctx, getPointer(ctx.appClassPath()));
 		} else {
-
 			Pointer nestedTypePtr = null;
 			if(ctx.varType() != null) {
 				if(!ctx.GENERIC_ID().getText().equals("array")) {
@@ -461,24 +460,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				nestedTypePtr = getPointer(ctx.varType());
 			}
 
-			Pointer ptr;
-			switch(ctx.GENERIC_ID().getText()) {
-				case "array":
-					ptr = new ArrayPointer(nestedTypePtr);		break;
-				case "string":
-					ptr = new StdPointer(MFlag.STRING);			break;
-				case "date":
-					ptr = new StdPointer(MFlag.DATE);			break;
-				case "integer":
-					ptr = new StdPointer(MFlag.INTEGER);		break;
-				case "Record":
-					ptr = new StdPointer(MFlag.RECORD);			break;
-				case "Rowset":
-					ptr = new StdPointer(MFlag.ROWSET);			break;
-				default:
-					throw new EntVMachRuntimeException("Unexpected data type: " +
-						ctx.GENERIC_ID().getText());
-			}
+            Pointer ptr;
+            switch(ctx.GENERIC_ID().getText()) {
+                case "array":
+                    ptr = new ArrayPointer(nestedTypePtr);      break;
+                case "string":
+                    ptr = new StdPointer(MFlag.STRING);         break;
+                case "date":
+                    ptr = new StdPointer(MFlag.DATE);           break;
+                case "integer":
+                    ptr = new StdPointer(MFlag.INTEGER);        break;
+                case "Record":
+                    ptr = new StdPointer(MFlag.RECORD);         break;
+                case "Rowset":
+                    ptr = new StdPointer(MFlag.ROWSET);         break;
+                default:
+                    throw new EntVMachRuntimeException("Unexpected data type: " +
+                        ctx.GENERIC_ID().getText());
+            }
 			setPointer(ctx, ptr);
 		}
 		return null;

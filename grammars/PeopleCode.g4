@@ -90,8 +90,8 @@ getImpl				:	'get' GENERIC_ID stmtList 'end-get' ;
 setImpl				:	'set' GENERIC_ID stmtList 'end-set' ;
 
 funcDeclaration :   'Function' GENERIC_ID formalParamList? returnType? ';'? stmtList 'End-Function' ;
-formalParamList	:	'(' ')' | '(' VAR_ID paramType? (',' VAR_ID paramType? )* ')' ;
-paramType		:	'As' varType ;
+formalParamList	:	'(' ( param (',' param)* )? ')' ;
+param			:	VAR_ID ('As' varType)? ;
 returnType		:	'Returns' varType ;
 
 ifStmt	:	'If' expr 'Then' ';'? stmtList ('Else' ';'? stmtList)? 'End-If' ;

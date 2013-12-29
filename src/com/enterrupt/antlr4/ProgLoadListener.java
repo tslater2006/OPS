@@ -69,10 +69,12 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		/**
 		 * Save the formal parameter identifiers for this method.
 		 */
+		String methodName = ctx.GENERIC_ID().getText();
 		if(ctx.formalParamList() != null) {
-			for(TerminalNode paramId : ctx.formalParamList().VAR_ID()) {
+			for(PeopleCodeParser.ParamContext paramCtx :
+					ctx.formalParamList().param()) {
 				((AppClassPeopleCodeProg)this.srcProg).addFormalParamForMethod(
-					ctx.GENERIC_ID().getText(), paramId.getText());
+					methodName, paramCtx.VAR_ID().getText());
 			}
 		}
 	}

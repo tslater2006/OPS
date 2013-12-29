@@ -4,15 +4,13 @@ import java.util.EnumSet;
 
 public class ArrayPointer extends Pointer {
 
-	public Pointer nestedTypePtr;
+	public int dimensions;
+	public Pointer baseTypePtr;
 
-	/**
-	 * Provided pointer should either be an ArrayPointer
-	 * or a StdPointer.
-	 */
 	public ArrayPointer(Pointer p) {
 		super(EnumSet.of(MFlag.ARRAY));
-		this.nestedTypePtr = p;
+		this.dimensions = 1;
+		this.baseTypePtr = p;
 	}
 
 	public void assign(PTDataType newTarget) {
@@ -21,13 +19,10 @@ public class ArrayPointer extends Pointer {
 	}
 
 	public String toString() {
-		StringBuilder builder = new StringBuilder("AMP:");
-		if(target == null) {
-			builder.append("@NULL");
-		} else {
-			builder.append(this.target.toString());
-		}
-		builder.append(this.flags.toString());
+		StringBuilder builder = new StringBuilder("Array(dim=");
+		builder.append(this.dimensions).append(",");
+		builder.append("baseTypePtr=").append(this.baseTypePtr.toString());
+		builder.append(")").append(this.flags.toString());
 		return builder.toString();
 	}
 }

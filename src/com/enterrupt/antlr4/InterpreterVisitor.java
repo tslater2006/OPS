@@ -433,7 +433,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 
 			log.debug("Declaring identifier ({}) with scope {} and type {}.",
-				idCtx.VAR_ID().getText(), scope, ctx.varType().getText());
+				idCtx.VAR_ID().getText(), scope, getPointer(ctx.varType()));
 			/**
 			 * IMPORTANT: The Pointer must cloned for each variable, otherwise
 			 * each identifier will point to the same target.
@@ -463,7 +463,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             Pointer ptr;
             switch(ctx.GENERIC_ID().getText()) {
                 case "array":
-                    ptr = new ArrayPointer(nestedTypePtr);      break;
+					if(nestedTypePtr instanceof ArrayPointer) {
+						((ArrayPointer)nestedTypePtr).dimensions++;
+						ptr = nestedTypePtr;
+					} else {
+	                    ptr = new ArrayPointer(nestedTypePtr);
+					}
+					break;
                 case "string":
                     ptr = new StdPointer(MFlag.STRING);         break;
                 case "date":

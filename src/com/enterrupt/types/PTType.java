@@ -111,6 +111,12 @@ public class PTType {
 				return new PTRecord();
 			case FIELD:
 				return new PTField();
+			case DATE:
+				return new PTDate();
+			case INTEGER:
+				return new PTInteger();
+			case ROWSET:
+				return new PTRowset();
 			default:
 				throw new EntDataTypeException("Unable to match type:" +
 					t + " to the appropriate PTType subclass.");

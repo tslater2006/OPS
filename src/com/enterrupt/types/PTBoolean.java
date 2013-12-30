@@ -42,7 +42,7 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());
-		b.append(",b=").append(b);
+		b.append(",b=").append(this.b);
 		return b.toString();
 	}
 }

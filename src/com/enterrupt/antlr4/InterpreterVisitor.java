@@ -31,6 +31,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private InterpretSupervisor supervisor;
 
 	private ParseTreeProperty<PTType> nodeAnnotations;
+	private ParseTreeProperty<Callable> nodeCallables;
 	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
 	private IEmission lastEmission;
@@ -42,6 +43,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.tokens = e.prog.tokenStream;
 		this.supervisor = s;
 		this.nodeAnnotations = new ParseTreeProperty<PTType>();
+		this.nodeCallables = new ParseTreeProperty<Callable>();
 		this.evalConstructStack = new Stack<EvaluateConstruct>();
 	}
 
@@ -62,9 +64,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	// Bubble-up operations should not fail in the event of nulls, unlike normal accesses.
-	private void bubbleUpAnnotation(ParseTree src, ParseTree dest) {
+	private void bubbleUp(ParseTree src, ParseTree dest) {
 		if(this.nodeAnnotations.get(src) != null) {
 			this.nodeAnnotations.put(dest, this.nodeAnnotations.get(src));
+		}
+		if(this.nodeCallables.get(src) != null) {
+			this.nodeCallables.put(dest, this.nodeCallables.get(src));
 		}
 	}
 
@@ -175,19 +180,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprParenthesized(PeopleCodeParser.ExprParenthesizedContext ctx) {
 		visit(ctx.expr());
-		bubbleUpAnnotation(ctx.expr(), ctx);
+		bubbleUp(ctx.expr(), ctx);
 		return null;
 	}
 
 	public Void visitExprLiteral(PeopleCodeParser.ExprLiteralContext ctx) {
 		visit(ctx.literal());
-		bubbleUpAnnotation(ctx.literal(), ctx);
+		bubbleUp(ctx.literal(), ctx);
 		return null;
 	}
 
 	public Void visitExprId(PeopleCodeParser.ExprIdContext ctx) {
 		visit(ctx.id());
-		bubbleUpAnnotation(ctx.id(), ctx);
+		bubbleUp(ctx.id(), ctx);
 		return null;
 	}
 
@@ -195,11 +200,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 
-		throw new EntVMachRuntimeException("Must re-implement visitExprFnOrIdxCall");
+		Callable call = this.nodeCallables.get(ctx.expr());
 
-/*		PTType ptdt = getAnnotation(ctx.expr());
-
-		if(!(ptdt instanceof PTCallable || ptdt instanceof PTSysFunc)) {
+		if(call == null) {
 			throw new EntVMachRuntimeException("Encountered non-callable data type "
 				+ "in visit to fn or idx call node; this may be an unimplemented "
 				+ "rowset indexing (i.e., &rs(1)) attempt.");
@@ -218,10 +221,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 
-		if(ptdt instanceof PTSysFunc) {
-			((PTSysFunc)ptdt).invoke();
+		if(call.sysFuncPtr != null) {
+			call.invokeSysFunc();
 		} else {
-			ExecContext eCtx = ((PTCallable)ptdt).eCtx;*/
+			ExecContext eCtx = call.eCtx;
 
 			/**
 			 * Record field references beyond a certain recursion level
@@ -231,7 +234,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			 * have yet to have their record defns loaded (note that they may
 			 * already be loaded anyway if they were referenced elsewhere).
 			 */
-/*			for(PeopleCodeProg p : eCtx.prog.referencedProgs) {
+			for(PeopleCodeProg p : eCtx.prog.referencedProgs) {
 				for(Map.Entry<Integer, Reference> cursor : p.progRefsTable.entrySet()) {
 					if(cursor.getValue().isRecordFieldRef) {
 						DefnCache.getRecord(cursor.getValue().RECNAME);
@@ -239,29 +242,29 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				}
 			}
 			this.supervisor.runImmediately(eCtx);
-		}*/
+		}
 
 		/**
 		 * Pop the first value from the call stack. If it's null, the function
 		 * did not emit a return value. If it's non-null, the next item on the stack
 		 * must be the null separator (PeopleCode funcs can only return 1 value).
 		 */
-/*	    PTType a = Environment.popFromCallStack();
+	    PTType a = Environment.popFromCallStack();
 		if(a != null) {
 			setAnnotation(ctx, a);
 		}
 
-		if(ptr != null && (Environment.popFromCallStack() != null)) {
+		if(a != null && (Environment.popFromCallStack() != null)) {
 			throw new EntVMachRuntimeException("More than one return value " +
 				"was found on the call stack.");
 		}
 
-		return null;*/
+		return null;
 	}
 
 	public Void visitExprCreate(PeopleCodeParser.ExprCreateContext ctx) {
 		visit(ctx.createInvocation());
-		bubbleUpAnnotation(ctx.createInvocation(), ctx);
+		bubbleUp(ctx.createInvocation(), ctx);
 		return null;
 	}
 
@@ -384,10 +387,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				/**
 				 * Detect system function references.
 				 */
-				throw new EntVMachRuntimeException("Need to re-implement annotations " +
-					"for sys functions.");
-			/*	setAnnotation(ctx, Environment.getSystemFuncPtr(
-						ctx.GENERIC_ID().getText()));*/
+				this.nodeCallables.put(ctx, Environment.getSystemFuncPtr(
+						ctx.GENERIC_ID().getText()));
 			}
 		}
 		return null;

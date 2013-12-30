@@ -4,7 +4,7 @@ import java.util.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.peoplecode.*;
 
-public class PTType {
+public abstract class PTType {
 
 	private Type type;
 	private EnumSet<TFlag> flags;
@@ -27,6 +27,8 @@ public class PTType {
 		this.type = t;
 		this.flags = EnumSet.noneOf(TFlag.class);
 	}
+
+	public abstract PTType dot(String s);
 
 	public static PTType getSentinel(Type t) {
 

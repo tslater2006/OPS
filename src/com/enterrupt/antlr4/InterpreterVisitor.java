@@ -273,16 +273,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 		visit(ctx.id());
-
-		throw new EntVMachRuntimeException("Need to re-enable dot access.");
-
-		/**
-		 * TODO: Figure out how this fits in.
-		PTType expr = getAnnotation(ctx.expr());
-		PTType accessedPtr = exprPtr.dereference().access(ctx.id().getText());
-		setAnnotation(ctx, accessedPtr);
+		setAnnotation(ctx, getAnnotation(ctx.expr()).dot(ctx.id().getText()));
 		return null;
-		*/
 	}
 
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {

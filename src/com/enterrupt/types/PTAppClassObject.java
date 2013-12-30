@@ -3,50 +3,25 @@ package com.enterrupt.types;
 import com.enterrupt.pt.*;
 import java.util.*;
 import com.enterrupt.types.*;
-import com.enterrupt.memory.*;
 import com.enterrupt.pt.peoplecode.*;
+import com.enterrupt.runtime.*;
 
-public class PTAppClassObject implements PTDataType {
+public class PTAppClassObject extends PTObjectType {
 
 	public AppClassPeopleCodeProg progDefn;
-	public Scope objScope;
+	public Scope instanceScope;
 
-	public PTAppClassObject(AppClassPeopleCodeProg prog) {
+	protected PTAppClassObject(AppClassPeopleCodeProg prog) {
+		super(Type.APP_CLASS_OBJ);
 		this.progDefn = prog;
-		this.objScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
+		this.instanceScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
 
-		for(Map.Entry<String, Void> cursor : prog.instanceIdTable.entrySet()) {
-			this.objScope.declareVar(cursor.getKey(), new StdPointer());
-		}
+		throw new EntVMachRuntimeException("Need to load methods and instance-scoped " +
+			"variables into this object before continuing");
 	}
 
-	public Pointer access(String s) {
-		if(!progDefn.methodEntryPoints.containsKey(s)) {
-			throw new EntDataTypeException("Call to access(s) on " +
-				"PTAppClassObject found no methods for s="+s);
-		}
-
-		/**
-		 * TODO: Eliminate unnecessary allocation by having the underlying
-		 * program definition create these pointers during initialization.
-		 */
-        return new StdPointer(new PTCallable(new AppClassObjExecContext(this, s)));
-	}
-
-	public boolean equals(Object obj) {
-        if(obj == this)
-            return true;
-        if(obj == null)
-            return false;
-        if(!(obj instanceof PTAppClassObject))
-            return false;
-
-        PTAppClassObject other = (PTAppClassObject)obj;
-		throw new EntDataTypeException("equals() for PTAppClassObject not yet implemented.");
-    }
-
-	public String toString() {
-		return "PTAppClassObject:" + progDefn.getDescriptor();
+	public PTType dot(String s) {
+		throw new EntVMachRuntimeException("Need to support dot() on app class objs.");
 	}
 }
 

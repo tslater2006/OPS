@@ -7,7 +7,6 @@ import com.enterrupt.runtime.*;
 import com.enterrupt.trace.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.types.*;
-import com.enterrupt.memory.*;
 import org.apache.logging.log4j.*;
 import com.enterrupt.antlr4.*;
 

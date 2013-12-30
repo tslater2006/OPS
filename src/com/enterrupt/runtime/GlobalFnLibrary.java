@@ -3,7 +3,6 @@ package com.enterrupt.runtime;
 import java.util.*;
 import com.enterrupt.types.*;
 import org.apache.logging.log4j.*;
-import com.enterrupt.memory.*;
 
 public class GlobalFnLibrary {
 
@@ -13,10 +12,10 @@ public class GlobalFnLibrary {
     /** Utility functions                */
     /*************************************/
 
-    private static ArrayList<Pointer> getArgsFromCallStack() {
+    private static ArrayList<PTType> getArgsFromCallStack() {
 
-        ArrayList<Pointer> args = new ArrayList<Pointer>();
-        Pointer p;
+        ArrayList<PTType> args = new ArrayList<PTType>();
+        PTType p;
         while((p = Environment.peekAtCallStack()) != null) {
             args.add(Environment.popFromCallStack());
         }
@@ -33,16 +32,16 @@ public class GlobalFnLibrary {
 	 * IMPORTANT: Use this: http://it.toolbox.com/blogs/spread-knowledge/understanding-blanknull-field-values-for-using-with-all-and-none-peoplecode-functions-40672
 	 * as a reference for null/blank rules with PeopleSoft data types.
 	 */
-	private static boolean doesContainValue(PTDataType ptdt) {
-		if(ptdt instanceof PTField
-				&& ((PTField)ptdt).valuePtr.dereference() instanceof PTString) {
-			return ((PTString)((PTField)ptdt).valuePtr.dereference()).value() != null;
+	private static boolean doesContainValue(PTType p) {
+		throw new EntVMachRuntimeException("Need to re-implement doesContainValue.");
+/*		if(p instanceof PTField && p.value instanceof PTString) {
+			return ((PTString)((PTField)p).value).read() != null;
 		} else if(ptdt instanceof PTString) {
 			return ((PTString)ptdt).value() != null;
 		} else {
 			throw new EntVMachRuntimeException("Unexpected data type passed " +
 				"to doesContainValue(ptdt).");
-		}
+		}*/
 	}
 
 	/*************************************/
@@ -54,8 +53,8 @@ public class GlobalFnLibrary {
      * if one or more contain a value.
      */
     public static void PT_None() {
-        for(Pointer arg : getArgsFromCallStack()) {
-			if(doesContainValue(arg.dereference())) {
+        for(PTType arg : getArgsFromCallStack()) {
+			if(doesContainValue(arg)) {
 	        	Environment.pushToCallStack(Environment.FALSE);
 	            return;
 			}
@@ -68,8 +67,8 @@ public class GlobalFnLibrary {
 	 * if one or more do not.
 	 */
     public static void PT_All() {
-        for(Pointer arg : getArgsFromCallStack()) {
-			if(!doesContainValue(arg.dereference())) {
+        for(PTType arg : getArgsFromCallStack()) {
+			if(!doesContainValue(arg)) {
 	        	Environment.pushToCallStack(Environment.FALSE);
 	            return;
 			}
@@ -98,7 +97,7 @@ public class GlobalFnLibrary {
      */
     public static void PT_IsModalComponent() {
 
-        ArrayList<Pointer> args = getArgsFromCallStack();
+        ArrayList<PTType> args = getArgsFromCallStack();
 
         // Expecting no arguments.
         if(args.size() != 0) {
@@ -110,15 +109,13 @@ public class GlobalFnLibrary {
 
 	public static void PT_CreateRecord() {
 
-        ArrayList<Pointer> args = getArgsFromCallStack();
+        ArrayList<PTType> args = getArgsFromCallStack();
 
-		if(args.size() != 1 || (!(args.get(0).dereference() instanceof PTString))) {
+		if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
 			throw new EntVMachRuntimeException("Expected single StringPtr arg to CreateRecord.");
 		}
 
-		PTRecord recObj = new PTFreeRecord(DefnCache.getRecord(
-			((PTString)args.get(0).dereference()).value()));
-
-		Environment.pushToCallStack(new StdPointer(recObj));
+		Environment.pushToCallStack(PTType.getSentinel(Type.RECORD).alloc(
+			DefnCache.getRecord(((PTString)args.get(0)).read())));
 	}
 }

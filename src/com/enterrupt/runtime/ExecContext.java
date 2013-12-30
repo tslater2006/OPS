@@ -1,4 +1,4 @@
-package com.enterrupt.memory;
+package com.enterrupt.runtime;
 
 import com.enterrupt.pt.peoplecode.*;
 import org.antlr.v4.runtime.*;
@@ -29,12 +29,12 @@ public abstract class ExecContext {
 		this.scopeStack.pop();
 	}
 
-    public void declareLocalVar(String id, Pointer p) {
+    public void declareLocalVar(String id, PTType p) {
         Scope topMostScope = this.scopeStack.peekFirst();
         topMostScope.declareVar(id, p);
     }
 
-    public Pointer resolveIdentifier(String id) {
+    public PTType resolveIdentifier(String id) {
 
         /**
          * Search through the stack of scopes;
@@ -58,6 +58,6 @@ public abstract class ExecContext {
         }
 
         throw new EntVMachRuntimeException("Unable to resolve identifier (" +
-            id + ") to pointer after checking all scopes.");
+            id + ") to PTType after checking all scopes.");
     }
 }

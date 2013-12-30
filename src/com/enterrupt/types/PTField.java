@@ -2,18 +2,20 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
-import com.enterrupt.memory.*;
 
-public abstract class PTField implements PTDataType {
+public class PTField extends PTObjectType {
 
-	public Pointer valuePtr;
+	private PTType value;
 
-	public PTField() {}
-
-	public Pointer access(String s) {
-		throw new EntDataTypeException("Need to implement access() for PTField.");
+	protected PTField(RecordField recFieldDefn) {
+		super(Type.FIELD);
+		/**
+		 * TODO: Determine type based on field metadata.
+		 */
+		this.value = PTType.getSentinel(Type.STRING).alloc();
 	}
 
-	public abstract boolean equals(Object obj);
-	public abstract String toString();
+	public PTType dot(String s) {
+		throw new EntDataTypeException("Need to implement dot() for PTFreeField.");
+	}
 }

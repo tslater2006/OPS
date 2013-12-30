@@ -21,10 +21,10 @@ public class Main {
 			Environment.setSystemVar("%OperatorId", "KADAMS");
 			Environment.setSystemVar("%EmployeeId", "AA0001");
 
-			Component c = new Component(((PTString)Environment.getSystemVar("%Component")
-				.dereference()).value(), "GBL");
-			Menu m = new Menu(((PTString)Environment.getSystemVar("%Menu")
-				.dereference()).value());
+			Component c = new Component(
+				Environment.getSystemVar("%Component").read(), "GBL");
+			Menu m = new Menu(
+				Environment.getSystemVar("%Menu").read());
 
 			c.loadSearchRecord();
 

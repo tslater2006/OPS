@@ -1,4 +1,4 @@
-package com.enterrupt.memory;
+package com.enterrupt.runtime;
 
 import java.util.*;
 import com.enterrupt.types.*;
@@ -13,14 +13,14 @@ public class Scope {
 	}
 
 	private Scope.Lvl level;
-	private Map<String, Pointer> symbolTable;
+	private Map<String, PTType> symbolTable;
 
 	public Scope(Scope.Lvl l) {
 		this.level = l;
-		this.symbolTable = new HashMap<String, Pointer>();
+		this.symbolTable = new HashMap<String, PTType>();
 	}
 
-	public void declareVar(String id, Pointer ptr) {
+	public void declareVar(String id, PTType ptr) {
 		if(this.isIdResolvable(id)) {
 			throw new EntVMachRuntimeException("Encountered attempt to re-declare " +
 				" variable (" + id + ") in scope level " + this.level);
@@ -28,7 +28,7 @@ public class Scope {
 		this.symbolTable.put(id, ptr);
 	}
 
-	public Pointer resolveVar(String id) {
+	public PTType resolveVar(String id) {
 		return this.symbolTable.get(id);
 	}
 

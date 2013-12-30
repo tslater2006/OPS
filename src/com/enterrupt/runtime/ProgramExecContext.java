@@ -1,4 +1,4 @@
-package com.enterrupt.memory;
+package com.enterrupt.runtime;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;

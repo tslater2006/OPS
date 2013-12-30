@@ -2,27 +2,23 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
-import com.enterrupt.memory.*;
+import com.enterrupt.runtime.*;
 
-public abstract class PTRecord implements PTDataType {
+public class PTRecord extends PTObjectType {
 
 	public Record recDefn;
-	protected Map<String, Pointer> fields;
+	private Map<String, PTField> fields;
 
-	public PTRecord(Record r) {
+	protected PTRecord(Record r) {
+		super(Type.RECORD);
 		this.recDefn = r;
-		this.fields = new HashMap<String, Pointer>();
-	}
-
-	public Pointer access(String s) {
-		Pointer ptr = this.fields.get(s);
-		if(ptr == null) {
-			throw new EntDataTypeException("Call to access(s) on PTRecord with " +
-				" s=" + s + " did not match any fields.");
+		for(Map.Entry<String, RecordField> cursor : r.fieldTable.entrySet()) {
+			this.fields.put(cursor.getKey(),
+				PTType.getSentinel(Type.RECORD).alloc(cursor.getValue()));
 		}
-		return ptr;
 	}
 
-	public abstract boolean equals(Object obj);
-	public abstract String toString();
+	public PTType dot(String s) {
+		throw new EntVMachRuntimeException("Need to implement dot() for PTRecord.");
+	}
 }

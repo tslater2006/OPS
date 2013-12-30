@@ -1,21 +1,26 @@
 package com.enterrupt.types;
 
 import java.util.EnumSet;
+import com.enterrupt.runtime.*;
 
-public class PTString extends PTPrimitive<String> {
+public class PTString extends PTPrimitiveType<String> {
 
 	private String s;
 
-	public PTString() {
-		this.s = null;
+	protected PTString() {
+		super(Type.STRING);
 	}
 
-	public PTString(String initial) {
-		this.s = initial;
-	}
-
-	public String value() {
+	public String read() {
 		return this.s;
+	}
+
+	public void write(String newValue) {
+        if(this.isSentinel()) {
+            throw new EntVMachRuntimeException("Attempted illegal write to a " +
+                "sentinel PTType object.");
+        }
+		this.s = newValue;
 	}
 
 	public boolean equals(Object obj) {
@@ -27,7 +32,7 @@ public class PTString extends PTPrimitive<String> {
             return false;
 
         PTString other = (PTString)obj;
-        if(this.value().equals(other.value())) {
+        if(this.read().equals(other.read())) {
             return true;
         }
         return false;

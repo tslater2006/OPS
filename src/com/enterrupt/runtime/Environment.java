@@ -1,75 +1,74 @@
 package com.enterrupt.runtime;
 
 import java.util.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
-import com.enterrupt.memory.*;
 import org.apache.logging.log4j.*;
 
 public class Environment {
 
-	public static Pointer TRUE;
-	public static Pointer FALSE;
-	public static Pointer DEFN_LITERAL;
+	public static PTBoolean TRUE;
+	public static PTBoolean FALSE;
+	public static PTDefnLiteral DEFN_LITERAL;
 
 	public static Scope globalScope;
 	public static Scope componentScope;
 
-	private static HashMap<String, Pointer> systemVarTable;
-	private static HashMap<String, Pointer> systemFuncTable;
+	private static HashMap<String, PTString> systemVarTable;
+	private static HashMap<String, Callable> systemFuncTable;
 
-	private static HashMap<Integer, Pointer> integerLiteralPool;
-	private static HashMap<String, Pointer> stringLiteralPool;
+	private static HashMap<Integer, PTInteger> integerLiteralPool;
+	private static HashMap<String, PTString> stringLiteralPool;
 
-    private static Stack<Pointer> callStack;
+    private static Stack<PTType> callStack;
 
-	private static String[] supportedGlobalVars = {"%EmployeeId", "%OperatorId", "%Menu",
-					"%Component"};
+	private static String[] supportedGlobalVars = {"%EmployeeId",
+		"%OperatorId", "%Menu", "%Component"};
 
 	private static Logger log = LogManager.getLogger(Environment.class.getName());
 
 	static {
 
 		// Load static boolean literals.
-		TRUE = new StdPointer(new PTBoolean(new Boolean(true)),
-			EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
-		FALSE = new StdPointer(new PTBoolean(new Boolean(false)),
-			EnumSet.of(MFlag.READ_ONLY, MFlag.BOOLEAN));
+		TRUE = (PTBoolean)PTType.getSentinel(Type.BOOLEAN).alloc().setReadOnly();
+		TRUE.write(true);
 
-		DEFN_LITERAL = new StdPointer(new PTDefnLiteral(),
-			EnumSet.of(MFlag.READ_ONLY));
+		FALSE = (PTBoolean)PTType.getSentinel(Type.BOOLEAN).alloc().setReadOnly();
+		FALSE.write(false);
+
+		DEFN_LITERAL = (PTDefnLiteral)PTType.getSentinel(
+										Type.DEFN_LITERAL).alloc().setReadOnly();
 
 		// Setup global and component scopes.
 		globalScope = new Scope(Scope.Lvl.GLOBAL);
 		componentScope = new Scope(Scope.Lvl.COMPONENT);
 
 		// Create memory pools for supported data types.
-		integerLiteralPool = new HashMap<Integer, Pointer>();
-		stringLiteralPool = new HashMap<String, Pointer>();
+		integerLiteralPool = new HashMap<Integer, PTInteger>();
+		stringLiteralPool = new HashMap<String, PTString>();
 
 		// Allocate space for system vars, mark each as read-only.
-		systemVarTable = new HashMap<String, Pointer>();
+		systemVarTable = new HashMap<String, PTString>();
 		for(String varName : supportedGlobalVars) {
-			systemVarTable.put(varName, new StdPointer(
-				new PTString(), EnumSet.of(MFlag.READ_ONLY, MFlag.STRING)));
+			systemVarTable.put(varName,
+				(PTString)PTType.getSentinel(Type.STRING).alloc().setReadOnly());
 		}
 
 		// Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
 		systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));
 
 		// Initialize the call stack.
-		callStack = new Stack<Pointer>();
+		callStack = new Stack<PTType>();
 
 		try {
 			/// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
 			Method[] methods = GlobalFnLibrary.class.getMethods();
-			systemFuncTable = new HashMap<String, Pointer>();
+			systemFuncTable = new HashMap<String, Callable>();
 			for(Method m : methods) {
 				if(m.getName().indexOf("PT_") == 0) {
 					systemFuncTable.put(m.getName().substring(3),
-						new StdPointer(new PTSysFunc(
-							GlobalFnLibrary.class.getMethod(m.getName()))));
+						new Callable(GlobalFnLibrary.class.getMethod(m.getName())));
 				}
 			}
         } catch(java.lang.NoSuchMethodException nsme) {
@@ -78,18 +77,18 @@ public class Environment {
         }
 	}
 
-    public static void pushToCallStack(Pointer p) {
+    public static void pushToCallStack(PTType p) {
         log.debug("Push\tCallStack\t" + (p == null ? "null" : p));
         callStack.push(p);
     }
 
-    public static Pointer popFromCallStack() {
-        Pointer p = callStack.pop();
+    public static PTType popFromCallStack() {
+        PTType p = callStack.pop();
         log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p));
         return p;
     }
 
-    public static Pointer peekAtCallStack() {
+    public static PTType peekAtCallStack() {
         return callStack.peek();
     }
 
@@ -98,11 +97,12 @@ public class Environment {
 	}
 
 	public static void setSystemVar(String var, String value) {
-		((StdPointer)systemVarTable.get(var)).systemAssign(new PTString(value));
+		throw new EntVMachRuntimeException("Need to re-implement setSystemVar");
+		//systemVarTable.get(var).systemAssign(new PTString(value));
 	}
 
-	public static Pointer getSystemVar(String var) {
-		Pointer ptr = systemVarTable.get(var);
+	public static PTString getSystemVar(String var) {
+		PTString ptr = systemVarTable.get(var);
 		if(ptr == null) {
 			throw new EntVMachRuntimeException("Attempted to access a system var "
 			 + "that is undefined: " + var);
@@ -110,25 +110,25 @@ public class Environment {
 		return ptr;
 	}
 
-	public static Pointer getSystemFuncPtr(String func) {
+	public static Callable getSystemFuncPtr(String func) {
 		return systemFuncTable.get(func);
 	}
 
-	public static Pointer getFromLiteralPool(Integer val) {
-		Pointer p = integerLiteralPool.get(val);
+	public static PTInteger getFromLiteralPool(Integer val) {
+		PTInteger p = integerLiteralPool.get(val);
 		if(p == null) {
-			p = new StdPointer(new PTInteger(val), EnumSet.of(MFlag.READ_ONLY,
-						MFlag.INTEGER));
+			p = (PTInteger)PTType.getSentinel(Type.INTEGER).alloc().setReadOnly();
+			p.write(val);
 			integerLiteralPool.put(val, p);
 		}
 		return p;
 	}
 
-	public static Pointer getFromLiteralPool(String val) {
-		Pointer p = stringLiteralPool.get(val);
+	public static PTString getFromLiteralPool(String val) {
+		PTString p = stringLiteralPool.get(val);
 		if(p == null) {
-			p = new StdPointer(new PTString(val), EnumSet.of(MFlag.READ_ONLY,
-						MFlag.STRING));
+			p = (PTString)PTType.getSentinel(Type.STRING).alloc().setReadOnly();
+			p.write(val);
 			stringLiteralPool.put(val, p);
 		}
 		return p;

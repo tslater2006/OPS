@@ -6,7 +6,6 @@ import java.io.*;
 import com.enterrupt.sql.StmtLibrary;
 import com.enterrupt.buffers.*;
 import com.enterrupt.types.*;
-import com.enterrupt.memory.*;
 import com.enterrupt.runtime.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.pt.pages.*;
@@ -168,8 +167,7 @@ public class Component {
     public void loadAndRunRecordPConSearchRecord() {
 
 		Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
-		ComponentBuffer.searchRecordPtr = new CBufferPointer(
-			new PTCBufferRecord(recDefn));
+		ComponentBuffer.searchRecord = PTType.getSentinel(Type.RECORD).alloc(recDefn);
 
 		/**
 		 * Record PC should be loaded at this time only if the search record

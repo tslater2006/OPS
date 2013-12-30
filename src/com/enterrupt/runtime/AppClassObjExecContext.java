@@ -1,4 +1,4 @@
-package com.enterrupt.memory;
+package com.enterrupt.runtime;
 
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.runtime.*;
@@ -11,7 +11,7 @@ public class AppClassObjExecContext extends ExecContext {
 	public AppClassObjExecContext(PTAppClassObject obj, String m) {
 		super(obj.progDefn);
 		this.methodName = m;
-		this.pushScope(obj.objScope);
+		this.pushScope(obj.instanceScope);
 
 		/**
 		 * Resolve method or function name to parse tree node.

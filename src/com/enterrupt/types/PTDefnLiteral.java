@@ -3,25 +3,21 @@ package com.enterrupt.types;
 import com.enterrupt.pt.*;
 import java.util.*;
 import com.enterrupt.runtime.*;
-import com.enterrupt.memory.*;
 
-public class PTDefnLiteral implements PTDataType {
+public class PTDefnLiteral extends PTObjectType {
 
-	public PTDefnLiteral() {}
+	protected PTDefnLiteral() {
+		super(Type.DEFN_LITERAL);
+	}
 
 	/**
 	 * Accesses on a defn literal reserved word always
 	 * resolve to the string itself; i.e., Menu.SA_LEARNER_SERVICES
 	 * resolves to "SA_LEARNER_SERVICES".
 	 */
-	public Pointer access(String s) {
+	public PTType dot(String s) {
 		return Environment.getFromLiteralPool(s);
 	}
-
-	public boolean equals(Object obj) {
-		throw new EntDataTypeException("Encountered illegal equals() call on "
-			+ "a PTDefnLiteral object.");
-    }
 
 	public String toString() {
 		return "#PTDefnLiteral";

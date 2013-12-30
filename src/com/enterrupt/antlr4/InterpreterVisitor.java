@@ -32,7 +32,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	private ParseTreeProperty<PTType> nodeAnnotations;
 	private ParseTreeProperty<Callable> nodeCallables;
-	private ParseTreeProperty<String> nodeVarIdentifiers;
 	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
 	private IEmission lastEmission;
@@ -44,7 +43,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.tokens = e.prog.tokenStream;
 		this.supervisor = s;
 		this.nodeAnnotations = new ParseTreeProperty<PTType>();
-		this.nodeVarIdentifiers = new ParseTreeProperty<String>();
 		this.nodeCallables = new ParseTreeProperty<Callable>();
 		this.evalConstructStack = new Stack<EvaluateConstruct>();
 	}
@@ -72,9 +70,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 		if(this.nodeCallables.get(src) != null) {
 			this.nodeCallables.put(dest, this.nodeCallables.get(src));
-		}
-		if(this.nodeVarIdentifiers.get(src) != null) {
-			this.nodeVarIdentifiers.put(dest, this.nodeVarIdentifiers.get(src));
 		}
 	}
 
@@ -178,7 +173,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			((PTObjectType)dst).assgmtDelegate((PTPrimitiveType)src);
 
 		} else if(dst instanceof PTObjectType && src instanceof PTObjectType) {
-			eCtx.assignToIdentifier(this.nodeVarIdentifiers.get(ctx), src);
+			// Assuming lhs is an identifier; this may or may not hold true long term.
+			eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
 
 		} else {
 			throw new EntVMachRuntimeException("Assignment failed; unexpected " +
@@ -372,7 +368,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		} else if(ctx.VAR_ID() != null) {
 			PTType a = eCtx.resolveIdentifier(ctx.VAR_ID().getText());
 			setAnnotation(ctx, a);
-			this.nodeVarIdentifiers.put(ctx, ctx.VAR_ID().getText());
 
 		} else if(ctx.GENERIC_ID() != null) {
 

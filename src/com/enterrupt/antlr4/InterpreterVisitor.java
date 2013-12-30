@@ -1,7 +1,6 @@
 package com.enterrupt.antlr4;
 
 import java.util.*;
-import java.lang.reflect.*;
 import com.enterrupt.types.*;
 import com.enterrupt.buffers.*;
 import com.enterrupt.pt.*;
@@ -448,48 +447,48 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitVarType(PeopleCodeParser.VarTypeContext ctx) {
 
-		throw new EntVMachRuntimeException("Need to re-implement varType visitor.");
-/*		if(ctx.appClassPath() != null) {
+		if(ctx.appClassPath() != null) {
 			visit(ctx.appClassPath());
 			setAnnotation(ctx, getAnnotation(ctx.appClassPath()));
 		} else {
-			PTType nestedTypePtr = null;
+			PTType nestedType = null;
 			if(ctx.varType() != null) {
 				if(!ctx.GENERIC_ID().getText().equals("array")) {
 					throw new EntVMachRuntimeException("Encountered non-array var " +
 						"type preceding 'of' clause: " + ctx.getText());
 				}
 				visit(ctx.varType());
-				nestedTypePtr = getAnnotation(ctx.varType());
+				nestedType = getAnnotation(ctx.varType());
 			}
 
-            PTType ptr;
+            PTType type;
             switch(ctx.GENERIC_ID().getText()) {
                 case "array":
-					if(nestedTypePtr instanceof ArrayPTType) {
-						((ArrayPTType)nestedTypePtr).dimensions++;
-						ptr = nestedTypePtr;
+					if(nestedType instanceof PTArray) {
+						type = PTType.getSentinel(
+							((PTArray)nestedType).dimensions+1,
+							((PTArray)nestedType).baseType);
 					} else {
-	                    ptr = new ArrayPTType(nestedTypePtr);
+						type = PTType.getSentinel(1, nestedType);
 					}
 					break;
                 case "string":
-                    ptr = new StdPTType(MFlag.STRING);         break;
+                    type = PTType.getSentinel(Type.STRING);    break;
                 case "date":
-                    ptr = new StdPTType(MFlag.DATE);           break;
+                    type = PTType.getSentinel(Type.DATE);      break;
                 case "integer":
-                    ptr = new StdPTType(MFlag.INTEGER);        break;
+                    type = PTType.getSentinel(Type.INTEGER);   break;
                 case "Record":
-                    ptr = new StdPTType(MFlag.RECORD);         break;
+                    type = PTType.getSentinel(Type.RECORD);    break;
                 case "Rowset":
-                    ptr = new StdPTType(MFlag.ROWSET);         break;
+                    type = PTType.getSentinel(Type.ROWSET);    break;
                 default:
                     throw new EntVMachRuntimeException("Unexpected data type: " +
                         ctx.GENERIC_ID().getText());
             }
-			setAnnotation(ctx, ptr);
+			setAnnotation(ctx, type);
 		}
-		return null;*/
+		return null;
 	}
 
 	public Void visitEvaluateStmt(PeopleCodeParser.EvaluateStmtContext ctx) {

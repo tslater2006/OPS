@@ -16,9 +16,11 @@ public class PTType {
 
 	private static Map<String, PTType> stdSentinelCache;
 	private static Map<String, PTAppClassObj> appClassObjSentinelCache;
+	private static Map<String, PTArray> arraySentinelCache;
 	static {
 		stdSentinelCache = new HashMap<String, PTType>();
 		appClassObjSentinelCache = new HashMap<String, PTAppClassObj>();
+		arraySentinelCache = new HashMap<String, PTArray>();
 	}
 
 	protected PTType(Type t) {
@@ -54,8 +56,20 @@ public class PTType {
 		return sentinelObj;
 	}
 
-	public static PTType getSentinel(Type t, int dim, Type baseType) {
-		throw new EntDataTypeException("Implement getSentinel for array types.");
+	public static PTArray getSentinel(int arrDimensions, PTType baseType) {
+
+		String cacheKey = "d=" + arrDimensions + ",baseType=" + baseType.getType();
+
+		// If the type has already been cached, return it immediately.
+		if(arraySentinelCache.containsKey(cacheKey)) {
+			return arraySentinelCache.get(cacheKey);
+		}
+
+		// OTherwise, create a new sentinel type and cache it before returning it.
+		PTArray sentinelObj = new PTArray(arrDimensions, baseType);
+		sentinelObj.setSentinel();
+		arraySentinelCache.put(cacheKey, sentinelObj);
+		return sentinelObj;
 	}
 
 	public PTType alloc() {

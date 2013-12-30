@@ -19,6 +19,10 @@ public class PTField extends PTObjectType {
 		this.value = (PTPrimitiveType)PTType.getSentinel(Type.STRING).alloc();
 	}
 
+	public PTPrimitiveType getValue() {
+		return this.value;
+	}
+
 	public PTType dot(String s) {
 		throw new EntDataTypeException("Need to implement dot() for PTField.");
 	}

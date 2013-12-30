@@ -33,15 +33,14 @@ public class GlobalFnLibrary {
 	 * as a reference for null/blank rules with PeopleSoft data types.
 	 */
 	private static boolean doesContainValue(PTType p) {
-		throw new EntVMachRuntimeException("Need to re-implement doesContainValue.");
-/*		if(p instanceof PTField && p.value instanceof PTString) {
-			return ((PTString)((PTField)p).value).read() != null;
-		} else if(ptdt instanceof PTString) {
-			return ((PTString)ptdt).value() != null;
+		if(p instanceof PTField) {
+			return doesContainValue(((PTField)p).getValue());
+		} else if(p instanceof PTString) {
+			return ((PTString)p).read() != null && !((PTString)p).read().equals(" ");
 		} else {
 			throw new EntVMachRuntimeException("Unexpected data type passed " +
 				"to doesContainValue(ptdt).");
-		}*/
+		}
 	}
 
 	/*************************************/

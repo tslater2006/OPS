@@ -236,7 +236,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		}
 
-
 		if(call.sysFuncPtr != null) {
 			call.invokeSysFunc();
 		} else {

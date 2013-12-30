@@ -39,7 +39,10 @@ public class PTInteger extends PTPrimitiveType<Integer> {
         return false;
     }
 
+	@Override
 	public String toString() {
-		return i.toString();
+		StringBuilder b = new StringBuilder(super.toString());
+		b.append(",i=").append(this.i);
+		return b.toString();
 	}
 }

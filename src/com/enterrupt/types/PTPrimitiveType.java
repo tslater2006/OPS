@@ -29,9 +29,4 @@ public abstract class PTPrimitiveType<T> extends PTType {
                 "to a sentinel PTType object.");
         }
 	}
-
-	/**
-	 * TODO: Enable.
-	 */
-    //public abstract String toString();
 }

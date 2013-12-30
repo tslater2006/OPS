@@ -7,9 +7,4 @@ public abstract class PTObjectType extends PTType {
 	}
 
 	public abstract PTType dot(String s);
-
-	/**
-	 * TODO: Enable.
-	 */
-	//public abstract String toString();
 }

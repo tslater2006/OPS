@@ -22,4 +22,11 @@ public class PTField extends PTObjectType {
 	public PTType dot(String s) {
 		throw new EntDataTypeException("Need to implement dot() for PTFreeField.");
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder(super.toString());
+		b.append(",value=").append(value.toString());
+		return b.toString();
+	}
 }

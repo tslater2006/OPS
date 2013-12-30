@@ -24,5 +24,12 @@ public class PTAppClassObj extends PTObjectType {
 	public PTType dot(String s) {
 		throw new EntDataTypeException("Need to support dot() on app class objs.");
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder(super.toString());
+		b.append(",prog=").append(this.progDefn.getDescriptor());
+		return b.toString();
+	}
 }
 

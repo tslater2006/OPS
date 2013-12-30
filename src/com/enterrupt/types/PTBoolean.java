@@ -39,9 +39,11 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
         return false;
     }
 
+	@Override
 	public String toString() {
-		if(this.b) { return "True"; }
-		return "False";
+		StringBuilder b = new StringBuilder(super.toString());
+		b.append(",b=").append(b);
+		return b.toString();
 	}
 }
 

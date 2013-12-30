@@ -39,7 +39,10 @@ public class PTString extends PTPrimitiveType<String> {
         return false;
     }
 
+	@Override
 	public String toString() {
-		return "\"" + this.s + "\"";
+		StringBuilder b = new StringBuilder(super.toString());
+		b.append(",s=").append(s);
+		return b.toString();
 	}
 }

@@ -19,7 +19,8 @@ public class PTDefnLiteral extends PTObjectType {
 		return Environment.getFromLiteralPool(s);
 	}
 
+	@Override
 	public String toString() {
-		return "#PTDefnLiteral";
+		return super.toString();
 	}
 }

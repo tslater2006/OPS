@@ -26,4 +26,9 @@ public class PTRecord extends PTObjectType {
 	public PTType dot(String s) {
 		throw new EntDataTypeException("Need to implement dot() for PTRecord.");
 	}
+
+	@Override
+	public String toString() {
+		return super.toString();
+	}
 }

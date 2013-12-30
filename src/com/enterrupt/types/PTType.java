@@ -158,4 +158,11 @@ public class PTType {
 		}
 		this.flags = fSet.clone();
 	}
+
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		if(this.isSentinel) { b.append("SENTINEL:"); }
+		b.append(this.type).append(this.flags);
+		return b.toString();
+	}
 }

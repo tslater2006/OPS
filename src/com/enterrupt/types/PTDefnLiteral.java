@@ -19,6 +19,11 @@ public class PTDefnLiteral extends PTObjectType {
 		return Environment.getFromLiteralPool(s);
 	}
 
+	public void assgmtDelegate(PTPrimitiveType src) {
+		throw new EntDataTypeException("assgmtDelegate for defn literal objects " +
+			"is not yet supported.");
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();

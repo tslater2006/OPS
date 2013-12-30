@@ -5,7 +5,7 @@ import java.util.*;
 
 public class PTField extends PTObjectType {
 
-	private PTType value;
+	private PTPrimitiveType value;
 
 	protected PTField() {
 		super(Type.FIELD);
@@ -16,11 +16,19 @@ public class PTField extends PTObjectType {
 		/**
 		 * TODO: Determine type based on field metadata.
 		 */
-		this.value = PTType.getSentinel(Type.STRING).alloc();
+		this.value = (PTPrimitiveType)PTType.getSentinel(Type.STRING).alloc();
 	}
 
 	public PTType dot(String s) {
 		throw new EntDataTypeException("Need to implement dot() for PTField.");
+	}
+
+	/**
+	 * Primitive assignments to a Field should assign to
+	 * the field's underlying value; i.e., SSR_STDNT_TERM0.EMPLID = %EmployeeId
+	 */
+	public void assgmtDelegate(PTPrimitiveType src) {
+		this.value.copyValueFrom(src);
 	}
 
 	@Override

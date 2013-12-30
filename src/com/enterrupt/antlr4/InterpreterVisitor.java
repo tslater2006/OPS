@@ -32,6 +32,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	private ParseTreeProperty<PTType> nodeAnnotations;
 	private ParseTreeProperty<Callable> nodeCallables;
+	private ParseTreeProperty<String> nodeVarIdentifiers;
 	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
 	private IEmission lastEmission;
@@ -43,6 +44,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.tokens = e.prog.tokenStream;
 		this.supervisor = s;
 		this.nodeAnnotations = new ParseTreeProperty<PTType>();
+		this.nodeVarIdentifiers = new ParseTreeProperty<String>();
 		this.nodeCallables = new ParseTreeProperty<Callable>();
 		this.evalConstructStack = new Stack<EvaluateConstruct>();
 	}
@@ -58,7 +60,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private PTType getAnnotation(ParseTree node) {
 		if(this.nodeAnnotations.get(node) == null) {
 			throw new EntVMachRuntimeException("Attempted to get the annotation " +
-				"to null for a node, encountered null: " + node.getText());
+				"for a node, encountered null: " + node.getText());
 		}
 		return this.nodeAnnotations.get(node);
 	}
@@ -70,6 +72,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 		if(this.nodeCallables.get(src) != null) {
 			this.nodeCallables.put(dest, this.nodeCallables.get(src));
+		}
+		if(this.nodeVarIdentifiers.get(src) != null) {
+			this.nodeVarIdentifiers.put(dest, this.nodeVarIdentifiers.get(src));
 		}
 	}
 
@@ -152,20 +157,35 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
 		this.emitStmt(ctx);
 		visit(ctx.expr(1));
-		PTType target = getAnnotation(ctx.expr(1));
+		PTType src = getAnnotation(ctx.expr(1));
 		visit(ctx.expr(0));
-		PTType dest = getAnnotation(ctx.expr(0));
-
-		throw new EntVMachRuntimeException("Need to re-implement assignment.");
+		PTType dst = getAnnotation(ctx.expr(0));
 
 		/**
-		 * TODO: Check the left hand side; if it's an identifier
-		 * and both sides are object data types, modify the scope
-		 * table to redirect the left hand variable name to point to the
-		 * right hand object.
-		 *
-		 * return null;
+		 * primitive = primitive : write from rhs to lhs, ignore identifier
+		 * primitive = object : throw exception
+		 * object = primitive : invoke object's assignment method.
+		 * object = object : get var identifier, make it point to rhs object
 		 */
+		if(dst instanceof PTPrimitiveType && src instanceof PTPrimitiveType) {
+			((PTPrimitiveType)dst).copyValueFrom((PTPrimitiveType)src);
+
+		} else if(dst instanceof PTPrimitiveType && src instanceof PTObjectType) {
+			throw new EntVMachRuntimeException("Encountered illegal assignment " +
+				"attempt from an object to a primitive.");
+
+		} else if(dst instanceof PTObjectType && src instanceof PTPrimitiveType) {
+			((PTObjectType)dst).assgmtDelegate((PTPrimitiveType)src);
+
+		} else if(dst instanceof PTObjectType && src instanceof PTObjectType) {
+			eCtx.assignToIdentifier(this.nodeVarIdentifiers.get(ctx), src);
+
+		} else {
+			throw new EntVMachRuntimeException("Assignment failed; unexpected " +
+				"type combination.");
+		}
+
+		return null;
 	}
 
 	public Void visitStmtExpr(PeopleCodeParser.StmtExprContext ctx) {
@@ -346,12 +366,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
 		if(ctx.SYS_VAR_ID() != null) {
-			PTType a = Environment.getSystemVar(ctx.getText());
+			PTType a = Environment.getSystemVar(ctx.SYS_VAR_ID().getText());
 			setAnnotation(ctx, a);
 
 		} else if(ctx.VAR_ID() != null) {
-			PTType a = eCtx.resolveIdentifier(ctx.getText());
+			PTType a = eCtx.resolveIdentifier(ctx.VAR_ID().getText());
 			setAnnotation(ctx, a);
+			this.nodeVarIdentifiers.put(ctx, ctx.VAR_ID().getText());
 
 		} else if(ctx.GENERIC_ID() != null) {
 

@@ -15,6 +15,11 @@ public class PTArray extends PTObjectType {
 		throw new EntDataTypeException("Need to support dot() on arrays.");
 	}
 
+	public void assgmtDelegate(PTPrimitiveType src) {
+		throw new EntDataTypeException("assgmtDelegate for arrays " +
+			"is not yet supported.");
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

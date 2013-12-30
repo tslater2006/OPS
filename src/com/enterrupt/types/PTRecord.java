@@ -31,6 +31,11 @@ public class PTRecord extends PTObjectType {
 			+ "with s=" + s);
 	}
 
+	public void assgmtDelegate(PTPrimitiveType src) {
+		throw new EntDataTypeException("assgmtDelegate for record objects " +
+			"is not yet supported.");
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();

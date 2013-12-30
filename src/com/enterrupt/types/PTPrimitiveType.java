@@ -1,5 +1,7 @@
 package com.enterrupt.types;
 
+import com.enterrupt.runtime.*;
+
 public abstract class PTPrimitiveType<T> extends PTType {
 
 	protected PTPrimitiveType(Type t) {
@@ -11,6 +13,16 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract void systemWrite(T newValue);
 
 	public abstract boolean equals(Object obj);
+
+	public void copyValueFrom(PTPrimitiveType src) {
+		if(src instanceof PTString) {
+			((PTString)this).write(((PTString)src).read());
+			return;
+		}
+
+		throw new EntVMachRuntimeException("copyValueFrom does not support " +
+			"the provided source operand: " + src.toString());
+	}
 
 	public PTType dot(String s) {
 		throw new EntDataTypeException("Encountered illegal dot() call on a " +

@@ -28,6 +28,10 @@ public class Scope {
 		this.symbolTable.put(id, ptr);
 	}
 
+	public void assignVar(String id, PTType ptr) {
+		this.symbolTable.put(id, ptr);
+	}
+
 	public PTType resolveVar(String id) {
 		return this.symbolTable.get(id);
 	}

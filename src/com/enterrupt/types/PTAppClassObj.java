@@ -25,6 +25,11 @@ public class PTAppClassObj extends PTObjectType {
 		throw new EntDataTypeException("Need to support dot() on app class objs.");
 	}
 
+	public void assgmtDelegate(PTPrimitiveType src) {
+		throw new EntDataTypeException("assgmtDelegate for app class objects " +
+			"is not yet supported.");
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

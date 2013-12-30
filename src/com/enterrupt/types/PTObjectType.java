@@ -7,4 +7,5 @@ public abstract class PTObjectType extends PTType {
 	}
 
 	public abstract PTType dot(String s);
+	public abstract void assgmtDelegate(PTPrimitiveType src);
 }

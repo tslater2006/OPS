@@ -24,7 +24,11 @@ public class PTRecord extends PTObjectType {
 	}
 
 	public PTType dot(String s) {
-		throw new EntDataTypeException("Need to implement dot() for PTRecord.");
+		if(this.fields.containsKey(s)) {
+			return this.fields.get(s);
+		}
+		throw new EntDataTypeException("No data member exists on PTRecord "
+			+ "with s=" + s);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import java.util.*;
 import com.enterrupt.pt.*;
+import com.enterrupt.pt.peoplecode.*;
 
 public class PTType {
 
@@ -13,9 +14,11 @@ public class PTType {
 	private int arrayDimensions;
 	private Type baseType;
 
-	private static Map<String, PTType> sentinelCache;
+	private static Map<String, PTType> stdSentinelCache;
+	private static Map<String, PTAppClassObj> appClassObjSentinelCache;
 	static {
-		sentinelCache = new HashMap<String, PTType>();
+		stdSentinelCache = new HashMap<String, PTType>();
+		appClassObjSentinelCache = new HashMap<String, PTAppClassObj>();
 	}
 
 	protected PTType(Type t) {
@@ -26,15 +29,28 @@ public class PTType {
 	public static PTType getSentinel(Type t) {
 
 		// If the type has already been cached, return it immediately.
-		String cacheKey = generateCacheKey(t);
-		if(sentinelCache.containsKey(cacheKey)) {
-			return sentinelCache.get(cacheKey);
+		if(stdSentinelCache.containsKey(t.toString())) {
+			return stdSentinelCache.get(t.toString());
 		}
 
 		// OTherwise, create a new sentinel type and cache it before returning it.
 		PTType sentinelObj = enumToType(t);
 		sentinelObj.setSentinel();
-		sentinelCache.put(cacheKey, sentinelObj);
+		stdSentinelCache.put(t.toString(), sentinelObj);
+		return sentinelObj;
+	}
+
+	public static PTAppClassObj getSentinel(AppClassPeopleCodeProg prog) {
+
+		// If the type has already been cached, return it immediately.
+		if(appClassObjSentinelCache.containsKey(prog.getDescriptor())) {
+			return appClassObjSentinelCache.get(prog.getDescriptor());
+		}
+
+		// OTherwise, create a new sentinel type and cache it before returning it.
+		PTAppClassObj sentinelObj = new PTAppClassObj(prog);
+		sentinelObj.setSentinel();
+		appClassObjSentinelCache.put(prog.getDescriptor(), sentinelObj);
 		return sentinelObj;
 	}
 
@@ -77,19 +93,14 @@ public class PTType {
 				return new PTBoolean();
 			case DEFN_LITERAL:
 				return new PTDefnLiteral();
+			case RECORD:
+				return new PTRecord();
+			case FIELD:
+				return new PTField();
 			default:
 				throw new EntDataTypeException("Unable to match type:" +
 					t + " to the appropriate PTType subclass.");
 		}
-	}
-
-	private static String generateCacheKey(Type t) {
-		/**
-		 * TODO: Arrays will need to include dimensions and base type.
-		 */
-		StringBuilder b = new StringBuilder();
-		b.append("t:").append(t);
-		return b.toString();
 	}
 
 	public PTType setReadOnly() {
@@ -105,7 +116,7 @@ public class PTType {
 		return this.isSentinel;
 	}
 
-	private PTType setSentinel() {
+	protected PTType setSentinel() {
 		this.isSentinel = true;
 		return this;
 	}

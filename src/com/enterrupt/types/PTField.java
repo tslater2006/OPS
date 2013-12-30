@@ -7,6 +7,10 @@ public class PTField extends PTObjectType {
 
 	private PTType value;
 
+	protected PTField() {
+		super(Type.FIELD);
+	}
+
 	protected PTField(RecordField recFieldDefn) {
 		super(Type.FIELD);
 		/**

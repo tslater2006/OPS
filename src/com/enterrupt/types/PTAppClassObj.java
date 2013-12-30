@@ -6,18 +6,19 @@ import com.enterrupt.types.*;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.runtime.*;
 
-public class PTAppClassObject extends PTObjectType {
+public class PTAppClassObj extends PTObjectType {
 
 	public AppClassPeopleCodeProg progDefn;
 	public Scope instanceScope;
 
-	protected PTAppClassObject(AppClassPeopleCodeProg prog) {
+	protected PTAppClassObj(AppClassPeopleCodeProg prog) {
 		super(Type.APP_CLASS_OBJ);
 		this.progDefn = prog;
 		this.instanceScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
 
-		throw new EntDataTypeException("Need to load methods and instance-scoped " +
-			"variables into this object before continuing");
+		/**
+		 * TODO: Load methods and instance variables here from prog defn.
+	 	 */
 	}
 
 	public PTType dot(String s) {

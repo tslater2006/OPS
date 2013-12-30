@@ -8,7 +8,7 @@ public class AppClassObjExecContext extends ExecContext {
 
 	public String methodName;
 
-	public AppClassObjExecContext(PTAppClassObject obj, String m) {
+	public AppClassObjExecContext(PTAppClassObj obj, String m) {
 		super(obj.progDefn);
 		this.methodName = m;
 		this.pushScope(obj.instanceScope);

@@ -555,12 +555,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitAppClassPath(PeopleCodeParser.AppClassPathContext ctx) {
-		throw new EntVMachRuntimeException("Need to re-implement app class path visitor.");
-/*		AppClassPeopleCodeProg progDefn =
+		AppClassPeopleCodeProg progDefn =
 			(AppClassPeopleCodeProg)DefnCache.getProgram(("AppClassPC." +
 				ctx.getText() + ".OnExecute").replaceAll(":","."));
-		setAnnotation(ctx, new AppClassObj(progDefn));
-		return null;*/
+		setAnnotation(ctx, PTType.getSentinel(progDefn));
+		return null;
 	}
 
 	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {

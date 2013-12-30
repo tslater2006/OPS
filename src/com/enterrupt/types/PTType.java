@@ -10,10 +10,6 @@ public abstract class PTType {
 	private EnumSet<TFlag> flags;
 	private boolean isSentinel;
 
-	// For arrays (i.e., "array of array of string")
-	private int arrayDimensions;
-	private Type baseType;
-
 	private static Map<String, PTType> stdSentinelCache;
 	private static Map<String, PTAppClassObj> appClassObjSentinelCache;
 	private static Map<String, PTArray> arraySentinelCache;
@@ -29,6 +25,7 @@ public abstract class PTType {
 	}
 
 	public abstract PTType dot(String s);
+	public abstract boolean typeCheck(PTType a);
 
 	public static PTType getSentinel(Type t) {
 
@@ -143,7 +140,7 @@ public abstract class PTType {
 		return this;
 	}
 
-	private Type getType() {
+	protected Type getType() {
 		return this.type;
 	}
 

@@ -18,6 +18,11 @@ public class PTRowset extends PTObjectType {
 			"is not yet supported.");
 	}
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTRowset &&
+			this.getType() == a.getType());
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();

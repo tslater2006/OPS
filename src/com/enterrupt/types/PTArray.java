@@ -20,6 +20,13 @@ public class PTArray extends PTObjectType {
 			"is not yet supported.");
 	}
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTArray  &&
+			this.getType() == a.getType() &&
+			this.dimensions == ((PTArray)a).dimensions &&
+			this.baseType == ((PTArray)a).baseType);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

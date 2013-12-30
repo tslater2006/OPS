@@ -28,8 +28,16 @@ public class Scope {
 		this.symbolTable.put(id, ptr);
 	}
 
-	public void assignVar(String id, PTType ptr) {
-		this.symbolTable.put(id, ptr);
+	public void assignVar(String id, PTType newRef) {
+		PTType currRef = this.symbolTable.get(id);
+
+		if(currRef.typeCheck(newRef)) {
+			this.symbolTable.put(id, newRef);
+		} else {
+			throw new EntVMachRuntimeException("Identifier assignment failed type " +
+				"check; currRef (" + currRef.toString() + ") and newRef (" +
+				newRef.toString() + ") are not type compatible.");
+		}
 	}
 
 	public PTType resolveVar(String id) {

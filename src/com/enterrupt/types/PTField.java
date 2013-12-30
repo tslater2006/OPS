@@ -31,6 +31,11 @@ public class PTField extends PTObjectType {
 		this.value.copyValueFrom(src);
 	}
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTField &&
+			this.getType() == a.getType());
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

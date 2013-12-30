@@ -39,6 +39,11 @@ public class PTInteger extends PTPrimitiveType<Integer> {
         return false;
     }
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTInteger &&
+			this.getType() == a.getType());
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

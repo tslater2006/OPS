@@ -39,6 +39,11 @@ public class PTDate extends PTPrimitiveType<Void> {
         return false;
     }
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTDate &&
+			this.getType() == a.getType());
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

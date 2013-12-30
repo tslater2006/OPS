@@ -30,6 +30,12 @@ public class PTAppClassObj extends PTObjectType {
 			"is not yet supported.");
 	}
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTAppClassObj &&
+			this.getType() == a.getType() &&
+			this.progDefn == ((PTAppClassObj)a).progDefn);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

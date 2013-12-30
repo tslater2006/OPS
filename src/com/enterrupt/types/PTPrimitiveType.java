@@ -13,6 +13,7 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract void systemWrite(T newValue);
 
 	public abstract boolean equals(Object obj);
+	public abstract boolean typeCheck(PTType a);
 
 	public void copyValueFrom(PTPrimitiveType src) {
 		if(src instanceof PTString) {

@@ -39,6 +39,11 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
         return false;
     }
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTBoolean &&
+			this.getType() == a.getType());
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());

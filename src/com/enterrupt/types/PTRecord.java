@@ -36,6 +36,11 @@ public class PTRecord extends PTObjectType {
 			"is not yet supported.");
 	}
 
+	public boolean typeCheck(PTType a) {
+		return (a instanceof PTRecord &&
+			this.getType() == a.getType());
+	}
+
 	@Override
 	public String toString() {
 		return super.toString();

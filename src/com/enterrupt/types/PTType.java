@@ -1,7 +1,6 @@
 package com.enterrupt.types;
 
 import java.util.*;
-import com.enterrupt.runtime.*;
 import com.enterrupt.pt.*;
 
 public class PTType {
@@ -40,7 +39,7 @@ public class PTType {
 	}
 
 	public static PTType getSentinel(Type t, int dim, Type baseType) {
-		throw new EntVMachRuntimeException("Implement getSentinel for array types.");
+		throw new EntDataTypeException("Implement getSentinel for array types.");
 	}
 
 	public PTType alloc() {
@@ -63,7 +62,7 @@ public class PTType {
 
 	private void clone(PTType src, PTType dest) {
 		if(src.type != dest.type) {
-			throw new EntVMachRuntimeException("Attempted to clone PTType objects " +
+			throw new EntDataTypeException("Attempted to clone PTType objects " +
 				"with different types (" + src.type + " to " + dest.type + ")");
 		}
 		dest.setType(src.getType());
@@ -79,7 +78,7 @@ public class PTType {
 			case DEFN_LITERAL:
 				return new PTDefnLiteral();
 			default:
-				throw new EntVMachRuntimeException("Unable to match type:" +
+				throw new EntDataTypeException("Unable to match type:" +
 					t + " to the appropriate PTType subclass.");
 		}
 	}
@@ -95,7 +94,7 @@ public class PTType {
 
 	public PTType setReadOnly() {
 		if(this.isSentinel()) {
-			throw new EntVMachRuntimeException("Encountered illegal attempt to " +
+			throw new EntDataTypeException("Encountered illegal attempt to " +
 				"make a sentinel PTType readonly.");
 		}
 		this.flags.add(TFlag.READONLY);
@@ -117,19 +116,19 @@ public class PTType {
 
 	private void setType(Type t) {
 		if(this.isSentinel()) {
-			throw new EntVMachRuntimeException("Encountered illegal attempt to " +
+			throw new EntDataTypeException("Encountered illegal attempt to " +
 				"set the type of a sentinel PTType.");
 		}
 		this.type = t;
 	}
 
-	private EnumSet<TFlag> getFlags() {
+	protected EnumSet<TFlag> getFlags() {
 		return this.flags;
 	}
 
 	private void setFlags(EnumSet<TFlag> fSet) {
 		if(this.isSentinel()) {
-			throw new EntVMachRuntimeException("Encountered illegal attempt to " +
+			throw new EntDataTypeException("Encountered illegal attempt to " +
 				"set the flags of a sentinel PTType.");
 		}
 		this.flags = fSet.clone();

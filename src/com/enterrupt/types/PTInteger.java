@@ -1,7 +1,6 @@
 package com.enterrupt.types;
 
 import java.util.EnumSet;
-import com.enterrupt.runtime.*;
 
 public class PTInteger extends PTPrimitiveType<Integer> {
 
@@ -15,13 +14,15 @@ public class PTInteger extends PTPrimitiveType<Integer> {
 		return this.i;
 	}
 
-	public void write(Integer newValue) {
-        if(this.isSentinel()) {
-            throw new EntVMachRuntimeException("Attempted illegal write to a " +
-                "sentinel PTType object.");
-        }
-		this.i = newValue;
-	}
+    public void write(Integer newValue) {
+        this.checkIsWriteable();
+        this.i = newValue;
+    }
+
+    public void systemWrite(Integer newValue) {
+        this.checkIsSystemWriteable();
+        this.i = newValue;
+    }
 
 	public boolean equals(Object obj) {
         if(obj == this)

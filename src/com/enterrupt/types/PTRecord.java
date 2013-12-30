@@ -2,7 +2,6 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
-import com.enterrupt.runtime.*;
 
 public class PTRecord extends PTObjectType {
 
@@ -19,6 +18,6 @@ public class PTRecord extends PTObjectType {
 	}
 
 	public PTType dot(String s) {
-		throw new EntVMachRuntimeException("Need to implement dot() for PTRecord.");
+		throw new EntDataTypeException("Need to implement dot() for PTRecord.");
 	}
 }

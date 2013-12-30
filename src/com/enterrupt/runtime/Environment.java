@@ -32,10 +32,10 @@ public class Environment {
 
 		// Load static boolean literals.
 		TRUE = (PTBoolean)PTType.getSentinel(Type.BOOLEAN).alloc().setReadOnly();
-		TRUE.write(true);
+		TRUE.systemWrite(true);
 
 		FALSE = (PTBoolean)PTType.getSentinel(Type.BOOLEAN).alloc().setReadOnly();
-		FALSE.write(false);
+		FALSE.systemWrite(false);
 
 		DEFN_LITERAL = (PTDefnLiteral)PTType.getSentinel(
 										Type.DEFN_LITERAL).alloc().setReadOnly();
@@ -97,8 +97,8 @@ public class Environment {
 	}
 
 	public static void setSystemVar(String var, String value) {
-		throw new EntVMachRuntimeException("Need to re-implement setSystemVar");
-		//systemVarTable.get(var).systemAssign(new PTString(value));
+		systemVarTable.get(var).systemWrite(
+			Environment.getFromLiteralPool(value).read());
 	}
 
 	public static PTString getSystemVar(String var) {
@@ -118,7 +118,7 @@ public class Environment {
 		PTInteger p = integerLiteralPool.get(val);
 		if(p == null) {
 			p = (PTInteger)PTType.getSentinel(Type.INTEGER).alloc().setReadOnly();
-			p.write(val);
+			p.systemWrite(val);
 			integerLiteralPool.put(val, p);
 		}
 		return p;
@@ -128,7 +128,7 @@ public class Environment {
 		PTString p = stringLiteralPool.get(val);
 		if(p == null) {
 			p = (PTString)PTType.getSentinel(Type.STRING).alloc().setReadOnly();
-			p.write(val);
+			p.systemWrite(val);
 			stringLiteralPool.put(val, p);
 		}
 		return p;

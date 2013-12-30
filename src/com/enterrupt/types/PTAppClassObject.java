@@ -16,12 +16,12 @@ public class PTAppClassObject extends PTObjectType {
 		this.progDefn = prog;
 		this.instanceScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
 
-		throw new EntVMachRuntimeException("Need to load methods and instance-scoped " +
+		throw new EntDataTypeException("Need to load methods and instance-scoped " +
 			"variables into this object before continuing");
 	}
 
 	public PTType dot(String s) {
-		throw new EntVMachRuntimeException("Need to support dot() on app class objs.");
+		throw new EntDataTypeException("Need to support dot() on app class objs.");
 	}
 }
 

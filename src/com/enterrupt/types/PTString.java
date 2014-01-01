@@ -4,10 +4,11 @@ import java.util.EnumSet;
 
 public class PTString extends PTPrimitiveType<String> {
 
+	private static Type staticTypeFlag = Type.STRING;
 	private String s;
 
 	protected PTString() {
-		super(Type.STRING);
+		super(staticTypeFlag);
 	}
 
 	public String read() {
@@ -43,6 +44,31 @@ public class PTString extends PTPrimitiveType<String> {
 		return (a instanceof PTString &&
 			this.getType() == a.getType());
 	}
+
+    public static PTString getSentinel() {
+
+        // If the sentinel has already been cached, return it immediately.
+        String cacheKey = getCacheKey();
+        if(PTType.isSentinelCached(cacheKey)) {
+            return (PTString)PTType.getCachedSentinel(cacheKey);
+        }
+
+        // Otherwise, create a new sentinel type and cache it before returning it.
+        PTString sentinelObj = new PTString();
+        PTType.cacheSentinel(sentinelObj, cacheKey);
+        return sentinelObj;
+    }
+
+    public PTString alloc() {
+        PTString newObj = new PTString();
+        PTType.clone(this, newObj);
+        return newObj;
+    }
+
+    private static String getCacheKey() {
+        StringBuilder b = new StringBuilder(staticTypeFlag.name());
+        return b.toString();
+    }
 
 	@Override
 	public String toString() {

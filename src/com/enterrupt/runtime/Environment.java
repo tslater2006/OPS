@@ -15,11 +15,11 @@ public class Environment {
 	public static Scope globalScope;
 	public static Scope componentScope;
 
-	private static HashMap<String, PTString> systemVarTable;
-	private static HashMap<String, Callable> systemFuncTable;
+	private static Map<String, PTString> systemVarTable;
+	private static Map<String, Callable> systemFuncTable;
 
-	private static HashMap<Integer, PTInteger> integerLiteralPool;
-	private static HashMap<String, PTString> stringLiteralPool;
+	private static Map<Integer, PTInteger> integerLiteralPool;
+	private static Map<String, PTString> stringLiteralPool;
 
     private static Stack<PTType> callStack;
 
@@ -31,14 +31,13 @@ public class Environment {
 	static {
 
 		// Load static boolean literals.
-		TRUE = (PTBoolean)PTType.getSentinel(Type.BOOLEAN).alloc().setReadOnly();
+		TRUE = (PTBoolean)PTBoolean.getSentinel().alloc().setReadOnly();
 		TRUE.systemWrite(true);
 
-		FALSE = (PTBoolean)PTType.getSentinel(Type.BOOLEAN).alloc().setReadOnly();
+		FALSE = (PTBoolean)PTBoolean.getSentinel().alloc().setReadOnly();
 		FALSE.systemWrite(false);
 
-		DEFN_LITERAL = (PTDefnLiteral)PTType.getSentinel(
-										Type.DEFN_LITERAL).alloc().setReadOnly();
+		DEFN_LITERAL = (PTDefnLiteral)PTDefnLiteral.getSentinel().alloc().setReadOnly();
 
 		// Setup global and component scopes.
 		globalScope = new Scope(Scope.Lvl.GLOBAL);
@@ -51,8 +50,8 @@ public class Environment {
 		// Allocate space for system vars, mark each as read-only.
 		systemVarTable = new HashMap<String, PTString>();
 		for(String varName : supportedGlobalVars) {
-			systemVarTable.put(varName,
-				(PTString)PTType.getSentinel(Type.STRING).alloc().setReadOnly());
+			systemVarTable.put(varName, (PTString)PTString.getSentinel()
+												.alloc().setReadOnly());
 		}
 
 		// Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
@@ -117,7 +116,7 @@ public class Environment {
 	public static PTInteger getFromLiteralPool(Integer val) {
 		PTInteger p = integerLiteralPool.get(val);
 		if(p == null) {
-			p = (PTInteger)PTType.getSentinel(Type.INTEGER).alloc().setReadOnly();
+			p = (PTInteger)PTInteger.getSentinel().alloc().setReadOnly();
 			p.systemWrite(val);
 			integerLiteralPool.put(val, p);
 		}
@@ -127,7 +126,7 @@ public class Environment {
 	public static PTString getFromLiteralPool(String val) {
 		PTString p = stringLiteralPool.get(val);
 		if(p == null) {
-			p = (PTString)PTType.getSentinel(Type.STRING).alloc().setReadOnly();
+			p = (PTString)PTString.getSentinel().alloc().setReadOnly();
 			p.systemWrite(val);
 			stringLiteralPool.put(val, p);
 		}

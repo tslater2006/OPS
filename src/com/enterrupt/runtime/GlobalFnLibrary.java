@@ -114,7 +114,7 @@ public class GlobalFnLibrary {
 			throw new EntVMachRuntimeException("Expected single StringPtr arg to CreateRecord.");
 		}
 
-		Environment.pushToCallStack(PTType.getSentinel(Type.RECORD).alloc(
+		Environment.pushToCallStack(PTRecord.getSentinel().alloc(
 			DefnCache.getRecord(((PTString)args.get(0)).read())));
 	}
 }

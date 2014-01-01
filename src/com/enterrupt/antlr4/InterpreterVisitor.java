@@ -473,23 +473,23 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             switch(ctx.GENERIC_ID().getText()) {
                 case "array":
 					if(nestedType instanceof PTArray) {
-						type = PTType.getSentinel(
+						type = PTArray.getSentinel(
 							((PTArray)nestedType).dimensions+1,
 							((PTArray)nestedType).baseType);
 					} else {
-						type = PTType.getSentinel(1, nestedType);
+						type = PTArray.getSentinel(1, nestedType);
 					}
 					break;
                 case "string":
-                    type = PTType.getSentinel(Type.STRING);    break;
+                    type = PTString.getSentinel();    break;
                 case "date":
-                    type = PTType.getSentinel(Type.DATE);      break;
+                    type = PTDate.getSentinel();      break;
                 case "integer":
-                    type = PTType.getSentinel(Type.INTEGER);   break;
+                    type = PTInteger.getSentinel();   break;
                 case "Record":
-                    type = PTType.getSentinel(Type.RECORD);    break;
+                    type = PTRecord.getSentinel();    break;
                 case "Rowset":
-                    type = PTType.getSentinel(Type.ROWSET);    break;
+                    type = PTRowset.getSentinel();    break;
                 default:
                     throw new EntVMachRuntimeException("Unexpected data type: " +
                         ctx.GENERIC_ID().getText());
@@ -565,26 +565,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		AppClassPeopleCodeProg progDefn =
 			(AppClassPeopleCodeProg)DefnCache.getProgram(("AppClassPC." +
 				ctx.getText() + ".OnExecute").replaceAll(":","."));
-		setAnnotation(ctx, PTType.getSentinel(progDefn));
+		setAnnotation(ctx, PTAppClassObj.getSentinel(progDefn));
 		return null;
 	}
 
 	public Void visitCreateInvocation(PeopleCodeParser.CreateInvocationContext ctx) {
 
-		throw new EntVMachRuntimeException("Need to re-implement create invoc visitor.");
-
-/*		AppClassObjPTType ptr;
+		PTAppClassObj objType;
 		if(ctx.appClassPath() != null) {
 			visit(ctx.appClassPath());
-			ptr = (AppClassObjPTType) getAnnotation(ctx.appClassPath());
+			objType = (PTAppClassObj)getAnnotation(ctx.appClassPath());
 		} else {
 			throw new EntVMachRuntimeException("Encountered create invocation without " +
 				"app class prefix; need to support this by resolving path to class.");
 		}
 
-		PTAppClassObject newObj = new PTAppClassObject(ptr.progDefn);
-		ptr.assign(newObj);
-		setAnnotation(ctx, ptr);*/
+		PTAppClassObj newObj = objType.alloc();
+		setAnnotation(ctx, newObj);
+		return null;
 
 		/**
 	     * Check for constructor; call it if it exists.

@@ -4,10 +4,11 @@ import java.util.EnumSet;
 
 public class PTDate extends PTPrimitiveType<Void> {
 
+	private static Type staticTypeFlag = Type.DATE;
 	private Void d;
 
 	protected PTDate() {
-		super(Type.DATE);
+		super(staticTypeFlag);
 	}
 
 	public Void read() {
@@ -43,6 +44,31 @@ public class PTDate extends PTPrimitiveType<Void> {
 		return (a instanceof PTDate &&
 			this.getType() == a.getType());
 	}
+
+    public static PTDate getSentinel() {
+
+        // If the sentinel has already been cached, return it immediately.
+        String cacheKey = getCacheKey();
+        if(PTType.isSentinelCached(cacheKey)) {
+            return (PTDate)PTType.getCachedSentinel(cacheKey);
+        }
+
+        // Otherwise, create a new sentinel type and cache it before returning it.
+        PTDate sentinelObj = new PTDate();
+        PTType.cacheSentinel(sentinelObj, cacheKey);
+        return sentinelObj;
+    }
+
+    public PTDate alloc() {
+        PTDate newObj = new PTDate();
+        PTType.clone(this, newObj);
+        return newObj;
+    }
+
+    private static String getCacheKey() {
+        StringBuilder b = new StringBuilder(staticTypeFlag.name());
+        return b.toString();
+    }
 
 	@Override
 	public String toString() {

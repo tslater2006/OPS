@@ -8,117 +8,45 @@ public abstract class PTType {
 
 	private Type type;
 	private EnumSet<TFlag> flags;
-	private boolean isSentinel;
+	private boolean sentinelFlag;
 
-	private static Map<String, PTType> stdSentinelCache;
-	private static Map<String, PTAppClassObj> appClassObjSentinelCache;
-	private static Map<String, PTArray> arraySentinelCache;
+	private static Map<String, PTType> sentinelCache;
 	static {
-		stdSentinelCache = new HashMap<String, PTType>();
-		appClassObjSentinelCache = new HashMap<String, PTAppClassObj>();
-		arraySentinelCache = new HashMap<String, PTArray>();
+		sentinelCache = new HashMap<String, PTType>();
 	}
+
+	public abstract PTType dot(String s);
+	public abstract boolean typeCheck(PTType a);
 
 	protected PTType(Type t) {
 		this.type = t;
 		this.flags = EnumSet.noneOf(TFlag.class);
 	}
 
-	public abstract PTType dot(String s);
-	public abstract boolean typeCheck(PTType a);
+	protected static boolean isSentinelCached(String key) {
+		return sentinelCache.containsKey(key);
+	}
 
-	public static PTType getSentinel(Type t) {
+	protected static PTType getCachedSentinel(String key) {
+		return sentinelCache.get(key);
+	}
 
-		// If the type has already been cached, return it immediately.
-		if(stdSentinelCache.containsKey(t.toString())) {
-			return stdSentinelCache.get(t.toString());
-		}
-
-		// OTherwise, create a new sentinel type and cache it before returning it.
-		PTType sentinelObj = enumToType(t);
+	protected static void cacheSentinel(PTType sentinelObj, String cacheKey) {
 		sentinelObj.setSentinel();
-		stdSentinelCache.put(t.toString(), sentinelObj);
-		return sentinelObj;
+		sentinelCache.put(cacheKey, sentinelObj);
 	}
 
-	public static PTAppClassObj getSentinel(AppClassPeopleCodeProg prog) {
-
-		// If the type has already been cached, return it immediately.
-		if(appClassObjSentinelCache.containsKey(prog.getDescriptor())) {
-			return appClassObjSentinelCache.get(prog.getDescriptor());
-		}
-
-		// OTherwise, create a new sentinel type and cache it before returning it.
-		PTAppClassObj sentinelObj = new PTAppClassObj(prog);
-		sentinelObj.setSentinel();
-		appClassObjSentinelCache.put(prog.getDescriptor(), sentinelObj);
-		return sentinelObj;
-	}
-
-	public static PTArray getSentinel(int arrDimensions, PTType baseType) {
-
-		String cacheKey = "d=" + arrDimensions + ",baseType=" + baseType.getType();
-
-		// If the type has already been cached, return it immediately.
-		if(arraySentinelCache.containsKey(cacheKey)) {
-			return arraySentinelCache.get(cacheKey);
-		}
-
-		// OTherwise, create a new sentinel type and cache it before returning it.
-		PTArray sentinelObj = new PTArray(arrDimensions, baseType);
-		sentinelObj.setSentinel();
-		arraySentinelCache.put(cacheKey, sentinelObj);
-		return sentinelObj;
-	}
-
-	public PTType alloc() {
-		PTType newObj = enumToType(this.type);
-		clone(this, newObj);
-		return newObj;
-	}
-
-	public PTRecord alloc(Record recDefn) {
-		PTRecord recObj = new PTRecord(recDefn);
-		clone(this, recObj);
-		return recObj;
-	}
-
-	public PTField alloc(RecordField recFieldDefn) {
-		PTField fldObj = new PTField(recFieldDefn);
-		clone(this, fldObj);
-		return fldObj;
-	}
-
-	private void clone(PTType src, PTType dest) {
+	protected static void clone(PTType src, PTType dest) {
 		if(src.type != dest.type) {
 			throw new EntDataTypeException("Attempted to clone PTType objects " +
-				"with different types (" + src.type + " to " + dest.type + ")");
+				"with different type enum flags (" + src.type + " to " + dest.type + ")");
 		}
 		dest.setType(src.getType());
 		dest.setFlags(src.getFlags());
-	}
 
-	private static PTType enumToType(Type t) {
-		switch(t) {
-			case STRING:
-				return new PTString();
-			case BOOLEAN:
-				return new PTBoolean();
-			case DEFN_LITERAL:
-				return new PTDefnLiteral();
-			case RECORD:
-				return new PTRecord();
-			case FIELD:
-				return new PTField();
-			case DATE:
-				return new PTDate();
-			case INTEGER:
-				return new PTInteger();
-			case ROWSET:
-				return new PTRowset();
-			default:
-				throw new EntDataTypeException("Unable to match type:" +
-					t + " to the appropriate PTType subclass.");
+		if(src instanceof PTArray) {
+			((PTArray)dest).dimensions = ((PTArray)src).dimensions;
+			((PTArray)dest).baseType = ((PTArray)src).baseType;
 		}
 	}
 
@@ -132,11 +60,11 @@ public abstract class PTType {
 	}
 
 	protected boolean isSentinel() {
-		return this.isSentinel;
+		return this.sentinelFlag;
 	}
 
-	protected PTType setSentinel() {
-		this.isSentinel = true;
+	private PTType setSentinel() {
+		this.sentinelFlag = true;
 		return this;
 	}
 
@@ -166,7 +94,7 @@ public abstract class PTType {
 
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		if(this.isSentinel) { b.append("SENTINEL:"); }
+		if(this.isSentinel()) { b.append("SENTINEL:"); }
 		b.append(this.type).append(this.flags);
 		return b.toString();
 	}

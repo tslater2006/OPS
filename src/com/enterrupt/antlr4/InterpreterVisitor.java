@@ -210,7 +210,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				"attempt from an object to a primitive.");
 
 		} else if(dst instanceof PTObjectType && src instanceof PTPrimitiveType) {
-			((PTObjectType)dst).assgmtDelegate((PTPrimitiveType)src);
+			//i.e., SSR_STND_TERM0.EMPLID = "5"; field must be cast to string.
+			PTPrimitiveType castedDst = ((PTObjectType)dst).castTo((PTPrimitiveType)src);
+			castedDst.copyValueFrom((PTPrimitiveType)src);
 
 		} else if(dst instanceof PTObjectType && src instanceof PTObjectType) {
 			// Assuming lhs is an identifier; this may or may not hold true long term.

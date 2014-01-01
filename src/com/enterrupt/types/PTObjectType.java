@@ -7,6 +7,6 @@ public abstract class PTObjectType extends PTType {
 	}
 
 	public abstract PTType dot(String s);
-	public abstract void assgmtDelegate(PTPrimitiveType src);
+	public abstract PTPrimitiveType castTo(PTPrimitiveType t);
 	public abstract boolean typeCheck(PTType a);
 }

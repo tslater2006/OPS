@@ -28,13 +28,13 @@ public class PTField extends PTObjectType {
 		throw new EntDataTypeException("Need to implement dot() for PTField.");
 	}
 
-	/**
-	 * Primitive assignments to a Field should assign to
-	 * the field's underlying value; i.e., SSR_STDNT_TERM0.EMPLID = %EmployeeId
-	 */
-	public void assgmtDelegate(PTPrimitiveType src) {
-		this.value.copyValueFrom(src);
-	}
+    public PTPrimitiveType castTo(PTPrimitiveType t) {
+		if(value.typeCheck(t)) {
+			return value;
+		}
+        throw new EntDataTypeException("Unable to cast PTField (" + this + ") to the " +
+			"type requested: " + t);
+    }
 
 	public boolean typeCheck(PTType a) {
 		return (a instanceof PTField &&

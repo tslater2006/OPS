@@ -15,10 +15,9 @@ public class PTRowset extends PTObjectType {
 		throw new EntDataTypeException("Need to implement dot() for PTRowset.");
 	}
 
-	public void assgmtDelegate(PTPrimitiveType src) {
-		throw new EntDataTypeException("assgmtDelegate for rowset objects " +
-			"is not yet supported.");
-	}
+    public PTPrimitiveType castTo(PTPrimitiveType t) {
+        throw new EntDataTypeException("castTo() has not been implemented.");
+    }
 
 	public boolean typeCheck(PTType a) {
 		return (a instanceof PTRowset &&

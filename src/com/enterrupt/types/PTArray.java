@@ -16,10 +16,9 @@ public class PTArray extends PTObjectType {
 		throw new EntDataTypeException("Need to support dot() on arrays.");
 	}
 
-	public void assgmtDelegate(PTPrimitiveType src) {
-		throw new EntDataTypeException("assgmtDelegate for arrays " +
-			"is not yet supported.");
-	}
+    public PTPrimitiveType castTo(PTPrimitiveType t) {
+        throw new EntDataTypeException("castTo() has not been implemented.");
+    }
 
 	public boolean typeCheck(PTType a) {
 		return (a instanceof PTArray  &&

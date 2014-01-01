@@ -21,10 +21,9 @@ public class PTDefnLiteral extends PTObjectType {
 		return Environment.getFromLiteralPool(s);
 	}
 
-	public void assgmtDelegate(PTPrimitiveType src) {
-		throw new EntDataTypeException("assgmtDelegate for defn literal objects " +
-			"is not yet supported.");
-	}
+    public PTPrimitiveType castTo(PTPrimitiveType t) {
+        throw new EntDataTypeException("castTo() has not been implemented.");
+    }
 
 	public boolean typeCheck(PTType a) {
 		return (a instanceof PTDefnLiteral &&

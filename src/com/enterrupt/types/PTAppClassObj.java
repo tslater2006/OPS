@@ -35,9 +35,8 @@ public class PTAppClassObj extends PTObjectType {
 		throw new EntDataTypeException("Need to support dot() on app class objs.");
 	}
 
-	public void assgmtDelegate(PTPrimitiveType src) {
-		throw new EntDataTypeException("assgmtDelegate for app class objects " +
-			"is not yet supported.");
+	public PTPrimitiveType castTo(PTPrimitiveType t) {
+		throw new EntDataTypeException("castTo() has not been implemented.");
 	}
 
 	public boolean typeCheck(PTType a) {

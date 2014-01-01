@@ -206,11 +206,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			((PTPrimitiveType)dst).copyValueFrom((PTPrimitiveType)src);
 
 		} else if(dst instanceof PTPrimitiveType && src instanceof PTObjectType) {
-			throw new EntVMachRuntimeException("Encountered illegal assignment " +
-				"attempt from an object to a primitive.");
+			//i.e., &str = SSR_STDNT_TERM0.EMPLID; field must be cast to string.
+			PTPrimitiveType castedSrc = ((PTObjectType)src).castTo((PTPrimitiveType)dst);
+			((PTPrimitiveType)dst).copyValueFrom(castedSrc);
 
 		} else if(dst instanceof PTObjectType && src instanceof PTPrimitiveType) {
-			//i.e., SSR_STND_TERM0.EMPLID = "5"; field must be cast to string.
+			//i.e., SSR_STNDT_TERM0.EMPLID = "5"; field must be cast to string.
 			PTPrimitiveType castedDst = ((PTObjectType)dst).castTo((PTPrimitiveType)src);
 			castedDst.copyValueFrom((PTPrimitiveType)src);
 

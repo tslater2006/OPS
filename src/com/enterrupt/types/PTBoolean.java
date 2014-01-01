@@ -59,7 +59,7 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
         return sentinelObj;
     }
 
-    public PTBoolean alloc() {
+    public PTPrimitiveType alloc() {
         PTBoolean newObj = new PTBoolean();
         PTType.clone(this, newObj);
         return newObj;

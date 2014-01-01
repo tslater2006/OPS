@@ -59,7 +59,7 @@ public class PTDate extends PTPrimitiveType<Void> {
         return sentinelObj;
     }
 
-    public PTDate alloc() {
+    public PTPrimitiveType alloc() {
         PTDate newObj = new PTDate();
         PTType.clone(this, newObj);
         return newObj;

@@ -12,6 +12,7 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract void write(T newValue);
 	public abstract void systemWrite(T newValue);
 
+	public abstract PTPrimitiveType alloc();
 	public abstract boolean equals(Object obj);
 	public abstract boolean typeCheck(PTType a);
 

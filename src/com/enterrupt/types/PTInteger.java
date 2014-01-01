@@ -59,7 +59,7 @@ public class PTInteger extends PTPrimitiveType<Integer> {
         return sentinelObj;
     }
 
-    public PTInteger alloc() {
+    public PTPrimitiveType alloc() {
         PTInteger newObj = new PTInteger();
         PTType.clone(this, newObj);
         return newObj;

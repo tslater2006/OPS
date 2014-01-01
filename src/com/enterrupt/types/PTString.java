@@ -59,7 +59,7 @@ public class PTString extends PTPrimitiveType<String> {
         return sentinelObj;
     }
 
-    public PTString alloc() {
+    public PTPrimitiveType alloc() {
         PTString newObj = new PTString();
         PTType.clone(this, newObj);
         return newObj;

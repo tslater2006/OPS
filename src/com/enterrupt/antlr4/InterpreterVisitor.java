@@ -198,8 +198,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		/**
 		 * primitive = primitive : write from rhs to lhs, ignore identifier
-		 * primitive = object : throw exception
-		 * object = primitive : invoke object's assignment method.
+		 * primitive = object : attempt cast from src type to destination type
+		 * object = primitive : attempt cast from destination type to src type
 		 * object = object : get var identifier, make it point to rhs object
 		 */
 		if(dst instanceof PTPrimitiveType && src instanceof PTPrimitiveType) {

@@ -21,7 +21,18 @@ public class PTAppClassObj extends PTObjectType {
 		for(Map.Entry<String, AppClassPeopleCodeProg.Instance> cursor :
 				this.progDefn.instanceTable.entrySet()) {
 			AppClassPeopleCodeProg.Instance instance = cursor.getValue();
-			this.instanceScope.declareVar(instance.id, instance.type);
+
+			/**
+			 * Primitive instance variables must have space allocated for them
+			 * immediately. Object instance variables should simply reference the
+			 * sentinel type value present in their declaration statement.
+			 */
+			if(instance.type instanceof PTPrimitiveType) {
+				this.instanceScope.declareVar(instance.id,
+					((PTPrimitiveType)instance.type).alloc());
+			} else {
+				this.instanceScope.declareVar(instance.id, instance.type);
+			}
 		}
 	}
 

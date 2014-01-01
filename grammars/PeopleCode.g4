@@ -79,7 +79,8 @@ recDefnPath	:	GENERIC_ID '.' GENERIC_ID ;
 event		:	'FieldFormula' | 'FieldChange' ;
 
 classDeclaration	:	'class' GENERIC_ID classBlock* 'end-class' ;
-classBlock			:	'private'? ((method | constant | property | instance) ';')+ ;
+classBlock			:	aLvl='private'? (classBlockStmt ';'*)+ ;
+classBlockStmt		:	method | constant | property | instance ;
 method				:	'method' GENERIC_ID formalParamList returnType? ;
 constant			:	'Constant' VAR_ID '=' expr ;
 property			:	'property' varType GENERIC_ID 'get'? 'set'? 'readonly'? ;

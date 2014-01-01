@@ -35,6 +35,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
 	private IEmission lastEmission;
+	private AccessLevel blockAccessLvl;
 
 	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
 
@@ -115,6 +116,45 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.stmtList());
 		this.eCtx.popScope();
+		return null;
+	}
+
+	public Void visitClassDeclaration(PeopleCodeParser.ClassDeclarationContext ctx) {
+		((AppClassPeopleCodeProg)this.eCtx.prog).appClassName = ctx.GENERIC_ID().getText();
+		for(PeopleCodeParser.ClassBlockContext bCtx : ctx.classBlock()) {
+			visit(bCtx);
+		}
+		return null;
+	}
+
+	public Void visitClassBlock(PeopleCodeParser.ClassBlockContext ctx) {
+		if(ctx.aLvl != null) {
+			switch(ctx.aLvl.getText()) {
+				case "private":
+					this.blockAccessLvl = AccessLevel.PRIVATE;	break;
+				case "public":
+					this.blockAccessLvl = AccessLevel.PUBLIC;	break;
+				default:
+					throw new EntVMachRuntimeException("Unknown access level modifier " +
+						"encountered: " + ctx.aLvl.getText());
+			}
+		} else {
+			// Blocks without an access level modifier are public by default.
+			this.blockAccessLvl = AccessLevel.PUBLIC;
+		}
+		for(PeopleCodeParser.ClassBlockStmtContext cbsCtx : ctx.classBlockStmt()) {
+			visit(cbsCtx);
+		}
+		return null;
+	}
+
+	public Void visitInstance(PeopleCodeParser.InstanceContext ctx) {
+		visit(ctx.varType());
+		PTType type = getAnnotation(ctx.varType());
+		for(TerminalNode varId : ctx.VAR_ID()) {
+			((AppClassPeopleCodeProg)this.eCtx.prog).addInstanceIdentifier(
+				this.blockAccessLvl, varId.getText(), type);
+		}
 		return null;
 	}
 
@@ -580,9 +620,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				"app class prefix; need to support this by resolving path to class.");
 		}
 
+		/**
+		 * Instantation of an app class object requires that the instance and method
+		 * information for the class be known ahead of time. This info is in the class
+		 * declaration body at the start of the program. If the class declaration has
+		 * not yet been processed, do so now.
+		 */
+		if(!objType.progDefn.hasClassDefnBeenLoaded) {
+			ExecContext classDeclCtx = new AppClassDeclExecContext(objType);
+			this.supervisor.runImmediately(classDeclCtx);
+		}
+
 		PTAppClassObj newObj = objType.alloc();
 		setAnnotation(ctx, newObj);
-		return null;
 
 		/**
 	     * Check for constructor; call it if it exists.
@@ -590,14 +640,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * declaration to ensure that the constructor (if it exists) is only called
 	     * when the appropriate number of arguments are supplied.
 		 */
-/*		String constructorName = ptr.progDefn.getClassName();
-		if(ptr.progDefn.methodEntryPoints.containsKey(constructorName)) {*/
+		String constructorName = newObj.progDefn.appClassName;
+		if(newObj.progDefn.methodEntryPoints.containsKey(constructorName)) {
 
 			/**
 			 * Load arguments to constructor onto call stack if
 			 * args have been provided.
 			 */
-/*			if(ctx.exprList() != null) {
+			if(ctx.exprList() != null) {
 				visit(ctx.exprList());
 				for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 					visit(argCtx);
@@ -611,7 +661,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			this.repeatLastEmission();
 		}
 
-		return null;*/
+		return null;
 	}
 
 	private void declareIdentifier(String scope, String id, PTType ptr) {

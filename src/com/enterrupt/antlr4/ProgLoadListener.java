@@ -40,6 +40,15 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	}
 
 	/**
+	 * Save the class declaration start node for use in selectively parsing
+	 * identifiers and methods during app class object instantiation.
+	 */
+	@Override
+	public void enterClassDeclaration(PeopleCodeParser.ClassDeclarationContext ctx) {
+		((AppClassPeopleCodeProg)this.srcProg).classDeclNode = ctx;
+	}
+
+	/**
 	 * When an app package/class is imported, load the root package's defn
 	 * and save the package path for use during potential class resolution later.
 	 */
@@ -256,20 +265,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	public void enterMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
 		((AppClassPeopleCodeProg)this.srcProg)
 			.saveMethodEntryPoint(ctx.GENERIC_ID().getText(), ctx);
-	}
-
-	/**
-	 * Instance variable names must be saved now so that when a PTAppClassObject
-	 * is created, it can initialize its scope with all of the
-	 * class's instance variables.
-	 * TODO: Also need to save type, public/private, etc.
-	 */
-	@Override
-	public void enterInstance(PeopleCodeParser.InstanceContext ctx) {
-		for(TerminalNode id : ctx.VAR_ID()) {
-			((AppClassPeopleCodeProg)this.srcProg)
-				.addInstanceIdentifier(id.getText());
-		}
 	}
 
 	/**

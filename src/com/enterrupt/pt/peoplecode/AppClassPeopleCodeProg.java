@@ -4,19 +4,34 @@ import java.util.*;
 import java.lang.StringBuilder;
 import com.enterrupt.runtime.*;
 import com.enterrupt.pt.*;
+import com.enterrupt.types.*;
 import org.apache.logging.log4j.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
 public class AppClassPeopleCodeProg extends PeopleCodeProg {
 
+	private static Logger log = LogManager.getLogger(AppClassPeopleCodeProg.class.getName());
+
+	public String appClassName;
+	public ParseTree classDeclNode;
 	public String[] pathParts;
 	public AppPackage rootPackage;
 	public Map<String, ParseTree> methodEntryPoints;
 	public Map<String, List<String>> methodFormalParams;
-	public Map<String, Void> instanceIdTable;
+	public Map<String, Instance> instanceTable;
+	public boolean hasClassDefnBeenLoaded = false;
 
-	private static Logger log = LogManager.getLogger(AppClassPeopleCodeProg.class.getName());
+	public class Instance {
+		public AccessLevel aLevel;
+		public String id;
+		public PTType type;
+		public Instance(AccessLevel a, String i, PTType t) {
+			this.aLevel = a;
+			this.id = i;
+			this.type = t;
+		}
+	}
 
 	public AppClassPeopleCodeProg(String[] path) {
 		super();
@@ -26,11 +41,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		this.rootPackage = DefnCache.getAppPackage(this.bindVals[1]);
 		this.methodEntryPoints = new HashMap<String, ParseTree>();
 		this.methodFormalParams = new HashMap<String, List<String>>();
-		this.instanceIdTable = new HashMap<String, Void>();
-	}
-
-	public String getClassName() {
-		return this.pathParts[this.pathParts.length - 1];
+		this.instanceTable = new HashMap<String, Instance>();
 	}
 
 	protected void initBindVals() {
@@ -82,11 +93,9 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
         this.methodEntryPoints.put(methodName, entryPoint);
 	}
 
-	/**
-	 * TODO: Save type information here in place of Void.
-	 */
-	public void addInstanceIdentifier(String id) {
-		this.instanceIdTable.put(id, null);
+	public void addInstanceIdentifier(AccessLevel aLvl, String id, PTType type) {
+		log.debug("Adding instance id to table: {}, {}, {}", aLvl.name(), id, type);
+		this.instanceTable.put(id, new Instance(aLvl, id, type));
 	}
 
 	public void addFormalParamForMethod(String methodName, String paramId) {

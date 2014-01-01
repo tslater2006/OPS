@@ -17,12 +17,21 @@ public class PTAppClassObj extends PTObjectType {
 		this.progDefn = prog;
 		this.instanceScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
 
-		/**
-		 * TODO: Load methods and instance variables here from prog defn.
-	 	 */
+		// Load instance identifiers into instance scope.
+		for(Map.Entry<String, AppClassPeopleCodeProg.Instance> cursor :
+				this.progDefn.instanceTable.entrySet()) {
+			AppClassPeopleCodeProg.Instance instance = cursor.getValue();
+			this.instanceScope.declareVar(instance.id, instance.type);
+		}
 	}
 
 	public PTType dot(String s) {
+        /**
+         * CRITICAL: When retrieving an instance variable using the dot operator,
+         * you must check whether it is public or private first. See documentation
+		 * on app classes for specifics. Note that private methods and props
+		 * are private to the *CLASS*, not the instances of the class themselves.
+         */
 		throw new EntDataTypeException("Need to support dot() on app class objs.");
 	}
 

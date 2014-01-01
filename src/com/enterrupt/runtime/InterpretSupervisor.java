@@ -40,6 +40,18 @@ public class InterpretSupervisor {
 
 		context.prog.lexAndParse();
 
+		/**
+		 * Requests to load app class declaration bodies do not
+		 * involve execution of PeopleCode instructions, and thus should
+		 * not trigger any trace file emissions.
+		 */
+		if(context instanceof AppClassDeclExecContext) {
+			InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
+			interpreter.visit(context.startNode);
+			execContextStack.pop();
+			return;
+		}
+
 		String methodOrFuncName = "";
 		if(context instanceof ProgramExecContext &&
 			((ProgramExecContext)context).funcName != null) {
@@ -58,6 +70,7 @@ public class InterpretSupervisor {
 			String.format("%02d", execContextStack.size() - 1),
 			methodOrFuncName, descriptor));
 		TraceFileVerifier.submitEmission(new PCBegin(descriptor, "0", "0"));
+
 		InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
 		interpreter.visit(context.startNode);
 

@@ -3,22 +3,64 @@ package com.enterrupt.types;
 import com.enterrupt.pt.*;
 import java.util.*;
 import com.enterrupt.runtime.*;
+import java.lang.reflect.*;
+import org.apache.logging.log4j.*;
 
 public class PTRowset extends PTObjectType {
 
 	private static Type staticTypeFlag = Type.ROWSET;
+	public Record recDefn;
+	private List<PTRecord> rows;
+	private static Map<String, Method> ptMethodTable;
+
+	private static Logger log = LogManager.getLogger(PTRowset.class.getName());
+
+	static {
+//        try {
+            /// Cache references to Rowset methods.
+            Method[] methods = PTRowset.class.getMethods();
+            ptMethodTable = new HashMap<String, Method>();
+            for(Method m : methods) {
+                if(m.getName().indexOf("PT_") == 0) {
+                    ptMethodTable.put(m.getName().substring(3), m);
+                }
+            }
+/*        } catch(java.lang.NoSuchMethodException nsme) {
+            log.fatal(nsme.getMessage(), nsme);
+            System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());
+        }*/
+	}
 
 	protected PTRowset() {
 		super(staticTypeFlag);
 	}
 
+	protected PTRowset(Record r) {
+		super(staticTypeFlag);
+
+		this.recDefn = r;
+		this.rows = new ArrayList<PTRecord>();
+	}
+
     public PTType dotProperty(String s) {
-        throw new EntDataTypeException("Need to support dotProperty().");
+		return null;
     }
 
     public Callable dotMethod(String s) {
-        throw new EntDataTypeException("Need to support dotMethod().");
+		if(ptMethodTable.containsKey(s)) {
+			return new Callable(ptMethodTable.get(s), this);
+		}
+		return null;
     }
+
+	public void PT_Flush() {
+        List<PTType> args = Environment.getArgsFromCallStack();
+        if(args.size() != 0) {
+            throw new EntVMachRuntimeException("Expected zero arguments.");
+        }
+
+		this.rows.clear();
+	}
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
         throw new EntDataTypeException("castTo() has not been implemented.");
@@ -43,8 +85,14 @@ public class PTRowset extends PTObjectType {
         return sentinelObj;
     }
 
-    public PTRowset alloc() {
-        PTRowset newObj = new PTRowset();
+    /**
+     * Allocated rowsets must have an associated record defn in order
+     * to determine the type of the value enclosed within them. However, this
+     * defn is not part of the type itself; a Rowset variable can be assigned
+     * any Rowset object, regardless of its underlying record defn.
+     */
+    public PTRowset alloc(Record recDefn) {
+        PTRowset newObj = new PTRowset(recDefn);
         PTType.clone(this, newObj);
         return newObj;
     }

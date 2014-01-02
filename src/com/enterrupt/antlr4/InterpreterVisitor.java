@@ -307,8 +307,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		}
 
-		if(call.sysFuncPtr != null) {
-			call.invokeSysFunc();
+		if(call.ptMethod != null) {
+			call.invokePtMethod();
 		} else {
 			ExecContext eCtx = call.eCtx;
 

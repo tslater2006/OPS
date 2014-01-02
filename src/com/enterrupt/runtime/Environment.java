@@ -60,20 +60,15 @@ public class Environment {
 		// Initialize the call stack.
 		callStack = new Stack<PTType>();
 
-		try {
-			/// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
-			Method[] methods = GlobalFnLibrary.class.getMethods();
-			systemFuncTable = new HashMap<String, Callable>();
-			for(Method m : methods) {
-				if(m.getName().indexOf("PT_") == 0) {
-					systemFuncTable.put(m.getName().substring(3),
-						new Callable(GlobalFnLibrary.class.getMethod(m.getName())));
-				}
+		// Cache references to global PT functions to avoid repeated reflection lookups at runtime.
+		Method[] methods = GlobalFnLibrary.class.getMethods();
+		systemFuncTable = new HashMap<String, Callable>();
+		for(Method m : methods) {
+			if(m.getName().indexOf("PT_") == 0) {
+				systemFuncTable.put(m.getName().substring(3), new Callable(m,
+					GlobalFnLibrary.class));
 			}
-        } catch(java.lang.NoSuchMethodException nsme) {
-            log.fatal(nsme.getMessage(), nsme);
-            System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());
-        }
+		}
 	}
 
     public static void pushToCallStack(PTType p) {
@@ -132,4 +127,18 @@ public class Environment {
 		}
 		return p;
 	}
+
+    public static List<PTType> getArgsFromCallStack() {
+
+        List<PTType> args = new ArrayList<PTType>();
+        PTType p;
+        while((p = Environment.peekAtCallStack()) != null) {
+            args.add(Environment.popFromCallStack());
+        }
+
+        // The last argument appears at the top of the stack,
+        // so we need to reverse the argument list here before returning it.
+        Collections.reverse(args);
+        return args;
+    }
 }

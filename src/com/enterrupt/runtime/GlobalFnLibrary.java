@@ -8,24 +8,6 @@ public class GlobalFnLibrary {
 
 	private static Logger log = LogManager.getLogger(GlobalFnLibrary.class.getName());
 
-	/*************************************/
-    /** Utility functions                */
-    /*************************************/
-
-    private static ArrayList<PTType> getArgsFromCallStack() {
-
-        ArrayList<PTType> args = new ArrayList<PTType>();
-        PTType p;
-        while((p = Environment.peekAtCallStack()) != null) {
-            args.add(Environment.popFromCallStack());
-        }
-
-        // The last argument appears at the top of the stack,
-        // so we need to reverse the argument list here before returning it.
-        Collections.reverse(args);
-        return args;
-    }
-
 	/**
 	 * This is a shared function used by logical PeopleCode functions (tests for
 	 * blank values).
@@ -52,7 +34,7 @@ public class GlobalFnLibrary {
      * if one or more contain a value.
      */
     public static void PT_None() {
-        for(PTType arg : getArgsFromCallStack()) {
+        for(PTType arg : Environment.getArgsFromCallStack()) {
 			if(doesContainValue(arg)) {
 	        	Environment.pushToCallStack(Environment.FALSE);
 	            return;
@@ -66,7 +48,7 @@ public class GlobalFnLibrary {
 	 * if one or more do not.
 	 */
     public static void PT_All() {
-        for(PTType arg : getArgsFromCallStack()) {
+        for(PTType arg : Environment.getArgsFromCallStack()) {
 			if(!doesContainValue(arg)) {
 	        	Environment.pushToCallStack(Environment.FALSE);
 	            return;
@@ -76,17 +58,17 @@ public class GlobalFnLibrary {
     }
 
     public static void PT_Hide() {
-        getArgsFromCallStack();
+        Environment.getArgsFromCallStack();
         // Not yet implemented.
     }
 
     public static void PT_SetSearchDialogBehavior() {
-        getArgsFromCallStack();
+        Environment.getArgsFromCallStack();
         // Not yet implemented.
     }
 
     public static void PT_AllowEmplIdChg() {
-        getArgsFromCallStack();
+        Environment.getArgsFromCallStack();
         // Not yet implemented.
     }
 
@@ -96,11 +78,9 @@ public class GlobalFnLibrary {
      */
     public static void PT_IsModalComponent() {
 
-        ArrayList<PTType> args = getArgsFromCallStack();
-
-        // Expecting no arguments.
+        List<PTType> args = Environment.getArgsFromCallStack();
         if(args.size() != 0) {
-            throw new EntVMachRuntimeException("IsModalComponent expects no arguments.");
+            throw new EntVMachRuntimeException("Expected zero arguments.");
         }
 
         Environment.pushToCallStack(Environment.FALSE);
@@ -108,13 +88,23 @@ public class GlobalFnLibrary {
 
 	public static void PT_CreateRecord() {
 
-        ArrayList<PTType> args = getArgsFromCallStack();
-
+        List<PTType> args = Environment.getArgsFromCallStack();
 		if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
-			throw new EntVMachRuntimeException("Expected single StringPtr arg to CreateRecord.");
+			throw new EntVMachRuntimeException("Expected single string arg.");
 		}
 
 		Environment.pushToCallStack(PTRecord.getSentinel().alloc(
+			DefnCache.getRecord(((PTString)args.get(0)).read())));
+	}
+
+	public static void PT_CreateRowset() {
+
+        List<PTType> args = Environment.getArgsFromCallStack();
+		if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
+			throw new EntVMachRuntimeException("Expected single string arg.");
+		}
+
+		Environment.pushToCallStack(PTRowset.getSentinel().alloc(
 			DefnCache.getRecord(((PTString)args.get(0)).read())));
 	}
 }

@@ -37,21 +37,39 @@ public class PTAppClassObj extends PTObjectType {
 	}
 
    /**
-    * TODO: When retrieving an instance variable using the dot operator,
-    * you must check whether it is public or private first. See documentation
-	* on app classes for specifics. Note that private methods and props
+	* Private properties
 	* are private to the *CLASS*, not the instances of the class themselves.
     */
 	public PTType dotProperty(String s) {
+
+		// Remember: instance variables are prefaced with ampersands in class declaration.
+		if(this.progDefn.instanceTable.containsKey("&"+s)) {
+			if(this.progDefn.instanceTable.get("&"+s).aLevel == AccessLevel.PUBLIC) {
+				return this.instanceScope.resolveVar("&"+s);
+			} else {
+				throw new EntVMachRuntimeException("Encountered request for non-public "+
+					"instance var; need to determine if the calling entity is an obj "+
+					"with the same app class type as this one, since private properties "+
+					"are private to all instances of the app class, not individual objects.");
+			}
+		}
 		return null;
 	}
 
-	/**
-	 * TODO: Take into account whether the method is public or private.
-	 */
+   /**
+	* Private methods
+	* are private to the *CLASS*, not the instances of the class themselves.
+    */
 	public Callable dotMethod(String s) {
 		if(this.progDefn.methodImplStartNodes.containsKey(s)) {
-			return new Callable(new AppClassObjExecContext(this, s));
+			if(this.progDefn.methodTable.get(s).aLevel == AccessLevel.PUBLIC) {
+				return new Callable(new AppClassObjExecContext(this, s));
+			} else {
+				throw new EntVMachRuntimeException("Encountered request for non-public "+
+					"method; need to determine if the calling entity is an obj "+
+					"with the same app class type as this one, since private methods "+
+					"are private to all instances of the app class, not individual objects.");
+			}
 		}
 		return null;
 	}

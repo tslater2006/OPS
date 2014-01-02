@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
+import com.enterrupt.runtime.*;
 
 public class PTField extends PTObjectType {
 
@@ -24,9 +25,13 @@ public class PTField extends PTObjectType {
 		return this.value;
 	}
 
-	public PTType dot(String s) {
-		throw new EntDataTypeException("Need to implement dot() for PTField.");
-	}
+    public PTType dotProperty(String s) {
+        throw new EntDataTypeException("Need to support dotProperty().");
+    }
+
+    public Callable dotMethod(String s) {
+        throw new EntDataTypeException("Need to support dotMethod().");
+    }
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
 		if(value.typeCheck(t)) {

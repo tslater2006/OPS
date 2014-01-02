@@ -30,7 +30,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private CommonTokenStream tokens;
 	private InterpretSupervisor supervisor;
 
-	private ParseTreeProperty<PTType> nodeAnnotations;
+	private ParseTreeProperty<PTType> nodeData;
 	private ParseTreeProperty<Callable> nodeCallables;
 	private Stack<EvaluateConstruct> evalConstructStack;
 	private InterruptFlag interrupt;
@@ -43,31 +43,39 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.eCtx = e;
 		this.tokens = e.prog.tokenStream;
 		this.supervisor = s;
-		this.nodeAnnotations = new ParseTreeProperty<PTType>();
+		this.nodeData = new ParseTreeProperty<PTType>();
 		this.nodeCallables = new ParseTreeProperty<Callable>();
 		this.evalConstructStack = new Stack<EvaluateConstruct>();
 	}
 
-	private void setAnnotation(ParseTree node, PTType ptr) {
-		if(ptr == null) {
-			throw new EntVMachRuntimeException("Attempted to set the annotation " +
-				"to null for a node: " + node.getText());
-		}
-		this.nodeAnnotations.put(node, ptr);
+	private void setNodeData(ParseTree node, PTType a) {
+		this.nodeData.put(node, a);
 	}
 
-	private PTType getAnnotation(ParseTree node) {
-		if(this.nodeAnnotations.get(node) == null) {
-			throw new EntVMachRuntimeException("Attempted to get the annotation " +
+	private PTType getNodeData(ParseTree node) {
+		if(this.nodeData.get(node) == null) {
+			throw new EntVMachRuntimeException("Attempted to get the node data " +
 				"for a node, encountered null: " + node.getText());
 		}
-		return this.nodeAnnotations.get(node);
+		return this.nodeData.get(node);
+	}
+
+	private void setNodeCallable(ParseTree node, Callable c) {
+		this.nodeCallables.put(node, c);
+	}
+
+	private Callable getNodeCallable(ParseTree node) {
+		if(this.nodeCallables.get(node) == null) {
+			throw new EntVMachRuntimeException("Attempted to get the callable " +
+				"for a node, encountered null: " + node.getText());
+		}
+		return this.nodeCallables.get(node);
 	}
 
 	// Bubble-up operations should not fail in the event of nulls, unlike normal accesses.
 	private void bubbleUp(ParseTree src, ParseTree dest) {
-		if(this.nodeAnnotations.get(src) != null) {
-			this.nodeAnnotations.put(dest, this.nodeAnnotations.get(src));
+		if(this.nodeData.get(src) != null) {
+			this.nodeData.put(dest, this.nodeData.get(src));
 		}
 		if(this.nodeCallables.get(src) != null) {
 			this.nodeCallables.put(dest, this.nodeCallables.get(src));
@@ -150,7 +158,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitInstance(PeopleCodeParser.InstanceContext ctx) {
 		visit(ctx.varType());
-		PTType type = getAnnotation(ctx.varType());
+		PTType type = getNodeData(ctx.varType());
 		for(TerminalNode varId : ctx.VAR_ID()) {
 			((AppClassPeopleCodeProg)this.eCtx.prog).addInstanceIdentifier(
 				this.blockAccessLvl, varId.getText(), type);
@@ -167,7 +175,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		// Get value of conditional expression.
 		visit(ctx.ifStmt().expr());
-		boolean exprResult = ((PTBoolean)getAnnotation(ctx.ifStmt().expr())).read();
+		boolean exprResult = ((PTBoolean)getNodeData(ctx.ifStmt().expr())).read();
 
 		// If expression evaluates to true, visit the conditional body;
 		// otherwise, visit the Else body if it exists.
@@ -192,9 +200,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitStmtAssign(PeopleCodeParser.StmtAssignContext ctx) {
 		this.emitStmt(ctx);
 		visit(ctx.expr(1));
-		PTType src = getAnnotation(ctx.expr(1));
+		PTType src = getNodeData(ctx.expr(1));
 		visit(ctx.expr(0));
-		PTType dst = getAnnotation(ctx.expr(0));
+		PTType dst = getNodeData(ctx.expr(0));
 
 		/**
 		 * primitive = primitive : write from rhs to lhs, ignore identifier
@@ -259,7 +267,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 
-		Callable call = this.nodeCallables.get(ctx.expr());
+		Callable call = getNodeCallable(ctx.expr());
 
 		if(call == null) {
 			throw new EntVMachRuntimeException("Encountered non-callable data type "
@@ -275,7 +283,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			visit(ctx.exprList());
 			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 				visit(argCtx);
-				Environment.pushToCallStack(getAnnotation(argCtx));
+				Environment.pushToCallStack(getNodeData(argCtx));
 			}
 		}
 
@@ -309,7 +317,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 */
 	    PTType a = Environment.popFromCallStack();
 		if(a != null) {
-			setAnnotation(ctx, a);
+			setNodeData(ctx, a);
 		}
 
 		if(a != null && (Environment.popFromCallStack() != null)) {
@@ -331,15 +339,27 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 		visit(ctx.id());
-		setAnnotation(ctx, getAnnotation(ctx.expr()).dot(ctx.id().getText()));
+
+		PTObjectType obj = (PTObjectType)getNodeData(ctx.expr());
+		PTType prop = obj.dotProperty(ctx.id().getText());
+		Callable call = obj.dotMethod(ctx.id().getText());
+
+		if(prop == null && call == null) {
+			throw new EntVMachRuntimeException("Failed to resolve identifier (" +
+				ctx.id().getText() + ") to a property and/or method for object: " +
+				obj);
+		}
+
+		setNodeData(ctx, prop);
+		setNodeCallable(ctx, call);
 		return null;
 	}
 
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
 		visit(ctx.expr(0));
-		PTType a1 = getAnnotation(ctx.expr(0));
+		PTType a1 = getNodeData(ctx.expr(0));
 		visit(ctx.expr(1));
-		PTType a2 = getAnnotation(ctx.expr(1));
+		PTType a2 = getNodeData(ctx.expr(1));
 
 		PTType result;
 		if(a1.equals(a2)) {
@@ -347,7 +367,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		} else {
 			result = Environment.FALSE;
 		}
-		setAnnotation(ctx, result);
+		setNodeData(ctx, result);
 		log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
 		return null;
 	}
@@ -356,17 +376,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.op.getText().equals("Or")) {
 			visit(ctx.expr(0));
-			PTBoolean lhs = (PTBoolean)getAnnotation(ctx.expr(0));
+			PTBoolean lhs = (PTBoolean)getNodeData(ctx.expr(0));
 
 			/**
 			 * Short-circuit evaluation: if lhs is true, this expression is true,
 			 * otherwise evaluate rhs and bubble up its value.
 			 */
 			if(lhs.read()) {
-				setAnnotation(ctx, Environment.TRUE);
+				setNodeData(ctx, Environment.TRUE);
 			} else {
 				visit(ctx.expr(1));
-				setAnnotation(ctx, getAnnotation(ctx.expr(1)));
+				setNodeData(ctx, getNodeData(ctx.expr(1)));
 			}
 		} else {
 			throw new EntInterpretException("Unsupported boolean comparison operation",
@@ -405,11 +425,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.SYS_VAR_ID() != null) {
 			PTType a = Environment.getSystemVar(ctx.SYS_VAR_ID().getText());
-			setAnnotation(ctx, a);
+			setNodeData(ctx, a);
 
 		} else if(ctx.VAR_ID() != null) {
 			PTType a = eCtx.resolveIdentifier(ctx.VAR_ID().getText());
-			setAnnotation(ctx, a);
+			setNodeData(ctx, a);
 
 		} else if(ctx.GENERIC_ID() != null) {
 
@@ -423,7 +443,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				/**
 				 * Detect references to search record buffer.
 				 */
-				setAnnotation(ctx, ComponentBuffer.searchRecord);
+				setNodeData(ctx, ComponentBuffer.searchRecord);
 
 			} else if(PSDefn.defnLiteralReservedWordsTable.containsKey(
 				ctx.GENERIC_ID().getText().toUpperCase())) {
@@ -431,14 +451,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				 * Detect defn literal reserved words (i.e.,
 				 * "Menu" in "Menu.SA_LEARNER_SERVICES").
 				 */
-				setAnnotation(ctx, Environment.DEFN_LITERAL);
+				setNodeData(ctx, Environment.DEFN_LITERAL);
 
 			} else if(Environment.getSystemFuncPtr(ctx.GENERIC_ID().getText()) != null) {
 				/**
 				 * Detect system function references.
 				 */
-				this.nodeCallables.put(ctx, Environment.getSystemFuncPtr(
-						ctx.GENERIC_ID().getText()));
+				setNodeCallable(ctx, Environment.getSystemFuncPtr(
+					ctx.GENERIC_ID().getText()));
 			}
 		}
 		return null;
@@ -450,15 +470,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 			PTType ptr = Environment.getFromLiteralPool(
 				new Integer(ctx.IntegerLiteral().getText()));
-			setAnnotation(ctx, ptr);
+			setNodeData(ctx, ptr);
 
 		} else if(ctx.BoolLiteral() != null) {
 
 			String b = ctx.BoolLiteral().getText();
 			if(b.equals("True") || b.equals("true")) {
-				setAnnotation(ctx, Environment.TRUE);
+				setNodeData(ctx, Environment.TRUE);
 			} else {
-				setAnnotation(ctx, Environment.FALSE);
+				setNodeData(ctx, Environment.FALSE);
 			}
 
 		} else if(ctx.DecimalLiteral() != null) {
@@ -485,13 +505,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 
 			log.debug("Declaring identifier ({}) with scope {} and type {}.",
-				idCtx.VAR_ID().getText(), scope, getAnnotation(ctx.varType()));
+				idCtx.VAR_ID().getText(), scope, getNodeData(ctx.varType()));
 			/**
 			 * IMPORTANT: The PTType must cloned for each variable, otherwise
 			 * each identifier will point to the same target.
 			 */
 			this.declareIdentifier(scope, idCtx.VAR_ID().getText(),
-				getAnnotation(ctx.varType()));
+				getNodeData(ctx.varType()));
 		}
 		return null;
 	}
@@ -500,7 +520,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.appClassPath() != null) {
 			visit(ctx.appClassPath());
-			setAnnotation(ctx, getAnnotation(ctx.appClassPath()));
+			setNodeData(ctx, getNodeData(ctx.appClassPath()));
 		} else {
 			PTType nestedType = null;
 			if(ctx.varType() != null) {
@@ -509,7 +529,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 						"type preceding 'of' clause: " + ctx.getText());
 				}
 				visit(ctx.varType());
-				nestedType = getAnnotation(ctx.varType());
+				nestedType = getNodeData(ctx.varType());
 			}
 
             PTType type;
@@ -537,7 +557,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
                     throw new EntVMachRuntimeException("Unexpected data type: " +
                         ctx.GENERIC_ID().getText());
             }
-			setAnnotation(ctx, type);
+			setNodeData(ctx, type);
 		}
 		return null;
 	}
@@ -547,7 +567,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		visit(ctx.expr());
 		EvaluateConstruct evalConstruct = new EvaluateConstruct(
-			getAnnotation(ctx.expr()));
+			getNodeData(ctx.expr()));
 		this.evalConstructStack.push(evalConstruct);
 
 		List<PeopleCodeParser.WhenBranchContext> branches = ctx.whenBranch();
@@ -579,7 +599,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		EvaluateConstruct evalConstruct = this.evalConstructStack.peek();
 		PTType p1 = evalConstruct.baseExpr;
 		visit(ctx.expr());
-		PTType p2 = getAnnotation(ctx.expr());
+		PTType p2 = getNodeData(ctx.expr());
 
 		/**
 		 * If a previous branch evaluated to true and we're here, that means
@@ -608,7 +628,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		AppClassPeopleCodeProg progDefn =
 			(AppClassPeopleCodeProg)DefnCache.getProgram(("AppClassPC." +
 				ctx.getText() + ".OnExecute").replaceAll(":","."));
-		setAnnotation(ctx, PTAppClassObj.getSentinel(progDefn));
+		setNodeData(ctx, PTAppClassObj.getSentinel(progDefn));
 		return null;
 	}
 
@@ -617,7 +637,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		PTAppClassObj objType;
 		if(ctx.appClassPath() != null) {
 			visit(ctx.appClassPath());
-			objType = (PTAppClassObj)getAnnotation(ctx.appClassPath());
+			objType = (PTAppClassObj)getNodeData(ctx.appClassPath());
 		} else {
 			throw new EntVMachRuntimeException("Encountered create invocation without " +
 				"app class prefix; need to support this by resolving path to class.");
@@ -635,7 +655,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		PTAppClassObj newObj = objType.alloc();
-		setAnnotation(ctx, newObj);
+		setNodeData(ctx, newObj);
 
 		/**
 	     * Check for constructor; call it if it exists.
@@ -654,7 +674,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				visit(ctx.exprList());
 				for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
 					visit(argCtx);
-	                Environment.pushToCallStack(getAnnotation(argCtx));
+	                Environment.pushToCallStack(getNodeData(argCtx));
 				}
 			}
 

@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
+import com.enterrupt.runtime.*;
 
 public class PTRowset extends PTObjectType {
 
@@ -11,9 +12,13 @@ public class PTRowset extends PTObjectType {
 		super(staticTypeFlag);
 	}
 
-	public PTType dot(String s) {
-		throw new EntDataTypeException("Need to implement dot() for PTRowset.");
-	}
+    public PTType dotProperty(String s) {
+        throw new EntDataTypeException("Need to support dotProperty().");
+    }
+
+    public Callable dotMethod(String s) {
+        throw new EntDataTypeException("Need to support dotMethod().");
+    }
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
         throw new EntDataTypeException("castTo() has not been implemented.");

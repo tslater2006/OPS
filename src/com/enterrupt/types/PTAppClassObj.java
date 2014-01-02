@@ -36,14 +36,18 @@ public class PTAppClassObj extends PTObjectType {
 		}
 	}
 
-	public PTType dot(String s) {
-        /**
-         * CRITICAL: When retrieving an instance variable using the dot operator,
-         * you must check whether it is public or private first. See documentation
-		 * on app classes for specifics. Note that private methods and props
-		 * are private to the *CLASS*, not the instances of the class themselves.
-         */
-		throw new EntDataTypeException("Need to support dot() on app class objs.");
+   /**
+    * CRITICAL: When retrieving an instance variable using the dot operator,
+    * you must check whether it is public or private first. See documentation
+	* on app classes for specifics. Note that private methods and props
+	* are private to the *CLASS*, not the instances of the class themselves.
+    */
+	public PTType dotProperty(String s) {
+		return null;
+	}
+
+	public Callable dotMethod(String s) {
+		throw new EntVMachRuntimeException("Need to search app class methods.");
 	}
 
 	public PTPrimitiveType castTo(PTPrimitiveType t) {

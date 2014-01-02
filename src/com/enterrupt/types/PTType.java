@@ -15,7 +15,6 @@ public abstract class PTType {
 		sentinelCache = new HashMap<String, PTType>();
 	}
 
-	public abstract PTType dot(String s);
 	public abstract boolean typeCheck(PTType a);
 
 	protected PTType(Type t) {

@@ -26,11 +26,6 @@ public abstract class PTPrimitiveType<T> extends PTType {
 			"the provided source operand: " + src.toString());
 	}
 
-	public PTType dot(String s) {
-		throw new EntDataTypeException("Encountered illegal dot() call on a " +
-			"PTPrimitiveType where s=" + s);
-	}
-
 	protected void checkIsWriteable() {
         if(this.isSentinel()) {
             throw new EntDataTypeException("Attempted illegal write to a " +

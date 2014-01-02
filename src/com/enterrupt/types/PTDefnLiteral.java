@@ -17,9 +17,13 @@ public class PTDefnLiteral extends PTObjectType {
 	 * resolve to the string itself; i.e., Menu.SA_LEARNER_SERVICES
 	 * resolves to "SA_LEARNER_SERVICES".
 	 */
-	public PTType dot(String s) {
+    public PTType dotProperty(String s) {
 		return Environment.getFromLiteralPool(s);
-	}
+    }
+
+    public Callable dotMethod(String s) {
+		return null;
+    }
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
         throw new EntDataTypeException("castTo() has not been implemented.");

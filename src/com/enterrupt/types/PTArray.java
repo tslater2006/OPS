@@ -1,5 +1,7 @@
 package com.enterrupt.types;
 
+import com.enterrupt.runtime.*;
+
 public class PTArray extends PTObjectType {
 
 	private static Type staticTypeFlag = Type.ARRAY;
@@ -12,8 +14,12 @@ public class PTArray extends PTObjectType {
 		this.baseType = b;
 	}
 
-	public PTType dot(String s) {
-		throw new EntDataTypeException("Need to support dot() on arrays.");
+	public PTType dotProperty(String s) {
+		throw new EntDataTypeException("Need to support dotProperty().");
+	}
+
+	public Callable dotMethod(String s) {
+		throw new EntDataTypeException("Need to support dotMethod().");
 	}
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {

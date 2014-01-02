@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
+import com.enterrupt.runtime.*;
 
 public class PTRecord extends PTObjectType {
 
@@ -24,13 +25,13 @@ public class PTRecord extends PTObjectType {
 		}
 	}
 
-	public PTType dot(String s) {
-		if(this.fields.containsKey(s)) {
-			return this.fields.get(s);
-		}
-		throw new EntDataTypeException("No data member exists on PTRecord "
-			+ "with s=" + s);
-	}
+    public PTType dotProperty(String s) {
+		return this.fields.get(s);
+    }
+
+    public Callable dotMethod(String s) {
+		return null;
+    }
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
         throw new EntDataTypeException("castTo() has not been implemented.");

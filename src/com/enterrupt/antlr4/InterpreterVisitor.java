@@ -515,6 +515,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		} else if(ctx.DecimalLiteral() != null) {
 			throw new EntVMachRuntimeException("Encountered a decimal literal; need to create "
 				+ "a BigDecimal memory pool and type.");
+
+		} else if(ctx.StringLiteral() != null) {
+			setNodeData(ctx, Environment.getFromLiteralPool(
+				ctx.StringLiteral().getText()));
+
 		} else {
 			throw new EntVMachRuntimeException("Unable to resolve literal to a terminal node.");
 		}

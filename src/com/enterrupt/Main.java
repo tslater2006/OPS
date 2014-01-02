@@ -22,9 +22,9 @@ public class Main {
 			Environment.setSystemVar("%EmployeeId", "AA0001");
 
 			Component c = new Component(
-				Environment.getSystemVar("%Component").read(), "GBL");
+				(String)Environment.getSystemVar("%Component").read(), "GBL");
 			Menu m = new Menu(
-				Environment.getSystemVar("%Menu").read());
+				(String)Environment.getSystemVar("%Menu").read());
 
 			c.loadSearchRecord();
 

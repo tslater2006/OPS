@@ -15,7 +15,7 @@ public class Environment {
 	public static Scope globalScope;
 	public static Scope componentScope;
 
-	private static Map<String, PTString> systemVarTable;
+	private static Map<String, PTPrimitiveType> systemVarTable;
 	private static Map<String, Callable> systemFuncTable;
 
 	private static Map<Integer, PTInteger> integerLiteralPool;
@@ -48,7 +48,7 @@ public class Environment {
 		stringLiteralPool = new HashMap<String, PTString>();
 
 		// Allocate space for system vars, mark each as read-only.
-		systemVarTable = new HashMap<String, PTString>();
+		systemVarTable = new HashMap<String, PTPrimitiveType>();
 		for(String varName : supportedGlobalVars) {
 			systemVarTable.put(varName, (PTString)PTString.getSentinel()
 												.alloc().setReadOnly());
@@ -91,17 +91,27 @@ public class Environment {
 	}
 
 	public static void setSystemVar(String var, String value) {
-		systemVarTable.get(var).systemWrite(
+		// Assuming var is mapped to a PTString for now.
+		((PTString)systemVarTable.get(var)).systemWrite(
 			Environment.getFromLiteralPool(value).read());
 	}
 
-	public static PTString getSystemVar(String var) {
-		PTString ptr = systemVarTable.get(var);
-		if(ptr == null) {
+	public static PTPrimitiveType getSystemVar(String var) {
+
+		PTPrimitiveType a = null;
+		switch(var) {
+			case "%Date":
+				a = PTDate.getSentinel().alloc();
+				break;
+			default:
+				a = systemVarTable.get(var);
+		}
+
+		if(a == null) {
 			throw new EntVMachRuntimeException("Attempted to access a system var "
 			 + "that is undefined: " + var);
 		}
-		return ptr;
+		return a;
 	}
 
 	public static Callable getSystemFuncPtr(String func) {

@@ -16,19 +16,13 @@ public class PTRowset extends PTObjectType {
 	private static Logger log = LogManager.getLogger(PTRowset.class.getName());
 
 	static {
-//        try {
-            /// Cache references to Rowset methods.
-            Method[] methods = PTRowset.class.getMethods();
-            ptMethodTable = new HashMap<String, Method>();
-            for(Method m : methods) {
-                if(m.getName().indexOf("PT_") == 0) {
-                    ptMethodTable.put(m.getName().substring(3), m);
-                }
-            }
-/*        } catch(java.lang.NoSuchMethodException nsme) {
-            log.fatal(nsme.getMessage(), nsme);
-            System.exit(ExitCode.REFLECT_FAIL_RTE_STATIC_INIT.getCode());
-        }*/
+		Method[] methods = PTRowset.class.getMethods();
+    	ptMethodTable = new HashMap<String, Method>();
+		for(Method m : methods) {
+			if(m.getName().indexOf("PT_") == 0) {
+				ptMethodTable.put(m.getName().substring(3), m);
+			}
+		}
 	}
 
 	protected PTRowset() {
@@ -40,6 +34,9 @@ public class PTRowset extends PTObjectType {
 
 		this.recDefn = r;
 		this.rows = new ArrayList<PTRecord>();
+
+		// One row is always present in the rowset, even when flushed.
+		this.rows.add(PTRecord.getSentinel().alloc(this.recDefn));
 	}
 
     public PTType dotProperty(String s) {
@@ -59,7 +56,18 @@ public class PTRowset extends PTObjectType {
             throw new EntVMachRuntimeException("Expected zero arguments.");
         }
 
+		// One row is always present in the rowset, even when flushed.
 		this.rows.clear();
+		this.rows.add(PTRecord.getSentinel().alloc(this.recDefn));
+	}
+
+	public void PT_Fill() {
+        List<PTType> args = Environment.getArgsFromCallStack();
+        if(args.size() < 1) {
+            throw new EntVMachRuntimeException("Expected at least one string arg.");
+        }
+
+		throw new EntVMachRuntimeException("Implement Fill.");
 	}
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {

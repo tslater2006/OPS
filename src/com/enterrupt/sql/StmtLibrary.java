@@ -146,7 +146,7 @@ public class StmtLibrary {
 */
 		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '"
 			+ "AA0001%' AND OPRID=? ORDER BY EMPLID");
-		stmt.bindVals.put(1, Environment.getSystemVar("%OperatorId").read());
+		stmt.bindVals.put(1, ((PTString)Environment.getSystemVar("%OperatorId")).read());
 		return stmt.generatePreparedStmt(conn);
 	}
 

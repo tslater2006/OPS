@@ -1,26 +1,30 @@
 package com.enterrupt.types;
 
-import java.util.EnumSet;
+import java.util.*;
+import java.text.SimpleDateFormat;
 
-public class PTDate extends PTPrimitiveType<Void> {
+public class PTDate extends PTPrimitiveType<String> {
 
 	private static Type staticTypeFlag = Type.DATE;
-	private Void d;
+	private String d;
 
 	protected PTDate() {
 		super(staticTypeFlag);
+
+		// default value is current date.
+		d = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 	}
 
-	public Void read() {
+	public String read() {
 		return this.d;
 	}
 
-    public void write(Void newValue) {
+    public void write(String newValue) {
         this.checkIsWriteable();
         this.d = newValue;
     }
 
-    public void systemWrite(Void newValue) {
+    public void systemWrite(String newValue) {
         this.checkIsSystemWriteable();
         this.d = newValue;
     }

@@ -166,6 +166,26 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitMethod(PeopleCodeParser.MethodContext ctx) {
+
+		visit(ctx.formalParamList());
+		List<FormalParam> formalParams = new ArrayList<FormalParam>();
+		for(PeopleCodeParser.ParamContext pCtx : ctx.formalParamList().param()) {
+			formalParams.add(new FormalParam(
+				getNodeData(pCtx.varType()), pCtx.VAR_ID().getText()));
+		}
+
+		PTType rType = null;
+		if(ctx.returnType() != null) {
+			visit(ctx.returnType());
+			rType = getNodeData(ctx.returnType().varType());
+		}
+
+		((AppClassPeopleCodeProg)this.eCtx.prog).addMethod(
+			this.blockAccessLvl, ctx.GENERIC_ID().getText(), formalParams, rType);
+		return null;
+	}
+
 	/**********************************************************
 	 * <stmt> alternative handlers.
 	 **********************************************************/
@@ -404,12 +424,23 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		this.emitStmt(ctx);
 
 		Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
-		List<String> formalParams = ((AppClassPeopleCodeProg)eCtx.prog).methodFormalParams.
-			get(ctx.GENERIC_ID().getText());
+		List<FormalParam> formalParams = ((AppClassPeopleCodeProg)eCtx.prog).methodTable.
+			get(ctx.GENERIC_ID().getText()).formalParams;
 
-		if(formalParams != null) {
-			for(String formalParamId : formalParams) {
-				localScope.declareVar(formalParamId, Environment.popFromCallStack());
+		/**
+		 * Ensure that each of the arguments passed to the method match
+		 * the types of the formal parameters, and assign (by reference) those args
+		 * to the identifiers in the formal parameter list of the method signature.
+		 * If there's a mismatch, attempt to cast the argument provided to the type
+		 * specified in the formal parameter definition.
+		 */
+		for(FormalParam fp : formalParams) {
+			PTType arg = Environment.popFromCallStack();
+			if(fp.type.typeCheck(arg)) {
+				localScope.declareVar(fp.id, arg);
+			} else {
+				localScope.declareVar(fp.id,
+					((PTObjectType)arg).castTo((PTPrimitiveType)fp.type));
 			}
 		}
 
@@ -664,7 +695,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	     * when the appropriate number of arguments are supplied.
 		 */
 		String constructorName = newObj.progDefn.appClassName;
-		if(newObj.progDefn.methodEntryPoints.containsKey(constructorName)) {
+		if(newObj.progDefn.methodImplStartNodes.containsKey(constructorName)) {
 
 			/**
 			 * Load arguments to constructor onto call stack if

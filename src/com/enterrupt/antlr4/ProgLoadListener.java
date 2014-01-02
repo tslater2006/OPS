@@ -73,21 +73,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		}
 	}
 
-	@Override
-	public void exitMethod(PeopleCodeParser.MethodContext ctx) {
-		/**
-		 * Save the formal parameter identifiers for this method.
-		 */
-		String methodName = ctx.GENERIC_ID().getText();
-		if(ctx.formalParamList() != null) {
-			for(PeopleCodeParser.ParamContext paramCtx :
-					ctx.formalParamList().param()) {
-				((AppClassPeopleCodeProg)this.srcProg).addFormalParamForMethod(
-					methodName, paramCtx.VAR_ID().getText());
-			}
-		}
-	}
-
 	/**
 	 * If a property statment in an App Class program references another app class object,
 	 * immediately load the program containing that app class.
@@ -264,7 +249,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	@Override
 	public void enterMethodImpl(PeopleCodeParser.MethodImplContext ctx) {
 		((AppClassPeopleCodeProg)this.srcProg)
-			.saveMethodEntryPoint(ctx.GENERIC_ID().getText(), ctx);
+			.saveMethodImplStartNode(ctx.GENERIC_ID().getText(), ctx);
 	}
 
 	/**

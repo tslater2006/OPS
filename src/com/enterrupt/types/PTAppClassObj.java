@@ -37,7 +37,7 @@ public class PTAppClassObj extends PTObjectType {
 	}
 
    /**
-    * CRITICAL: When retrieving an instance variable using the dot operator,
+    * TODO: When retrieving an instance variable using the dot operator,
     * you must check whether it is public or private first. See documentation
 	* on app classes for specifics. Note that private methods and props
 	* are private to the *CLASS*, not the instances of the class themselves.
@@ -46,8 +46,14 @@ public class PTAppClassObj extends PTObjectType {
 		return null;
 	}
 
+	/**
+	 * TODO: Take into account whether the method is public or private.
+	 */
 	public Callable dotMethod(String s) {
-		throw new EntVMachRuntimeException("Need to search app class methods.");
+		if(this.progDefn.methodImplStartNodes.containsKey(s)) {
+			return new Callable(new AppClassObjExecContext(this, s));
+		}
+		return null;
 	}
 
 	public PTPrimitiveType castTo(PTPrimitiveType t) {

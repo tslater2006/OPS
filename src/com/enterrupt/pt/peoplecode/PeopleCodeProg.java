@@ -13,8 +13,11 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.*;
 import com.enterrupt.antlr4.*;
 import com.enterrupt.antlr4.frontend.*;
+import com.enterrupt.types.*;
 
 public abstract class PeopleCodeProg {
+
+	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
 	protected String[] bindVals;
 	public String event;
@@ -30,8 +33,6 @@ public abstract class PeopleCodeProg {
 	public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
 	public Map<String, List<AppPackagePath>> importedAppClasses;
 	public List<AppPackagePath> importedAppPackagePaths;
-
-	private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
 	private boolean hasInitialized = false;
 	private boolean haveLoadedDefnsAndPrograms = false;

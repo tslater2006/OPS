@@ -16,12 +16,12 @@ public class AppClassObjExecContext extends ExecContext {
 		/**
 		 * Resolve method or function name to parse tree node.
 		 */
-		if(!obj.progDefn.methodEntryPoints.containsKey(this.methodName)) {
+		if(!obj.progDefn.methodImplStartNodes.containsKey(this.methodName)) {
 			throw new EntVMachRuntimeException("Unable to resolve method or function " +
 				"name (" + this.methodName + ") to a parse tree node for program: " +
 				obj.progDefn.getDescriptor());
 		}
 
-		this.startNode = obj.progDefn.methodEntryPoints.get(this.methodName);
+		this.startNode = obj.progDefn.methodImplStartNodes.get(this.methodName);
 	}
 }

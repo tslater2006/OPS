@@ -17,9 +17,9 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	public ParseTree classDeclNode;
 	public String[] pathParts;
 	public AppPackage rootPackage;
-	public Map<String, ParseTree> methodEntryPoints;
-	public Map<String, List<String>> methodFormalParams;
 	public Map<String, Instance> instanceTable;
+	public Map<String, Method> methodTable;
+	public Map<String, ParseTree> methodImplStartNodes;
 	public boolean hasClassDefnBeenLoaded = false;
 
 	public class Instance {
@@ -33,15 +33,28 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		}
 	}
 
+	public class Method {
+		public AccessLevel aLevel;
+		public String name;
+		public List<FormalParam> formalParams;
+		public PTType returnType;
+		public Method(AccessLevel a, String n, List<FormalParam> l, PTType r) {
+			this.aLevel = a;
+			this.name = n;
+			this.formalParams = l;
+			this.returnType = r;
+		}
+	}
+
 	public AppClassPeopleCodeProg(String[] path) {
 		super();
 		this.pathParts = path;
 		this.event = "OnExecute";
 		this.initBindVals();
 		this.rootPackage = DefnCache.getAppPackage(this.bindVals[1]);
-		this.methodEntryPoints = new HashMap<String, ParseTree>();
-		this.methodFormalParams = new HashMap<String, List<String>>();
 		this.instanceTable = new HashMap<String, Instance>();
+		this.methodTable = new HashMap<String, Method>();
+		this.methodImplStartNodes = new HashMap<String, ParseTree>();
 	}
 
 	protected void initBindVals() {
@@ -89,8 +102,8 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		return sb.toString();
 	}
 
-    public void saveMethodEntryPoint(String methodName, ParseTree entryPoint) {
-        this.methodEntryPoints.put(methodName, entryPoint);
+    public void saveMethodImplStartNode(String methodName, ParseTree node) {
+        this.methodImplStartNodes.put(methodName, node);
 	}
 
 	public void addInstanceIdentifier(AccessLevel aLvl, String id, PTType type) {
@@ -98,12 +111,10 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		this.instanceTable.put(id, new Instance(aLvl, id, type));
 	}
 
-	public void addFormalParamForMethod(String methodName, String paramId) {
-		List<String> paramList = this.methodFormalParams.get(methodName);
-		if(paramList == null) {
-			paramList = new ArrayList<String>();
-			this.methodFormalParams.put(methodName, paramList);
-		}
-		paramList.add(paramId);
+	public void addMethod(AccessLevel aLvl, String name,
+					List<FormalParam> fp, PTType rType) {
+		log.debug("Adding method to table: {}, {}, {}, {}",
+			aLvl.name(), name, fp, rType);
+		this.methodTable.put(name, new Method(aLvl, name, fp, rType));
 	}
 }

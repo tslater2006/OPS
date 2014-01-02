@@ -527,22 +527,38 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		visit(ctx.varType());
 
 		String scope = ctx.varScope.getText();
+		PTType varType = getNodeData(ctx.varType());
+		boolean didInitializeAnIdentifier = false;
 
 		List<PeopleCodeParser.VarDeclaratorContext> varsToDeclare = ctx.varDeclarator();
 		for(PeopleCodeParser.VarDeclaratorContext idCtx : varsToDeclare) {
+
 			if(idCtx.expr() != null) {
-				throw new EntVMachRuntimeException("Initialization during var declaration is " +
-					"not yet supported.");
+				visit(idCtx.expr());
+				PTType initialValue = getNodeData(idCtx.expr());
+				if(varType.typeCheck(initialValue)) {
+					log.debug("Initializing identifier ({}) with scope {} and value {}.",
+						idCtx.VAR_ID().getText(), scope, initialValue);
+					this.declareIdentifier(scope, idCtx.VAR_ID().getText(), initialValue);
+					didInitializeAnIdentifier = true;
+				} else {
+					throw new EntVMachRuntimeException("Type mismatch between declared " +
+						"variable type ("+varType+") and its initialized value ("
+						+initialValue+").");
+				}
+			} else {
+				log.debug("Declaring identifier ({}) with scope {} and type {}.",
+					idCtx.VAR_ID().getText(), scope, varType);
+				this.declareIdentifier(scope, idCtx.VAR_ID().getText(), varType);
 			}
 
-			log.debug("Declaring identifier ({}) with scope {} and type {}.",
-				idCtx.VAR_ID().getText(), scope, getNodeData(ctx.varType()));
-			/**
-			 * IMPORTANT: The PTType must cloned for each variable, otherwise
-			 * each identifier will point to the same target.
-			 */
-			this.declareIdentifier(scope, idCtx.VAR_ID().getText(),
-				getNodeData(ctx.varType()));
+		}
+
+		if(this.eCtx.prog instanceof AppClassPeopleCodeProg) {
+			if(varType instanceof PTRowset || varType instanceof PTAppClassObj
+				|| didInitializeAnIdentifier) {
+				this.emitStmt(ctx);
+			}
 		}
 		return null;
 	}
@@ -722,16 +738,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	private void declareIdentifier(String scope, String id, PTType ptr) {
+	private void declareIdentifier(String scope, String id, PTType a) {
 		switch(scope) {
 			case "Local":
-				eCtx.declareLocalVar(id, ptr);
+				eCtx.declareLocalVar(id, a);
 				break;
 			case "Component":
-				Environment.componentScope.declareVar(id, ptr);
+				Environment.componentScope.declareVar(id, a);
 				break;
 			case "Global":
-				Environment.globalScope.declareVar(id, ptr);
+				Environment.globalScope.declareVar(id, a);
 				break;
 			default:
 				throw new EntVMachRuntimeException("Encountered unexpected variable " +

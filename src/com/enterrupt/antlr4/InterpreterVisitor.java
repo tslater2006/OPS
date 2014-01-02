@@ -575,15 +575,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 					}
 					break;
                 case "string":
-                    type = PTString.getSentinel();    break;
+                    type = PTString.getSentinel();		break;
                 case "date":
-                    type = PTDate.getSentinel();      break;
+                    type = PTDate.getSentinel();		break;
                 case "integer":
-                    type = PTInteger.getSentinel();   break;
+                    type = PTInteger.getSentinel();		break;
                 case "Record":
-                    type = PTRecord.getSentinel();    break;
+                    type = PTRecord.getSentinel();		break;
                 case "Rowset":
-                    type = PTRowset.getSentinel();    break;
+                    type = PTRowset.getSentinel();		break;
+				case "number":
+					type = PTNumber.getSentinel();		break;
+				case "boolean":
+					type = PTBoolean.getSentinel();		break;
                 default:
                     throw new EntVMachRuntimeException("Unexpected data type: " +
                         ctx.GENERIC_ID().getText());

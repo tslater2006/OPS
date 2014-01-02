@@ -156,6 +156,14 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
+	public static PreparedStatement prepareArbitraryStmt(String sql, String[] bindVals) {
+		ENTStmt stmt = new ENTStmt(sql);
+		for(int i = 0; i < bindVals.length; i++) {
+			stmt.bindVals.put(i+1, bindVals[i]);
+		}
+		return stmt.generatePreparedStmt(conn);
+	}
+
 	public static void disconnect() {
 		try {
 			conn.close();

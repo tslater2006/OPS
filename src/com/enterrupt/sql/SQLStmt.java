@@ -13,7 +13,7 @@ import org.apache.logging.log4j.*;
  */
 public class SQLStmt implements IEmission {
     public String sql;
-    public HashMap<Integer, String> bindVals;
+    public Map<Integer, String> bindVals;
 
 	private static Logger log = LogManager.getLogger(SQLStmt.class.getName());
 

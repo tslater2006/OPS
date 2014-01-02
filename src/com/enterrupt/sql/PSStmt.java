@@ -9,17 +9,20 @@ import java.util.regex.Matcher;
 
 public class PSStmt extends SQLStmt {
 
-	// Note: this regex uses positve lookbehind and lookahead.
-	private final String BIND_IDX_REGEX = "(?<=\\s*)(:\\d+)(?=\\s?)";
+	private static Pattern bindIdxPattern;
 	public String originalStmt;
 	public int line_nbr;
+
+	static {
+		// Note: this regex uses positve lookbehind and lookahead.
+		bindIdxPattern = Pattern.compile("(?<=\\s*)(:\\d+)(?=\\s?)");
+	}
 
 	public PSStmt(String sql, int line_nbr) {
 		super(sql.trim());
 
 		this.line_nbr = line_nbr;
 
-		Pattern bindIdxPattern = Pattern.compile(BIND_IDX_REGEX);
 		Matcher m = bindIdxPattern.matcher(sql);
 		this.originalStmt = sql;
 		this.sql =  m.replaceAll("?").trim();

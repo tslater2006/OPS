@@ -517,8 +517,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				+ "a BigDecimal memory pool and type.");
 
 		} else if(ctx.StringLiteral() != null) {
-			setNodeData(ctx, Environment.getFromLiteralPool(
-				ctx.StringLiteral().getText()));
+			/**
+			 * Strip surrounding double quotes from literal.
+			 */
+			String str = ctx.StringLiteral().getText();
+			if(str.equals("\"\"")) {
+				throw new EntVMachRuntimeException("Need to support empty string literals.");
+			} else {
+				setNodeData(ctx, Environment.getFromLiteralPool(
+					str.substring(1, str.length() - 1)));
+			}
 
 		} else {
 			throw new EntVMachRuntimeException("Unable to resolve literal to a terminal node.");

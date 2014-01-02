@@ -8,7 +8,7 @@ public class PTRecord extends PTObjectType {
 
 	private static Type staticTypeFlag = Type.RECORD;
 	public Record recDefn;
-	private Map<String, PTField> fields;
+	public Map<String, PTField> fields;
 
 	protected PTRecord() {
 		super(staticTypeFlag);
@@ -18,7 +18,8 @@ public class PTRecord extends PTObjectType {
 		super(staticTypeFlag);
 
 		this.recDefn = r;
-		this.fields = new HashMap<String, PTField>();
+		// this map is linked in order to preserve the order in which fields are added.
+		this.fields = new LinkedHashMap<String, PTField>();
 		for(Map.Entry<String, RecordField> cursor : r.fieldTable.entrySet()) {
 			this.fields.put(cursor.getKey(),
 				PTField.getSentinel().alloc(cursor.getValue()));

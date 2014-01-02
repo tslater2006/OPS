@@ -2,9 +2,12 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
+import java.sql.*;
+import com.enterrupt.sql.*;
 import com.enterrupt.runtime.*;
 import java.lang.reflect.*;
 import org.apache.logging.log4j.*;
+import java.util.regex.*;
 
 public class PTRowset extends PTObjectType {
 
@@ -12,10 +15,13 @@ public class PTRowset extends PTObjectType {
 	public Record recDefn;
 	private List<PTRecord> rows;
 	private static Map<String, Method> ptMethodTable;
+	private static Pattern bindIdxPattern;
+	private static Pattern dateInPattern;
 
 	private static Logger log = LogManager.getLogger(PTRowset.class.getName());
 
 	static {
+		// cache pointers to PeopleTools Rowset methods.
 		Method[] methods = PTRowset.class.getMethods();
     	ptMethodTable = new HashMap<String, Method>();
 		for(Method m : methods) {
@@ -23,6 +29,10 @@ public class PTRowset extends PTObjectType {
 				ptMethodTable.put(m.getName().substring(3), m);
 			}
 		}
+
+		// compile meta-SQL detection regex patterns.
+		bindIdxPattern = Pattern.compile(":\\d+");
+		dateInPattern = Pattern.compile("%DATEIN\\((.+?)\\)");
 	}
 
 	protected PTRowset() {
@@ -67,7 +77,75 @@ public class PTRowset extends PTObjectType {
             throw new EntVMachRuntimeException("Expected at least one string arg.");
         }
 
-		throw new EntVMachRuntimeException("Implement Fill.");
+		StringBuilder query = new StringBuilder("SELECT ");
+		List<RecordField> rfList = this.recDefn.getExpandedFieldList();
+		PTRecord firstRow = this.rows.get(0);
+
+		for(int i = 0; i < rfList.size(); i++) {
+			if(i > 0) { query.append(","); }
+			String fieldname = rfList.get(i).FIELDNAME;
+
+			// Selected date fields must be wrapped with TO_CHAR directive.
+			if(firstRow.fields.get(fieldname).getValue() instanceof PTDate) {
+				query.append("TO_CHAR(FILL.").append(fieldname)
+					.append(",'YYYY-MM-DD')");
+			} else {
+				query.append("FILL.").append(fieldname);
+			}
+		}
+		query.append(" FROM PS_").append(this.recDefn.RECNAME).append(" FILL");
+
+		String whereStr = ((PTString)args.get(0)).read();
+
+		// Replace numeric bind sockets (":1") with "?".
+		Matcher bindIdxMatcher = bindIdxPattern.matcher(whereStr);
+		whereStr = bindIdxMatcher.replaceAll("?");
+
+		// Replace occurrences of %DATEIN(*) with TO_DATE(*,'YYYY-MM-DD')
+		Matcher dateInMatcher = dateInPattern.matcher(whereStr);
+		while(dateInMatcher.find()) {
+			//log.debug("Found DATEIN: " + dateInMatcher.group(0));
+			whereStr = dateInMatcher.replaceAll("TO_DATE("+
+				dateInMatcher.group(1)+",'YYYY-MM-DD')");
+		}
+
+		query.append("  ").append(whereStr);
+		//log.debug("Fill query string: {}", query.toString());
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		// Gather bind values.
+		String[] bindVals = new String[args.size() - 1];
+		for(int i = 1; i < args.size(); i++) {
+			bindVals[i-1] = (String)((PTPrimitiveType)args.get(i)).read();
+			//log.debug("Fill query bind value {}: {}", i-1, bindVals[i-1]);
+ 		}
+
+		try {
+			pstmt = StmtLibrary.prepareArbitraryStmt(query.toString(), bindVals);
+			rs = pstmt.executeQuery();
+
+			int rowsRead = 0;
+			while(rs.next()) {
+				/**
+				 * TODO: Fill this rowset with records for each result.
+				 */
+				rowsRead++;
+			}
+
+			// Return the number of rows read from the fill operation.
+			Environment.pushToCallStack(Environment.getFromLiteralPool(rowsRead));
+
+		} catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
+        }
 	}
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {

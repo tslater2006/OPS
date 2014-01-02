@@ -8,17 +8,31 @@ public class PTField extends PTObjectType {
 
 	private static Type staticTypeFlag = Type.FIELD;
 	private PTPrimitiveType value;
+	private RecordField recFieldDefn;
 
 	protected PTField() {
 		super(staticTypeFlag);
 	}
 
-	protected PTField(RecordField recFieldDefn) {
+	protected PTField(RecordField rfd) {
 		super(staticTypeFlag);
-		/**
-		 * TODO: Determine type based on field metadata.
-		 */
-		this.value = (PTPrimitiveType)PTString.getSentinel().alloc();
+		this.recFieldDefn = rfd;
+
+		switch(rfd.typeFlag) {
+			case 0:
+				this.value = (PTPrimitiveType)PTString.getSentinel().alloc();
+				break;
+			case 2:
+				this.value = (PTPrimitiveType)PTNumber.getSentinel().alloc();
+				break;
+			case 4:
+				this.value = (PTPrimitiveType)PTDate.getSentinel().alloc();
+				break;
+			default:
+				throw new EntVMachRuntimeException("Unable to determine appropriate " +
+					"PTPrimitiveType for PTField given record field type flag: "
+					+ rfd.typeFlag);
+		}
 	}
 
 	public PTPrimitiveType getValue() {

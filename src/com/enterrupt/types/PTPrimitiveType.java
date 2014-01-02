@@ -17,13 +17,17 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract boolean typeCheck(PTType a);
 
 	public void copyValueFrom(PTPrimitiveType src) {
+
 		if(src instanceof PTString) {
 			((PTString)this).write(((PTString)src).read());
-			return;
-		}
 
-		throw new EntVMachRuntimeException("copyValueFrom does not support " +
-			"the provided source operand: " + src.toString());
+		} else if(src instanceof PTInteger) {
+			((PTInteger)this).write(((PTInteger)src).read());
+
+		} else {
+			throw new EntVMachRuntimeException("copyValueFrom does not support " +
+				"the provided source operand: " + src.toString());
+		}
 	}
 
 	protected void checkIsWriteable() {

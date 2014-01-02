@@ -11,8 +11,14 @@ public class PTDate extends PTPrimitiveType<String> {
 	protected PTDate() {
 		super(staticTypeFlag);
 
-		// default value is current date.
-		d = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+		// default value is current date unless date is overridden for trace file
+		// verification purposes.
+		if(System.getProperty("traceFileDate") != null) {
+			this.d = System.getProperty("traceFileDate");
+		} else {
+			d = new SimpleDateFormat("yyyy-MM-dd")
+						.format(Calendar.getInstance().getTime());
+		}
 	}
 
 	public String read() {

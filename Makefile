@@ -4,8 +4,13 @@ COMPONENT=SSR_SSENRL_LIST
 TRACE_FILE=trace/005_KADAMS_SSR_SSENRL_LIST.tracesql
 #TRACE_FILE=trace/006_KADAMS_SSR_SSENRL_ADD.tracesql
 
+# Overrides the current date used by the EVM in order
+# to emit the correct date for trace file verification purposes.
+TRACE_FILE_DATE=2013-11-16
+
 JAVA_D=-Duser.timezone=GMT -Dlog4j.configurationFile=conf/log4j.xml -DComponentToLoad=$(COMPONENT) \
--Dtracefile=$(TRACE_FILE) -Dignore_stmts_file=conf/ignore_stmts.conf -DcacheProgText=true
+-Dtracefile=$(TRACE_FILE) -Dignore_stmts_file=conf/ignore_stmts.conf -DcacheProgText=true \
+-DtraceFileDate=$(TRACE_FILE_DATE)
 
 JAVA_CP=bin:lib/*:$(OCI_DIR)/ojdbc7.jar
 

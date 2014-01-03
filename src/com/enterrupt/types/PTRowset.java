@@ -13,8 +13,8 @@ public class PTRowset extends PTObjectType {
 
 	private static Type staticTypeFlag = Type.ROWSET;
 	public Record recDefn;
-	private PTRecord emptyRecord;
-	private List<PTRecord> rows;
+	private PTRow emptyRow;
+	private List<PTRow> rows;
 	private static Map<String, Method> ptMethodTable;
 	private static Pattern bindIdxPattern;
 	private static Pattern dateInPattern;
@@ -44,12 +44,12 @@ public class PTRowset extends PTObjectType {
 		super(staticTypeFlag);
 
 		this.recDefn = r;
-		this.rows = new ArrayList<PTRecord>();
+		this.rows = new ArrayList<PTRow>();
 
 		// One row is always present in the rowset, even when flushed.
-		this.emptyRecord = PTRecord.getSentinel().alloc(this.recDefn);
-		this.emptyRecord.setReadOnly();
-		this.rows.add(this.emptyRecord);
+		this.emptyRow = new PTRow(PTRecord.getSentinel().alloc(this.recDefn));
+		this.emptyRow.setReadOnly();
+		this.rows.add(this.emptyRow);
 	}
 
     public PTType dotProperty(String s) {
@@ -90,7 +90,7 @@ public class PTRowset extends PTObjectType {
 	private void internalFlush() {
 		// One row is always present in the rowset, even when flushed.
 		this.rows.clear();
-		this.rows.add(this.emptyRecord);
+		this.rows.add(this.emptyRow);
 	}
 
 	public void PT_Fill() {
@@ -104,14 +104,14 @@ public class PTRowset extends PTObjectType {
 
 		StringBuilder query = new StringBuilder("SELECT ");
 		List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-		PTRecord firstRow = this.rows.get(0);
+		PTRow firstRow = this.rows.get(0);
 
 		for(int i = 0; i < rfList.size(); i++) {
 			if(i > 0) { query.append(","); }
 			String fieldname = rfList.get(i).FIELDNAME;
 
 			// Selected date fields must be wrapped with TO_CHAR directive.
-			if(firstRow.fields.get(fieldname).getValue() instanceof PTDate) {
+			if(firstRow.record.fields.get(fieldname).getValue() instanceof PTDate) {
 				query.append("TO_CHAR(FILL.").append(fieldname)
 					.append(",'YYYY-MM-DD')");
 			} else {
@@ -217,7 +217,7 @@ public class PTRowset extends PTObjectType {
 							 newFld.getValue().getType());
 					}
 				}
-				this.rows.add(newRecord);
+				this.rows.add(new PTRow(newRecord));
 				rowsRead++;
 			}
 

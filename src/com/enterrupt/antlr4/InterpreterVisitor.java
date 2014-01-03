@@ -510,8 +510,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitId(PeopleCodeParser.IdContext ctx) {
 
 		if(ctx.SYS_VAR_ID() != null) {
-			PTType a = Environment.getSystemVar(ctx.SYS_VAR_ID().getText());
-			setNodeData(ctx, a);
+			/**
+			 * Catch use of %This, which points to the app class obj
+			 * loaded in the current execution context.
+			 */
+			if(ctx.SYS_VAR_ID().getText().equals("%This")) {
+				setNodeData(ctx, ((AppClassObjExecContext)this.eCtx).appClassObj);
+			} else {
+				setNodeData(ctx, Environment.getSystemVar(ctx.SYS_VAR_ID().getText()));
+			}
 
 		} else if(ctx.VAR_ID() != null) {
 			PTType a = eCtx.resolveIdentifier(ctx.VAR_ID().getText());

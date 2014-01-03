@@ -8,9 +8,11 @@ import org.antlr.v4.runtime.tree.*;
 public abstract class AppClassObjExecContext extends ExecContext {
 
 	public String methodOrGetterName;
+	public PTAppClassObj appClassObj;
 
 	public AppClassObjExecContext(PTAppClassObj obj, String m, ParseTree s) {
 		super(obj.progDefn);
+		this.appClassObj = obj;
 		this.startNode = s;
 		this.methodOrGetterName = m;
 		this.pushScope(obj.propertyScope);

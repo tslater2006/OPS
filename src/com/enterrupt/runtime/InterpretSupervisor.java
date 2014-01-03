@@ -38,6 +38,22 @@ public class InterpretSupervisor {
 
 		ExecContext context = execContextStack.peek();
 
+		boolean doEmitProgramMarkers = true;
+
+		/**
+		 * If another context is on the stack, it means that context was
+		 * interrupted by the call to run this one. If the programs being run in
+		 * both contexts are the same, PCStart/PCBegin/PCEnd markers should not
+		 * be emitted.
+		 */
+		if(execContextStack.size() > 1) {
+			// get the context that was interrupted by the call to run this context.
+			ExecContext prevContext = execContextStack.get(1);
+			if(prevContext.prog.getDescriptor().equals(context.prog.getDescriptor())) {
+				doEmitProgramMarkers = false;
+			}
+		}
+
 		context.prog.lexAndParse();
 
 		/**
@@ -65,11 +81,13 @@ public class InterpretSupervisor {
 		String descriptor = context.prog.getDescriptor();
 		descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
-		TraceFileVerifier.submitEmission(new PCStart(
-			(execContextStack.size() == 1 ? "start" : "start-ext"),
-			String.format("%02d", execContextStack.size() - 1),
-			methodOrFuncName, descriptor));
-		TraceFileVerifier.submitEmission(new PCBegin(descriptor, "0", "0"));
+		if(doEmitProgramMarkers) {
+			TraceFileVerifier.submitEmission(new PCStart(
+				(execContextStack.size() == 1 ? "start" : "start-ext"),
+				String.format("%02d", execContextStack.size() - 1),
+				methodOrFuncName, descriptor));
+			TraceFileVerifier.submitEmission(new PCBegin(descriptor, "0", "0"));
+		}
 
 		InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
 		interpreter.visit(context.startNode);
@@ -86,10 +104,12 @@ public class InterpretSupervisor {
 				"for the underlying object's prop and instance scopes to be popped.");
 		}
 
-		TraceFileVerifier.submitEmission(new PCEnd(
-			(execContextStack.size() == 1 ? "end" : "end-ext"),
-			String.format("%02d", execContextStack.size() - 1),
-			methodOrFuncName, descriptor));
+		if(doEmitProgramMarkers) {
+			TraceFileVerifier.submitEmission(new PCEnd(
+				(execContextStack.size() == 1 ? "end" : "end-ext"),
+				String.format("%02d", execContextStack.size() - 1),
+				methodOrFuncName, descriptor));
+		}
 
 		execContextStack.pop();
 	}

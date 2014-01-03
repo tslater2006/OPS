@@ -581,15 +581,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		} else if(ctx.StringLiteral() != null) {
 			/**
-			 * Strip surrounding double quotes from literal.
+			 * Strip surrounding double quotes from literal. Note that empty
+			 * strings ("") are a possibility here.
 			 */
 			String str = ctx.StringLiteral().getText();
-			if(str.equals("\"\"")) {
-				throw new EntVMachRuntimeException("Need to support empty string literals.");
-			} else {
 				setNodeData(ctx, Environment.getFromLiteralPool(
 					str.substring(1, str.length() - 1)));
-			}
 
 		} else {
 			throw new EntVMachRuntimeException("Unable to resolve literal to a terminal node.");

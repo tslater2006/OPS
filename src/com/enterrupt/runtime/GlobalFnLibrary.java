@@ -107,4 +107,22 @@ public class GlobalFnLibrary {
 		Environment.pushToCallStack(PTRowset.getSentinel().alloc(
 			DefnCache.getRecord(((PTString)args.get(0)).read())));
 	}
+
+	public static void PT_CreateArrayRept() {
+
+        List<PTType> args = Environment.getArgsFromCallStack();
+		if(args.size() != 2 || (!(args.get(1) instanceof PTInteger))) {
+			throw new EntVMachRuntimeException("Expected single string arg.");
+		}
+
+		PTArray newArray = PTArray.getSentinel(1, args.get(0)).alloc();
+
+		int initialSize = ((PTInteger)args.get(1)).read();
+		for(int i = 0; i < initialSize; i++) {
+			throw new EntVMachRuntimeException("Must support array instantiation in "+
+				"CreateArrayRept; make sure to check toString() output.");
+		}
+
+		Environment.pushToCallStack(newArray);
+	}
 }

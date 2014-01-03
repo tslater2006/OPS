@@ -15,6 +15,7 @@ import com.enterrupt.antlr4.frontend.*;
 
 class EvaluateConstruct {
 	public PTType baseExpr;
+	public boolean hasBranchBeenEmitted = false;
 	public boolean trueBranchExprSeen = false;
 	public boolean breakSeen = false;
 	public EvaluateConstruct(PTType p) { this.baseExpr = p; }
@@ -726,16 +727,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		visit(ctx.expr());
 		PTType p2 = getNodeData(ctx.expr());
 
+		if(!evalConstruct.hasBranchBeenEmitted || !evalConstruct.trueBranchExprSeen) {
+			this.emitStmt(ctx);
+			evalConstruct.hasBranchBeenEmitted = true;
+		}
+
 		/**
 		 * If a previous branch evaluated to true and we're here, that means
 		 * execution continues to fall through all branches until either a break
 		 * is seen, or the evaluate construct ends.
 		 */
 		if(evalConstruct.trueBranchExprSeen || p1.equals(p2)) {
-			if(!evalConstruct.trueBranchExprSeen) {
-				// Only emit the first true branch expr seen.
-				this.emitStmt(ctx);
-			}
 			evalConstruct.trueBranchExprSeen = true;
 			visit(ctx.stmtList());
 		}

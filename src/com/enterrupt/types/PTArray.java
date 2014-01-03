@@ -3,6 +3,7 @@ package com.enterrupt.types;
 import com.enterrupt.runtime.*;
 import java.util.*;
 import org.apache.logging.log4j.*;
+import java.lang.reflect.*;
 
 public class PTArray extends PTObjectType {
 
@@ -11,6 +12,18 @@ public class PTArray extends PTObjectType {
 	public int dimensions;
 	public PTType baseType;
 	public List<PTType> values;
+	private static Map<String, Method> ptMethodTable;
+
+	static {
+		// cache pointers to PeopleTools Array methods.
+		Method[] methods = PTArray.class.getMethods();
+		ptMethodTable = new HashMap<String, Method>();
+		for(Method m : methods) {
+			if(m.getName().indexOf("PT_") == 0) {
+				ptMethodTable.put(m.getName().substring(3), m);
+			}
+		}
+	}
 
 	protected PTArray(int d, PTType b) {
 		super(staticTypeFlag);
@@ -25,11 +38,14 @@ public class PTArray extends PTObjectType {
 	}
 
 	public PTType dotProperty(String s) {
-		throw new EntDataTypeException("Need to support dotProperty().");
+		return null;
 	}
 
 	public Callable dotMethod(String s) {
-		throw new EntDataTypeException("Need to support dotMethod().");
+		if(ptMethodTable.containsKey(s)) {
+			return new Callable(ptMethodTable.get(s), this);
+		}
+		return null;
 	}
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
@@ -86,6 +102,15 @@ public class PTArray extends PTObjectType {
 				"array for a sentinel PTArray object.");
 		}
 		this.values = new ArrayList<PTType>();
+	}
+
+	public void PT_Push() {
+        List<PTType> args = Environment.getArgsFromCallStack();
+        if(args.size() != 1) {
+            throw new EntVMachRuntimeException("Expected one argument.");
+        }
+
+		throw new EntVMachRuntimeException("Push() on PTArray has not been implemented.");
 	}
 }
 

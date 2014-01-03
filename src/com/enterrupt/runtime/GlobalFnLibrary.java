@@ -112,7 +112,8 @@ public class GlobalFnLibrary {
 
         List<PTType> args = Environment.getArgsFromCallStack();
 		if(args.size() != 2 || (!(args.get(1) instanceof PTInteger))) {
-			throw new EntVMachRuntimeException("Expected single string arg.");
+			throw new EntVMachRuntimeException("Expected two args, with the second "
+				+ "being an integer.");
 		}
 
 		PTArray newArray = PTArray.getSentinel(1, args.get(0)).alloc();

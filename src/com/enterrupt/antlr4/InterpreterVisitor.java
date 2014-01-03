@@ -36,6 +36,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	private InterruptFlag interrupt;
 	private IEmission lastEmission;
 	private AccessLevel blockAccessLvl;
+	private boolean hasVarDeclBeenEmitted = false;
 
 	private static Logger log = LogManager.getLogger(InterpreterVisitor.class.getName());
 
@@ -630,9 +631,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		if(this.eCtx.prog instanceof AppClassPeopleCodeProg) {
-			if(varType instanceof PTRowset || varType instanceof PTAppClassObj
-				|| varType instanceof PTArray || didInitializeAnIdentifier) {
+			if(!this.hasVarDeclBeenEmitted || varType instanceof PTRowset
+				|| varType instanceof PTAppClassObj || didInitializeAnIdentifier) {
 				this.emitStmt(ctx);
+				this.hasVarDeclBeenEmitted = true;
 			}
 		}
 		return null;

@@ -9,6 +9,7 @@ public class PTRecord extends PTObjectType {
 	private static Type staticTypeFlag = Type.RECORD;
 	public Record recDefn;
 	public Map<String, PTField> fields;
+	public Map<Integer, PTField> fieldIdxTable;
 
 	protected PTRecord() {
 		super(staticTypeFlag);
@@ -20,9 +21,12 @@ public class PTRecord extends PTObjectType {
 		this.recDefn = r;
 		// this map is linked in order to preserve the order in which fields are added.
 		this.fields = new LinkedHashMap<String, PTField>();
+		this.fieldIdxTable = new LinkedHashMap<Integer, PTField>();
+		int i = 1;
 		for(Map.Entry<String, RecordField> cursor : r.fieldTable.entrySet()) {
-			this.fields.put(cursor.getKey(),
-				PTField.getSentinel().alloc(cursor.getValue()));
+		 	PTField newFld = PTField.getSentinel().alloc(cursor.getValue());
+			this.fields.put(cursor.getKey(), newFld);
+			this.fieldIdxTable.put(i++, newFld);
 		}
 	}
 
@@ -32,6 +36,29 @@ public class PTRecord extends PTObjectType {
 
     public Callable dotMethod(String s) {
 		return null;
+    }
+
+	public PTField getField(String fldName) {
+		if(!this.fields.containsKey(fldName)) {
+			throw new EntVMachRuntimeException("Call to getField with fldname=" +
+				fldName + " did not match any field on this record: " + this.toString());
+		}
+		return this.fields.get(fldName);
+	}
+
+	/**
+	 * Calls to make a record read-only should make its
+	 * fields read-only as well.
+	 */
+	@Override
+    public PTType setReadOnly() {
+		super.setReadOnly();
+		if(fields != null) {
+			for(Map.Entry<String, PTField> cursor : fields.entrySet()) {
+				cursor.getValue().setReadOnly();
+			}
+		}
+        return this;
     }
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
@@ -76,6 +103,9 @@ public class PTRecord extends PTObjectType {
 
 	@Override
 	public String toString() {
-		return super.toString();
+		StringBuilder b = new StringBuilder(super.toString());
+		b.append(":").append(recDefn.RECNAME);
+		b.append(",fields=").append(this.fields);
+		return b.toString();
 	}
 }

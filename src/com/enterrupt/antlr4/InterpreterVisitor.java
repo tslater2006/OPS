@@ -55,10 +55,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	private PTType getNodeData(ParseTree node) {
-		if(this.nodeData.get(node) == null) {
-			throw new EntVMachRuntimeException("Attempted to get the node data " +
-				"for a node, encountered null: " + node.getText());
-		}
 		return this.nodeData.get(node);
 	}
 
@@ -67,10 +63,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	private Callable getNodeCallable(ParseTree node) {
-		if(this.nodeCallables.get(node) == null) {
-			throw new EntVMachRuntimeException("Attempted to get the callable " +
-				"for a node, encountered null: " + node.getText());
-		}
 		return this.nodeCallables.get(node);
 	}
 
@@ -320,17 +312,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		visit(ctx.expr());
 
 		Callable call = getNodeCallable(ctx.expr());
-
-		if(call == null) {
-			throw new EntVMachRuntimeException("Encountered non-callable data type "
-				+ "in visit to fn or idx call node; this may be an unimplemented "
-				+ "rowset indexing (i.e., &rs(1)) attempt.");
-		}
+		PTType t = getNodeData(ctx.expr());
 
 		// null is used to separate call frames.
 		Environment.pushToCallStack(null);
 
-		// if args exist, move args from runtime stack to call stack.
+		// if args exist, push them onto the call stack.
 		if(ctx.exprList() != null) {
 			visit(ctx.exprList());
 			for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
@@ -339,7 +326,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		}
 
-		if(call.ptMethod != null) {
+		/**
+		 * If the node represents a rowset, this expression represents
+	 	 * a row indexing operation (i.e., "&rs(1)"). Call getRow() to run
+		 * the indexing operation.
+		 */
+		if(t instanceof PTRowset) {
+			((PTRowset)t).getRow();
+		} else if(call.ptMethod != null) {
 			call.invokePtMethod();
 		} else {
 			ExecContext eCtx = call.eCtx;

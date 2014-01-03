@@ -93,8 +93,9 @@ public abstract class PTType {
 
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		if(this.isSentinel()) { b.append("SENTINEL:"); }
-		b.append(this.type).append(this.flags);
+		if(this.isSentinel()) { b.append("(SENTINEL)"); }
+		b.append(this.type);
+		if(this.flags.size() > 0) {b.append(this.flags); }
 		return b.toString();
 	}
 }

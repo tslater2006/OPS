@@ -8,7 +8,7 @@ public class PTField extends PTObjectType {
 
 	private static Type staticTypeFlag = Type.FIELD;
 	private PTPrimitiveType value;
-	private RecordField recFieldDefn;
+	public RecordField recFieldDefn;
 
 	protected PTField() {
 		super(staticTypeFlag);
@@ -45,6 +45,19 @@ public class PTField extends PTObjectType {
 
     public Callable dotMethod(String s) {
         throw new EntDataTypeException("Need to support dotMethod().");
+    }
+
+    /**
+     * Calls to make a field read-only should make the
+	 * field's value read-only as well.
+     */
+    @Override
+    public PTType setReadOnly() {
+        super.setReadOnly();
+		if(this.value != null) {
+			this.value.setReadOnly();
+		}
+        return this;
     }
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
@@ -94,6 +107,7 @@ public class PTField extends PTObjectType {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(super.toString());
+		b.append(":").append(recFieldDefn.FIELDNAME);
 		b.append(",value=").append(value.toString());
 		return b.toString();
 	}

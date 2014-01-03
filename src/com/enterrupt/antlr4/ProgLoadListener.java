@@ -253,6 +253,16 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	}
 
 	/**
+	 * Save property getter entry points in the parse tree for lookup during
+	 * interpretation later.
+	 */
+	@Override
+	public void enterGetImpl(PeopleCodeParser.GetImplContext ctx) {
+		((AppClassPeopleCodeProg)this.srcProg)
+			.savePropGetterImplStartNode(ctx.GENERIC_ID().getText(), ctx);
+	}
+
+	/**
 	 * Detect function (*not* method) calls; if a call corresponds to a
 	 * function referenced in a previously seen "Declare" stmt, mark that program
 	 * as having at least one call to it. Calls to index into a rowset using

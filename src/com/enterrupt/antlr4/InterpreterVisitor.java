@@ -158,11 +158,41 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitInstance(PeopleCodeParser.InstanceContext ctx) {
 		visit(ctx.varType());
+
+		if(this.blockAccessLvl != AccessLevel.PRIVATE) {
+			throw new EntVMachRuntimeException("Expected instance declaration to be " +
+				"private; actual access level is: " + this.blockAccessLvl);
+		}
+
 		PTType type = getNodeData(ctx.varType());
 		for(TerminalNode varId : ctx.VAR_ID()) {
 			((AppClassPeopleCodeProg)this.eCtx.prog).addInstanceIdentifier(
-				this.blockAccessLvl, varId.getText(), type);
+				varId.getText(), type);
 		}
+		return null;
+	}
+
+	public Void visitProperty(PeopleCodeParser.PropertyContext ctx) {
+		visit(ctx.varType());
+
+		if(this.blockAccessLvl != AccessLevel.PUBLIC) {
+			throw new EntVMachRuntimeException("Expected property declaration to be " +
+				"publicly accessible; actual access level is: " + this.blockAccessLvl);
+		}
+
+		String id = ctx.GENERIC_ID().getText();
+		PTType type = getNodeData(ctx.varType());
+		boolean hasGetter = (ctx.g != null);
+		boolean hasSetter = (ctx.s != null);
+		boolean isReadOnly = (ctx.r != null);
+
+		if(hasSetter || isReadOnly) {
+			throw new EntVMachRuntimeException("Need to support property setters and/or "+
+				"readonly properties: " + ctx.getText());
+		}
+
+		((AppClassPeopleCodeProg)this.eCtx.prog).addPropertyIdentifier(
+			id, type, hasGetter);
 		return null;
 	}
 
@@ -372,6 +402,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		setNodeData(ctx, prop);
 		setNodeCallable(ctx, call);
+
+		/**
+		 * If the identifier points to a getter on an app class object,
+		 * the getter should be run immediately in order to set the node data
+		 * for this context object.
+		 */
+		if(call != null && call.eCtx != null &&
+				call.eCtx instanceof AppClassObjGetterExecContext) {
+			this.supervisor.runImmediately(call.eCtx);
+			throw new EntVMachRuntimeException("Need to overwrite the node data " +
+				"for this ctx with the getter return value on the call stack.");
+		}
+
 		return null;
 	}
 
@@ -449,6 +492,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		eCtx.popScope();
 
 		this.emitStmt("end-method");
+		return null;
+	}
+
+	public Void visitGetImpl(PeopleCodeParser.GetImplContext ctx) {
+		this.emitStmt(ctx);
+
+		Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
+		eCtx.pushScope(localScope);
+		visit(ctx.stmtList());
+		eCtx.popScope();
+
+		this.emitStmt("end-get");
 		return null;
 	}
 
@@ -569,7 +624,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(this.eCtx.prog instanceof AppClassPeopleCodeProg) {
 			if(varType instanceof PTRowset || varType instanceof PTAppClassObj
-				|| didInitializeAnIdentifier) {
+				|| varType instanceof PTArray || didInitializeAnIdentifier) {
 				this.emitStmt(ctx);
 			}
 		}
@@ -742,8 +797,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				}
 			}
 
-			ExecContext constructorCtx = new AppClassObjExecContext(newObj,
-				constructorName);
+			ExecContext constructorCtx = new AppClassObjMethodExecContext(newObj,
+				constructorName, newObj.progDefn
+					.methodImplStartNodes.get(constructorName));
 			this.supervisor.runImmediately(constructorCtx);
 			this.repeatLastEmission();
 		}

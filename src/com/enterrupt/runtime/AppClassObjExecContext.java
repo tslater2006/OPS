@@ -3,25 +3,17 @@ package com.enterrupt.runtime;
 import com.enterrupt.pt.peoplecode.*;
 import com.enterrupt.runtime.*;
 import com.enterrupt.types.*;
+import org.antlr.v4.runtime.tree.*;
 
-public class AppClassObjExecContext extends ExecContext {
+public abstract class AppClassObjExecContext extends ExecContext {
 
-	public String methodName;
+	public String methodOrGetterName;
 
-	public AppClassObjExecContext(PTAppClassObj obj, String m) {
+	public AppClassObjExecContext(PTAppClassObj obj, String m, ParseTree s) {
 		super(obj.progDefn);
-		this.methodName = m;
+		this.startNode = s;
+		this.methodOrGetterName = m;
+		this.pushScope(obj.propertyScope);
 		this.pushScope(obj.instanceScope);
-
-		/**
-		 * Resolve method or function name to parse tree node.
-		 */
-		if(!obj.progDefn.methodImplStartNodes.containsKey(this.methodName)) {
-			throw new EntVMachRuntimeException("Unable to resolve method or function " +
-				"name (" + this.methodName + ") to a parse tree node for program: " +
-				obj.progDefn.getDescriptor());
-		}
-
-		this.startNode = obj.progDefn.methodImplStartNodes.get(this.methodName);
 	}
 }

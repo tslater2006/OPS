@@ -83,7 +83,7 @@ classBlock			:	aLvl='private'? (classBlockStmt ';'*)+ ;
 classBlockStmt		:	method | constant | property | instance ;
 method				:	'method' GENERIC_ID formalParamList returnType? ;
 constant			:	'Constant' VAR_ID '=' expr ;
-property			:	'property' varType GENERIC_ID 'get'? 'set'? 'readonly'? ;
+property			:	'property' varType GENERIC_ID g='get'? s='set'? r='readonly'? ;
 instance			:	'instance' varType VAR_ID (',' VAR_ID)* ;
 
 methodImpl			:	'method' GENERIC_ID stmtList 'end-method' ;

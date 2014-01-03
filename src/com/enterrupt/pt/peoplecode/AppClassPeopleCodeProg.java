@@ -18,18 +18,29 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	public String[] pathParts;
 	public AppPackage rootPackage;
 	public Map<String, Instance> instanceTable;
+	public Map<String, Property> propertyTable;
 	public Map<String, Method> methodTable;
 	public Map<String, ParseTree> methodImplStartNodes;
+	public Map<String, ParseTree> propGetterImplStartNodes;
 	public boolean hasClassDefnBeenLoaded = false;
 
 	public class Instance {
-		public AccessLevel aLevel;
 		public String id;
 		public PTType type;
-		public Instance(AccessLevel a, String i, PTType t) {
-			this.aLevel = a;
+		public Instance(String i, PTType t) {
 			this.id = i;
 			this.type = t;
+		}
+	}
+
+	public class Property {
+		public String id;
+		public PTType type;
+		public boolean hasGetter;
+		public Property(String i, PTType t, boolean g) {
+			this.id = i;
+			this.type = t;
+			this.hasGetter = g;
 		}
 	}
 
@@ -53,8 +64,10 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		this.initBindVals();
 		this.rootPackage = DefnCache.getAppPackage(this.bindVals[1]);
 		this.instanceTable = new HashMap<String, Instance>();
+		this.propertyTable = new HashMap<String, Property>();
 		this.methodTable = new HashMap<String, Method>();
 		this.methodImplStartNodes = new HashMap<String, ParseTree>();
+		this.propGetterImplStartNodes = new HashMap<String, ParseTree>();
 	}
 
 	protected void initBindVals() {
@@ -106,9 +119,20 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
         this.methodImplStartNodes.put(methodName, node);
 	}
 
-	public void addInstanceIdentifier(AccessLevel aLvl, String id, PTType type) {
-		log.debug("Adding instance id to table: {}, {}, {}", aLvl.name(), id, type);
-		this.instanceTable.put(id, new Instance(aLvl, id, type));
+    public void savePropGetterImplStartNode(String propertyName, ParseTree node) {
+        this.propGetterImplStartNodes.put(propertyName, node);
+	}
+
+	public void addInstanceIdentifier(String id, PTType type) {
+		log.debug("Adding instance id to table: {}, {}", id, type);
+		this.instanceTable.put(id, new Instance(id, type));
+	}
+
+	public void addPropertyIdentifier(String id, PTType type,
+			boolean hasGetter) {
+		log.debug("Adding property id to table: {}, {}, getter?{}",
+			id, type, hasGetter);
+		this.propertyTable.put(id, new Property(id, type, hasGetter));
 	}
 
 	public void addMethod(AccessLevel aLvl, String name,

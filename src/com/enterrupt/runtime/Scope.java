@@ -9,7 +9,7 @@ public class Scope {
 	public enum Lvl {
 		GLOBAL, COMPONENT,
 		PROGRAM_LOCAL, FUNCTION_LOCAL, METHOD_LOCAL,
-		APP_CLASS_OBJ_INSTANCE
+		APP_CLASS_OBJ_INSTANCE, APP_CLASS_OBJ_PROPERTY
 	}
 
 	private Scope.Lvl level;

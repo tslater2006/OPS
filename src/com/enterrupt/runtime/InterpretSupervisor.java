@@ -58,8 +58,8 @@ public class InterpretSupervisor {
 			methodOrFuncName = ((ProgramExecContext)context).funcName;
 		}
 		if(context instanceof AppClassObjExecContext &&
-			((AppClassObjExecContext)context).methodName != null) {
-			methodOrFuncName = ((AppClassObjExecContext)context).methodName;
+			((AppClassObjExecContext)context).methodOrGetterName != null) {
+			methodOrFuncName = ((AppClassObjExecContext)context).methodOrGetterName;
 		}
 
 		String descriptor = context.prog.getDescriptor();
@@ -81,9 +81,9 @@ public class InterpretSupervisor {
 		}
 
 		if(context instanceof AppClassObjExecContext &&
-			context.scopeStack.size() > 1) {
+			context.scopeStack.size() > 2) {
 			throw new EntVMachRuntimeException("Expected all scope ptrs except " +
-				"for the underlying object's instance scope to be popped.");
+				"for the underlying object's prop and instance scopes to be popped.");
 		}
 
 		TraceFileVerifier.submitEmission(new PCEnd(

@@ -84,7 +84,8 @@ public class PTAppClassObj extends PTObjectType {
 		if(this.progDefn.propGetterImplStartNodes.containsKey(s)) {
 			if(this.progDefn.propertyTable.get(s).hasGetter) {
 				return new Callable(new AppClassObjGetterExecContext(this, s,
-					this.progDefn.propGetterImplStartNodes.get(s)));
+					this.progDefn.propGetterImplStartNodes.get(s),
+					this.progDefn.propertyTable.get(s).type));
 			}
 		}
 
@@ -95,7 +96,8 @@ public class PTAppClassObj extends PTObjectType {
 		if(this.progDefn.methodImplStartNodes.containsKey(s)) {
 			if(this.progDefn.methodTable.get(s).aLevel == AccessLevel.PUBLIC) {
 				return new Callable(new AppClassObjMethodExecContext(this, s,
-					this.progDefn.methodImplStartNodes.get(s)));
+					this.progDefn.methodImplStartNodes.get(s),
+					this.progDefn.methodTable.get(s).returnType));
 			} else {
 				throw new EntVMachRuntimeException("Encountered request for non-public "+
 					"method; need to determine if the calling entity is an obj "+

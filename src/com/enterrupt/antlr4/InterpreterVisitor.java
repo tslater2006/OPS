@@ -286,7 +286,25 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitStmtReturn(PeopleCodeParser.StmtReturnContext ctx) {
-		throw new EntVMachRuntimeException("Need to implement Return visitor.");
+		this.emitStmt(ctx);
+		if(ctx.expr() != null) {
+			visit(ctx.expr());
+			PTType retVal = getNodeData(ctx.expr());
+
+			if(this.eCtx instanceof AppClassObjExecContext) {
+				if(((AppClassObjExecContext)this.eCtx).expectedReturnType
+					.typeCheck(retVal)) {
+					Environment.pushToCallStack(retVal);
+				} else {
+					throw new EntVMachRuntimeException("Value returned in app class "+
+						"obj execution context does not match the expected type.");
+				}
+			} else {
+				throw new EntVMachRuntimeException("Must type check return values " +
+					"in non-app class execution contexts.");
+			}
+		}
+		return null;
 	}
 
 	/**********************************************************
@@ -411,8 +429,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		if(call != null && call.eCtx != null &&
 				call.eCtx instanceof AppClassObjGetterExecContext) {
 			this.supervisor.runImmediately(call.eCtx);
-			throw new EntVMachRuntimeException("Need to overwrite the node data " +
-				"for this ctx with the getter return value on the call stack.");
+
+			List<PTType> args = Environment.getArgsFromCallStack();
+			if(args.size() != 1) {
+				throw new EntVMachRuntimeException("Getter should return exactly " +
+					"one value.");
+	        }
+			setNodeData(ctx, args.get(0));
+			this.repeatLastEmission();
 		}
 
 		return null;
@@ -503,7 +527,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		visit(ctx.stmtList());
 		eCtx.popScope();
 
-		this.emitStmt("end-get");
 		return null;
 	}
 
@@ -815,7 +838,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 			ExecContext constructorCtx = new AppClassObjMethodExecContext(newObj,
 				constructorName, newObj.progDefn
-					.methodImplStartNodes.get(constructorName));
+					.methodImplStartNodes.get(constructorName), null);
 			this.supervisor.runImmediately(constructorCtx);
 			this.repeatLastEmission();
 		}

@@ -285,6 +285,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitStmtReturn(PeopleCodeParser.StmtReturnContext ctx) {
+		throw new EntVMachRuntimeException("Need to implement Return visitor.");
+	}
+
 	/**********************************************************
 	 * <expr> alternative handlers.
 	 **********************************************************/
@@ -740,8 +744,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitWhenOtherBranch(PeopleCodeParser.WhenOtherBranchContext ctx) {
+
+		EvaluateConstruct evalConstruct = this.evalConstructStack.peek();
 		this.emitStmt(ctx);
-		visit(ctx.stmtList());
+
+		/**
+	 	 * Execution cannot fall through to When-Other; if no break was seen
+		 * in a true branch body, the When-Other body should not run. Only run
+		 * if no true branches were seen.
+		 */
+		if(!evalConstruct.trueBranchExprSeen) {
+			visit(ctx.stmtList());
+		}
 		return null;
 	}
 

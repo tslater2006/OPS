@@ -23,7 +23,10 @@ public class PTRow extends PTObjectType {
 	}
 
     public PTType dotProperty(String s) {
-		throw new EntVMachRuntimeException("Implement dotProperty on PTRow.");
+		if(this.record.recDefn.RECNAME.equals(s)) {
+			return this.record;
+		}
+		return null;
     }
 
     public Callable dotMethod(String s) {

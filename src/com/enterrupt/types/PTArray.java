@@ -11,7 +11,7 @@ public class PTArray extends PTObjectType {
 	private static Type staticTypeFlag = Type.ARRAY;
 	public int dimensions;
 	public PTType baseType;
-	public List<PTType> values;
+	public LinkedList<PTType> values;
 	private static Map<String, Method> ptMethodTable;
 
 	static {
@@ -101,7 +101,7 @@ public class PTArray extends PTObjectType {
 			throw new EntVMachRuntimeException("Attempted to initialize the values " +
 				"array for a sentinel PTArray object.");
 		}
-		this.values = new ArrayList<PTType>();
+		this.values = new LinkedList<PTType>();
 	}
 
 	public void PT_Push() {
@@ -110,7 +110,9 @@ public class PTArray extends PTObjectType {
             throw new EntVMachRuntimeException("Expected one argument.");
         }
 
-		throw new EntVMachRuntimeException("Push() on PTArray has not been implemented.");
+		if(this.baseType.typeCheck(args.get(0))) {
+			this.values.addLast(args.get(0));
+		}
 	}
 }
 

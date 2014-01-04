@@ -40,11 +40,14 @@ public class PTField extends PTObjectType {
 	}
 
     public PTType dotProperty(String s) {
-        throw new EntDataTypeException("Need to support dotProperty().");
+		if(s.equals("Value")) {
+			return this.value;
+		}
+		return null;
     }
 
     public Callable dotMethod(String s) {
-        throw new EntDataTypeException("Need to support dotMethod().");
+		return null;
     }
 
     /**

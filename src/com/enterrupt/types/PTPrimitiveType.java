@@ -1,7 +1,5 @@
 package com.enterrupt.types;
 
-import com.enterrupt.runtime.*;
-
 public abstract class PTPrimitiveType<T> extends PTType {
 
 	protected PTPrimitiveType(Type t) {
@@ -16,6 +14,9 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract boolean equals(Object obj);
 	public abstract boolean typeCheck(PTType a);
 
+	public abstract PTBoolean isEqual(PTPrimitiveType op);
+	public abstract PTBoolean isGreaterThan(PTPrimitiveType op);
+
 	public void copyValueFrom(PTPrimitiveType src) {
 
 		if(src instanceof PTString) {
@@ -25,7 +26,7 @@ public abstract class PTPrimitiveType<T> extends PTType {
 			((PTInteger)this).write(((PTInteger)src).read());
 
 		} else {
-			throw new EntVMachRuntimeException("copyValueFrom does not support " +
+			throw new EntDataTypeException("copyValueFrom does not support " +
 				"the provided source operand: " + src.toString());
 		}
 	}

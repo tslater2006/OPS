@@ -1,6 +1,7 @@
 package com.enterrupt.types;
 
 import java.util.EnumSet;
+import com.enterrupt.runtime.*;
 
 public class PTBoolean extends PTPrimitiveType<Boolean> {
 
@@ -24,6 +25,21 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
         this.checkIsSystemWriteable();
         this.b = newValue;
     }
+
+    public PTBoolean isEqual(PTPrimitiveType op) {
+		if(!(op instanceof PTBoolean)) {
+			throw new EntDataTypeException("Expected op to be PTBoolean.");
+		}
+		if(this.b.equals(((PTBoolean)op).read())) {
+			return Environment.TRUE;
+		}
+		return Environment.FALSE;
+	}
+
+    public PTBoolean isGreaterThan(PTPrimitiveType op) {
+		throw new EntDataTypeException("isGreaterThan is not supported for " +
+			"booleans.");
+	}
 
     public boolean equals(Object obj) {
         if(obj == this)

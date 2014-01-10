@@ -1,6 +1,7 @@
 package com.enterrupt.types;
 
 import java.util.EnumSet;
+import com.enterrupt.runtime.*;
 
 public class PTInteger extends PTPrimitiveType<Integer> {
 
@@ -38,6 +39,21 @@ public class PTInteger extends PTPrimitiveType<Integer> {
             return true;
         }
         return false;
+    }
+
+    public PTBoolean isEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isEqual is not implemented for " +
+        	"integers.");
+    }
+
+    public PTBoolean isGreaterThan(PTPrimitiveType op) {
+        if(!(op instanceof PTInteger)) {
+            throw new EntDataTypeException("Expected op to be PTInteger.");
+        }
+        if(this.i.compareTo(((PTInteger)op).read()) > 0) {
+            return Environment.TRUE;
+        }
+        return Environment.FALSE;
     }
 
 	public boolean typeCheck(PTType a) {

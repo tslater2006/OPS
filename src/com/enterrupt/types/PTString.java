@@ -1,6 +1,7 @@
 package com.enterrupt.types;
 
 import java.util.EnumSet;
+import com.enterrupt.runtime.*;
 
 public class PTString extends PTPrimitiveType<String> {
 
@@ -24,6 +25,21 @@ public class PTString extends PTPrimitiveType<String> {
 		this.checkIsSystemWriteable();
 		this.s = newValue;
 	}
+
+    public PTBoolean isEqual(PTPrimitiveType op) {
+		if(!(op instanceof PTString)) {
+			throw new EntDataTypeException("Expected op to be PTString.");
+		}
+		if(this.s.equals(((PTString)op).read())) {
+			return Environment.TRUE;
+		}
+		return Environment.FALSE;
+    }
+
+    public PTBoolean isGreaterThan(PTPrimitiveType op) {
+        throw new EntDataTypeException("isGreaterThan is not supported for " +
+            "strings.");
+    }
 
 	public boolean equals(Object obj) {
         if(obj == this)

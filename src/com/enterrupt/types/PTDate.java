@@ -35,6 +35,16 @@ public class PTDate extends PTPrimitiveType<String> {
         this.d = newValue;
     }
 
+    public PTBoolean isEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isEqual not implemented for " +
+			"Date.");
+	}
+
+    public PTBoolean isGreaterThan(PTPrimitiveType op) {
+		throw new EntDataTypeException("isGreaterThan not implemented for " +
+			"Date.");
+	}
+
 	public boolean equals(Object obj) {
         if(obj == this)
             return true;

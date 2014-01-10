@@ -444,21 +444,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprComparison(PeopleCodeParser.ExprComparisonContext ctx) {
 		visit(ctx.expr(0));
-		PTType a1 = getNodeData(ctx.expr(0));
+		PTPrimitiveType a1 = (PTPrimitiveType)getNodeData(ctx.expr(0));
 		visit(ctx.expr(1));
-		PTType a2 = getNodeData(ctx.expr(1));
+		PTPrimitiveType a2 = (PTPrimitiveType)getNodeData(ctx.expr(1));
 
-		PTType result;
+		PTBoolean result;
 		if(ctx.l != null) {
-			if(a1.equals(a2)) {
-				result = Environment.TRUE;
-			} else {
-				result = Environment.FALSE;
-			}
-			log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
+			throw new EntVMachRuntimeException("Less than not implemented.");
 
 		} else if(ctx.g != null) {
-			throw new EntVMachRuntimeException("Greater than not implemented.");
+			result = a1.isGreaterThan(a2);
+			log.debug("isGreaterThan: {}? {}", ctx.getText(), result);
 
 		} else if(ctx.ge != null) {
 			throw new EntVMachRuntimeException("Greater or equal not implemented.");
@@ -476,18 +472,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
 		visit(ctx.expr(0));
-		PTType a1 = getNodeData(ctx.expr(0));
+		PTPrimitiveType a1 = (PTPrimitiveType)getNodeData(ctx.expr(0));
 		visit(ctx.expr(1));
-		PTType a2 = getNodeData(ctx.expr(1));
+		PTPrimitiveType a2 = (PTPrimitiveType)getNodeData(ctx.expr(1));
 
-		PTType result;
+		PTBoolean result;
 		if(ctx.e != null) {
-			if(a1.equals(a2)) {
-				result = Environment.TRUE;
-			} else {
-				result = Environment.FALSE;
-			}
-			log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
+			result = a1.isEqual(a2);
+			log.debug("isEqual: {}? {}", ctx.getText(), result);
 
 		} else if(ctx.i != null) {
 			throw new EntVMachRuntimeException("Inequality comparison not implemented.");

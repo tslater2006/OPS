@@ -25,6 +25,9 @@ public abstract class PTPrimitiveType<T> extends PTType {
 		} else if(src instanceof PTInteger) {
 			((PTInteger)this).write(((PTInteger)src).read());
 
+		} else if(src instanceof PTBoolean) {
+			((PTBoolean)this).write(((PTBoolean)src).read());
+
 		} else {
 			throw new EntDataTypeException("copyValueFrom does not support " +
 				"the provided source operand: " + src.toString());

@@ -675,9 +675,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 						+initialValue+").");
 				}
 			} else {
+				/**
+				 * Primitive variables must have space allocated for them
+				 * immediately. Object variables should simply reference
+				 * the sentinel type value present in their declaration statement.
+				 */
+				PTType t = varType;
+				if(varType instanceof PTPrimitiveType) {
+					t = ((PTPrimitiveType)varType).alloc();
+				}
 				log.debug("Declaring identifier ({}) with scope {} and type {}.",
-					idCtx.VAR_ID().getText(), scope, varType);
-				this.declareIdentifier(scope, idCtx.VAR_ID().getText(), varType);
+					idCtx.VAR_ID().getText(), scope, t);
+				this.declareIdentifier(scope, idCtx.VAR_ID().getText(), t);
 			}
 
 		}

@@ -442,6 +442,38 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitExprComparison(PeopleCodeParser.ExprComparisonContext ctx) {
+		visit(ctx.expr(0));
+		PTType a1 = getNodeData(ctx.expr(0));
+		visit(ctx.expr(1));
+		PTType a2 = getNodeData(ctx.expr(1));
+
+		PTType result;
+		if(ctx.l != null) {
+			if(a1.equals(a2)) {
+				result = Environment.TRUE;
+			} else {
+				result = Environment.FALSE;
+			}
+			log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
+
+		} else if(ctx.g != null) {
+			throw new EntVMachRuntimeException("Greater than not implemented.");
+
+		} else if(ctx.ge != null) {
+			throw new EntVMachRuntimeException("Greater or equal not implemented.");
+
+		} else if(ctx.le != null) {
+			throw new EntVMachRuntimeException("Less or equal not implemented.");
+
+		} else {
+			throw new EntVMachRuntimeException("Unknown comparison " +
+				"operation encountered.");
+		}
+		setNodeData(ctx, result);
+		return null;
+	}
+
 	public Void visitExprEquality(PeopleCodeParser.ExprEqualityContext ctx) {
 		visit(ctx.expr(0));
 		PTType a1 = getNodeData(ctx.expr(0));
@@ -449,13 +481,22 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		PTType a2 = getNodeData(ctx.expr(1));
 
 		PTType result;
-		if(a1.equals(a2)) {
-			result = Environment.TRUE;
+		if(ctx.e != null) {
+			if(a1.equals(a2)) {
+				result = Environment.TRUE;
+			} else {
+				result = Environment.FALSE;
+			}
+			log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
+
+		} else if(ctx.i != null) {
+			throw new EntVMachRuntimeException("Inequality comparison not implemented.");
+
 		} else {
-			result = Environment.FALSE;
+			throw new EntVMachRuntimeException("Unknown equality " +
+				"operation encountered.");
 		}
 		setNodeData(ctx, result);
-		log.debug("Compared for equality: {}, result={}", ctx.getText(), result);
 		return null;
 	}
 

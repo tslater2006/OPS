@@ -39,9 +39,9 @@ public class EntDiagErrorListener extends DiagnosticErrorListener {
 		 * that the correct action will be taken when ANTLR chooses the first alternative.
 		 */
 		if(msg.startsWith("reportAmbiguity d=4 (stmt): ambigAlts={20, 21}")
-			|| msg.startsWith("reportAmbiguity d=9 (expr): ambigAlts={1, 2}")
+			|| msg.startsWith("reportAmbiguity d=11 (expr): ambigAlts={1, 2}")
 			|| msg.startsWith("reportAmbiguity d=28 (funcDeclaration): ambigAlts={1, 2}")
-			|| msg.startsWith("reportAmbiguity d=21 (classBlock): ambigAlts={1, 2}")) {
+			|| msg.startsWith("reportAmbiguity d=23 (classBlock): ambigAlts={1, 2}")) {
 			return;
 		}
 

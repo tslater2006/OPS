@@ -38,6 +38,9 @@ public class PTArray extends PTObjectType {
 	}
 
 	public PTType dotProperty(String s) {
+		if(s.equals("Len")) {
+			return Environment.getFromLiteralPool(values.size());
+		}
 		return null;
 	}
 

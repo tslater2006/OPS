@@ -37,20 +37,20 @@ stmt	:	appClassImport						# StmtAppClassImport
 		|	expr								# StmtExpr		// For fn calls; the value of expr is not assigned to anything.
 		;
 
-expr	:	'(' expr ')'					# ExprParenthesized
-		|	'@' expr						# ExprDynamicReference
-		|	literal							# ExprLiteral
-		|	id								# ExprId
-		|	createInvocation				# ExprCreate
-		|	expr '.' id						# ExprDotAccess
-		|	expr '[' exprList ']'			# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i][&j]
-		| 	expr '(' exprList? ')'			# ExprFnOrIdxCall
-		|	'-' expr						# ExprNegate
-		|	'Not' expr						# ExprNot
-		|	expr ('*'|'/') expr				# ExprMulDiv
-		|	expr ('+'|'-') expr				# ExprAddSub
-		|	expr ('<='|'>='|'<'|'>') expr	# ExprComparison
-		|	expr ('='|'<>') expr			# ExprEquality
+expr	:	'(' expr ')'					 		# ExprParenthesized
+		|	'@' expr								# ExprDynamicReference
+		|	literal									# ExprLiteral
+		|	id										# ExprId
+		|	createInvocation						# ExprCreate
+		|	expr '.' id								# ExprDotAccess
+		|	expr '[' exprList ']'					# ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i][&j]
+		| 	expr '(' exprList? ')'					# ExprFnOrIdxCall
+		|	'-' expr								# ExprNegate
+		|	'Not' expr								# ExprNot
+		|	expr ('*'|'/') expr						# ExprMulDiv
+		|	expr ('+'|'-') expr						# ExprAddSub
+		|	expr (le='<='|ge='>='|l='<'|g='>') expr	# ExprComparison
+		|	expr (e='='|i='<>') expr				# ExprEquality
 		|	expr (
 					op='And'<assoc=right>
 				|	op='Or'<assoc=right>

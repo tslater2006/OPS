@@ -42,8 +42,13 @@ public class PTInteger extends PTPrimitiveType<Integer> {
     }
 
     public PTBoolean isEqual(PTPrimitiveType op) {
-		throw new EntDataTypeException("isEqual is not implemented for " +
-        	"integers.");
+        if(!(op instanceof PTInteger)) {
+            throw new EntDataTypeException("Expected op to be PTInteger.");
+        }
+		if(this.i.compareTo(((PTInteger)op).read()) == 0) {
+			return Environment.TRUE;
+		}
+		return Environment.FALSE;
     }
 
     public PTBoolean isGreaterThan(PTPrimitiveType op) {

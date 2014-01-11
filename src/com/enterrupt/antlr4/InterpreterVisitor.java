@@ -693,7 +693,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(this.eCtx.prog instanceof AppClassPeopleCodeProg) {
 			if(!this.hasVarDeclBeenEmitted || varType instanceof PTRowset
-				|| varType instanceof PTAppClassObj || didInitializeAnIdentifier) {
+				|| varType instanceof PTAppClassObj || varType instanceof PTRecord
+				|| didInitializeAnIdentifier) {
 				this.emitStmt(ctx);
 				this.hasVarDeclBeenEmitted = true;
 			}

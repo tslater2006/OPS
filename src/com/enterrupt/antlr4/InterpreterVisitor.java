@@ -235,6 +235,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitStmtFor(PeopleCodeParser.StmtForContext ctx) {
+		this.emitStmt(ctx);
+		throw new EntVMachRuntimeException("Need to implement For visitor.");
+		//return null;
+	}
+
 	public Void visitStmtBreak(PeopleCodeParser.StmtBreakContext ctx) {
 		this.emitStmt(ctx);
 		this.interrupt = InterruptFlag.BREAK;

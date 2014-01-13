@@ -1,9 +1,12 @@
 package com.enterrupt.types;
 
-import com.enterrupt.pt.*;
+import java.sql.*;
 import java.util.*;
 import java.lang.reflect.*;
+import com.enterrupt.pt.*;
+import com.enterrupt.sql.*;
 import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 public class PTRecord extends PTObjectType {
 
@@ -12,6 +15,8 @@ public class PTRecord extends PTObjectType {
 	public Map<String, PTField> fields;
 	public Map<Integer, PTField> fieldIdxTable;
 	private static Map<String, Method> ptMethodTable;
+
+	private static Logger log = LogManager.getLogger(PTRecord.class.getName());
 
     static {
         // cache pointers to PeopleTools Record methods.
@@ -23,7 +28,6 @@ public class PTRecord extends PTObjectType {
             }
         }
     }
-
 
 	protected PTRecord() {
 		super(staticTypeFlag);
@@ -37,9 +41,9 @@ public class PTRecord extends PTObjectType {
 		this.fields = new LinkedHashMap<String, PTField>();
 		this.fieldIdxTable = new LinkedHashMap<Integer, PTField>();
 		int i = 1;
-		for(Map.Entry<String, RecordField> cursor : r.fieldTable.entrySet()) {
-		 	PTField newFld = PTField.getSentinel().alloc(cursor.getValue());
-			this.fields.put(cursor.getKey(), newFld);
+		for(RecordField rf : this.recDefn.getExpandedFieldList()) {
+		 	PTField newFld = PTField.getSentinel().alloc(rf);
+			this.fields.put(rf.FIELDNAME, newFld);
 			this.fieldIdxTable.put(i++, newFld);
 		}
 	}
@@ -84,7 +88,47 @@ public class PTRecord extends PTObjectType {
             throw new EntVMachRuntimeException("Expected single date arg.");
         }
 
-		throw new EntVMachRuntimeException("Must implement SelectByKeyEffDt.");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			List<RecordField> rfList = this.recDefn.getExpandedFieldList();
+
+			pstmt = StmtLibrary.prepareSelectByKeyEffDtStmt(this.recDefn,
+						this, (PTDate)args.get(0));
+			rs = pstmt.executeQuery();
+
+			int numCols = rs.getMetaData().getColumnCount();
+			if(numCols != rfList.size()) {
+				throw new EntVMachRuntimeException("The number of columns returned " +
+					"by the select by key query (" + numCols + ") differs from the number " +
+					"of fields (" + rfList.size() +
+					") in the record defn field list.");
+			}
+
+			/**
+			 * Although multiple rows may exist in the ResultSet,
+			 * only one row is read by SelectByKeyEffDt.
+			 */
+			PTBoolean returnVal = Environment.FALSE;
+			if(rs.next()) {
+				GlobalFnLibrary.readRecordFromResultSet(
+					this.recDefn, this, rs);
+				returnVal = Environment.TRUE;
+			}
+
+			// Return true if record was read, false otherwise.
+			Environment.pushToCallStack(returnVal);
+
+		} catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
+        }
 	}
 
 	/**

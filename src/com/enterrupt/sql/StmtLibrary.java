@@ -165,31 +165,11 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
-	public static PreparedStatement prepareFillStmt(Record recDefn, List<RecordField> rfList, String whereStr, String[] bindVals) {
+	public static PreparedStatement prepareFillStmt(Record recDefn, String whereStr, String[] bindVals) {
 
-		StringBuilder query = new StringBuilder("SELECT ");
+		StringBuilder query = new StringBuilder(
+			generateSelectClause(recDefn, "FILL"));
 
-		/**
-		 * Generate fields for the SELECT clause.
-		 */
-        for(int i = 0; i < rfList.size(); i++) {
-            if(i > 0) { query.append(","); }
-            String fieldname = rfList.get(i).FIELDNAME;
-
-            // Selected date fields must be wrapped with TO_CHAR directive.
-            if(rfList.get(i).getSentinelForUnderlyingValue()
-                     instanceof PTDate) {
-                query.append("TO_CHAR(FILL.").append(fieldname)
-                    .append(",'YYYY-MM-DD')");
-            } else {
-                query.append("FILL.").append(fieldname);
-            }
-        }
-        query.append(" FROM PS_").append(recDefn.RECNAME).append(" FILL");
-
-		/**
-		 * Begin WHERE string processing.
-		 */
         // Replace numeric bind sockets (":1") with "?".
         Matcher bindIdxMatcher = bindIdxPattern.matcher(whereStr);
         whereStr = bindIdxMatcher.replaceAll("?");
@@ -212,7 +192,97 @@ public class StmtLibrary {
 		for(int i = 0; i < bindVals.length; i++) {
 			stmt.bindVals.put(i+1, bindVals[i]);
 		}
+
 		return stmt.generatePreparedStmt(conn);
+	}
+
+	public static PreparedStatement prepareSelectByKeyEffDtStmt(
+		Record recDefn, PTRecord recObj, PTDate effDt) {
+
+		String tableAlias = "A";
+		StringBuilder query = new StringBuilder(
+			generateSelectClause(recDefn, tableAlias));
+
+		query.append(" WHERE ");
+
+		List<RecordField> rfList = recDefn.getExpandedFieldList();
+		List<String> bindVals = new ArrayList<String>();
+
+		boolean isFirstKey = true;
+		for(RecordField rf : rfList) {
+			if(rf.isKey()) {
+				if(!isFirstKey) { query.append(" AND "); }
+				isFirstKey = false;
+
+				query.append(tableAlias).append(".")
+						.append(rf.FIELDNAME).append("=");
+
+				if(!rf.FIELDNAME.equals("EFFDT")) {
+					query.append("?");
+					bindVals.add((String)recObj.fields.get(rf.FIELDNAME)
+						.getValue().read());
+				} else {
+					/**
+					 * Insert subquery for EFFDT field.
+					 */
+					query.append("(")
+						 .append("SELECT MAX(EFFDT) FROM PS_")
+						 .append(recDefn.RECNAME)
+						 .append(" B WHERE ");
+
+					boolean isFirstKeyOnSub = true;
+					for(RecordField subRf : rfList) {
+						if(subRf.isKey()) {
+							if(!isFirstKeyOnSub) { query.append(" AND "); }
+							if(!subRf.FIELDNAME.equals("EFFDT")) {
+								query.append("B.").append(subRf.FIELDNAME)
+									 .append("=").append(tableAlias)
+									 .append(".").append(subRf.FIELDNAME);
+							} else {
+								query.append("B.EFFDT<=TO_DATE(")
+									 .append("?,'YYYY-MM-DD')");
+								bindVals.add(effDt.read());
+							}
+							isFirstKeyOnSub = false;
+						}
+					}
+					query.append(")");
+				}
+			}
+		}
+
+		ENTStmt stmt = new ENTStmt(query.toString());
+		for(int i = 0; i < bindVals.size(); i++) {
+			stmt.bindVals.put(i+1, bindVals.get(i));
+		}
+
+		return stmt.generatePreparedStmt(conn);
+	}
+
+	private static String generateSelectClause(Record recDefn,
+			String tableAlias) {
+
+		StringBuilder selectClause = new StringBuilder("SELECT ");
+		List<RecordField> rfList = recDefn.getExpandedFieldList();
+
+        for(int i = 0; i < rfList.size(); i++) {
+            if(i > 0) { selectClause.append(","); }
+            String fieldname = rfList.get(i).FIELDNAME;
+
+            // Selected date fields must be wrapped with TO_CHAR directive.
+            if(rfList.get(i).getSentinelForUnderlyingValue()
+                     instanceof PTDate) {
+                selectClause.append("TO_CHAR(").append(tableAlias)
+					.append(".").append(fieldname)
+                    .append(",'YYYY-MM-DD')");
+            } else {
+                selectClause.append(tableAlias).append(".").append(fieldname);
+            }
+        }
+        selectClause.append(" FROM PS_").append(recDefn.RECNAME)
+			.append(" ").append(tableAlias);
+
+		return selectClause.toString();
 	}
 
 	public static void disconnect() {

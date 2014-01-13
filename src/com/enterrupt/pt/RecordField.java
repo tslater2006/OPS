@@ -51,3 +51,4 @@ public class RecordField {
 		return ((this.USEEDIT & this.ALTERNATE_SEARCH_KEY_FLAG) > 0);
 	}
 }
+

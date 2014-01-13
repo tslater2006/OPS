@@ -108,7 +108,7 @@ public class PTRowset extends PTObjectType {
 		try {
 			List<RecordField> rfList = this.recDefn.getExpandedFieldList();
 
-			pstmt = StmtLibrary.prepareFillStmt(this.recDefn, rfList,
+			pstmt = StmtLibrary.prepareFillStmt(this.recDefn,
 						((PTString)args.get(0)).read(), bindVals);
 			rs = pstmt.executeQuery();
 
@@ -128,8 +128,10 @@ public class PTRowset extends PTObjectType {
 					this.rows.clear();
 				}
 
-				this.rows.add(new PTRow(GlobalFnLibrary
-					.readRecordFromResultSet(this.recDefn, rfList, rs)));
+				PTRecord newRecord = PTRecord.getSentinel().alloc(this.recDefn);
+				GlobalFnLibrary
+					.readRecordFromResultSet(this.recDefn, newRecord, rs);
+				this.rows.add(new PTRow(newRecord));
 				rowsRead++;
 			}
 

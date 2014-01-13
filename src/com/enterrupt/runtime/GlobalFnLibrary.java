@@ -153,16 +153,17 @@ public class GlobalFnLibrary {
 	/*************************************/
     /** Shared EVM functions          	 */
     /*************************************/
-	public static PTRecord readRecordFromResultSet(Record recDefn,
-		List<RecordField> rfList, ResultSet rs)	throws SQLException {
 
-		PTRecord newRecord = PTRecord.getSentinel().alloc(recDefn);
+	public static void readRecordFromResultSet(Record recDefn,
+			PTRecord recObj, ResultSet rs) throws SQLException {
+
+		List<RecordField> rfList = recDefn.getExpandedFieldList();
 		ResultSetMetaData rsMetadata = rs.getMetaData();
 		int numCols = rsMetadata.getColumnCount();
 
 		for(int i = 1; i <= numCols; i++) {
 			String colName = rsMetadata.getColumnName(i);
-			PTField newFld = newRecord.getField(rfList.get(i-1).FIELDNAME);
+			PTField newFld = recObj.getField(rfList.get(i-1).FIELDNAME);
 			String colTypeName = rsMetadata.getColumnTypeName(i);
 
 			log.debug("Copying {} with type {} from resultset to Field:{} "+
@@ -211,6 +212,5 @@ public class GlobalFnLibrary {
 						 newFld.getValue().getType());
 			}
 		}
-		return newRecord;
 	}
 }

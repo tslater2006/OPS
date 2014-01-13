@@ -112,8 +112,20 @@ public class GlobalFnLibrary {
 			DefnCache.getRecord(((PTString)args.get(0)).read())));
 	}
 
-	public static void PT_CreateArrayRept() {
+	public static void PT_CreateArray() {
 
+		/**
+		 * I am simply calling CreateArrayRept for now,
+		 * because I saw input for CreateArray(" ", 0) despite
+		 * the fact that the documentation says all arguments should
+		 * be the same type. In the future, there will likely be
+		 * instances where something other than CreateArrayRept
+		 * should be done.
+		 */
+		PT_CreateArrayRept();
+	}
+
+	public static void PT_CreateArrayRept() {
 
         List<PTType> args = Environment.getArgsFromCallStack();
 		if(args.size() != 2 || (!(args.get(1) instanceof PTInteger))) {

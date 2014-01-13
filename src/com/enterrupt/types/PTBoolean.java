@@ -30,6 +30,10 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
 		throw new EntDataTypeException("setDefault not implemented.");
 	}
 
+	public PTPrimitiveType add(PTPrimitiveType op) {
+		throw new EntVMachRuntimeException("add() not supported.");
+	}
+
     public PTBoolean isEqual(PTPrimitiveType op) {
 		if(!(op instanceof PTBoolean)) {
 			throw new EntDataTypeException("Expected op to be PTBoolean.");

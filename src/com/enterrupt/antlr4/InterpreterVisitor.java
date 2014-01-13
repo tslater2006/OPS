@@ -261,8 +261,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		do {
 			visit(ctx.stmtList());
-			Integer newExprValue = ((PTInteger)varId).read() + 1;
-			((PTInteger)varId).write(newExprValue);
+			((PTInteger)varId).add(Environment.getFromLiteralPool(1));
 		} while(((PTInteger)varId).isLessThan((PTInteger)toExpr)
 				== Environment.TRUE);
 
@@ -425,6 +424,30 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		if(a != null && (Environment.popFromCallStack() != null)) {
 			throw new EntVMachRuntimeException("More than one return value " +
 				"was found on the call stack.");
+		}
+
+		return null;
+	}
+
+	public Void visitExprAddSub(PeopleCodeParser.ExprAddSubContext ctx) {
+
+		visit(ctx.expr(0));
+		PTPrimitiveType lhs = (PTPrimitiveType)getNodeData(ctx.expr(0));
+		visit(ctx.expr(1));
+		PTPrimitiveType rhs = (PTPrimitiveType)getNodeData(ctx.expr(1));
+
+		if(ctx.a != null) {
+			if(lhs instanceof PTInteger && rhs instanceof PTInteger) {
+				setNodeData(ctx, lhs.add(rhs));
+			} else {
+				throw new EntVMachRuntimeException("Unsupported types provided to addition operator.");
+			}
+
+		} else if(ctx.s != null) {
+			throw new EntVMachRuntimeException("Subtraction is not supported.");
+
+		} else {
+			throw new EntVMachRuntimeException("Unsupported add/sub operation.");
 		}
 
 		return null;

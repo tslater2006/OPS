@@ -47,8 +47,8 @@ expr	:	'(' expr ')'					 		# ExprParenthesized
 		| 	expr '(' exprList? ')'					# ExprFnOrIdxCall
 		|	'-' expr								# ExprNegate
 		|	'Not' expr								# ExprNot
-		|	expr ('*'|'/') expr						# ExprMulDiv
-		|	expr ('+'|'-') expr						# ExprAddSub
+		|	expr (m='*'|d='/') expr					# ExprMulDiv
+		|	expr (a='+'|s='-') expr					# ExprAddSub
 		|	expr (le='<='|ge='>='|l='<'|g='>') expr	# ExprComparison
 		|	expr (e='='|i='<>') expr				# ExprEquality
 		|	expr (

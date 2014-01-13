@@ -35,6 +35,10 @@ public class PTDate extends PTPrimitiveType<String> {
         this.d = newValue;
     }
 
+	public PTPrimitiveType add(PTPrimitiveType op) {
+		throw new EntDataTypeException("add() not supported.");
+	}
+
 	public void setDefault() {
 		this.d = null;
 	}

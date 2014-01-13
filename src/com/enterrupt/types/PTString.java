@@ -30,6 +30,10 @@ public class PTString extends PTPrimitiveType<String> {
 		this.s = " ";
 	}
 
+	public PTPrimitiveType add(PTPrimitiveType op) {
+		throw new EntVMachRuntimeException("add() not supported.");
+	}
+
     public PTBoolean isEqual(PTPrimitiveType op) {
 		if(!(op instanceof PTString)) {
 			throw new EntDataTypeException("Expected op to be PTString.");

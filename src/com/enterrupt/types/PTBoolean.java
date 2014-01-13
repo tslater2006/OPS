@@ -26,6 +26,10 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
         this.b = newValue;
     }
 
+	public void setDefault() {
+		throw new EntDataTypeException("setDefault not implemented.");
+	}
+
     public PTBoolean isEqual(PTPrimitiveType op) {
 		if(!(op instanceof PTBoolean)) {
 			throw new EntDataTypeException("Expected op to be PTBoolean.");

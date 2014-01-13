@@ -35,6 +35,10 @@ public class PTDate extends PTPrimitiveType<String> {
         this.d = newValue;
     }
 
+	public void setDefault() {
+		this.d = null;
+	}
+
     public PTBoolean isEqual(PTPrimitiveType op) {
 		throw new EntDataTypeException("isEqual not implemented for " +
 			"Date.");

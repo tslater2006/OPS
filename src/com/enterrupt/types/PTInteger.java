@@ -26,6 +26,10 @@ public class PTInteger extends PTPrimitiveType<Integer> {
         this.i = newValue;
     }
 
+	public void setDefault() {
+		throw new EntDataTypeException("setDefault not implemented.");
+	}
+
 	public boolean equals(Object obj) {
         if(obj == this)
             return true;

@@ -93,8 +93,10 @@ public class GlobalFnLibrary {
 			throw new EntVMachRuntimeException("Expected single string arg.");
 		}
 
-		Environment.pushToCallStack(PTRecord.getSentinel().alloc(
-			DefnCache.getRecord(((PTString)args.get(0)).read())));
+		PTRecord rec = PTRecord.getSentinel().alloc(
+			DefnCache.getRecord(((PTString)args.get(0)).read()));
+		rec.setDefault();
+		Environment.pushToCallStack(rec);
 	}
 
 	public static void PT_CreateRowset() {

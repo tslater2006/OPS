@@ -542,6 +542,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				visit(ctx.expr(1));
 				setNodeData(ctx, getNodeData(ctx.expr(1)));
 			}
+		} else if(ctx.op.getText().equals("And")) {
+			visit(ctx.expr(0));
+			PTBoolean lhs = (PTBoolean)getNodeData(ctx.expr(0));
+			visit(ctx.expr(1));
+			PTBoolean rhs = (PTBoolean)getNodeData(ctx.expr(1));
+
+			if(lhs.read() && rhs.read()) {
+				setNodeData(ctx, Environment.TRUE);
+			} else {
+				setNodeData(ctx, Environment.FALSE);
+			}
 		} else {
 			throw new EntInterpretException("Unsupported boolean comparison operation",
 				ctx.getText(), ctx.getStart().getLine());

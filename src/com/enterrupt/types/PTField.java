@@ -35,6 +35,10 @@ public class PTField extends PTObjectType {
 		}
 	}
 
+	public void setDefault() {
+		value.setDefault();
+	}
+
 	public PTPrimitiveType getValue() {
 		return this.value;
 	}

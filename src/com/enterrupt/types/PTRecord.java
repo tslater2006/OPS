@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import com.enterrupt.pt.*;
 import java.util.*;
+import java.lang.reflect.*;
 import com.enterrupt.runtime.*;
 
 public class PTRecord extends PTObjectType {
@@ -10,6 +11,19 @@ public class PTRecord extends PTObjectType {
 	public Record recDefn;
 	public Map<String, PTField> fields;
 	public Map<Integer, PTField> fieldIdxTable;
+	private static Map<String, Method> ptMethodTable;
+
+    static {
+        // cache pointers to PeopleTools Record methods.
+        Method[] methods = PTRecord.class.getMethods();
+        ptMethodTable = new HashMap<String, Method>();
+        for(Method m : methods) {
+            if(m.getName().indexOf("PT_") == 0) {
+                ptMethodTable.put(m.getName().substring(3), m);
+            }
+        }
+    }
+
 
 	protected PTRecord() {
 		super(staticTypeFlag);
@@ -35,7 +49,10 @@ public class PTRecord extends PTObjectType {
     }
 
     public Callable dotMethod(String s) {
-		return null;
+       if(ptMethodTable.containsKey(s)) {
+            return new Callable(ptMethodTable.get(s), this);
+        }
+        return null;
     }
 
 	public PTField getField(String fldName) {
@@ -44,6 +61,30 @@ public class PTRecord extends PTObjectType {
 				fldName + " did not match any field on this record: " + this.toString());
 		}
 		return this.fields.get(fldName);
+	}
+
+	public void setDefault() {
+		for(Map.Entry<String, PTField> cursor : this.fields.entrySet()) {
+			cursor.getValue().setDefault();
+		}
+	}
+
+	public void PT_SetDefault() {
+        List<PTType> args = Environment.getArgsFromCallStack();
+        if(args.size() != 0) {
+            throw new EntVMachRuntimeException("Expected no args.");
+        }
+
+		this.setDefault();
+	}
+
+	public void PT_SelectByKeyEffDt() {
+        List<PTType> args = Environment.getArgsFromCallStack();
+	    if(args.size() != 1 || (!(args.get(0) instanceof PTDate))) {
+            throw new EntVMachRuntimeException("Expected single date arg.");
+        }
+
+		throw new EntVMachRuntimeException("Must implement SelectByKeyEffDt.");
 	}
 
 	/**

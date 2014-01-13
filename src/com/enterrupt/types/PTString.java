@@ -26,6 +26,10 @@ public class PTString extends PTPrimitiveType<String> {
 		this.s = newValue;
 	}
 
+	public void setDefault() {
+		this.s = " ";
+	}
+
     public PTBoolean isEqual(PTPrimitiveType op) {
 		if(!(op instanceof PTString)) {
 			throw new EntDataTypeException("Expected op to be PTString.");

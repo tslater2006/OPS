@@ -30,6 +30,10 @@ public class PTNumber extends PTPrimitiveType<Double> {
         this.d = newValue;
     }
 
+	public void setDefault() {
+		this.d = 0.0;
+	}
+
     public PTBoolean isEqual(PTPrimitiveType op) {
 		throw new EntDataTypeException("isEqual is not implemented for " +
         	"numbers.");

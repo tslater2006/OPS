@@ -40,6 +40,11 @@ public class PTNumber extends PTPrimitiveType<Double> {
             "numbers.");
     }
 
+    public PTBoolean isLessThan(PTPrimitiveType op) {
+		throw new EntDataTypeException("isLessThan is not supported for " +
+			"Number.");
+	}
+
 	public boolean equals(Object obj) {
         if(obj == this)
             return true;

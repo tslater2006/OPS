@@ -61,6 +61,16 @@ public class PTInteger extends PTPrimitiveType<Integer> {
         return Environment.FALSE;
     }
 
+    public PTBoolean isLessThan(PTPrimitiveType op) {
+        if(!(op instanceof PTInteger)) {
+            throw new EntDataTypeException("Expected op to be PTInteger.");
+        }
+        if(this.i.compareTo(((PTInteger)op).read()) < 0) {
+            return Environment.TRUE;
+        }
+        return Environment.FALSE;
+	}
+
 	public boolean typeCheck(PTType a) {
 		return (a instanceof PTInteger &&
 			this.getType() == a.getType());

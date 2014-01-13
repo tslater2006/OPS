@@ -127,7 +127,7 @@ public class GlobalFnLibrary {
 		PTArray newArray = null;
 		if(args.get(0) instanceof PTArray) {
 			newArray = PTArray.getSentinel(((PTArray)args.get(0)).dimensions + 1,
-				((PTArray)args.get(0)).baseType);
+				((PTArray)args.get(0)).baseType).alloc();
 		} else {
 			newArray = PTArray.getSentinel(1, args.get(0)).alloc();
 		}

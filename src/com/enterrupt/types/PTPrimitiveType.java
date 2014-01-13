@@ -16,6 +16,7 @@ public abstract class PTPrimitiveType<T> extends PTType {
 
 	public abstract PTBoolean isEqual(PTPrimitiveType op);
 	public abstract PTBoolean isGreaterThan(PTPrimitiveType op);
+	public abstract PTBoolean isLessThan(PTPrimitiveType op);
 
 	public void copyValueFrom(PTPrimitiveType src) {
 

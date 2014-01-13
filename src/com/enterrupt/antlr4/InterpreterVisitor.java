@@ -235,10 +235,38 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
-	public Void visitStmtFor(PeopleCodeParser.StmtForContext ctx) {
+	public Void visitForStmt(PeopleCodeParser.ForStmtContext ctx) {
 		this.emitStmt(ctx);
-		throw new EntVMachRuntimeException("Need to implement For visitor.");
-		//return null;
+
+		if(ctx.step != null) {
+			throw new EntVMachRuntimeException("Step clause encountered " +
+				"in For construct; not yet supported.");
+		}
+
+		PTType varId = eCtx.resolveIdentifier(ctx.VAR_ID().getText());
+
+		visit(ctx.expr(0));
+		PTType initialExpr = getNodeData(ctx.expr(0));
+
+		if(!(varId instanceof PTInteger
+				&& initialExpr instanceof PTInteger)) {
+			throw new EntVMachRuntimeException("Expected both the VAR_ID "+
+				"and expr in For construct to be integers.");
+		}
+
+		((PTPrimitiveType)varId).copyValueFrom((PTPrimitiveType)initialExpr);
+
+		visit(ctx.expr(1));
+		PTType toExpr = getNodeData(ctx.expr(1));
+
+		do {
+			visit(ctx.stmtList());
+			Integer newExprValue = ((PTInteger)varId).read() + 1;
+			((PTInteger)varId).write(newExprValue);
+		} while(((PTInteger)varId).isLessThan((PTInteger)toExpr)
+				== Environment.TRUE);
+
+		return null;
 	}
 
 	public Void visitStmtBreak(PeopleCodeParser.StmtBreakContext ctx) {
@@ -584,6 +612,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		} else if(ctx.VAR_ID() != null) {
 			PTType a = eCtx.resolveIdentifier(ctx.VAR_ID().getText());
+			//log.debug("Resolved {} to {}.", ctx.VAR_ID().getText(), a);
 			setNodeData(ctx, a);
 
 		} else if(ctx.GENERIC_ID() != null) {

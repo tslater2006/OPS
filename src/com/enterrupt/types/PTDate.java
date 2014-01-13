@@ -45,6 +45,11 @@ public class PTDate extends PTPrimitiveType<String> {
 			"Date.");
 	}
 
+    public PTBoolean isLessThan(PTPrimitiveType op) {
+		throw new EntDataTypeException("isLessThan is not supported for " +
+			"Date.");
+	}
+
 	public boolean equals(Object obj) {
         if(obj == this)
             return true;

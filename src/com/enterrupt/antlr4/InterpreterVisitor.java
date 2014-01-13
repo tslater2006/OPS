@@ -238,7 +238,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	public Void visitForStmt(PeopleCodeParser.ForStmtContext ctx) {
 		this.emitStmt(ctx);
 
-		if(ctx.step != null) {
+		if(ctx.expr(2) != null) {
 			throw new EntVMachRuntimeException("Step clause encountered " +
 				"in For construct; not yet supported.");
 		}

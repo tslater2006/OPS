@@ -1,6 +1,8 @@
 package com.enterrupt.pt;
 
 import org.apache.logging.log4j.*;
+import com.enterrupt.runtime.*;
+import com.enterrupt.types.*;
 
 public class RecordField {
 
@@ -8,7 +10,7 @@ public class RecordField {
 	public String FIELDNAME;
 	public byte USEEDIT;
 	public int FIELDNUM;
-	public int typeFlag;
+	private int typeFlag;
 
 	private final byte KEY_FLAG = (byte) 1;
 	private final byte ALTERNATE_SEARCH_KEY_FLAG = (byte) 16;
@@ -20,6 +22,21 @@ public class RecordField {
 		this.RECNAME = r;
 		this.FIELDNAME = f;
 		this.typeFlag = t;
+	}
+
+	public PTType getSentinelForUnderlyingValue() {
+		switch(this.typeFlag) {
+			case 0:
+                return PTString.getSentinel();
+            case 2:
+                return PTNumber.getSentinel();
+            case 4:
+                return PTDate.getSentinel();
+            default:
+				throw new EntVMachRuntimeException("Unable to determine " +
+					"appropriate sentinel for underlying record field " +
+					"value given a typeFlag of: " + this.typeFlag);
+		}
 	}
 
 	public boolean isKey() {

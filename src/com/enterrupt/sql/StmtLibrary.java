@@ -2,14 +2,19 @@ package com.enterrupt.sql;
 
 import java.sql.*;
 import java.util.*;
+import com.enterrupt.pt.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
+import java.util.regex.*;
 
 public class StmtLibrary {
 
 	private static Connection conn;
 	private static Logger log = LogManager.getLogger(StmtLibrary.class.getName());
+
+	private static Pattern bindIdxPattern;
+    private static Pattern dateInPattern;
 
 	static {
 		try {
@@ -23,6 +28,10 @@ public class StmtLibrary {
 			log.fatal(sqle.getMessage(), sqle);
 			System.exit(ExitCode.UNABLE_TO_ACQUIRE_DB_CONN.getCode());
 		}
+
+		// compile meta-SQL detection regex patterns.
+        bindIdxPattern = Pattern.compile(":\\d+");
+        dateInPattern = Pattern.compile("%DATEIN\\((.+?)\\)");
 	}
 
 	public static PreparedStatement getPSPNLGRPDEFN(String b1, String b2) {
@@ -156,8 +165,50 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
-	public static PreparedStatement prepareArbitraryStmt(String sql, String[] bindVals) {
-		ENTStmt stmt = new ENTStmt(sql);
+	public static PreparedStatement prepareFillStmt(Record recDefn, List<RecordField> rfList, String whereStr, String[] bindVals) {
+
+		StringBuilder query = new StringBuilder("SELECT ");
+
+		/**
+		 * Generate fields for the SELECT clause.
+		 */
+        for(int i = 0; i < rfList.size(); i++) {
+            if(i > 0) { query.append(","); }
+            String fieldname = rfList.get(i).FIELDNAME;
+
+            // Selected date fields must be wrapped with TO_CHAR directive.
+            if(rfList.get(i).getSentinelForUnderlyingValue()
+                     instanceof PTDate) {
+                query.append("TO_CHAR(FILL.").append(fieldname)
+                    .append(",'YYYY-MM-DD')");
+            } else {
+                query.append("FILL.").append(fieldname);
+            }
+        }
+        query.append(" FROM PS_").append(recDefn.RECNAME).append(" FILL");
+
+		/**
+		 * Begin WHERE string processing.
+		 */
+        // Replace numeric bind sockets (":1") with "?".
+        Matcher bindIdxMatcher = bindIdxPattern.matcher(whereStr);
+        whereStr = bindIdxMatcher.replaceAll("?");
+
+        // Replace occurrences of %DATEIN(*) with TO_DATE(*,'YYYY-MM-DD')
+        Matcher dateInMatcher = dateInPattern.matcher(whereStr);
+        while(dateInMatcher.find()) {
+            //log.debug("Found DATEIN: " + dateInMatcher.group(0));
+            whereStr = dateInMatcher.replaceAll("TO_DATE("+
+                dateInMatcher.group(1)+",'YYYY-MM-DD')");
+        }
+
+        query.append("  ").append(whereStr);
+        //log.debug("Fill query string: {}", query.toString());
+
+		/**
+		 * Prepare the statement.
+		 */
+		ENTStmt stmt = new ENTStmt(query.toString());
 		for(int i = 0; i < bindVals.length; i++) {
 			stmt.bindVals.put(i+1, bindVals[i]);
 		}

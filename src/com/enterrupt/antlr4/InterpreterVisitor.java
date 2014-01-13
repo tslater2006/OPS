@@ -95,6 +95,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	private void emitStmt(String str) {
+
+		/**
+		 * Don't emit an End-If statement after exiting a For loop.
+		 */
+		if(str.equals("End-If") &&
+				this.lastEmission instanceof PCInstruction) {
+			if(((PCInstruction)this.lastEmission).instruction
+				.startsWith("For")) {
+				return;
+			}
+		}
 		IEmission e = new PCInstruction(str);
 		TraceFileVerifier.submitEmission(e);
 		this.lastEmission = e;
@@ -214,21 +225,22 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	 * <stmt> alternative handlers.
 	 **********************************************************/
 
-	public Void visitStmtIf(PeopleCodeParser.StmtIfContext ctx) {
+	public Void visitIfStmt(PeopleCodeParser.IfStmtContext ctx) {
 		this.emitStmt(ctx);
 
 		// Get value of conditional expression.
-		visit(ctx.ifStmt().expr());
-		boolean exprResult = ((PTBoolean)getNodeData(ctx.ifStmt().expr())).read();
+		visit(ctx.expr());
+		boolean exprResult = ((PTBoolean)getNodeData(ctx.expr())).read();
 
 		// If expression evaluates to true, visit the conditional body;
 		// otherwise, visit the Else body if it exists.
 		if(exprResult) {
-			visit(ctx.ifStmt().stmtList(0));
+			visit(ctx.stmtList(0));
 			this.emitStmt("End-If");
 		} else {
-			if(ctx.ifStmt().stmtList(1) != null) {
-				visit(ctx.ifStmt().stmtList(1));
+			if(ctx.stmtList(1) != null) {
+				visit(ctx.stmtList(1));
+				this.emitStmt("End-If");
 			}
 		}
 
@@ -262,6 +274,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		do {
 			visit(ctx.stmtList());
 			((PTInteger)varId).add(Environment.getFromLiteralPool(1));
+			this.emitStmt("End-For");
+			this.emitStmt(ctx);
 		} while(((PTInteger)varId).isLessThan((PTInteger)toExpr)
 				== Environment.TRUE);
 
@@ -337,7 +351,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 					"in non-app class execution contexts.");
 			}
 		}
-		return null;
+		throw new EntReturnException(ctx.getText());
 	}
 
 	/**********************************************************
@@ -496,6 +510,30 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			this.repeatLastEmission();
 		}
 
+		return null;
+	}
+
+	public Void visitExprArrayIndex(PeopleCodeParser.ExprArrayIndexContext ctx) {
+
+		visit(ctx.expr());
+		PTArray arrayObj = (PTArray)getNodeData(ctx.expr());
+
+		visit(ctx.exprList());
+		PTType index = null;
+		for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
+			visit(argCtx);
+			if(index != null) {
+				throw new EntVMachRuntimeException("Multiple array indexes "+
+					"is not yet supported.");
+			}
+			index = getNodeData(argCtx);
+			break;
+		}
+
+		log.debug("About to index into {} with index {}.",
+			arrayObj, index);
+
+		setNodeData(ctx, arrayObj.getElement(index));
 		return null;
 	}
 
@@ -792,8 +830,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
                 case "array":
 					if(nestedType instanceof PTArray) {
 						type = PTArray.getSentinel(
-							((PTArray)nestedType).dimensions+1,
-							((PTArray)nestedType).baseType);
+							((PTArray)nestedType).dimensions+1,nestedType);
 					} else {
 						type = PTArray.getSentinel(1, nestedType);
 					}

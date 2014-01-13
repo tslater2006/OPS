@@ -90,18 +90,25 @@ public class InterpretSupervisor {
 		}
 
 		InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
-		interpreter.visit(context.startNode);
-
-		if(context instanceof ProgramExecContext &&
-			context.scopeStack.size() > 0) {
-			throw new EntVMachRuntimeException("Expected all scope ptrs in the " +
-				"ProgramExecContext to be popped.");
+		boolean normalExit = true;
+		try {
+			interpreter.visit(context.startNode);
+		} catch(EntReturnException ere) {
+			normalExit = false;
 		}
 
-		if(context instanceof AppClassObjExecContext &&
-			context.scopeStack.size() > 2) {
-			throw new EntVMachRuntimeException("Expected all scope ptrs except " +
-				"for the underlying object's prop and instance scopes to be popped.");
+		if(normalExit) {
+			if(context instanceof ProgramExecContext &&
+				context.scopeStack.size() > 0) {
+				throw new EntVMachRuntimeException("Expected all scope ptrs in the " +
+					"ProgramExecContext to be popped.");
+			}
+
+			if(context instanceof AppClassObjExecContext &&
+				context.scopeStack.size() > 2) {
+				throw new EntVMachRuntimeException("Expected all scope ptrs except " +
+					"for the underlying object's prop and instance scopes to be popped.");
+			}
 		}
 
 		if(doEmitProgramMarkers) {

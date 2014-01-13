@@ -75,8 +75,8 @@ appPkgPath		:	GENERIC_ID (':' GENERIC_ID)* ':' '*' ;
 appClassPath	:	GENERIC_ID (':' GENERIC_ID)+ ;
 
 extFuncImport	:	'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event ;
-recDefnPath	:	GENERIC_ID '.' GENERIC_ID ;
-event		:	'FieldFormula' | 'FieldChange' ;
+recDefnPath		:	GENERIC_ID '.' GENERIC_ID ;
+event			:	'FieldFormula' | 'FieldChange' ;
 
 classDeclaration	:	'class' GENERIC_ID classBlock* 'end-class' ;
 classBlock			:	aLvl='private'? (classBlockStmt ';'*)+ ;

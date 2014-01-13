@@ -37,6 +37,16 @@ public class PTArray extends PTObjectType {
 		this.baseType = b;
 	}
 
+	public PTType getElement(PTType index) {
+		if(!(index instanceof PTInteger)) {
+			throw new EntVMachRuntimeException("Expected index to be " +
+				"an integer.");
+		}
+
+		// Must subtract 1; PT array indices are 1-based.
+		return this.values.get(((PTInteger)index).read() - 1);
+	}
+
 	public PTType dotProperty(String s) {
 		if(s.equals("Len")) {
 			return Environment.getFromLiteralPool(values.size());
@@ -107,15 +117,44 @@ public class PTArray extends PTObjectType {
 		this.values = new LinkedList<PTType>();
 	}
 
+	protected void internalPush(PTType value) {
+
+		/**
+		 * NOTE: This code can promote non-array values to arrays,
+		 * but it cannot "flatten" arrays to the appropriate base type,
+		 * which will likely be required down the line.
+		 */
+		if(this.baseType.typeCheck(value)) {
+			this.values.addLast(value);
+
+		} else if(this.baseType instanceof PTArray) {
+
+			PTArray promotedVal = null;
+			if(((PTArray)this.baseType).dimensions == 1) {
+				promotedVal = PTArray.getSentinel(1,
+					value).alloc();
+			} else {
+				promotedVal = PTArray.getSentinel(
+					((PTArray)this.baseType).dimensions,
+					this.baseType).alloc();
+			}
+			promotedVal.internalPush(value);
+			this.values.addLast(promotedVal);
+
+		} else {
+			throw new EntVMachRuntimeException("Cannot Push onto array; "+
+				"types are not compatible.");
+		}
+
+	}
+
 	public void PT_Push() {
         List<PTType> args = Environment.getArgsFromCallStack();
         if(args.size() != 1) {
             throw new EntVMachRuntimeException("Expected one argument.");
         }
 
-		if(this.baseType.typeCheck(args.get(0))) {
-			this.values.addLast(args.get(0));
-		}
+		internalPush(args.get(0));
 	}
 }
 

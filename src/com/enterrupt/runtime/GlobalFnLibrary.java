@@ -1,6 +1,8 @@
 package com.enterrupt.runtime;
 
 import java.util.*;
+import com.enterrupt.pt.*;
+import java.sql.*;
 import com.enterrupt.types.*;
 import org.apache.logging.log4j.*;
 
@@ -146,5 +148,69 @@ public class GlobalFnLibrary {
 		}
 
 		Environment.pushToCallStack(newArray);
+	}
+
+	/*************************************/
+    /** Shared EVM functions          	 */
+    /*************************************/
+	public static PTRecord readRecordFromResultSet(Record recDefn,
+		List<RecordField> rfList, ResultSet rs)	throws SQLException {
+
+		PTRecord newRecord = PTRecord.getSentinel().alloc(recDefn);
+		ResultSetMetaData rsMetadata = rs.getMetaData();
+		int numCols = rsMetadata.getColumnCount();
+
+		for(int i = 1; i <= numCols; i++) {
+			String colName = rsMetadata.getColumnName(i);
+			PTField newFld = newRecord.getField(rfList.get(i-1).FIELDNAME);
+			String colTypeName = rsMetadata.getColumnTypeName(i);
+
+			log.debug("Copying {} with type {} from resultset to Field:{} "+
+				"with type flag {}", colName, colTypeName,
+				newFld.recFieldDefn.FIELDNAME, newFld.getValue().getType());
+
+			switch(newFld.getValue().getType()) {
+				case STRING:
+					if(colTypeName.equals("VARCHAR2")) {
+						((PTString)newFld.getValue()).write(
+							rs.getString(colName));
+					} else {
+						throw new EntVMachRuntimeException("Unexpected db " +
+							"type for Type.STRING: " + colTypeName + "; " +
+							"colName=" + colName);
+					}
+					break;
+				case NUMBER:
+					if(colTypeName.equals("NUMBER")) {
+						if(rs.getDouble(colName) % 1 == 0) {
+							((PTNumber)newFld.getValue()).write(
+								rs.getInt(colName));
+						} else {
+							((PTNumber)newFld.getValue()).write(
+								rs.getDouble(colName));
+						}
+					} else {
+						throw new EntVMachRuntimeException("Unexpected db " +
+							"type for Type.NUMBER: " + colTypeName + "; " +
+							"colName=" + colName);
+					}
+					break;
+				case DATE:
+					if(colTypeName.equals("VARCHAR2")) {
+						((PTDate)newFld.getValue()).write(
+							rs.getString(colName));
+					} else {
+						throw new EntVMachRuntimeException("Unexpected db " +
+							"type for Type.DATE: " + colTypeName + "; " +
+							"colName=" + colName);
+					}
+					break;
+				default:
+					throw new EntVMachRuntimeException("Unexpected field " +
+						"value type encountered when filling rowset: " +
+						 newFld.getValue().getType());
+			}
+		}
+		return newRecord;
 	}
 }

@@ -111,9 +111,8 @@ public class PTRowset extends PTObjectType {
 			pstmt = StmtLibrary.prepareFillStmt(this.recDefn, rfList,
 						((PTString)args.get(0)).read(), bindVals);
 			rs = pstmt.executeQuery();
-			ResultSetMetaData rsMetadata = rs.getMetaData();
 
-			int numCols = rsMetadata.getColumnCount();
+			int numCols = rs.getMetaData().getColumnCount();
 			if(numCols != rfList.size()) {
 				throw new EntVMachRuntimeException("The number of columns returned " +
 					"by the fill query (" + numCols + ") differs from the number " +
@@ -129,56 +128,8 @@ public class PTRowset extends PTObjectType {
 					this.rows.clear();
 				}
 
-				PTRecord newRecord = PTRecord.getSentinel().alloc(this.recDefn);
-				for(int i = 1; i <= numCols; i++) {
-					String colName = rsMetadata.getColumnName(i);
-					PTField newFld = newRecord.getField(
-						rfList.get(i-1).FIELDNAME);
-					String colTypeName = rsMetadata.getColumnTypeName(i);
-
-					log.debug("Copying {} with type {} from resultset to Field:{} "+
-						"with type flag {}", colName, colTypeName,
-						newFld.recFieldDefn.FIELDNAME, newFld.getValue().getType());
-
-					switch(newFld.getValue().getType()) {
-					case STRING:
-						if(colTypeName.equals("VARCHAR2")) {
-							((PTString)newFld.getValue()).write(rs.getString(colName));
-						} else {
-							throw new EntVMachRuntimeException("Unexpected database " +
-								"type for Type.STRING: " + colTypeName + "; colName=" +
-								colName);
-						}
-						break;
-					case NUMBER:
-						if(colTypeName.equals("NUMBER")) {
-							if(rs.getDouble(colName) % 1 == 0) {
-								((PTNumber)newFld.getValue()).write(rs.getInt(colName));
-							} else {
-								((PTNumber)newFld.getValue()).write(rs.getDouble(colName));
-							}
-						} else {
-							throw new EntVMachRuntimeException("Unexpected database " +
-								"type for Type.NUMBER: " + colTypeName + "; colName=" +
-								colName);
-						}
-						break;
-					case DATE:
-						if(colTypeName.equals("VARCHAR2")) {
-							((PTDate)newFld.getValue()).write(rs.getString(colName));
-						} else {
-							throw new EntVMachRuntimeException("Unexpected database " +
-								"type for Type.DATE: " + colTypeName + "; colName=" +
-								colName);
-						}
-						break;
-					default:
-						throw new EntVMachRuntimeException("Unexpected field " +
-							"value type encountered when filling rowset: " +
-							 newFld.getValue().getType());
-					}
-				}
-				this.rows.add(new PTRow(newRecord));
+				this.rows.add(new PTRow(GlobalFnLibrary
+					.readRecordFromResultSet(this.recDefn, rfList, rs)));
 				rowsRead++;
 			}
 

@@ -67,7 +67,7 @@ public abstract class PTType {
 		return this;
 	}
 
-	protected Type getType() {
+	public Type getType() {
 		return this.type;
 	}
 

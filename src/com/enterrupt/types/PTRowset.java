@@ -78,7 +78,6 @@ public class PTRowset extends PTObjectType {
 		LinkedList<String> orders = new LinkedList<String>();
 
 		do {
-
 			PTString orderStr = (PTString)Environment.popFromCallStack();
 			if(orderStr.read().equals("A") || orderStr.read().equals("D")){
 				orders.push(orderStr.read());
@@ -99,18 +98,113 @@ public class PTRowset extends PTObjectType {
 					fld.FIELDNAME + " does not exist on the underlying "+
 					"record.");
 			}
+			fields.push(fld.FIELDNAME);
 
 		} while(Environment.peekAtCallStack() != null);
 
+		this.rows = mergeSortRows(this.rows, fields, orders);
+
 		int i=1;
+		log.debug("=========== Sorted Rowset ===========");
 		for(PTRow row : this.rows) {
 			PTRecord rec = row.record;
 			log.debug("{}: STRM={}, ACAD_CAREER={}, INSTITUTION={}",
 				i++, rec.fields.get("STRM"), rec.fields.get("ACAD_CAREER"),
 				rec.fields.get("INSTITUTION"));
 		}
+		log.debug("======== End Sorted Rowset =========");
+	}
 
-		throw new EntVMachRuntimeException("Need to implement Sort.");
+	private List<PTRow> mergeSortRows(List<PTRow> rowsToSort,
+		List<String> sortFields, List<String> sortOrders) {
+
+		if(rowsToSort.size() < 2) {
+			return rowsToSort;
+		}
+
+		int mid = rowsToSort.size() / 2;
+		List<PTRow> left = mergeSortRows(
+			rowsToSort.subList(0, mid), sortFields, sortOrders);
+		List<PTRow> right = mergeSortRows(
+			rowsToSort.subList(mid-1,
+				rowsToSort.size() - 1), sortFields, sortOrders);
+		return merge(left, right, sortFields, sortOrders);
+	}
+
+	private List<PTRow> merge(List<PTRow> left, List<PTRow> right,
+		List<String> sortFields, List<String> sortOrders) {
+
+		List<PTRow> merged = new ArrayList<PTRow>();
+		int l = 0, r = 0;
+		while(l < left.size() && r < right.size()) {
+			PTRow lRow = left.get(l);
+			PTRow rRow = right.get(r);
+
+			/**
+			 * Order the rows based on the precedence
+			 * specified in the list of sort fields,
+			 * along with the order accompanying each (A or D).
+			 */
+			for(int i=0; i < sortFields.size(); i++) {
+				String order = sortOrders.get(i);
+
+				PTPrimitiveType lVal = lRow.record
+					.getField(sortFields.get(i)).getValue();
+				PTPrimitiveType rVal = rRow.record
+					.getField(sortFields.get(i)).getValue();
+
+				if(lVal.isLessThan(rVal) == Environment.TRUE) {
+					if(order.equals("A")) {
+						merged.add(lRow);
+						l++;
+					} else {
+						merged.add(rRow);
+						r++;
+					}
+					break;
+				} else if(lVal.isGreaterThan(rVal) == Environment.TRUE) {
+					if(order.equals("A")) {
+						merged.add(rRow);
+						r++;
+					} else {
+						merged.add(lRow);
+						l++;
+					}
+					break;
+				} else {
+					/**
+					 * If this is the last sort field,
+					 * and the rows are still considered "equal"
+					 * in terms of ordering, add both to the merged
+					 * array in terms of their natural ordering.
+					 */
+					if((i+1) == sortFields.size()) {
+						merged.add(lRow);
+						l++;
+						merged.add(rRow);
+						r++;
+					} else {
+						/**
+						 * If another sort field exists,
+						 * use that to determine ordering.
+						 */
+						continue;
+					}
+				}
+			}
+		}
+
+		/**
+		 * Add any surplus elements to end of merged array.
+		 */
+		while(l < left.size()) {
+			merged.add(left.get(l++));
+		}
+		while(r < right.size()) {
+			merged.add(right.get(r++));
+		}
+
+		return merged;
 	}
 
 	public void PT_Flush() {

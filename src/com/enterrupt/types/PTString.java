@@ -45,13 +45,23 @@ public class PTString extends PTPrimitiveType<String> {
     }
 
     public PTBoolean isGreaterThan(PTPrimitiveType op) {
-        throw new EntDataTypeException("isGreaterThan is not supported for " +
-            "strings.");
+        if(!(op instanceof PTString)) {
+            throw new EntDataTypeException("Expected op to be PTString.");
+        }
+        if(this.s.compareTo(((PTString)op).read()) > 0) {
+            return Environment.TRUE;
+        }
+        return Environment.FALSE;
     }
 
     public PTBoolean isLessThan(PTPrimitiveType op) {
-		throw new EntDataTypeException("isLessThan is not supported for " +
-			"strings.");
+        if(!(op instanceof PTString)) {
+            throw new EntDataTypeException("Expected op to be PTString.");
+        }
+        if(this.s.compareTo(((PTString)op).read()) < 0) {
+            return Environment.TRUE;
+        }
+        return Environment.FALSE;
 	}
 
 	public boolean equals(Object obj) {

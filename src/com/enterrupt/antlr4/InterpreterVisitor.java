@@ -715,6 +715,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				 */
 				setNodeCallable(ctx, Environment.getSystemFuncPtr(
 					ctx.GENERIC_ID().getText()));
+
+			} else if(DefnCache.hasRecord(ctx.GENERIC_ID().getText())) {
+				/**
+				 * Detect references to record field literals
+				 * (i.e., those passed to Sort on Rowsets).
+				 */
+				setNodeData(ctx, PTRecFldLiteral.getSentinel().alloc(
+					DefnCache.getRecord(ctx.GENERIC_ID().getText())));
 			}
 		}
 		return null;

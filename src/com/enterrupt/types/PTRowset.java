@@ -72,6 +72,10 @@ public class PTRowset extends PTObjectType {
 		Environment.pushToCallStack(this.rows.get(idx - 1));
 	}
 
+	public void PT_Sort() {
+		throw new EntVMachRuntimeException("Need to implement Sort.");
+	}
+
 	public void PT_Flush() {
         List<PTType> args = Environment.getArgsFromCallStack();
         if(args.size() != 0) {

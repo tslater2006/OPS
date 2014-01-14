@@ -21,6 +21,10 @@ public class DefnCache {
 		appPackages = new HashMap<String, AppPackage>();
 	}
 
+	public static boolean hasRecord(String RECNAME) {
+		return records.containsKey(RECNAME);
+	}
+
 	public static Record getRecord(String RECNAME) {
 
 		// Ignore requests for system records like PSXlATITEM.

@@ -59,6 +59,10 @@ public class PTRecord extends PTObjectType {
         return null;
     }
 
+	public boolean hasField(String fldName) {
+		return this.fields.containsKey(fldName);
+	}
+
 	public PTField getField(String fldName) {
 		if(!this.fields.containsKey(fldName)) {
 			throw new EntVMachRuntimeException("Call to getField with fldname=" +

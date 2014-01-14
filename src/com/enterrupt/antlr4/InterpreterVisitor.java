@@ -721,8 +721,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				 * Detect references to record field literals
 				 * (i.e., those passed to Sort on Rowsets).
 				 */
-				setNodeData(ctx, PTRecFldLiteral.getSentinel().alloc(
+				setNodeData(ctx, PTRecordLiteral.getSentinel().alloc(
 					DefnCache.getRecord(ctx.GENERIC_ID().getText())));
+
+			} else {
+				/**
+				 * At this point, assume the GENERIC_ID is a FieldLiteral.
+				 */
+				setNodeData(ctx, PTFieldLiteral.getSentinel().alloc(
+					ctx.GENERIC_ID().getText()));
 			}
 		}
 		return null;

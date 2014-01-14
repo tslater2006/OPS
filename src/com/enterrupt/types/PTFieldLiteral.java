@@ -4,44 +4,33 @@ import com.enterrupt.pt.*;
 import java.util.*;
 import com.enterrupt.runtime.*;
 
-public class PTRecFldLiteral extends PTObjectType {
+public class PTFieldLiteral extends PTObjectType {
 
-	private static Type staticTypeFlag = Type.REC_FLD_LITERAL;
+	private static Type staticTypeFlag = Type.FLD_LITERAL;
 	public String RECNAME;
 	public String FIELDNAME;
-	private Record recDefn;
 
-	protected PTRecFldLiteral() {
+	protected PTFieldLiteral() {
 		super(staticTypeFlag);
 	}
 
-	protected PTRecFldLiteral(Record r) {
+	protected PTFieldLiteral(String f) {
 		super(staticTypeFlag);
-		this.RECNAME = r.RECNAME;
-		this.recDefn = r;
+		this.FIELDNAME = f;
 	}
 
-	/**
-	 * Dot accesses on record field literals must
-	 * always return this object, with the field
-	 * value set to the GENERIC_ID following the dot operator.
-	 */
+	protected PTFieldLiteral(String r, String f) {
+		super(staticTypeFlag);
+		this.RECNAME = r;
+		this.FIELDNAME = f;
+	}
+
     public PTType dotProperty(String s) {
-		List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-		for(RecordField rf : rfList) {
-			if(rf.FIELDNAME.equals(s)) {
-				this.FIELDNAME = s;
-				return this;
-			}
-		}
-
-		throw new EntVMachRuntimeException("Unable to resolve s=" +
-			s + " to a field on the PTRecFldLiteral for record " +
-			this.RECNAME);
+		throw new EntVMachRuntimeException("dotProperty not supported.");
     }
 
     public Callable dotMethod(String s) {
-		return null;
+		throw new EntVMachRuntimeException("dotMethod not supported.");
     }
 
     public PTPrimitiveType castTo(PTPrimitiveType t) {
@@ -49,26 +38,32 @@ public class PTRecFldLiteral extends PTObjectType {
     }
 
 	public boolean typeCheck(PTType a) {
-		return (a instanceof PTRecFldLiteral &&
+		return (a instanceof PTFieldLiteral &&
 			this.getType() == a.getType());
 	}
 
-    public static PTRecFldLiteral getSentinel() {
+    public static PTFieldLiteral getSentinel() {
 
         // If the sentinel has already been cached, return it immediately.
         String cacheKey = getCacheKey();
         if(PTType.isSentinelCached(cacheKey)) {
-            return (PTRecFldLiteral)PTType.getCachedSentinel(cacheKey);
+            return (PTFieldLiteral)PTType.getCachedSentinel(cacheKey);
         }
 
         // Otherwise, create a new sentinel type and cache it before returning it.
-        PTRecFldLiteral sentinelObj = new PTRecFldLiteral();
+        PTFieldLiteral sentinelObj = new PTFieldLiteral();
         PTType.cacheSentinel(sentinelObj, cacheKey);
         return sentinelObj;
     }
 
-    public PTRecFldLiteral alloc(Record recDefn) {
-        PTRecFldLiteral newObj = new PTRecFldLiteral(recDefn);
+    public PTFieldLiteral alloc(String FIELDNAME) {
+        PTFieldLiteral newObj = new PTFieldLiteral(FIELDNAME);
+        PTType.clone(this, newObj);
+        return newObj;
+    }
+
+    public PTFieldLiteral alloc(String RECNAME, String FIELDNAME) {
+        PTFieldLiteral newObj = new PTFieldLiteral(RECNAME, FIELDNAME);
         PTType.clone(this, newObj);
         return newObj;
     }

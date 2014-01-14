@@ -73,6 +73,43 @@ public class PTRowset extends PTObjectType {
 	}
 
 	public void PT_Sort() {
+
+		LinkedList<String> fields = new LinkedList<String>();
+		LinkedList<String> orders = new LinkedList<String>();
+
+		do {
+
+			PTString orderStr = (PTString)Environment.popFromCallStack();
+			if(orderStr.read().equals("A") || orderStr.read().equals("D")){
+				orders.push(orderStr.read());
+			} else {
+				throw new EntVMachRuntimeException("Unexpected order "+
+					"string: " + orderStr.read());
+			}
+
+			PTFieldLiteral fld = (PTFieldLiteral)Environment.popFromCallStack();
+			if(fld != null && !fld.RECNAME.equals(this.recDefn.RECNAME)) {
+				throw new EntVMachRuntimeException("Encountered a sort " +
+					"field for a record other than the one underlying this "+
+					"rowset; this is legal but not yet supported.");
+			}
+
+			if(!this.emptyRow.record.hasField(fld.FIELDNAME)) {
+				throw new EntVMachRuntimeException("The field " +
+					fld.FIELDNAME + " does not exist on the underlying "+
+					"record.");
+			}
+
+		} while(Environment.peekAtCallStack() != null);
+
+		int i=1;
+		for(PTRow row : this.rows) {
+			PTRecord rec = row.record;
+			log.debug("{}: STRM={}, ACAD_CAREER={}, INSTITUTION={}",
+				i++, rec.fields.get("STRM"), rec.fields.get("ACAD_CAREER"),
+				rec.fields.get("INSTITUTION"));
+		}
+
 		throw new EntVMachRuntimeException("Need to implement Sort.");
 	}
 

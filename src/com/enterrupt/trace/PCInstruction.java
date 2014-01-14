@@ -6,6 +6,12 @@ public class PCInstruction implements IEmission {
 
 	public PCInstruction(String i) {
 		this.instruction = i;
+
+		// Remove trailing semicolons.
+		if(this.instruction.charAt(i.length() - 1) == ';') {
+			this.instruction = this.instruction.substring(0,
+				this.instruction.length() - 1);
+		}
 	}
 
 	public boolean equals(Object obj) {

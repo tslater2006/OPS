@@ -30,6 +30,13 @@ public class PTString extends PTPrimitiveType<String> {
 		this.s = " ";
 	}
 
+	public void copyValueFrom(PTPrimitiveType src) {
+		if(!(src instanceof PTString)) {
+			throw new EntDataTypeException("Expected src to be PTString.");
+		}
+		this.write(((PTString)src).read());
+	}
+
 	public PTPrimitiveType add(PTPrimitiveType op) {
 		throw new EntVMachRuntimeException("add() not supported.");
 	}

@@ -30,6 +30,13 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
 		throw new EntDataTypeException("setDefault not implemented.");
 	}
 
+	public void copyValueFrom(PTPrimitiveType src) {
+		if(!(src instanceof PTBoolean)) {
+			throw new EntDataTypeException("Expected src to be PTBoolean.");
+		}
+		this.write(((PTBoolean)src).read());
+	}
+
 	public PTPrimitiveType add(PTPrimitiveType op) {
 		throw new EntVMachRuntimeException("add() not supported.");
 	}

@@ -14,29 +14,13 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract boolean equals(Object obj);
 	public abstract boolean typeCheck(PTType a);
 	public abstract void setDefault();
+	public abstract void copyValueFrom(PTPrimitiveType src);
 
 	public abstract PTBoolean isEqual(PTPrimitiveType op);
 	public abstract PTBoolean isGreaterThan(PTPrimitiveType op);
 	public abstract PTBoolean isLessThan(PTPrimitiveType op);
 
 	public abstract PTPrimitiveType add(PTPrimitiveType op);
-
-	public void copyValueFrom(PTPrimitiveType src) {
-
-		if(src instanceof PTString) {
-			((PTString)this).write(((PTString)src).read());
-
-		} else if(src instanceof PTInteger) {
-			((PTInteger)this).write(((PTInteger)src).read());
-
-		} else if(src instanceof PTBoolean) {
-			((PTBoolean)this).write(((PTBoolean)src).read());
-
-		} else {
-			throw new EntDataTypeException("copyValueFrom does not support " +
-				"the provided source operand: " + src.toString());
-		}
-	}
 
 	protected void checkIsWriteable() {
         if(this.isSentinel()) {

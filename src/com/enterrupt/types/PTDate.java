@@ -35,6 +35,10 @@ public class PTDate extends PTPrimitiveType<String> {
         this.d = newValue;
     }
 
+	public void copyValueFrom(PTPrimitiveType src) {
+		throw new EntDataTypeException("copyValueFrom is not yet supported.");
+	}
+
 	public PTPrimitiveType add(PTPrimitiveType op) {
 		throw new EntDataTypeException("add() not supported.");
 	}

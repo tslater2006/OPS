@@ -30,6 +30,13 @@ public class PTInteger extends PTPrimitiveType<Integer> {
 		throw new EntDataTypeException("setDefault not implemented.");
 	}
 
+	public void copyValueFrom(PTPrimitiveType src) {
+		if(!(src instanceof PTInteger)) {
+			throw new EntDataTypeException("Expected src to be PTInteger.");
+		}
+		this.write(((PTInteger)src).read());
+	}
+
 	public PTPrimitiveType add(PTPrimitiveType op) {
 		if(!(op instanceof PTInteger)) {
 			throw new EntDataTypeException("Expected op to be PTInteger.");

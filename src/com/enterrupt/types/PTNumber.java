@@ -34,6 +34,16 @@ public class PTNumber extends PTPrimitiveType<Double> {
 		this.d = 0.0;
 	}
 
+	public void copyValueFrom(PTPrimitiveType src) {
+		if(src instanceof PTNumber) {
+			this.write(((PTNumber)src).read());
+		} else if(src instanceof PTInteger) {
+			this.write(new Double(((PTInteger)src).read()));
+		} else {
+			throw new EntDataTypeException("Expected src to be PTNumber.");
+		}
+	}
+
 	public PTPrimitiveType add(PTPrimitiveType op) {
 		throw new EntDataTypeException("add() not supported.");
 	}

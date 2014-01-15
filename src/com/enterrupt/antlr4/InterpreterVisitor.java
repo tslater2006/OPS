@@ -251,7 +251,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitForStmt(PeopleCodeParser.ForStmtContext ctx) {
-		this.emitStmt(ctx);
 
 		if(ctx.expr(2) != null) {
 			throw new EntVMachRuntimeException("Step clause encountered " +
@@ -268,9 +267,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		varId.copyValueFrom(initialExpr);
 
 		visit(ctx.expr(1));
-		PTType toExpr = getNodeData(ctx.expr(1));
+		PTPrimitiveType toExpr = (PTPrimitiveType)getNodeData(ctx.expr(1));
 
-		do {
+		this.emitStmt(ctx);
+		while(varId.isLessThanOrEqual(toExpr) == Environment.TRUE) {
 			visit(ctx.stmtList());
 
 			// Increment and set new value of incrementing expression.
@@ -280,8 +280,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 			this.emitStmt("End-For");
 			this.emitStmt(ctx);
-		} while(((PTPrimitiveType)varId).isLessThanOrEqual((PTPrimitiveType)toExpr)
-				== Environment.TRUE);
+		}
 
 		return null;
 	}

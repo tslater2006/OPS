@@ -15,6 +15,10 @@ public class PTNumber extends PTPrimitiveType<Double> {
 		return this.d;
 	}
 
+	public int read(PTInteger i) {
+		return this.d.intValue();
+	}
+
 	public void write(int newValue) {
         this.checkIsWriteable();
 		this.d = new Double(newValue);

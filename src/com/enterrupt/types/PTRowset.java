@@ -61,11 +61,22 @@ public class PTRowset extends PTObjectType {
 
 	public void getRow() {
         List<PTType> args = Environment.getArgsFromCallStack();
-        if(args.size() != 1 || !(args.get(0) instanceof PTInteger)) {
-            throw new EntVMachRuntimeException("Expected only one integer arg.");
+        if(args.size() != 1) {
+            throw new EntVMachRuntimeException("Expected only one arg.");
         }
 
-		int idx = ((PTInteger)args.get(0)).read();
+		int idx = -1;
+		PTType iterExpr = args.get(0);
+
+		if(iterExpr instanceof PTInteger) {
+			idx = ((PTInteger)iterExpr).read();
+		} else if(iterExpr instanceof PTNumber) {
+			idx = ((PTNumber)iterExpr).read(PTInteger.getSentinel());
+		} else {
+			throw new EntVMachRuntimeException("Expected iterExpr to be" +
+				" either integer or Number.");
+		}
+
 		if(idx < 1 || idx > this.rows.size()) {
 			throw new EntVMachRuntimeException("Index (" + idx + ") provided to " +
 				"getRows is out of bounds; number of rows is " + this.rows.size());
@@ -107,7 +118,7 @@ public class PTRowset extends PTObjectType {
 
 		this.rows = mergeSortRows(this.rows, fields, orders);
 
-		int i=1;
+/*		int i=1;
 		log.debug("=========== Sorted Rowset ===========");
 		for(PTRow row : this.rows) {
 			PTRecord rec = row.record;
@@ -115,7 +126,7 @@ public class PTRowset extends PTObjectType {
 				i++, rec.fields.get("STRM"), rec.fields.get("ACAD_CAREER"),
 				rec.fields.get("INSTITUTION"));
 		}
-		log.debug("======== End Sorted Rowset =========");
+		log.debug("======== End Sorted Rowset =========");*/
 	}
 
 	private List<PTRow> mergeSortRows(List<PTRow> rowsToSort,

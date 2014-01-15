@@ -74,6 +74,11 @@ public class GlobalFnLibrary {
         // Not yet implemented.
     }
 
+    public static void PT_Rept() {
+        Environment.getArgsFromCallStack();
+		throw new EntVMachRuntimeException("Rept has not been implemented.");
+    }
+
     /**
      * TODO: Return true if DoModalComponent
      * has been previously called; requires more research.

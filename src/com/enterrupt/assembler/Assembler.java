@@ -91,8 +91,8 @@ public class Assembler {
 			new SimpleElementAssembler((byte) 73, "set"),	// 0x49
 			new ReferenceAssembler((byte) 74), 		// 0x4A
 			new SimpleElementAssembler((byte) 75, "Null"),		// 0x4B
-			new SimpleElementAssembler((byte) 76, "[", AFlag.SPACE_BEFORE | AFlag.NO_SPACE_AFTER),		// 0x4C
-			new SimpleElementAssembler((byte) 77, "]", AFlag.NO_SPACE_BEFORE | AFlag.SPACE_AFTER),		// 0x4D
+			new SimpleElementAssembler((byte) 76, "[", AFlag.L_BRACKET | AFlag.SPACE_BEFORE | AFlag.NO_SPACE_AFTER),		// 0x4C
+			new SimpleElementAssembler((byte) 77, "]", AFlag.R_BRACKET | AFlag.NO_SPACE_BEFORE | AFlag.SPACE_AFTER),		// 0x4D
 			new CommentAssembler((byte) 78, AFlag.NEWLINE_AFTER | AFlag.COMMENT_ON_SAME_LINE | AFlag.SPACE_BEFORE),		// 0x4E
 			new SimpleElementAssembler((byte) 79, "", AFlag.NEWLINE_AFTER),
 			new NumberAssembler((byte) 80, 18),										// 0x50
@@ -197,7 +197,9 @@ public class Assembler {
 					&& (lastAssembler == null || ((lastAssembler.format != AFlag.PUNCTUATION
 												&& (lastAssembler.format & AFlag.NO_SPACE_AFTER) == 0)
 								   		   || ((a.format & AFlag.SPACE_BEFORE2) > 0)))
-					&& (a.format & AFlag.NO_SPACE_BEFORE) == 0) {
+					&& (a.format & AFlag.NO_SPACE_BEFORE) == 0
+					&& !((a.format & AFlag.L_BRACKET) > 0
+						&& (lastAssembler.format & AFlag.R_BRACKET) > 0)) {
 
 					this.stream.appendAssembledText(' ');
 					wroteSpace = true;

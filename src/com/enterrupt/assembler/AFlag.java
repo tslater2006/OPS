@@ -20,6 +20,8 @@ public class AFlag {
 	public static final int SEMICOLON = 0x8000;
 	public static final int SPACE_BEFORE2 = 0x10000;
 	public static final int COMMENT_ON_SAME_LINE = 0x20000;
+	public static final int R_BRACKET = 0x80000;
+	public static final int L_BRACKET = 0x40000;
 	public static final int SPACE_BEFORE_AND_AFTER = SPACE_BEFORE | SPACE_AFTER;
 	public static final int SPACE_BEFORE_AND_AFTER2 = SPACE_BEFORE2 | SPACE_BEFORE | SPACE_AFTER;
 	public static final int AND_STYLE = NEWLINE_AFTER | SPACE_BEFORE2 | SPACE_BEFORE | AND_INDICATOR;

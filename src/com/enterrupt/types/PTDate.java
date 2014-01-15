@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import java.util.*;
 import java.text.SimpleDateFormat;
+import com.enterrupt.runtime.*;
 
 public class PTDate extends PTPrimitiveType<String> {
 
@@ -41,6 +42,10 @@ public class PTDate extends PTPrimitiveType<String> {
 
 	public PTPrimitiveType add(PTPrimitiveType op) {
 		throw new EntDataTypeException("add() not supported.");
+	}
+
+	public PTPrimitiveType subtract(PTPrimitiveType op) {
+		throw new EntVMachRuntimeException("subtract() not supported.");
 	}
 
 	public void setDefault() {

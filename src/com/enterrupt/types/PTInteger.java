@@ -47,6 +47,14 @@ public class PTInteger extends PTPrimitiveType<Integer> {
 			this.read() + ((PTInteger)op).read());
 	}
 
+	public PTPrimitiveType subtract(PTPrimitiveType op) {
+		if(!(op instanceof PTInteger)) {
+			throw new EntDataTypeException("Expected op to be PTInteger.");
+		}
+		return Environment.getFromLiteralPool(
+			this.read() - ((PTInteger)op).read());
+	}
+
 	public boolean equals(Object obj) {
         if(obj == this)
             return true;

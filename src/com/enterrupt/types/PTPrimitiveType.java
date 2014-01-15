@@ -22,6 +22,7 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract PTBoolean isLessThanOrEqual(PTPrimitiveType op);
 
 	public abstract PTPrimitiveType add(PTPrimitiveType op);
+	public abstract PTPrimitiveType subtract(PTPrimitiveType op);
 
 	protected void checkIsWriteable() {
         if(this.isSentinel()) {

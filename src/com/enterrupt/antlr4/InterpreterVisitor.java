@@ -456,10 +456,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		if(ctx.a != null) {
 			setNodeData(ctx, lhs.add(rhs));
-
 		} else if(ctx.s != null) {
-			throw new EntVMachRuntimeException("Subtraction is not supported.");
-
+			setNodeData(ctx, lhs.subtract(rhs));
 		} else {
 			throw new EntVMachRuntimeException("Unsupported add/sub operation.");
 		}
@@ -623,8 +621,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 	}
 
 	public Void visitExprConcat(PeopleCodeParser.ExprConcatContext ctx) {
-		throw new EntVMachRuntimeException("Concat not supported.");
-		//return null;
+		visit(ctx.expr(0));
+		PTString lhs = (PTString)getNodeData(ctx.expr(0));
+		visit(ctx.expr(1));
+		PTString rhs = (PTString)getNodeData(ctx.expr(1));
+
+		setNodeData(ctx, lhs.concat(rhs));
+		return null;
 	}
 
 	/**********************************************************

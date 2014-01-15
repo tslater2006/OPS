@@ -75,9 +75,34 @@ public class GlobalFnLibrary {
     }
 
     public static void PT_Rept() {
-        Environment.getArgsFromCallStack();
-		throw new EntVMachRuntimeException("Rept has not been implemented.");
+
+        List<PTType> args = Environment.getArgsFromCallStack();
+        if(args.size() != 2) {
+            throw new EntVMachRuntimeException("Expected two args.");
+        }
+
+		PTString str = (PTString)args.get(0);
+		PTInteger reptNum = (PTInteger)args.get(1);
+
+		StringBuilder b = new StringBuilder();
+		for(int i = 0; i < reptNum.read(); i++) {
+			b.append(str.read());
+		}
+
+		Environment.pushToCallStack(Environment.getFromLiteralPool(
+			b.toString()));
     }
+
+	public static void PT_Len() {
+
+        List<PTType> args = Environment.getArgsFromCallStack();
+        if(args.size() != 1 && !(args.get(0) instanceof PTString)) {
+            throw new EntVMachRuntimeException("Expected single string arg.");
+        }
+
+		Environment.pushToCallStack(Environment.getFromLiteralPool(
+			((PTString)args.get(0)).read().length()));
+	}
 
     /**
      * TODO: Return true if DoModalComponent

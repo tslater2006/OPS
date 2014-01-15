@@ -41,6 +41,10 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
 		throw new EntVMachRuntimeException("add() not supported.");
 	}
 
+	public PTPrimitiveType subtract(PTPrimitiveType op) {
+		throw new EntVMachRuntimeException("subtract() not supported.");
+	}
+
     public PTBoolean isEqual(PTPrimitiveType op) {
 		if(!(op instanceof PTBoolean)) {
 			throw new EntDataTypeException("Expected op to be PTBoolean.");

@@ -46,6 +46,9 @@ public class PTRowset extends PTObjectType {
 	}
 
     public PTType dotProperty(String s) {
+		if(s.equals("ActiveRowCount")) {
+			return Environment.getFromLiteralPool(this.rows.size());
+		}
 		return null;
     }
 

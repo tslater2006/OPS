@@ -38,13 +38,18 @@ public class PTArray extends PTObjectType {
 	}
 
 	public PTType getElement(PTType index) {
-		if(!(index instanceof PTInteger)) {
-			throw new EntVMachRuntimeException("Expected index to be " +
-				"an integer.");
+
+		int idx = -1;
+		if(index instanceof PTInteger) {
+			idx = ((PTInteger)index).read();
+		} else if(index instanceof PTNumber) {
+			idx = ((PTNumber)index).read(PTInteger.getSentinel());
+		} else {
+			throw new EntVMachRuntimeException("Unexpected type for index.");
 		}
 
 		// Must subtract 1; PT array indices are 1-based.
-		return this.values.get(((PTInteger)index).read() - 1);
+		return this.values.get(idx - 1);
 	}
 
 	public PTType dotProperty(String s) {

@@ -19,6 +19,7 @@ public abstract class PTPrimitiveType<T> extends PTType {
 	public abstract PTBoolean isEqual(PTPrimitiveType op);
 	public abstract PTBoolean isGreaterThan(PTPrimitiveType op);
 	public abstract PTBoolean isLessThan(PTPrimitiveType op);
+	public abstract PTBoolean isLessThanOrEqual(PTPrimitiveType op);
 
 	public abstract PTPrimitiveType add(PTPrimitiveType op);
 

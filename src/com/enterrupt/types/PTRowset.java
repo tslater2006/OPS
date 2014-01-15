@@ -140,8 +140,8 @@ public class PTRowset extends PTObjectType {
 		List<PTRow> left = mergeSortRows(
 			rowsToSort.subList(0, mid), sortFields, sortOrders);
 		List<PTRow> right = mergeSortRows(
-			rowsToSort.subList(mid-1,
-				rowsToSort.size() - 1), sortFields, sortOrders);
+			rowsToSort.subList(mid,
+				rowsToSort.size()), sortFields, sortOrders);
 		return merge(left, right, sortFields, sortOrders);
 	}
 

@@ -61,6 +61,11 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
 			"booleans.");
 	}
 
+    public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isLessThanOrEqual is not supported for " +
+			"booleans.");
+	}
+
     public boolean equals(Object obj) {
         if(obj == this)
             return true;

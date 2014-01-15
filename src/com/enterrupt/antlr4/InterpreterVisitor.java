@@ -258,22 +258,29 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				"in For construct; not yet supported.");
 		}
 
-		PTType varId = eCtx.resolveIdentifier(ctx.VAR_ID().getText());
+		PTPrimitiveType varId = (PTPrimitiveType)eCtx
+			.resolveIdentifier(ctx.VAR_ID().getText());
 
 		visit(ctx.expr(0));
-		PTType initialExpr = getNodeData(ctx.expr(0));
+		PTPrimitiveType initialExpr = (PTPrimitiveType)getNodeData(ctx.expr(0));
 
-		((PTPrimitiveType)varId).copyValueFrom((PTPrimitiveType)initialExpr);
+		// Initialize incrementing expression.
+		varId.copyValueFrom(initialExpr);
 
 		visit(ctx.expr(1));
 		PTType toExpr = getNodeData(ctx.expr(1));
 
 		do {
 			visit(ctx.stmtList());
-			((PTPrimitiveType)varId).add(Environment.getFromLiteralPool(1));
+
+			// Increment and set new value of incrementing expression.
+			PTPrimitiveType incremented = (PTPrimitiveType)varId
+				.add(Environment.getFromLiteralPool(1));
+			varId.copyValueFrom(incremented);
+
 			this.emitStmt("End-For");
 			this.emitStmt(ctx);
-		} while(((PTPrimitiveType)varId).isLessThan((PTPrimitiveType)toExpr)
+		} while(((PTPrimitiveType)varId).isLessThanOrEqual((PTPrimitiveType)toExpr)
 				== Environment.TRUE);
 
 		return null;

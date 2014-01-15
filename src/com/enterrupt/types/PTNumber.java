@@ -2,9 +2,11 @@ package com.enterrupt.types;
 
 import java.util.EnumSet;
 import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 public class PTNumber extends PTPrimitiveType<Double> {
 
+	private static Logger log = LogManager.getLogger(PTNumber.class.getName());
 	private static Type staticTypeFlag = Type.NUMBER;
 	private Double d;
 
@@ -51,7 +53,7 @@ public class PTNumber extends PTPrimitiveType<Double> {
 
 	public PTPrimitiveType add(PTPrimitiveType op) {
 		if(op instanceof PTInteger) {
-	        return Environment.getFromLiteralPool(
+	       return Environment.getFromLiteralPool(
     	        this.read() + new Double(((PTInteger)op).read()));
 		} else {
 			throw new EntDataTypeException("Unexpected op type "+
@@ -70,8 +72,35 @@ public class PTNumber extends PTPrimitiveType<Double> {
     }
 
     public PTBoolean isLessThan(PTPrimitiveType op) {
-		throw new EntDataTypeException("isLessThan is not supported for " +
-			"Number.");
+        if(op instanceof PTNumber) {
+	        if(this.d.compareTo(((PTNumber)op).read()) < 0) {
+    	        return Environment.TRUE;
+        	}
+		} else if(op instanceof PTInteger) {
+	        if(this.d.compareTo(new Double(((PTInteger)op).read())) < 0) {
+    	        return Environment.TRUE;
+        	}
+        } else {
+            throw new EntDataTypeException("Expected op to be PTNumber "+
+				"or PTInteger.");
+		}
+        return Environment.FALSE;
+	}
+
+    public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
+        if(op instanceof PTNumber) {
+	        if(this.d.compareTo(((PTNumber)op).read()) <= 0) {
+    	        return Environment.TRUE;
+        	}
+		} else if(op instanceof PTInteger) {
+	        if(this.d.compareTo(new Double(((PTInteger)op).read())) <= 0) {
+    	        return Environment.TRUE;
+        	}
+        } else {
+            throw new EntDataTypeException("Expected op to be PTNumber "+
+				"or PTInteger.");
+		}
+        return Environment.FALSE;
 	}
 
 	public boolean equals(Object obj) {

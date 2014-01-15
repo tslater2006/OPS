@@ -71,6 +71,11 @@ public class PTString extends PTPrimitiveType<String> {
         return Environment.FALSE;
 	}
 
+    public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isLessThanOrEqual not supported "+
+			"for strings.");
+	}
+
 	public boolean equals(Object obj) {
         if(obj == this)
             return true;

@@ -2,9 +2,11 @@ package com.enterrupt.types;
 
 import java.util.EnumSet;
 import com.enterrupt.runtime.*;
+import org.apache.logging.log4j.*;
 
 public class PTInteger extends PTPrimitiveType<Integer> {
 
+	private static Logger log = LogManager.getLogger(PTInteger.class.getName());
 	private static Type staticTypeFlag = Type.INTEGER;
 	private Integer i;
 
@@ -85,6 +87,16 @@ public class PTInteger extends PTPrimitiveType<Integer> {
             throw new EntDataTypeException("Expected op to be PTInteger.");
         }
         if(this.i.compareTo(((PTInteger)op).read()) < 0) {
+            return Environment.TRUE;
+        }
+        return Environment.FALSE;
+	}
+
+    public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
+        if(!(op instanceof PTInteger)) {
+            throw new EntDataTypeException("Expected op to be PTInteger.");
+        }
+        if(this.i.compareTo(((PTInteger)op).read()) <= 0) {
             return Environment.TRUE;
         }
         return Environment.FALSE;

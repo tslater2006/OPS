@@ -135,6 +135,65 @@ public class PTRecord extends PTObjectType {
         }
 	}
 
+	public void PT_SelectByKey() {
+        List<PTType> args = Environment.getArgsFromCallStack();
+	    if(args.size() != 0) {
+            throw new EntVMachRuntimeException("Expected zero args.");
+        }
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			List<RecordField> rfList = this.recDefn.getExpandedFieldList();
+
+			pstmt = StmtLibrary.prepareSelectByKey(this.recDefn, this);
+			rs = pstmt.executeQuery();
+
+			int numCols = rs.getMetaData().getColumnCount();
+			if(numCols != rfList.size()) {
+				throw new EntVMachRuntimeException("The number of columns returned " +
+					"by the select by key query (" + numCols + ") differs from the number " +
+					"of fields (" + rfList.size() +
+					") in the record defn field list.");
+			}
+
+			/**
+			 * True should be returned only if exactly one row
+			 * was read.
+			 */
+			PTBoolean returnVal = Environment.FALSE;
+			while(rs.next()) {
+				if(rs.isFirst()) {		// is this the first row in rs?
+					GlobalFnLibrary.readRecordFromResultSet(
+						this.recDefn, this, rs);
+					returnVal = Environment.TRUE;
+				} else {
+					returnVal = Environment.FALSE;
+					throw new EntVMachRuntimeException("Multiple rows "
+						+"returned by SelectByKey; although this is "+
+						"not an error, review the documentation to ensure "+
+						"necessary actions to set default values are being "
+						+"taken.");
+					//break;
+				}
+			}
+
+			// Return true if record was read, false if
+			// 0 or multiple recs read.
+			Environment.pushToCallStack(returnVal);
+
+		} catch(java.sql.SQLException sqle) {
+            log.fatal(sqle.getMessage(), sqle);
+            System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+        } finally {
+            try {
+                if(rs != null) { rs.close(); }
+                if(pstmt != null) { pstmt.close(); }
+            } catch(java.sql.SQLException sqle) {}
+        }
+	}
+
 	/**
 	 * Calls to make a record read-only should make its
 	 * fields read-only as well.

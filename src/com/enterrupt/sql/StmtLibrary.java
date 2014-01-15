@@ -259,8 +259,44 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
+	public static PreparedStatement prepareSelectByKey(
+		Record recDefn, PTRecord recObj) {
+
+		String tableAlias = "";
+		StringBuilder query = new StringBuilder(
+			generateSelectClause(recDefn, tableAlias));
+		query.append("WHERE ");
+
+		List<RecordField> rfList = recDefn.getExpandedFieldList();
+		List<String> bindVals = new ArrayList<String>();
+
+		boolean isFirstKey = true;
+		for(RecordField rf : rfList) {
+			if(rf.isKey()) {
+				if(!isFirstKey) { query.append(" AND "); }
+				isFirstKey = false;
+
+				query.append(rf.FIELDNAME).append("=?");
+				bindVals.add((String)recObj.fields.get(rf.FIELDNAME)
+					.getValue().read());
+			}
+		}
+
+		ENTStmt stmt = new ENTStmt(query.toString());
+		for(int i = 0; i < bindVals.size(); i++) {
+			stmt.bindVals.put(i+1, bindVals.get(i));
+		}
+
+		return stmt.generatePreparedStmt(conn);
+	}
+
 	private static String generateSelectClause(Record recDefn,
 			String tableAlias) {
+
+		String dottedAlias = tableAlias;
+		if(dottedAlias.length() > 0) {
+			dottedAlias = dottedAlias.concat(".");
+		}
 
 		StringBuilder selectClause = new StringBuilder("SELECT ");
 		List<RecordField> rfList = recDefn.getExpandedFieldList();
@@ -272,11 +308,10 @@ public class StmtLibrary {
             // Selected date fields must be wrapped with TO_CHAR directive.
             if(rfList.get(i).getSentinelForUnderlyingValue()
                      instanceof PTDate) {
-                selectClause.append("TO_CHAR(").append(tableAlias)
-					.append(".").append(fieldname)
-                    .append(",'YYYY-MM-DD')");
+                selectClause.append("TO_CHAR(").append(dottedAlias)
+					.append(fieldname).append(",'YYYY-MM-DD')");
             } else {
-                selectClause.append(tableAlias).append(".").append(fieldname);
+                selectClause.append(dottedAlias).append(fieldname);
             }
         }
         selectClause.append(" FROM PS_").append(recDefn.RECNAME)

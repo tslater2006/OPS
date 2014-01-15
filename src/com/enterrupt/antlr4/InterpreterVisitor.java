@@ -427,6 +427,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				}
 			}
 			this.supervisor.runImmediately(eCtx);
+			this.repeatLastEmission();
 		}
 
 		/**

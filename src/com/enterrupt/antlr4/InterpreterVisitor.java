@@ -260,12 +260,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		visit(ctx.expr(0));
 		PTType initialExpr = getNodeData(ctx.expr(0));
 
-		if(!(varId instanceof PTInteger
-				&& initialExpr instanceof PTInteger)) {
-			throw new EntVMachRuntimeException("Expected both the VAR_ID "+
-				"and expr in For construct to be integers.");
-		}
-
 		((PTPrimitiveType)varId).copyValueFrom((PTPrimitiveType)initialExpr);
 
 		visit(ctx.expr(1));
@@ -273,10 +267,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		do {
 			visit(ctx.stmtList());
-			((PTInteger)varId).add(Environment.getFromLiteralPool(1));
+			((PTPrimitiveType)varId).add(Environment.getFromLiteralPool(1));
 			this.emitStmt("End-For");
 			this.emitStmt(ctx);
-		} while(((PTInteger)varId).isLessThan((PTInteger)toExpr)
+		} while(((PTPrimitiveType)varId).isLessThan((PTPrimitiveType)toExpr)
 				== Environment.TRUE);
 
 		return null;

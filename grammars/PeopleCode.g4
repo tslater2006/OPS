@@ -55,7 +55,7 @@ expr	:	'(' expr ')'					 		# ExprParenthesized
 					op='And'<assoc=right>
 				|	op='Or'<assoc=right>
 			) expr							# ExprBoolean // order: Not, And, then Or
-		|	expr '|' expr					# ExprConcatenate
+		|	expr '|' expr					# ExprConcat
 		;
 
 exprList:	expr (',' expr)* ;

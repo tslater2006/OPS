@@ -130,7 +130,17 @@ public class PTArray extends PTObjectType {
 		 * which will likely be required down the line.
 		 */
 		if(this.baseType.typeCheck(value)) {
-			this.values.addLast(value);
+			/**
+			 * Objects should be added by reference; primitives
+			 * should have new versions of themselves created.
+			 */
+			if(value instanceof PTObjectType) {
+				this.values.addLast(value);
+			} else {
+				PTPrimitiveType clone = ((PTPrimitiveType)value).alloc();
+				clone.copyValueFrom(((PTPrimitiveType)value));
+				this.values.addLast(clone);
+			}
 
 		} else if(this.baseType instanceof PTArray) {
 

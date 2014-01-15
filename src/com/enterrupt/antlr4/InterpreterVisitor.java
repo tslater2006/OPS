@@ -622,6 +622,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitExprConcat(PeopleCodeParser.ExprConcatContext ctx) {
+		throw new EntVMachRuntimeException("Concat not supported.");
+		//return null;
+	}
+
 	/**********************************************************
 	 * Primary rule handlers.
 	 **********************************************************/

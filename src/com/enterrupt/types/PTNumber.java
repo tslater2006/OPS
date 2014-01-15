@@ -1,6 +1,7 @@
 package com.enterrupt.types;
 
 import java.util.EnumSet;
+import com.enterrupt.runtime.*;
 
 public class PTNumber extends PTPrimitiveType<Double> {
 
@@ -49,7 +50,13 @@ public class PTNumber extends PTPrimitiveType<Double> {
 	}
 
 	public PTPrimitiveType add(PTPrimitiveType op) {
-		throw new EntDataTypeException("add() not supported.");
+		if(op instanceof PTInteger) {
+	        return Environment.getFromLiteralPool(
+    	        this.read() + new Double(((PTInteger)op).read()));
+		} else {
+			throw new EntDataTypeException("Unexpected op type "+
+				"provided to add().");
+		}
 	}
 
     public PTBoolean isEqual(PTPrimitiveType op) {

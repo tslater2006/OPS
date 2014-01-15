@@ -20,6 +20,7 @@ public class Environment {
 
 	private static Map<Integer, PTInteger> integerLiteralPool;
 	private static Map<String, PTString> stringLiteralPool;
+	private static Map<Double, PTNumber> numberLiteralPool;
 
     private static Stack<PTType> callStack;
 
@@ -46,6 +47,7 @@ public class Environment {
 		// Create memory pools for supported data types.
 		integerLiteralPool = new HashMap<Integer, PTInteger>();
 		stringLiteralPool = new HashMap<String, PTString>();
+		numberLiteralPool = new HashMap<Double, PTNumber>();
 
 		// Allocate space for system vars, mark each as read-only.
 		systemVarTable = new HashMap<String, PTPrimitiveType>();
@@ -124,6 +126,16 @@ public class Environment {
 			p = (PTInteger)PTInteger.getSentinel().alloc().setReadOnly();
 			p.systemWrite(val);
 			integerLiteralPool.put(val, p);
+		}
+		return p;
+	}
+
+	public static PTNumber getFromLiteralPool(Double val) {
+		PTNumber p = numberLiteralPool.get(val);
+		if(p == null) {
+			p = (PTNumber)PTNumber.getSentinel().alloc().setReadOnly();
+			p.systemWrite(val);
+			numberLiteralPool.put(val, p);
 		}
 		return p;
 	}

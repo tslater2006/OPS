@@ -445,11 +445,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		PTPrimitiveType rhs = (PTPrimitiveType)getNodeData(ctx.expr(1));
 
 		if(ctx.a != null) {
-			if(lhs instanceof PTInteger && rhs instanceof PTInteger) {
-				setNodeData(ctx, lhs.add(rhs));
-			} else {
-				throw new EntVMachRuntimeException("Unsupported types provided to addition operator.");
-			}
+			setNodeData(ctx, lhs.add(rhs));
 
 		} else if(ctx.s != null) {
 			throw new EntVMachRuntimeException("Subtraction is not supported.");

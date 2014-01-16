@@ -14,6 +14,8 @@
     	</Root>
 		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
 		<Logger name="com.enterrupt.sql.ENTStmt" level="WARN"/>
+		<Logger name="com.enterrupt.runtime.Environment" level="WARN"/>
+		<Logger name="com.enterrupt.types" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode.PeopleCodeProg" level="all"/>
 		<Logger name="com.enterrupt.pt.peoplecode.AppClassPeopleCodeProg" level="all"/>

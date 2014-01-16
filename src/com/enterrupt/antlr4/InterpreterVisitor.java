@@ -536,8 +536,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			break;
 		}
 
-		log.debug("About to index into {} with index {}.",
-			arrayObj, index);
+		//log.debug("About to index into {} with index {}.",
+		//	arrayObj, index);
 
 		setNodeData(ctx, arrayObj.getElement(index));
 		return null;

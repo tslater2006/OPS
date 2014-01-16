@@ -5,6 +5,7 @@ import java.util.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.buffers.*;
 import org.apache.logging.log4j.*;
 import java.util.regex.*;
 
@@ -144,18 +145,61 @@ public class StmtLibrary {
 		return stmt.generatePreparedStmt(conn);
 	}
 
-	/**
-	 * TODO: Clean this up. Remember that this query is dynamically generated based on 1) the structure
-	 * and keys on the search record 2) the data in the component buffer following execution of SearchInit PC.
-	 */
 	public static PreparedStatement getSearchRecordFillQuery() {
 		// I hardcoded: "PS_LS_SS_PERS_SRCH", "EMPLID", the value for EMPLID, "OPRID", and the value for OPRID.
 /**		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '" +
 			((PTString)Environment.getCompBufferEntry("LS_SS_PERS_SRCH.EMPLID").dereference()).value() + "%' AND OPRID=? ORDER BY EMPLID");
 */
-		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '"
-			+ "AA0001%' AND OPRID=? ORDER BY EMPLID");
-		stmt.bindVals.put(1, ((PTString)Environment.getSystemVar("%OperatorId")).read());
+
+		PTRecord searchRec = ComponentBuffer.searchRecord;
+		Record recDefn = searchRec.recDefn;
+		List<RecordField> rfList = recDefn.getExpandedFieldList();
+		ArrayList<String> bindVals = new ArrayList<String>();
+
+		StringBuilder query = new StringBuilder("SELECT  ");
+		int i = 0;
+        for(RecordField rf : rfList) {
+			log.debug("USEEDIT for {}: {}", rf.FIELDNAME, rf.USEEDIT);
+			if(rf.isSearchKey()) {
+	            if(i > 0) { query.append(", "); }
+	            query.append(rf.FIELDNAME);
+				i++;
+			}
+		}
+
+		query.append(" FROM PS_").append(recDefn.RECNAME)
+			.append(" WHERE ");
+
+		i = 0;
+		for(RecordField rf : rfList) {
+			if(rf.isSearchKey()) {
+	            if(i > 0) { query.append(" AND "); }
+	            query.append(rf.FIELDNAME).append("=?");
+				bindVals.add((String)searchRec.getField(rf.FIELDNAME)
+					.getValue().read());
+				i++;
+			}
+		}
+
+		query.append(" ORDER BY ");
+
+		i = 0;
+		for(RecordField rf : rfList) {
+			if(rf.isSearchKey()) {
+	            if(i > 0) { query.append(", "); }
+	            query.append(rf.FIELDNAME);
+				if(rf.isDescendingKey()) {
+					query.append(" DESC");
+				}
+				i++;
+			}
+		}
+
+		ENTStmt stmt = new ENTStmt(query.toString());
+		for(i = 0; i < bindVals.size(); i++) {
+			stmt.bindVals.put(i+1, bindVals.get(i));
+		}
+
 		return stmt.generatePreparedStmt(conn);
 	}
 

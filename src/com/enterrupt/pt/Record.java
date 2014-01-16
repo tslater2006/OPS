@@ -61,7 +61,7 @@ public class Record {
         	while(rs.next()) {
 				RecordField f = new RecordField(this.RECNAME,
 					rs.getString("FIELDNAME").trim(), rs.getInt("FIELDTYPE"));
-				f.USEEDIT = (byte) rs.getInt("USEEDIT");
+				f.USEEDIT = rs.getInt("USEEDIT");
 				f.FIELDNUM = rs.getInt("FIELDNUM");
 				this.fieldTable.put(f.FIELDNAME, f);
 				this.fldAndSubrecordTable.put(f.FIELDNUM, f);

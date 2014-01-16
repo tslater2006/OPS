@@ -8,13 +8,14 @@ public class RecordField {
 
 	public String RECNAME;
 	public String FIELDNAME;
-	public byte USEEDIT;
+	public int USEEDIT;
 	public int FIELDNUM;
 	private int typeFlag;
 
-	private final byte KEY_FLAG = (byte) 1;
-	private final byte ALTERNATE_SEARCH_KEY_FLAG = (byte) 16;
-	private final byte SEARCH_KEY_FLAG = (byte) 2048;
+	private final int KEY_FLAG = 1;
+	private final int ALTERNATE_SEARCH_KEY_FLAG = 16;
+	private final int DESCENDING_KEY_FLAG = 64;
+	private final int SEARCH_KEY_FLAG = 2048;
 
 	private static Logger log = LogManager.getLogger(RecordField.class.getName());
 
@@ -41,6 +42,10 @@ public class RecordField {
 
 	public boolean isKey() {
 		return ((this.USEEDIT & this.KEY_FLAG) > 0);
+	}
+
+	public boolean isDescendingKey() {
+		return ((this.USEEDIT & this.DESCENDING_KEY_FLAG) > 0);
 	}
 
 	public boolean isSearchKey() {

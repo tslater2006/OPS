@@ -62,14 +62,29 @@ public class PTDate extends PTPrimitiveType<String> {
 			"Date.");
 	}
 
+    public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
+        if(!(op instanceof PTDate)) {
+            throw new EntDataTypeException("Expected op to be PTDate.");
+        }
+        if(this.d.compareTo(((PTDate)op).read()) >= 0) {
+            return Environment.TRUE;
+        }
+        return Environment.FALSE;
+	}
+
     public PTBoolean isLessThan(PTPrimitiveType op) {
 		throw new EntDataTypeException("isLessThan is not supported for " +
 			"Date.");
 	}
 
     public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
-		throw new EntDataTypeException("isLessThanOrEqual is not supported for " +
-			"Date.");
+        if(!(op instanceof PTDate)) {
+            throw new EntDataTypeException("Expected op to be PTDate.");
+        }
+        if(this.d.compareTo(((PTDate)op).read()) <= 0) {
+            return Environment.TRUE;
+        }
+        return Environment.FALSE;
 	}
 
 	public boolean equals(Object obj) {

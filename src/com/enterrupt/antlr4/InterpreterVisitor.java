@@ -98,14 +98,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		/**
 		 * Don't emit an End-If statement after exiting a For loop
-		 * or If construct.
+		 * or If construct or if Else was previously seen.
 		 */
 		if(str.equals("End-If") &&
 				this.lastEmission instanceof PCInstruction) {
 			if(((PCInstruction)this.lastEmission).instruction
 				.startsWith("For") ||
 			   ((PCInstruction)this.lastEmission).instruction
-				.equals("End-If")) {
+				.equals("End-If") ||
+			   ((PCInstruction)this.lastEmission).instruction
+				.equals("Else")) {
 				return;
 			}
 		}
@@ -239,7 +241,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		// otherwise, visit the Else body if it exists.
 		if(exprResult) {
 			visit(ctx.stmtList(0));
-			this.emitStmt("End-If");
+			if(ctx.stmtList(1) != null) {
+				this.emitStmt("Else");
+			} else {
+				this.emitStmt("End-If");
+			}
 		} else {
 			if(ctx.stmtList(1) != null) {
 				visit(ctx.stmtList(1));
@@ -543,18 +549,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
 		PTBoolean result;
 		if(ctx.l != null) {
-			throw new EntVMachRuntimeException("Less than not implemented.");
-
+			result = a1.isLessThan(a2);
+			log.debug("isLessThan: {}? {}", ctx.getText(), result);
 		} else if(ctx.g != null) {
 			result = a1.isGreaterThan(a2);
 			log.debug("isGreaterThan: {}? {}", ctx.getText(), result);
-
 		} else if(ctx.ge != null) {
-			throw new EntVMachRuntimeException("Greater or equal not implemented.");
-
+			result = a1.isGreaterThanOrEqual(a2);
+			log.debug("isGreaterThanOrEqual: {}? {}", ctx.getText(), result);
 		} else if(ctx.le != null) {
-			throw new EntVMachRuntimeException("Less or equal not implemented.");
-
+			result = a1.isLessThanOrEqual(a2);
+			log.debug("isLessThanOrEqual: {}? {}", ctx.getText(), result);
 		} else {
 			throw new EntVMachRuntimeException("Unknown comparison " +
 				"operation encountered.");

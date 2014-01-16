@@ -75,6 +75,11 @@ public class PTNumber extends PTPrimitiveType<Double> {
             "numbers.");
     }
 
+    public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isGreaterThanOrEqual not "
+			+ "supported.");
+	}
+
     public PTBoolean isLessThan(PTPrimitiveType op) {
         if(op instanceof PTNumber) {
 	        if(this.d.compareTo(((PTNumber)op).read()) < 0) {

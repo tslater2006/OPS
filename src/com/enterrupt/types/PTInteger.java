@@ -90,6 +90,11 @@ public class PTInteger extends PTPrimitiveType<Integer> {
         return Environment.FALSE;
     }
 
+    public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isGreaterThanOrEqual not "
+			+ "supported.");
+	}
+
     public PTBoolean isLessThan(PTPrimitiveType op) {
         if(!(op instanceof PTInteger)) {
             throw new EntDataTypeException("Expected op to be PTInteger.");

@@ -55,9 +55,14 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
 		return Environment.FALSE;
 	}
 
+    public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isGreaterThanOrEqual not "
+			+ "supported.");
+	}
+
     public PTBoolean isGreaterThan(PTPrimitiveType op) {
-		throw new EntDataTypeException("isGreaterThan is not supported for " +
-			"booleans.");
+		throw new EntDataTypeException("isGreaterThan not "
+			+ "supported.");
 	}
 
     public PTBoolean isLessThan(PTPrimitiveType op) {

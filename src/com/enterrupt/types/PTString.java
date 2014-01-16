@@ -70,6 +70,11 @@ public class PTString extends PTPrimitiveType<String> {
         return Environment.FALSE;
     }
 
+    public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
+		throw new EntDataTypeException("isGreaterThanOrEqual not "
+			+ "supported.");
+	}
+
     public PTBoolean isLessThan(PTPrimitiveType op) {
         if(!(op instanceof PTString)) {
             throw new EntDataTypeException("Expected op to be PTString.");

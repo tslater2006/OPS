@@ -1,12 +1,18 @@
+# Note: TRACE_FILE_DATE Overrides the current date used by the EVM in order
+# to emit the correct date for trace file verification purposes.
+
 COMPONENT=SSR_SSENRL_LIST
+
+# Trace files generated on AWS VPC Cluster:
 #TRACE_FILE=trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql
 #TRACE_FILE=trace/004_KADAMS_CLASS_SEARCH.tracesql
-TRACE_FILE=trace/005_KADAMS_SSR_SSENRL_LIST.tracesql
+#TRACE_FILE=trace/005_KADAMS_SSR_SSENRL_LIST.tracesql
 #TRACE_FILE=trace/006_KADAMS_SSR_SSENRL_ADD.tracesql
+#TRACE_FILE_DATE=2013-11-16
 
-# Overrides the current date used by the EVM in order
-# to emit the correct date for trace file verification purposes.
-TRACE_FILE_DATE=2013-11-16
+# Trace files generated on local Xen cluster:
+TRACE_FILE=trace/007_KADAMS_SSR_SSENRL_LIST.tracesql
+TRACE_FILE_DATE=2014-01-15
 
 JAVA_D=-Duser.timezone=GMT -Dlog4j.configurationFile=conf/log4j.xml -DComponentToLoad=$(COMPONENT) \
 -Dtracefile=$(TRACE_FILE) -Dignore_stmts_file=conf/ignore_stmts.conf -DcacheProgText=true \

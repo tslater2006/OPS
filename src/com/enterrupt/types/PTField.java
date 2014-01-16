@@ -9,6 +9,7 @@ public class PTField extends PTObjectType {
 	private static Type staticTypeFlag = Type.FIELD;
 	private PTPrimitiveType value;
 	public RecordField recFieldDefn;
+	public PTBoolean visibleProperty;
 
 	protected PTField() {
 		super(staticTypeFlag);
@@ -19,6 +20,7 @@ public class PTField extends PTObjectType {
 		this.recFieldDefn = rfd;
 		this.value = ((PTPrimitiveType)recFieldDefn
 						.getSentinelForUnderlyingValue()).alloc();
+		this.visibleProperty = (PTBoolean)PTBoolean.getSentinel().alloc();
 	}
 
 	public void setDefault() {
@@ -32,6 +34,8 @@ public class PTField extends PTObjectType {
     public PTType dotProperty(String s) {
 		if(s.equals("Value")) {
 			return this.value;
+		} else if(s.equals("Visible")) {
+			return this.visibleProperty;
 		}
 		return null;
     }

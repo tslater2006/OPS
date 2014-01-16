@@ -107,7 +107,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			   ((PCInstruction)this.lastEmission).instruction
 				.equals("End-If") ||
 			   ((PCInstruction)this.lastEmission).instruction
-				.equals("Else")) {
+				.equals("Else") ||
+			   ((PCInstruction)this.lastEmission).instruction
+				.startsWith("If")) {
 				return;
 			}
 		}
@@ -580,7 +582,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			log.debug("isEqual: {}? {}", ctx.getText(), result);
 
 		} else if(ctx.i != null) {
-			throw new EntVMachRuntimeException("Inequality comparison not implemented.");
+			result = a1.isEqual(a2);
+			if(result == Environment.TRUE) {
+				result = Environment.FALSE;
+			} else {
+				result = Environment.TRUE;
+			}
+			log.debug("isNotEqual: {}? {}", ctx.getText(), result);
 
 		} else {
 			throw new EntVMachRuntimeException("Unknown equality " +

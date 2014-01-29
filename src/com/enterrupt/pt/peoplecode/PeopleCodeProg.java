@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.*;
 import java.io.*;
 import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.assembler.*;
+import com.enterrupt.bytecode.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;

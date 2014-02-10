@@ -214,7 +214,7 @@ public abstract class PeopleCodeProg {
 			 */
 			if(System.getProperty("cacheProgText").equals("true")) {
     	    	BufferedWriter writer = new BufferedWriter(new FileWriter(
-        	    	new File("/home/mquinn/evm/cache/" + this.getDescriptor() + ".pc")));
+        	    	new File("/home/mquinn/ops/cache/" + this.getDescriptor() + ".pc")));
             	writer.write(this.programText);
 	            writer.close();
     	    }

@@ -1,3 +1,12 @@
 bin
 cache
 src/com/enterrupt/antlr4/frontend
+/target
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/.lein-*
+/.nrepl-port

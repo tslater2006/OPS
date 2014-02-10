@@ -146,10 +146,6 @@ public class StmtLibrary {
 	}
 
 	public static PreparedStatement getSearchRecordFillQuery() {
-		// I hardcoded: "PS_LS_SS_PERS_SRCH", "EMPLID", the value for EMPLID, "OPRID", and the value for OPRID.
-/**		ENTStmt stmt = new ENTStmt("SELECT DISTINCT EMPLID FROM PS_LS_SS_PERS_SRCH WHERE EMPLID LIKE '" +
-			((PTString)Environment.getCompBufferEntry("LS_SS_PERS_SRCH.EMPLID").dereference()).value() + "%' AND OPRID=? ORDER BY EMPLID");
-*/
 
 		PTRecord searchRec = ComponentBuffer.searchRecord;
 		Record recDefn = searchRec.recDefn;
@@ -157,6 +153,7 @@ public class StmtLibrary {
 		ArrayList<String> bindVals = new ArrayList<String>();
 
 		StringBuilder query = new StringBuilder("SELECT  ");
+
 		int i = 0;
         for(RecordField rf : rfList) {
 			log.debug("USEEDIT for {}: {}", rf.FIELDNAME, rf.USEEDIT);

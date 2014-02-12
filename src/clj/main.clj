@@ -1,13 +1,11 @@
 (ns main
-	(import org.openpplsoft.JavaClass)
+  (import org.apache.logging.log4j.Logger)
+  (import org.apache.logging.log4j.LogManager)
 	(:gen-class))
 
 (defn -main [& args]
-	(println "START In main...")
-	(do
-			(def jc (JavaClass.))
-			(. jc saySomething)
-			(println (. jc sayMore))
-	)
-	(println "END In main...")
-	)
+  (def log (. LogManager getLogger "main"))
+	(. log info "START In main...")
+	(. log warn "END In main...")
+	(println "Hello, World!")
+)

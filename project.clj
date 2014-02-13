@@ -5,7 +5,10 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                 [org.apache.logging.log4j/log4j-api "2.0-beta9"]
-                [org.apache.logging.log4j/log4j-core "2.0-beta9"]]
+                [org.apache.logging.log4j/log4j-core "2.0-beta9"]
+								[self/ojdbc7 "7.0.0"]]
+	:repositories {"local" "file:mvn_repo"}
 	:source-paths	["src/clj"]
 	:java-source-paths	["src/java"]
 	:main main)
+

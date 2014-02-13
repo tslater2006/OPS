@@ -15,7 +15,7 @@ TRACE_FILE=trace/007_KADAMS_SSR_SSENRL_LIST.tracesql
 TRACE_FILE_DATE=2014-01-15
 
 JAVA_CP=bin:lib/*
-JAVA_D=-Duser.timezone=GMT -Dlog4j.configurationFile=conf/log4j.xml -DComponentToLoad=$(COMPONENT) \
+JAVA_D=-Duser.timezone=GMT -Dlog4j.configurationFile=resources/log4j2.xml -DComponentToLoad=$(COMPONENT) \
 -Dtracefile=$(TRACE_FILE) -Dignore_stmts_file=conf/ignore_stmts.conf -DcacheProgText=true \
 -DtraceFileDate=$(TRACE_FILE_DATE)
 
@@ -31,9 +31,11 @@ JAVA_D+= -DDbDriver=jdbc:oracle:thin
 #JAVA_D+= -DDbIP=10.0.1.88
 #JAVA_D+= -DDbDriver=jdbc:oracle:oci
 
-all: build_and_run
+all: build run
 
-build_and_run:
+build:
 		ant build_all
+
+run:
 		java $(JAVA_D) -cp $(JAVA_CP) com.enterrupt.Main
  

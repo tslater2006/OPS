@@ -98,12 +98,6 @@ public class Component {
 		}
     }
 
-	public void loadSearchRecord() {
-		// Loads the search records and puts their defns into cache.
-		DefnCache.getRecord(this.SEARCHRECNAME);
-		DefnCache.getRecord(this.ADDSRCHRECNAME);
-    }
-
     public void getListOfComponentPC() {
 
 		if(this.hasListOfComponentPCBeenRetrieved) { return; }

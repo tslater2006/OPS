@@ -27,8 +27,6 @@ public class Main {
 			Menu m = new Menu(
 				(String)Environment.getSystemVar("%Menu").read());
 
-			c.loadSearchRecord();
-
 			c.getListOfComponentPC();
 			c.loadAndRunRecordPConSearchRecord();
 			c.loadAndRunComponentPConSearchRecord();

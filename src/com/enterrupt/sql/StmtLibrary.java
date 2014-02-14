@@ -235,7 +235,7 @@ public class StmtLibrary {
 	public static PreparedStatement getSubrecordsUsingPSDBFIELD_PSRECFIELD_JOIN(String b1) {
 		ENTStmt stmt = new ENTStmt("SELECT FIELDNUM, FIELDNAME, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID, RECNAME FROM PSRECFIELD WHERE RECNAME = ? AND SUBRECORD = 'Y' ORDER BY RECNAME, FIELDNUM");
 		stmt.bindVals.put(1, b1);
-		return stmt.generateEnforcedPreparedStmt(conn);
+		return stmt.generateUnenforcedPreparedStmt(conn);
 	}
 
 	public static PreparedStatement prepareFillStmt(Record recDefn, String whereStr, String[] bindVals) {

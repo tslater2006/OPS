@@ -55,12 +55,6 @@ public class Page {
 				pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
 				pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
 
-				/**
-				 * Issue request for the record definition and record fields,
-				 * regardless of field type.
-		 		 */
-				DefnCache.getRecord(pf.RECNAME);
-
     	        switch(rs.getInt("FIELDTYPE")) {
 
 					case 1: 	// frame

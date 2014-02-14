@@ -37,12 +37,8 @@ public class Main {
 			c.assembleComponentStructure();
 			//ComponentBuffer.printStructure();
 			ComponentStructureVerifier.verify();
-
-			c.loadAllRecordPCProgsAndReferencedDefns();
-			c.loadAllComponentPCProgsAndReferencedDefns();
-			c.loadAllPagePC();
-
 			TraceFileVerifier.logVerificationSummary(false);
+
 		} catch(EntVMachRuntimeException evmre) {
 			log.fatal(evmre.getMessage(), evmre);
 			TraceFileVerifier.logVerificationSummary(true);

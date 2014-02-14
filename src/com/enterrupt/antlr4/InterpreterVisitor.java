@@ -977,6 +977,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * not yet been processed, do so now.
 		 */
 		if(!objType.progDefn.hasClassDefnBeenLoaded) {
+			objType.progDefn.loadDefnsAndPrograms();
 			ExecContext classDeclCtx = new AppClassDeclExecContext(objType);
 			this.supervisor.runImmediately(classDeclCtx);
 		}
@@ -990,8 +991,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * declaration to ensure that the constructor (if it exists) is only called
 	     * when the appropriate number of arguments are supplied.
 		 */
-		String constructorName = newObj.progDefn.appClassName;
-		if(newObj.progDefn.methodImplStartNodes.containsKey(constructorName)) {
+		if(newObj.progDefn.hasConstructor()) {
 
 			/**
 			 * Load arguments to constructor onto call stack if
@@ -1005,9 +1005,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				}
 			}
 
+			String constructorName = newObj.progDefn.appClassName;
 			ExecContext constructorCtx = new AppClassObjMethodExecContext(newObj,
 				constructorName, newObj.progDefn
-					.methodImplStartNodes.get(constructorName), null);
+					.getMethodImplStartNode(constructorName), null);
 			this.supervisor.runImmediately(constructorCtx);
 			this.repeatLastEmission();
 		}

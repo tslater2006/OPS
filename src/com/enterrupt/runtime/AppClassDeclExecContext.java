@@ -8,6 +8,6 @@ public class AppClassDeclExecContext extends ExecContext {
 
 	public AppClassDeclExecContext(PTAppClassObj obj) {
 		super(obj.progDefn);
-		this.startNode = obj.progDefn.classDeclNode;
+		this.startNode = obj.progDefn.getClassDeclNode();
 	}
 }

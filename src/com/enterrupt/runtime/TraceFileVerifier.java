@@ -70,12 +70,14 @@ public class TraceFileVerifier {
 	}
 
 	public static void submitUnenforcedEmission(IEmission evmEmission) {
-		log.debug(evmEmission);
+		//log.debug(evmEmission);
 		unenforcedEmissions.add(evmEmission);
 	}
 
 	public static void enforceEmission(IEmission evmEmission) {
-		log.debug(evmEmission);
+		if(!(evmEmission instanceof ENTStmt)) {
+			log.debug(evmEmission);
+		}
 
 		IEmission traceEmission;
 		if(coverageAreaStartLineNbr == 0) {

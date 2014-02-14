@@ -20,6 +20,7 @@ public class Page {
 
 	private static Logger log = LogManager.getLogger(Page.class.getName());
 
+	private boolean hasInitialized = false;
 	private boolean hasDiscoveredPagePC = false;
 
     public Page(String pnlname) {
@@ -27,6 +28,9 @@ public class Page {
 	}
 
 	public void init() {
+
+		if(this.hasInitialized) { return; }
+		this.hasInitialized = true;
 
         PreparedStatement pstmt = null;
         ResultSet rs = null;

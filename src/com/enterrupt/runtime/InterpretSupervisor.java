@@ -54,7 +54,7 @@ public class InterpretSupervisor {
 			}
 		}
 
-		context.prog.lexAndParse();
+		context.prog.loadDefnsAndPrograms();
 
 		/**
 		 * Requests to load app class declaration bodies do not

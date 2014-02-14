@@ -112,6 +112,7 @@ public class Assembler {
 			new SimpleElementAssembler((byte) 68, "Local", AFlag.NEWLINE_BEFORE_SPACE_AFTER), // 0x44
 			new SimpleElementAssembler((byte) 69, "Global", AFlag.NEWLINE_BEFORE_SPACE_AFTER), 		// 0x45
 			new SimpleElementAssembler((byte) 71, "@", AFlag.SPACE_BEFORE | AFlag.NO_SPACE_AFTER),	// 0x47
+			new ReferenceAssembler((byte) 72), 		// 0x48
 			new SimpleElementAssembler((byte) 73, "set"),	// 0x49
 			new ReferenceAssembler((byte) 74), 		// 0x4A
 			new SimpleElementAssembler((byte) 75, "Null"),		// 0x4B

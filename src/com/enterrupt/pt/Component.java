@@ -176,8 +176,6 @@ public class Component {
    	    for(PeopleCodeProg prog : recDefn.orderedRecordProgs) {
        	    if(prog.event.equals("SearchInit")) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.init();
-				p.loadDefnsAndPrograms(LoadGranularity.DEEP);
 				ExecContext eCtx = new ProgramExecContext(p);
 				InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
 				interpreter.run();
@@ -190,8 +188,6 @@ public class Component {
 		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
 			if(prog.RECNAME != null && prog.RECNAME.equals(this.searchRecordToUse)) {
 				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.init();
-				p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 				ExecContext eCtx = new ProgramExecContext(p);
 				InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
 				interpreter.run();
@@ -316,75 +312,6 @@ public class Component {
 			if(scrollMarkers.size() != 0) {
 				throw new EntVMachRuntimeException("Scroll marker stack size exceeds 0 " +
 					"at the end of the page token stream.");
-			}
-		}
-	}
-
-	public void loadAllRecordPCProgsAndReferencedDefns() {
-
-		IStreamableBuffer buf;
-
-		ComponentBuffer.resetCursors();
-		while((buf = ComponentBuffer.next()) != null) {
-
-			if(buf instanceof RecordFieldBuffer) {
-				RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
-
-				ArrayList<PeopleCodeProg> fieldProgs = fbuf.recDefn.getRecordProgsForField(fbuf.fldName);
-				if(fieldProgs != null) {
-
-					log.debug("Record:{} has Record PC programs, loading them and their refs now.",
-						fbuf.recDefn.RECNAME);
-
-					for(PeopleCodeProg prog : fieldProgs) {
-						PeopleCodeProg p = DefnCache.getProgram(prog);
-						log.debug("Root-level call to init {} taking place now.", p.getDescriptor());
-						p.init();
-						log.debug("Root-level call to load refs for {} taking place now.", p.getDescriptor());
-						p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
-					}
-				}
-			}
-		}
-	}
-
-	public void loadAllComponentPCProgsAndReferencedDefns() {
-
-		// Load the PostBuild event for the component first, if it exists.
-		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PostBuild")) {
-				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.init();
-				p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
-			}
-		}
-
-		// Then the PreBuild event, if it exists.
-		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-			if(prog.RECNAME == null && prog.FLDNAME == null && prog.event.equals("PreBuild")) {
-				PeopleCodeProg p = DefnCache.getProgram(prog);
-				p.init();
-				p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
-			}
-		}
-
-		// Then load each Component PC program in order of appearance in result set.
-		for(ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-			PeopleCodeProg p = DefnCache.getProgram(prog);
-			p.init();
-			p.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
-		}
-	}
-
-	public void loadAllPagePC() {
-
-		for(Page p : this.pages) {
-			Page cachedPage = DefnCache.getPage(p.PNLNAME);
-			cachedPage.discoverPagePC();
-			if(cachedPage.pageActivateProg != null) {
-				PeopleCodeProg pr = DefnCache.getProgram(cachedPage.pageActivateProg);
-				pr.init();
-				pr.loadDefnsAndPrograms(LoadGranularity.SHALLOW);
 			}
 		}
 	}

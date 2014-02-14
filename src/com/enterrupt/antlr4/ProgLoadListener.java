@@ -13,7 +13,6 @@ import com.enterrupt.antlr4.frontend.*;
 
 public class ProgLoadListener extends PeopleCodeBaseListener {
 
-	private int recurseLvl;
 	private PeopleCodeProg srcProg;
 	private ProgLoadSupervisor supervisor;
 	private BufferedTokenStream tokens;
@@ -30,11 +29,10 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 	private static Logger log = LogManager.getLogger(ProgLoadListener.class.getName());
 
-	public ProgLoadListener(PeopleCodeProg srcProg, int recurseLvl,
+	public ProgLoadListener(PeopleCodeProg srcProg,
 			ProgLoadSupervisor supervisor,  BufferedTokenStream tokens) {
 		this.srcProg = srcProg;
 		this.tokens = tokens;
-		this.recurseLvl = recurseLvl;
 		this.supervisor = supervisor;
 		this.refIndicesSeen = new HashMap<Integer, Void>();
 	}
@@ -185,9 +183,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		String fnName = ctx.GENERIC_ID().getText();
 		String recname = ctx.recDefnPath().GENERIC_ID(0).getText();
 		String fldname = ctx.recDefnPath().GENERIC_ID(1).getText();
-
-		// Load the record defn it it hasn't already been cached.
-		DefnCache.getRecord(recname);
 
 		PeopleCodeProg prog = new RecordPeopleCodeProg(recname, fldname,
 			ctx.event().getText());
@@ -343,23 +338,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 			 * If we've already seen this reference, no need to process it again.
 			 */
 			if(!this.refIndicesSeen.containsKey(refIdx)) {
-
 				Reference refObj = this.srcProg.progRefsTable.get(refIdx);
 				this.refIndicesSeen.put(refIdx, null);
-
-				// Only load record field references (i.e., not Record.TERM_TBL)
-				if(!refObj.isRecordFieldRef) {
-					return;
-				}
-
-				if((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
-					|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2)
-					|| (srcProg instanceof PagePeopleCodeProg)
-					|| (srcProg instanceof AppClassPeopleCodeProg
-							&& this.supervisor.loadGranularity ==
-								LoadGranularity.DEEP && recurseLvl < 2)) {
-					DefnCache.getRecord(refObj.RECNAME);
-				}
 			}
 		}
 	}

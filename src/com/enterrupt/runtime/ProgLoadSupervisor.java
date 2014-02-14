@@ -58,7 +58,7 @@ public class ProgLoadSupervisor {
 		int recurseLvl = loadStack.size() - 1;
 
 		ParseTreeWalker walker = new ParseTreeWalker();
-		walker.walk(new ProgLoadListener(prog, recurseLvl, this,
+		walker.walk(new ProgLoadListener(prog, this,
 			prog.tokenStream), prog.parseTree);
 
 	    /**

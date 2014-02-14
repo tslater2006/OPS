@@ -15,7 +15,7 @@ public abstract class ExecContext {
 
 	public ExecContext(PeopleCodeProg p) {
 		this.prog = p;
-		this.startNode = p.parseTree;
+		this.startNode = p.getParseTree();
 		this.scopeStack = new LinkedList<Scope>();
 	}
 

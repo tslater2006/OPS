@@ -105,21 +105,6 @@ public class Record {
                 if(pstmt != null) { pstmt.close(); }
             } catch(java.sql.SQLException sqle) {}
         }
-
-		for(String subrecname : subRecordNames) {
-			DefnCache.getRecord(subrecname);
-		}
-
-		/**
-		 * If RELLANGRECNAME is not blank, load it here.
-		 * If this part causes issues, consider:
-		 *   1) moving this above the subrecord initialization.
-		 * TODO: the record attached as RELLANGRECNAME may not have a discernible use or applicability
-	     * to Enterrupt; need to look into this.
-		 */
-		if(this.RELLANGRECNAME.length() > 0) {
-			DefnCache.getRecord(this.RELLANGRECNAME);
-		}
     }
 
 	public void discoverRecordPC() {

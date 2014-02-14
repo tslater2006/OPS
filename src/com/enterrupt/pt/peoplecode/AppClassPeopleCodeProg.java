@@ -14,14 +14,14 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 	private static Logger log = LogManager.getLogger(AppClassPeopleCodeProg.class.getName());
 
 	public String appClassName;
-	public ParseTree classDeclNode;
+	private ParseTree classDeclNode;
 	public String[] pathParts;
 	public AppPackage rootPackage;
 	public Map<String, Instance> instanceTable;
 	public Map<String, Property> propertyTable;
 	public Map<String, Method> methodTable;
-	public Map<String, ParseTree> methodImplStartNodes;
-	public Map<String, ParseTree> propGetterImplStartNodes;
+	private Map<String, ParseTree> methodImplStartNodes;
+	private Map<String, ParseTree> propGetterImplStartNodes;
 	public boolean hasClassDefnBeenLoaded = false;
 
 	public class Instance {
@@ -115,12 +115,44 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		return sb.toString();
 	}
 
+	public boolean hasConstructor() {
+		return this.hasMethod(this.appClassName);
+	}
+
+	public boolean hasMethod(String methodName) {
+		if(!this.methodImplStartNodes.containsKey(methodName)) {
+			this.lexAndParse();
+		}
+		return this.methodImplStartNodes.containsKey(methodName);
+	}
+
     public void saveMethodImplStartNode(String methodName, ParseTree node) {
         this.methodImplStartNodes.put(methodName, node);
 	}
 
+	public ParseTree getMethodImplStartNode(String methodName) {
+		if(!this.methodImplStartNodes.containsKey(methodName)) {
+			this.lexAndParse();
+		}
+		return this.methodImplStartNodes.get(methodName);
+	}
+
     public void savePropGetterImplStartNode(String propertyName, ParseTree node) {
         this.propGetterImplStartNodes.put(propertyName, node);
+	}
+
+	public ParseTree getPropGetterImplStartNode(String propertyName) {
+		if(!this.propGetterImplStartNodes.containsKey(propertyName)) {
+			this.lexAndParse();
+		}
+		return this.propGetterImplStartNodes.get(propertyName);
+	}
+
+	public boolean hasPropertyGetter(String propertyName) {
+		if(!this.propGetterImplStartNodes.containsKey(propertyName)) {
+			this.lexAndParse();
+		}
+		return this.propGetterImplStartNodes.containsKey(propertyName);
 	}
 
 	public void addInstanceIdentifier(String id, PTType type) {
@@ -140,5 +172,16 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 		log.debug("Adding method to table: {}, {}, {}, {}",
 			aLvl.name(), name, fp, rType);
 		this.methodTable.put(name, new Method(aLvl, name, fp, rType));
+	}
+
+	public void setClassDeclNode(ParseTree node) {
+		this.classDeclNode = node;
+	}
+
+	public ParseTree getClassDeclNode() {
+		if(this.classDeclNode == null) {
+			this.lexAndParse();
+		}
+		return this.classDeclNode;
 	}
 }

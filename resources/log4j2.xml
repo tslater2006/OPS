@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
+<Configuration status="WARN">
 	<Appenders>
     	<Console name="Console-Less" target="SYSTEM_OUT">
     		<PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level - %msg%n"/>
@@ -13,7 +13,7 @@
     </Appenders>
 
     <Loggers>
-    	<Root level="all">
+    	<Root level="WARN">
     		<AppenderRef ref="Console-Less"/>
     	</Root>
 
@@ -24,15 +24,16 @@
 
 		<!-- JAVA LOGGERS -->
 		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
-		<Logger name="com.enterrupt.sql.ENTStmt" level="WARN"/>
-		<Logger name="com.enterrupt.runtime.Environment" level="WARN"/>
+		<Logger name="com.enterrupt.sql" level="WARN"/>
+		<Logger name="com.enterrupt.runtime" level="INFO"/>
+		<Logger name="com.enterrupt.runtime.DefnCache" level="DEBUG"/>
+		<Logger name="com.enterrupt.runtime.TraceFileVerifier" level="DEBUG"/>
 		<Logger name="com.enterrupt.types" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode" level="WARN"/>
 		<Logger name="com.enterrupt.pt.peoplecode.PeopleCodeProg" level="all"/>
 		<Logger name="com.enterrupt.pt.peoplecode.AppClassPeopleCodeProg" level="all"/>
 		<Logger name="com.enterrupt.pt.peoplecode.ProgLoadSupervisor" level="all"/>
-		<Logger name="com.enterrupt.runtime.ComponentStructureVerifier" level="WARN"/>
 		<Logger name="com.enterrupt.pt.Component" level="WARN"/>
-		<Logger name="com.enterrupt.antlr4" level="all"/>
+		<Logger name="com.enterrupt.antlr4" level="DEBUG"/>
     </Loggers>
 </Configuration>

@@ -24,7 +24,7 @@ public abstract class PeopleCodeProg {
 	public String programText;
     public byte[] progBytes;
 	public CommonTokenStream tokenStream;
-	public ParseTree parseTree;
+	private ParseTree parseTree;
 
 	public List<PeopleCodeProg> referencedProgs;
 	public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
@@ -36,6 +36,7 @@ public abstract class PeopleCodeProg {
 
 	private boolean hasInitialized = false;
 	private boolean haveLoadedDefnsAndPrograms = false;
+	private boolean haveLexedAndParsed = false;
 
     protected PeopleCodeProg() {}
 
@@ -43,12 +44,16 @@ public abstract class PeopleCodeProg {
 
 	public abstract String getDescriptor();
 
+	public ParseTree getParseTree() {
+		if(parseTree == null) {
+			this.lexAndParse();
+		}
+		return this.parseTree;
+	}
+
 	public void init() {
 
-		if(this.hasInitialized) {
-			return;
-		}
-
+		if(this.hasInitialized) { return; }
 		this.hasInitialized = true;
 
     	PreparedStatement pstmt = null;
@@ -168,25 +173,22 @@ public abstract class PeopleCodeProg {
 		this.progBytes = allBytes;
     }
 
-	public void loadDefnsAndPrograms(LoadGranularity loadGranularity) {
-		ProgLoadSupervisor supervisor = new ProgLoadSupervisor(this, loadGranularity);
-		supervisor.start();
-	}
+	public void loadDefnsAndPrograms() {
+		log.debug("Loading defns and programs for {}", this.getDescriptor());
 
-	public boolean haveDefnsAndProgsBeenLoaded() {
-		if(this.haveLoadedDefnsAndPrograms) {
-			return true;
-		} else {
-			this.referencedProgs = new ArrayList<PeopleCodeProg>();
-			this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
-        	this.importedRootAppPackages = new HashMap<String, Boolean>();
-			this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
-			this.importedAppClasses = new HashMap<String, List<AppPackagePath>>();
-			this.importedAppPackagePaths = new ArrayList<AppPackagePath>();
+		if(this.haveLoadedDefnsAndPrograms) { return; }
+		this.haveLoadedDefnsAndPrograms = true;
 
-			this.haveLoadedDefnsAndPrograms = true;
-			return false;
-		}
+		this.referencedProgs = new ArrayList<PeopleCodeProg>();
+		this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
+       	this.importedRootAppPackages = new HashMap<String, Boolean>();
+		this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
+		this.importedAppClasses = new HashMap<String, List<AppPackagePath>>();
+		this.importedAppPackagePaths = new ArrayList<AppPackagePath>();
+
+	    this.lexAndParse();
+       	ParseTreeWalker walker = new ParseTreeWalker();
+        walker.walk(new ProgLoadListener(this), this.parseTree);
 	}
 
 	public Reference getReference(int refNbr) {
@@ -199,12 +201,8 @@ public abstract class PeopleCodeProg {
 
 	public void lexAndParse() {
 
-		/**
-		 * There's no need to lex and parse the program multiple times.
-		 */
-		if(this.parseTree != null && this.tokenStream != null) {
-			return;
-		}
+		if(this.haveLexedAndParsed) { return; }
+		this.haveLexedAndParsed = true;
 
 		log.debug("Lexing and parsing: {}", this.getDescriptor());
 

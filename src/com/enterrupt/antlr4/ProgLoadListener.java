@@ -13,9 +13,7 @@ import com.enterrupt.antlr4.frontend.*;
 
 public class ProgLoadListener extends PeopleCodeBaseListener {
 
-	private int recurseLvl;
 	private PeopleCodeProg srcProg;
-	private ProgLoadSupervisor supervisor;
 	private BufferedTokenStream tokens;
 	private Map<Integer, Void> refIndicesSeen;
     private ParseTreeProperty<PeopleCodeProg> varTypeProgs = new ParseTreeProperty<PeopleCodeProg>();
@@ -30,12 +28,9 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
 	private static Logger log = LogManager.getLogger(ProgLoadListener.class.getName());
 
-	public ProgLoadListener(PeopleCodeProg srcProg, int recurseLvl,
-			ProgLoadSupervisor supervisor,  BufferedTokenStream tokens) {
+	public ProgLoadListener(PeopleCodeProg srcProg) {
 		this.srcProg = srcProg;
-		this.tokens = tokens;
-		this.recurseLvl = recurseLvl;
-		this.supervisor = supervisor;
+		this.tokens = srcProg.tokenStream;
 		this.refIndicesSeen = new HashMap<Integer, Void>();
 	}
 
@@ -45,7 +40,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	 */
 	@Override
 	public void enterClassDeclaration(PeopleCodeParser.ClassDeclarationContext ctx) {
-		((AppClassPeopleCodeProg)this.srcProg).classDeclNode = ctx;
+		((AppClassPeopleCodeProg)this.srcProg).setClassDeclNode(ctx);
 	}
 
 	/**
@@ -103,26 +98,10 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	 */
 	@Override
 	public void exitVarDeclaration(PeopleCodeParser.VarDeclarationContext ctx) {
-
-		if(this.srcProg instanceof AppClassPeopleCodeProg &&
-			this.supervisor.loadGranularity ==
-				LoadGranularity.SHALLOW) {
-			return;
-		}
-
 	    if(this.getVarTypeProg(ctx.varType()) != null) {
 			PeopleCodeProg prog = this.getVarTypeProg(ctx.varType());
 			prog = DefnCache.getProgram(prog);
 			this.srcProg.referencedProgs.add(prog);
-
-			// Load the referenced program's initial metadata.
-			prog.init();
-
-			if(this.supervisor.loadGranularity ==
-				LoadGranularity.SHALLOW) {
-				// Load the program's referenced defns and programs immediately.
-				this.supervisor.loadImmediately(prog);
-			}
 		}
 	}
 
@@ -186,9 +165,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 		String recname = ctx.recDefnPath().GENERIC_ID(0).getText();
 		String fldname = ctx.recDefnPath().GENERIC_ID(1).getText();
 
-		// Load the record defn it it hasn't already been cached.
-		DefnCache.getRecord(recname);
-
 		PeopleCodeProg prog = new RecordPeopleCodeProg(recname, fldname,
 			ctx.event().getText());
 		prog = DefnCache.getProgram(prog);
@@ -234,12 +210,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 			new String[appClassParts.size()]));
 		prog = DefnCache.getProgram(prog);
 		this.srcProg.referencedProgs.add(prog);
-
-		// Load the referenced program's initial metadata.
-		prog.init();
-
-		// Load the program's referenced defns and programs immediately.
-		this.supervisor.loadImmediately(prog);
 	}
 
 	/**
@@ -324,12 +294,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	@Override
 	public void enterEveryRule(ParserRuleContext ctx) {
 
-		if(this.srcProg instanceof AppClassPeopleCodeProg &&
-			this.supervisor.loadGranularity ==
-				LoadGranularity.SHALLOW) {
-			return;
-		}
-
 		int tokPos = ctx.getStart().getTokenIndex();
 		List<Token> refChannel = tokens.getHiddenTokensToLeft(tokPos,
 			PeopleCodeLexer.REFERENCES);
@@ -343,23 +307,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 			 * If we've already seen this reference, no need to process it again.
 			 */
 			if(!this.refIndicesSeen.containsKey(refIdx)) {
-
 				Reference refObj = this.srcProg.progRefsTable.get(refIdx);
 				this.refIndicesSeen.put(refIdx, null);
-
-				// Only load record field references (i.e., not Record.TERM_TBL)
-				if(!refObj.isRecordFieldRef) {
-					return;
-				}
-
-				if((srcProg instanceof RecordPeopleCodeProg && recurseLvl < 4)
-					|| (srcProg instanceof ComponentPeopleCodeProg && recurseLvl < 2)
-					|| (srcProg instanceof PagePeopleCodeProg)
-					|| (srcProg instanceof AppClassPeopleCodeProg
-							&& this.supervisor.loadGranularity ==
-								LoadGranularity.DEEP && recurseLvl < 2)) {
-					DefnCache.getRecord(refObj.RECNAME);
-				}
 			}
 		}
 	}
@@ -420,20 +369,5 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 	private void handlePropOrInstanceAppClassRef(PeopleCodeProg prog) {
 		prog = DefnCache.getProgram(prog);
 		this.srcProg.referencedProgs.add(prog);
-
-		// Load the referenced program's initial metadata.
-		prog.init();
-
-		/**
-	     * I added this call when I learned that when PT encounters a referenced
-		 * object in an app class, it recursively loads that app class's references
-	     * immediately. It's possible that this call may
-		 * need to be locked down to instances when the root program is a Component PC prog
-		 * if issues with Record PC loading surface later on. TODO: Keep this in mind.
-		 */
-		// Load the program's referenced defns and programs immediately.
-		log.debug("IMMEDIATELY LOADING {}. Load stack: {}", prog.getDescriptor(),
-			this.supervisor.loadStack);
-		supervisor.loadImmediately(prog);
 	}
 }

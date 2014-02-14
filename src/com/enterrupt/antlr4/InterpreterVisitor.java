@@ -90,7 +90,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		}
 
 		IEmission e = new PCInstruction(line.toString());
-		TraceFileVerifier.submitEmission(e);
+		TraceFileVerifier.enforceEmission(e);
 		this.lastEmission = e;
 	}
 
@@ -114,12 +114,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			}
 		}
 		IEmission e = new PCInstruction(str);
-		TraceFileVerifier.submitEmission(e);
+		TraceFileVerifier.enforceEmission(e);
 		this.lastEmission = e;
 	}
 
 	private void repeatLastEmission() {
-		TraceFileVerifier.submitEmission(this.lastEmission);
+		TraceFileVerifier.enforceEmission(this.lastEmission);
 	}
 
 	public Void visitProgram(PeopleCodeParser.ProgramContext ctx) {
@@ -417,22 +417,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 			call.invokePtMethod();
 		} else {
 			ExecContext eCtx = call.eCtx;
-
-			/**
-			 * Record field references beyond a certain recursion level
-			 * in app class programs have their constituent record defns
-			 * loaded lazily. Before executing the app class method, check
-			 * if any of the references within programs referenced by the app class
-			 * have yet to have their record defns loaded (note that they may
-			 * already be loaded anyway if they were referenced elsewhere).
-			 */
-			for(PeopleCodeProg p : eCtx.prog.referencedProgs) {
-				for(Map.Entry<Integer, Reference> cursor : p.progRefsTable.entrySet()) {
-					if(cursor.getValue().isRecordFieldRef) {
-						DefnCache.getRecord(cursor.getValue().RECNAME);
-					}
-				}
-			}
 			this.supervisor.runImmediately(eCtx);
 			this.repeatLastEmission();
 		}
@@ -993,6 +977,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * not yet been processed, do so now.
 		 */
 		if(!objType.progDefn.hasClassDefnBeenLoaded) {
+			objType.progDefn.loadDefnsAndPrograms();
 			ExecContext classDeclCtx = new AppClassDeclExecContext(objType);
 			this.supervisor.runImmediately(classDeclCtx);
 		}
@@ -1006,8 +991,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 		 * declaration to ensure that the constructor (if it exists) is only called
 	     * when the appropriate number of arguments are supplied.
 		 */
-		String constructorName = newObj.progDefn.appClassName;
-		if(newObj.progDefn.methodImplStartNodes.containsKey(constructorName)) {
+		if(newObj.progDefn.hasConstructor()) {
 
 			/**
 			 * Load arguments to constructor onto call stack if
@@ -1021,9 +1005,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 				}
 			}
 
+			String constructorName = newObj.progDefn.appClassName;
 			ExecContext constructorCtx = new AppClassObjMethodExecContext(newObj,
 				constructorName, newObj.progDefn
-					.methodImplStartNodes.get(constructorName), null);
+					.getMethodImplStartNode(constructorName), null);
 			this.supervisor.runImmediately(constructorCtx);
 			this.repeatLastEmission();
 		}

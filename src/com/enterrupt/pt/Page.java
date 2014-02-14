@@ -20,6 +20,7 @@ public class Page {
 
 	private static Logger log = LogManager.getLogger(Page.class.getName());
 
+	private boolean hasInitialized = false;
 	private boolean hasDiscoveredPagePC = false;
 
     public Page(String pnlname) {
@@ -27,6 +28,9 @@ public class Page {
 	}
 
 	public void init() {
+
+		if(this.hasInitialized) { return; }
+		this.hasInitialized = true;
 
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -54,12 +58,6 @@ public class Page {
 				pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
 				pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
 				pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
-
-				/**
-				 * Issue request for the record definition and record fields,
-				 * regardless of field type.
-		 		 */
-				DefnCache.getRecord(pf.RECNAME);
 
     	        switch(rs.getInt("FIELDTYPE")) {
 

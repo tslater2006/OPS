@@ -4,6 +4,7 @@ import com.enterrupt.sql.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.buffers.*;
 import org.apache.logging.log4j.*;
 
 public class Main {
@@ -26,8 +27,6 @@ public class Main {
 			Menu m = new Menu(
 				(String)Environment.getSystemVar("%Menu").read());
 
-			c.loadSearchRecord();
-
 			c.getListOfComponentPC();
 			c.loadAndRunRecordPConSearchRecord();
 			c.loadAndRunComponentPConSearchRecord();
@@ -36,13 +35,10 @@ public class Main {
 			c.loadPages();
 
 			c.assembleComponentStructure();
+			//ComponentBuffer.printStructure();
 			ComponentStructureVerifier.verify();
-
-			c.loadAllRecordPCProgsAndReferencedDefns();
-			c.loadAllComponentPCProgsAndReferencedDefns();
-			c.loadAllPagePC();
-
 			TraceFileVerifier.logVerificationSummary(false);
+
 		} catch(EntVMachRuntimeException evmre) {
 			log.fatal(evmre.getMessage(), evmre);
 			TraceFileVerifier.logVerificationSummary(true);

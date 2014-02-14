@@ -35,10 +35,11 @@ public class DefnCache {
 
 		Record r = records.get(RECNAME);
 		if(r == null) {
+			log.debug("Caching record defn for {}", RECNAME);
 			r = new Record(RECNAME);
-			r.init();
 			records.put(RECNAME, r);
 		}
+		r.init();
 		return r;
 	}
 
@@ -50,10 +51,12 @@ public class DefnCache {
 
 		Page p = pages.get(PNLNAME);
 		if(p == null) {
+			log.debug("Caching page defn for {}", PNLNAME);
 			p = new Page(PNLNAME);
-			p.init();
 			pages.put(p.PNLNAME, p);
 		}
+		p.init();
+		p.discoverPagePC();
 		return p;
 	}
 
@@ -61,19 +64,22 @@ public class DefnCache {
 
         AppPackage ap = appPackages.get(packageName);
         if(ap == null) {
+			log.debug("Caching app package defn for {}", packageName);
             ap = new AppPackage(packageName);
-            ap.discoverAppClassPC();
             appPackages.put(ap.rootPkgName, ap);
         }
+        ap.discoverAppClassPC();
         return ap;
 	}
 
 	public static PeopleCodeProg getProgram(PeopleCodeProg prog) {
 		PeopleCodeProg p = programs.get(prog.getDescriptor());
 		if(p == null) {
+			log.debug("Caching program defn for {}", prog.getDescriptor());
 			p = prog;
 			programs.put(p.getDescriptor(), p);
 		}
+		p.init();
 		return p;
 	}
 

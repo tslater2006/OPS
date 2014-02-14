@@ -65,7 +65,7 @@ public class PTAppClassObj extends PTObjectType {
 		 * return the value associated with them in this object's property scope.
 		 * Note that properties are always public, so no need to check access level.
 		 */
-		if(this.progDefn.propGetterImplStartNodes.containsKey(s)) {
+		if(this.progDefn.hasPropertyGetter(s)) {
 			if(!this.progDefn.propertyTable.get(s).hasGetter) {
 				return this.propertyScope.resolveVar(s);
 			}
@@ -81,10 +81,10 @@ public class PTAppClassObj extends PTObjectType {
 		 * object; return a callable accordingly. Note that properties are always
 		 * public, so no need to check access level.
 		 */
-		if(this.progDefn.propGetterImplStartNodes.containsKey(s)) {
+		if(this.progDefn.hasPropertyGetter(s)) {
 			if(this.progDefn.propertyTable.get(s).hasGetter) {
 				return new Callable(new AppClassObjGetterExecContext(this, s,
-					this.progDefn.propGetterImplStartNodes.get(s),
+					this.progDefn.getPropGetterImplStartNode(s),
 					this.progDefn.propertyTable.get(s).type));
 			}
 		}
@@ -93,10 +93,10 @@ public class PTAppClassObj extends PTObjectType {
 		* Note: Private methods
 		* are private to the *CLASS*, not the instances of the class themselves.
     	*/
-		if(this.progDefn.methodImplStartNodes.containsKey(s)) {
+		if(this.progDefn.hasMethod(s)) {
 			if(this.progDefn.methodTable.get(s).aLevel == AccessLevel.PUBLIC) {
 				return new Callable(new AppClassObjMethodExecContext(this, s,
-					this.progDefn.methodImplStartNodes.get(s),
+					this.progDefn.getMethodImplStartNode(s),
 					this.progDefn.methodTable.get(s).returnType));
 			} else {
 				throw new EntVMachRuntimeException("Encountered request for non-public "+

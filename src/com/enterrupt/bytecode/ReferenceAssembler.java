@@ -65,16 +65,17 @@ public class ReferenceAssembler extends ElementAssembler {
 		}
 
 		/**
-		 * TODO: Reach a better understanding of the purpose of this.
-		 * If the exception below is ever encountered, setup a hidden parser channel
-		 * and emit the before and after reference string for analysis.
+		 * This code apparently puts string literals around a definition; i.e,
+		 * producing: MenuName."ESTABLISH_COURSES" -> why this is I'm not sure,
+		 * it may be deprecated PeopleCode that still works for backwards
+		 * compatibility reasons. I'm going to strip the quotes b/c the
+		 * interpreter expects definition literals without quotes.
 		 */
 		int p1 = ref.indexOf('.');
 		if(b == (byte) 72 && p1 > 0) {
 			String rec = ref.substring(0, p1);
-			ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
-			throw new EntAssembleException("Encountered byte 72 during assembly of reference text; "
-				+ "investigate this.");
+			//ORIGINAL LINE: ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
+			ref = rec.concat("."+ref.substring(p1+1));
 		}
 
 		/**

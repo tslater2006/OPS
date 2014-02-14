@@ -54,7 +54,7 @@ public class InterpretSupervisor {
 			}
 		}
 
-		context.prog.lexAndParse();
+		context.prog.loadDefnsAndPrograms();
 
 		/**
 		 * Requests to load app class declaration bodies do not
@@ -82,11 +82,11 @@ public class InterpretSupervisor {
 		descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
 		if(doEmitProgramMarkers) {
-			TraceFileVerifier.submitEmission(new PCStart(
+			TraceFileVerifier.enforceEmission(new PCStart(
 				(execContextStack.size() == 1 ? "start" : "start-ext"),
 				String.format("%02d", execContextStack.size() - 1),
 				methodOrFuncName, descriptor));
-			TraceFileVerifier.submitEmission(new PCBegin(descriptor, "0", "0"));
+			TraceFileVerifier.enforceEmission(new PCBegin(descriptor, "0", "0"));
 		}
 
 		InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
@@ -112,7 +112,7 @@ public class InterpretSupervisor {
 		}
 
 		if(doEmitProgramMarkers) {
-			TraceFileVerifier.submitEmission(new PCEnd(
+			TraceFileVerifier.enforceEmission(new PCEnd(
 				(execContextStack.size() == 1 ? "end" : "end-ext"),
 				String.format("%02d", execContextStack.size() - 1),
 				methodOrFuncName, descriptor));

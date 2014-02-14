@@ -36,7 +36,6 @@ public class RecordFieldBuffer implements IStreamableBuffer, Comparable<RecordFi
          */
         if(this.parentRecordBuffer.scrollLevel == 0
             && !this.recDefn.isDerivedWorkRecord()
-            && !this.fldDefn.isSearchKey()
             && !this.fldDefn.isAlternateSearchKey()) {
 
             this.parentRecordBuffer.expandEntireRecordIntoBuffer();

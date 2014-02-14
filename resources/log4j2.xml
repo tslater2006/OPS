@@ -33,7 +33,9 @@
 		<Logger name="com.enterrupt.pt.peoplecode.PeopleCodeProg" level="all"/>
 		<Logger name="com.enterrupt.pt.peoplecode.AppClassPeopleCodeProg" level="all"/>
 		<Logger name="com.enterrupt.pt.peoplecode.ProgLoadSupervisor" level="all"/>
-		<Logger name="com.enterrupt.pt.Component" level="WARN"/>
+		<Logger name="com.enterrupt.pt.Component" level="DEBUG"/>
 		<Logger name="com.enterrupt.antlr4" level="DEBUG"/>
+		<Logger name="com.enterrupt.pt.pages" level="DEBUG"/>
+		<Logger name="com.enterrupt.buffers.ComponentBuffer" level="DEBUG"/>
     </Loggers>
 </Configuration>

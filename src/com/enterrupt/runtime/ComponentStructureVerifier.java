@@ -17,9 +17,6 @@ public class ComponentStructureVerifier {
 		if(hasBeenVerified) { return; }
 
 		String pnlgrpname = System.getProperty("ComponentToLoad");
-		if(pnlgrpname.equals("SSR_SSENRL_LIST")) {
-			return;
-		}
 
 	    int indent = 0;
         IStreamableBuffer buf;

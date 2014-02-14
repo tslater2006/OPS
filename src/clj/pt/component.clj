@@ -10,6 +10,12 @@
 	(. log info "Loading Component:{}.{}" (object-array [pnlgrpname market]))
 )
 
+/**
+ * TODO:
+ *   - Wrap db functions in another namespace (look at reify for
+ *     making resultsets into iterable sequences?)
+ *   - Wrap log functions in another namespace.
+ */
 (defn ora-test []
 ;;	(jdbc/query oracle ["select * from PS_INSTALLATION"] )
 	(def conn	(. DriverManager getConnection

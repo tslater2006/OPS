@@ -71,7 +71,7 @@ public class PgTokenStream {
 
 					// Ignore groupboxes and any field without a valid RECNAME.
 					if(!lookToken.flags.contains(PFlag.GROUPBOX) && lookToken.RECNAME != null
-						&& lookToken.RECNAME.length() > 0) {
+						&& !lookToken.isRelatedDisplay() && lookToken.RECNAME.length() > 0) {
 
 						/**
 						 * First priority is given to a RECNAME in the scroll area that *is not*
@@ -84,6 +84,7 @@ public class PgTokenStream {
 							primaryRecNameCandidate = lookToken.RECNAME;
 							break;
 						} else if(primaryRecNameCandidate == null) {
+							// Save the candidate for consideration after while loop ends.
 							primaryRecNameCandidate = lookToken.RECNAME;
 						}
 					}
@@ -122,6 +123,7 @@ public class PgTokenStream {
 			}
 
 			this.prevOCCURSLEVEL = tok.OCCURSLEVEL;
+
 			return tok;
 
 		} else {

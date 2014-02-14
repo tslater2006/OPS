@@ -35,7 +35,7 @@ public class Main {
 			c.loadPages();
 
 			c.assembleComponentStructure();
-			//ComponentBuffer.printStructure();
+			ComponentBuffer.printStructure();
 			ComponentStructureVerifier.verify();
 			TraceFileVerifier.logVerificationSummary(false);
 

@@ -152,13 +152,19 @@ public class StmtLibrary {
 		List<RecordField> rfList = recDefn.getExpandedFieldList();
 		ArrayList<String> bindVals = new ArrayList<String>();
 
-		StringBuilder query = new StringBuilder("SELECT  ");
+		/** NOTE: "SELECT" is prepended below due to PS oddities. */
+		StringBuilder query = new StringBuilder();
+		boolean distinctKeywordUsed = false;
 
 		int i = 0;
         for(RecordField rf : rfList) {
 			log.debug("USEEDIT for {}: {}", rf.FIELDNAME, rf.USEEDIT);
 			if(rf.isSearchKey()) {
 	            if(i > 0) { query.append(", "); }
+				if(rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
+					query.append("DISTINCT ");
+					distinctKeywordUsed = true;
+				}
 	            query.append(rf.FIELDNAME);
 				i++;
 			}
@@ -169,11 +175,30 @@ public class StmtLibrary {
 
 		i = 0;
 		for(RecordField rf : rfList) {
-			if(rf.isSearchKey()) {
+			if(rf.isKey() || rf.isSearchKey()) {
 	            if(i > 0) { query.append(" AND "); }
-	            query.append(rf.FIELDNAME).append("=?");
-				bindVals.add((String)searchRec.getField(rf.FIELDNAME)
-					.getValue().read());
+
+				String val = (String)searchRec.getField(rf.FIELDNAME)
+					.getValue().read();
+
+				/**
+				 * If this is the OPRID field and it has a null value
+				 * in the search record, default it to the system var value.
+				 * TODO: If multiple fields require this kind of defaulting,
+				 * abstract this into the underlying RecordField object.
+				 */
+				if(val == null && rf.FIELDNAME.equals("OPRID")) {
+					val = (String)Environment.getSystemVar("%OperatorId").read();
+				}
+
+				query.append(rf.FIELDNAME);
+				if(rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
+					query.append(" LIKE '").append(val).append("%'");
+				} else {
+					query.append("=?");
+					bindVals.add(val);
+				}
+
 				i++;
 			}
 		}
@@ -192,7 +217,14 @@ public class StmtLibrary {
 			}
 		}
 
-		ENTStmt stmt = new ENTStmt(query.toString());
+		String queryStr;
+		if(distinctKeywordUsed) {
+			queryStr = "SELECT " + query.toString();
+		} else {
+			queryStr = "SELECT  " + query.toString();
+		}
+
+		ENTStmt stmt = new ENTStmt(queryStr);
 		for(i = 0; i < bindVals.size(); i++) {
 			stmt.bindVals.put(i+1, bindVals.get(i));
 		}

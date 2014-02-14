@@ -18,15 +18,25 @@ public class ENTStmt extends SQLStmt {
         super(sql.trim());
     }
 
-    public PreparedStatement generatePreparedStmt(Connection conn) {
+	public PreparedStatement generateEnforcedPreparedStmt(Connection conn) {
+		PreparedStatement pstmt = generatePreparedStmt(conn);
+		TraceFileVerifier.enforceEmission(this);
+		return pstmt;
+	}
+
+	public PreparedStatement generateUnenforcedPreparedStmt(Connection conn) {
+		PreparedStatement pstmt = generatePreparedStmt(conn);
+		TraceFileVerifier.submitUnenforcedEmission(this);
+		return pstmt;
+	}
+
+    private PreparedStatement generatePreparedStmt(Connection conn) {
 
 		try {
 	        PreparedStatement pstmt = conn.prepareStatement(this.sql);
    		    for(Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
          		pstmt.setString(cursor.getKey(), cursor.getValue());
         	}
-
-			TraceFileVerifier.submitEmission(this);
         	return pstmt;
 
 		} catch(java.sql.SQLException sqle) {

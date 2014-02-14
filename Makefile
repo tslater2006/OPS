@@ -17,7 +17,7 @@ TRACE_FILE_DATE=2014-01-15
 JAVA_CP=bin:lib/*
 JAVA_D=-Duser.timezone=GMT -Dlog4j.configurationFile=resources/log4j2.xml -DComponentToLoad=$(COMPONENT) \
 -Dtracefile=$(TRACE_FILE) -Dignore_stmts_file=conf/ignore_stmts.conf -DcacheProgText=true \
--DtraceFileDate=$(TRACE_FILE_DATE)
+-DtraceFileDate=$(TRACE_FILE_DATE) -Ddefn_stmts_file=conf/defn_stmts.conf
 
 # For execution on local Xen server.
 JAVA_D+= -DDbSID=XENCSDEV

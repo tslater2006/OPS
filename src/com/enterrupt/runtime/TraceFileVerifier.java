@@ -9,7 +9,7 @@ import com.enterrupt.trace.*;
 
 public class TraceFileVerifier {
 
-	private static List<Object> emissions;
+	private static List<IEmission> unenforcedEmissions;
 	private static Map<String, Boolean> ignoredStmts;
 	private static String currTraceLine = "";
 	private static int currTraceLineNbr = 0;
@@ -18,12 +18,13 @@ public class TraceFileVerifier {
 		pcBeginPattern, pcInstrPattern, pcEndPattern;
 
 	private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
-	private static int numEmissionMatches, numSQLEmissionMatches, numPCEmissionMatches;
+	private static int numEnforcedSQLEmissions, numPCEmissionMatches;
 	private static int numTraceSQLStmts, numTraceSQLStmtsIgnored;
 
 	private static Logger log = LogManager.getLogger(TraceFileVerifier.class.getName());
 
 	static {
+		unenforcedEmissions = new ArrayList<IEmission>();
 		ignoredStmts = new HashMap<String, Boolean>();
 		sqlTokenPattern = Pattern.compile("\\sStmt=(.*)");
 		bindValPattern = Pattern.compile("\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
@@ -45,12 +46,14 @@ public class TraceFileVerifier {
             System.exit(ExitCode.TRACE_FILE_NOT_FOUND.getCode());
         }
 
-		/**
-		 * Open ignored stmts file for reading.
-		 */
+		ignoreStmtsInFile(System.getProperty("ignore_stmts_file"));
+		ignoreStmtsInFile(System.getProperty("defn_stmts_file"));
+	}
+
+	public static void ignoreStmtsInFile(String filename) {
 		try {
 			BufferedReader ignoreFileReader = new BufferedReader(new FileReader(
-				new File(System.getProperty("ignore_stmts_file"))));
+				new File(filename)));
 
 			String line;
 			while((line = ignoreFileReader.readLine()) != null) {
@@ -66,13 +69,13 @@ public class TraceFileVerifier {
         }
 	}
 
-	public static void submitEmission(IEmission evmEmission) {
+	public static void submitUnenforcedEmission(IEmission evmEmission) {
+		log.debug(evmEmission);
+		unenforcedEmissions.add(evmEmission);
+	}
 
-		if(evmEmission instanceof ENTStmt) {
-			log.debug(evmEmission);
-		} else {
-			log.debug(evmEmission);
-		}
+	public static void enforceEmission(IEmission evmEmission) {
+		log.debug(evmEmission);
 
 		IEmission traceEmission;
 		if(coverageAreaStartLineNbr == 0) {
@@ -90,8 +93,7 @@ public class TraceFileVerifier {
 
 			if(traceEmission != null) {
 				coverageAreaStartLineNbr = currTraceLineNbr;
-				numSQLEmissionMatches++;
-				numEmissionMatches++;
+				numEnforcedSQLEmissions++;
 				return;
 			}
 		} else {
@@ -107,7 +109,7 @@ public class TraceFileVerifier {
 
 			// Increment emission-specific counter.
 			if(evmEmission instanceof ENTStmt) {
-				numSQLEmissionMatches++;
+				numEnforcedSQLEmissions++;
 			} else {
 				numPCEmissionMatches++;
 			}
@@ -117,8 +119,6 @@ public class TraceFileVerifier {
 			log.fatal("Trace file expects: {}", traceEmission);
 			throw new EntVMachRuntimeException("Emission mismatch.");
 		}
-
-		numEmissionMatches++;
 	}
 
 	private static IEmission getNextTraceEmission() {
@@ -223,14 +223,17 @@ public class TraceFileVerifier {
 		log.info("SQL Stmts in Ignore File:\t\t{}", ignoredStmts.size());
 		log.info("SQL Stmts Seen (Total / Ignored):\t{}\t\t{}", numTraceSQLStmts,
 			numTraceSQLStmtsIgnored);
-		log.info("Matched SQL Emissions:\t\t\t{}", numSQLEmissionMatches);
-		log.info("Matched PC Emissions:\t\t\t{}", numPCEmissionMatches);
-		log.info("Total Matched Emissions:\t\t\t{}", numEmissionMatches);
+		log.info("Adhoc SQL Emissions:\t\t\t{}", unenforcedEmissions.size());
+		log.info("Enforced SQL Emissions:\t\t\t{}", numEnforcedSQLEmissions);
+		log.info("Enforced PC Emissions:\t\t\t{}", numPCEmissionMatches);
+		log.info("Total Emissions:\t\t\t\t{}",
+			numEnforcedSQLEmissions + unenforcedEmissions.size() + numPCEmissionMatches);
 		log.info("Component Structure Valid?\t\t\t\t{}",
 			ComponentStructureVerifier.hasBeenVerified ? "YES" : "!!NO!!");
 		log.info("Coverage Area Bounded?\t\t\t\t{}",
 			mismatchFlag ? "!!NO!!" : "YES");
 		log.info("Coverage Area (Start / End Lines):\tL_{}\t\tL_{}",
 			coverageAreaStartLineNbr, coverageAreaEndLineNbr);
+		log.info("\nNext unmatched emission in trace file: {}", getNextTraceEmission());
 	}
 }

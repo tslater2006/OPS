@@ -1,11 +1,11 @@
 # Note: TRACE_FILE_DATE Overrides the current date used by the EVM in order
 # to emit the correct date for trace file verification purposes.
 
-COMPONENT=CLASS_SEARCH
+COMPONENT=SSS_STUDENT_CENTER
 
 # Trace files generated on AWS VPC Cluster:
-#TRACE_FILE=trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql
-TRACE_FILE=trace/004_KADAMS_CLASS_SEARCH.tracesql
+TRACE_FILE=trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql
+#TRACE_FILE=trace/004_KADAMS_CLASS_SEARCH.tracesql
 #TRACE_FILE=trace/005_KADAMS_SSR_SSENRL_LIST.tracesql
 #TRACE_FILE=trace/006_KADAMS_SSR_SSENRL_ADD.tracesql
 TRACE_FILE_DATE=2013-11-16

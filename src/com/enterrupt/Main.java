@@ -4,6 +4,7 @@ import com.enterrupt.sql.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
+import com.enterrupt.buffers.*;
 import org.apache.logging.log4j.*;
 
 public class Main {
@@ -36,6 +37,7 @@ public class Main {
 			c.loadPages();
 
 			c.assembleComponentStructure();
+			ComponentBuffer.printStructure();
 			ComponentStructureVerifier.verify();
 
 			c.loadAllRecordPCProgsAndReferencedDefns();

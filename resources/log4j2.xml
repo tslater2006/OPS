@@ -18,7 +18,10 @@
     	</Root>
 
 		<!-- CLOJURE LOGGERS -->
-		<Logger name="main" level="INFO" additivity="false">
+		<Logger name="main" level="DEBUG" additivity="false">
+			<AppenderRef ref="Console-Clojure"/>
+		</Logger>
+		<Logger name="pt" level="DEBUG" additivity="false">
 			<AppenderRef ref="Console-Clojure"/>
 		</Logger>
 

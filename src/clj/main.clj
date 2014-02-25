@@ -2,13 +2,14 @@
   (import org.apache.logging.log4j.Logger)
   (import org.apache.logging.log4j.LogManager)
 	(:use [pt.component :only [load-defn ora-test]])
+	(:use [runtime.log :only [get-log INFO]])
 	(:gen-class))
 
-(def log (. LogManager getLogger "main"))
+(def ^{:private true} log (get-log *ns*))
 
 (defn -main [& args]
-	(. log info "-main starting...")
+	(INFO log "main starting...")
 	(pt.component/load-defn "SSS_STUDENT_CENTER" "GBL")
 	(pt.component/ora-test)
-	(. log info "-main exiting.")
+	(INFO log "-main exiting.")
 )

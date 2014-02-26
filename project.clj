@@ -6,7 +6,9 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                 [org.apache.logging.log4j/log4j-api "2.0-beta9"]
                 [org.apache.logging.log4j/log4j-core "2.0-beta9"]
-								[self/ojdbc7 "7.0.0"]]
+								[self/ojdbc7 "7.0.0"]
+								[com.mchange/c3p0 "0.9.5-pre6"]
+								[org.clojure/java.jdbc "0.3.3"]]
 	:repositories {"local" "file:mvn_repo"}
 	:source-paths	["src/clj"]
 	:java-source-paths	["src/java"]

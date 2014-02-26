@@ -1,26 +1,23 @@
 (ns pt.component
-  (import org.apache.logging.log4j.Logger)
-  (import org.apache.logging.log4j.LogManager)
-	(import java.sql.DriverManager)
+	(require [clojure.java.jdbc :as jdbc])
+	(:use [sql.stmtlib])
 	(:use [runtime.log :only [get-log INFO DEBUG]])
 	(:gen-class))
 
 (def ^{:private true} log (get-log *ns*))
 
-(defn load-defn [pnlgrpname market]
+(defn init-component [pnlgrpname market]
 	(INFO log "Loading Component:{}.{}" (object-array [pnlgrpname market]))
-	pnlgrpname
-)
 
-(defn ora-test []
-	(DEBUG log "Start of ora-test")  
-	(def conn	(. DriverManager getConnection
-				"jdbc:oracle:thin:@//10.0.0.88:1521/XENCSDEV" "SYSADM" "SYSADM"))
-	(def pstmt (. conn prepareStatement
-				"SELECT * FROM PSPNLGRPDEFN"))
-	(def rs (. pstmt executeQuery))
-	(. rs next)
-	(def temp (. rs getString "SEARCHRECNAME"))
-	(DEBUG log "Search record name: {}" (object-array [temp]))
-	temp
-)
+	(jdbc/db-query-with-resultset
+		@pooled-conn-ds
+		["SELECT * FROM PSPNLGRPDEFN WHERE PNLGRPNAME = ?" pnlgrpname]
+		(fn [rs]
+			(def rs-seq (jdbc/result-set-seq rs))
+			(assert (= (count rs-seq) 1))
+			(select-keys (first rs-seq) 
+					[:actions
+					 :addsrchrecname
+					 :dfltaction
+					 :searchrecname
+					 :primaryaction]))))

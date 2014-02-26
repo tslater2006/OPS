@@ -1,6 +1,6 @@
 (ns pt.component
 	(require [clojure.java.jdbc :as jdbc])
-	(:use [sql.stmtlib])
+	(:use [sql.stmtlib :as stmtlib])
 	(:use [runtime.log :only [get-log INFO DEBUG]])
 	(:gen-class))
 
@@ -9,9 +9,8 @@
 (defn init-component [pnlgrpname market]
 	(INFO log "Loading Component:{}.{}" (object-array [pnlgrpname market]))
 
-	(jdbc/db-query-with-resultset
-		@pooled-conn-ds
-		["SELECT * FROM PSPNLGRPDEFN WHERE PNLGRPNAME = ?" pnlgrpname]
+	(def initial-rec (stmtlib/query-pnlgrpdefn
+		[pnlgrpname market]
 		(fn [rs]
 			(def rs-seq (jdbc/result-set-seq rs))
 			(assert (= (count rs-seq) 1))
@@ -21,3 +20,14 @@
 					 :dfltaction
 					 :searchrecname
 					 :primaryaction]))))
+
+	(def pages (stmtlib/query-pspnlgroup
+		[pnlgrpname market]
+		(fn [rs]
+			(def rs-seq (jdbc/result-set-seq rs))
+			(assert (> (count rs-seq) 0))
+			(vec (map :pnlname rs-seq))
+	)))
+
+	(into initial-rec {:pnlgrpname pnlgrpname :_pages pages})
+)

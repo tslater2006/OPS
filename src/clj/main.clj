@@ -1,5 +1,5 @@
 (ns main
-	(:use [runtime.log :only [get-log INFO]])
+	(:use [runtime.log :only [get-log INFO DEBUG]])
 	(:use [pt.component :only [init-component]])
 	(:gen-class))
 
@@ -7,6 +7,6 @@
 
 (defn -main [& args]
 	(INFO log "main starting...")
-	(prn (pt.component/init-component "SSS_STUDENT_CENTER" "GBL"))
+	(DEBUG log (str (pt.component/init-component "SSS_STUDENT_CENTER" "GBL")))
 	(INFO log "-main exiting.")
 )

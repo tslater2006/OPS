@@ -32,3 +32,14 @@
 
 	(into initial-rec {:pnlgrpname pnlgrpname :_pages pages})
 )
+
+(defn load-programs
+	[{:keys [pnlgrpname]}]
+	(INFO log "Loading programs for Component:{}", (object-array [pnlgrpname]))
+	;; TODO: Create skeleton type hierarchy for PeopleCodeProg,
+	;; which requires init() to be filled out on the parent
+	;; and ComponentPeopleCodeProg to derive from it.
+	;; TODO: Think about ways to make caching cleaner and to replace the
+	;; use of guards that are preventing various functions from executing
+	;; more than once.
+)

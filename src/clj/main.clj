@@ -8,7 +8,9 @@
 
 (defn -main [& args]
 	(INFO log "main starting...")
-	(DEBUG log (str (component/init "SSS_STUDENT_CENTER" "GBL")))
+	(def inited-comp (component/init "SSS_STUDENT_CENTER" "GBL"))
+	(DEBUG log (str inited-comp))
 	(DEBUG log (str (menu/init "SA_LEARNER_SERVICES")))
+	(DEBUG log (str (component/load-programs inited-comp)))
 	(INFO log "-main exiting.")
 )

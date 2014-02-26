@@ -25,6 +25,13 @@
 			<AppenderRef ref="Console-Clojure"/>
 		</Logger>
 
+	  <!-- c3p0 (logs to slf4j as directed in resources/mchange-log.properties,
+				 which is then redirected to log4j2 due to the presence of
+				 the log4j-slf4j-impl Maven dependency) -->
+		<Logger name="com.mchange" level="WARN" additivity="false">
+			<AppenderRef ref="Console-Less"/>
+		</Logger>
+
 		<!-- JAVA LOGGERS -->
 		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
 		<Logger name="com.enterrupt.sql" level="WARN"/>

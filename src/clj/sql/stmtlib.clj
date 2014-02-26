@@ -6,7 +6,7 @@
 (def ^{:private true} jdbc-url
 	"jdbc:oracle:thin:SYSADM/SYSADM@//10.0.0.88:1521/XENCSDEV")
 
-(def pooled-conn-ds
+(def ^{:private true} pooled-conn-ds
 	"Returns the pooled connection's underlying DataSource
    in the form of a map."
 	(delay
@@ -30,7 +30,7 @@
 			pnlgrpname market]
 		func))
 
-(defn query-pspnlgroup
+(defn query-pnlgroup
 	[[pnlgrpname market] func]
 	(jdbc/db-query-with-resultset
 		@pooled-conn-ds	
@@ -38,4 +38,26 @@
 					"SUBITEMNUM FROM PSPNLGROUP WHERE PNLGRPNAME = ? AND MARKET = ? "
 					"ORDER BY SUBITEMNUM")
 			pnlgrpname market]
+		func))
+
+(defn query-menudefn
+	[[menuname] func]
+	(jdbc/db-query-with-resultset
+		@pooled-conn-ds
+		[(str "SELECT MENULABEL, MENUGROUP, GROUPORDER, MENUORDER, "
+					"VERSION, INSTALLED, GROUPSEP, MENUSEP, MENUTYPE, OBJECTOWNERID, "
+					"LASTUPDOPRID, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),"
+					"'YYYY-MM-DD-HH24.MI.SS.FF'), DESCR, DESCRLONG FROM PSMENUDEFN "
+					"WHERE MENUNAME = ?")
+			menuname]
+		func))
+
+(defn query-menuitem
+	[[menuname] func]
+	(jdbc/db-query-with-resultset
+		@pooled-conn-ds
+		[(str "SELECT BARNAME, ITEMNAME, BARLABEL, ITEMLABEL, "
+					"MARKET, ITEMTYPE, PNLGRPNAME, SEARCHRECNAME, ITEMNUM, "
+					"XFERCOUNT FROM PSMENUITEM WHERE MENUNAME = ? ORDER BY ITEMNUM")
+			menuname]
 		func))

@@ -6,7 +6,8 @@
 
 (def ^{:private true} log (get-log *ns*))
 
-(defn init-component [pnlgrpname market]
+(defn init
+	[pnlgrpname market]
 	(INFO log "Loading Component:{}.{}" (object-array [pnlgrpname market]))
 
 	(def initial-rec (stmtlib/query-pnlgrpdefn
@@ -21,7 +22,7 @@
 					 :searchrecname
 					 :primaryaction]))))
 
-	(def pages (stmtlib/query-pspnlgroup
+	(def pages (stmtlib/query-pnlgroup
 		[pnlgrpname market]
 		(fn [rs]
 			(def rs-seq (jdbc/result-set-seq rs))

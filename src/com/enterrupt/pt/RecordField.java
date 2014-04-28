@@ -30,12 +30,22 @@ public class RecordField {
 		switch(this.typeFlag) {
 			case 0:
                 return PTString.getSentinel();
+			case 1: // TODO: 0 is char, 1 is long char: should I distinguish?
+                return PTString.getSentinel();
             case 2:
                 return PTNumber.getSentinel();
+			case 3: // TODO: 2 is unsigned, 3 is signed: should I distinguish?
+				return PTNumber.getSentinel();
             case 4:
                 return PTDate.getSentinel();
+            case 5:
+                return PTTime.getSentinel();
 			case 6:
 				return PTDateTime.getSentinel();
+			case 8:	// TODO: 8 is image/attachment; doesn't need to be stored.
+				return PTString.getSentinel();
+			case 9:	// TODO: 9 is image reference; doesn't need to be stored.
+				return PTString.getSentinel();
             default:
 				throw new EntVMachRuntimeException("Unable to determine " +
 					"appropriate sentinel for underlying record field " +

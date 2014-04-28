@@ -2,6 +2,7 @@ package com.enterrupt.types;
 
 import java.sql.*;
 import java.util.*;
+import java.util.regex.*;
 import java.lang.reflect.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.sql.*;
@@ -64,6 +65,25 @@ public class PTRecord extends PTObjectType {
 	}
 
 	public PTField getField(String fldName) {
+
+		/**
+		 * Unwrap the field name from any function calls like TO_CHAR.
+		 */
+		Pattern toCharPattern = Pattern.compile("TO_CHAR\\(([^,]*),'YYYY-MM-DD'\\)");
+		Matcher toCharMatcher = toCharPattern.matcher(fldName);
+		if(toCharMatcher.find()) {
+			fldName = toCharMatcher.group(1);
+		}
+
+		/**
+		 * Remove any record or "FILL" prefix from the field name.
+		 */
+		Pattern dotPattern = Pattern.compile("([^\\.]*)\\.(.*)");
+		Matcher dotMatcher = dotPattern.matcher(fldName);
+		if(dotMatcher.find()) {
+			fldName = dotMatcher.group(2);
+		}
+
 		if(!this.fields.containsKey(fldName)) {
 			throw new EntVMachRuntimeException("Call to getField with fldname=" +
 				fldName + " did not match any field on this record: " + this.toString());

@@ -19,6 +19,15 @@ public class RecordBuffer implements IStreamableBuffer {
     public ArrayList<RecordFieldBuffer> fieldBuffers;
     private boolean hasBeenExpanded;
 
+	/**
+	 * IMPORTANT: I am using this to hold the actual data in the
+	 * buffer rather than store it in the individual field buffers.
+	 * At least for now, the RecordFieldBuffers are the authoritative source
+	 * on *which* fields are available in the component. The PTRecord
+	 * contains the data.
+	 */
+	private PTRecord underlyingRecord;
+
 	// Used for reading.
 	private boolean hasEmittedSelf = false;
 	private int fieldBufferCursor = 0;
@@ -50,6 +59,8 @@ public class RecordBuffer implements IStreamableBuffer {
 		if(EFFDT != null && EFFDT.isKey()) {
 			this.addPageField(this.recName, "EFFDT");
 		}
+
+		this.underlyingRecord = PTRecord.getSentinel().alloc(recDefn);
     }
 
 	public void firstPassFill() {
@@ -66,6 +77,22 @@ public class RecordBuffer implements IStreamableBuffer {
 			if(pstmt == null) { return; }
 
 			rs = pstmt.executeQuery();
+
+			ResultSetMetaData rsMetadata = rs.getMetaData();
+			int numCols = rsMetadata.getColumnCount();
+
+			if(rs.next()) { // record may legitimately be empty.
+				Record recDefn = DefnCache.getRecord(this.recName);
+				for(int i = 1; i <= numCols; i++) {
+					String colName = rsMetadata.getColumnName(i);
+					String colTypeName = rsMetadata.getColumnTypeName(i);
+					PTField fldObj = this.underlyingRecord.getField(colName);
+					log.debug("Before: {} = {}", colName, fldObj);
+					GlobalFnLibrary.readFieldFromResultSet(fldObj,
+						colName, colTypeName, rs);
+					log.debug("After: {} = {}", colName, fldObj);
+				}
+			}
 			rs.next();	// TODO: Fill underlying record fields with data.
 
 		} catch(java.sql.SQLException sqle) {

@@ -1,8 +1,9 @@
 package com.enterrupt.runtime;
 
-import java.util.*;
-import com.enterrupt.pt.*;
 import java.sql.*;
+import java.util.*;
+import java.util.regex.*;
+import com.enterrupt.pt.*;
 import com.enterrupt.types.*;
 import org.apache.logging.log4j.*;
 
@@ -199,24 +200,13 @@ public class GlobalFnLibrary {
 	public static void readRecordFromResultSet(Record recDefn,
 			PTRecord recObj, ResultSet rs) throws SQLException {
 
-		List<RecordField> rfList = recDefn.getExpandedFieldList();
 		ResultSetMetaData rsMetadata = rs.getMetaData();
 		int numCols = rsMetadata.getColumnCount();
 
-		/**
-		 * NOTE: This code assumes that the query issued to obtain the
-		 * provided ResultSet requested all of the columns in the record.
-		 */
 		for(int i = 1; i <= numCols; i++) {
-			/**
-			 * rfList MUST be used to retrieve the name of the column here;
-			 * the name in the JDBC ResultSet could be different if the
-			 * query aliased the column name.
-			 */
-			PTField fldObj = recObj.getField(rfList.get(i-1).FIELDNAME);
-
 			String colName = rsMetadata.getColumnName(i);
 			String colTypeName = rsMetadata.getColumnTypeName(i);
+			PTField fldObj = recObj.getField(colName);
 			GlobalFnLibrary.readFieldFromResultSet(fldObj,
 				colName, colTypeName, rs);
 		}

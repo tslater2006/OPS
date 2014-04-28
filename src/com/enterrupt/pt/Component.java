@@ -213,8 +213,25 @@ public class Component {
 		try {
 			pstmt = StmtLibrary.getSearchRecordFillQuery();
 			rs = pstmt.executeQuery();
-			rs.next();   // Do nothing with records for now.
 
+			ResultSetMetaData rsMetadata = rs.getMetaData();
+			int numCols = rsMetadata.getColumnCount();
+
+			if(rs.next()) {	// search record may be empty
+				PTRecord searchRecord = ComponentBuffer.searchRecord;
+				for(int i = 1; i <= numCols; i++) {
+					String colName = rsMetadata.getColumnName(i);
+					String colTypeName = rsMetadata.getColumnTypeName(i);
+					PTField fldObj = searchRecord.getField(colName);
+					GlobalFnLibrary.readFieldFromResultSet(fldObj,
+						colName, colTypeName, rs);
+				}
+				if(rs.next()) {
+					throw new EntVMachRuntimeException(
+						"Result set for search record fill has more than " +
+						"one record.");
+				}
+			}
         } catch(java.sql.SQLException sqle) {
             log.fatal(sqle.getMessage(), sqle);
             System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());

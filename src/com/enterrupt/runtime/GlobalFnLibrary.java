@@ -203,11 +203,21 @@ public class GlobalFnLibrary {
 		ResultSetMetaData rsMetadata = rs.getMetaData();
 		int numCols = rsMetadata.getColumnCount();
 
+		/**
+		 * NOTE: This code assumes that the query issued to obtain the
+		 * provided ResultSet requested all of the columns in the record.
+		 */
 		for(int i = 1; i <= numCols; i++) {
-			PTField newFld = recObj.getField(rfList.get(i-1).FIELDNAME);
+			/**
+			 * rfList MUST be used to retrieve the name of the column here;
+			 * the name in the JDBC ResultSet could be different if the
+			 * query aliased the column name.
+			 */
+			PTField fldObj = recObj.getField(rfList.get(i-1).FIELDNAME);
+
 			String colName = rsMetadata.getColumnName(i);
 			String colTypeName = rsMetadata.getColumnTypeName(i);
-			GlobalFnLibrary.readFieldFromResultSet(newFld,
+			GlobalFnLibrary.readFieldFromResultSet(fldObj,
 				colName, colTypeName, rs);
 		}
 	}

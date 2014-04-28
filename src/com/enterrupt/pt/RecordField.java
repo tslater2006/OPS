@@ -34,10 +34,13 @@ public class RecordField {
                 return PTNumber.getSentinel();
             case 4:
                 return PTDate.getSentinel();
+			case 6:
+				return PTDateTime.getSentinel();
             default:
 				throw new EntVMachRuntimeException("Unable to determine " +
 					"appropriate sentinel for underlying record field " +
-					"value given a typeFlag of: " + this.typeFlag);
+					"value given a typeFlag of: " + this.typeFlag + "; " +
+					"RECNAME=" + RECNAME + ", FIELDNAME=" + FIELDNAME);
 		}
 	}
 

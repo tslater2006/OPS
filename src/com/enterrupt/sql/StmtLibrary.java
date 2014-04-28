@@ -393,6 +393,87 @@ public class StmtLibrary {
 		return selectClause.toString();
 	}
 
+	public static PreparedStatement prepareFirstPassFillQuery(
+		RecordBuffer rbuf) {
+
+		/**
+		 * Iterate over the fields in the expanded record field list
+		 * and select each of those in the statment. For each field that is
+		 * a key, add it to the WHERE clause and get its value from the
+		 * scroll buffer chain.
+		 */
+		Record recDefn = DefnCache.getRecord(rbuf.recName);
+		List<RecordField> rfList = recDefn.getExpandedFieldList();
+
+		/**
+		 * Ensure all keys have an associated value in the scroll
+		 * buffer hierarchy. If any key does not, do not continue.
+		 */
+		for(RecordField rf : rfList) {
+			if(rf.isKey()
+				&& rbuf.sbuf.getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
+				log.debug("Aborting first pass fill for Record.{}; " +
+					"value does not exist for key: {}", rbuf.recName, rf.FIELDNAME);
+				return null;
+			}
+		}
+
+		/**
+		 * Begin building fill query.
+		 */
+		StringBuilder query = new StringBuilder("SELECT ");
+		ArrayList<String> bindVals = new ArrayList<String>();
+
+		for(int i = 0; i < rfList.size(); i++) {
+			if(i > 0) { query.append(", "); }
+			String fieldname = rfList.get(i).FIELDNAME;
+
+			// Selected date fields must be wrapped with TO_CHAR directive.
+			if(rfList.get(i).getSentinelForUnderlyingValue()
+				instanceof PTDate) {
+				query.append("TO_CHAR(").append(fieldname)
+					.append(",'YYYY-MM-DD')");
+			} else {
+				query.append(fieldname);
+			}
+		}
+
+		query.append(" FROM PS_").append(rbuf.recName);
+
+		int i = 0;
+		for(RecordField rf : rfList) {
+			if(rf.isKey()) {
+				if(i == 0) { query.append(" WHERE "); }
+				if(i > 0) { query.append(" AND "); }
+				String val = (String)rbuf.sbuf.getKeyValueFromHierarchy(
+					rf.FIELDNAME).read();
+				query.append(rf.FIELDNAME).append("=?");
+				bindVals.add(val);
+				i++;
+			}
+		}
+
+		i = 0;
+		for(RecordField rf : rfList) {
+			if(rf.isKey()) {
+				if(i == 0) { query.append(" ORDER BY "); }
+				if(i > 0) { query.append(", "); }
+				query.append(rf.FIELDNAME);
+				if(rf.isDescendingKey()) {
+					query.append(" DESC");
+				}
+				i++;
+			}
+		}
+
+		ENTStmt stmt = new ENTStmt(query.toString());
+		for(i = 0; i < bindVals.size(); i++) {
+			stmt.bindVals.put(i+1, bindVals.get(i));
+		}
+
+		return stmt.generateEnforcedPreparedStmt(conn);
+	}
+
 	public static void disconnect() {
 		try {
 			conn.close();

@@ -1,14 +1,17 @@
 package com.enterrupt.buffers;
 
+import java.sql.*;
 import java.util.*;
 import java.lang.StringBuilder;
 import com.enterrupt.pt.*;
+import com.enterrupt.sql.*;
+import com.enterrupt.types.*;
 import com.enterrupt.runtime.*;
 import org.apache.logging.log4j.*;
 
 public class RecordBuffer implements IStreamableBuffer {
 
-	public ScrollBuffer parentSB;
+	public ScrollBuffer sbuf;
     public String recName;
     public int scrollLevel;
     public boolean isPrimaryScrollRecordBuffer;
@@ -24,7 +27,7 @@ public class RecordBuffer implements IStreamableBuffer {
 
     public RecordBuffer(ScrollBuffer p, String r,
 						int scrollLevel, String primaryRecName) {
-		this.parentSB = p;
+		this.sbuf = p;
         this.recName = r;
         this.scrollLevel = scrollLevel;
 
@@ -48,6 +51,33 @@ public class RecordBuffer implements IStreamableBuffer {
 			this.addPageField(this.recName, "EFFDT");
 		}
     }
+
+	public void firstPassFill() {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			pstmt = StmtLibrary.prepareFirstPassFillQuery(this);
+
+			/**
+			 * If null comes back, one or more key values is not
+			 * available, and thus the fill cannot be run.
+			 */
+			if(pstmt == null) { return; }
+
+			rs = pstmt.executeQuery();
+			rs.next();	// TODO: Fill underlying record fields with data.
+
+		} catch(java.sql.SQLException sqle) {
+			log.fatal(sqle.getMessage(), sqle);
+			System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+		} finally {
+			try {
+				if(rs != null) { rs.close(); }
+				if(pstmt != null) { pstmt.close(); }
+			} catch(java.sql.SQLException sqle) {}
+		}
+	}
 
     public void addPageField(String RECNAME, String FIELDNAME) {
 

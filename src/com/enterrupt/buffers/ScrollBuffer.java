@@ -5,6 +5,7 @@ import java.lang.StringBuilder;
 import com.enterrupt.pt.*;
 import com.enterrupt.pt.pages.*;
 import com.enterrupt.types.*;
+import com.enterrupt.runtime.*;
 
 public class ScrollBuffer implements IStreamableBuffer {
 
@@ -41,6 +42,29 @@ public class ScrollBuffer implements IStreamableBuffer {
         this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
 		this.recEntryTable = new HashMap<String, PTRecord>();
     }
+
+	public PTPrimitiveType getKeyValueFromHierarchy(String fldName) {
+		if(this.parent == null) {
+			/**
+			 * Examine the search record of the component buffer
+			 * if this is the level 0 scroll buffer.
+			 */
+			if(ComponentBuffer.searchRecord.hasField(fldName)) {
+				return ComponentBuffer.searchRecord.getField(fldName)
+					.getValue();
+			}
+		} else {
+			/**
+			 * Examine the primary scroll record of the *parent* scroll
+			 * buffer, not this scroll buffer. If key value exists,
+			 * return it, otherwise call this method on the parent's parent
+			 * scroll buffer.
+			 */
+			throw new EntVMachRuntimeException("Need to support getting "+
+				"key values from scroll 1 and/or 2 of comp buffer.");
+		}
+		return null;
+	}
 
     public void addPageField(PgToken tok) {
 

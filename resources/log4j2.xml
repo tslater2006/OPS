@@ -33,8 +33,7 @@
 		</Logger>
 
 		<!-- JAVA LOGGERS -->
-		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
-		<Logger name="com.enterrupt.sql" level="WARN"/>
+		<Logger name="com.enterrupt.sql" level="DEBUG"/>
 		<Logger name="com.enterrupt.runtime" level="INFO"/>
 		<Logger name="com.enterrupt.runtime.DefnCache" level="DEBUG"/>
 		<Logger name="com.enterrupt.runtime.TraceFileVerifier" level="DEBUG"/>
@@ -46,6 +45,8 @@
 		<Logger name="com.enterrupt.pt.Component" level="DEBUG"/>
 		<Logger name="com.enterrupt.antlr4" level="DEBUG"/>
 		<Logger name="com.enterrupt.pt.pages" level="DEBUG"/>
+		<Logger name="com.enterrupt.buffers" level="DEBUG"/>
 		<Logger name="com.enterrupt.buffers.ComponentBuffer" level="DEBUG"/>
+		<Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
     </Loggers>
 </Configuration>

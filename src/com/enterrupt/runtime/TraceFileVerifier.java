@@ -75,9 +75,9 @@ public class TraceFileVerifier {
 	}
 
 	public static void enforceEmission(IEmission evmEmission) {
-		if(!(evmEmission instanceof ENTStmt)) {
+		//if(!(evmEmission instanceof ENTStmt)) {
 			log.debug(evmEmission);
-		}
+		//}
 
 		IEmission traceEmission;
 		if(coverageAreaStartLineNbr == 0) {

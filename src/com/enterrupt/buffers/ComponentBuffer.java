@@ -131,11 +131,14 @@ public class ComponentBuffer {
 
 				/**
 				 * For the first pass, only fill table and view
-				 * (i.e., not derived) buffers.
+				 * (i.e., not derived) buffers that have at least
+				 * one key (altho fill will be canceled if not all
+				 * key values are known).
 				 */
 				Record recDefn = DefnCache.getRecord(rbuf.recName);
-				if(recDefn.isTable() || recDefn.isView()) {
-					log.info("FIRST PASS: {}", rbuf.recName);
+				if(recDefn.isTable() || recDefn.isView()
+					&& recDefn.hasAnyKeys()) {
+					rbuf.firstPassFill();
 				}
             }
         }

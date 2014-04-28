@@ -255,6 +255,16 @@ public class GlobalFnLibrary {
 						"colName=" + colName);
 				}
 				break;
+			case DATETIME:
+				if(colTypeName.equals("VARCHAR2")) {
+					((PTDateTime)fldObj.getValue()).write(
+						rs.getString(colName));
+				} else {
+					throw new EntVMachRuntimeException("Unexpected db " +
+						"type for Type.DATETIME: " + colTypeName + "; " +
+						"colName=" + colName);
+				}
+				break;
 			default:
 				throw new EntVMachRuntimeException("Unexpected field " +
 					"value type encountered when filling rowset: " +

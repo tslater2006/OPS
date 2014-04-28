@@ -427,12 +427,15 @@ public class StmtLibrary {
 		for(int i = 0; i < rfList.size(); i++) {
 			if(i > 0) { query.append(", "); }
 			String fieldname = rfList.get(i).FIELDNAME;
+			PTType val = rfList.get(i)
+				.getSentinelForUnderlyingValue();
 
-			// Selected date fields must be wrapped with TO_CHAR directive.
-			if(rfList.get(i).getSentinelForUnderlyingValue()
-				instanceof PTDate) {
+			if(val instanceof PTDate) {
 				query.append("TO_CHAR(").append(fieldname)
 					.append(",'YYYY-MM-DD')");
+			} else if(val instanceof PTDateTime) {
+				query.append("TO_CHAR(CAST((").append(fieldname)
+					.append(") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')");
 			} else {
 				query.append(fieldname);
 			}

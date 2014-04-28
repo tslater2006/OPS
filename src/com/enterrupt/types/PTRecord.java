@@ -67,21 +67,34 @@ public class PTRecord extends PTObjectType {
 	public PTField getField(String fldName) {
 
 		/**
-		 * Unwrap the field name from any function calls like TO_CHAR.
+		 * Unwrap datetime fields.
+		 * "ASTIMESTAMP" is not a typo; no spaces exist in the name as
+		 * returned in the ResultSet.
 		 */
-		Pattern toCharPattern = Pattern.compile("TO_CHAR\\(([^,]*),'YYYY-MM-DD'\\)");
-		Matcher toCharMatcher = toCharPattern.matcher(fldName);
-		if(toCharMatcher.find()) {
-			fldName = toCharMatcher.group(1);
+		Pattern dtPattern = Pattern.compile("TO_CHAR\\(CAST\\(\\(([^\\)]*)\\)ASTIMESTAMP\\),'YYYY-MM-DD-HH24\\.MI\\.SS\\.FF'\\)");
+		Matcher dtMatcher = dtPattern.matcher(fldName);
+		if(dtMatcher.find()) {
+			fldName = dtMatcher.group(1);
+		}
+
+		/**
+		 * Unwrap date fields.
+		 */
+		Pattern datePattern = Pattern.compile("TO_CHAR\\(([^,]*),'YYYY-MM-DD'\\)");
+		Matcher dateMatcher = datePattern.matcher(fldName);
+		if(dateMatcher.find()) {
+			fldName = dateMatcher.group(1);
 		}
 
 		/**
 		 * Remove any record or "FILL" prefix from the field name.
 		 */
-		Pattern dotPattern = Pattern.compile("([^\\.]*)\\.(.*)");
-		Matcher dotMatcher = dotPattern.matcher(fldName);
-		if(dotMatcher.find()) {
-			fldName = dotMatcher.group(2);
+		if(fldName.contains(".")) {
+			Pattern dotPattern = Pattern.compile("([^\\.]*)\\.(.*)");
+			Matcher dotMatcher = dotPattern.matcher(fldName);
+			if(dotMatcher.find()) {
+				fldName = dotMatcher.group(2);
+			}
 		}
 
 		if(!this.fields.containsKey(fldName)) {

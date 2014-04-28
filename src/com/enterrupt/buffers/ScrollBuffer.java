@@ -46,7 +46,7 @@ public class ScrollBuffer implements IStreamableBuffer {
 
         RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
         if(r == null) {
-            r = new RecordBuffer(tok.RECNAME, this.scrollLevel, this.primaryRecName);
+            r = new RecordBuffer(this, tok.RECNAME, this.scrollLevel, this.primaryRecName);
             this.recBufferTable.put(r.recName, r);
             orderedRecBuffers.add(r);
         }

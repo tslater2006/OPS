@@ -112,4 +112,32 @@ public class ComponentBuffer {
             }
         }
 	}
+
+	/**
+     * MQUINN 04-27-2014
+     * Filling the component buffer involves multiple passes, total
+     * involved is dynamic I believe. I'm calling this just the first
+     * pass for now. The goal is to delegate as much of the filling part
+     * to the buffers themselves, as that will be the same across all passes.
+	 */
+	public static void firstPassFill() {
+        IStreamableBuffer buf;
+
+        ComponentBuffer.resetCursors();
+        while((buf = ComponentBuffer.next()) != null) {
+
+            if(buf instanceof RecordBuffer) {
+                RecordBuffer rbuf = (RecordBuffer) buf;
+
+				/**
+				 * For the first pass, only fill table and view
+				 * (i.e., not derived) buffers.
+				 */
+				Record recDefn = DefnCache.getRecord(rbuf.recName);
+				if(recDefn.isTable() || recDefn.isView()) {
+					log.info("FIRST PASS: {}", rbuf.recName);
+				}
+            }
+        }
+	}
 }

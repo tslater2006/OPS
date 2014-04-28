@@ -37,6 +37,8 @@ public class Main {
 			c.assembleComponentStructure();
 			ComponentBuffer.printStructure();
 			ComponentStructureVerifier.verify();
+			ComponentBuffer.firstPassFill();
+
 			TraceFileVerifier.logVerificationSummary(false);
 
 		} catch(EntVMachRuntimeException evmre) {

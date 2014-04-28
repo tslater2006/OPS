@@ -150,6 +150,14 @@ public class Record {
         }
 	}
 
+	public boolean isTable() {
+		return this.RECTYPE == 0;
+	}
+
+	public boolean isView() {
+		return this.RECTYPE == 1;
+	}
+
 	public boolean isSubrecord() {
 		return this.RECTYPE == 3;
 	}

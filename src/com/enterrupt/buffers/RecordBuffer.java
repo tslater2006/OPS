@@ -8,6 +8,7 @@ import org.apache.logging.log4j.*;
 
 public class RecordBuffer implements IStreamableBuffer {
 
+	public ScrollBuffer parentSB;
     public String recName;
     public int scrollLevel;
     public boolean isPrimaryScrollRecordBuffer;
@@ -21,7 +22,9 @@ public class RecordBuffer implements IStreamableBuffer {
 
 	private Logger log = LogManager.getLogger(RecordBuffer.class.getName());
 
-    public RecordBuffer(String r, int scrollLevel, String primaryRecName) {
+    public RecordBuffer(ScrollBuffer p, String r,
+						int scrollLevel, String primaryRecName) {
+		this.parentSB = p;
         this.recName = r;
         this.scrollLevel = scrollLevel;
 

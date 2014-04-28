@@ -204,55 +204,61 @@ public class GlobalFnLibrary {
 		int numCols = rsMetadata.getColumnCount();
 
 		for(int i = 1; i <= numCols; i++) {
-			String colName = rsMetadata.getColumnName(i);
 			PTField newFld = recObj.getField(rfList.get(i-1).FIELDNAME);
+			String colName = rsMetadata.getColumnName(i);
 			String colTypeName = rsMetadata.getColumnTypeName(i);
+			GlobalFnLibrary.readFieldFromResultSet(newFld,
+				colName, colTypeName, rs);
+		}
+	}
 
-			log.debug("Copying {} with type {} from resultset to Field:{} "+
-				"with type flag {}", colName, colTypeName,
-				newFld.recFieldDefn.FIELDNAME, newFld.getValue().getType());
+	public static void readFieldFromResultSet(PTField fldObj,
+			String colName, String colTypeName, ResultSet rs) throws SQLException {
 
-			switch(newFld.getValue().getType()) {
-				case STRING:
-					if(colTypeName.equals("VARCHAR2")) {
-						((PTString)newFld.getValue()).write(
-							rs.getString(colName));
+		log.debug("Copying {} with type {} from resultset to Field:{} "+
+			"with type flag {}", colName, colTypeName,
+			fldObj.recFieldDefn.FIELDNAME, fldObj.getValue().getType());
+
+		switch(fldObj.getValue().getType()) {
+			case STRING:
+				if(colTypeName.equals("VARCHAR2")) {
+					((PTString)fldObj.getValue()).write(
+						rs.getString(colName));
+				} else {
+					throw new EntVMachRuntimeException("Unexpected db " +
+						"type for Type.STRING: " + colTypeName + "; " +
+						"colName=" + colName);
+				}
+				break;
+			case NUMBER:
+				if(colTypeName.equals("NUMBER")) {
+					if(rs.getDouble(colName) % 1 == 0) {
+						((PTNumber)fldObj.getValue()).write(
+							rs.getInt(colName));
 					} else {
-						throw new EntVMachRuntimeException("Unexpected db " +
-							"type for Type.STRING: " + colTypeName + "; " +
-							"colName=" + colName);
+						((PTNumber)fldObj.getValue()).write(
+							rs.getDouble(colName));
 					}
-					break;
-				case NUMBER:
-					if(colTypeName.equals("NUMBER")) {
-						if(rs.getDouble(colName) % 1 == 0) {
-							((PTNumber)newFld.getValue()).write(
-								rs.getInt(colName));
-						} else {
-							((PTNumber)newFld.getValue()).write(
-								rs.getDouble(colName));
-						}
-					} else {
-						throw new EntVMachRuntimeException("Unexpected db " +
-							"type for Type.NUMBER: " + colTypeName + "; " +
-							"colName=" + colName);
-					}
-					break;
-				case DATE:
-					if(colTypeName.equals("VARCHAR2")) {
-						((PTDate)newFld.getValue()).write(
-							rs.getString(colName));
-					} else {
-						throw new EntVMachRuntimeException("Unexpected db " +
-							"type for Type.DATE: " + colTypeName + "; " +
-							"colName=" + colName);
-					}
-					break;
-				default:
-					throw new EntVMachRuntimeException("Unexpected field " +
-						"value type encountered when filling rowset: " +
-						 newFld.getValue().getType());
-			}
+				} else {
+					throw new EntVMachRuntimeException("Unexpected db " +
+						"type for Type.NUMBER: " + colTypeName + "; " +
+						"colName=" + colName);
+				}
+				break;
+			case DATE:
+				if(colTypeName.equals("VARCHAR2")) {
+					((PTDate)fldObj.getValue()).write(
+						rs.getString(colName));
+				} else {
+					throw new EntVMachRuntimeException("Unexpected db " +
+						"type for Type.DATE: " + colTypeName + "; " +
+						"colName=" + colName);
+				}
+				break;
+			default:
+				throw new EntVMachRuntimeException("Unexpected field " +
+					"value type encountered when filling rowset: " +
+					 fldObj.getValue().getType());
 		}
 	}
 }

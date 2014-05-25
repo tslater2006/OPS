@@ -1,24 +1,72 @@
 ---
 - hosts: all
   user: deploy
-  sudo: yes
   gather_facts: no
   vars:
-    jdk_binary: jdk-7u55-linux-x64.tar.gz
+    jdk_v_maj: 7
+    jdk_v_min: 55
+    jdk_archive: jdk-{{jdk_v_maj}}u{{jdk_v_min}}-linux-x64.tar.gz
+    jdk_dir: jdk1.{{jdk_v_maj}}.0_{{jdk_v_min}}
     unix_user_dev: opsdev
   tasks:
 
 #  - name: update apt cache before dist-upgrading
+#    sudo: yes
 #    apt: update_cache=yes upgrade=dist
 
   - name: add/check for opsdev user account
-    user: name={{ unix_user_dev }} shell=/bin/bash state=present
+    sudo: yes
+    user: name={{unix_user_dev}} shell=/bin/bash state=present
 
   - name: copy pub keys to dev user account
-    authorized_key: user={{ unix_user_dev }}
-      key="{{ lookup('file', '/home/mquinn/.ssh/xen_rsa.pub') }}"
-    authorized_key: user={{ unix_user_dev }}
-      key="{{ lookup('file', '/home/mquinn/.ssh/mquinn-aws.pub') }}"
+    sudo: yes
+    authorized_key: user={{unix_user_dev}}
+      key="{{lookup('file', '/home/mquinn/.ssh/xen_rsa.pub')}}"
+    authorized_key: user={{unix_user_dev}}
+      key="{{lookup('file', '/home/mquinn/.ssh/mquinn-aws.pub')}}"
 
-  - name: copy Oracle JDK7 binary to hosts
-    copy: src=jdk_binaries/{{ jdk_binary }} dest=/tmp/{{ jdk_binary }}
+  - name: ensure dir for jdk binaries exists
+    file: path=/home/deploy/jdk_binaries state=directory
+
+  - name: upload Oracle JDK7 archive
+    copy: src=jdk_binaries/{{jdk_archive}}
+            dest=/home/deploy/jdk_binaries/{{jdk_archive}}
+
+  - name: ensure jvm dir exists
+    sudo: yes
+    file: path=/usr/lib/jvm  state=directory
+
+  - name: ensure target jdk dir is gone prior to archive extraction
+    sudo: yes
+    file: path=/usr/lib/jvm/{{jdk_dir}} state=absent
+
+  # MQUINN: --no-same-owner ensures files are owned by root (not uucp)
+  - name: extract Oracle JDK7 archive to jvm dir
+    sudo: yes
+    command: tar xvf /home/deploy/jdk_binaries/{{jdk_archive}} 
+      -C /usr/lib/jvm --no-same-owner
+
+  - name: point to extracted java binary
+    sudo: yes
+    alternatives: name=java link=/usr/bin/java
+      path=/usr/lib/jvm/{{jdk_dir}}/bin/java
+
+  - name: point to extracted javac binary
+    sudo: yes
+    alternatives: name=javac link=/usr/bin/javac
+      path=/usr/lib/jvm/{{jdk_dir}}/bin/javac
+
+  - name: point to extracted javaws binary
+    sudo: yes
+    alternatives: name=javaws link=/usr/bin/javaws
+      path=/usr/lib/jvm/{{jdk_dir}}/bin/javaws
+
+  - name: gather java version
+    command: java -version
+    register: java_ver
+  - debug: var=java_ver.stderr
+
+  - name: gather javac version
+    command: javac -version    
+    register: javac_ver
+  - debug: var=javac_ver.stderr

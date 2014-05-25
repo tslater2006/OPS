@@ -1,0 +1,8 @@
+---
+- hosts: all
+  sudo: yes
+  gather_facts: no
+  tasks:
+  - name: update apt cache before dist-upgrading
+    apt: update_cache=yes upgrade=dist
+

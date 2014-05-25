@@ -24,7 +24,7 @@
 	<target name="antlr">
 
 		<!-- Remove previously generated lexer and parser. -->
-		<delete>
+		<delete failonerror="false">
 			<fileset dir="${ANTLR_SRC_DIR}" includes="*.java"/>
 		</delete>
 

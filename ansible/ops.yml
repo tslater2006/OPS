@@ -1,8 +1,24 @@
 ---
 - hosts: all
+  user: deploy
   sudo: yes
   gather_facts: no
+  vars:
+    jdk_binary: jdk-7u55-linux-x64.tar.gz
+    unix_user_dev: opsdev
   tasks:
-  - name: update apt cache before dist-upgrading
-    apt: update_cache=yes upgrade=dist
 
+#  - name: update apt cache before dist-upgrading
+#    apt: update_cache=yes upgrade=dist
+
+  - name: add/check for opsdev user account
+    user: name={{ unix_user_dev }} shell=/bin/bash state=present
+
+  - name: copy pub keys to dev user account
+    authorized_key: user={{ unix_user_dev }}
+      key="{{ lookup('file', '/home/mquinn/.ssh/xen_rsa.pub') }}"
+    authorized_key: user={{ unix_user_dev }}
+      key="{{ lookup('file', '/home/mquinn/.ssh/mquinn-aws.pub') }}"
+
+  - name: copy Oracle JDK7 binary to hosts
+    copy: src=jdk_binaries/{{ jdk_binary }} dest=/tmp/{{ jdk_binary }}

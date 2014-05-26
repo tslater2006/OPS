@@ -7,7 +7,7 @@
 # user on the target machine with typical deployment privileges (i.e,
 # ability to sudo).
 
-- name: ensure local dir to hold jdk binaries exists
+- name: ensure local dir exists to hold jdk archive
   file: path=/home/{{ansible_ssh_user}}/files state=directory
 
 - name: upload Oracle JDK{{jdk_v_maj}}u{{jdk_v_min}} archive

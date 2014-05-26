@@ -1,0 +1,4 @@
+This role expects a tar'ed and gzipped archive
+of the Apache Ant binaries that you wish to install
+on the target hosts. Adjust the variable values in
+the role-specific vars file accordingly.

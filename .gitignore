@@ -10,4 +10,4 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
-ansible/archive_files
+ansible/roles/*/files/*.tar.gz

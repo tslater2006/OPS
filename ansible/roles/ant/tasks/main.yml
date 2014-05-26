@@ -1,0 +1,27 @@
+---
+# This role installs Apache Ant on the target host, and sets relevant
+# environment variables only for the UNIX user that will be developing
+# the OPS codebase.
+#
+# NOTE: This role expects the {{ansible_ssh_user}} var to refer to a UNIX
+# user capable of typical deployment tasks (i.e., ability to sudo).
+
+- name: upload Apache Ant archive
+  copy: src={{ant_archive}}
+          dest=/home/{{ansible_ssh_user}}/files/{{ant_archive}}
+
+# MQUINN: --no-same-owner ensures files are owned by root (not uucp)
+- name: extract Apache Ant archive to /opt
+  sudo: yes
+  command: tar xvf /home/{{ansible_ssh_user}}/files/{{ant_archive}} 
+    -C /opt --no-same-owner
+
+- name: set ANT_HOME for UNIX user *{{ops_unix_user}}*
+  sudo: yes
+  lineinfile: dest=/home/{{ops_unix_user}}/.profile
+    line="export ANT_HOME=/opt/{{ant_dir}}"
+
+- name: add Ant to $PATH for UNIX user *{{ops_unix_user}}*
+  sudo: yes
+  lineinfile: dest=/home/{{ops_unix_user}}/.profile
+    line="export PATH=$PATH:$ANT_HOME/bin"

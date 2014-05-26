@@ -1,0 +1,7 @@
+---
+git_name: Matt Quinn
+git_email: matt@mattjquinn.com
+github_key_file: github_ops_rsa
+git_repo_path: /home/{{ops_unix_user}}/ops
+git_remote_url: ssh://git@github.com/mquinn/OpenPplSoft.git
+

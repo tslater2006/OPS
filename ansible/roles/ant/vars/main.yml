@@ -1,0 +1,6 @@
+---
+ant_v_maj: 1
+ant_v_min: 9
+ant_v_patch: 4
+ant_dir: apache-ant-{{ant_v_maj}}.{{ant_v_min}}.{{ant_v_patch}}
+ant_archive: apache-ant-{{ant_v_maj}}.{{ant_v_min}}.{{ant_v_patch}}-bin.tar.gz

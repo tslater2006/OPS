@@ -1,0 +1,67 @@
+---
+# This role configures a UNIX user account for OPS development, then
+# ensures that the OPS codebase is present in that user's home directory.
+
+- name: ensure UNIX user *{{ops_unix_user}}* exists
+  sudo: yes
+  user: name={{ops_unix_user}} shell=/bin/bash state=present
+
+# MQUINN: The value of {{host_identity_pub_key}} differs for each host;
+#   see the host-specific variable defined a few hiearchies above this file.
+- name: copy host-specific SSH pub ident file for *{{ops_unix_user}}*
+  sudo: yes
+  authorized_key: user={{ops_unix_user}} state=present
+     key="{{ lookup('file', '/home/mquinn/.ssh/' + host_identity_pub_key) }}"
+
+- name: ensure git is installed
+  sudo: yes
+  apt: name=git state=present
+
+- name: ensure make is installed
+  sudo: yes
+  apt: name=build-essential state=present
+
+- name: copy private key for authenticating with GitHub
+  sudo: yes
+  sudo_user: "{{ops_unix_user}}"
+  copy: src=/home/mquinn/.ssh/{{github_key_file}}
+    dest=/home/{{ops_unix_user}}/.ssh/{{github_key_file}}
+    owner={{ops_unix_user}} group={{ops_unix_user}} mode=0600
+
+####################################################################
+# The remaining tasks should be done as the UNIX user under which  #
+# OPS development will take place; thus, ensure "sudo: yes" exists #
+# and the sudo_user is set to {{ops_unix_user}}.                   #
+####################################################################
+
+- name: ensure GitHub key is always present in the auth agent
+  sudo: yes
+  sudo_user: "{{ops_unix_user}}"
+  lineinfile: dest=/home/{{ops_unix_user}}/.ssh/config
+    create=yes line="IdentityFile ~/.ssh/{{github_key_file}}"
+    owner={{ops_unix_user}} group={{ops_unix_user}} mode=0600
+
+- name: configure git commit authorship email
+  sudo: yes
+  sudo_user: "{{ops_unix_user}}"
+  command: git config --global user.email "{{git_email}}"
+
+- name: configure git commit authorship name
+  sudo: yes
+  sudo_user: "{{ops_unix_user}}"
+  command: git config --global user.name "{{git_name}}"
+
+- name: check if repo already exists on instance
+  sudo: yes
+  sudo_user: "{{ops_unix_user}}"
+  stat: path={{git_repo_path}}
+  register: repo_exists
+
+- name: clone OPS repo from GitHub (only if target path is nonexistent)
+  sudo: yes
+  sudo_user: "{{ops_unix_user}}"
+  git: repo={{git_remote_url}}
+       accept_hostkey=yes
+       key_file=/home/{{ansible_ssh_user}}/.ssh/{{github_key_file}}
+       dest={{git_repo_path}}
+  when: repo_exists.stat.exists == false

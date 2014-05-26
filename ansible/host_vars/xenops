@@ -1,0 +1,3 @@
+---
+host_identity_pub_key: xen_rsa.pub
+ansible_ssh_port: 4

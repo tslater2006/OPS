@@ -1,0 +1,5 @@
+---
+jdk_v_maj: 7
+jdk_v_min: 55
+jdk_dir: jdk1.{{jdk_v_maj}}.0_{{jdk_v_min}}
+jdk_archive: jdk-{{jdk_v_maj}}u{{jdk_v_min}}-linux-x64.tar.gz

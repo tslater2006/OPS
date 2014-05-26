@@ -1,0 +1,59 @@
+---
+# This role installs an Oracle JDK to the target host. See jdk7/vars/main.yml
+# for relevant variables. The JDK archive to be installed must be
+# in jdk7/files.
+#
+# NOTE: This role expects the {{ansible_ssh_user}} var to refer to a UNIX
+# user on the target machine with typical deployment privileges (i.e,
+# ability to sudo).
+
+- name: ensure local dir to hold jdk binaries exists
+  file: path=/home/{{ansible_ssh_user}}/files state=directory
+
+- name: upload Oracle JDK{{jdk_v_maj}}u{{jdk_v_min}} archive
+  copy: src={{jdk_archive}}
+          dest=/home/{{ansible_ssh_user}}/files/{{jdk_archive}}
+
+- name: ensure jvm dir exists
+  sudo: yes
+  file: path=/usr/lib/jvm  state=directory
+
+- name: ensure target jdk dir is gone prior to archive extraction
+  sudo: yes
+  file: path=/usr/lib/jvm/{{jdk_dir}} state=absent
+
+# MQUINN: --no-same-owner ensures files are owned by root (not uucp)
+- name: extract Oracle JDK{{jdk_v_maj}}u{{jdk_v_min}} archive to jvm dir
+  sudo: yes
+  command: tar xvf /home/{{ansible_ssh_user}}/files/{{jdk_archive}} 
+    -C /usr/lib/jvm --no-same-owner
+
+- name: point to extracted java binary
+  sudo: yes
+  alternatives: name=java link=/usr/bin/java
+    path=/usr/lib/jvm/{{jdk_dir}}/bin/java
+
+- name: point to extracted javac binary
+  sudo: yes
+  alternatives: name=javac link=/usr/bin/javac
+    path=/usr/lib/jvm/{{jdk_dir}}/bin/javac
+
+- name: point to extracted javaws binary
+  sudo: yes
+  alternatives: name=javaws link=/usr/bin/javaws
+    path=/usr/lib/jvm/{{jdk_dir}}/bin/javaws
+
+- name: set JAVA_HOME for UNIX user *{{ops_unix_user}}*
+  sudo: yes
+  lineinfile: dest=/home/{{ops_unix_user}}/.profile
+    line="export JAVA_HOME=/usr/lib/jvm/{{jdk_dir}}"
+
+- name: gather java version
+  command: java -version
+  register: java_ver
+- debug: var=java_ver.stderr
+
+- name: gather javac version
+  command: javac -version    
+  register: javac_ver
+- debug: var=javac_ver.stderr

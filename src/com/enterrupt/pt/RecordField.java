@@ -15,8 +15,9 @@ public class RecordField {
 	private final int KEY_FLAG = 1;
 	private final int ALTERNATE_SEARCH_KEY_FLAG = 16;
 	private final int DESCENDING_KEY_FLAG = 64;
-	private final int SEARCH_KEY_FLAG = 2048;
 	private final int LISTBOX_ITEM_FLAG = 32;
+	private final int REQUIRED_FLAG = 256;
+	private final int SEARCH_KEY_FLAG = 2048;
 
 	private static Logger log = LogManager.getLogger(RecordField.class.getName());
 
@@ -72,6 +73,10 @@ public class RecordField {
 
 	public boolean isListBoxItem() {
 		return ((this.USEEDIT & this.LISTBOX_ITEM_FLAG) > 0);
+	}
+
+	public boolean isRequired() {
+		return ((this.USEEDIT & this.REQUIRED_FLAG) > 0);
 	}
 }
 

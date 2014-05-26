@@ -410,10 +410,10 @@ public class StmtLibrary {
 		 * buffer hierarchy. If any key does not, do not continue.
 		 */
 		for(RecordField rf : rfList) {
-			if(rf.isKey()
+			if(rf.isSearchKey()
 				&& rbuf.sbuf.getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
 				log.debug("Aborting first pass fill for Record.{}; " +
-					"value does not exist for key: {}", rbuf.recName, rf.FIELDNAME);
+					"value does not exist for search key: {}", rbuf.recName, rf.FIELDNAME);
 				return null;
 			}
 		}
@@ -445,7 +445,7 @@ public class StmtLibrary {
 
 		int i = 0;
 		for(RecordField rf : rfList) {
-			if(rf.isKey()) {
+			if(rf.isSearchKey()) {
 				if(i == 0) { query.append(" WHERE "); }
 				if(i > 0) { query.append(" AND "); }
 				String val = (String)rbuf.sbuf.getKeyValueFromHierarchy(
@@ -458,7 +458,7 @@ public class StmtLibrary {
 
 		i = 0;
 		for(RecordField rf : rfList) {
-			if(rf.isKey()) {
+			if(rf.isSearchKey()) {
 				if(i == 0) { query.append(" ORDER BY "); }
 				if(i > 0) { query.append(", "); }
 				query.append(rf.FIELDNAME);

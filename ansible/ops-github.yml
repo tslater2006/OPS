@@ -1,0 +1,36 @@
+---
+- hosts: all
+  user: opsdev
+  gather_facts: no
+  vars:
+    git_repo_path: /home/{{ansible_ssh_user}}/ops
+    git_email: matt@mattjquinn.com
+    git_name: Matt Quinn
+  tasks:
+
+  - name: copy GitHub key used for OPS development
+    copy: src=/home/mquinn/.ssh/github_ops_rsa
+      dest=/home/opsdev/.ssh/github_ops_rsa
+      owner=opsdev group=opsdev mode=0600
+
+  - name: ensure GitHub key is always present in the auth agent
+    lineinfile: dest=/home/opsdev/.ssh/config
+      create=yes line="IdentityFile ~/.ssh/github_ops_rsa"
+      owner=opsdev group=opsdev mode=0600
+
+  - name: configure git commit authorship email
+    command: git config --global user.email "{{git_email}}"
+
+  - name: configure git commit authorship name
+    command: git config --global user.name "{{git_name}}"
+
+  - name: check if repo already exists on instance
+    stat: path={{git_repo_path}}
+    register: repo_exists
+
+  - name: clone OPS repo from GitHub (only if target path is nonexistent)
+    git: repo=ssh://git@github.com/mquinn/OpenPplSoft.git
+          accept_hostkey=yes
+          key_file=/home/{{ansible_ssh_user}}/.ssh/github_ops_rsa
+          dest={{git_repo_path}}
+    when: repo_exists.stat.exists == false

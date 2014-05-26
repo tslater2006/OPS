@@ -10,4 +10,4 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
-ansible/jdk_binaries
+ansible/archive_files

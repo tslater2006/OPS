@@ -1,6 +1,6 @@
 OpenPplSoft is licensed under the MIT License:
 
-> Copyright (c) 2014: Matt Quinn and other contributors:
+> Copyright (c) 2013, 2014: Matt Quinn and other contributors:
 > 
 > https://github.com/OpenPplSoft/OPS/contributors
 > 

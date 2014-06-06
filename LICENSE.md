@@ -25,5 +25,5 @@ OpenPplSoft is licensed under the MIT License:
 
 External libraries, if used, include their own licenses:
 
-- [Decode PeopleCode](http://openpplsoft.org/DecodePeopleCodeLicense.txt)
-- [ANTLR4](http://openpplsoft.org/ANTLR4License.txt)
+- [Decode PeopleCode](http://openpplsoft.org/assests/DecodePeopleCodeLicense.txt)
+- [ANTLR4](http://openpplsoft.org/assets/ANTLR4License.txt)

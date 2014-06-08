@@ -1,11 +1,12 @@
-<!---------------------------------------------------------------------------->
-<!--                       The OpenPplSoft Runtime Project                   ->
-<!--                                                                         ->
-<!--              This file is distributed under the MIT License.            ->
-<!--                         See LICENSE.md for details.                     ->
-<!---------------------------------------------------------------------------->
-
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--========================================================================-->
+<!--                       The OpenPplSoft Runtime Project                  -->
+<!--                                                                        -->
+<!--              This file is distributed under the MIT License.           -->
+<!--                         See LICENSE.md for details.                    -->
+<!--========================================================================-->
+
 <Configuration status="WARN">
   <Appenders>
       <Console name="Console-Less" target="SYSTEM_OUT">

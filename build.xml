@@ -1,55 +1,55 @@
 <project name="ENT Server" default="build" basedir=".">
 
-	<description>Build file for the ENT app server / db broker.</description>
+  <description>Build file for the ENT app server / db broker.</description>
 
-	<presetdef name="javac">
-		<javac includeantruntime="false"/>
-	</presetdef>
+  <presetdef name="javac">
+    <javac includeantruntime="false"/>
+  </presetdef>
 
-	<property name="ANTLR_SRC_DIR" value="${basedir}/src/com/enterrupt/antlr4/frontend"/>
-	<property name="ANTLR_JAR" value="${basedir}/lib/antlr-4.1-complete.jar"/>
+  <property name="ANTLR_SRC_DIR" value="${basedir}/src/com/enterrupt/antlr4/frontend"/>
+  <property name="ANTLR_JAR" value="${basedir}/lib/antlr-4.1-complete.jar"/>
 
-	<target name="build_all">
-		<mkdir dir="bin"/>
-		<javac srcdir="src" destdir="bin" debug="true">
-			<compilerarg value="-Xlint:unchecked"/>
-			<classpath>
-				<fileset dir="lib">
-					<include name="*.jar"/>
-				</fileset>
-			</classpath>
-		</javac>
-	</target>
+  <target name="build_all">
+    <mkdir dir="bin"/>
+    <javac srcdir="src" destdir="bin" debug="true">
+      <compilerarg value="-Xlint:unchecked"/>
+      <classpath>
+        <fileset dir="lib">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
 
-	<target name="antlr">
+  <target name="antlr">
 
-		<!-- Remove previously generated lexer and parser. -->
-		<delete failonerror="false">
-			<fileset dir="${ANTLR_SRC_DIR}" includes="*.java"/>
-		</delete>
+    <!-- Remove previously generated lexer and parser. -->
+    <delete failonerror="false">
+      <fileset dir="${ANTLR_SRC_DIR}" includes="*.java"/>
+    </delete>
 
-		<!-- Generate a lexer and parser for the PeopleCode grammar. -->
-		<exec executable="java">
-			<arg value="-jar"/>
-			<arg value="${ANTLR_JAR}"/>
-			<arg value="-lib"/>
-			<arg value="${basedir}/grammars"/>
-			<arg value="-o"/>
-			<arg value="${ANTLR_SRC_DIR}"/>
-			<arg value="-package"/>
-			<arg value="com.enterrupt.antlr4.frontend"/>
-			<arg value="-visitor"/>
-			<arg value="-listener"/>
-			<arg value="${basedir}/grammars/PeopleCode.g4"/>
-		</exec>
+    <!-- Generate a lexer and parser for the PeopleCode grammar. -->
+    <exec executable="java">
+      <arg value="-jar"/>
+      <arg value="${ANTLR_JAR}"/>
+      <arg value="-lib"/>
+      <arg value="${basedir}/grammars"/>
+      <arg value="-o"/>
+      <arg value="${ANTLR_SRC_DIR}"/>
+      <arg value="-package"/>
+      <arg value="com.enterrupt.antlr4.frontend"/>
+      <arg value="-visitor"/>
+      <arg value="-listener"/>
+      <arg value="${basedir}/grammars/PeopleCode.g4"/>
+    </exec>
 
-		<!-- .tokens files not needed at runtime -->
-		<delete>
-			<fileset dir="${ANTLR_SRC_DIR}" includes="*.tokens"/>
-		</delete>
-	</target>
+    <!-- .tokens files not needed at runtime -->
+    <delete>
+      <fileset dir="${ANTLR_SRC_DIR}" includes="*.tokens"/>
+    </delete>
+  </target>
 
-	<target name="clean">
-		<delete dir="bin"/>
-	</target>
+  <target name="clean">
+    <delete dir="bin"/>
+  </target>
 </project>

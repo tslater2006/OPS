@@ -1,3 +1,10 @@
+;*===---------------------------------------------------------------------===*;
+;*                       The OpenPplSoft Runtime Project                     *;
+;*                                                                           *;
+;*              This file is distributed under the MIT License.              *;
+;*                         See LICENSE.md for details.                       *;
+;*===---------------------------------------------------------------------===*;
+
 (defproject ops "0.1.0-SNAPSHOT"
   :description "An open source alternative runtime engine for Oracle's PeopleSoft applications."
   :url "http://openpplsoft.org"

@@ -32,7 +32,8 @@
 
   <target name="build_all">
     <mkdir dir="bin"/>
-    <javac srcdir="src" destdir="bin" debug="true">
+    <javac srcdir="src" destdir="bin" debug="true"
+        excludes="**/package-info.java">
       <compilerarg value="-Xlint:unchecked"/>
       <classpath>
         <fileset dir="lib">

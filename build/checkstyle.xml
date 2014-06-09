@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+  <!-- Ensures that there are no tab characters in the file. -->
+  <module name="FileTabCharacter">
+    <property name="eachLine" value="true"/>
+  </module>
+
+  <!-- Files exceeding 1500 lines in length are prohibited. -->
+  <module name="FileLength">
+    <property name="max" value="1500"/>
+  </module>
+
+  <!-- All source files must have the license header at the top. -->
+  <module name="Header">
+    <property name="headerFile" value="build/java.header"/>
+    <property name="fileExtensions" value="java"/>
+  </module>
+
+  <!-- All files must end with a Unix-style newline. -->
+  <module name="NewlineAtEndOfFile">
+    <property name="lineSeparator" value="lf"/>
+  </module>
+
+  <!-- Checks that FIXME is not used in comments.  TODO is preferred. -->
+  <module name="RegexpSingleline">
+    <property name="format" value="((//.*)|(\*.*))FIXME" />
+    <property name="message" value='TODO is preferred to FIXME.  e.g. "TODO(johndoe): Refactor when v2 is released."' />
+  </module>
+
+  <!-- Checks that TODOs are named.  (Actually, just that they are followed by an open paren.) -->
+  <module name="RegexpSingleline">
+    <property name="format" value="((//.*)|(\*.*))TODO[^(]" />
+    <property name="message" value='All TODOs should be named.  e.g. "TODO(johndoe): Refactor when v2 is released."' />
+  </module>
+
+  <!-- Ensure each package has a Javadoc file (package-info.java). -->
+  <module name="JavadocPackage"/>
+
+  <!-- All Java AST specific tests live under TreeWalker module. -->
+  <module name="TreeWalker">
+
+    <!-- Enforce ordering of imports; static imports at the top, then java(x);
+         a line must separate each group. -->
+    <module name="ImportOrder">
+      <property name="groups" value="/^javax?\./,org"/>
+      <property name="ordered" value="true"/>
+      <property name="separated" value="true"/>
+      <property name="option" value="top"/>
+      <property name="tokens" value="STATIC_IMPORT, IMPORT"/>
+    </module>
+
+    <!-- Forbid star imports, except for the packages explicitly excluded below. -->
+    <module name="AvoidStarImport">
+      <property name="excludes" value="com.enterrupt.runtime"/>
+      <property name="allowClassImports" value="false"/>
+      <property name="allowStaticMemberImports" value="false"/>
+    </module>
+
+    <!-- Enforce Javadoc documentation of all public and protected methods. -->
+    <module name="JavadocMethod">
+      <property name="scope" value="protected"/>
+    </module>
+
+    <!-- Enforce Javadoc documentation of all public and protected classes and interfaces. -->
+    <module name="JavadocType">
+      <property name="scope" value="protected"/>
+    </module>
+
+    <!-- Enforce good Javadoc style for all Javadoc comments. -->
+    <module name="JavadocStyle"/>
+
+    <!-- Validates identifiers for package names against the
+         supplied expression. -->
+    <module name="PackageName">
+      <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]{1,})*$"/>
+    </module>
+
+    <!-- Validates static, final fields against the
+         expression "^[A-Z][a-zA-Z0-9]*$". -->
+    <module name="TypeNameCheck">
+      <metadata name="altname" value="TypeName"/>
+    </module>
+
+    <!-- Validates non-private, static, final fields against the supplied
+         public/package final fields "^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$". -->
+    <module name="ConstantNameCheck">
+      <metadata name="altname" value="ConstantName"/>
+      <property name="applyToPublic" value="true"/>
+      <property name="applyToProtected" value="true"/>
+      <property name="applyToPackage" value="true"/>
+      <property name="applyToPrivate" value="false"/>
+      <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|FLAG_.*)$"/>
+      <message key="name.invalidPattern"
+               value="Variable ''{0}'' should be in ALL_CAPS (if it is a constant) or be private (otherwise)."/>
+    </module>
+
+    <!-- Validates static, non-final fields against the supplied
+         expression "^[a-z][a-zA-Z0-9]*_?$". -->
+    <module name="StaticVariableNameCheck">
+      <metadata name="altname" value="StaticVariableName"/>
+      <property name="applyToPublic" value="true"/>
+      <property name="applyToProtected" value="true"/>
+      <property name="applyToPackage" value="true"/>
+      <property name="applyToPrivate" value="true"/>
+      <property name="format" value="^[a-z][a-zA-Z0-9]*_?$"/>
+    </module>
+
+    <module name="MemberNameCheck">
+      <!-- Validates non-static members against the supplied expression. -->
+      <metadata name="altname" value="MemberName"/>
+      <property name="applyToPublic" value="true"/>
+      <property name="applyToProtected" value="true"/>
+      <property name="applyToPackage" value="true"/>
+      <property name="applyToPrivate" value="true"/>
+      <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+    </module>
+
+    <module name="MethodNameCheck">
+      <!-- Validates identifiers for method names. -->
+      <metadata name="altname" value="MethodName"/>
+      <property name="format" value="^[a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$"/>
+    </module>
+
+    <!-- Validates identifiers for method parameters against the
+         expression "^[a-z][a-zA-Z0-9]*$". -->
+    <module name="ParameterName">
+    </module>
+
+    <!-- Validates identifiers for local final variables against the
+         expression "^[a-z][a-zA-Z0-9]*$". -->
+    <module name="LocalFinalVariableName"/>
+
+    <!-- Validates identifiers for local variables against the
+         expression "^[a-z][a-zA-Z0-9]*$". -->
+    <module name="LocalVariableName"/>
+
+    <!-- Checks that classes that define a covariant equals() method also override method equals(java.lang.Object). -->
+    <module name="CovariantEquals"/>
+
+    <!-- If a file has a cyclomatic complexity >= 11, it needs to be refactored. -->
+    <module name="CyclomaticComplexity">
+      <property name="max" value="7"/>
+    </module>
+
+    <!-- Enforces declaration order according to Java coding conventions. -->
+    <module name="DeclarationOrder"/>
+
+    <!-- Ensure that the default case in a switch statement always comes last. -->
+    <module name="DefaultComesLast"/>
+
+    <!-- No empty blocks allowed. -->
+    <module name="EmptyBlock"/>
+
+    <!-- No empty statements allowed. -->
+    <module name="EmptyStatement"/>
+
+    <!-- If equals() is overriden, hashCode() must be as well. -->
+    <module name="EqualsHashCode"/>
+
+    <!-- If any class or obj member is explicitly initialized to its default type,
+         it is redundant (as Java already does this automatically) and should be removed. -->
+    <module name="ExplicitInitialization"/>
+
+    <!-- Enforce presence of "// fall through" for every case in a switch that falls through. -->
+    <module name="FallThrough"/>
+
+    <!-- A class consisting solely of private constructors must be declared final.-->
+    <module name="FinalClass"/>
+
+    <!-- Local vars and params that don't have their value changed must be declared final.-->
+    <module name="FinalLocalVariable">
+      <property name="tokens" value="VARIABLE_DEF,PARAMETER_DEF"/>
+    </module>
+
+    <!-- Enforce typical rules concerning whitespace around generics. -->
+    <module name="GenericWhitespace"/>
+
+    <!-- Method/constructor/catch block params should never be changed, must be final. -->
+    <module name="FinalParameters">
+      <property name="tokens" value="CTOR_DEF"/>
+    </module>
+
+    <!-- Local vars and parameters must not shadow hidden fields. -->
+    <module name="HiddenField"/>
+
+    <!-- Utility classes (only private fields/methods) must not have a public constructor. -->
+    <module name="HideUtilityClassConstructor"/>
+
+    <!-- Exception, Throwable, and RTE must not be caught. -->
+    <module name="IllegalCatch"/>
+
+    <!-- Exception, Throwable, and RTE must not be declared to be thrown. -->
+    <module name="IllegalThrows"/>
+
+    <!-- Forbid the clone() method on the Object class from being overriden. -->
+    <module name="NoClone"/>
+
+    <!-- Forbid the presence of any methods named finalize() in any object (conflicts with Java spec). -->
+    <module name="NoFinalizer"/>
+
+    <!-- Indentation should be incremented in units of 2 spaces. -->
+    <module name="Indentation">
+      <property name="basicOffset" value="2"/>
+      <property name="braceAdjustment" value="0"/>
+      <property name="caseIndent" value="2"/>
+      <property name="throwsIndent" value="2"/>
+    </module>
+
+    <!-- Magic numbers (non-final constants excluding -1, 0, 1, 2) are prohibited. -->
+    <module name="MagicNumber"/>
+
+    <!-- The outer type and the file name must match. -->
+    <module name="OuterTypeFilename"/>
+
+    <!-- Only permit one outer type per file. -->
+    <module name="OuterTypeNumber"/>
+
+    <!-- Ensure each class has a package decl and that it matches the directory name. -->
+    <module name="PackageDeclaration"/>
+
+    <!-- Forbid assignment of parameters. -->
+    <module name="ParameterAssignment"/>
+
+    <!-- Methods and constructors are limited to a maximum of 7 parameters. -->
+    <module name="ParameterNumber">
+      <property name="max" value="7"/>
+    </module>
+
+    <!-- Checks if a line exceeds 80 chars. -->
+    <module name="LineLength">
+      <property name="max" value="80"/>
+      <!-- The default ignore pattern exempts the following elements:
+           - import statements
+           - long URLs inside comments -->
+      <property name="ignorePattern"
+          value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.ignorePattern}"
+          default="^(package .*;\s*)|(import .*;\s*)|( *\* *https?://.*)$"/>
+    </module>
+
+    <!-- Left brace must be at the end of the line, not on a new line. -->
+    <module name="LeftCurly">
+      <property name="option" value="eol"/>
+    </module>
+
+    <!-- Right brace must be on same line as next keyword, or at end of line. -->
+    <module name="RightCurly">
+      <property name="option" value="same"/>
+    </module>
+
+    <!-- Enforces presence of braces around all code blocks. -->
+    <module name="NeedBraces"/>
+
+    <!-- Checks that long constants are defined with an upper ell.-->
+    <module name="UpperEll"/>
+
+    <!-- Anonymous inner classes must not exceed 20 lines in length. -->
+    <module name="AnonInnerLength">
+      <property name="max" value="20"/>
+    </module>
+
+    <!-- Array type definitions must use Java style (i.e., String[], not args[]). -->
+    <module name="ArrayTypeStyle">
+      <property name="javaStyle" value="true"/>
+    </module>
+
+    <!-- Forbid inner assignment in expressions in all constructs except for loops. -->
+    <module name="InnerAssignment"/>
+
+    <!-- Nested classes and interfaces must be declared last. -->
+    <module name="InnerTypeLast"/>
+
+    <!-- Interfaces must contain at least one method; forbid any that only define constants. -->
+    <module name="InterfaceIsType"/>
+
+    <!-- Enforce non-commenting source statement maximums. -->
+    <module name="JavaNCSS">
+      <property name="methodMaximum" value="50"/>
+      <property name="classMaximum" value="1500"/>
+      <property name="fileMaximum" value="2000"/>
+    </module>
+
+    <!-- Non-abstract classes must define a constructor. -->
+    <module name="MissingCtor"/>
+
+    <!-- Every switch statement must have a default case. -->
+    <module name="MissingSwitchDefault"/>
+
+    <!-- For loop control vars must not be modified within the block. -->
+    <module name="ModifiedControlVariable"/>
+
+    <!-- Warn if modifier order is inconsistent with JLS3 8.1.1, 8.3.1, and
+         8.4.3.  The prescribed order is:
+         public, protected, private, abstract, static, final, transient, volatile,
+         synchronized, native, strictfp -->
+    <module name="ModifierOrder"/>
+
+    <!-- Multiple occurrences of a string literal should be refactored into
+         a single instance. -->
+    <module name="MultipleStringLiterals"/>
+
+    <!-- Only one statement is allowed per line. -->
+    <module name="OneStatementPerLine"/>
+
+    <!-- All tokens except assgmt operators must wrap to a newline. -->
+    <module name="OperatorWrap"/>
+
+    <!-- Checks that various tokens are surrounded by whitespace.
+         This includes most binary operators and keywords followed
+         by regular or curly braces. -->
+    <module name="WhitespaceAround">
+      <property name="tokens" value="ASSIGN, BAND, BAND_ASSIGN, BOR,
+        BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV, DIV_ASSIGN,
+        EQUAL, GE, GT, LAND, LE, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE,
+        LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN,
+        LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS,
+        MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION,
+        SL, SL_ASSIGN, SR_ASSIGN, STAR, STAR_ASSIGN"/>
+    </module>
+
+    <!-- Checks that commas, semicolons and typecasts are followed by
+         whitespace. -->
+    <module name="WhitespaceAfter">
+      <property name="tokens" value="COMMA, SEMI, TYPECAST"/>
+    </module>
+
+    <!-- Checks that there is no whitespace after various unary operators.
+         Linebreaks are allowed. -->
+    <module name="NoWhitespaceAfter">
+      <property name="tokens" value="BNOT, DEC, DOT, INC, LNOT, UNARY_MINUS,
+        UNARY_PLUS"/>
+      <property name="allowLineBreaks" value="true"/>
+    </module>
+
+    <!-- Checks that there is no whitespace before various unary operators.
+         Linebreaks are allowed. -->
+    <module name="NoWhitespaceBefore">
+      <property name="tokens" value="SEMI, DOT, POST_DEC, POST_INC"/>
+      <property name="allowLineBreaks" value="true"/>
+    </module>
+
+    <!-- Checks that there is no whitespace before close parens or after
+           open parens. -->
+    <module name="ParenPad"/>
+
+    <!-- Forbid redundant imports. -->
+    <module name="RedundantImport"/>
+
+    <!-- Forbid redundant modifiers. -->
+    <module name="RedundantModifier"/>
+
+    <!-- Forbid redundant throws. -->
+    <module name="RedundantThrows"/>
+
+    <!-- Require explicit use of this keyword when referencing local vars and methods. -->
+    <module name="RequireThis"/>
+
+    <!-- Forbid use of == or != when comparing Strings. -->
+    <module name="StringLiteralEquality"/>
+
+    <!-- Warn about all TODO comments. -->
+    <module name="TodoComment">
+      <property name="format" value="TODO"/>
+      <property name="severity" value="error"/>
+    </module>
+
+    <!-- Forbid trailing comments. -->
+    <module name="TrailingComment"/>
+
+    <!-- Forbid padding of parentheses for typecast. -->
+    <module name="TypecastParenPad"/>
+
+    <!-- Forbid main methods in any class except Main. -->
+    <module name="UncommentedMain">
+      <property name="excludedClasses" value="\.Main$"/>
+    </module>
+
+    <!-- Only allow static final class members to be public; rest must be private;
+         this enforces encapsulation. -->
+    <module name="VisibilityModifier"/>
+  </module>
+</module>
+

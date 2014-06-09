@@ -27,14 +27,14 @@ JAVA_D=-Duser.timezone=GMT -Dlog4j.configurationFile=resources/log4j2.xml -DComp
 -DtraceFileDate=$(TRACE_FILE_DATE) -Ddefn_stmts_file=conf/defn_stmts.conf
 
 # For execution on local Xen server.
-#JAVA_D+= -DDbSID=XENCSDEV
-#JAVA_D+= -DDbIP=10.0.0.88
-#JAVA_D+= -DDbDriver=jdbc:oracle:thin
+JAVA_D+= -DDbSID=XENCSDEV
+JAVA_D+= -DDbIP=10.0.0.88
+JAVA_D+= -DDbDriver=jdbc:oracle:thin
 
 # For execution on AWS VPC.
-JAVA_D+= -DDbSID=ENTCSDEV
-JAVA_D+= -DDbIP=10.0.1.88
-JAVA_D+= -DDbDriver=jdbc:oracle:thin
+#JAVA_D+= -DDbSID=ENTCSDEV
+#JAVA_D+= -DDbIP=10.0.1.88
+#xJAVA_D+= -DDbDriver=jdbc:oracle:thin
 
 # Enables OCI driver on AWS VPC; must remember to uncomment "thin" line above.
 #OCI_DIR=/usr/lib/oracle/12.1/client64/lib

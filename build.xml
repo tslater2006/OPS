@@ -16,6 +16,20 @@
   <property name="ANTLR_SRC_DIR" value="${basedir}/src/com/enterrupt/antlr4/frontend"/>
   <property name="ANTLR_JAR" value="${basedir}/lib/antlr-4.1-complete.jar"/>
 
+  <taskdef resource="checkstyletask.properties"
+         classpath="${basedir}/lib/checkstyle-5.7-all.jar"/>
+
+  <target name="checkstyle"
+        description="Generates a report of code convention violations.">
+    <checkstyle config="build/checkstyle.xml"
+                failureProperty="checkstyle.failure"
+                failOnViolation="true">
+      <fileset dir="src">
+        <include name="com/enterrupt/runtime/**.java"/>
+      </fileset>
+    </checkstyle>
+  </target>
+
   <target name="build_all">
     <mkdir dir="bin"/>
     <javac srcdir="src" destdir="bin" debug="true">

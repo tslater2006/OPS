@@ -15,6 +15,9 @@ import com.enterrupt.runtime.*;
 import com.enterrupt.sql.*;
 import com.enterrupt.types.*;
 
+/**
+ * Main entry point for the OPS runtime.
+ */
 public class Main {
 
   private static Logger log = LogManager.getLogger(Main.class.getName());

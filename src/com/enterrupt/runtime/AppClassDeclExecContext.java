@@ -7,13 +7,19 @@
 
 package com.enterrupt.runtime;
 
-import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.runtime.*;
-import com.enterrupt.types.*;
+import com.enterrupt.types.PTAppClassObj;
 
+/**
+ * Execution of an app class requires evaluation starting
+ * at the class' declaration node; this differs from
+ * non-app class PeopleCode programs.
+ */
 public class AppClassDeclExecContext extends ExecContext {
 
-  public AppClassDeclExecContext(PTAppClassObj obj) {
+  /**
+   * @param obj The app class around which to form an execution context.
+   */
+  public AppClassDeclExecContext(final PTAppClassObj obj) {
     super(obj.progDefn);
     this.startNode = obj.progDefn.getClassDeclNode();
   }

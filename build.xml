@@ -25,7 +25,8 @@
                 failureProperty="checkstyle.failure"
                 failOnViolation="true">
       <fileset dir="src">
-        <include name="com/enterrupt/runtime/**.java"/>
+        <include name="com/enterrupt/Main.java"/>
+        <!-- <include name="com/enterrupt/runtime/AppClassDeclExecContext.java"/>-->
       </fileset>
     </checkstyle>
   </target>

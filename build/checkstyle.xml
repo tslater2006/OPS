@@ -56,7 +56,7 @@
 
     <!-- Forbid star imports, except for the packages explicitly excluded below. -->
     <module name="AvoidStarImport">
-      <property name="excludes" value="com.enterrupt.runtime"/>
+      <property name="excludes" value="com.enterrupt.runtime,com.enterrupt.pt,com.enterrupt.buffers"/>
       <property name="allowClassImports" value="false"/>
       <property name="allowStaticMemberImports" value="false"/>
     </module>
@@ -301,7 +301,9 @@
 
     <!-- Multiple occurrences of a string literal should be refactored into
          a single instance. -->
-    <module name="MultipleStringLiterals"/>
+    <module name="MultipleStringLiterals">
+      <property name="allowedDuplicates" value="2"/>
+    </module>
 
     <!-- Only one statement is allowed per line. -->
     <module name="OneStatementPerLine"/>

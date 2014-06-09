@@ -7,22 +7,31 @@
 
 package com.enterrupt;
 
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.enterrupt.buffers.*;
 import com.enterrupt.pt.*;
 import com.enterrupt.runtime.*;
 import com.enterrupt.sql.*;
-import com.enterrupt.types.*;
 
 /**
- * Main entry point for the OPS runtime.
+ * Main entry class for the OPS runtime.
  */
-public class Main {
+public final class Main {
 
   private static Logger log = LogManager.getLogger(Main.class.getName());
 
-  public static void main(String[] args) {
+  /**
+   * Default no-arg constructor.
+   */
+  private Main() {}
+
+  /**
+   * Main entry point for the OPS runtime.
+   * @param args command line args to main
+   */
+  public static void main(final String[] args) {
 
     try {
       Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
@@ -33,9 +42,9 @@ public class Main {
       Environment.setSystemVar("%OperatorId", "KADAMS");
       Environment.setSystemVar("%EmployeeId", "AA0001");
 
-      Component c = new Component(
+      final Component c = new Component(
           (String) Environment.getSystemVar("%Component").read(), "GBL");
-      Menu m = new Menu(
+      final Menu m = new Menu(
           (String) Environment.getSystemVar("%Menu").read());
 
       c.getListOfComponentPC();
@@ -52,18 +61,15 @@ public class Main {
 
       TraceFileVerifier.logVerificationSummary(false);
 
-    } catch (EntVMachRuntimeException evmre) {
+    } catch (final EntVMachRuntimeException evmre) {
       log.fatal(evmre.getMessage(), evmre);
       TraceFileVerifier.logVerificationSummary(true);
       System.exit(ExitCode.ENT_VIRTUAL_MACH_RUNTIME_EXCEPTION.getCode());
-    } catch (Exception ex) {
-      log.fatal(ex.getMessage(), ex);
-      TraceFileVerifier.logVerificationSummary(true);
-      System.exit(ExitCode.GENERIC_FAILURE.getCode());
     }
   }
 
   private static class ENTShutdownHook extends Thread {
+    public ENTShutdownHook() {}
     public void run() {
       StmtLibrary.disconnect();
       TraceFileVerifier.closeTraceFile();

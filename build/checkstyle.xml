@@ -56,7 +56,8 @@
 
     <!-- Forbid star imports, except for the packages explicitly excluded below. -->
     <module name="AvoidStarImport">
-      <property name="excludes" value="com.enterrupt.runtime,com.enterrupt.pt,com.enterrupt.buffers"/>
+      <property name="excludes" value="com.enterrupt.runtime,
+        com.enterrupt.pt,com.enterrupt.buffers,com.enterrupt.pt.peoplecode"/>
       <property name="allowClassImports" value="false"/>
       <property name="allowStaticMemberImports" value="false"/>
     </module>

@@ -1,3 +1,10 @@
+#*===---------------------------------------------------------------------===*#
+#*                       The OpenPplSoft Runtime Project                     *#
+#*                                                                           *#
+#*              This file is distributed under the MIT License.              *#
+#*                         See LICENSE.md for details.                       *#
+#*===---------------------------------------------------------------------===*#
+
 # Note: TRACE_FILE_DATE Overrides the current date used by the EVM in order
 # to emit the correct date for trace file verification purposes.
 
@@ -37,8 +44,8 @@ JAVA_D+= -DDbDriver=jdbc:oracle:thin
 all: build run
 
 build:
-		ant build_all
+	ant build_all
 
 run:
-		java $(JAVA_D) -cp $(JAVA_CP) com.enterrupt.Main
+	java $(JAVA_D) -cp $(JAVA_CP) com.enterrupt.Main
  

@@ -6,7 +6,6 @@ src/com/enterrupt/antlr4/frontend
 /checkouts
 pom.xml
 pom.xml.asc
-*.jar
 *.class
 /.lein-*
 /.nrepl-port

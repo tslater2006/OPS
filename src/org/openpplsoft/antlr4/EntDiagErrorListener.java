@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.antlr4;
+package org.openpplsoft.antlr4;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Nullable;
 import java.util.*;
 import java.lang.StringBuilder;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 /*
  * This listener does not tolerate ANTLR errors of any kind,

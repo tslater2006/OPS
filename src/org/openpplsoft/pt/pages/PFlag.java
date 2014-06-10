@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.pages;
+package org.openpplsoft.pt.pages;
 
 public enum PFlag {
   PAGE,

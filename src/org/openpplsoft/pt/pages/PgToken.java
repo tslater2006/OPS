@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.pages;
+package org.openpplsoft.pt.pages;
 
 import java.util.EnumSet;
-import com.enterrupt.pt.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.runtime.*;
 
 public class PgToken {
 

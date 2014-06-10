@@ -5,15 +5,15 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt;
+package org.openpplsoft.pt;
 
 import java.sql.*;
 import java.util.*;
-import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.buffers.RecordPCListRequestBuffer;
-import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.pt.pages.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.buffers.RecordPCListRequestBuffer;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.pt.pages.*;
+import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
 
 public class Page {

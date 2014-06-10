@@ -26,9 +26,9 @@
 |* OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.bytecode;
+package org.openpplsoft.bytecode;
 
-import com.enterrupt.pt.peoplecode.PeopleCodeByteStream;
+import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
 public class CommentAssembler extends ElementAssembler {
 

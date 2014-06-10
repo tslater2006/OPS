@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.antlr4;
+package org.openpplsoft.antlr4;
 
 import org.antlr.v4.runtime.*;
-import com.enterrupt.antlr4.frontend.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.antlr4.frontend.*;
+import org.openpplsoft.runtime.*;
 
 public class NoErrorTolerancePeopleCodeLexer extends PeopleCodeLexer {
 

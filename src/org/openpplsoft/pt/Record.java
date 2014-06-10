@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt;
+package org.openpplsoft.pt;
 
 import java.sql.*;
 import java.util.*;
-import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.runtime.*;
-import com.enterrupt.pt.peoplecode.*;
+import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.pt.peoplecode.*;
 import org.apache.logging.log4j.*;
 
 public class Record {

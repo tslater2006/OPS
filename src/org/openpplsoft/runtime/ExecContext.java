@@ -5,14 +5,14 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
-import com.enterrupt.pt.peoplecode.*;
+import org.openpplsoft.pt.peoplecode.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.*;
-import com.enterrupt.types.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.types.*;
+import org.openpplsoft.runtime.*;
 
 public abstract class ExecContext {
 

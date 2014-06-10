@@ -10,4 +10,4 @@
 * codebase; it should contain only main entry
 * classes.
 */
-package com.enterrupt;
+package org.openpplsoft;

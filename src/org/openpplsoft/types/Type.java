@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
 public enum Type {
   STRING, BOOLEAN, INTEGER, DEFN_LITERAL, RECORD, FIELD,

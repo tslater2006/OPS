@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt;
+package org.openpplsoft.pt;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import com.enterrupt.sql.StmtLibrary;
+import org.openpplsoft.sql.StmtLibrary;
 import org.apache.logging.log4j.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 public class Menu {
 

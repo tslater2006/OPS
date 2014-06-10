@@ -5,9 +5,9 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 public abstract class PTObjectType extends PTType {
 

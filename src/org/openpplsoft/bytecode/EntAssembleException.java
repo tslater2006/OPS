@@ -26,9 +26,9 @@
 |* OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.bytecode;
+package org.openpplsoft.bytecode;
 
-import com.enterrupt.runtime.EntVMachRuntimeException;
+import org.openpplsoft.runtime.EntVMachRuntimeException;
 
 public class EntAssembleException extends EntVMachRuntimeException {
 

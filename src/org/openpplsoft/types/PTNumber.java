@@ -5,10 +5,10 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
 import java.util.EnumSet;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
 
 public class PTNumber extends PTPrimitiveType<Double> {

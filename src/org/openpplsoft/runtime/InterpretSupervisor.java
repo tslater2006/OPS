@@ -5,17 +5,17 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 import java.util.*;
 import java.io.*;
 import java.nio.charset.Charset;
-import com.enterrupt.runtime.*;
-import com.enterrupt.trace.*;
-import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.trace.*;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.types.*;
 import org.apache.logging.log4j.*;
-import com.enterrupt.antlr4.*;
+import org.openpplsoft.antlr4.*;
 
 public class InterpretSupervisor {
 

@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.trace;
+package org.openpplsoft.trace;
 
 public interface IEmission {
   public boolean equals(Object obj);

@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.buffers;
+package org.openpplsoft.buffers;
 
 public interface IStreamableBuffer {
 

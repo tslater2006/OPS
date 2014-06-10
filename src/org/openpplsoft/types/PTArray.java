@@ -5,9 +5,9 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 import java.util.*;
 import org.apache.logging.log4j.*;
 import java.lang.reflect.*;

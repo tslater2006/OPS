@@ -5,10 +5,10 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
 import java.util.EnumSet;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 public class PTString extends PTPrimitiveType<String> {
 

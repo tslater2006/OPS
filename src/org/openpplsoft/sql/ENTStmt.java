@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.sql;
+package org.openpplsoft.sql;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.sql.PreparedStatement;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
 
 public class ENTStmt extends SQLStmt {

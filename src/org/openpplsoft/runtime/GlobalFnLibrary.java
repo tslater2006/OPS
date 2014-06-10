@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 import java.sql.*;
 import java.util.*;
 import java.util.regex.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.types.*;
 import org.apache.logging.log4j.*;
 
 public class GlobalFnLibrary {

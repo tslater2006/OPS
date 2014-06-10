@@ -5,20 +5,20 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.antlr4;
+package org.openpplsoft.antlr4;
 
 import java.util.*;
-import com.enterrupt.types.*;
-import com.enterrupt.buffers.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.pt.peoplecode.*;
+import org.openpplsoft.types.*;
+import org.openpplsoft.buffers.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.peoplecode.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import org.antlr.v4.runtime.misc.Interval;
-import com.enterrupt.runtime.*;
-import com.enterrupt.trace.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.trace.*;
 import org.apache.logging.log4j.*;
-import com.enterrupt.antlr4.frontend.*;
+import org.openpplsoft.antlr4.frontend.*;
 
 class EvaluateConstruct {
   public PTType baseExpr;

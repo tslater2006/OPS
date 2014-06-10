@@ -5,22 +5,22 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.peoplecode;
+package org.openpplsoft.pt.peoplecode;
 
 import java.sql.*;
 import java.util.*;
 import java.io.*;
-import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.bytecode.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.bytecode.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.*;
-import com.enterrupt.antlr4.*;
-import com.enterrupt.antlr4.frontend.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.antlr4.*;
+import org.openpplsoft.antlr4.frontend.*;
+import org.openpplsoft.types.*;
 
 public abstract class PeopleCodeProg {
 

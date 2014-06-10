@@ -56,9 +56,9 @@
 
     <!-- Forbid star imports, except for the packages explicitly excluded below. -->
     <module name="AvoidStarImport">
-      <property name="excludes" value="com.enterrupt.runtime,
-        com.enterrupt.pt,com.enterrupt.buffers,com.enterrupt.pt.peoplecode,
-        com.enterrupt.sql,com.enterrupt.trace"/>
+      <property name="excludes" value="org.openpplsoft.runtime,
+        org.openpplsoft.pt,org.openpplsoft.buffers,org.openpplsoft.pt.peoplecode,
+        org.openpplsoft.sql,org.openpplsoft.trace"/>
       <property name="allowClassImports" value="false"/>
       <property name="allowStaticMemberImports" value="false"/>
     </module>

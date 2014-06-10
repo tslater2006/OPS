@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 public enum ExitCode {
 

@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.sql;
+package org.openpplsoft.sql;
 
 import java.sql.*;
 import java.util.*;
 import java.util.regex.*;
-import com.enterrupt.runtime.*;
-import com.enterrupt.trace.IEmission;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.trace.IEmission;
 import org.apache.logging.log4j.*;
 
 public class SQLStmt implements IEmission {

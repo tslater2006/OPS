@@ -5,15 +5,15 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.buffers;
+package org.openpplsoft.buffers;
 
 import java.util.*;
 import java.lang.StringBuilder;
-import com.enterrupt.pt.*;
-import com.enterrupt.pt.pages.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.pages.*;
+import org.openpplsoft.types.*;
 import org.apache.logging.log4j.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 public class ComponentBuffer {
 

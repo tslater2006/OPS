@@ -5,9 +5,9 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.antlr4;
+package org.openpplsoft.antlr4;
 
-import com.enterrupt.runtime.EntVMachRuntimeException;
+import org.openpplsoft.runtime.EntVMachRuntimeException;
 
 public class EntInterpretException extends EntVMachRuntimeException {
 

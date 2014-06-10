@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 import java.util.*;
-import com.enterrupt.types.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.types.*;
+import org.openpplsoft.runtime.*;
 
 public class Scope {
 

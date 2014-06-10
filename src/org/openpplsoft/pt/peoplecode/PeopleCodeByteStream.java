@@ -5,9 +5,9 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.peoplecode;
+package org.openpplsoft.pt.peoplecode;
 
-import com.enterrupt.pt.*;
+import org.openpplsoft.pt.*;
 
 public class PeopleCodeByteStream {
 

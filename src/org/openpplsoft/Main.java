@@ -5,15 +5,15 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt;
+package org.openpplsoft;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import com.enterrupt.buffers.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.runtime.*;
-import com.enterrupt.sql.*;
+import org.openpplsoft.buffers.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.sql.*;
 
 /**
  * Main entry class for the OPS runtime.

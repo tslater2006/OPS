@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
-import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.runtime.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.types.*;
 import org.antlr.v4.runtime.tree.*;
 
 public class AppClassObjGetterExecContext extends AppClassObjExecContext {

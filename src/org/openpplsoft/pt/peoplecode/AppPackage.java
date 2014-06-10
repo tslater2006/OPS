@@ -5,12 +5,12 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.peoplecode;
+package org.openpplsoft.pt.peoplecode;
 
 import java.sql.*;
-import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.runtime.*;
-import com.enterrupt.pt.*;
+import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.pt.*;
 import org.apache.logging.log4j.*;
 import java.util.*;
 

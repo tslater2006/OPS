@@ -5,9 +5,9 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.peoplecode;
+package org.openpplsoft.pt.peoplecode;
 
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 public class AppPackagePath {
 

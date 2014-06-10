@@ -5,12 +5,12 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.buffers;
+package org.openpplsoft.buffers;
 
 import java.util.*;
 import java.lang.StringBuilder;
-import com.enterrupt.pt.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.runtime.*;
 
 public class RecordFieldBuffer implements IStreamableBuffer,
     Comparable<RecordFieldBuffer> {

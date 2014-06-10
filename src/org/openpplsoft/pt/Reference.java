@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt;
+package org.openpplsoft.pt;
 
 import java.util.HashMap;
 

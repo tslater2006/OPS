@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
 import java.util.*;
 import java.text.SimpleDateFormat;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 public class PTDate extends PTPrimitiveType<String> {
 

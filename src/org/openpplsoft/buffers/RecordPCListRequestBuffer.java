@@ -5,12 +5,12 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.buffers;
+package org.openpplsoft.buffers;
 
 import java.util.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.pt.pages.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.pages.*;
+import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
 
 /*

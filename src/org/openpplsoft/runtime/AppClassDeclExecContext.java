@@ -5,9 +5,9 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
-import com.enterrupt.types.PTAppClassObj;
+import org.openpplsoft.types.PTAppClassObj;
 
 /**
  * Execution of an app class requires evaluation starting

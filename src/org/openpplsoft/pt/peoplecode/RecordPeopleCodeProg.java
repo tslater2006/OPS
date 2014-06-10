@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.peoplecode;
+package org.openpplsoft.pt.peoplecode;
 
 import java.sql.*;
-import com.enterrupt.sql.StmtLibrary;
-import com.enterrupt.pt.*;
+import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.pt.*;
 
 public class RecordPeopleCodeProg extends PeopleCodeProg {
 

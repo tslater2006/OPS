@@ -5,12 +5,12 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 import java.util.*;
 import java.io.*;
-import com.enterrupt.buffers.*;
-import com.enterrupt.pt.*;
+import org.openpplsoft.buffers.*;
+import org.openpplsoft.pt.*;
 import org.apache.logging.log4j.*;
 
 public class ComponentStructureVerifier {

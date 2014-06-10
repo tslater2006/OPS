@@ -5,18 +5,18 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.antlr4;
+package org.openpplsoft.antlr4;
 
 import java.util.*;
 import java.lang.reflect.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.types.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.antlr4.frontend.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.antlr4.frontend.*;
 
 public class ProgLoadListener extends PeopleCodeBaseListener {
 

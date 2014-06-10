@@ -5,9 +5,9 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
-import com.enterrupt.runtime.EntVMachRuntimeException;
+import org.openpplsoft.runtime.EntVMachRuntimeException;
 
 public class EntDataTypeException extends EntVMachRuntimeException {
 

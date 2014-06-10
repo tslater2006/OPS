@@ -41,20 +41,20 @@
     </Logger>
 
     <!-- JAVA LOGGERS -->
-    <Logger name="com.enterrupt.sql" level="DEBUG"/>
-    <Logger name="com.enterrupt.runtime" level="INFO"/>
-    <Logger name="com.enterrupt.runtime.DefnCache" level="DEBUG"/>
-    <Logger name="com.enterrupt.runtime.TraceFileVerifier" level="DEBUG"/>
-    <Logger name="com.enterrupt.types" level="WARN"/>
-    <Logger name="com.enterrupt.pt.peoplecode" level="WARN"/>
-    <Logger name="com.enterrupt.pt.peoplecode.PeopleCodeProg" level="all"/>
-    <Logger name="com.enterrupt.pt.peoplecode.AppClassPeopleCodeProg" level="all"/>
-    <Logger name="com.enterrupt.pt.peoplecode.ProgLoadSupervisor" level="all"/>
-    <Logger name="com.enterrupt.pt.Component" level="DEBUG"/>
-    <Logger name="com.enterrupt.antlr4" level="DEBUG"/>
-    <Logger name="com.enterrupt.pt.pages" level="DEBUG"/>
-    <Logger name="com.enterrupt.buffers" level="DEBUG"/>
-    <Logger name="com.enterrupt.buffers.ComponentBuffer" level="DEBUG"/>
-    <Logger name="com.enterrupt.buffers.RecordPCListRequestBuffer" level="WARN"/>
+    <Logger name="org.openpplsoft.sql" level="DEBUG"/>
+    <Logger name="org.openpplsoft.runtime" level="INFO"/>
+    <Logger name="org.openpplsoft.runtime.DefnCache" level="DEBUG"/>
+    <Logger name="org.openpplsoft.runtime.TraceFileVerifier" level="DEBUG"/>
+    <Logger name="org.openpplsoft.types" level="WARN"/>
+    <Logger name="org.openpplsoft.pt.peoplecode" level="WARN"/>
+    <Logger name="org.openpplsoft.pt.peoplecode.PeopleCodeProg" level="all"/>
+    <Logger name="org.openpplsoft.pt.peoplecode.AppClassPeopleCodeProg" level="all"/>
+    <Logger name="org.openpplsoft.pt.peoplecode.ProgLoadSupervisor" level="all"/>
+    <Logger name="org.openpplsoft.pt.Component" level="DEBUG"/>
+    <Logger name="org.openpplsoft.antlr4" level="DEBUG"/>
+    <Logger name="org.openpplsoft.pt.pages" level="DEBUG"/>
+    <Logger name="org.openpplsoft.buffers" level="DEBUG"/>
+    <Logger name="org.openpplsoft.buffers.ComponentBuffer" level="DEBUG"/>
+    <Logger name="org.openpplsoft.buffers.RecordPCListRequestBuffer" level="WARN"/>
     </Loggers>
 </Configuration>

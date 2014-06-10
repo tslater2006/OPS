@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
-import com.enterrupt.pt.*;
+import org.openpplsoft.pt.*;
 import java.util.*;
-import com.enterrupt.types.*;
-import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.types.*;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.runtime.*;
 
 public class PTAppClassObj extends PTObjectType {
 

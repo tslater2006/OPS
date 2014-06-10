@@ -5,14 +5,14 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.sql;
+package org.openpplsoft.sql;
 
 import java.sql.*;
 import java.util.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.types.*;
-import com.enterrupt.runtime.*;
-import com.enterrupt.buffers.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.types.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.buffers.*;
 import org.apache.logging.log4j.*;
 import java.util.regex.*;
 

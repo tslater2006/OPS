@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
-import com.enterrupt.pt.*;
+import org.openpplsoft.pt.*;
 import java.util.*;
 import java.sql.*;
-import com.enterrupt.sql.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.sql.*;
+import org.openpplsoft.runtime.*;
 import java.lang.reflect.*;
 import org.apache.logging.log4j.*;
 

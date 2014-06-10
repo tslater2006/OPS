@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt;
+package org.openpplsoft.pt;
 
 import org.apache.logging.log4j.*;
-import com.enterrupt.runtime.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.types.*;
 
 public class RecordField {
 

@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.sql;
+package org.openpplsoft.sql;
 
 import java.sql.Connection;
 import java.util.HashMap;

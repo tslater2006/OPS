@@ -5,11 +5,11 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.types;
+package org.openpplsoft.types;
 
 import java.util.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.pt.peoplecode.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.peoplecode.*;
 
 public abstract class PTType {
 

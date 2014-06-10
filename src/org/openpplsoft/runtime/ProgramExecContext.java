@@ -5,12 +5,12 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import com.enterrupt.pt.peoplecode.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.runtime.*;
 
 public class ProgramExecContext extends ExecContext {
 

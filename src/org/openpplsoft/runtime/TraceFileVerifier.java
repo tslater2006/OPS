@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.enterrupt.sql.*;
-import com.enterrupt.trace.*;
+import org.openpplsoft.sql.*;
+import org.openpplsoft.trace.*;
 
 public final class TraceFileVerifier {
 

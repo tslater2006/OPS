@@ -5,13 +5,13 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.peoplecode;
+package org.openpplsoft.pt.peoplecode;
 
 import java.util.*;
 import java.lang.StringBuilder;
-import com.enterrupt.runtime.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.types.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.types.*;
 import org.apache.logging.log4j.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;

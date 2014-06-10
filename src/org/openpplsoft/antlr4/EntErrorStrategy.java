@@ -5,10 +5,10 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.antlr4;
+package org.openpplsoft.antlr4;
 
 import org.antlr.v4.runtime.*;
-import com.enterrupt.runtime.*;
+import org.openpplsoft.runtime.*;
 
 /*
  * This error strategy bails out upon encountering the

@@ -5,12 +5,12 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.pt.pages;
+package org.openpplsoft.pt.pages;
 
 import java.util.*;
-import com.enterrupt.pt.*;
-import com.enterrupt.runtime.*;
-import com.enterrupt.buffers.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.buffers.*;
 import org.apache.logging.log4j.*;
 
 public class PgTokenStream {

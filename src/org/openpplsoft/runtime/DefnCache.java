@@ -5,7 +5,7 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package com.enterrupt.runtime;
+package org.openpplsoft.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +13,8 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.enterrupt.pt.*;
-import com.enterrupt.pt.peoplecode.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.peoplecode.*;
 
 /**
  * Central repository for cached PeopleTools

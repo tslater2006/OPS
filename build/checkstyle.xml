@@ -58,7 +58,7 @@
     <module name="AvoidStarImport">
       <property name="excludes" value="org.openpplsoft.runtime,
         org.openpplsoft.pt,org.openpplsoft.buffers,org.openpplsoft.pt.peoplecode,
-        org.openpplsoft.sql,org.openpplsoft.trace"/>
+        org.openpplsoft.sql,org.openpplsoft.trace,org.openpplsoft.types"/>
       <property name="allowClassImports" value="false"/>
       <property name="allowStaticMemberImports" value="false"/>
     </module>

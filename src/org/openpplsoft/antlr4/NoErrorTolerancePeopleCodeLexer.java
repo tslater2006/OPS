@@ -7,17 +7,27 @@
 
 package org.openpplsoft.antlr4;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.LexerNoViableAltException;
+
 import org.openpplsoft.antlr4.frontend.*;
 import org.openpplsoft.runtime.*;
 
+/**
+ * This lexer does not recover from lexer errors; it fails
+ * irrecoverably instead.
+ */
 public class NoErrorTolerancePeopleCodeLexer extends PeopleCodeLexer {
 
-  public NoErrorTolerancePeopleCodeLexer(CharStream input) {
+  /**
+   * @param input the CharStream to lex
+   */
+  public NoErrorTolerancePeopleCodeLexer(final CharStream input) {
     super(input);
   }
 
-  public void recover(LexerNoViableAltException e) {
+  @Override
+  public void recover(final LexerNoViableAltException e) {
     throw new OPSVMachRuntimeException(e.getMessage(), e);
   }
 }

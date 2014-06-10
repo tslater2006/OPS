@@ -81,9 +81,9 @@ public class Component {
        * Select the search record to use based on the mode
        * the component should open in.
        */
-      if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_New) {
+      if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_NEW) {
         this.searchRecordToUse = this.ptADDSRCHRECNAME;
-      } else if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_Search) {
+      } else if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_SEARCH) {
         this.searchRecordToUse = this.ptSEARCHRECNAME;
       } else {
         throw new OPSVMachRuntimeException("Unable to select search record "

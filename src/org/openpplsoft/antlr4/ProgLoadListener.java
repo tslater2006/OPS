@@ -139,7 +139,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
        * don't consider it to be an app class (technically "date", "Record",
        * etc. are allowable app class names, keep this in mind if issues arise).
        */
-      if(!PSDefn.varTypesTable.containsKey(ctx.GENERIC_ID().getText())) {
+      if(!PSDefn.VAR_TYPES_TABLE.containsKey(ctx.GENERIC_ID().getText())) {
         appClassParts = this.resolveAppClassToFullPath(ctx.GENERIC_ID().getText());
             prog = new AppClassPeopleCodeProg(appClassParts.toArray(
                 new String[appClassParts.size()]));

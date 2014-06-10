@@ -713,7 +713,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          */
         setNodeData(ctx, ComponentBuffer.searchRecord);
 
-      } else if(PSDefn.defnLiteralReservedWordsTable.containsKey(
+      } else if(PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.containsKey(
         ctx.GENERIC_ID().getText().toUpperCase())) {
         /*
          * Detect defn literal reserved words (i.e.,

@@ -25,7 +25,7 @@
                 failureProperty="checkstyle.failure"
                 failOnViolation="true">
       <fileset dir="src">
-        <include name="org/openpplsoft/pt/Menu.java"/>
+        <include name="org/openpplsoft/pt/PSDefn.java"/>
       </fileset>
     </checkstyle>
   </target>

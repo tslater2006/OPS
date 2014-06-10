@@ -26,10 +26,10 @@ public class Reference {
      * camelcase equivalent and set the appropriate flag.
      */
     boolean containsKeyword = false;
-    if(PSDefn.defnLiteralReservedWordsTable.get(recname) != null) {
+    if(PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.get(recname) != null) {
       // remember: this assigns the value (which is camelcase) rather
       // than the key (which is upper).
-      recname = PSDefn.defnLiteralReservedWordsTable.get(recname);
+      recname = PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.get(recname);
       containsKeyword = true;
     }
 

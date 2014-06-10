@@ -617,7 +617,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         setNodeData(ctx, Environment.FALSE);
       }
     } else {
-      throw new EntInterpretException("Unsupported boolean comparison operation",
+      throw new OPSInterpretException("Unsupported boolean comparison operation",
         ctx.getText(), ctx.getStart().getLine());
     }
 

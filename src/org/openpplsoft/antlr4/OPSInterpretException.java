@@ -9,9 +9,23 @@ package org.openpplsoft.antlr4;
 
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
-public class EntInterpretException extends OPSVMachRuntimeException {
+/**
+ * OPS runtime exception meant exclusively for
+ * exceptional events occurring during execution of the
+ * interpreter.
+ */
+public class OPSInterpretException extends OPSVMachRuntimeException {
 
-  public EntInterpretException(String msg, String input, int lineNbr) {
+  /**
+   * Constructs an exception message from the provided args.
+   * @param msg the msg describing the exceptional situation
+   * @param input the input that caused the interpreter to throw the
+   *    exception
+   * @param lineNbr the line number in the PeopleCode program where
+   *    the input is located
+   */
+  public OPSInterpretException(final String msg, final String input,
+      final int lineNbr) {
     super(msg + "; input: \"" + input + "\" on line " + lineNbr);
   }
 }

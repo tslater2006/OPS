@@ -96,7 +96,7 @@ public class Component {
       while (rs.next()) {
         // All pages at the root of the component start at scroll level 0.
         final Page p = new Page(rs.getString("PNLNAME"));
-        log.debug("Component contains Page.{}", p.PNLNAME);
+        log.debug("Component contains Page.{}", p.getPNLNAME());
         this.pages.add(p);
       }
     } catch (final java.sql.SQLException sqle) {
@@ -303,7 +303,7 @@ public class Component {
     final byte REL_DISP_FLAG = (byte) 16;
 
     for (Page p : this.pages) {
-      pfs = new PgTokenStream(p.PNLNAME);
+      pfs = new PgTokenStream(p.getPNLNAME());
 
       final Stack<ScrollMarker> scrollMarkers = new Stack<ScrollMarker>();
       scrollMarkers.push(new ScrollMarker(0, null, PFlag.PAGE));

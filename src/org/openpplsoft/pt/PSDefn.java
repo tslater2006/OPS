@@ -135,5 +135,35 @@ public final class PSDefn {
   public static boolean isSystemRecord(final String recName) {
     return SYSTEM_RECORDS.get(recName) != null;
   }
+
+  /**
+   * Contains all recognized values of the FIELDTYPE field on PSPNLFIELD.
+   */
+  public final class PageFieldType {
+    // represents text on page linked to msg set/nbr; this text
+    // text is not in component or page buffer.
+    public static final int STATIC_TEXT = 0;
+    public static final int FRAME = 1;
+    public static final int GROUPBOX = 2;
+    public static final int STATIC_IMAGE = 3;
+    public static final int SCROLL_BAR = 10;
+    public static final int SUBPAGE = 11;
+    public static final int PUSHBTN_LINK_PEOPLECODE = 12;
+    public static final int PUSHBTN_LINK_SCROLL_ACTION = 13;
+    public static final int PUSHBTN_LINK_TOOLBAR_ACTION = 14;
+    public static final int PUSHBTN_LINK_EXTERNAL = 15;
+    public static final int PUSHBTN_LINK_INTERNAL = 16;
+    public static final int PUSHBTN_LINK_PROCESS = 17;
+    public static final int GRID = 19;
+    public static final int PUSHBTN_LINK_SECPAGE = 21;
+    public static final int SECPAGE = 18;
+    public static final int HORIZONTAL_RULE = 23;
+    public static final int PUSHBTN_LINK_PROMPT_ACTION = 26;
+    public static final int SCROLL_AREA = 27;
+    public static final int PUSHBTN_LINK_PAGE_ANCHOR = 29;
+    public static final int PUSHBTN_LINK_INST_MSG_ACTION = 31;
+
+    private PageFieldType() {}
+  }
 }
 

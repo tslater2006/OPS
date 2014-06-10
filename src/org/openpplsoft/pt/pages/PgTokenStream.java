@@ -42,8 +42,9 @@ public class PgTokenStream {
       return this.readFromPfs();
     }
 
-    if(this.cursor < p.tokens.size()) {
-      PgToken tok = p.tokens.get(this.cursor++);
+    List<PgToken> tokens = p.getTokens();
+    if(this.cursor < tokens.size()) {
+      PgToken tok = tokens.get(this.cursor++);
 
       // Changes in scroll level must be reported to the receiver.
       if(tok.OCCURSLEVEL < this.prevOCCURSLEVEL) {
@@ -68,8 +69,8 @@ public class PgTokenStream {
         int lookAheadCursor = this.cursor;
         String primaryRecNameCandidate = null;
 
-        while(lookAheadCursor < p.tokens.size()) {
-          PgToken lookToken = p.tokens.get(lookAheadCursor++);
+        while(lookAheadCursor < tokens.size()) {
+          PgToken lookToken = tokens.get(lookAheadCursor++);
 
           // Stop looking once this scroll area has ended.
           if(lookToken.OCCURSLEVEL < tok.OCCURSLEVEL) {

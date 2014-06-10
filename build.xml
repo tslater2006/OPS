@@ -25,7 +25,12 @@
                 failureProperty="checkstyle.failure"
                 failOnViolation="true">
       <fileset dir="src">
+        <include name="org/openpplsoft/pt/Menu.java"/>
+        <include name="org/openpplsoft/pt/Page.java"/>
         <include name="org/openpplsoft/pt/PSDefn.java"/>
+        <include name="org/openpplsoft/runtime/TraceFileVerifier.java"/>
+        <include name="org/openpplsoft/runtime/DefnCache.java"/>
+        <include name="org/openpplsoft/runtime/Scope.java"/>
       </fileset>
     </checkstyle>
   </target>

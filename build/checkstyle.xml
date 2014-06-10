@@ -281,7 +281,7 @@
 
     <!-- Enforce non-commenting source statement maximums. -->
     <module name="JavaNCSS">
-      <property name="methodMaximum" value="50"/>
+      <property name="methodMaximum" value="100"/>
       <property name="classMaximum" value="1500"/>
       <property name="fileMaximum" value="2000"/>
     </module>
@@ -363,7 +363,7 @@
     <!-- Warn about all TODO comments. -->
     <module name="TodoComment">
       <property name="format" value="TODO"/>
-      <property name="severity" value="error"/>
+      <property name="severity" value="warning"/>
     </module>
 
     <!-- Forbid trailing comments. -->

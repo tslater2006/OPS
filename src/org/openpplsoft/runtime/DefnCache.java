@@ -87,7 +87,7 @@ public final class DefnCache {
     if (p == null) {
       log.debug("Caching page defn for {}", pnlName);
       p = new Page(pnlName);
-      pages.put(p.PNLNAME, p);
+      pages.put(p.getPNLNAME(), p);
     }
     p.init();
     p.discoverPagePC();

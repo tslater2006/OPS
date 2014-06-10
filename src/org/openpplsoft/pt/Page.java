@@ -7,45 +7,76 @@
 
 package org.openpplsoft.pt;
 
-import java.sql.*;
-import java.util.*;
-import org.openpplsoft.sql.StmtLibrary;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.openpplsoft.buffers.RecordPCListRequestBuffer;
-import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.pt.pages.*;
+import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
-import org.apache.logging.log4j.*;
+import org.openpplsoft.sql.StmtLibrary;
 
+/**
+ * Represents a PeopleTools page definition.
+ */
 public class Page {
-
-  public String PNLNAME;
-
-  public ArrayList<PgToken> subpages;
-  public ArrayList<PgToken> secpages;
-  public ArrayList<PgToken> tokens;
-  public PeopleCodeProg pageActivateProg = null;
 
   private static Logger log = LogManager.getLogger(Page.class.getName());
 
-  private boolean hasInitialized = false;
-  private boolean hasDiscoveredPagePC = false;
+  private String ptPNLNAME;
+  private List<PgToken> subpages;
+  private List<PgToken> secpages;
+  private List<PgToken> tokens;
+  private PeopleCodeProg pageActivateProg;
+  private boolean hasInitialized, hasDiscoveredPagePC;
 
-  public Page(String pnlname) {
-    this.PNLNAME = pnlname;
+  /**
+   * Creates a representation of the page definition for
+   * the provided page name.
+   * @param pnlname name of the page defn
+   */
+  public Page(final String pnlname) {
+    this.ptPNLNAME = pnlname;
   }
 
+  /**
+   * @return the name of the page (PNLNAME field on PSPNLFIELD table)
+   */
+  public String getPNLNAME() {
+    return this.ptPNLNAME;
+  }
+
+  /**
+   * @return the page tokens attached to this page
+   */
+  public List<PgToken> getTokens() {
+    return this.tokens;
+  }
+
+  /**
+   * Pulls data from the database about this page definition.
+   * This functionality is separate from the constructor body because
+   * certain queries used here are enforced emissions; running the queries
+   * at instantiation would cause queries to be out of order.
+   */
   public void init() {
 
-    if(this.hasInitialized) { return; }
+    if (this.hasInitialized) { return; }
     this.hasInitialized = true;
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.getPSPNLDEFN(this.PNLNAME);
+      pstmt = StmtLibrary.getPSPNLDEFN(this.ptPNLNAME);
       rs = pstmt.executeQuery();
-      rs.next(); // Do nothing with record for now.
+      // Do nothing with record for now.
+      rs.next();
       rs.close();
       pstmt.close();
 
@@ -53,138 +84,144 @@ public class Page {
       this.secpages = new ArrayList<PgToken>();
       this.tokens = new ArrayList<PgToken>();
 
-      pstmt = StmtLibrary.getPSPNLFIELD(this.PNLNAME);
+      pstmt = StmtLibrary.getPSPNLFIELD(this.ptPNLNAME);
       rs = pstmt.executeQuery();
 
-      // TODO: Throw exception if no records were read (need to use counter, no method on rs available).
-      while(rs.next()) {
+      /*
+       * TODO(mquinn): Throw exception if no records were read
+       * (need to use counter, no method on rs available).
+       */
+      while (rs.next()) {
 
-        PgToken pf = new PgToken();
+        final PgToken pf = new PgToken();
         pf.RECNAME = rs.getString("RECNAME").trim();
         pf.FIELDNAME = rs.getString("FIELDNAME").trim();
         pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
         pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
         pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
 
-        switch(rs.getInt("FIELDTYPE")) {
-          case 1:   // frame
+        switch (rs.getInt("FIELDTYPE")) {
+          case PSDefn.PageFieldType.STATIC_TEXT:
+          case PSDefn.PageFieldType.FRAME:
+          case PSDefn.PageFieldType.STATIC_IMAGE:
+          case PSDefn.PageFieldType.HORIZONTAL_RULE:
             break;
-          case 23:  // horizontal rule
-            break;
-          case 3:   // static image
-            break;
-          case 0:   // text (on page, linked to msg set/nbr, not in component or page buffer)
-            break;
-          case 2:
+          case PSDefn.PageFieldType.GROUPBOX:
             pf.flags.add(PFlag.GROUPBOX);
             this.tokens.add(pf);
             break;
-          case 11:
+          case PSDefn.PageFieldType.SUBPAGE:
             pf.flags.add(PFlag.PAGE);
             pf.flags.add(PFlag.SUBPAGE);
             this.subpages.add(pf);
             this.tokens.add(pf);
             break;
-          case 12:
-          case 13:
-          case 14:
-          case 15:
-          case 16:
-          case 17:
-          case 21:
-          case 26:
-          case 29:
-          case 31: // pushbtn/links with various targets
+          case PSDefn.PageFieldType.PUSHBTN_LINK_PEOPLECODE:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_SCROLL_ACTION:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_TOOLBAR_ACTION:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_EXTERNAL:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_INTERNAL:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_PROCESS:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_SECPAGE:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_PROMPT_ACTION:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_PAGE_ANCHOR:
+          case PSDefn.PageFieldType.PUSHBTN_LINK_INST_MSG_ACTION:
             pf.flags.add(PFlag.PUSHBTN_LINK);
             this.tokens.add(pf);
             break;
-          case 18:
+          case PSDefn.PageFieldType.SECPAGE:
             pf.flags.add(PFlag.PAGE);
             pf.flags.add(PFlag.SECPAGE);
             this.secpages.add(pf);
             this.tokens.add(pf);
             break;
-          case 10: // scroll bar
-          case 19: // grid
-            case 27: // scroll area
+          case PSDefn.PageFieldType.SCROLL_BAR:
+          case PSDefn.PageFieldType.GRID:
+          case PSDefn.PageFieldType.SCROLL_AREA:
             pf.flags.add(PFlag.SCROLL_START);
             this.tokens.add(pf);
             break;
-            default:
+          default:
             pf.flags.add(PFlag.GENERIC);
             this.tokens.add(pf);
-            if(pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
-              throw new OPSVMachRuntimeException("A generic field with either a blank RECNAME " +
-                "or FIELDNAME was encountered.");
+            if (pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
+              throw new OPSVMachRuntimeException("A generic field with "
+                  + "either a blank RECNAME "
+                  + "or FIELDNAME was encountered.");
             }
           }
         }
-      } catch(java.sql.SQLException sqle) {
+      } catch (final java.sql.SQLException sqle) {
         log.fatal(sqle.getMessage(), sqle);
         System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
       } finally {
         try {
-          if(rs != null) { rs.close(); }
-          if(pstmt != null) { pstmt.close(); }
-      } catch(java.sql.SQLException sqle) {}
+          if (rs != null) { rs.close(); }
+          if (pstmt != null) { pstmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close rs and/or pstmt in finally block.");
+      }
     }
   }
 
+  /**
+   * Recursively caches all subpage definitions attached to
+   * this page.
+   */
   public void recursivelyLoadSubpages() {
-    Page loadedPage = DefnCache.getPage(this.PNLNAME);
-    for(PgToken tok : loadedPage.subpages) {
-      Page p = DefnCache.getPage(tok.SUBPNLNAME);
+    final Page loadedPage = DefnCache.getPage(this.ptPNLNAME);
+    for (PgToken tok : loadedPage.subpages) {
+      final Page p = DefnCache.getPage(tok.SUBPNLNAME);
       p.recursivelyLoadSubpages();
     }
   }
 
-  /*
-   * This method is complex for a reason. PeopleTools recursively iterates through
-   * subpages before recursively iterating through secpages. However, during both sets
-   * of recursion, the order in which records are first referenced must be preserved
-   * in a buffer;
-   * when the secpage recursion begins, each occurrence of a secpage must cause the
-   * buffer
-   * to be flushed in the form of SQL requests for each record's Record PC listing.
-   * To accomplish this,
-   * we must be able to "expand" the secpages during secpage recursion, with
-   * emphasis on the fact that
-   * the expansions must be done in place, surrounded by all the other fields
-   * that come before/after it
-   * in the recursive traversal. The RecordPCListRequestBuffer abstracts the
-   * expansion process away
-   * from this routine.
+  /**
+   * Recursively caches all secpage definitions attached to this page.
+   * This method is complex for a reason. PeopleTools recursively
+   * iterates through subpages before recursively iterating through
+   * secpages. However, during both sets of recursion, the order in
+   * which records are first referenced must be preserved in a buffer;
+   * when the secpage recursion begins, each occurrence of a secpage
+   * must cause the buffer to be flushed in the form of SQL requests
+   * for each record's Record PC listing.
+   * To accomplish this, we must be able to "expand" the secpages
+   * during secpage recursion, with emphasis on the fact that
+   * the expansions must be done in place, surrounded by all the
+   * other fields that come before/after it
+   * in the recursive traversal. The RecordPCListRequestBuffer abstracts
+   * the expansion process away from this routine.
    */
   public void recursivelyLoadSecpages() {
 
-    Page loadedPage = DefnCache.getPage(this.PNLNAME);
+    final  Page loadedPage = DefnCache.getPage(this.ptPNLNAME);
     Page p;
 
-    ArrayList<PgToken> secpageMarkers = new ArrayList<PgToken>();
+    final List<PgToken> secpageMarkers = new ArrayList<PgToken>();
 
     // Recursively expand/search subpages for secpages.
-    for(PgToken tok : loadedPage.tokens) {
+    for (PgToken tok : loadedPage.tokens) {
 
-      if(tok.flags.contains(PFlag.SUBPAGE)) {
+      if (tok.flags.contains(PFlag.SUBPAGE)) {
         p = DefnCache.getPage(tok.SUBPNLNAME);
         p.recursivelyLoadSecpages();
 
-      } else if(tok.flags.contains(PFlag.SECPAGE)) {
+      } else if (tok.flags.contains(PFlag.SECPAGE)) {
 
-        /**
+        /*
          * Create a new PgToken instead of using the current one,
          * otherwise there could be issues if the same token is submitted twice,
          * which is valid because secpages can appear on multiple pages.
          */
-        PgToken marker = new PgToken(PFlag.SECPAGE);
+        final PgToken marker = new PgToken(PFlag.SECPAGE);
         marker.SUBPNLNAME = tok.SUBPNLNAME;
         secpageMarkers.add(marker);
         RecordPCListRequestBuffer.queueSecpageToken(marker);
 
-      } else if(tok.SUBPNLNAME.length() == 0 && tok.RECNAME.length() > 0 &&
-          tok.FIELDNAME.length() > 0) {
+      } else if (tok.SUBPNLNAME.length() == 0 && tok.RECNAME.length() > 0
+            && tok.FIELDNAME.length() > 0) {
 
-        /**
+        /*
          * The RECNAME on this token will be used to query for the record's
          * Record PC listing if it is the first instance of the RECNAME in
          * the expanded stream.
@@ -194,7 +231,7 @@ public class Page {
     }
 
     // Then, recursively expand/search secpages for more secpages.
-    for(PgToken marker : secpageMarkers) {
+    for (PgToken marker : secpageMarkers) {
       RecordPCListRequestBuffer.notifyStartOfExpansion(marker);
       RecordPCListRequestBuffer.flushUpTo(marker);
       p = DefnCache.getPage(marker.SUBPNLNAME);
@@ -203,9 +240,13 @@ public class Page {
     }
   }
 
+  /**
+   * Retrieves any and all Page PeopleCode associated with this page
+   * from the database.
+   */
   public void discoverPagePC() {
 
-    if(this.hasDiscoveredPagePC) { return; }
+    if (this.hasDiscoveredPagePC) { return; }
     this.hasDiscoveredPagePC = true;
 
     PreparedStatement pstmt = null;
@@ -213,20 +254,23 @@ public class Page {
 
     try {
       // Check to see if this page has any Page PeopleCode associated with it.
-      pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.PAGE, this.PNLNAME);
+      pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.PAGE,
+          this.ptPNLNAME);
       rs = pstmt.executeQuery();
-      while(rs.next()) {
-        PeopleCodeProg prog = new PagePeopleCodeProg(this.PNLNAME);
+      while (rs.next()) {
+        final PeopleCodeProg prog = new PagePeopleCodeProg(this.ptPNLNAME);
         this.pageActivateProg = DefnCache.getProgram(prog);
       }
-    } catch(java.sql.SQLException sqle) {
+    } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
       System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
     } finally {
       try {
-        if(rs != null) { rs.close(); }
-        if(pstmt != null) { pstmt.close(); }
-      } catch(java.sql.SQLException sqle) {}
+        if (rs != null) { rs.close(); }
+        if (pstmt != null) { pstmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close rs and/or pstmt in finally block.");
+      }
     }
   }
 }

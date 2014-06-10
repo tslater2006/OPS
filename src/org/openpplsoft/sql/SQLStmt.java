@@ -53,7 +53,7 @@ public class SQLStmt implements IEmission {
       if(!cursor.getValue().equals(
           otherStmt.bindVals.get(cursor.getKey()))) {
         //log.debug("Other stmt for key {} has value {}.", cursor.getKey(), otherStmt.bindVals.get(cursor.getKey()));
-        //throw new EntVMachRuntimeException("Bindings differ.");
+        //throw new OPSVMachRuntimeException("Bindings differ.");
         return false;
       }
     }

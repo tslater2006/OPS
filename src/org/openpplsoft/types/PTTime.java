@@ -47,7 +47,7 @@ public class PTTime extends PTPrimitiveType<String> {
   }
 
   public PTPrimitiveType subtract(PTPrimitiveType op) {
-    throw new EntVMachRuntimeException("subtract() not supported.");
+    throw new OPSVMachRuntimeException("subtract() not supported.");
   }
 
   public void setDefault() {

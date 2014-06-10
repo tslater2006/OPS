@@ -58,6 +58,6 @@ public class EntDiagErrorListener extends DiagnosticErrorListener {
     builder.append(" at ").append(offendingSymbol);
     builder.append(": ").append(msg);
     builder.append(". Rule stack: ").append(stack);
-    throw new EntVMachRuntimeException(builder.toString(), ex);
+    throw new OPSVMachRuntimeException(builder.toString(), ex);
   }
 }

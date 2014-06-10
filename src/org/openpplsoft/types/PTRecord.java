@@ -105,7 +105,7 @@ public class PTRecord extends PTObjectType {
     }
 
     if(!this.fields.containsKey(fldName)) {
-      throw new EntVMachRuntimeException("Call to getField with fldname=" +
+      throw new OPSVMachRuntimeException("Call to getField with fldname=" +
           fldName + " did not match any field on this record: " + this.toString());
     }
     return this.fields.get(fldName);
@@ -120,7 +120,7 @@ public class PTRecord extends PTObjectType {
   public void PT_SetDefault() {
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 0) {
-      throw new EntVMachRuntimeException("Expected no args.");
+      throw new OPSVMachRuntimeException("Expected no args.");
     }
     this.setDefault();
   }
@@ -128,7 +128,7 @@ public class PTRecord extends PTObjectType {
   public void PT_SelectByKeyEffDt() {
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 1 || (!(args.get(0) instanceof PTDate))) {
-      throw new EntVMachRuntimeException("Expected single date arg.");
+      throw new OPSVMachRuntimeException("Expected single date arg.");
     }
 
     PreparedStatement pstmt = null;
@@ -143,7 +143,7 @@ public class PTRecord extends PTObjectType {
 
       int numCols = rs.getMetaData().getColumnCount();
       if(numCols != rfList.size()) {
-        throw new EntVMachRuntimeException("The number of columns returned " +
+        throw new OPSVMachRuntimeException("The number of columns returned " +
           "by the select by key query (" + numCols + ") differs from the number " +
           "of fields (" + rfList.size() +
           ") in the record defn field list.");
@@ -177,7 +177,7 @@ public class PTRecord extends PTObjectType {
   public void PT_SelectByKey() {
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 0) {
-      throw new EntVMachRuntimeException("Expected zero args.");
+      throw new OPSVMachRuntimeException("Expected zero args.");
     }
 
     PreparedStatement pstmt = null;
@@ -191,7 +191,7 @@ public class PTRecord extends PTObjectType {
 
       int numCols = rs.getMetaData().getColumnCount();
       if(numCols != rfList.size()) {
-        throw new EntVMachRuntimeException("The number of columns returned " +
+        throw new OPSVMachRuntimeException("The number of columns returned " +
           "by the select by key query (" + numCols + ") differs from the number " +
           "of fields (" + rfList.size() +
           ") in the record defn field list.");
@@ -209,7 +209,7 @@ public class PTRecord extends PTObjectType {
           returnVal = Environment.TRUE;
         } else {
           returnVal = Environment.FALSE;
-          throw new EntVMachRuntimeException("Multiple rows "
+          throw new OPSVMachRuntimeException("Multiple rows "
             +"returned by SelectByKey; although this is "+
             "not an error, review the documentation to ensure "+
             "necessary actions to set default values are being "

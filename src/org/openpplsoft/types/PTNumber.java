@@ -69,7 +69,7 @@ public class PTNumber extends PTPrimitiveType<Double> {
   }
 
   public PTPrimitiveType subtract(PTPrimitiveType op) {
-    throw new EntVMachRuntimeException("subtract() not supported.");
+    throw new OPSVMachRuntimeException("subtract() not supported.");
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

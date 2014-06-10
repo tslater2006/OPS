@@ -50,11 +50,11 @@ public class PTString extends PTPrimitiveType<String> {
   }
 
   public PTPrimitiveType add(PTPrimitiveType op) {
-    throw new EntVMachRuntimeException("add() not supported.");
+    throw new OPSVMachRuntimeException("add() not supported.");
   }
 
   public PTPrimitiveType subtract(PTPrimitiveType op) {
-    throw new EntVMachRuntimeException("subtract() not supported.");
+    throw new OPSVMachRuntimeException("subtract() not supported.");
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

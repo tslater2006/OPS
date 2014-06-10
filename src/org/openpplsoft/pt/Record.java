@@ -53,7 +53,7 @@ public class Record {
         this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
         this.RECTYPE = rs.getInt("RECTYPE");
       } else {
-        throw new EntVMachRuntimeException("Expected record to be returned from PSRECDEFN query: " + this.RECNAME);
+        throw new OPSVMachRuntimeException("Expected record to be returned from PSRECDEFN query: " + this.RECNAME);
       }
       rs.close();
       pstmt.close();
@@ -94,7 +94,7 @@ public class Record {
           }
 
           if(fieldcount != i) {
-            throw new EntVMachRuntimeException("Even after querying for subrecords, field count " +
+            throw new OPSVMachRuntimeException("Even after querying for subrecords, field count " +
               "does not match that on PSRECDEFN.");
           }
         }

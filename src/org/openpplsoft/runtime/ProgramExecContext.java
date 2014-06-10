@@ -32,7 +32,7 @@ public class ProgramExecContext extends ExecContext {
      * is encountered, the interpreter will need to stop visiting the entire program
      * and jump directly to the parse tree node pointed to by funcStartNode.
      */
-    throw new EntVMachRuntimeException("Running external functions is not yet " +
+    throw new OPSVMachRuntimeException("Running external functions is not yet " +
       "supported.");
   }
 }

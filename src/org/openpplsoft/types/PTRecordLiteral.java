@@ -41,7 +41,7 @@ public class PTRecordLiteral extends PTObjectType {
       }
     }
 
-    throw new EntVMachRuntimeException("Unable to resolve s=" +
+    throw new OPSVMachRuntimeException("Unable to resolve s=" +
       s + " to a field on the PTRecordLiteral for record " +
       this.RECNAME);
   }

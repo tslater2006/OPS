@@ -48,7 +48,7 @@ public class Scope {
    */
   public void declareVar(final String id, final PTType type) {
     if (this.isIdResolvable(id)) {
-      throw new EntVMachRuntimeException("Encountered attempt to re-declare "
+      throw new OPSVMachRuntimeException("Encountered attempt to re-declare "
           + " variable (" + id + ") in scope level " + this.level);
     }
     this.symbolTable.put(id, type);
@@ -66,7 +66,7 @@ public class Scope {
     if (currRef.typeCheck(newRef)) {
       this.symbolTable.put(id, newRef);
     } else {
-      throw new EntVMachRuntimeException("Identifier assignment failed type "
+      throw new OPSVMachRuntimeException("Identifier assignment failed type "
           + "check; currRef (" + currRef.toString() + ") and newRef ("
           + newRef.toString() + ") are not type compatible.");
     }
@@ -85,7 +85,7 @@ public class Scope {
    * Determines if the provided identifier has been declared in this scope.
    * @param id the identifier to check
    * @return true if the identifier has been declared in this scope,
-        false otherwise.
+   *    false otherwise.
    */
   public boolean isIdResolvable(final String id) {
     return this.symbolTable.containsKey(id);

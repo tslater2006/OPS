@@ -114,7 +114,7 @@ public class Page {
             pf.flags.add(PFlag.GENERIC);
             this.tokens.add(pf);
             if(pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
-              throw new EntVMachRuntimeException("A generic field with either a blank RECNAME " +
+              throw new OPSVMachRuntimeException("A generic field with either a blank RECNAME " +
                 "or FIELDNAME was encountered.");
             }
           }

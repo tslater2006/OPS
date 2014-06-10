@@ -16,7 +16,7 @@ public class AppPackagePath {
   public AppPackagePath(String pathStr) {
     String[] pathParts = pathStr.split(":");
     if(pathParts.length < 2) {
-      throw new EntVMachRuntimeException("Expecting at least two parts " +
+      throw new OPSVMachRuntimeException("Expecting at least two parts " +
          "in app package / class path: " + pathStr);
     }
 

@@ -22,14 +22,14 @@ public class EntErrorStrategy extends DefaultErrorStrategy {
 
   @Override
   public void recover(Parser recognizer, RecognitionException e) {
-    throw new EntVMachRuntimeException(e.getMessage(), e);
+    throw new OPSVMachRuntimeException(e.getMessage(), e);
   }
 
   // Prevents recovery from inline errors.
   @Override
   public Token recoverInline(Parser recognizer) throws RecognitionException {
     InputMismatchException ime = new InputMismatchException(recognizer);
-    throw new EntVMachRuntimeException(ime.getMessage(), ime);
+    throw new OPSVMachRuntimeException(ime.getMessage(), ime);
   }
 
   // Prevents recovery from errors in subrules.

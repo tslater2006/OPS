@@ -36,7 +36,7 @@ public class PTArray extends PTObjectType {
     super(staticTypeFlag);
 
     if(d == 1 && b instanceof PTArray) {
-      throw new EntVMachRuntimeException("Single dimension arrays cannot " +
+      throw new OPSVMachRuntimeException("Single dimension arrays cannot " +
         "have a base type of PTArray.");
     }
 
@@ -52,7 +52,7 @@ public class PTArray extends PTObjectType {
     } else if(index instanceof PTNumber) {
       idx = ((PTNumber)index).read(PTInteger.getSentinel());
     } else {
-      throw new EntVMachRuntimeException("Unexpected type for index.");
+      throw new OPSVMachRuntimeException("Unexpected type for index.");
     }
 
     // Must subtract 1; PT array indices are 1-based.
@@ -123,7 +123,7 @@ public class PTArray extends PTObjectType {
 
   protected void initValues() {
     if(this.isSentinel()) {
-      throw new EntVMachRuntimeException("Attempted to initialize the values " +
+      throw new OPSVMachRuntimeException("Attempted to initialize the values " +
         "array for a sentinel PTArray object.");
     }
     this.values = new LinkedList<PTType>();
@@ -164,7 +164,7 @@ public class PTArray extends PTObjectType {
       this.values.addLast(promotedVal);
 
     } else {
-      throw new EntVMachRuntimeException("Cannot Push onto array; "+
+      throw new OPSVMachRuntimeException("Cannot Push onto array; "+
         "types are not compatible.");
     }
   }
@@ -172,7 +172,7 @@ public class PTArray extends PTObjectType {
   public void PT_Push() {
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 1) {
-      throw new EntVMachRuntimeException("Expected one argument.");
+      throw new OPSVMachRuntimeException("Expected one argument.");
     }
     internalPush(args.get(0));
   }

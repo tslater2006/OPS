@@ -30,7 +30,7 @@ public class GlobalFnLibrary {
     } else if(p instanceof PTString) {
       return ((PTString)p).read() != null && !((PTString)p).read().equals(" ");
     } else {
-      throw new EntVMachRuntimeException("Unexpected data type passed " +
+      throw new OPSVMachRuntimeException("Unexpected data type passed " +
         "to doesContainValue(ptdt).");
     }
   }
@@ -86,7 +86,7 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 2) {
-      throw new EntVMachRuntimeException("Expected two args.");
+      throw new OPSVMachRuntimeException("Expected two args.");
     }
 
     PTString str = (PTString)args.get(0);
@@ -105,7 +105,7 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 1 && !(args.get(0) instanceof PTString)) {
-      throw new EntVMachRuntimeException("Expected single string arg.");
+      throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
     Environment.pushToCallStack(Environment.getFromLiteralPool(
@@ -120,7 +120,7 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 0) {
-      throw new EntVMachRuntimeException("Expected zero arguments.");
+      throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
     Environment.pushToCallStack(Environment.FALSE);
   }
@@ -129,7 +129,7 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
-      throw new EntVMachRuntimeException("Expected single string arg.");
+      throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
     PTRecord rec = PTRecord.getSentinel().alloc(
@@ -142,7 +142,7 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
-      throw new EntVMachRuntimeException("Expected single string arg.");
+      throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
     Environment.pushToCallStack(PTRowset.getSentinel().alloc(
@@ -166,7 +166,7 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 2 || (!(args.get(1) instanceof PTInteger))) {
-      throw new EntVMachRuntimeException("Expected two args, with the second "
+      throw new OPSVMachRuntimeException("Expected two args, with the second "
           + "being an integer.");
     }
 
@@ -192,7 +192,7 @@ public class GlobalFnLibrary {
      * states that this is the behavior that occurs, unless .Clone() is used.
      */
     for(int i = 0; i < initialSize; i++) {
-      throw new EntVMachRuntimeException("Must support array instantiation in "+
+      throw new OPSVMachRuntimeException("Must support array instantiation in "+
         "CreateArrayRept; make sure to check toString() output.");
     }
 
@@ -231,7 +231,7 @@ public class GlobalFnLibrary {
           ((PTString)fldObj.getValue()).write(
             rs.getString(colName));
         } else {
-          throw new EntVMachRuntimeException("Unexpected db " +
+          throw new OPSVMachRuntimeException("Unexpected db " +
             "type for Type.STRING: " + colTypeName + "; " +
             "colName=" + colName);
         }
@@ -246,7 +246,7 @@ public class GlobalFnLibrary {
               rs.getDouble(colName));
           }
         } else {
-          throw new EntVMachRuntimeException("Unexpected db " +
+          throw new OPSVMachRuntimeException("Unexpected db " +
             "type for Type.NUMBER: " + colTypeName + "; " +
             "colName=" + colName);
         }
@@ -256,7 +256,7 @@ public class GlobalFnLibrary {
           ((PTDate)fldObj.getValue()).write(
             rs.getString(colName));
         } else {
-          throw new EntVMachRuntimeException("Unexpected db " +
+          throw new OPSVMachRuntimeException("Unexpected db " +
             "type for Type.DATE: " + colTypeName + "; " +
             "colName=" + colName);
         }
@@ -266,13 +266,13 @@ public class GlobalFnLibrary {
           ((PTDateTime)fldObj.getValue()).write(
             rs.getString(colName));
         } else {
-          throw new EntVMachRuntimeException("Unexpected db " +
+          throw new OPSVMachRuntimeException("Unexpected db " +
             "type for Type.DATETIME: " + colTypeName + "; " +
             "colName=" + colName);
         }
         break;
       default:
-        throw new EntVMachRuntimeException("Unexpected field " +
+        throw new OPSVMachRuntimeException("Unexpected field " +
           "value type encountered when filling rowset: " +
            fldObj.getValue().getType());
     }

@@ -7,9 +7,9 @@
 
 package org.openpplsoft.antlr4;
 
-import org.openpplsoft.runtime.EntVMachRuntimeException;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
-public class EntReturnException extends EntVMachRuntimeException {
+public class EntReturnException extends OPSVMachRuntimeException {
 
   public EntReturnException(String instructionText) {
     super(instructionText);

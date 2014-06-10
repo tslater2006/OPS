@@ -33,11 +33,11 @@ public class InterpretSupervisor {
     this.runTopOfStack();
 
     if(this.execContextStack.size() != 0) {
-      throw new EntVMachRuntimeException("Expected exec context stack to be empty.");
+      throw new OPSVMachRuntimeException("Expected exec context stack to be empty.");
     }
 
     if(Environment.getCallStackSize() != 0) {
-      throw new EntVMachRuntimeException("Expected call stack to be empty.");
+      throw new OPSVMachRuntimeException("Expected call stack to be empty.");
     }
   }
 
@@ -107,13 +107,13 @@ public class InterpretSupervisor {
     if(normalExit) {
       if(context instanceof ProgramExecContext &&
         context.scopeStack.size() > 0) {
-        throw new EntVMachRuntimeException("Expected all scope ptrs in the " +
+        throw new OPSVMachRuntimeException("Expected all scope ptrs in the " +
           "ProgramExecContext to be popped.");
       }
 
       if(context instanceof AppClassObjExecContext &&
         context.scopeStack.size() > 2) {
-        throw new EntVMachRuntimeException("Expected all scope ptrs except " +
+        throw new OPSVMachRuntimeException("Expected all scope ptrs except " +
           "for the underlying object's prop and instance scopes to be popped.");
       }
     }

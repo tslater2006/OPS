@@ -7,9 +7,9 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.runtime.EntVMachRuntimeException;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
-public class EntDataTypeException extends EntVMachRuntimeException {
+public class EntDataTypeException extends OPSVMachRuntimeException {
 
   public EntDataTypeException(String msg) {
     super(msg);

@@ -64,7 +64,7 @@ public abstract class ExecContext {
       return Environment.globalScope.resolveVar(id);
     }
 
-    throw new EntVMachRuntimeException("Unable to resolve identifier (" +
+    throw new OPSVMachRuntimeException("Unable to resolve identifier (" +
         id + ") to PTType after checking all scopes.");
   }
 
@@ -93,7 +93,7 @@ public abstract class ExecContext {
       return;
     }
 
-    throw new EntVMachRuntimeException("Unable to resolve identifier (" +
+    throw new OPSVMachRuntimeException("Unable to resolve identifier (" +
         id + ") in any scope before assigning to identifier.");
   }
 }

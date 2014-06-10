@@ -106,7 +106,7 @@ public class PTAppClassObj extends PTObjectType {
           this.progDefn.getMethodImplStartNode(s),
           this.progDefn.methodTable.get(s).returnType));
       } else {
-        throw new EntVMachRuntimeException("Encountered request for non-public "+
+        throw new OPSVMachRuntimeException("Encountered request for non-public "+
           "method; need to determine if the calling entity is an obj "+
           "with the same app class type as this one, since private methods "+
           "are private to all instances of the app class, not individual objects.");

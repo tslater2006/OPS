@@ -128,7 +128,7 @@ public class AppPackage {
       }
 
       // If we get to this point, this entry has an unexpected format.
-      throw new EntVMachRuntimeException("Unexpected OBJECTID in app class path " +
+      throw new OPSVMachRuntimeException("Unexpected OBJECTID in app class path " +
         "from database: " + id);
     }
   }
@@ -138,7 +138,7 @@ public class AppPackage {
     PackageTreeNode currNode = this.rootPkgNode;
 
     if(!pkgPath.parts[0].equals(this.rootPkgNode.pkgName)) {
-      throw new EntVMachRuntimeException("The app package path provided (" +
+      throw new OPSVMachRuntimeException("The app package path provided (" +
           pkgPath + ") does not match the root package name (" + this.rootPkgName + ").");
     }
 
@@ -157,7 +157,7 @@ public class AppPackage {
          */
         return currNode.classNames;
       } else {
-        throw new EntVMachRuntimeException("The app package path provided (" +
+        throw new OPSVMachRuntimeException("The app package path provided (" +
           pkgPath + ") does not resolve in the context of this package (" + this.rootPkgName + ").");
       }
     }

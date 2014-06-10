@@ -92,7 +92,7 @@ public abstract class PeopleCodeProg {
       pstmt.close();
 
       if(this.progBytes.length != PROGLEN) {
-        throw new EntVMachRuntimeException("Number of bytes in " + this.getDescriptor() + " ("
+        throw new OPSVMachRuntimeException("Number of bytes in " + this.getDescriptor() + " ("
             + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
       }
 
@@ -241,7 +241,7 @@ public abstract class PeopleCodeProg {
       //log.debug(this.parseTree.toStringTree(parser));
       //log.debug("====================================================");
     } catch(java.io.IOException ioe) {
-      throw new EntVMachRuntimeException(ioe.getMessage());
+      throw new OPSVMachRuntimeException(ioe.getMessage());
     }
   }
 }

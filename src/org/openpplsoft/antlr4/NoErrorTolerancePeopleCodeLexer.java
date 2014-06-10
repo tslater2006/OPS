@@ -18,6 +18,6 @@ public class NoErrorTolerancePeopleCodeLexer extends PeopleCodeLexer {
   }
 
   public void recover(LexerNoViableAltException e) {
-    throw new EntVMachRuntimeException(e.getMessage(), e);
+    throw new OPSVMachRuntimeException(e.getMessage(), e);
   }
 }

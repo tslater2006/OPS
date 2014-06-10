@@ -80,7 +80,7 @@ public class Component {
       } else if(this.PRIMARYACTION == PSDefn.PRIMARYACTION_Search) {
         this.searchRecordToUse = this.SEARCHRECNAME;
       } else {
-        throw new EntVMachRuntimeException("Unable to select search record "
+        throw new OPSVMachRuntimeException("Unable to select search record "
             + "due to unknown Primary Action value.");
       }
 
@@ -147,7 +147,7 @@ public class Component {
             objectval3, objectval4, objectval5);
 
         } else {
-          throw new EntVMachRuntimeException("Unexpected type of "
+          throw new OPSVMachRuntimeException("Unexpected type of "
               + "Component PC encountered.");
         }
 
@@ -234,7 +234,7 @@ public class Component {
             colName, colTypeName, rs);
         }
         if(rs.next()) {
-          throw new EntVMachRuntimeException(
+          throw new OPSVMachRuntimeException(
             "Result set for search record fill has more than " +
             "one record.");
         }
@@ -328,7 +328,7 @@ public class Component {
       }
 
       if(scrollMarkers.size() != 0) {
-        throw new EntVMachRuntimeException("Scroll marker stack size exceeds 0 " +
+        throw new OPSVMachRuntimeException("Scroll marker stack size exceeds 0 " +
           "at the end of the page token stream.");
       }
     }

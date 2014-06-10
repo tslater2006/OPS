@@ -160,7 +160,7 @@ public final class TraceFileVerifier {
     }
 
     if (traceEmission == null) {
-      throw new EntVMachRuntimeException("Reached EOF of trace file; no "
+      throw new OPSVMachRuntimeException("Reached EOF of trace file; no "
           + "emission match is possible.");
     }
 
@@ -176,7 +176,7 @@ public final class TraceFileVerifier {
       log.fatal("=== Emission Mismatch! =======================");
       log.fatal("OPS emitted: {}", opsEmission);
       log.fatal("Trace file expects: {}", traceEmission);
-      throw new EntVMachRuntimeException("Emission mismatch.");
+      throw new OPSVMachRuntimeException("Emission mismatch.");
     }
   }
 

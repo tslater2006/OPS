@@ -162,7 +162,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         case "public":
           this.blockAccessLvl = AccessLevel.PUBLIC; break;
         default:
-          throw new EntVMachRuntimeException("Unknown access level modifier " +
+          throw new OPSVMachRuntimeException("Unknown access level modifier " +
             "encountered: " + ctx.aLvl.getText());
       }
     } else {
@@ -179,7 +179,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.varType());
 
     if(this.blockAccessLvl != AccessLevel.PRIVATE) {
-      throw new EntVMachRuntimeException("Expected instance declaration to be " +
+      throw new OPSVMachRuntimeException("Expected instance declaration to be " +
         "private; actual access level is: " + this.blockAccessLvl);
     }
 
@@ -195,7 +195,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.varType());
 
     if(this.blockAccessLvl != AccessLevel.PUBLIC) {
-      throw new EntVMachRuntimeException("Expected property declaration to be " +
+      throw new OPSVMachRuntimeException("Expected property declaration to be " +
         "publicly accessible; actual access level is: " + this.blockAccessLvl);
     }
 
@@ -206,7 +206,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     boolean isReadOnly = (ctx.r != null);
 
     if(hasSetter || isReadOnly) {
-      throw new EntVMachRuntimeException("Need to support property setters and/or "+
+      throw new OPSVMachRuntimeException("Need to support property setters and/or "+
         "readonly properties: " + ctx.getText());
     }
 
@@ -268,7 +268,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitForStmt(PeopleCodeParser.ForStmtContext ctx) {
 
     if(ctx.expr(2) != null) {
-      throw new EntVMachRuntimeException("Step clause encountered " +
+      throw new OPSVMachRuntimeException("Step clause encountered " +
         "in For construct; not yet supported.");
     }
 
@@ -337,7 +337,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
 
     } else {
-      throw new EntVMachRuntimeException("Assignment failed; unexpected " +
+      throw new OPSVMachRuntimeException("Assignment failed; unexpected " +
         "type combination.");
     }
 
@@ -361,11 +361,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           .typeCheck(retVal)) {
           Environment.pushToCallStack(retVal);
         } else {
-          throw new EntVMachRuntimeException("Value returned in app class "+
+          throw new OPSVMachRuntimeException("Value returned in app class "+
             "obj execution context does not match the expected type.");
         }
       } else {
-        throw new EntVMachRuntimeException("Must type check return values " +
+        throw new OPSVMachRuntimeException("Must type check return values " +
           "in non-app class execution contexts.");
       }
     }
@@ -439,7 +439,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     if(a != null && (Environment.popFromCallStack() != null)) {
-      throw new EntVMachRuntimeException("More than one return value " +
+      throw new OPSVMachRuntimeException("More than one return value " +
         "was found on the call stack.");
     }
 
@@ -458,7 +458,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else if(ctx.s != null) {
       setNodeData(ctx, lhs.subtract(rhs));
     } else {
-      throw new EntVMachRuntimeException("Unsupported add/sub operation.");
+      throw new OPSVMachRuntimeException("Unsupported add/sub operation.");
     }
 
     return null;
@@ -481,7 +481,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     Callable call = obj.dotMethod(ctx.id().getText());
 
     if(prop == null && call == null) {
-      throw new EntVMachRuntimeException("Failed to resolve identifier (" +
+      throw new OPSVMachRuntimeException("Failed to resolve identifier (" +
         ctx.id().getText() + ") to a property and/or method for object: " +
         obj);
     }
@@ -500,7 +500,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
       List<PTType> args = Environment.getArgsFromCallStack();
       if(args.size() != 1) {
-        throw new EntVMachRuntimeException("Getter should return exactly " +
+        throw new OPSVMachRuntimeException("Getter should return exactly " +
           "one value.");
       }
       setNodeData(ctx, args.get(0));
@@ -520,7 +520,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     for(PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
       visit(argCtx);
       if(index != null) {
-        throw new EntVMachRuntimeException("Multiple array indexes "+
+        throw new OPSVMachRuntimeException("Multiple array indexes "+
           "is not yet supported.");
       }
       index = getNodeData(argCtx);
@@ -554,7 +554,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       result = a1.isLessThanOrEqual(a2);
       log.debug("isLessThanOrEqual: {}? {}", ctx.getText(), result);
     } else {
-      throw new EntVMachRuntimeException("Unknown comparison " +
+      throw new OPSVMachRuntimeException("Unknown comparison " +
         "operation encountered.");
     }
     setNodeData(ctx, result);
@@ -582,7 +582,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       log.debug("isNotEqual: {}? {}", ctx.getText(), result);
 
     } else {
-      throw new EntVMachRuntimeException("Unknown equality " +
+      throw new OPSVMachRuntimeException("Unknown equality " +
         "operation encountered.");
     }
     setNodeData(ctx, result);
@@ -765,7 +765,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
 
     } else if(ctx.DecimalLiteral() != null) {
-      throw new EntVMachRuntimeException("Encountered a decimal literal; need to create "
+      throw new OPSVMachRuntimeException("Encountered a decimal literal; need to create "
         + "a BigDecimal memory pool and type.");
 
     } else if(ctx.StringLiteral() != null) {
@@ -778,7 +778,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           str.substring(1, str.length() - 1)));
 
     } else {
-      throw new EntVMachRuntimeException("Unable to resolve literal to a terminal node.");
+      throw new OPSVMachRuntimeException("Unable to resolve literal to a terminal node.");
     }
 
     return null;
@@ -804,7 +804,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           this.declareIdentifier(scope, idCtx.VAR_ID().getText(), initialValue);
           didInitializeAnIdentifier = true;
         } else {
-          throw new EntVMachRuntimeException("Type mismatch between declared " +
+          throw new OPSVMachRuntimeException("Type mismatch between declared " +
             "variable type ("+varType+") and its initialized value ("
             +initialValue+").");
         }
@@ -844,7 +844,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       PTType nestedType = null;
       if(ctx.varType() != null) {
         if(!ctx.GENERIC_ID().getText().equals("array")) {
-          throw new EntVMachRuntimeException("Encountered non-array var " +
+          throw new OPSVMachRuntimeException("Encountered non-array var " +
             "type preceding 'of' clause: " + ctx.getText());
         }
         visit(ctx.varType());
@@ -876,7 +876,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         case "boolean":
           type = PTBoolean.getSentinel();   break;
         default:
-          throw new EntVMachRuntimeException("Unexpected data type: " +
+          throw new OPSVMachRuntimeException("Unexpected data type: " +
             ctx.GENERIC_ID().getText());
       }
       setNodeData(ctx, type);
@@ -914,7 +914,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitWhenBranch(PeopleCodeParser.WhenBranchContext ctx) {
 
     if(ctx.op != null) {
-      throw new EntVMachRuntimeException("Encountered relational op in when "
+      throw new OPSVMachRuntimeException("Encountered relational op in when "
           + "branch, not yet supported.");
     }
 
@@ -972,7 +972,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       visit(ctx.appClassPath());
       objType = (PTAppClassObj)getNodeData(ctx.appClassPath());
     } else {
-      throw new EntVMachRuntimeException("Encountered create invocation without " +
+      throw new OPSVMachRuntimeException("Encountered create invocation without " +
         "app class prefix; need to support this by resolving path to class.");
     }
 
@@ -1034,7 +1034,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         Environment.globalScope.declareVar(id, a);
         break;
       default:
-        throw new EntVMachRuntimeException("Encountered unexpected variable " +
+        throw new OPSVMachRuntimeException("Encountered unexpected variable " +
           " scope: " + scope);
     }
   }

@@ -33,11 +33,11 @@ public class PTFieldLiteral extends PTObjectType {
   }
 
   public PTType dotProperty(String s) {
-    throw new EntVMachRuntimeException("dotProperty not supported.");
+    throw new OPSVMachRuntimeException("dotProperty not supported.");
   }
 
   public Callable dotMethod(String s) {
-    throw new EntVMachRuntimeException("dotMethod not supported.");
+    throw new OPSVMachRuntimeException("dotMethod not supported.");
   }
 
   public PTPrimitiveType castTo(PTPrimitiveType t) {

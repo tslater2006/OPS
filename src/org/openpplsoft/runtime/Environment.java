@@ -117,7 +117,7 @@ public class Environment {
     }
 
     if(a == null) {
-      throw new EntVMachRuntimeException("Attempted to access a system var "
+      throw new OPSVMachRuntimeException("Attempted to access a system var "
        + "that is undefined: " + var);
     }
     return a;

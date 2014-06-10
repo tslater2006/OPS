@@ -61,7 +61,7 @@ public final class Main {
 
       TraceFileVerifier.logVerificationSummary(false);
 
-    } catch (final EntVMachRuntimeException evmre) {
+    } catch (final OPSVMachRuntimeException evmre) {
       log.fatal(evmre.getMessage(), evmre);
       TraceFileVerifier.logVerificationSummary(true);
       System.exit(ExitCode.ENT_VIRTUAL_MACH_RUNTIME_EXCEPTION.getCode());

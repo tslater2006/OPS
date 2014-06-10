@@ -271,7 +271,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
        */
       return;
     } else {
-      throw new EntVMachRuntimeException("Encountered unexpected expression type "+
+      throw new OPSVMachRuntimeException("Encountered unexpected expression type "+
         "preceding a function call or rowset index call: " + ctx.expr().getText());
     }
 
@@ -335,7 +335,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
     if(pkgList != null) {
       if(pkgList.size() > 1) {
-        throw new EntVMachRuntimeException("Found multiple discrete app class imports " +
+        throw new OPSVMachRuntimeException("Found multiple discrete app class imports " +
           "for an app class; unable to resolve authoritative package path.");
       } else {
         authoritativePath = pkgList.get(0);
@@ -348,7 +348,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
           if(authoritativePath == null) {
             authoritativePath = importedPkgPath;
           } else {
-            throw new EntVMachRuntimeException("Found multiple discrete app pkg " +
+            throw new OPSVMachRuntimeException("Found multiple discrete app pkg " +
               "imports for an app class; unable to resolve authoritative package path.");
           }
         }
@@ -362,7 +362,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
       }
       appClassParts.add(appClassName);
     } else {
-      throw new EntVMachRuntimeException("Unable to resolve authoritative path to class name (" + 
+      throw new OPSVMachRuntimeException("Unable to resolve authoritative path to class name (" + 
         appClassName + ").");
     }
 

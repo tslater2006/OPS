@@ -69,7 +69,7 @@ public class PTRowset extends PTObjectType {
   public void getRow() {
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 1) {
-      throw new EntVMachRuntimeException("Expected only one arg.");
+      throw new OPSVMachRuntimeException("Expected only one arg.");
     }
 
     int idx = -1;
@@ -80,12 +80,12 @@ public class PTRowset extends PTObjectType {
     } else if(iterExpr instanceof PTNumber) {
       idx = ((PTNumber)iterExpr).read(PTInteger.getSentinel());
     } else {
-      throw new EntVMachRuntimeException("Expected iterExpr to be" +
+      throw new OPSVMachRuntimeException("Expected iterExpr to be" +
         " either integer or Number.");
     }
 
     if(idx < 1 || idx > this.rows.size()) {
-      throw new EntVMachRuntimeException("Index (" + idx + ") provided to " +
+      throw new OPSVMachRuntimeException("Index (" + idx + ") provided to " +
           "getRows is out of bounds; number of rows is " + this.rows.size());
     }
 
@@ -103,19 +103,19 @@ public class PTRowset extends PTObjectType {
       if(orderStr.read().equals("A") || orderStr.read().equals("D")){
         orders.push(orderStr.read());
       } else {
-        throw new EntVMachRuntimeException("Unexpected order "+
+        throw new OPSVMachRuntimeException("Unexpected order "+
           "string: " + orderStr.read());
       }
 
       PTFieldLiteral fld = (PTFieldLiteral)Environment.popFromCallStack();
       if(fld != null && !fld.RECNAME.equals(this.recDefn.RECNAME)) {
-        throw new EntVMachRuntimeException("Encountered a sort " +
+        throw new OPSVMachRuntimeException("Encountered a sort " +
           "field for a record other than the one underlying this "+
           "rowset; this is legal but not yet supported.");
       }
 
       if(!this.emptyRow.record.hasField(fld.FIELDNAME)) {
-        throw new EntVMachRuntimeException("The field " +
+        throw new OPSVMachRuntimeException("The field " +
           fld.FIELDNAME + " does not exist on the underlying "+
           "record.");
       }
@@ -233,7 +233,7 @@ public class PTRowset extends PTObjectType {
   public void PT_Flush() {
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() != 0) {
-      throw new EntVMachRuntimeException("Expected zero arguments.");
+      throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
     this.internalFlush();
   }
@@ -247,7 +247,7 @@ public class PTRowset extends PTObjectType {
   public void PT_Fill() {
     List<PTType> args = Environment.getArgsFromCallStack();
     if(args.size() < 1) {
-      throw new EntVMachRuntimeException("Expected at least one string arg.");
+      throw new OPSVMachRuntimeException("Expected at least one string arg.");
     }
 
     // Gather bind values following the WHERE string on the stack.
@@ -272,7 +272,7 @@ public class PTRowset extends PTObjectType {
 
       int numCols = rs.getMetaData().getColumnCount();
       if(numCols != rfList.size()) {
-        throw new EntVMachRuntimeException("The number of columns returned " +
+        throw new OPSVMachRuntimeException("The number of columns returned " +
           "by the fill query (" + numCols + ") differs from the number " +
           "of fields (" + rfList.size() +
           ") in the record defn field list.");

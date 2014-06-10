@@ -100,7 +100,7 @@ public class RecordPCListRequestBuffer {
   public static void flushEntireTokenStream() {
 
     if(secpagesBeingExpanded.size() > 0) {
-      throw new EntVMachRuntimeException("Expected empty secpage stack before flushing remaining"
+      throw new OPSVMachRuntimeException("Expected empty secpage stack before flushing remaining"
           + "Record PC list requests.");
     }
 

@@ -9,13 +9,13 @@ package org.openpplsoft.runtime;
 
 import java.lang.RuntimeException;
 
-public class EntVMachRuntimeException extends RuntimeException {
+public class OPSVMachRuntimeException extends RuntimeException {
 
-  public EntVMachRuntimeException(String msg) {
+  public OPSVMachRuntimeException(String msg) {
     super(msg);
   }
 
-  public EntVMachRuntimeException(String msg, Exception ex) {
+  public OPSVMachRuntimeException(String msg, Exception ex) {
     super(msg, ex);
   }
 }

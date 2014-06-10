@@ -55,7 +55,7 @@ public class RecordField {
       case 9: // TODO: 9 is image reference; doesn't need to be stored.
         return PTString.getSentinel();
         default:
-      throw new EntVMachRuntimeException("Unable to determine " +
+      throw new OPSVMachRuntimeException("Unable to determine " +
         "appropriate sentinel for underlying record field " +
         "value given a typeFlag of: " + this.typeFlag + "; " +
         "RECNAME=" + RECNAME + ", FIELDNAME=" + FIELDNAME);

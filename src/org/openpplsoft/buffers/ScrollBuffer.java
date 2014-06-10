@@ -66,7 +66,7 @@ public class ScrollBuffer implements IStreamableBuffer {
        * return it, otherwise call this method on the parent's parent
        * scroll buffer.
        */
-      throw new EntVMachRuntimeException("Need to support getting "+
+      throw new OPSVMachRuntimeException("Need to support getting "+
         "key values from scroll 1 and/or 2 of comp buffer.");
     }
     return null;

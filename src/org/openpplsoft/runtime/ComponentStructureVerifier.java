@@ -69,7 +69,7 @@ public class ComponentStructureVerifier {
             Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
             (!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
             && Integer.parseInt(lineParts[1]) > 0)) {
-          throw new EntVMachRuntimeException("Incorrect/absent scroll token encountered " +
+          throw new OPSVMachRuntimeException("Incorrect/absent scroll token encountered " +
               "during component structure validation.");
         }
       } else if(buf instanceof RecordBuffer) {
@@ -81,7 +81,7 @@ public class ComponentStructureVerifier {
 
         if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
             !lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
-          throw new EntVMachRuntimeException("Incorrect/absent record token encountered " +
+          throw new OPSVMachRuntimeException("Incorrect/absent record token encountered " +
               "during component structure validation.");
         }
       } else {
@@ -93,7 +93,7 @@ public class ComponentStructureVerifier {
 
         if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
             !lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
-          throw new EntVMachRuntimeException("Incorrect/absent field token encountered " +
+          throw new OPSVMachRuntimeException("Incorrect/absent field token encountered " +
               "during component structure validation.");
         }
       }
@@ -101,7 +101,7 @@ public class ComponentStructureVerifier {
 
     try {
       if(!reader.readLine().trim().equals("END-COMPONENT-STRUCTURE")) {
-        throw new EntVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
+        throw new OPSVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
       }
     } catch(java.io.IOException ioe) {
       log.fatal(ioe.getMessage(), ioe);

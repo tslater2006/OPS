@@ -28,9 +28,9 @@
 
 package org.openpplsoft.bytecode;
 
-import org.openpplsoft.runtime.EntVMachRuntimeException;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
-public class EntAssembleException extends EntVMachRuntimeException {
+public class EntAssembleException extends OPSVMachRuntimeException {
 
   public EntAssembleException(String msg) {
     super(msg);

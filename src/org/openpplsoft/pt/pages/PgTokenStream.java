@@ -98,7 +98,7 @@ public class PgTokenStream {
         }
 
         if(primaryRecNameCandidate == null) {
-          throw new EntVMachRuntimeException("Unable to find the scroll area's primary record name.");
+          throw new OPSVMachRuntimeException("Unable to find the scroll area's primary record name.");
         } else {
           tok.primaryRecName = primaryRecNameCandidate;
         }

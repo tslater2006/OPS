@@ -30,7 +30,7 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     this.parentRecordBuffer = parent;
 
     if(this.fldDefn == null) {
-      throw new EntVMachRuntimeException("Field not found on the record supplied. Likely on a subrecord. " +
+      throw new OPSVMachRuntimeException("Field not found on the record supplied. Likely on a subrecord. " +
           "Subrecord traversal in RecordFieldBuffer not supported at this time.");
     }
   }

@@ -5,9 +5,9 @@
 <!--                         See LICENSE.md for details.                    -->
 <!--========================================================================-->
 
-<project name="ENT Server" default="build" basedir=".">
+<project name="OPS Runtime" default="build" basedir=".">
 
-  <description>Build file for the ENT app server / db broker.</description>
+  <description>Build file for the OPS runtime project.</description>
 
   <presetdef name="javac">
     <javac includeantruntime="false"/>
@@ -31,6 +31,7 @@
         <include name="org/openpplsoft/runtime/TraceFileVerifier.java"/>
         <include name="org/openpplsoft/runtime/DefnCache.java"/>
         <include name="org/openpplsoft/runtime/Scope.java"/>
+        <include name="org/openpplsoft/antlr4/OPSDiagErrorListener.java"/>
       </fileset>
     </checkstyle>
   </target>

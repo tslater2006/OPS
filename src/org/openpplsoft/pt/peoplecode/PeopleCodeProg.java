@@ -230,7 +230,7 @@ public abstract class PeopleCodeProg {
       PeopleCodeParser parser = new PeopleCodeParser(this.tokenStream);
 
       parser.removeErrorListeners();
-      parser.addErrorListener(new EntDiagErrorListener());
+      parser.addErrorListener(new OPSDiagErrorListener());
       parser.getInterpreter()
           .setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
       parser.setErrorHandler(new EntErrorStrategy());

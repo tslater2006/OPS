@@ -13,7 +13,7 @@
     <javac includeantruntime="false"/>
   </presetdef>
 
-  <property name="ANTLR_SRC_DIR" value="${basedir}/src/com/enterrupt/antlr4/frontend"/>
+  <property name="ANTLR_SRC_DIR" value="${basedir}/src/org/openpplsoft/antlr4/frontend"/>
   <property name="ANTLR_JAR" value="${basedir}/lib/antlr-4.1-complete.jar"/>
 
   <taskdef resource="checkstyletask.properties"
@@ -25,7 +25,7 @@
                 failureProperty="checkstyle.failure"
                 failOnViolation="true">
       <fileset dir="src">
-        <include name="com/enterrupt/runtime/TraceFileVerifier.java"/>
+        <include name="org/openpplsoft/runtime/TraceFileVerifier.java"/>
       </fileset>
     </checkstyle>
   </target>
@@ -59,7 +59,7 @@
       <arg value="-o"/>
       <arg value="${ANTLR_SRC_DIR}"/>
       <arg value="-package"/>
-      <arg value="com.enterrupt.antlr4.frontend"/>
+      <arg value="org.openpplsoft.antlr4.frontend"/>
       <arg value="-visitor"/>
       <arg value="-listener"/>
       <arg value="${basedir}/grammars/PeopleCode.g4"/>

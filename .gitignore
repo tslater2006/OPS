@@ -1,6 +1,6 @@
 bin
 cache
-src/com/enterrupt/antlr4/frontend
+src/org/openpplsoft/antlr4/frontend
 /target
 /classes
 /checkouts

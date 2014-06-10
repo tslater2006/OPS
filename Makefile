@@ -47,5 +47,5 @@ build:
 	ant build_all
 
 run:
-	java $(JAVA_D) -cp $(JAVA_CP) com.enterrupt.Main
+	java $(JAVA_D) -cp $(JAVA_CP) org.openpplsoft.Main
  

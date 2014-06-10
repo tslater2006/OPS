@@ -1,8 +1,0 @@
-Example installation of local JAR to this local repo:
-
-mvn install:install-file \
--Dfile=lib/ojdbc7.jar \
--DgroupId=self -DartifactId=ojdbc7 \
--Dversion=7.0.0 -Dpackaging=jar -DgeneratePom=true \
--DcreateChecksum=true -DlocalRepositoryPath=mvn_repo
-

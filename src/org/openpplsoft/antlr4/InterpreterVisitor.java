@@ -369,7 +369,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           "in non-app class execution contexts.");
       }
     }
-    throw new EntReturnException(ctx.getText());
+    throw new OPSReturnException(ctx.getText());
   }
 
   /*=========================================================

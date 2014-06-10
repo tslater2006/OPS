@@ -9,9 +9,20 @@ package org.openpplsoft.antlr4;
 
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
-public class EntReturnException extends OPSVMachRuntimeException {
+/**
+ * This exception is thrown by the interpreter when a PeopleCode
+ * return statement is encountered; the exception will subsequently
+ * be caught by the InterpreterSupervisor, which will clean up after
+ * execution differently than if the return stmt had not been present.
+ */
+public class OPSReturnException extends OPSVMachRuntimeException {
 
-  public EntReturnException(String instructionText) {
+  /**
+   * Creates an instance of the exception.
+   * @param instructionText the text of the return stmt in the
+   *    PeopleCode program.
+   */
+  public OPSReturnException(final String instructionText) {
     super(instructionText);
   }
 }

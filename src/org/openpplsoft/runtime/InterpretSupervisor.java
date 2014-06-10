@@ -100,7 +100,7 @@ public class InterpretSupervisor {
     boolean normalExit = true;
     try {
       interpreter.visit(context.startNode);
-    } catch(EntReturnException ere) {
+    } catch(OPSReturnException ere) {
       normalExit = false;
     }
 

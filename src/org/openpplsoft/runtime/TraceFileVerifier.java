@@ -111,7 +111,7 @@ public final class TraceFileVerifier {
     /*
      * If this is the first emission being matched, seek
      * to the match in the trace file. It is assumed that the first
-     * EVM emission is a SQL statement due to the need to get component
+     * OPS emission is a SQL statement due to the need to get component
      * metadata; if this routine is used to check tracefiles that have been
      * generated with a non-empty cache, this assumption may not be valid.
      */
@@ -144,7 +144,7 @@ public final class TraceFileVerifier {
       }
     } else {
       log.fatal("=== Emission Mismatch! =======================");
-      log.fatal("EVM emitted: {}", evmEmission);
+      log.fatal("OPS emitted: {}", evmEmission);
       log.fatal("Trace file expects: {}", traceEmission);
       throw new EntVMachRuntimeException("Emission mismatch.");
     }

@@ -200,7 +200,7 @@ public class GlobalFnLibrary {
   }
 
   /*==================================*/
-  /* Shared EVM functions             */
+  /* Shared OPS functions             */
   /*==================================*/
 
   public static void readRecordFromResultSet(Record recDefn,

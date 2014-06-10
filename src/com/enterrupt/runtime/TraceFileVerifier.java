@@ -7,19 +7,30 @@
 
 package com.enterrupt.runtime;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
-import org.apache.logging.log4j.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.enterrupt.sql.*;
 import com.enterrupt.trace.*;
 
-public class TraceFileVerifier {
+public final class TraceFileVerifier {
 
   private static List<IEmission> unenforcedEmissions;
   private static Map<String, Boolean> ignoredStmts;
   private static String currTraceLine = "";
-  private static int currTraceLineNbr = 0;
+  private static int currTraceLineNbr;
   private static BufferedReader traceFileReader;
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
       pcBeginPattern, pcInstrPattern, pcEndPattern;
@@ -28,16 +39,23 @@ public class TraceFileVerifier {
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
   private static int numTraceSQLStmts, numTraceSQLStmtsIgnored;
 
-  private static Logger log = LogManager.getLogger(TraceFileVerifier.class.getName());
+  private static Logger log = LogManager.getLogger(
+      TraceFileVerifier.class.getName());
 
   static {
     unenforcedEmissions = new ArrayList<IEmission>();
     ignoredStmts = new HashMap<String, Boolean>();
     sqlTokenPattern = Pattern.compile("\\sStmt=(.*)");
-    bindValPattern = Pattern.compile("\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
-    pcStartPattern = Pattern.compile("\\s+>>>\\s+(start|start-ext)\\s+Nest=(\\d+)\\s+([A-Za-z_0-9]*?)\\s+([A-Za-z\\._0-9]+)");
-    pcBeginPattern = Pattern.compile("\\s>>>>>\\s+Begin\\s+([A-Za-z\\._0-9]+)\\s+level\\s+(\\d+)\\s+row\\s+(\\d+)");
-    pcEndPattern = Pattern.compile("\\s+<<<\\s(end|end-ext)\\s+Nest=(\\d+)\\s+([A-Za-z0-9]*?)\\s+([A-Za-z\\._0-9]+)");
+    bindValPattern = Pattern.compile(
+        "\\sBind-(\\d+)\\stype=\\d+\\slength=\\d+\\svalue=(.*)");
+    pcStartPattern = Pattern.compile(
+        "\\s+>>>\\s+(start|start-ext)\\s+Nest=(\\d+)"
+        + "\\s+([A-Za-z_0-9]*?)\\s+([A-Za-z\\._0-9]+)");
+    pcBeginPattern = Pattern.compile(
+        "\\s>>>>>\\s+Begin\\s+([A-Za-z\\._0-9]+)\\s+level"
+        + "\\s+(\\d+)\\s+row\\s+(\\d+)");
+    pcEndPattern = Pattern.compile("\\s+<<<\\s(end|end-ext)"
+        + "\\s+Nest=(\\d+)\\s+([A-Za-z0-9]*?)\\s+([A-Za-z\\._0-9]+)");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?)[;]*$");
@@ -48,7 +66,7 @@ public class TraceFileVerifier {
     try {
       traceFileReader = new BufferedReader(new FileReader(
       new File(System.getProperty("tracefile"))));
-    } catch(java.io.FileNotFoundException fnfe) {
+    } catch (final java.io.FileNotFoundException fnfe) {
       log.fatal(fnfe.getMessage(), fnfe);
       System.exit(ExitCode.TRACE_FILE_NOT_FOUND.getCode());
     }
@@ -57,31 +75,33 @@ public class TraceFileVerifier {
     ignoreStmtsInFile(System.getProperty("defn_stmts_file"));
   }
 
-  public static void ignoreStmtsInFile(String filename) {
+  private TraceFileVerifier() {}
+
+  public static void ignoreStmtsInFile(final String filename) {
     try {
-      BufferedReader ignoreFileReader = new BufferedReader(new FileReader(
+      final BufferedReader ignoreFileReader = new BufferedReader(new FileReader(
           new File(filename)));
 
       String line;
-      while((line = ignoreFileReader.readLine()) != null) {
+      while ((line = ignoreFileReader.readLine()) != null) {
         ignoredStmts.put(line, true);
       }
       ignoreFileReader.close();
-    } catch(java.io.FileNotFoundException fnfe) {
+    } catch (final java.io.FileNotFoundException fnfe) {
       log.fatal(fnfe.getMessage(), fnfe);
       System.exit(ExitCode.IGNORE_STMTS_FILE_NOT_FOUND.getCode());
-    } catch(java.io.IOException ioe) {
+    } catch (final java.io.IOException ioe) {
       log.fatal(ioe.getMessage(), ioe);
       System.exit(ExitCode.FAILED_READ_FROM_IGNORE_STMTS_FILE.getCode());
     }
   }
 
-  public static void submitUnenforcedEmission(IEmission evmEmission) {
+  public static void submitUnenforcedEmission(final IEmission evmEmission) {
     //log.debug(evmEmission);
     unenforcedEmissions.add(evmEmission);
   }
 
-  public static void enforceEmission(IEmission evmEmission) {
+  public static void enforceEmission(final IEmission evmEmission) {
     //if(!(evmEmission instanceof ENTStmt)) {
     log.debug(evmEmission);
     //}

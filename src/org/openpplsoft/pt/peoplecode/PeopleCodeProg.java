@@ -233,7 +233,7 @@ public abstract class PeopleCodeProg {
       parser.addErrorListener(new OPSDiagErrorListener());
       parser.getInterpreter()
           .setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
-      parser.setErrorHandler(new EntErrorStrategy());
+      parser.setErrorHandler(new OPSErrorStrategy());
 
       this.parseTree = parser.program();
 

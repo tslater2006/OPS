@@ -32,6 +32,7 @@
         <include name="org/openpplsoft/runtime/DefnCache.java"/>
         <include name="org/openpplsoft/runtime/Scope.java"/>
         <include name="org/openpplsoft/antlr4/OPSDiagErrorListener.java"/>
+        <include name="org/openpplsoft/antlr4/OPSErrorStrategy.java"/>
       </fileset>
     </checkstyle>
   </target>

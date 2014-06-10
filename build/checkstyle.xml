@@ -146,7 +146,7 @@
 
     <!-- If a file has a cyclomatic complexity >= 11, it needs to be refactored. -->
     <module name="CyclomaticComplexity">
-      <property name="max" value="7"/>
+      <property name="max" value="11"/>
     </module>
 
     <!-- Enforces declaration order according to Java coding conventions. -->

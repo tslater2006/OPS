@@ -32,6 +32,7 @@
         <include name="org/openpplsoft/runtime/DefnCache.java"/>
         <include name="org/openpplsoft/runtime/Scope.java"/>
         <include name="org/openpplsoft/antlr4/*.java"/>
+        <include name="org/openpplsoft/buffers/ComponentBuffer.java"/>
         <exclude name="**/package-info.java"/>
       </fileset>
     </checkstyle>

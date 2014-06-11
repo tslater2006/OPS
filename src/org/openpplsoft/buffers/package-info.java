@@ -6,7 +6,7 @@
 \*===---------------------------------------------------------------------===*/
 
 /**
- * Contains the environment, execution context, definition cache,
- * and PeopleTools global function definitions required at runtime.
+ * Consists of all definitions for buffer structures
+ * defined in PeopleTools.
  */
-package org.openpplsoft.runtime;
+package org.openpplsoft.buffers;

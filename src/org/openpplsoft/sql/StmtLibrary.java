@@ -153,7 +153,7 @@ public class StmtLibrary {
 
   public static PreparedStatement getSearchRecordFillQuery() {
 
-    PTRecord searchRec = ComponentBuffer.searchRecord;
+    PTRecord searchRec = ComponentBuffer.getSearchRecord();
     Record recDefn = searchRec.recDefn;
     List<RecordField> rfList = recDefn.getExpandedFieldList();
     ArrayList<String> bindVals = new ArrayList<String>();

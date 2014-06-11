@@ -7,115 +7,178 @@
 
 package org.openpplsoft.buffers;
 
-import java.util.*;
-import java.lang.StringBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
-import org.openpplsoft.types.*;
-import org.apache.logging.log4j.*;
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.types.*;
 
-public class ComponentBuffer {
+/**
+ * Represents a PeopleTools component buffer.
+ */
+public final class ComponentBuffer {
 
-  public static int currScrollLevel;
-  public static ScrollBuffer currSB;
-  public static ScrollBuffer compBuffer;
-  public static PTRecord searchRecord;
+  private static Logger log =
+      LogManager.getLogger(ComponentBuffer.class.getName());
 
-  private static Logger log = LogManager.getLogger(ComponentBuffer.class.getName());
+  private static int currScrollLevel;
+  private static ScrollBuffer currSB;
+  private static ScrollBuffer compBuffer;
+  private static PTRecord searchRecord;
+
+  private ComponentBuffer() {}
 
   static {
     compBuffer = new ScrollBuffer(0, null, null);
     currSB = compBuffer;
   }
 
-  public static void addPageField(PgToken tok, int level, String primaryRecName) {
+  /**
+   * Return the search record underlying this component.
+   * @return the underlying search record
+   */
+  public static PTRecord getSearchRecord() {
+    return searchRecord;
+  }
 
+  /**
+   * Set the search record to be used by this component.
+   * @param r the search record to use
+   */
+  public static void setSearchRecord(final PTRecord r) {
+    searchRecord = r;
+  }
+
+  /**
+   * Get the scroll buffer that the ComponentBuffer is
+   * currently pointing at.
+   * @return the currently pointed at ScrollBuffer
+   */
+  public static ScrollBuffer getCurrentScrollBuffer() {
+    return currSB;
+  }
+
+  /**
+   * Add a page field to the appropriate ScrollBuffer
+   * in the ComponentBuffer.
+   * @param tok the page field to add
+   * @param level the scroll level on which the field occurs
+   * @param primaryRecName the primary record name of the scroll
+   *    on which the page field occurs
+   */
+  public static void addPageField(final PgToken tok,
+      final int level, final String primaryRecName) {
     // Ensure that we're pointing at the correct scroll buffer.
     pointAtScroll(level, primaryRecName);
     currSB.addPageField(tok);
   }
 
-  public static void pointAtScroll(int targetScrollLevel, String targetPrimaryRecName) {
+  /**
+   * Change the ScrollBuffer that the ComponentBuffer currently points at.
+   * @param targetScrollLevel the scroll level of the scroll buffer to
+   *    point to
+   * @param targetPrimaryRecName the primary record name for the scroll
+   *    buffer to point to
+   */
+  public static void pointAtScroll(final int targetScrollLevel,
+      final String targetPrimaryRecName) {
 
     // Remember that there's only one scroll level at 0.
-    if(currSB.scrollLevel == targetScrollLevel &&
-      (currSB.scrollLevel == 0 || currSB.primaryRecName.equals(targetPrimaryRecName))) {
+    if (currSB.scrollLevel == targetScrollLevel
+        && (currSB.scrollLevel == 0
+          || currSB.primaryRecName.equals(targetPrimaryRecName))) {
       return;
     }
 
-    while(currScrollLevel < targetScrollLevel) {
+    while (currScrollLevel < targetScrollLevel) {
       currSB = currSB.getChildScroll(targetPrimaryRecName);
       currScrollLevel = currSB.scrollLevel;
     }
 
-    while(currScrollLevel > targetScrollLevel) {
+    while (currScrollLevel > targetScrollLevel) {
       currSB = currSB.parent;
       currScrollLevel = currSB.scrollLevel;
     }
 
-    // The scroll level may not have changed, but if the targeted primary rec name
-    // differs from the current, we need to change buffers.
-    if(currScrollLevel > 0 &&
-      !currSB.primaryRecName.equals(targetPrimaryRecName)) {
+    // The scroll level may not have changed, but if the
+    // targeted primary rec name differs from the current,
+    // we need to change buffers.
+    if (currScrollLevel > 0
+        && !currSB.primaryRecName.equals(targetPrimaryRecName)) {
       currSB = currSB.parent.getChildScroll(targetPrimaryRecName);
       currScrollLevel = currSB.scrollLevel;
     }
   }
 
-  /*
-   * This is the entry point / wrapper for reading
-   * buffers out of the component buffer in a recursive, depth-first
-   * manner.
+  /**
+   * Retrieve the next buffer out of the ComponentBuffer;
+   * buffers are read out of the component buffer in a recursive,
+   * depth-first manner.
+   * @return the next buffer in the read sequence
    */
   public static IStreamableBuffer next() {
     return compBuffer.next();
   }
 
-  /*
-   * Propagates cursor resets to all
-   * buffers.
+  /**
+   * Reset all buffer cursors; this should be done before using
+   * {@code next()} to read all buffers out of the ComponentBuffer.
+   * This reset call will propagate recursively to all child buffers.
    */
   public static void resetCursors() {
     compBuffer.resetCursors();
   }
 
+  /**
+   * Prints the structure of this ComponentBuffer; includes scroll levels,
+   * primary record names, and all included child records. Indentation is
+   * printed where appropriate.
+   */
   public static void printStructure() {
     int indent = 0;
+    final int INDENT_INCREMENT = 3;
     IStreamableBuffer buf;
     ComponentBuffer.resetCursors();
-    while((buf = ComponentBuffer.next()) != null) {
-      if(buf instanceof ScrollBuffer) {
-
-        ScrollBuffer sbuf = (ScrollBuffer) buf;
-        indent = sbuf.scrollLevel * 3;
-        StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(" ");}
+    while ((buf = ComponentBuffer.next()) != null) {
+      if (buf instanceof ScrollBuffer) {
+        final ScrollBuffer sbuf = (ScrollBuffer) buf;
+        indent = sbuf.scrollLevel * INDENT_INCREMENT;
+        final StringBuilder b = new StringBuilder();
+        for (int i = 0; i < indent; i++) {
+          b.append(" ");
+        }
         b.append("Scroll - Level ").append(sbuf.scrollLevel)
             .append("\tPrimary Record: ").append(sbuf.primaryRecName);
-        for(int i=0; i<indent; i++){b.append(" ");}
+        for (int i = 0; i < indent; i++) {
+          b.append(" ");
+        }
         log.info(b.toString());
         log.info("=======================================================");
-      } else if(buf instanceof RecordBuffer) {
-
-        RecordBuffer rbuf = (RecordBuffer) buf;
-        StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(" ");}
+      } else if (buf instanceof RecordBuffer) {
+        final RecordBuffer rbuf = (RecordBuffer) buf;
+        final StringBuilder b = new StringBuilder();
+        for (int i = 0; i < indent; i++) {
+          b.append(" ");
+        }
         b.append(" + ").append(rbuf.recName);
         log.info(b.toString());
       } else {
 
-        RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
-        StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(" ");}
+        final RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+        final StringBuilder b = new StringBuilder();
+        for (int i = 0; i < indent; i++) {
+          b.append(" ");
+        }
         b.append("   - ").append(fbuf.fldName);
         log.info(b.toString());
       }
     }
   }
 
-  /*
-   * MQUINN 04-27-2014
+  /**
+   * TODO(mquinn): complete this method.
    * Filling the component buffer involves multiple passes, total
    * involved is dynamic I believe. I'm calling this just the first
    * pass for now. The goal is to delegate as much of the filling part
@@ -125,10 +188,10 @@ public class ComponentBuffer {
     IStreamableBuffer buf;
 
     ComponentBuffer.resetCursors();
-    while((buf = ComponentBuffer.next()) != null) {
+    while ((buf = ComponentBuffer.next()) != null) {
 
-      if(buf instanceof RecordBuffer) {
-        RecordBuffer rbuf = (RecordBuffer) buf;
+      if (buf instanceof RecordBuffer) {
+        final RecordBuffer rbuf = (RecordBuffer) buf;
 
         /*
          * For the first pass, only fill table and view
@@ -136,8 +199,8 @@ public class ComponentBuffer {
          * be aborted if record conditions are not met (see
          * method implementation for details).
          */
-        Record recDefn = DefnCache.getRecord(rbuf.recName);
-        if(recDefn.isTable() || recDefn.isView()) {
+        final Record recDefn = DefnCache.getRecord(rbuf.recName);
+        if (recDefn.isTable() || recDefn.isView()) {
           rbuf.firstPassFill();
         }
       }

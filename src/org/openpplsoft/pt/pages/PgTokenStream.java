@@ -88,7 +88,8 @@ public class PgTokenStream {
              * buffer already). To prepare for that case, we must save the first RECNAME we come across
              * for potential use as the primary record name of this scroll area.
              */
-            if(ComponentBuffer.currSB.recBufferTable.get(lookToken.RECNAME) == null) {
+            if(ComponentBuffer.getCurrentScrollBuffer()
+                .recBufferTable.get(lookToken.RECNAME) == null) {
               primaryRecNameCandidate = lookToken.RECNAME;
               break;
             } else if(primaryRecNameCandidate == null) {

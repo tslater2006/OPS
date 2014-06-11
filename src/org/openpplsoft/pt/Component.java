@@ -188,7 +188,7 @@ public class Component {
   public void loadAndRunRecordPConSearchRecord() {
 
     final Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
-    ComponentBuffer.searchRecord = PTRecord.getSentinel().alloc(recDefn);
+    ComponentBuffer.setSearchRecord(PTRecord.getSentinel().alloc(recDefn));
 
     if (!recDefn.hasAnyKeys()) {
       log.debug("No keys on search record.");
@@ -246,7 +246,7 @@ public class Component {
 
       // search record may legitimately be empty, check before continuing.
       if (rs.next()) {
-        final PTRecord searchRecord = ComponentBuffer.searchRecord;
+        final PTRecord searchRecord = ComponentBuffer.getSearchRecord();
         for (int i = 1; i <= numCols; i++) {
           final String colName = rsMetadata.getColumnName(i);
           final String colTypeName = rsMetadata.getColumnTypeName(i);

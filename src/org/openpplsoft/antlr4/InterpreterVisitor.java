@@ -963,12 +963,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * The checks on GENERIC_ID below should be run in order of lowest scope
        * to highest scope for this reason.
        */
-      if (ComponentBuffer.searchRecord.recDefn
+      if (ComponentBuffer.getSearchRecord().recDefn
             .RECNAME.equals(ctx.GENERIC_ID().getText())) {
         /*
          * Detect references to search record buffer.
          */
-        this.setNodeData(ctx, ComponentBuffer.searchRecord);
+        this.setNodeData(ctx, ComponentBuffer.getSearchRecord());
 
       } else if (PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.containsKey(
         ctx.GENERIC_ID().getText().toUpperCase())) {

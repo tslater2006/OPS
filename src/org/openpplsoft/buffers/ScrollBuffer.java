@@ -55,8 +55,8 @@ public class ScrollBuffer implements IStreamableBuffer {
        * Examine the search record of the component buffer
        * if this is the level 0 scroll buffer.
        */
-      if(ComponentBuffer.searchRecord.hasField(fldName)) {
-        return ComponentBuffer.searchRecord.getField(fldName)
+      if(ComponentBuffer.getSearchRecord().hasField(fldName)) {
+        return ComponentBuffer.getSearchRecord().getField(fldName)
             .getValue();
       }
     } else {

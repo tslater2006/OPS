@@ -88,11 +88,11 @@ public class ComponentStructureVerifier {
         RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
         StringBuilder b = new StringBuilder();
         for(int i=0; i<indent; i++){b.append(" ");}
-        b.append("   - ").append(fbuf.fldName);
+        b.append("   - ").append(fbuf.getFldName());
         log.info(b.toString());
 
         if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
-            !lineParts[1].replaceAll("-", "_").equals(fbuf.fldName)) {
+            !lineParts[1].replaceAll("-", "_").equals(fbuf.getFldName())) {
           throw new OPSVMachRuntimeException("Incorrect/absent field token encountered " +
               "during component structure validation.");
         }

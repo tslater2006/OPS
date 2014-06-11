@@ -188,7 +188,7 @@ public class RecordBuffer implements IStreamableBuffer {
     RecordFieldBuffer f = this.fieldBufferTable.get(ptFIELDNAME);
     if (f == null) {
       f = new RecordFieldBuffer(ptRECNAME, ptFIELDNAME, this);
-      this.fieldBufferTable.put(f.fldName, f);
+      this.fieldBufferTable.put(f.getFldName(), f);
       this.fieldBuffers.add(f);
 
       // Ensure this is done after adding to the table,
@@ -215,7 +215,7 @@ public class RecordBuffer implements IStreamableBuffer {
         // FieldBuffer will be that of the subrecord itself.
         final RecordFieldBuffer fldBuffer =
             new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this);
-        this.fieldBufferTable.put(fldBuffer.fldName, fldBuffer);
+        this.fieldBufferTable.put(fldBuffer.getFldName(), fldBuffer);
         this.fieldBuffers.add(fldBuffer);
       }
 

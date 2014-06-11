@@ -171,7 +171,7 @@ public final class ComponentBuffer {
         for (int i = 0; i < indent; i++) {
           b.append(" ");
         }
-        b.append("   - ").append(fbuf.fldName);
+        b.append("   - ").append(fbuf.getFldName());
         log.info(b.toString());
       }
     }

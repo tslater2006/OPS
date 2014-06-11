@@ -30,6 +30,10 @@ import org.openpplsoft.runtime.*;
 import org.openpplsoft.trace.*;
 import org.openpplsoft.types.*;
 
+/**
+ * This visitor interprets PeopleCode programs as ANTLR
+ * lexes and parses them.
+ */
 public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
   private static Logger log =
@@ -46,6 +50,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private AccessLevel blockAccessLvl;
   private boolean hasVarDeclBeenEmitted;
 
+  /**
+   * Creates a new interpreter instance that is aware
+   * of the program's execution context and the supervisor
+   * responsible for kicking off execution of the interpreter.
+   * @param e the execution context for the program to interpret
+   * @param s the supervisor driving the interpretation process
+   */
   public InterpreterVisitor(final ExecContext e,
       final InterpretSupervisor s) {
     this.eCtx = e;
@@ -56,25 +67,60 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.evalConstructStack = new Stack<EvaluateConstruct>();
   }
 
+  /**
+   * Associates a data value with a ParseTree node; this data
+   * value can then be accessed by other parts of the interpreter.
+   * @param node the ParseTree node to associate {@code a} with
+   * @param a the data value to associate with {@code node}
+   */
   private void setNodeData(final ParseTree node, final PTType a) {
     this.nodeData.put(node, a);
   }
 
+  /**
+   * Retrieves a data value associated with a ParseTree node,
+   * assuming the value has already been associated via a call
+   * to {@code setNodeData}.
+   * @param node the ParseTree node to retrieve the associated
+   *    data value for
+   */
   private PTType getNodeData(final ParseTree node) {
     return this.nodeData.get(node);
   }
 
+  /**
+   * Associates a callable (i.e., function/method call)
+   * with a ParseTree node for access by other parts of the
+   * interpreter.
+   * @param node the ParseTree node to associate {@code c} with
+   * @param c the Callable to associate with {@code node}
+   */
   private void setNodeCallable(final ParseTree node,
       final Callable c) {
     this.nodeCallables.put(node, c);
   }
 
+  /**
+   * Retrives a callable (i.e., function/method call) that
+   * has been previously associated with a ParseTree node
+   * via {@code setNodeCallable}.
+   * @param node the ParseTree node to retrieve the associated
+   *    callable for
+   */
   private Callable getNodeCallable(final ParseTree node) {
     return this.nodeCallables.get(node);
   }
 
-  // Bubble-up operations should not fail in the event
-  // of nulls, unlike normal accesses.
+  /**
+   * Associates the data value and callable for one ParseTree
+   * node with another; typically {@code dest} is the parent
+   * or an ancestor of {@code src}. Note that bubble-up operations
+   * must not fail if a data and/or callable value is not associated
+   * with the {@code src} node.
+   * @param src the source ParseTree node to retrieve associations from
+   * @param dest the destination ParseTree node to receive the
+   *    associations currently attached to {@code src}.
+   */
   private void bubbleUp(final ParseTree src,
       final ParseTree dest) {
     if (this.nodeData.get(src) != null) {
@@ -135,6 +181,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     TraceFileVerifier.enforceEmission(this.lastEmission);
   }
 
+  /**
+   * Called by ANTLR when a program node is being visited
+   * in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitProgram(final PeopleCodeParser.ProgramContext ctx) {
     /*
      * App class programs do not get a fresh scope b/c they
@@ -151,6 +203,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a class declaration node is being visited
+   * in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitClassDeclaration(
       final PeopleCodeParser.ClassDeclarationContext ctx) {
     ((AppClassPeopleCodeProg) this.eCtx.prog).appClassName =
@@ -161,6 +219,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an app class block node is being visited
+   * in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitClassBlock(final PeopleCodeParser.ClassBlockContext ctx) {
     if (ctx.aLvl != null) {
       switch (ctx.aLvl.getText()) {
@@ -185,6 +249,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an app class instance variable declaration
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitInstance(
       final PeopleCodeParser.InstanceContext ctx) {
     visit(ctx.varType());
@@ -202,6 +272,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an app class property declaration
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitProperty(final PeopleCodeParser.PropertyContext ctx) {
     visit(ctx.varType());
 
@@ -227,6 +303,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a method declaration
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitMethod(final PeopleCodeParser.MethodContext ctx) {
 
     visit(ctx.formalParamList());
@@ -252,6 +334,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * <stmt> alternative handlers.
    *==========================================================*/
 
+  /**
+   * Called by ANTLR when an If statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitIfStmt(final PeopleCodeParser.IfStmtContext ctx) {
     this.emitStmt(ctx);
 
@@ -279,6 +367,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a For statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitForStmt(final PeopleCodeParser.ForStmtContext ctx) {
 
     if (ctx.expr(2) != null) {
@@ -317,6 +411,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a Break statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitStmtBreak(
       final PeopleCodeParser.StmtBreakContext ctx) {
     this.emitStmt(ctx);
@@ -324,6 +424,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an assignment statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitStmtAssign(
       final PeopleCodeParser.StmtAssignContext ctx) {
     this.emitStmt(ctx);
@@ -365,12 +471,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a statement consisting solely
+   * of an expression is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitStmtExpr(final PeopleCodeParser.StmtExprContext ctx) {
     this.emitStmt(ctx);
     visit(ctx.expr());
     return null;
   }
 
+  /**
+   * Called by ANTLR when a Return statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitStmtReturn(final PeopleCodeParser.StmtReturnContext ctx) {
     this.emitStmt(ctx);
     if (ctx.expr() != null) {
@@ -397,6 +515,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * <expr> alternative handlers.
    *=========================================================*/
 
+  /**
+   * Called by ANTLR when a parenthesized expression statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprParenthesized(
       final PeopleCodeParser.ExprParenthesizedContext ctx) {
     visit(ctx.expr());
@@ -404,6 +528,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a literal in an expression
+   * statement is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprLiteral(
       final PeopleCodeParser.ExprLiteralContext ctx) {
     visit(ctx.literal());
@@ -411,6 +541,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an identifier in an expression
+   * statement is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprId(
       final PeopleCodeParser.ExprIdContext ctx) {
     visit(ctx.id());
@@ -418,6 +554,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a function call or indexing
+   * operation in an expression within a statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprFnOrIdxCall(
       final PeopleCodeParser.ExprFnOrIdxCallContext ctx) {
 
@@ -470,6 +613,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an addition or subtraction operation
+   * within an expression in a statement is being visited
+   * in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprAddSub(
       final PeopleCodeParser.ExprAddSubContext ctx) {
 
@@ -491,6 +641,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a create invocation within an expression
+   * in a statement is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprCreate(
       final PeopleCodeParser.ExprCreateContext ctx) {
     visit(ctx.createInvocation());
@@ -498,6 +654,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when the dot operator in an expression within
+   * a statement is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprDotAccess(
          final PeopleCodeParser.ExprDotAccessContext ctx) {
 
@@ -538,6 +700,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an array indexing operation within
+   * an expression in a stement is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprArrayIndex(
       final PeopleCodeParser.ExprArrayIndexContext ctx) {
 
@@ -563,6 +731,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a logical, non-equality comparison
+   * operation within an expression in a statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprComparison(
       final PeopleCodeParser.ExprComparisonContext ctx) {
     visit(ctx.expr(0));
@@ -593,6 +768,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a logical equality operation
+   * within an expression in a statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprEquality(
       final PeopleCodeParser.ExprEqualityContext ctx) {
     visit(ctx.expr(0));
@@ -624,6 +806,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a Boolean comparison operation
+   * within an expression in a statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprBoolean(
       final PeopleCodeParser.ExprBooleanContext ctx) {
 
@@ -660,6 +849,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a string concatentation operation
+   * within an expression in a statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitExprConcat(
       final PeopleCodeParser.ExprConcatContext ctx) {
     visit(ctx.expr(0));
@@ -675,6 +871,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * Primary rule handlers.
    *=========================================================*/
 
+  /**
+   * Called by ANTLR when a method implementation
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitMethodImpl(
       final PeopleCodeParser.MethodImplContext ctx) {
     this.emitStmt(ctx);
@@ -709,6 +911,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an app class getter (accessor) method
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitGetImpl(
       final PeopleCodeParser.GetImplContext ctx) {
     this.emitStmt(ctx);
@@ -721,6 +929,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an identifier
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitId(
       final PeopleCodeParser.IdContext ctx) {
 
@@ -791,6 +1005,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a literal
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitLiteral(
       final PeopleCodeParser.LiteralContext ctx) {
 
@@ -829,6 +1049,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a variable declaration statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitVarDeclaration(
       final PeopleCodeParser.VarDeclarationContext ctx) {
 
@@ -881,6 +1107,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when the variable type portion of
+   * a variable declaration statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitVarType(
       final PeopleCodeParser.VarTypeContext ctx) {
 
@@ -938,6 +1171,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an Evaluate statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitEvaluateStmt(
       final PeopleCodeParser.EvaluateStmtContext ctx) {
     this.emitStmt(ctx);
@@ -966,6 +1205,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a When branch of an Evaluate statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitWhenBranch(
       final PeopleCodeParser.WhenBranchContext ctx) {
 
@@ -998,6 +1243,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a When-Other branch of an Evaluate statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitWhenOtherBranch(
       final PeopleCodeParser.WhenOtherBranchContext ctx) {
 
@@ -1015,6 +1266,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when an app class path
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitAppClassPath(
       final PeopleCodeParser.AppClassPathContext ctx) {
     final AppClassPeopleCodeProg progDefn =
@@ -1024,6 +1281,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a create invocation
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
   public Void visitCreateInvocation(
       final PeopleCodeParser.CreateInvocationContext ctx) {
 

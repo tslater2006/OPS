@@ -31,12 +31,8 @@
         <include name="org/openpplsoft/runtime/TraceFileVerifier.java"/>
         <include name="org/openpplsoft/runtime/DefnCache.java"/>
         <include name="org/openpplsoft/runtime/Scope.java"/>
-        <include name="org/openpplsoft/antlr4/OPSDiagErrorListener.java"/>
-        <include name="org/openpplsoft/antlr4/OPSErrorStrategy.java"/>
-        <include name="org/openpplsoft/antlr4/OPSInterpretException.java"/>
-        <include name="org/openpplsoft/antlr4/OPSReturnException.java"/>
-        <include name="org/openpplsoft/antlr4/NoErrorTolerancePeopleCodeLexer.java"/>
-        <include name="org/openpplsoft/antlr4/ProgLoadListener.java"/>
+        <include name="org/openpplsoft/antlr4/*.java"/>
+        <exclude name="**/package-info.java"/>
       </fileset>
     </checkstyle>
   </target>

@@ -42,7 +42,7 @@ public class RecordFieldBuffer implements IStreamableBuffer,
      * that is neither a search key nor an alternate key, all of the record's fields
      * should be present in the component buffer.
      */
-    if(this.parentRecordBuffer.scrollLevel == 0
+    if(this.parentRecordBuffer.getScrollLevel() == 0
         && !this.recDefn.isDerivedWorkRecord()
         && !this.fldDefn.isAlternateSearchKey()) {
       this.parentRecordBuffer.expandEntireRecordIntoBuffer();
@@ -52,8 +52,8 @@ public class RecordFieldBuffer implements IStreamableBuffer,
      * All the fields on a primary scroll record at level 1 or higher
      * should be present in the component buffer.
      */
-    if(this.parentRecordBuffer.scrollLevel > 0
-        && this.parentRecordBuffer.isPrimaryScrollRecordBuffer) {
+    if(this.parentRecordBuffer.getScrollLevel() > 0
+        && this.parentRecordBuffer.getIsPrimaryScrollRecordBuffer()) {
       this.parentRecordBuffer.expandEntireRecordIntoBuffer();
     }
   }

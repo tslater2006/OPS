@@ -162,7 +162,7 @@ public final class ComponentBuffer {
         for (int i = 0; i < indent; i++) {
           b.append(" ");
         }
-        b.append(" + ").append(rbuf.recName);
+        b.append(" + ").append(rbuf.getRecName());
         log.info(b.toString());
       } else {
 
@@ -199,7 +199,7 @@ public final class ComponentBuffer {
          * be aborted if record conditions are not met (see
          * method implementation for details).
          */
-        final Record recDefn = DefnCache.getRecord(rbuf.recName);
+        final Record recDefn = DefnCache.getRecord(rbuf.getRecName());
         if (recDefn.isTable() || recDefn.isView()) {
           rbuf.firstPassFill();
         }

@@ -76,11 +76,11 @@ public class ComponentStructureVerifier {
         RecordBuffer rbuf = (RecordBuffer) buf;
         StringBuilder b = new StringBuilder();
         for(int i=0; i<indent; i++){b.append(" ");}
-        b.append(" + ").append(rbuf.recName);
+        b.append(" + ").append(rbuf.getRecName());
         log.info(b.toString());
 
         if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
-            !lineParts[1].replaceAll("-", "_").equals(rbuf.recName)) {
+            !lineParts[1].replaceAll("-", "_").equals(rbuf.getRecName())) {
           throw new OPSVMachRuntimeException("Incorrect/absent record token encountered " +
               "during component structure validation.");
         }

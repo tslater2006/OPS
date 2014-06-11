@@ -407,7 +407,7 @@ public class StmtLibrary {
      * a key, add it to the WHERE clause and get its value from the
      * scroll buffer chain.
      */
-    Record recDefn = DefnCache.getRecord(rbuf.recName);
+    Record recDefn = DefnCache.getRecord(rbuf.getRecName());
     List<RecordField> rfList = recDefn.getExpandedFieldList();
 
     /*
@@ -416,9 +416,10 @@ public class StmtLibrary {
      */
     for(RecordField rf : rfList) {
       if(rf.isSearchKey()
-        && rbuf.sbuf.getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
+          && rbuf.getParentScrollBuffer()
+            .getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
         log.debug("Aborting first pass fill for Record.{}; " +
-          "value does not exist for search key: {}", rbuf.recName, rf.FIELDNAME);
+          "value does not exist for search key: {}", rbuf.getRecName(), rf.FIELDNAME);
         return null;
       }
     }
@@ -446,14 +447,14 @@ public class StmtLibrary {
       }
     }
 
-    query.append(" FROM PS_").append(rbuf.recName);
+    query.append(" FROM PS_").append(rbuf.getRecName());
 
     int i = 0;
     for(RecordField rf : rfList) {
       if(rf.isSearchKey()) {
         if(i == 0) { query.append(" WHERE "); }
         if(i > 0) { query.append(" AND "); }
-        String val = (String)rbuf.sbuf.getKeyValueFromHierarchy(
+        String val = (String)rbuf.getParentScrollBuffer().getKeyValueFromHierarchy(
             rf.FIELDNAME).read();
         query.append(rf.FIELDNAME).append("=?");
         bindVals.add(val);

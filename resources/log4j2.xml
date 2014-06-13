@@ -9,38 +9,19 @@
 
 <Configuration status="WARN">
   <Appenders>
-      <Console name="Console-Less" target="SYSTEM_OUT">
-        <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level - %msg%n"/>
-      </Console>
-      <Console name="Console-More" target="SYSTEM_OUT">
-        <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-      </Console>
-      <Console name="Console-Clojure" target="SYSTEM_OUT">
-        <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level ns:%logger{36} - %msg%n"/>
-      </Console>
-    </Appenders>
+    <Console name="Console-Less" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level - %msg%n"/>
+    </Console>
+    <Console name="Console-More" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+  </Appenders>
 
-    <Loggers>
-      <Root level="WARN">
-        <AppenderRef ref="Console-Less"/>
-      </Root>
-
-    <!-- CLOJURE LOGGERS -->
-    <Logger name="main" level="DEBUG" additivity="false">
-      <AppenderRef ref="Console-Clojure"/>
-    </Logger>
-    <Logger name="pt" level="DEBUG" additivity="false">
-      <AppenderRef ref="Console-Clojure"/>
-    </Logger>
-
-    <!-- c3p0 (logs to slf4j as directed in resources/mchange-log.properties,
-         which is then redirected to log4j2 due to the presence of
-         the log4j-slf4j-impl Maven dependency) -->
-    <Logger name="com.mchange" level="WARN" additivity="false">
+  <Loggers>
+    <Root level="WARN">
       <AppenderRef ref="Console-Less"/>
-    </Logger>
+    </Root>
 
-    <!-- JAVA LOGGERS -->
     <Logger name="org.openpplsoft.sql" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime" level="INFO"/>
     <Logger name="org.openpplsoft.runtime.DefnCache" level="DEBUG"/>
@@ -55,6 +36,5 @@
     <Logger name="org.openpplsoft.pt.pages" level="DEBUG"/>
     <Logger name="org.openpplsoft.buffers" level="DEBUG"/>
     <Logger name="org.openpplsoft.buffers.ComponentBuffer" level="DEBUG"/>
-    <Logger name="org.openpplsoft.buffers.RecordPCListRequestBuffer" level="WARN"/>
-    </Loggers>
+  </Loggers>
 </Configuration>

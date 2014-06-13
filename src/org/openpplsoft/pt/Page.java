@@ -15,7 +15,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.openpplsoft.buffers.RecordPCListRequestBuffer;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
@@ -195,50 +194,53 @@ public class Page {
   public void recursivelyLoadSecpages() {
 
     final  Page loadedPage = DefnCache.getPage(this.ptPNLNAME);
-    Page p;
-
-    final List<PgToken> secpageMarkers = new ArrayList<PgToken>();
+    final List<PgToken> secpageTokens = new ArrayList<PgToken>();
 
     // Recursively expand/search subpages for secpages.
     for (PgToken tok : loadedPage.tokens) {
 
       if (tok.flags.contains(PFlag.SUBPAGE)) {
-        p = DefnCache.getPage(tok.SUBPNLNAME);
+
+        final Page p = DefnCache.getPage(tok.SUBPNLNAME);
         p.recursivelyLoadSecpages();
 
       } else if (tok.flags.contains(PFlag.SECPAGE)) {
 
-        /*
-         * Create a new PgToken instead of using the current one,
-         * otherwise there could be issues if the same token is submitted twice,
-         * which is valid because secpages can appear on multiple pages.
-         */
-        final PgToken marker = new PgToken(PFlag.SECPAGE);
-        marker.SUBPNLNAME = tok.SUBPNLNAME;
-        secpageMarkers.add(marker);
-        RecordPCListRequestBuffer.queueSecpageToken(marker);
+        secpageTokens.add(tok);
 
-      } else if (tok.SUBPNLNAME.length() == 0 && tok.RECNAME.length() > 0
-            && tok.FIELDNAME.length() > 0) {
+      } else if (tok.SUBPNLNAME.length() == 0
+          && tok.RECNAME != null && tok.FIELDNAME != null
+          && tok.RECNAME.length() > 0 && tok.FIELDNAME.length() > 0) {
 
-        /*
-         * The RECNAME on this token will be used to query for the record's
-         * Record PC listing if it is the first instance of the RECNAME in
-         * the expanded stream.
-         */
-        RecordPCListRequestBuffer.queueFieldToken(tok);
+        this.issuePCListRequestForRecord(tok.RECNAME);
       }
     }
 
     // Then, recursively expand/search secpages for more secpages.
-    for (PgToken marker : secpageMarkers) {
-      RecordPCListRequestBuffer.notifyStartOfExpansion(marker);
-      RecordPCListRequestBuffer.flushUpTo(marker);
-      p = DefnCache.getPage(marker.SUBPNLNAME);
+    for (PgToken marker : secpageTokens) {
+      final Page p = DefnCache.getPage(marker.SUBPNLNAME);
       p.recursivelyLoadSecpages();
-      RecordPCListRequestBuffer.notifyEndOfExpansion(marker);
     }
   }
+
+  private void issuePCListRequestForRecord(final String recName) {
+
+    if (recName != null && !PSDefn.isSystemRecord(recName)) {
+
+      final Record recDefn = DefnCache.getRecord(recName);
+      log.debug("Issuing PC List Request for {}", recDefn.RECNAME);
+      recDefn.discoverRecordPC();
+
+      /*
+       * If this record contains subrecords, requests for their
+       * Record PC listings should be issued now.
+       */
+      for (String subrecname : recDefn.subRecordNames) {
+        this.issuePCListRequestForRecord(subrecname);
+      }
+    }
+  }
+
 
   /**
    * Retrieves any and all Page PeopleCode associated with this page

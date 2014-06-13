@@ -282,12 +282,9 @@ public class Component {
       p.recursivelyLoadSubpages();
     }
 
-    RecordPCListRequestBuffer.init();
     for (Page p : this.pages) {
       p.recursivelyLoadSecpages();
     }
-
-    RecordPCListRequestBuffer.flushEntireTokenStream();
   }
 
   /**

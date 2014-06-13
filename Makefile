@@ -48,4 +48,4 @@ build:
 
 run:
 	java $(JAVA_D) -cp $(JAVA_CP) org.openpplsoft.Main
- 
+

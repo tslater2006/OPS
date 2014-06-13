@@ -7,8 +7,11 @@
 
 package org.openpplsoft.buffers;
 
-import java.util.*;
-import java.lang.StringBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.types.*;
@@ -19,8 +22,8 @@ public class ScrollBuffer implements IStreamableBuffer {
   public int scrollLevel;
   public String primaryRecName;
   public ScrollBuffer parent;
-  public HashMap<String, RecordBuffer> recBufferTable;
-  public ArrayList<RecordBuffer> orderedRecBuffers;
+  public Map<String, RecordBuffer> recBufferTable;
+  public List<RecordBuffer> orderedRecBuffers;
 
   /*
    * TODO: I need to figure out how I'm going to integrate this
@@ -30,7 +33,7 @@ public class ScrollBuffer implements IStreamableBuffer {
   public Map<String, PTRecord> recEntryTable;
 
   public HashMap<String, ScrollBuffer> scrollBufferTable;
-  public ArrayList<ScrollBuffer> orderedScrollBuffers;
+  public List<ScrollBuffer> orderedScrollBuffers;
 
   // Used for reading.
   private boolean hasEmittedSelf = false;

@@ -89,7 +89,7 @@ public class PgTokenStream {
              * for potential use as the primary record name of this scroll area.
              */
             if(ComponentBuffer.getCurrentScrollBuffer()
-                .recBufferTable.get(lookToken.RECNAME) == null) {
+                .getRecBufferTable().get(lookToken.RECNAME) == null) {
               primaryRecNameCandidate = lookToken.RECNAME;
               break;
             } else if(primaryRecNameCandidate == null) {

@@ -86,29 +86,30 @@ public final class ComponentBuffer {
       final String targetPrimaryRecName) {
 
     // Remember that there's only one scroll level at 0.
-    if (currSB.scrollLevel == targetScrollLevel
-        && (currSB.scrollLevel == 0
-          || currSB.primaryRecName.equals(targetPrimaryRecName))) {
+    if (currSB.getScrollLevel() == targetScrollLevel
+        && (currSB.getScrollLevel() == 0
+          || currSB.getPrimaryRecName().equals(targetPrimaryRecName))) {
       return;
     }
 
     while (currScrollLevel < targetScrollLevel) {
       currSB = currSB.getChildScroll(targetPrimaryRecName);
-      currScrollLevel = currSB.scrollLevel;
+      currScrollLevel = currSB.getScrollLevel();
     }
 
     while (currScrollLevel > targetScrollLevel) {
-      currSB = currSB.parent;
-      currScrollLevel = currSB.scrollLevel;
+      currSB = currSB.getParentScrollBuffer();
+      currScrollLevel = currSB.getScrollLevel();
     }
 
     // The scroll level may not have changed, but if the
     // targeted primary rec name differs from the current,
     // we need to change buffers.
     if (currScrollLevel > 0
-        && !currSB.primaryRecName.equals(targetPrimaryRecName)) {
-      currSB = currSB.parent.getChildScroll(targetPrimaryRecName);
-      currScrollLevel = currSB.scrollLevel;
+        && !currSB.getPrimaryRecName().equals(targetPrimaryRecName)) {
+      currSB = currSB.getParentScrollBuffer()
+          .getChildScroll(targetPrimaryRecName);
+      currScrollLevel = currSB.getScrollLevel();
     }
   }
 
@@ -144,13 +145,13 @@ public final class ComponentBuffer {
     while ((buf = ComponentBuffer.next()) != null) {
       if (buf instanceof ScrollBuffer) {
         final ScrollBuffer sbuf = (ScrollBuffer) buf;
-        indent = sbuf.scrollLevel * INDENT_INCREMENT;
+        indent = sbuf.getScrollLevel() * INDENT_INCREMENT;
         final StringBuilder b = new StringBuilder();
         for (int i = 0; i < indent; i++) {
           b.append(" ");
         }
-        b.append("Scroll - Level ").append(sbuf.scrollLevel)
-            .append("\tPrimary Record: ").append(sbuf.primaryRecName);
+        b.append("Scroll - Level ").append(sbuf.getScrollLevel())
+            .append("\tPrimary Record: ").append(sbuf.getPrimaryRecName());
         for (int i = 0; i < indent; i++) {
           b.append(" ");
         }

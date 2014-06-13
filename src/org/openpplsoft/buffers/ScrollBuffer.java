@@ -8,42 +8,51 @@
 package org.openpplsoft.buffers;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
-import org.openpplsoft.types.*;
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.types.*;
 
+/**
+ * Represents a PeopleTools scroll buffer.
+ */
 public class ScrollBuffer implements IStreamableBuffer {
 
-  public int scrollLevel;
-  public String primaryRecName;
-  public ScrollBuffer parent;
-  public Map<String, RecordBuffer> recBufferTable;
-  public List<RecordBuffer> orderedRecBuffers;
+  private int scrollLevel;
+  private String primaryRecName;
+  private ScrollBuffer parent;
+  private Map<String, RecordBuffer> recBufferTable;
+  private List<RecordBuffer> orderedRecBuffers;
 
   /*
-   * TODO: I need to figure out how I'm going to integrate this
+   * TODO(mquinn): I need to figure out how I'm going to integrate this
    * with the buffer objects/concepts I've written to-date. Punting
    * for now.
    */
-  public Map<String, PTRecord> recEntryTable;
+  private Map<String, PTRecord> recEntryTable;
 
-  public HashMap<String, ScrollBuffer> scrollBufferTable;
-  public List<ScrollBuffer> orderedScrollBuffers;
+  private Map<String, ScrollBuffer> scrollBufferTable;
+  private List<ScrollBuffer> orderedScrollBuffers;
 
   // Used for reading.
-  private boolean hasEmittedSelf = false;
-  private int recBufferCursor = 0;
-  private int scrollBufferCursor = 0;
+  private boolean hasEmittedSelf;
+  private int recBufferCursor, scrollBufferCursor;
 
-  public ScrollBuffer(int level, String primaryRecName, ScrollBuffer parent) {
-    this.scrollLevel = level;
-    this.primaryRecName = primaryRecName;
-    this.parent = parent;
+  /**
+   * Constructs a scroll buffer with a particular scroll level, primary
+   * record name, and parent scroll buffer.
+   * @param l the scroll level of the new scroll buffer
+   * @param r the primary record name of the new scroll buffer
+   * @param p the parent scroll buffer of the new scroll buffer
+   */
+  public ScrollBuffer(final int l, final String r, final ScrollBuffer p) {
+    this.scrollLevel = l;
+    this.primaryRecName = r;
+    this.parent = p;
 
     this.recBufferTable = new HashMap<String, RecordBuffer>();
     this.orderedRecBuffers = new ArrayList<RecordBuffer>();
@@ -52,13 +61,52 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.recEntryTable = new HashMap<String, PTRecord>();
   }
 
-  public PTPrimitiveType getKeyValueFromHierarchy(String fldName) {
-    if(this.parent == null) {
+  /**
+   * Get the scroll level on which this scroll buffer exists.
+   * @return this scroll buffer's scroll level
+   */
+  public int getScrollLevel() {
+    return this.scrollLevel;
+  }
+
+  /**
+   * Get the primary record name for this scroll buffer.
+   * @return the primary record name for this scroll buffer.
+   */
+  public String getPrimaryRecName() {
+    return this.primaryRecName;
+  }
+
+  /**
+   * Get this scroll buffer's parent scroll buffer.
+   * @return this scroll buffer's parent scroll buffer
+   */
+  public ScrollBuffer getParentScrollBuffer() {
+    return this.parent;
+  }
+
+  /**
+   * Get the table that maps this scroll buffer's constituent
+   * records to the records' corresponding record buffers.
+   * @return a table mapping record names to record buffers
+   */
+  public Map<String, RecordBuffer> getRecBufferTable() {
+    return this.recBufferTable;
+  }
+
+  /**
+   * Searches up the scroll hierarchy for the appropriate value
+   * for the provided key field.
+   * @param fldName the key field name for which a value is needed
+   * @return the value for the key field
+   */
+  public PTPrimitiveType getKeyValueFromHierarchy(final String fldName) {
+    if (this.parent == null) {
       /*
        * Examine the search record of the component buffer
        * if this is the level 0 scroll buffer.
        */
-      if(ComponentBuffer.getSearchRecord().hasField(fldName)) {
+      if (ComponentBuffer.getSearchRecord().hasField(fldName)) {
         return ComponentBuffer.getSearchRecord().getField(fldName)
             .getValue();
       }
@@ -69,25 +117,39 @@ public class ScrollBuffer implements IStreamableBuffer {
        * return it, otherwise call this method on the parent's parent
        * scroll buffer.
        */
-      throw new OPSVMachRuntimeException("Need to support getting "+
-        "key values from scroll 1 and/or 2 of comp buffer.");
+      throw new OPSVMachRuntimeException("Need to support getting "
+          + "key values from scroll 1 and/or 2 of comp buffer.");
     }
     return null;
   }
 
-  public void addPageField(PgToken tok) {
+  /**
+   * Add a page field to this scroll buffer.
+   * @param tok the page field token representing the page field
+   *    to be added.
+   */
+  public void addPageField(final PgToken tok) {
     RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
-    if(r == null) {
-      r = new RecordBuffer(this, tok.RECNAME, this.scrollLevel, this.primaryRecName);
+    if (r == null) {
+      r = new RecordBuffer(this, tok.RECNAME, this.scrollLevel,
+          this.primaryRecName);
       this.recBufferTable.put(r.getRecName(), r);
-      orderedRecBuffers.add(r);
+      this.orderedRecBuffers.add(r);
     }
     r.addPageField(tok.RECNAME, tok.FIELDNAME);
   }
 
-  public ScrollBuffer getChildScroll(String targetPrimaryRecName) {
+  /**
+   * Gets a child scroll buffer given the name of the primary record
+   * belonging to the desired child scroll buffer.
+   * @param targetPrimaryRecName the primary record name attached to the
+   *    desired scroll
+   * @return the child scroll buffer with a primary record name matching
+   *    the provided record name
+   */
+  public ScrollBuffer getChildScroll(final String targetPrimaryRecName) {
     ScrollBuffer sb = this.scrollBufferTable.get(targetPrimaryRecName);
-    if(sb == null) {
+    if (sb == null) {
       sb = new ScrollBuffer(this.scrollLevel + 1, targetPrimaryRecName, this);
       this.scrollBufferTable.put(targetPrimaryRecName, sb);
       this.orderedScrollBuffers.add(sb);
@@ -95,17 +157,22 @@ public class ScrollBuffer implements IStreamableBuffer {
     return sb;
   }
 
+  /**
+   * Gets the next child buffer in the read sequence.
+   * @return the next child buffer in the read sequence
+   */
   public IStreamableBuffer next() {
 
-    if(!this.hasEmittedSelf) {
+    if (!this.hasEmittedSelf) {
       this.hasEmittedSelf = true;
       return this;
     }
 
-    if(this.recBufferCursor < this.orderedRecBuffers.size()) {
-      RecordBuffer rbuf = this.orderedRecBuffers.get(this.recBufferCursor);
-      IStreamableBuffer toRet = rbuf.next();
-      if(toRet != null) {
+    if (this.recBufferCursor < this.orderedRecBuffers.size()) {
+      final RecordBuffer rbuf =
+          this.orderedRecBuffers.get(this.recBufferCursor);
+      final IStreamableBuffer toRet = rbuf.next();
+      if (toRet != null) {
         return toRet;
       } else {
         this.recBufferCursor++;
@@ -113,10 +180,11 @@ public class ScrollBuffer implements IStreamableBuffer {
       }
     }
 
-    if(this.scrollBufferCursor < this.orderedScrollBuffers.size()) {
-      ScrollBuffer sbuf = this.orderedScrollBuffers.get(this.scrollBufferCursor);
-      IStreamableBuffer toRet = sbuf.next();
-      if(toRet != null) {
+    if (this.scrollBufferCursor < this.orderedScrollBuffers.size()) {
+      final ScrollBuffer sbuf =
+          this.orderedScrollBuffers.get(this.scrollBufferCursor);
+      final IStreamableBuffer toRet = sbuf.next();
+      if (toRet != null) {
         return toRet;
       } else {
         this.scrollBufferCursor++;
@@ -127,17 +195,21 @@ public class ScrollBuffer implements IStreamableBuffer {
     return null;
   }
 
+  /**
+   * Resets the read cursors on this, and (recursively) on all child
+   * buffers.
+   */
   public void resetCursors() {
 
     this.hasEmittedSelf = false;
     this.recBufferCursor = 0;
     this.scrollBufferCursor = 0;
 
-    for(RecordBuffer rbuf : this.orderedRecBuffers) {
+    for (RecordBuffer rbuf : this.orderedRecBuffers) {
       rbuf.resetCursors();
     }
 
-    for(ScrollBuffer sbuf : this.orderedScrollBuffers) {
+    for (ScrollBuffer sbuf : this.orderedScrollBuffers) {
       sbuf.resetCursors();
     }
   }

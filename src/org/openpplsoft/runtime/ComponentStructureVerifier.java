@@ -55,19 +55,19 @@ public class ComponentStructureVerifier {
       if(buf instanceof ScrollBuffer) {
 
         ScrollBuffer sbuf = (ScrollBuffer) buf;
-        indent = sbuf.scrollLevel * 3;
+        indent = sbuf.getScrollLevel() * 3;
 
         StringBuilder b = new StringBuilder();
         for(int i=0; i<indent; i++){b.append(" ");}
-        b.append("Scroll - Level ").append(sbuf.scrollLevel).append("\tPrimary Record: ")
-            .append(sbuf.primaryRecName);
+        b.append("Scroll - Level ").append(sbuf.getScrollLevel()).append("\tPrimary Record: ")
+            .append(sbuf.getPrimaryRecName());
         for(int i=0; i<indent; i++){b.append(" ");}
         log.info(b.toString());
         log.info("=======================================================");
 
         if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
-            Integer.parseInt(lineParts[1]) != sbuf.scrollLevel ||
-            (!lineParts[2].replaceAll("-", "_").equals(sbuf.primaryRecName)
+            Integer.parseInt(lineParts[1]) != sbuf.getScrollLevel() ||
+            (!lineParts[2].replaceAll("-", "_").equals(sbuf.getPrimaryRecName())
             && Integer.parseInt(lineParts[1]) > 0)) {
           throw new OPSVMachRuntimeException("Incorrect/absent scroll token encountered " +
               "during component structure validation.");

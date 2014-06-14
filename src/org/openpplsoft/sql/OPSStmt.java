@@ -16,12 +16,12 @@ import java.util.regex.Matcher;
 import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
 
-public class ENTStmt extends SQLStmt {
+public class OPSStmt extends SQLStmt {
 
-  private static Logger log = LogManager.getLogger(ENTStmt.class.getName());
+  private static Logger log = LogManager.getLogger(OPSStmt.class.getName());
   private static int stmtCounter = 0;
 
-  public ENTStmt(String sql) {
+  public OPSStmt(String sql) {
     super(sql.trim());
   }
 

@@ -33,9 +33,7 @@
         <include name="org/openpplsoft/runtime/Scope.java"/>
         <include name="org/openpplsoft/antlr4/*.java"/>
         <include name="org/openpplsoft/buffers/*.java"/>
-        <include name="org/openpplsoft/sql/OPSStmt.java"/>
-        <include name="org/openpplsoft/sql/PSStmt.java"/>
-        <include name="org/openpplsoft/sql/SQLStmt.java"/>
+        <include name="org/openpplsoft/sql/*.java"/>
         <exclude name="**/package-info.java"/>
       </fileset>
     </checkstyle>

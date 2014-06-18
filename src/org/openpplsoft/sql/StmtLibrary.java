@@ -7,19 +7,29 @@
 
 package org.openpplsoft.sql;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.types.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.buffers.*;
-import org.apache.logging.log4j.*;
-import java.util.regex.*;
 
 public class StmtLibrary {
 
   private static Connection conn;
-  private static Logger log = LogManager.getLogger(StmtLibrary.class.getName());
+  private static Logger log =
+      LogManager.getLogger(StmtLibrary.class.getName());
 
   private static Pattern bindIdxPattern;
   private static Pattern dateInPattern;
@@ -31,7 +41,7 @@ public class StmtLibrary {
       String dbDriver = System.getProperty("DbDriver");
       conn = DriverManager.getConnection(
         dbDriver + ":@//" + dbIP +":1521/" + dbSID, "SYSADM", "SYSADM");
-    } catch(java.sql.SQLException sqle) {
+    } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
       System.exit(ExitCode.UNABLE_TO_ACQUIRE_DB_CONN.getCode());
     }
@@ -41,8 +51,9 @@ public class StmtLibrary {
     dateInPattern = Pattern.compile("%DATEIN\\((.+?)\\)");
   }
 
-  public static PreparedStatement getPSPNLGRPDEFN(String b1, String b2) {
-    OPSStmt stmt = new OPSStmt("SELECT DESCR, ACTIONS, VERSION, SEARCHRECNAME, ADDSRCHRECNAME,  SEARCHPNLNAME, LOADLOC, SAVELOC, DISABLESAVE, PRIMARYACTION, DFLTACTION, DFLTSRCHTYPE,  DEFERPROC, EXPENTRYPROC, WSRPCOMPLIANT, REQSECURESSL, INCLNAVIGATION, FORCESEARCH, ALLOWACTMODESEL,  PNLNAVFLAGS, TBARBTNS, SHOWTBAR, ADDLINKMSGSET, ADDLINKMSGNUM, SRCHLINKMSGSET, SRCHLINKMSGNUM,  SRCHTEXTMSGSET, SRCHTEXTMSGNUM, OBJECTOWNERID, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID,  DESCRLONG  FROM PSPNLGRPDEFN WHERE PNLGRPNAME = ? AND MARKET = ?");
+  public static PreparedStatement getPSPNLGRPDEFN(
+      final String b1, final String b2) {
+    final OPSStmt stmt = new OPSStmt("SELECT DESCR, ACTIONS, VERSION, SEARCHRECNAME, ADDSRCHRECNAME,  SEARCHPNLNAME, LOADLOC, SAVELOC, DISABLESAVE, PRIMARYACTION, DFLTACTION, DFLTSRCHTYPE,  DEFERPROC, EXPENTRYPROC, WSRPCOMPLIANT, REQSECURESSL, INCLNAVIGATION, FORCESEARCH, ALLOWACTMODESEL,  PNLNAVFLAGS, TBARBTNS, SHOWTBAR, ADDLINKMSGSET, ADDLINKMSGNUM, SRCHLINKMSGSET, SRCHLINKMSGNUM,  SRCHTEXTMSGSET, SRCHTEXTMSGNUM, OBJECTOWNERID, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID,  DESCRLONG  FROM PSPNLGRPDEFN WHERE PNLGRPNAME = ? AND MARKET = ?");
     stmt.bindVals.put(1, b1);
     stmt.bindVals.put(2, b2);
     return stmt.generateEnforcedPreparedStmt(conn);

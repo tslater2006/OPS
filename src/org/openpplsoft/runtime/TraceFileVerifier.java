@@ -132,7 +132,7 @@ public final class TraceFileVerifier {
    * @param opsEmission emission from OPS that SHOULD be enforced
    */
   public static void enforceEmission(final IEmission opsEmission) {
-    //if(!(opsEmission instanceof ENTStmt)) {
+    //if(!(opsEmission instanceof OPSStmt)) {
     log.debug(opsEmission);
     //}
 
@@ -167,7 +167,7 @@ public final class TraceFileVerifier {
     if (opsEmission.equals(traceEmission)) {
 
       // Increment emission-specific counter.
-      if (opsEmission instanceof ENTStmt) {
+      if (opsEmission instanceof OPSStmt) {
         numEnforcedSQLEmissions++;
       } else {
         numPCEmissionMatches++;
@@ -192,7 +192,7 @@ public final class TraceFileVerifier {
         final PSStmt psStmt = new PSStmt(sqlMatcher.group(1), currTraceLineNbr);
 
         // If the stmt is in the ignored file, skip it.
-        if (ignoredStmts.containsKey(psStmt.originalStmt)) {
+        if (ignoredStmts.containsKey(psStmt.getOriginalStmt())) {
           numTraceSQLStmtsIgnored++;
           continue;
         }

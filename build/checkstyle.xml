@@ -380,7 +380,9 @@
 
     <!-- Only allow static final class members to be public; rest must be private;
          this enforces encapsulation. -->
-    <module name="VisibilityModifier"/>
+    <module name="VisibilityModifier">
+      <property name="protectedAllowed" value="true"/>
+    </module>
   </module>
 </module>
 

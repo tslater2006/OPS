@@ -201,7 +201,7 @@ public final class TraceFileVerifier {
         while ((currTraceLine = getNextTraceLine()) != null) {
           final Matcher bindValMatcher = bindValPattern.matcher(currTraceLine);
           if (bindValMatcher.find()) {
-            psStmt.bindVals.put(Integer.parseInt(bindValMatcher
+            psStmt.getBindVals().put(Integer.parseInt(bindValMatcher
                 .group(GROUP1)), bindValMatcher.group(GROUP2));
             } else {
               // statement has one or more bind values.

@@ -35,6 +35,7 @@
         <include name="org/openpplsoft/buffers/*.java"/>
         <include name="org/openpplsoft/sql/OPSStmt.java"/>
         <include name="org/openpplsoft/sql/PSStmt.java"/>
+        <include name="org/openpplsoft/sql/SQLStmt.java"/>
         <exclude name="**/package-info.java"/>
       </fileset>
     </checkstyle>

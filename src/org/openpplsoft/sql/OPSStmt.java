@@ -39,6 +39,12 @@ public class OPSStmt extends SQLStmt {
     super(sql.trim());
   }
 
+  /**
+   * Submits the underlying PreparedStatement as an enforced
+   * emission to the TraceFileVerifier.
+   * @param conn the previously established JDBC connection
+   * @return the underlying PreparedStatement
+   */
   public PreparedStatement generateEnforcedPreparedStmt(
       final Connection conn) {
     final PreparedStatement pstmt = this.generatePreparedStmt(conn);
@@ -46,6 +52,12 @@ public class OPSStmt extends SQLStmt {
     return pstmt;
   }
 
+  /**
+   * Submits the underlying PreparedStatement as an unenforced
+   * emission to the TraceFileVerifier.
+   * @param conn the previously established JDBC connection
+   * @return the underlying PreparedStatement
+   */
   public PreparedStatement generateUnenforcedPreparedStmt(
       final Connection conn) {
     final PreparedStatement pstmt = this.generatePreparedStmt(conn);

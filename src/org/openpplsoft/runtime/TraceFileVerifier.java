@@ -192,7 +192,7 @@ public final class TraceFileVerifier {
         final PSStmt psStmt = new PSStmt(sqlMatcher.group(1), currTraceLineNbr);
 
         // If the stmt is in the ignored file, skip it.
-        if (ignoredStmts.containsKey(psStmt.originalStmt)) {
+        if (ignoredStmts.containsKey(psStmt.getOriginalStmt())) {
           numTraceSQLStmtsIgnored++;
           continue;
         }

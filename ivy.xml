@@ -15,6 +15,8 @@
     <dependency org="com.puppycrawl.tools" name="checkstyle" rev="5.7"
       conf="checkstyle->default"/>
 
+    <dependency org="org.springframework" name="spring-context"
+      rev="4.0.5.RELEASE" conf="runtime,compile->default"/>
     <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.0-rc1"
       conf="runtime,compile->default"/>
     <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.0-rc1"

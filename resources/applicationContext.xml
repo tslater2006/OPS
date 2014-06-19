@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+    "http://www.springframework.org/dtd/spring-beans.dtd">
+ 
+<beans>
+  <bean id="mquinn-test" class="java.lang.String">
+    <constructor-arg>
+      <value>FROM APPCONTEXT.XML</value>
+   </constructor-arg>
+  </bean>
+</beans>

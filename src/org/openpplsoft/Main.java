@@ -15,6 +15,8 @@ import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 /**
  * Main entry class for the OPS runtime.
  */
@@ -32,6 +34,12 @@ public final class Main {
    * @param args command line args to main
    */
   public static void main(final String[] args) {
+
+    ClassPathXmlApplicationContext ctx =
+        new ClassPathXmlApplicationContext("applicationContext.xml");
+    String b = (String) ctx.getBean("mquinn-test");
+    log.WARN("b = " + b);
+    System.exit(1);
 
     try {
       Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());

@@ -120,7 +120,7 @@
     </exec>-->
 
     <java classname="org.openpplsoft.Main" fork="yes"
-      classpath="bin:${runtime.cp}">
+      classpath="resources:bin:${runtime.cp}">
 
 <!--
       <sysproperty key="ComponentToLoad" value="SSS_STUDENT_CENTER"/>  

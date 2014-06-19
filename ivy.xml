@@ -4,23 +4,21 @@
   <configurations>
     <conf name="antlr" visibility="public"/>
     <conf name="checkstyle" visibility="public"/>
+    <conf name="compile" visibility="public"/>
   </configurations>
 
   <dependencies>
     <dependency org="org.antlr" name="antlr4" rev="4.1"
-      conf="antlr->default"/>
+      conf="antlr,compile->default"/>
     <dependency org="com.puppycrawl.tools" name="checkstyle" rev="5.7"
       conf="checkstyle->default"/>
-<!--
-    <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.0-rc1"/>
-    <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.0-rc1"/>
-    <dependency org="org.apache.commons" name="commons-lang3" rev="3.3.2"/>-->
 
-    <!-- This is the ANTLR4 compiler; translates .g4 grammars into lexer/
-         parsers. -->
-<!--    <dependency org="org.antlr" name="antlr4" rev="4.2.2"/>
-      <artifact name="antlr4-4.2.2-complete.jar" type="jar"/>
-    </dependency>-->
+    <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.0-rc1"
+      conf="compile->default"/>
+    <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.0-rc1"
+      conf="compile->default"/>
+    <dependency org="org.apache.commons" name="commons-lang3" rev="3.3.2"
+      conf="compile->default"/>
 
     <!-- Not available on public repos due to licensing constraints; will
          be picked up from local ivy repository. -->

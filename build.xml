@@ -57,15 +57,16 @@
   </target>
 
   <target name="build_all">
+
+    <ivy:cachepath pathid="compile.classpath" conf="compile"/>
+    <pathconvert property="compile.cp" refid="compile.classpath"/>
+
     <mkdir dir="bin"/>
+
     <javac srcdir="src" destdir="bin" debug="true"
-        excludes="**/package-info.java">
+        excludes="**/package-info.java"
+        classpath="${compile.cp}">
       <compilerarg value="-Xlint:unchecked"/>
-      <classpath>
-        <fileset dir="lib">
-          <include name="*.jar"/>
-        </fileset>
-      </classpath>
     </javac>
   </target>
 

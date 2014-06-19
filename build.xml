@@ -5,19 +5,32 @@
 <!--                         See LICENSE.md for details.                    -->
 <!--========================================================================-->
 
-<project name="OPS Runtime" default="build" basedir=".">
+<project name="OPS Runtime" default="build" basedir="."
+    xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <description>Build file for the OPS runtime project.</description>
+
+<!--  <ivy:settings file="ivysettings.xml"/>-->
 
   <presetdef name="javac">
     <javac includeantruntime="false"/>
   </presetdef>
 
   <property name="ANTLR_SRC_DIR" value="${basedir}/src/org/openpplsoft/antlr4/frontend"/>
-  <property name="ANTLR_JAR" value="${basedir}/lib/antlr-4.1-complete.jar"/>
 
   <taskdef resource="checkstyletask.properties"
          classpath="${basedir}/lib/checkstyle-5.7-all.jar"/>
+
+    <!-- ================================= 
+          target: resolve              
+         ================================= -->
+    <target name="resolve" description="retrieve dependencies with ivy">
+        <ivy:resolve/>
+    </target>
+
+  <target name="ivy-clean">
+    <ivy:cleancache/>
+  </target>
 
   <target name="checkstyle"
         description="Generates a report of code convention violations.">
@@ -59,10 +72,14 @@
       <fileset dir="${ANTLR_SRC_DIR}" includes="*.java"/>
     </delete>
 
+    <ivy:cachepath pathid="antlr.classpath" conf="antlr"/>
+    <pathconvert property="antlr.cp" refid="antlr.classpath"/>
+
     <!-- Generate a lexer and parser for the PeopleCode grammar. -->
     <exec executable="java">
-      <arg value="-jar"/>
-      <arg value="${ANTLR_JAR}"/>
+      <arg value="-cp"/>
+      <arg value="${antlr.cp}"/>
+      <arg value="org.antlr.v4.Tool"/>
       <arg value="-lib"/>
       <arg value="${basedir}/grammars"/>
       <arg value="-o"/>

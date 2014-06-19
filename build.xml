@@ -121,14 +121,38 @@
 
     <java classname="org.openpplsoft.Main" fork="yes"
       classpath="bin:${runtime.cp}">
+
+<!--      <sysproperty key="ComponentToLoad" value="SSS_STUDENT_CENTER"/>  
+      <sysproperty key="tracefile" value="trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql"/>
+-->
       <sysproperty key="ComponentToLoad" value="SSR_SSENRL_LIST"/>
-      <sysproperty key="tracefile" value="trace/007_KADAMS_SSR_SSENRL_LIST.tracesql"/>
-      <sysproperty key="traceFileDate" value="2014-01-15"/>
+      <sysproperty key="tracefile" value="trace/005_KADAMS_SSR_SSENRL_LIST.tracesql"/>
+
+<!--      <sysproperty key="ComponentToLoad" value="CLASS_SEARCH"/>
+      <sysproperty key="tracefile" value="trace/004_KADAMS_CLASS_SEARCH.tracesql"/>
+-->
+
+<!--
+      <sysproperty key="ComponentToLoad" value="SSR_SSENRL_ADD"/>
+      <sysproperty key="tracefile" value="trace/006_KADAMS_SSR_SSENRL_ADD.tracesql"/>
+-->
+
+      <sysproperty key="traceFileDate" value="2013-11-16"/>
+
+      <!-- Trace files for local Xen cluster -->
+<!--      <sysproperty key="tracefile" value="trace/007_KADAMS_SSR_SSENRL_LIST.tracesql"/>
+      <sysproperty key="traceFileDate" value="2014-01-15"/>-->
+
       <sysproperty key="ignore_stmts_file" value="conf/ignore_stmts.conf"/>
       <sysproperty key="defn_stmts_file" value="conf/defn_stmts.conf"/>
       <sysproperty key="cacheProgText" value="true"/>
-      <sysproperty key="DbSID" value="XENCSDEV"/>
-      <sysproperty key="DbIP" value="10.0.0.88"/>
+
+<!--      <sysproperty key="DbSID" value="XENCSDEV"/>
+      <sysproperty key="DbIP" value="10.0.0.88"/>-->
+
+      <sysproperty key="DbSID" value="ENTCSDEV"/>
+      <sysproperty key="DbIP" value="10.0.1.88"/>
+
       <sysproperty key="DbDriver" value="jdbc:oracle:thin"/>
       <sysproperty key="user.timezone" value="GMT"/>
       <sysproperty key="log4j.configurationFile" value="resources/log4j2.xml"/>

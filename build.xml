@@ -122,9 +122,11 @@
     <java classname="org.openpplsoft.Main" fork="yes"
       classpath="bin:${runtime.cp}">
 
-<!--      <sysproperty key="ComponentToLoad" value="SSS_STUDENT_CENTER"/>  
+<!--
+      <sysproperty key="ComponentToLoad" value="SSS_STUDENT_CENTER"/>  
       <sysproperty key="tracefile" value="trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql"/>
 -->
+
       <sysproperty key="ComponentToLoad" value="SSR_SSENRL_LIST"/>
       <sysproperty key="tracefile" value="trace/005_KADAMS_SSR_SSENRL_LIST.tracesql"/>
 
@@ -132,8 +134,8 @@
       <sysproperty key="tracefile" value="trace/004_KADAMS_CLASS_SEARCH.tracesql"/>
 -->
 
-<!--
-      <sysproperty key="ComponentToLoad" value="SSR_SSENRL_ADD"/>
+
+<!--      <sysproperty key="ComponentToLoad" value="SSR_SSENRL_ADD"/>
       <sysproperty key="tracefile" value="trace/006_KADAMS_SSR_SSENRL_ADD.tracesql"/>
 -->
 

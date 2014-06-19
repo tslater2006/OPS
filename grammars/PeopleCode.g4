@@ -59,8 +59,8 @@ expr  : '(' expr ')'                              # ExprParenthesized
       | expr (le='<='|ge='>='|l='<'|g='>') expr   # ExprComparison
       | expr (e='='|i='<>') expr                  # ExprEquality
       | expr (
-            op='And'<assoc=right>
-          | op='Or'<assoc=right>
+            <assoc=right>op='And'
+          | <assoc=right>op='Or'
         ) expr                                    # ExprBoolean // order: Not, And, then Or
       | expr '|' expr                             # ExprConcat
       ;

@@ -18,9 +18,6 @@
 
   <property name="ANTLR_SRC_DIR" value="${basedir}/src/org/openpplsoft/antlr4/frontend"/>
 
-  <taskdef resource="checkstyletask.properties"
-         classpath="${basedir}/lib/checkstyle-5.7-all.jar"/>
-
     <!-- ================================= 
           target: resolve              
          ================================= -->
@@ -34,6 +31,13 @@
 
   <target name="checkstyle"
         description="Generates a report of code convention violations.">
+
+    <ivy:cachepath pathid="checkstyle.classpath" conf="checkstyle"/>
+    <pathconvert property="checkstyle.cp" refid="checkstyle.classpath"/>
+
+  <taskdef resource="checkstyletask.properties"
+         classpath="${checkstyle.cp}"/>
+
     <checkstyle config="build/checkstyle.xml"
                 failureProperty="checkstyle.failure"
                 failOnViolation="true">

@@ -5,24 +5,27 @@
     <conf name="antlr" visibility="public"/>
     <conf name="checkstyle" visibility="public"/>
     <conf name="compile" visibility="public"/>
+    <conf name="runtime" visibility="public"/>
   </configurations>
 
   <dependencies>
     <dependency org="org.antlr" name="antlr4" rev="4.1"
-      conf="antlr,compile->default"/>
+      conf="antlr,compile,runtime->default"/>
+
     <dependency org="com.puppycrawl.tools" name="checkstyle" rev="5.7"
       conf="checkstyle->default"/>
 
     <dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.0-rc1"
-      conf="compile->default"/>
+      conf="runtime,compile->default"/>
     <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.0-rc1"
-      conf="compile->default"/>
+      conf="runtime,compile->default"/>
     <dependency org="org.apache.commons" name="commons-lang3" rev="3.3.2"
       conf="compile->default"/>
 
     <!-- Not available on public repos due to licensing constraints; will
          be picked up from local ivy repository. -->
-<!--    <dependency org="oracle" name="ojdbc7" rev="1.0"/>-->
+    <dependency org="oracle" name="ojdbc7" rev="1.0"
+      conf="runtime->default"/>
   </dependencies>
 </ivy-module>
 

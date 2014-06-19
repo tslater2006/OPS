@@ -1,0 +1,11 @@
+<ivysettings>
+  <settings defaultResolver="chain"/>
+  <resolvers returnFirst="true">
+    <chain name="chain">
+      <filesystem name="local">
+        <artifact pattern="${ivy.settings.dir}/local-ivy-repo/[module]-[revision].[ext]" />
+      </filesystem>
+      <ibiblio name="ibiblio" m2compatible="true"/>
+    </chain>
+  </resolvers>
+</ivysettings>

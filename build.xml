@@ -10,7 +10,7 @@
 
   <description>Build file for the OPS runtime project.</description>
 
-<!--  <ivy:settings file="ivysettings.xml"/>-->
+  <ivy:settings file="ivysettings.xml"/>
 
   <presetdef name="javac">
     <javac includeantruntime="false"/>
@@ -80,6 +80,8 @@
     <ivy:cachepath pathid="antlr.classpath" conf="antlr"/>
     <pathconvert property="antlr.cp" refid="antlr.classpath"/>
 
+    <!-- <echo message="antlr path is : ${antlr.cp}"/> -->
+
     <!-- Generate a lexer and parser for the PeopleCode grammar. -->
     <exec executable="java">
       <arg value="-cp"/>
@@ -104,5 +106,32 @@
 
   <target name="clean">
     <delete dir="bin"/>
+  </target>
+
+  <target name="exec">
+
+    <ivy:cachepath pathid="runtime.classpath" conf="runtime"/>
+    <pathconvert property="runtime.cp" refid="runtime.classpath"/>
+
+<!--    <exec executable="java">
+      <arg value="-cp"/>
+      <arg value="bin:${runtime.cp}"/>
+      <arg value="org.openpplsoft.Main"/>
+    </exec>-->
+
+    <java classname="org.openpplsoft.Main" fork="yes"
+      classpath="bin:${runtime.cp}">
+      <sysproperty key="ComponentToLoad" value="SSR_SSENRL_LIST"/>
+      <sysproperty key="tracefile" value="trace/007_KADAMS_SSR_SSENRL_LIST.tracesql"/>
+      <sysproperty key="traceFileDate" value="2014-01-15"/>
+      <sysproperty key="ignore_stmts_file" value="conf/ignore_stmts.conf"/>
+      <sysproperty key="defn_stmts_file" value="conf/defn_stmts.conf"/>
+      <sysproperty key="cacheProgText" value="true"/>
+      <sysproperty key="DbSID" value="XENCSDEV"/>
+      <sysproperty key="DbIP" value="10.0.0.88"/>
+      <sysproperty key="DbDriver" value="jdbc:oracle:thin"/>
+      <sysproperty key="user.timezone" value="GMT"/>
+      <sysproperty key="log4j.configurationFile" value="resources/log4j2.xml"/>
+    </java>
   </target>
 </project>

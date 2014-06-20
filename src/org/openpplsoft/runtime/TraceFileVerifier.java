@@ -71,13 +71,17 @@ public final class TraceFileVerifier {
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?)[;]*$");
+  }
 
+  private TraceFileVerifier() {}
+
+  public static void init(ComponentRuntimeProfile profile) {
     /*
      * Open trace file for reading.
      */
     try {
       traceFileReader = new BufferedReader(new FileReader(
-      new File(System.getProperty("tracefile"))));
+          new File("trace/" + profile.getTraceFileName())));
     } catch (final java.io.FileNotFoundException fnfe) {
       log.fatal(fnfe.getMessage(), fnfe);
       System.exit(ExitCode.TRACE_FILE_NOT_FOUND.getCode());
@@ -86,8 +90,6 @@ public final class TraceFileVerifier {
     ignoreStmtsInFile(System.getProperty("ignore_stmts_file"));
     ignoreStmtsInFile(System.getProperty("defn_stmts_file"));
   }
-
-  private TraceFileVerifier() {}
 
   /**
    * Some SQL statements in the PS tracefile are not issued by OPS,

@@ -7,6 +7,8 @@
 
 package org.openpplsoft;
 
+import java.util.List;
+
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -14,6 +16,7 @@ import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
+import org.openpplsoft.types.*;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -36,16 +39,21 @@ public final class Main {
   public static void main(final String[] args) {
 
     ClassPathXmlApplicationContext ctx =
-        new ClassPathXmlApplicationContext("applicationContext.xml");
-    String b = (String) ctx.getBean("mquinn-test");
-    log.WARN("b = " + b);
-    System.exit(1);
+        new ClassPathXmlApplicationContext("psEnviContext.xml");
+
+    // The name of the component to load is expected at args[0]
+    ComponentRuntimeProfile profileToRun =
+        (ComponentRuntimeProfile) ctx.getBean(args[0]);
+
+    // Since we are verifying against a tracefile, we have to override
+    // the default date value with the date the tracefile was generated on.
+    PTDate.overrideDefaultDate(profileToRun.getTraceFileDate());
 
     try {
+      TraceFileVerifier.init(profileToRun);
       Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
 
-      Environment.setSystemVar("%Component",
-          System.getProperty("ComponentToLoad"));
+      Environment.setSystemVar("%Component", profileToRun.getComponentName());
       Environment.setSystemVar("%Menu", "SA_LEARNER_SERVICES");
       Environment.setSystemVar("%OperatorId", "KADAMS");
       Environment.setSystemVar("%EmployeeId", "AA0001");
@@ -64,7 +72,7 @@ public final class Main {
 
       c.assembleComponentStructure();
       ComponentBuffer.printStructure();
-      ComponentStructureVerifier.verify();
+      ComponentStructureVerifier.verify(profileToRun);
       //ComponentBuffer.firstPassFill();
 
       TraceFileVerifier.logVerificationSummary(false);

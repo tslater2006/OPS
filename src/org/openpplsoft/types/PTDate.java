@@ -14,19 +14,24 @@ import org.openpplsoft.runtime.*;
 public class PTDate extends PTPrimitiveType<String> {
 
   private static Type staticTypeFlag = Type.DATE;
+  private static String defaultDateOverride;
   private String d;
 
   protected PTDate() {
     super(staticTypeFlag);
 
-    // default value is current date unless date is overridden for trace file
-    // verification purposes.
-    if(System.getProperty("traceFileDate") != null) {
-      this.d = System.getProperty("traceFileDate");
+    // default value is current date unless date has been overridden for
+    // tracefile verification purposes.
+    if(defaultDateOverride != null) {
+      this.d = defaultDateOverride;
     } else {
       d = new SimpleDateFormat("yyyy-MM-dd")
             .format(Calendar.getInstance().getTime());
     }
+  }
+
+  public static void overrideDefaultDate(final String d) {
+    defaultDateOverride = d;
   }
 
   public String read() {

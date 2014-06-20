@@ -19,10 +19,10 @@ public class ComponentStructureVerifier {
 
   private static Logger log = LogManager.getLogger(ComponentStructureVerifier.class.getName());
 
-  public static void verify() {
+  public static void verify(ComponentRuntimeProfile profile) {
 
     if(hasBeenVerified) { return; }
-    String pnlgrpname = System.getProperty("ComponentToLoad");
+    String pnlgrpname = profile.getComponentName();
 
     int indent = 0;
     IStreamableBuffer buf;

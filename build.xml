@@ -113,33 +113,9 @@
     <ivy:cachepath pathid="runtime.classpath" conf="runtime"/>
     <pathconvert property="runtime.cp" refid="runtime.classpath"/>
 
-<!--    <exec executable="java">
-      <arg value="-cp"/>
-      <arg value="bin:${runtime.cp}"/>
-      <arg value="org.openpplsoft.Main"/>
-    </exec>-->
-
     <java classname="org.openpplsoft.Main" fork="yes"
       classpath="resources:bin:${runtime.cp}">
-
-<!--
-      <sysproperty key="ComponentToLoad" value="SSS_STUDENT_CENTER"/>  
-      <sysproperty key="tracefile" value="trace/003_KADAMS_SSS_STUDENT_CENTER.tracesql"/>
--->
-
-      <sysproperty key="ComponentToLoad" value="SSR_SSENRL_LIST"/>
-      <sysproperty key="tracefile" value="trace/005_KADAMS_SSR_SSENRL_LIST.tracesql"/>
-
-<!--      <sysproperty key="ComponentToLoad" value="CLASS_SEARCH"/>
-      <sysproperty key="tracefile" value="trace/004_KADAMS_CLASS_SEARCH.tracesql"/>
--->
-
-
-<!--      <sysproperty key="ComponentToLoad" value="SSR_SSENRL_ADD"/>
-      <sysproperty key="tracefile" value="trace/006_KADAMS_SSR_SSENRL_ADD.tracesql"/>
--->
-
-      <sysproperty key="traceFileDate" value="2013-11-16"/>
+      <arg value="${comp}"/>
 
       <!-- Trace files for local Xen cluster -->
 <!--      <sysproperty key="tracefile" value="trace/007_KADAMS_SSR_SSENRL_LIST.tracesql"/>
@@ -154,10 +130,10 @@
 
       <sysproperty key="DbSID" value="ENTCSDEV"/>
       <sysproperty key="DbIP" value="10.0.1.88"/>
-
       <sysproperty key="DbDriver" value="jdbc:oracle:thin"/>
+
+      <!-- Required for use with Oracle JDBC driver. -->
       <sysproperty key="user.timezone" value="GMT"/>
-      <sysproperty key="log4j.configurationFile" value="resources/log4j2.xml"/>
     </java>
   </target>
 </project>

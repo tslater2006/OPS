@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+          http://www.springframework.org/schema/beans 
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/util
+            http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+  <bean id="SSS_STUDENT_CENTER"
+    class="org.openpplsoft.runtime.ComponentRuntimeProfile">
+    <constructor-arg value="SSS_STUDENT_CENTER"/>
+    <constructor-arg value="003_KADAMS_SSS_STUDENT_CENTER.tracesql"/>
+    <constructor-arg value="2013-11-16"/>
+  </bean>
+
+  <bean id="CLASS_SEARCH"
+    class="org.openpplsoft.runtime.ComponentRuntimeProfile">
+    <constructor-arg value="CLASS_SEARCH"/>
+    <constructor-arg value="004_KADAMS_CLASS_SEARCH.tracesql"/>
+    <constructor-arg value="2013-11-16"/>
+  </bean>
+
+  <bean id="SSR_SSENRL_LIST"
+    class="org.openpplsoft.runtime.ComponentRuntimeProfile">
+    <constructor-arg value="SSR_SSENRL_LIST"/>
+    <constructor-arg value="005_KADAMS_SSR_SSENRL_LIST.tracesql"/>
+    <constructor-arg value="2013-11-16"/>
+  </bean>
+
+  <bean id="SSR_SSENRL_ADD"
+    class="org.openpplsoft.runtime.ComponentRuntimeProfile">
+    <constructor-arg value="SSR_SSENRL_ADD"/>
+    <constructor-arg value="006_KADAMS_SSR_SSENRL_ADD.tracesql"/>
+    <constructor-arg value="2013-11-16"/>
+  </bean>
+</beans>

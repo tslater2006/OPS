@@ -23,6 +23,8 @@
       conf="runtime,compile->default"/>
     <dependency org="org.apache.commons" name="commons-lang3" rev="3.3.2"
       conf="compile->default"/>
+    <dependency org="org.apache.commons" name="commons-dbcp2" rev="2.0.1"
+      conf="runtime,compile->default"/>
 
     <!-- Not available on public repos due to licensing constraints; will
          be picked up from local ivy repository. -->

@@ -115,19 +115,12 @@
 
     <java classname="org.openpplsoft.Main" fork="yes"
       classpath="resources:bin:${runtime.cp}">
+      <arg value="${envi}"/>
       <arg value="${comp}"/>
 
       <sysproperty key="ignore_stmts_file" value="conf/ignore_stmts.conf"/>
       <sysproperty key="defn_stmts_file" value="conf/defn_stmts.conf"/>
       <sysproperty key="cacheProgText" value="true"/>
-
-      <sysproperty key="DbSID" value="XENCSDEV"/>
-      <sysproperty key="DbIP" value="10.0.0.88"/>
-
-<!--      <sysproperty key="DbSID" value="ENTCSDEV"/>
-      <sysproperty key="DbIP" value="10.0.1.88"/>-->
-
-      <sysproperty key="DbDriver" value="jdbc:oracle:thin"/>
 
       <!-- Required for use with Oracle JDBC driver. -->
       <sysproperty key="user.timezone" value="GMT"/>

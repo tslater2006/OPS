@@ -38,12 +38,13 @@ public final class Main {
    */
   public static void main(final String[] args) {
 
+    // The name of the environment to access is expected at args[0]
     ClassPathXmlApplicationContext ctx =
-        new ClassPathXmlApplicationContext("psEnviContext.xml");
+        new ClassPathXmlApplicationContext(args[0]+".xml");
 
-    // The name of the component to load is expected at args[0]
+    // The name of the component to load is expected at args[1]
     ComponentRuntimeProfile profileToRun =
-        (ComponentRuntimeProfile) ctx.getBean(args[0]);
+        (ComponentRuntimeProfile) ctx.getBean(args[1]);
 
     // Since we are verifying against a tracefile, we have to override
     // the default date value with the date the tracefile was generated on.

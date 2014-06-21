@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.sql.DataSource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +26,8 @@ import org.openpplsoft.pt.*;
 import org.openpplsoft.types.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.buffers.*;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class StmtLibrary {
 
@@ -35,12 +39,12 @@ public class StmtLibrary {
   private static Pattern dateInPattern;
 
   static {
+    ClassPathXmlApplicationContext ctx =
+        new ClassPathXmlApplicationContext("MQUINN_AWS.xml");
+    DataSource ds = (DataSource) ctx.getBean("dataSource");
+
     try {
-      String dbSID = System.getProperty("DbSID");
-      String dbIP = System.getProperty("DbIP");
-      String dbDriver = System.getProperty("DbDriver");
-      conn = DriverManager.getConnection(
-        dbDriver + ":@//" + dbIP +":1521/" + dbSID, "SYSADM", "SYSADM");
+      conn = ds.getConnection();
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
       System.exit(ExitCode.UNABLE_TO_ACQUIRE_DB_CONN.getCode());

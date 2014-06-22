@@ -89,11 +89,11 @@ public class InterpretSupervisor {
     descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
     if(doEmitProgramMarkers) {
-      TraceFileVerifier.enforceEmission(new PCStart(
+      TraceFileVerifier.submitEnforcedEmission(new PCStart(
         (execContextStack.size() == 1 ? "start" : "start-ext"),
         String.format("%02d", execContextStack.size() - 1),
         methodOrFuncName, descriptor));
-      TraceFileVerifier.enforceEmission(new PCBegin(descriptor, "0", "0"));
+      TraceFileVerifier.submitEnforcedEmission(new PCBegin(descriptor, "0", "0"));
     }
 
     InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
@@ -119,7 +119,7 @@ public class InterpretSupervisor {
     }
 
     if(doEmitProgramMarkers) {
-      TraceFileVerifier.enforceEmission(new PCEnd(
+      TraceFileVerifier.submitEnforcedEmission(new PCEnd(
         (execContextStack.size() == 1 ? "end" : "end-ext"),
         String.format("%02d", execContextStack.size() - 1),
         methodOrFuncName, descriptor));

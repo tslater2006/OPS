@@ -131,15 +131,13 @@ public class PTRecord extends PTObjectType {
       throw new OPSVMachRuntimeException("Expected single date arg.");
     }
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.prepareSelectByKeyEffDtStmt(this.recDefn,
+        this, (PTDate)args.get(0));
     ResultSet rs = null;
 
     try {
       List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-
-      pstmt = StmtLibrary.prepareSelectByKeyEffDtStmt(this.recDefn,
-            this, (PTDate)args.get(0));
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       int numCols = rs.getMetaData().getColumnCount();
       if(numCols != rfList.size()) {
@@ -169,7 +167,7 @@ public class PTRecord extends PTObjectType {
     } finally {
       try {
         if(rs != null) { rs.close(); }
-        if(pstmt != null) { pstmt.close(); }
+        if(ostmt != null) { ostmt.close(); }
       } catch(java.sql.SQLException sqle) {}
     }
   }
@@ -180,14 +178,12 @@ public class PTRecord extends PTObjectType {
       throw new OPSVMachRuntimeException("Expected zero args.");
     }
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.prepareSelectByKey(this.recDefn, this);
     ResultSet rs = null;
 
     try {
       List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-
-      pstmt = StmtLibrary.prepareSelectByKey(this.recDefn, this);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       int numCols = rs.getMetaData().getColumnCount();
       if(numCols != rfList.size()) {
@@ -228,7 +224,7 @@ public class PTRecord extends PTObjectType {
     } finally {
       try {
         if(rs != null) { rs.close(); }
-        if(pstmt != null) { pstmt.close(); }
+        if(ostmt != null) { ostmt.close(); }
       } catch(java.sql.SQLException sqle) {}
     }
   }

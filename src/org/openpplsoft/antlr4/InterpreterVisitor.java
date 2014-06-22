@@ -150,7 +150,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     final IEmission e = new PCInstruction(line.toString());
-    TraceFileVerifier.enforceEmission(e);
+    TraceFileVerifier.submitEnforcedEmission(e);
     this.lastEmission = e;
   }
 
@@ -173,12 +173,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
     }
     final IEmission e = new PCInstruction(str);
-    TraceFileVerifier.enforceEmission(e);
+    TraceFileVerifier.submitEnforcedEmission(e);
     this.lastEmission = e;
   }
 
   private void repeatLastEmission() {
-    TraceFileVerifier.enforceEmission(this.lastEmission);
+    TraceFileVerifier.submitEnforcedEmission(this.lastEmission);
   }
 
   /**

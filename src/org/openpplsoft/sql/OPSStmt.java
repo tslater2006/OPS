@@ -37,59 +37,13 @@ public class OPSStmt extends SQLStmt {
   private EmissionType emissionType;
   private PreparedStatement pstmt;
 
+  /**
+   * An OPS SQL emission can either be enforced against the trace
+   * file or it can be unenforced.
+   */
   public static enum EmissionType {
      ENFORCED, UNENFORCED
   }
-
-   /** DEPRECATED
-* @param sql the sql statement to be executed
-*/
-  public OPSStmt(final String sql) {
-    super(sql.trim());
-  }
-
-  /** DEPRECATED
-* Submits the underlying PreparedStatement as an enforced
-* emission to the TraceFileVerifier.
-* @param conn the previously established JDBC connection
-* @return the underlying PreparedStatement
-*/
-  public PreparedStatement generateEnforcedPreparedStmt(
-      final Connection conn) {
-    final PreparedStatement pstmt = this.generatePreparedStmt(conn);
-    TraceFileVerifier.enforceEmission(this);
-    return pstmt;
-  }
-
-  /** DEPRECATED
-* Submits the underlying PreparedStatement as an unenforced
-* emission to the TraceFileVerifier.
-* @param conn the previously established JDBC connection
-* @return the underlying PreparedStatement
-*/
-  public PreparedStatement generateUnenforcedPreparedStmt(
-      final Connection conn) {
-    final PreparedStatement pstmt = this.generatePreparedStmt(conn);
-    TraceFileVerifier.submitUnenforcedEmission(this);
-    return pstmt;
-  }
-
-/** DEPRECATED */
-  private PreparedStatement generatePreparedStmt(
-      final Connection conn) {
-    try {
-      final PreparedStatement pstmt = conn.prepareStatement(this.sql);
-      for (Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
-        pstmt.setString(cursor.getKey(), cursor.getValue());
-      }
-      return pstmt;
-    } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.FAILED_TO_CREATE_PSTMT_FROM_CONN.getCode());
-    }
-    return null;
-  }
-
 
   public OPSStmt(final String sql, final String[] bVals,
       final EmissionType eType) {

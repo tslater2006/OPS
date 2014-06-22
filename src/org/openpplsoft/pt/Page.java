@@ -252,7 +252,8 @@ public class Page {
     if (this.hasDiscoveredPagePC) { return; }
     this.hasDiscoveredPagePC = true;
 
-    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
+    final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
+        "query.PSPCMPROG_RecordPCList",
         new String[]{PSDefn.PAGE, this.ptPNLNAME});
     ResultSet rs = null;
 

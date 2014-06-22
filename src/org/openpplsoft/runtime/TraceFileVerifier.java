@@ -75,7 +75,12 @@ public final class TraceFileVerifier {
 
   private TraceFileVerifier() {}
 
-  public static void init(ComponentRuntimeProfile profile) {
+  /**
+   * Initializes the verifier with the component runtime
+   * profile that will be verified.
+   * @param profile the component runtime profile to verify
+   */
+  public static void init(final ComponentRuntimeProfile profile) {
     /*
      * Open trace file for reading.
      */
@@ -126,13 +131,6 @@ public final class TraceFileVerifier {
   public static void submitUnenforcedEmission(final IEmission opsEmission) {
     //log.debug(opsEmission);
     unenforcedEmissions.add(opsEmission);
-  }
-
-  /**
-   * DEPRECATED; using only until code is switched over to submitEnforcedEmission.
-   */
-  public static void enforceEmission(final IEmission opsEmission) {
-    submitEnforcedEmission(opsEmission);
   }
 
   /**

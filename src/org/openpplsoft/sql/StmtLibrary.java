@@ -134,12 +134,12 @@ public class StmtLibrary {
         bindVals, staticSqlDefns.get(uniqueLabel).emissionType);
   }
 
-  public static PreparedStatement getSearchRecordFillQuery() {
+  public static OPSStmt getSearchRecordFillQuery() {
 
     PTRecord searchRec = ComponentBuffer.getSearchRecord();
     Record recDefn = searchRec.recDefn;
     List<RecordField> rfList = recDefn.getExpandedFieldList();
-    ArrayList<String> bindVals = new ArrayList<String>();
+    List<String> bindVals = new ArrayList<String>();
 
     /* NOTE: "SELECT" is prepended below due to PS oddities. */
     StringBuilder query = new StringBuilder();
@@ -212,15 +212,11 @@ public class StmtLibrary {
       queryStr = "SELECT  " + query.toString();
     }
 
-    OPSStmt stmt = new OPSStmt(queryStr);
-    for(i = 0; i < bindVals.size(); i++) {
-      stmt.bindVals.put(i+1, bindVals.get(i));
-    }
-
-    return stmt.generateEnforcedPreparedStmt(conn);
+    return new OPSStmt(queryStr, bindVals.toArray(
+        new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
-  public static PreparedStatement prepareFillStmt(Record recDefn, String whereStr, String[] bindVals) {
+  public static OPSStmt prepareFillStmt(Record recDefn, String whereStr, String[] bindVals) {
 
     StringBuilder query = new StringBuilder(
       generateSelectClause(recDefn, "FILL"));
@@ -240,18 +236,11 @@ public class StmtLibrary {
         query.append("  ").append(whereStr);
         //log.debug("Fill query string: {}", query.toString());
 
-    /*
-     * Prepare the statement.
-     */
-    OPSStmt stmt = new OPSStmt(query.toString());
-    for(int i = 0; i < bindVals.length; i++) {
-      stmt.bindVals.put(i+1, bindVals[i]);
-    }
-
-    return stmt.generateEnforcedPreparedStmt(conn);
+    return new OPSStmt(query.toString(), bindVals,
+        OPSStmt.EmissionType.ENFORCED);
   }
 
-  public static PreparedStatement prepareSelectByKeyEffDtStmt(
+  public static OPSStmt prepareSelectByKeyEffDtStmt(
       Record recDefn, PTRecord recObj, PTDate effDt) {
 
     String tableAlias = "A";
@@ -306,15 +295,11 @@ public class StmtLibrary {
       }
     }
 
-    OPSStmt stmt = new OPSStmt(query.toString());
-    for(int i = 0; i < bindVals.size(); i++) {
-      stmt.bindVals.put(i+1, bindVals.get(i));
-    }
-
-    return stmt.generateEnforcedPreparedStmt(conn);
+    return new OPSStmt(query.toString(), bindVals.toArray(
+        new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
-  public static PreparedStatement prepareSelectByKey(
+  public static OPSStmt prepareSelectByKey(
     Record recDefn, PTRecord recObj) {
 
     String tableAlias = "";
@@ -337,12 +322,8 @@ public class StmtLibrary {
       }
     }
 
-    OPSStmt stmt = new OPSStmt(query.toString());
-    for(int i = 0; i < bindVals.size(); i++) {
-      stmt.bindVals.put(i+1, bindVals.get(i));
-    }
-
-    return stmt.generateEnforcedPreparedStmt(conn);
+    return new OPSStmt(query.toString(), bindVals.toArray(
+        new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
   private static String generateSelectClause(Record recDefn,
@@ -375,7 +356,7 @@ public class StmtLibrary {
     return selectClause.toString();
   }
 
-  public static PreparedStatement prepareFirstPassFillQuery(
+  public static OPSStmt prepareFirstPassFillQuery(
     RecordBuffer rbuf) {
 
     /*
@@ -452,12 +433,8 @@ public class StmtLibrary {
       }
     }
 
-    OPSStmt stmt = new OPSStmt(query.toString());
-    for(i = 0; i < bindVals.size(); i++) {
-      stmt.bindVals.put(i+1, bindVals.get(i));
-    }
-
-    return stmt.generateEnforcedPreparedStmt(conn);
+    return new OPSStmt(query.toString(), bindVals.toArray(
+        new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
   public static void disconnect() {

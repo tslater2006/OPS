@@ -260,15 +260,13 @@ public class PTRowset extends PTObjectType {
     // The rowset must be flushed before continuing.
     this.internalFlush();
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.prepareFillStmt(this.recDefn,
+        ((PTString)args.get(0)).read(), bindVals);
     ResultSet rs = null;
 
     try {
       List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-
-      pstmt = StmtLibrary.prepareFillStmt(this.recDefn,
-          ((PTString)args.get(0)).read(), bindVals);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       int numCols = rs.getMetaData().getColumnCount();
       if(numCols != rfList.size()) {
@@ -302,7 +300,7 @@ public class PTRowset extends PTObjectType {
     } finally {
       try {
         if(rs != null) { rs.close(); }
-        if(pstmt != null) { pstmt.close(); }
+        if(ostmt != null) { ostmt.close(); }
       } catch(java.sql.SQLException sqle) {}
     }
   }

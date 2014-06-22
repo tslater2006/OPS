@@ -236,12 +236,11 @@ public class Component {
       return;
     }
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getSearchRecordFillQuery();
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.getSearchRecordFillQuery();
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       final ResultSetMetaData rsMetadata = rs.getMetaData();
       final int numCols = rsMetadata.getColumnCount();
@@ -268,9 +267,9 @@ public class Component {
     } finally {
       try {
         if (rs != null) { rs.close(); }
-        if (pstmt != null) { pstmt.close(); }
+        if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or pstmt in finally block.");
+        log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
   }

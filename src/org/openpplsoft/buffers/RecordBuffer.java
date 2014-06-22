@@ -129,19 +129,18 @@ public class RecordBuffer implements IStreamableBuffer {
    * first pass fill routine (under heavy development).
    */
   public void firstPassFill() {
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.prepareFirstPassFillQuery(this);
 
       /*
        * If null comes back, one or more key values is not
        * available, and thus the fill cannot be run.
        */
-      if (pstmt == null) { return; }
+      if (ostmt == null) { return; }
 
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       final ResultSetMetaData rsMetadata = rs.getMetaData();
       final int numCols = rsMetadata.getColumnCount();
@@ -171,9 +170,9 @@ public class RecordBuffer implements IStreamableBuffer {
     } finally {
       try {
         if (rs != null) { rs.close(); }
-        if (pstmt != null) { pstmt.close(); }
+        if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or pstmt in finally block.");
+        log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
   }

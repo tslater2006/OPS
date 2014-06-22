@@ -45,6 +45,12 @@ public class OPSStmt extends SQLStmt {
      ENFORCED, UNENFORCED
   }
 
+  /**
+   * Creates an OPSStmt instance.
+   * @param sql the SQL statement to be executed
+   * @param bVals the bind vals to attach at execution time
+   * @param eType the emission type (enforced or unenforced)
+   */
   public OPSStmt(final String sql, final String[] bVals,
       final EmissionType eType) {
 
@@ -52,13 +58,13 @@ public class OPSStmt extends SQLStmt {
     this.emissionType = eType;
 
     for (int i = 0; i < bVals.length; i++) {
-      this.bindVals.put(i+1, bVals[i]);
+      this.bindVals.put(i + 1, bVals[i]);
     }
 
     try {
       this.pstmt = StmtLibrary.getConnection().prepareStatement(this.sql);
       for (Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
-        pstmt.setString(cursor.getKey(), cursor.getValue());
+        this.pstmt.setString(cursor.getKey(), cursor.getValue());
       }
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
@@ -66,9 +72,15 @@ public class OPSStmt extends SQLStmt {
     }
   }
 
+  /**
+   * Executes the query represented by this OPSStmt.
+   * @return the JDBC ResultSet containing the query results
+   * @throws java.sql.SQLException if execution of underlying PreparedStatement
+   *    results in an error.
+   */
   public ResultSet executeQuery() throws java.sql.SQLException {
 
-    if(this.emissionType == EmissionType.ENFORCED) {
+    if (this.emissionType == EmissionType.ENFORCED) {
       TraceFileVerifier.submitEnforcedEmission(this);
     } else {
       TraceFileVerifier.submitUnenforcedEmission(this);
@@ -77,6 +89,11 @@ public class OPSStmt extends SQLStmt {
     return this.pstmt.executeQuery();
   }
 
+  /**
+   * Closes the underlying PreparedStatement.
+   * @throws java.sql.SQLException if closing of underlying PreparedStatement
+   *    results in an error.
+   */
   public void close() throws java.sql.SQLException {
     this.pstmt.close();
   }

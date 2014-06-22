@@ -15,8 +15,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import java.util.regex.Matcher;
@@ -27,16 +27,20 @@ import javax.sql.DataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.openpplsoft.pt.*;
-import org.openpplsoft.types.*;
-import org.openpplsoft.runtime.*;
 import org.openpplsoft.buffers.*;
+import org.openpplsoft.pt.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.types.*;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-public class StmtLibrary {
+/**
+ * Central location for retrieval of static SQL statements,
+ * in addition to creation of dynamic SQL statements.
+ */
+public final class StmtLibrary {
 
   private static Connection conn;
   private static Logger log =
@@ -46,15 +50,10 @@ public class StmtLibrary {
   private static Pattern bindIdxPattern;
   private static Pattern dateInPattern;
 
-  private static class StaticSqlDefn {
-    private String uniqueLabel, sql;
-    private OPSStmt.EmissionType emissionType;
-  }
-
   static {
-    ClassPathXmlApplicationContext ctx =
+    final ClassPathXmlApplicationContext ctx =
         new ClassPathXmlApplicationContext(System.getProperty("contextFile"));
-    DataSource ds = (DataSource) ctx.getBean("dataSource");
+    final DataSource ds = (DataSource) ctx.getBean("dataSource");
 
     try {
       conn = ds.getConnection();
@@ -66,7 +65,8 @@ public class StmtLibrary {
     /*
      * Load static SQL defns into memory from file.
      */
-    Resource sqlDefnRsrc = (ClassPathResource) ctx.getBean("staticSqlDefnsResource");
+    final Resource sqlDefnRsrc =
+        (ClassPathResource) ctx.getBean("staticSqlDefnsResource");
     staticSqlDefns = new HashMap<String, StaticSqlDefn>();
 
     BufferedReader br = null;
@@ -75,7 +75,7 @@ public class StmtLibrary {
       StringBuilder b = new StringBuilder();
       StaticSqlDefn defn = null;
       String line = "";
-      while((line = br.readLine()) != null) {
+      while ((line = br.readLine()) != null) {
         if (line.startsWith("=!=")) {
           continue;
         } else if (line.startsWith("###[label]:")) {
@@ -91,8 +91,8 @@ public class StmtLibrary {
           defn.uniqueLabel = line.split(":")[1].trim();
           log.debug("Label: {}", defn.uniqueLabel);
         } else if (line.startsWith("#[enforced]:")) {
-          String isEnforced = line.split(":")[1].trim();
-          if(isEnforced.equals("true")) {
+          final String isEnforced = line.split(":")[1].trim();
+          if (isEnforced.equals("true")) {
             defn.emissionType = OPSStmt.EmissionType.ENFORCED;
           } else {
             defn.emissionType = OPSStmt.EmissionType.UNENFORCED;
@@ -113,7 +113,7 @@ public class StmtLibrary {
       System.exit(ExitCode.FAILED_READ_FROM_STATIC_SQL_DEFN_FILE.getCode());
     } finally {
       try {
-        if(br != null) { br.close(); }
+        if (br != null) { br.close(); }
       } catch (final java.io.IOException ioe) {
         log.warn("Unable to close br in finally block.");
       }
@@ -123,6 +123,8 @@ public class StmtLibrary {
     bindIdxPattern = Pattern.compile(":\\d+");
     dateInPattern = Pattern.compile("%DATEIN\\((.+?)\\)");
   }
+
+  private StmtLibrary() {}
 
   public static Connection getConnection() {
     return conn;
@@ -136,21 +138,21 @@ public class StmtLibrary {
 
   public static OPSStmt getSearchRecordFillQuery() {
 
-    PTRecord searchRec = ComponentBuffer.getSearchRecord();
-    Record recDefn = searchRec.recDefn;
-    List<RecordField> rfList = recDefn.getExpandedFieldList();
-    List<String> bindVals = new ArrayList<String>();
+    final PTRecord searchRec = ComponentBuffer.getSearchRecord();
+    final Record recDefn = searchRec.recDefn;
+    final List<RecordField> rfList = recDefn.getExpandedFieldList();
+    final List<String> bindVals = new ArrayList<String>();
 
     /* NOTE: "SELECT" is prepended below due to PS oddities. */
-    StringBuilder query = new StringBuilder();
+    final StringBuilder query = new StringBuilder();
     boolean distinctKeywordUsed = false;
 
     int i = 0;
-    for(RecordField rf : rfList) {
+    for (RecordField rf : rfList) {
       log.debug("USEEDIT for {}: {}", rf.FIELDNAME, rf.USEEDIT);
-      if(rf.isSearchKey()) {
-        if(i > 0) { query.append(", "); }
-        if(rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
+      if (rf.isSearchKey()) {
+        if (i > 0) { query.append(", "); }
+        if (rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
           query.append("DISTINCT ");
           distinctKeywordUsed = true;
         }
@@ -162,25 +164,25 @@ public class StmtLibrary {
     query.append(" FROM PS_").append(recDefn.RECNAME).append(" WHERE ");
 
     i = 0;
-    for(RecordField rf : rfList) {
-      if(rf.isKey() || rf.isSearchKey()) {
-        if(i > 0) { query.append(" AND "); }
+    for (RecordField rf : rfList) {
+      if (rf.isKey() || rf.isSearchKey()) {
+        if (i > 0) { query.append(" AND "); }
 
-        String val = (String)searchRec.getField(rf.FIELDNAME)
+        String val = (String) searchRec.getField(rf.FIELDNAME)
             .getValue().read();
 
         /*
          * If this is the OPRID field and it has a null value
          * in the search record, default it to the system var value.
-         * TODO: If multiple fields require this kind of defaulting,
+         * TODO(mquinn): If multiple fields require this kind of defaulting,
          * abstract this into the underlying RecordField object.
          */
-        if(val == null && rf.FIELDNAME.equals("OPRID")) {
-          val = (String)Environment.getSystemVar("%OperatorId").read();
+        if (val == null && rf.FIELDNAME.equals("OPRID")) {
+          val = (String) Environment.getSystemVar("%OperatorId").read();
         }
 
         query.append(rf.FIELDNAME);
-        if(rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
+        if (rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
           query.append(" LIKE '").append(val).append("%'");
         } else {
           query.append("=?");
@@ -194,11 +196,11 @@ public class StmtLibrary {
     query.append(" ORDER BY ");
 
     i = 0;
-    for(RecordField rf : rfList) {
-      if(rf.isSearchKey()) {
-        if(i > 0) { query.append(", "); }
+    for (RecordField rf : rfList) {
+      if (rf.isSearchKey()) {
+        if (i > 0) { query.append(", "); }
         query.append(rf.FIELDNAME);
-        if(rf.isDescendingKey()) {
+        if (rf.isDescendingKey()) {
           query.append(" DESC");
         }
         i++;
@@ -206,7 +208,7 @@ public class StmtLibrary {
     }
 
     String queryStr;
-    if(distinctKeywordUsed) {
+    if (distinctKeywordUsed) {
       queryStr = "SELECT " + query.toString();
     } else {
       queryStr = "SELECT  " + query.toString();
@@ -216,54 +218,56 @@ public class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
-  public static OPSStmt prepareFillStmt(Record recDefn, String whereStr, String[] bindVals) {
+  public static OPSStmt prepareFillStmt(final Record recDefn,
+      final String whereStr, final String[] bindVals) {
 
-    StringBuilder query = new StringBuilder(
-      generateSelectClause(recDefn, "FILL"));
+    final StringBuilder query = new StringBuilder(
+        generateSelectClause(recDefn, "FILL"));
 
-      // Replace numeric bind sockets (":1") with "?".
-      Matcher bindIdxMatcher = bindIdxPattern.matcher(whereStr);
-      whereStr = bindIdxMatcher.replaceAll("?");
+    // Replace numeric bind sockets (":1") with "?".
+    final Matcher bindIdxMatcher = bindIdxPattern.matcher(whereStr);
+    String newWhereStr = bindIdxMatcher.replaceAll("?");
 
-      // Replace occurrences of %DATEIN(*) with TO_DATE(*,'YYYY-MM-DD')
-      Matcher dateInMatcher = dateInPattern.matcher(whereStr);
-      while(dateInMatcher.find()) {
-        //log.debug("Found DATEIN: " + dateInMatcher.group(0));
-        whereStr = dateInMatcher.replaceAll("TO_DATE("+
-            dateInMatcher.group(1)+",'YYYY-MM-DD')");
-        }
+    // Replace occurrences of %DATEIN(*) with TO_DATE(*,'YYYY-MM-DD')
+    final Matcher dateInMatcher = dateInPattern.matcher(newWhereStr);
+    while (dateInMatcher.find()) {
 
-        query.append("  ").append(whereStr);
-        //log.debug("Fill query string: {}", query.toString());
+      //log.debug("Found DATEIN: " + dateInMatcher.group(0));
+      newWhereStr = dateInMatcher.replaceAll("TO_DATE("
+          + dateInMatcher.group(1) + ",'YYYY-MM-DD')");
+    }
+
+    query.append("  ").append(newWhereStr);
+    //log.debug("Fill query string: {}", query.toString());
 
     return new OPSStmt(query.toString(), bindVals,
         OPSStmt.EmissionType.ENFORCED);
   }
 
   public static OPSStmt prepareSelectByKeyEffDtStmt(
-      Record recDefn, PTRecord recObj, PTDate effDt) {
+      final Record recDefn, final PTRecord recObj, final PTDate effDt) {
 
-    String tableAlias = "A";
-    StringBuilder query = new StringBuilder(
+    final String tableAlias = "A";
+    final StringBuilder query = new StringBuilder(
         generateSelectClause(recDefn, tableAlias));
 
     query.append(" WHERE ");
 
-    List<RecordField> rfList = recDefn.getExpandedFieldList();
-    List<String> bindVals = new ArrayList<String>();
+    final List<RecordField> rfList = recDefn.getExpandedFieldList();
+    final List<String> bindVals = new ArrayList<String>();
 
     boolean isFirstKey = true;
-    for(RecordField rf : rfList) {
-      if(rf.isKey()) {
-        if(!isFirstKey) { query.append(" AND "); }
+    for (RecordField rf : rfList) {
+      if (rf.isKey()) {
+        if (!isFirstKey) { query.append(" AND "); }
         isFirstKey = false;
 
         query.append(tableAlias).append(".")
             .append(rf.FIELDNAME).append("=");
 
-        if(!rf.FIELDNAME.equals("EFFDT")) {
+        if (!rf.FIELDNAME.equals("EFFDT")) {
           query.append("?");
-          bindVals.add((String)recObj.fields.get(rf.FIELDNAME)
+          bindVals.add((String) recObj.fields.get(rf.FIELDNAME)
               .getValue().read());
         } else {
           /*
@@ -275,10 +279,10 @@ public class StmtLibrary {
              .append(" B WHERE ");
 
           boolean isFirstKeyOnSub = true;
-          for(RecordField subRf : rfList) {
-            if(subRf.isKey()) {
-              if(!isFirstKeyOnSub) { query.append(" AND "); }
-              if(!subRf.FIELDNAME.equals("EFFDT")) {
+          for (RecordField subRf : rfList) {
+            if (subRf.isKey()) {
+              if (!isFirstKeyOnSub) { query.append(" AND "); }
+              if (!subRf.FIELDNAME.equals("EFFDT")) {
                 query.append("B.").append(subRf.FIELDNAME)
                    .append("=").append(tableAlias)
                    .append(".").append(subRf.FIELDNAME);
@@ -300,24 +304,24 @@ public class StmtLibrary {
   }
 
   public static OPSStmt prepareSelectByKey(
-    Record recDefn, PTRecord recObj) {
+      final Record recDefn, final PTRecord recObj) {
 
-    String tableAlias = "";
-    StringBuilder query = new StringBuilder(
+    final String tableAlias = "";
+    final StringBuilder query = new StringBuilder(
         generateSelectClause(recDefn, tableAlias));
     query.append("WHERE ");
 
-    List<RecordField> rfList = recDefn.getExpandedFieldList();
-    List<String> bindVals = new ArrayList<String>();
+    final List<RecordField> rfList = recDefn.getExpandedFieldList();
+    final List<String> bindVals = new ArrayList<String>();
 
     boolean isFirstKey = true;
-    for(RecordField rf : rfList) {
-      if(rf.isKey()) {
-        if(!isFirstKey) { query.append(" AND "); }
+    for (RecordField rf : rfList) {
+      if (rf.isKey()) {
+        if (!isFirstKey) { query.append(" AND "); }
         isFirstKey = false;
 
         query.append(rf.FIELDNAME).append("=?");
-        bindVals.add((String)recObj.fields.get(rf.FIELDNAME)
+        bindVals.add((String) recObj.fields.get(rf.FIELDNAME)
           .getValue().read());
       }
     }
@@ -326,23 +330,23 @@ public class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
-  private static String generateSelectClause(Record recDefn,
-      String tableAlias) {
+  private static String generateSelectClause(final Record recDefn,
+      final String tableAlias) {
 
-    String dottedAlias = tableAlias;
-    if(dottedAlias.length() > 0) {
+    final String dottedAlias = tableAlias;
+    if (dottedAlias.length() > 0) {
       dottedAlias = dottedAlias.concat(".");
     }
 
-    StringBuilder selectClause = new StringBuilder("SELECT ");
-    List<RecordField> rfList = recDefn.getExpandedFieldList();
+    final StringBuilder selectClause = new StringBuilder("SELECT ");
+    final List<RecordField> rfList = recDefn.getExpandedFieldList();
 
-    for(int i = 0; i < rfList.size(); i++) {
-      if(i > 0) { selectClause.append(","); }
-      String fieldname = rfList.get(i).FIELDNAME;
+    for (int i = 0; i < rfList.size(); i++) {
+      if (i > 0) { selectClause.append(","); }
+      final String fieldname = rfList.get(i).FIELDNAME;
 
       // Selected date fields must be wrapped with TO_CHAR directive.
-      if(rfList.get(i).getSentinelForUnderlyingValue()
+      if (rfList.get(i).getSentinelForUnderlyingValue()
           instanceof PTDate) {
         selectClause.append("TO_CHAR(").append(dottedAlias)
             .append(fieldname).append(",'YYYY-MM-DD')");
@@ -357,7 +361,7 @@ public class StmtLibrary {
   }
 
   public static OPSStmt prepareFirstPassFillQuery(
-    RecordBuffer rbuf) {
+    final RecordBuffer rbuf) {
 
     /*
      * Iterate over the fields in the expanded record field list
@@ -365,19 +369,20 @@ public class StmtLibrary {
      * a key, add it to the WHERE clause and get its value from the
      * scroll buffer chain.
      */
-    Record recDefn = DefnCache.getRecord(rbuf.getRecName());
-    List<RecordField> rfList = recDefn.getExpandedFieldList();
+    final Record recDefn = DefnCache.getRecord(rbuf.getRecName());
+    final List<RecordField> rfList = recDefn.getExpandedFieldList();
 
     /*
      * Ensure all keys have an associated value in the scroll
      * buffer hierarchy. If any key does not, do not continue.
      */
-    for(RecordField rf : rfList) {
-      if(rf.isSearchKey()
+    for (RecordField rf : rfList) {
+      if (rf.isSearchKey()
           && rbuf.getParentScrollBuffer()
             .getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
-        log.debug("Aborting first pass fill for Record.{}; " +
-          "value does not exist for search key: {}", rbuf.getRecName(), rf.FIELDNAME);
+        log.debug("Aborting first pass fill for Record.{}; "
+            + "value does not exist for search key: {}", rbuf.getRecName(),
+            rf.FIELDNAME);
         return null;
       }
     }
@@ -385,19 +390,19 @@ public class StmtLibrary {
     /*
      * Begin building fill query.
      */
-    StringBuilder query = new StringBuilder("SELECT ");
-    ArrayList<String> bindVals = new ArrayList<String>();
+    final StringBuilder query = new StringBuilder("SELECT ");
+    final List<String> bindVals = new ArrayList<String>();
 
-    for(int i = 0; i < rfList.size(); i++) {
-      if(i > 0) { query.append(", "); }
-      String fieldname = rfList.get(i).FIELDNAME;
-      PTType val = rfList.get(i)
+    for (int i = 0; i < rfList.size(); i++) {
+      if (i > 0) { query.append(", "); }
+      final String fieldname = rfList.get(i).FIELDNAME;
+      final PTType val = rfList.get(i)
           .getSentinelForUnderlyingValue();
 
-      if(val instanceof PTDate) {
+      if (val instanceof PTDate) {
         query.append("TO_CHAR(").append(fieldname)
           .append(",'YYYY-MM-DD')");
-      } else if(val instanceof PTDateTime) {
+      } else if (val instanceof PTDateTime) {
         query.append("TO_CHAR(CAST((").append(fieldname)
           .append(") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')");
       } else {
@@ -408,12 +413,12 @@ public class StmtLibrary {
     query.append(" FROM PS_").append(rbuf.getRecName());
 
     int i = 0;
-    for(RecordField rf : rfList) {
-      if(rf.isSearchKey()) {
-        if(i == 0) { query.append(" WHERE "); }
-        if(i > 0) { query.append(" AND "); }
-        String val = (String)rbuf.getParentScrollBuffer().getKeyValueFromHierarchy(
-            rf.FIELDNAME).read();
+    for (RecordField rf : rfList) {
+      if (rf.isSearchKey()) {
+        if (i == 0) { query.append(" WHERE "); }
+        if (i > 0) { query.append(" AND "); }
+        final String val = (String) rbuf.getParentScrollBuffer()
+            .getKeyValueFromHierarchy(rf.FIELDNAME).read();
         query.append(rf.FIELDNAME).append("=?");
         bindVals.add(val);
         i++;
@@ -421,12 +426,12 @@ public class StmtLibrary {
     }
 
     i = 0;
-    for(RecordField rf : rfList) {
-      if(rf.isSearchKey()) {
-        if(i == 0) { query.append(" ORDER BY "); }
-        if(i > 0) { query.append(", "); }
+    for (RecordField rf : rfList) {
+      if (rf.isSearchKey()) {
+        if (i == 0) { query.append(" ORDER BY "); }
+        if (i > 0) { query.append(", "); }
         query.append(rf.FIELDNAME);
-        if(rf.isDescendingKey()) {
+        if (rf.isDescendingKey()) {
           query.append(" DESC");
         }
         i++;
@@ -440,8 +445,14 @@ public class StmtLibrary {
   public static void disconnect() {
     try {
       conn.close();
-    } catch(java.sql.SQLException sqle) {
+    } catch (final java.sql.SQLException sqle) {
       log.warn("Unable to close connection to database.", sqle);
     }
+  }
+
+  private static final class StaticSqlDefn {
+    private String uniqueLabel, sql;
+    private OPSStmt.EmissionType emissionType;
+    private StaticSqlDefn() {}
   }
 }

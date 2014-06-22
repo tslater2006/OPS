@@ -129,7 +129,7 @@ public class RecordBuffer implements IStreamableBuffer {
    * first pass fill routine (under heavy development).
    */
   public void firstPassFill() {
-    OPSStmt ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
+    final OPSStmt ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
     ResultSet rs = null;
 
     try {

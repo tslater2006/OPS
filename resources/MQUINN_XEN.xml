@@ -17,6 +17,11 @@
     p:username="SYSADM"
     p:password="SYSADM"/>
 
+  <bean id="staticSqlDefnsResource"
+    class="org.springframework.core.io.ClassPathResource">
+    <constructor-arg value="staticSql_ORACLE.dat"/>
+  </bean>
+
   <!-- Component runtime profiles available on this host: -->
 
   <bean id="SSS_STUDENT_CENTER"

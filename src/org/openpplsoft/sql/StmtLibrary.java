@@ -102,6 +102,12 @@ public class StmtLibrary {
           b.append(line);
         }
       }
+
+      // Save last statement defn.
+      defn.sql = b.toString().replaceAll("\\n", "");
+      log.debug("Saving defn; sql is: {}", defn.sql);
+      staticSqlDefns.put(defn.uniqueLabel, defn);
+
       br.close();
     } catch (final java.io.IOException ioe) {
       log.fatal(ioe.getMessage(), ioe);
@@ -127,43 +133,6 @@ public class StmtLibrary {
       final String[] bindVals) {
     return new OPSStmt(staticSqlDefns.get(uniqueLabel).sql,
         bindVals, staticSqlDefns.get(uniqueLabel).emissionType);
-  }
-
-  public static PreparedStatement getPSPNLGROUP(String b1, String b2) {
-    OPSStmt stmt = new OPSStmt("SELECT PNLNAME, ITEMNAME, HIDDEN, ITEMLABEL, FOLDERTABLABEL, SUBITEMNUM FROM PSPNLGROUP WHERE PNLGRPNAME = ? AND MARKET = ? ORDER BY SUBITEMNUM");
-    stmt.bindVals.put(1, b1);
-    stmt.bindVals.put(2, b2);
-    return stmt.generateEnforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSMENUDEFN(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT MENULABEL, MENUGROUP, GROUPORDER, MENUORDER, VERSION, INSTALLED, GROUPSEP, MENUSEP, MENUTYPE, OBJECTOWNERID, LASTUPDOPRID, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), DESCR, DESCRLONG FROM PSMENUDEFN WHERE MENUNAME = ?");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateEnforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSMENUITEM(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT BARNAME, ITEMNAME, BARLABEL, ITEMLABEL, MARKET, ITEMTYPE, PNLGRPNAME, SEARCHRECNAME, ITEMNUM, XFERCOUNT FROM PSMENUITEM WHERE MENUNAME = ? ORDER BY ITEMNUM");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateEnforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSRECDEFN(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT VERSION, FIELDCOUNT, RECTYPE, RECUSE, OPTTRIGFLAG, AUDITRECNAME, SETCNTRLFLD, RELLANGRECNAME, OPTDELRECNAME, PARENTRECNAME, QRYSECRECNAME, SQLTABLENAME, BUILDSEQNO, OBJECTOWNERID, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID, SYSTEMIDFIELDNAME, TIMESTAMPFIELDNAME, RECDESCR, AUXFLAGMASK, DESCRLONG  FROM PSRECDEFN WHERE RECNAME = ?");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateUnenforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSDBFIELD_PSRECFIELD_JOIN(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT VERSION, A.FIELDNAME, FIELDTYPE, LENGTH, DECIMALPOS, FORMAT, FORMATLENGTH, IMAGE_FMT, FORMATFAMILY, DISPFMTNAME, DEFCNTRYYR,IMEMODE,KBLAYOUT,OBJECTOWNERID, DEFRECNAME, DEFFIELDNAME, CURCTLFIELDNAME, USEEDIT, USEEDIT2, EDITTABLE, DEFGUICONTROL, SETCNTRLFLD, LABEL_ID, TIMEZONEUSE, TIMEZONEFIELDNAME, CURRCTLUSE, RELTMDTFIELDNAME, TO_CHAR(CAST((B.LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), B.LASTUPDOPRID, B.FIELDNUM, A.FLDNOTUSED, A.AUXFLAGMASK, B.RECNAME FROM PSDBFIELD A, PSRECFIELD B WHERE B.RECNAME = ? AND A.FIELDNAME = B.FIELDNAME AND B.SUBRECORD = 'N' ORDER BY B.RECNAME, B.FIELDNUM");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateUnenforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSDBFLDLBL(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT FIELDNAME, LABEL_ID, LONGNAME, SHORTNAME, DEFAULT_LABEL FROM PSDBFLDLABL WHERE FIELDNAME IN (SELECT A.FIELDNAME FROM PSDBFIELD A, PSRECFIELD B WHERE B.RECNAME = ? AND A.FIELDNAME = B.FIELDNAME) ORDER BY FIELDNAME, LABEL_ID");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateUnenforcedPreparedStmt(conn);
   }
 
   public static PreparedStatement getPSPCMPROG_CompPCList(String b1, String b2, String b3, String b4) {
@@ -316,12 +285,6 @@ public class StmtLibrary {
     }
 
     return stmt.generateEnforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getSubrecordsUsingPSDBFIELD_PSRECFIELD_JOIN(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT FIELDNUM, FIELDNAME, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID, RECNAME FROM PSRECFIELD WHERE RECNAME = ? AND SUBRECORD = 'Y' ORDER BY RECNAME, FIELDNUM");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateUnenforcedPreparedStmt(conn);
   }
 
   public static PreparedStatement prepareFillStmt(Record recDefn, String whereStr, String[] bindVals) {

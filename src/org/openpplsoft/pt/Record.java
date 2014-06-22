@@ -9,7 +9,7 @@ package org.openpplsoft.pt;
 
 import java.sql.*;
 import java.util.*;
-import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.sql.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.apache.logging.log4j.*;
@@ -40,12 +40,12 @@ public class Record {
     if(this.hasBeenInitialized) { return; }
     this.hasBeenInitialized = true;
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSRECDEFN",
+        new String[]{this.RECNAME});
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.getPSRECDEFN(this.RECNAME);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       int fieldcount = 0;
       if(rs.next()) {
@@ -56,10 +56,11 @@ public class Record {
         throw new OPSVMachRuntimeException("Expected record to be returned from PSRECDEFN query: " + this.RECNAME);
       }
       rs.close();
-      pstmt.close();
+      ostmt.close();
 
-      pstmt = StmtLibrary.getPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
-      rs = pstmt.executeQuery();
+      ostmt = StmtLibrary.getStaticSQLStmt("query.PSDBFIELD_PSRECFIELD_JOIN",
+          new String[]{this.RECNAME});
+      rs = ostmt.executeQuery();
 
       this.fieldTable = new HashMap<String, RecordField>();
       this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
@@ -75,7 +76,7 @@ public class Record {
           i++;
         }
         rs.close();
-        pstmt.close();
+        ostmt.close();
 
         this.subRecordNames = new ArrayList<String>();
 
@@ -84,8 +85,9 @@ public class Record {
          * definition, we need to query for subrecords.
          */
         if(fieldcount != i) {
-          pstmt = StmtLibrary.getSubrecordsUsingPSDBFIELD_PSRECFIELD_JOIN(this.RECNAME);
-          rs = pstmt.executeQuery();
+          ostmt = StmtLibrary.getStaticSQLStmt(
+              "query.PSDBFIELD_PSRECFIELD_JOIN_ForSubrecords", new String[]{this.RECNAME});
+          rs = ostmt.executeQuery();
 
           while(rs.next()) {
             this.fldAndSubrecordTable.put(rs.getInt("FIELDNUM"), rs.getString("FIELDNAME"));
@@ -99,8 +101,9 @@ public class Record {
           }
         }
 
-        pstmt = StmtLibrary.getPSDBFLDLBL(this.RECNAME);
-        rs = pstmt.executeQuery();
+        ostmt = StmtLibrary.getStaticSQLStmt("query.PSDBFLDLBL",
+            new String[]{this.RECNAME});
+        rs = ostmt.executeQuery();
         rs.next();        // Do nothing with records for now.
       } catch(java.sql.SQLException sqle) {
         log.fatal(sqle.getMessage(), sqle);
@@ -108,7 +111,7 @@ public class Record {
       } finally {
         try {
           if(rs != null) { rs.close(); }
-          if(pstmt != null) { pstmt.close(); }
+          if(ostmt != null) { ostmt.close(); }
         } catch(java.sql.SQLException sqle) {}
       }
     }
@@ -118,15 +121,15 @@ public class Record {
       if(this.hasRecordPCBeenDiscovered) { return; }
       this.hasRecordPCBeenDiscovered = true;
 
-      PreparedStatement pstmt = null;
+      PreparedStatement ostmt = null;
       ResultSet rs = null;
 
       try {
         this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
         this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
 
-        pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
-        rs = pstmt.executeQuery();
+        ostmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
+        rs = ostmt.executeQuery();
 
         while(rs.next()) {
           PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
@@ -149,7 +152,7 @@ public class Record {
       } finally {
         try {
           if(rs != null) { rs.close(); }
-          if(pstmt != null) { pstmt.close(); }
+          if(ostmt != null) { ostmt.close(); }
       } catch(java.sql.SQLException sqle) {}
     }
   }

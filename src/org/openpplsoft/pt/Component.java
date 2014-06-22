@@ -62,12 +62,12 @@ public class Component {
     this.ptPNLGRPNAME = pnlgrpname;
     this.ptMARKET = market;
 
-    OPSStmt opsstmt = StmtLibrary.getStaticSQLStmt("query.PSPNLGRPDEFN",
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLGRPDEFN",
         new String[]{this.ptPNLGRPNAME, this.ptMARKET});
     ResultSet rs = null;
 
     try {
-      rs = opsstmt.executeQuery();
+      rs = ostmt.executeQuery();
       rs.next();
       this.ptADDSRCHRECNAME = rs.getString("ADDSRCHRECNAME");
       this.ptSEARCHRECNAME = rs.getString("SEARCHRECNAME");
@@ -75,7 +75,7 @@ public class Component {
       this.ptPRIMARYACTION = rs.getInt("PRIMARYACTION");
       this.ptDFLTACTION = rs.getInt("DFLTACTION");
       rs.close();
-      opsstmt.close();
+      ostmt.close();
 
       /*
        * Select the search record to use based on the mode
@@ -91,8 +91,10 @@ public class Component {
       }
 
       this.pages = new ArrayList<Page>();
-      PreparedStatement pstmt = StmtLibrary.getPSPNLGROUP(this.ptPNLGRPNAME, this.ptMARKET);
-      rs = pstmt.executeQuery();
+      ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLGROUP",
+          new String[]{this.ptPNLGRPNAME, this.ptMARKET});
+      rs = ostmt.executeQuery();
+
       while (rs.next()) {
         // All pages at the root of the component start at scroll level 0.
         final Page p = new Page(rs.getString("PNLNAME"));
@@ -105,9 +107,9 @@ public class Component {
     } finally {
       try {
         if (rs != null) { rs.close(); }
-        if (opsstmt != null) { opsstmt.close(); }
+        if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or opsstmt in finally block.");
+        log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
   }

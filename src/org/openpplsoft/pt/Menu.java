@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.sql.*;
 
 /**
  * Represents a PeopleTools menu definition.
@@ -33,19 +33,20 @@ public class Menu {
   public Menu(final String menuname) {
     this.ptMENUNAME = menuname;
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSMENUDEFN",
+        new String[]{this.ptMENUNAME});
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.getPSMENUDEFN(this.ptMENUNAME);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
       //Do nothing with record for now.
       rs.next();
       rs.close();
-      pstmt.close();
+      ostmt.close();
 
-      pstmt = StmtLibrary.getPSMENUITEM(this.ptMENUNAME);
-      rs = pstmt.executeQuery();
+      ostmt = StmtLibrary.getStaticSQLStmt("query.PSMENUITEM",
+          new String[]{this.ptMENUNAME});
+      rs = ostmt.executeQuery();
       //Do nothing with records for now.
       rs.next();
     } catch (final java.sql.SQLException sqle) {
@@ -54,9 +55,9 @@ public class Menu {
     } finally {
       try {
         if (rs != null) { rs.close(); }
-        if (pstmt != null) { pstmt.close(); }
+        if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or pstmt in finally block.");
+        log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
   }

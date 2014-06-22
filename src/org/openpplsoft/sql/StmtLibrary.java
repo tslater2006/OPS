@@ -379,7 +379,7 @@ public final class StmtLibrary {
   private static String generateSelectClause(final Record recDefn,
       final String tableAlias) {
 
-    final String dottedAlias = tableAlias;
+    String dottedAlias = tableAlias;
     if (dottedAlias.length() > 0) {
       dottedAlias = dottedAlias.concat(".");
     }

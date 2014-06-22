@@ -161,13 +161,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      */
     if (str.equals("End-If")
         && this.lastEmission instanceof PCInstruction) {
-      if (((PCInstruction) this.lastEmission).instruction
+      if (((PCInstruction) this.lastEmission).getInstruction()
           .startsWith("For")
-          || ((PCInstruction) this.lastEmission).instruction
+          || ((PCInstruction) this.lastEmission).getInstruction()
           .equals("End-If")
-          || ((PCInstruction) this.lastEmission).instruction
+          || ((PCInstruction) this.lastEmission).getInstruction()
           .equals("Else")
-          || ((PCInstruction) this.lastEmission).instruction
+          || ((PCInstruction) this.lastEmission).getInstruction()
           .startsWith("If")) {
         return;
       }

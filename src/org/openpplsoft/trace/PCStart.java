@@ -7,40 +7,71 @@
 
 package org.openpplsoft.trace;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+/**
+ * Represents an emission indicating the start of execution
+ * of a PeopleCode method, function, or other sub-program unit
+ * of logic/control.
+ */
 public class PCStart implements IEmission {
 
-  public String startTag;
-  public String nest;
-  public String methodName;
-  public String progDescriptor;
+  private String startTag;
+  private String nest;
+  private String methodName;
+  private String progDescriptor;
 
-  public PCStart(String s, String n, String m, String p) {
+  /**
+   * Creates a new PCStart instance.
+   * @param s the start-tag for the emission
+   * @param n the nesting level of the execution demarcated
+   *   by this emission
+   * @param m the method being executed
+   * @param p the parent program of the method being
+   *   executed
+   */
+  public PCStart(final String s, final String n,
+      final String m, final String p) {
     this.startTag = s;
     this.nest = n;
     this.methodName = m;
     this.progDescriptor = p;
   }
 
-  public boolean equals(Object obj) {
-    if(obj == this)
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj == this) {
       return true;
-    if(obj == null)
+    } else if (obj == null) {
       return false;
-    if(!(obj instanceof PCStart))
+    } else if (!(obj instanceof PCStart)) {
       return false;
+    }
 
-    PCStart other = (PCStart)obj;
-    if(this.startTag.equals(other.startTag)
-      && this.nest.equals(other.nest)
-      && this.methodName.equals(other.methodName)
-      && this.progDescriptor.equals(other.progDescriptor)) {
+    final PCStart other = (PCStart) obj;
+    if (this.startTag.equals(other.startTag)
+        && this.nest.equals(other.nest)
+        && this.methodName.equals(other.methodName)
+        && this.progDescriptor.equals(other.progDescriptor)) {
       return true;
     }
     return false;
   }
 
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 103, HBC_MULTIPLIER = 277;
+
+    final HashCodeBuilder hbc = new HashCodeBuilder(HBC_INITIAL,
+        HBC_MULTIPLIER).append(this.startTag).append(this.nest)
+        .append(this.methodName).append(this.progDescriptor);
+
+    return hbc.toHashCode();
+  }
+
+  @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     builder.append(">>> ").append(this.startTag);
     builder.append("     Nest=").append(this.nest);
     builder.append(" ").append(this.methodName);

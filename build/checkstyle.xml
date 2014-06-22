@@ -272,7 +272,9 @@
     </module>
 
     <!-- Forbid inner assignment in expressions in all constructs except for loops. -->
-    <module name="InnerAssignment"/>
+    <module name="InnerAssignment">
+      <property name="severity" value="warning"/>
+    </module>
 
     <!-- Nested classes and interfaces must be declared last. -->
     <module name="InnerTypeLast"/>

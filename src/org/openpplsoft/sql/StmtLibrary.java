@@ -126,16 +126,33 @@ public final class StmtLibrary {
 
   private StmtLibrary() {}
 
+  /**
+   * Retrieves the underlying JDBC connection.
+   * @return the underlying JDBC connection
+   */
   public static Connection getConnection() {
     return conn;
   }
 
+  /**
+   * Generates an OPSStmt for the static SQL stmt with the provided
+   * label, along with the provided bind values.
+   * @param uniqueLabel the label for the desired statement in the static
+   *   SQL defn file
+   * @param bindVals the values to bind to the statement parameters
+   * @return the OPSStmt to be executed
+   */
   public static OPSStmt getStaticSQLStmt(final String uniqueLabel,
       final String[] bindVals) {
     return new OPSStmt(staticSqlDefns.get(uniqueLabel).sql,
         bindVals, staticSqlDefns.get(uniqueLabel).emissionType);
   }
 
+  /**
+   * Generates an OPSStmt that will fill the search record on
+   * the ComponentBuffer.
+   * @return the OPSStmt to be executed
+   */
   public static OPSStmt getSearchRecordFillQuery() {
 
     final PTRecord searchRec = ComponentBuffer.getSearchRecord();
@@ -218,6 +235,14 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
+
+  /**
+   * Generates an OPSStmt that will fill the given record.
+   * @param recDefn the record to fill
+   * @param whereStr the WHERE clause that will be part of the stmt
+   * @param bindVals the bind values to bind to the stmt params
+   * @return the OPSStmt to be executed
+   */
   public static OPSStmt prepareFillStmt(final Record recDefn,
       final String whereStr, final String[] bindVals) {
 
@@ -244,6 +269,14 @@ public final class StmtLibrary {
         OPSStmt.EmissionType.ENFORCED);
   }
 
+  /**
+   * Generates an OPSStmt that will select from the record by key
+   * and consider the EFFDT as well.
+   * @param recDefn the record defn to be selected from
+   * @param recObj the record obj to be selected from
+   * @param effDt the effective date to be considered
+   * @return the OPSStmt to be executed
+   */
   public static OPSStmt prepareSelectByKeyEffDtStmt(
       final Record recDefn, final PTRecord recObj, final PTDate effDt) {
 
@@ -303,6 +336,13 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
+  /**
+   * Generates an OPSStmt that will select from the given record
+   * using the record's key(s).
+   * @param recDefn the record defn to select from
+   * @param recObj the record obj to select from
+   * @return the OPSStmt to be executed
+   */
   public static OPSStmt prepareSelectByKey(
       final Record recDefn, final PTRecord recObj) {
 
@@ -330,6 +370,12 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
+  /**
+   * Generates the SELECT clause given a record defn.
+   * @param recDefn the record definition to select from
+   * @param tableAlias the alias for the record (if none, use empty str)
+   * @return the SELECT clause in string form
+   */
   private static String generateSelectClause(final Record recDefn,
       final String tableAlias) {
 
@@ -360,6 +406,12 @@ public final class StmtLibrary {
     return selectClause.toString();
   }
 
+  /**
+   * Generates an OPSStmt that will fill data into the provided
+   * RecordBuffer during the first pass fill phase.
+   * @param rbuf the RecordBuffer to fill
+   * @return the OPSStmt to be executed
+   */
   public static OPSStmt prepareFirstPassFillQuery(
     final RecordBuffer rbuf) {
 
@@ -442,6 +494,9 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
+  /**
+   * Disconnects the underlying JDBC connection.
+   */
   public static void disconnect() {
     try {
       conn.close();

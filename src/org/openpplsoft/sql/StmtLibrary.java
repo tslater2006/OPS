@@ -7,12 +7,17 @@
 
 package org.openpplsoft.sql;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +33,8 @@ import org.openpplsoft.runtime.*;
 import org.openpplsoft.buffers.*;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 public class StmtLibrary {
 
@@ -35,12 +42,18 @@ public class StmtLibrary {
   private static Logger log =
       LogManager.getLogger(StmtLibrary.class.getName());
 
+  private static Map<String, StaticSqlDefn> staticSqlDefns;
   private static Pattern bindIdxPattern;
   private static Pattern dateInPattern;
 
+  private static class StaticSqlDefn {
+    private String uniqueLabel, sql;
+    private OPSStmt.EmissionType emissionType;
+  }
+
   static {
     ClassPathXmlApplicationContext ctx =
-        new ClassPathXmlApplicationContext("MQUINN_AWS.xml");
+        new ClassPathXmlApplicationContext(System.getProperty("contextFile"));
     DataSource ds = (DataSource) ctx.getBean("dataSource");
 
     try {
@@ -50,17 +63,70 @@ public class StmtLibrary {
       System.exit(ExitCode.UNABLE_TO_ACQUIRE_DB_CONN.getCode());
     }
 
+    /*
+     * Load static SQL defns into memory from file.
+     */
+    Resource sqlDefnRsrc = (ClassPathResource) ctx.getBean("staticSqlDefnsResource");
+    staticSqlDefns = new HashMap<String, StaticSqlDefn>();
+
+    BufferedReader br = null;
+    try {
+      br = new BufferedReader(new FileReader(sqlDefnRsrc.getFile()));
+      StringBuilder b = new StringBuilder();
+      StaticSqlDefn defn = null;
+      String line = "";
+      while((line = br.readLine()) != null) {
+        if (line.startsWith("=!=")) {
+          continue;
+        } else if (line.startsWith("###[label]:")) {
+          if (defn != null) {
+            // All newlines must be removed, otherwise tracefile verificatin
+            // will fail.
+            defn.sql = b.toString().replaceAll("\\n", "");
+            log.debug("Saving defn; sql is: {}", defn.sql);
+            staticSqlDefns.put(defn.uniqueLabel, defn);
+          }
+          defn = new StaticSqlDefn();
+          b = new StringBuilder();
+          defn.uniqueLabel = line.split(":")[1].trim();
+          log.debug("Label: {}", defn.uniqueLabel);
+        } else if (line.startsWith("#[enforced]:")) {
+          String isEnforced = line.split(":")[1].trim();
+          if(isEnforced.equals("true")) {
+            defn.emissionType = OPSStmt.EmissionType.ENFORCED;
+          } else {
+            defn.emissionType = OPSStmt.EmissionType.UNENFORCED;
+          }
+          log.debug("Enforced? {}", defn.emissionType);
+        } else {
+          b.append(line);
+        }
+      }
+      br.close();
+    } catch (final java.io.IOException ioe) {
+      log.fatal(ioe.getMessage(), ioe);
+      System.exit(ExitCode.FAILED_READ_FROM_STATIC_SQL_DEFN_FILE.getCode());
+    } finally {
+      try {
+        if(br != null) { br.close(); }
+      } catch (final java.io.IOException ioe) {
+        log.warn("Unable to close br in finally block.");
+      }
+    }
+
     // compile meta-SQL detection regex patterns.
     bindIdxPattern = Pattern.compile(":\\d+");
     dateInPattern = Pattern.compile("%DATEIN\\((.+?)\\)");
   }
 
-  public static PreparedStatement getPSPNLGRPDEFN(
-      final String b1, final String b2) {
-    final OPSStmt stmt = new OPSStmt("SELECT DESCR, ACTIONS, VERSION, SEARCHRECNAME, ADDSRCHRECNAME,  SEARCHPNLNAME, LOADLOC, SAVELOC, DISABLESAVE, PRIMARYACTION, DFLTACTION, DFLTSRCHTYPE,  DEFERPROC, EXPENTRYPROC, WSRPCOMPLIANT, REQSECURESSL, INCLNAVIGATION, FORCESEARCH, ALLOWACTMODESEL,  PNLNAVFLAGS, TBARBTNS, SHOWTBAR, ADDLINKMSGSET, ADDLINKMSGNUM, SRCHLINKMSGSET, SRCHLINKMSGNUM,  SRCHTEXTMSGSET, SRCHTEXTMSGNUM, OBJECTOWNERID, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID,  DESCRLONG  FROM PSPNLGRPDEFN WHERE PNLGRPNAME = ? AND MARKET = ?");
-    stmt.bindVals.put(1, b1);
-    stmt.bindVals.put(2, b2);
-    return stmt.generateEnforcedPreparedStmt(conn);
+  public static Connection getConnection() {
+    return conn;
+  }
+
+  public static OPSStmt getStaticSQLStmt(final String uniqueLabel,
+      final String[] bindVals) {
+    return new OPSStmt(staticSqlDefns.get(uniqueLabel).sql,
+        bindVals, staticSqlDefns.get(uniqueLabel).emissionType);
   }
 
   public static PreparedStatement getPSPNLGROUP(String b1, String b2) {

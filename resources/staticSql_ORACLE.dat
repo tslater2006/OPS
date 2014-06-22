@@ -1,0 +1,23 @@
+=!= IMPORTANT: Before editing this file, keep in mind that
+=!= enforced emissions are matched character-for-character against
+=!= the tracefile. Thus, the number and location of whitespace
+=!= characters matters for enforced statements; you can use newlines
+=!= to wrap lengthy statements, as these will be removed when this file
+=!= is parsed at runtime, but do not trim trailing spaces, as this
+=!= will guarantee tracefile verification failures at runtime.
+
+###[label]:   query.PSPNLGRPDEFN
+#[enforced]:  true
+SELECT DESCR, ACTIONS, VERSION, SEARCHRECNAME, ADDSRCHRECNAME,  
+SEARCHPNLNAME, LOADLOC, SAVELOC, DISABLESAVE, PRIMARYACTION, 
+DFLTACTION, DFLTSRCHTYPE,  DEFERPROC, EXPENTRYPROC, WSRPCOMPLIANT, 
+REQSECURESSL, INCLNAVIGATION, FORCESEARCH, ALLOWACTMODESEL,  
+PNLNAVFLAGS, TBARBTNS, SHOWTBAR, ADDLINKMSGSET, ADDLINKMSGNUM, 
+SRCHLINKMSGSET, SRCHLINKMSGNUM,  SRCHTEXTMSGSET, SRCHTEXTMSGNUM, 
+OBJECTOWNERID, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),
+'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID,  DESCRLONG  
+FROM PSPNLGRPDEFN WHERE PNLGRPNAME = ? AND MARKET = ?
+
+###[label]:   query.PLACEHOLDER
+#[enforced]:  false
+SELECT * FROM NONEXISTENT TABLE

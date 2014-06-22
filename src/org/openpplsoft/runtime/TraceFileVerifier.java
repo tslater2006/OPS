@@ -129,11 +129,18 @@ public final class TraceFileVerifier {
   }
 
   /**
+   * DEPRECATED; using only until code is switched over to submitEnforcedEmission.
+   */
+  public static void enforceEmission(final IEmission opsEmission) {
+    submitEnforcedEmission(opsEmission);
+  }
+
+  /**
    * The verifier WILL fail if it is passed an emission that does not
    * correspond to the next emission in the PS tracefile via this method.
    * @param opsEmission emission from OPS that SHOULD be enforced
    */
-  public static void enforceEmission(final IEmission opsEmission) {
+  public static void submitEnforcedEmission(final IEmission opsEmission) {
     //if(!(opsEmission instanceof OPSStmt)) {
     log.debug(opsEmission);
     //}

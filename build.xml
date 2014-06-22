@@ -56,7 +56,7 @@
     </checkstyle>
   </target>
 
-  <target name="build_all">
+  <target name="compile">
 
     <ivy:cachepath pathid="compile.classpath" conf="compile"/>
     <pathconvert property="compile.cp" refid="compile.classpath"/>
@@ -108,7 +108,7 @@
     <delete dir="bin"/>
   </target>
 
-  <target name="exec">
+  <target name="exec" depends="compile">
 
     <ivy:cachepath pathid="runtime.classpath" conf="runtime"/>
     <pathconvert property="runtime.cp" refid="runtime.classpath"/>

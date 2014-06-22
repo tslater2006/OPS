@@ -21,7 +21,7 @@ import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.sql.*;
 import org.openpplsoft.types.*;
 
 /**
@@ -62,12 +62,12 @@ public class Component {
     this.ptPNLGRPNAME = pnlgrpname;
     this.ptMARKET = market;
 
-    PreparedStatement pstmt = null;
+    OPSStmt opsstmt = StmtLibrary.getStaticSQLStmt("query.PSPNLGRPDEFN",
+        new String[]{this.ptPNLGRPNAME, this.ptMARKET});
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.getPSPNLGRPDEFN(this.ptPNLGRPNAME, this.ptMARKET);
-      rs = pstmt.executeQuery();
+      rs = opsstmt.executeQuery();
       rs.next();
       this.ptADDSRCHRECNAME = rs.getString("ADDSRCHRECNAME");
       this.ptSEARCHRECNAME = rs.getString("SEARCHRECNAME");
@@ -75,7 +75,7 @@ public class Component {
       this.ptPRIMARYACTION = rs.getInt("PRIMARYACTION");
       this.ptDFLTACTION = rs.getInt("DFLTACTION");
       rs.close();
-      pstmt.close();
+      opsstmt.close();
 
       /*
        * Select the search record to use based on the mode
@@ -91,7 +91,7 @@ public class Component {
       }
 
       this.pages = new ArrayList<Page>();
-      pstmt = StmtLibrary.getPSPNLGROUP(this.ptPNLGRPNAME, this.ptMARKET);
+      PreparedStatement pstmt = StmtLibrary.getPSPNLGROUP(this.ptPNLGRPNAME, this.ptMARKET);
       rs = pstmt.executeQuery();
       while (rs.next()) {
         // All pages at the root of the component start at scroll level 0.
@@ -105,9 +105,9 @@ public class Component {
     } finally {
       try {
         if (rs != null) { rs.close(); }
-        if (pstmt != null) { pstmt.close(); }
+        if (opsstmt != null) { opsstmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or pstmt in finally block.");
+        log.warn("Unable to close rs and/or opsstmt in finally block.");
       }
     }
   }

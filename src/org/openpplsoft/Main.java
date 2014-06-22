@@ -39,8 +39,9 @@ public final class Main {
   public static void main(final String[] args) {
 
     // The name of the environment to access is expected at args[0]
+    System.setProperty("contextFile", args[0]+".xml");
     ClassPathXmlApplicationContext ctx =
-        new ClassPathXmlApplicationContext(args[0]+".xml");
+        new ClassPathXmlApplicationContext(System.getProperty("contextFile"));
 
     // The name of the component to load is expected at args[1]
     ComponentRuntimeProfile profileToRun =

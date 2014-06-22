@@ -10,7 +10,7 @@ package org.openpplsoft.pt.peoplecode;
 import java.sql.*;
 import java.util.*;
 import java.io.*;
-import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.sql.*;
 import org.openpplsoft.bytecode.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
@@ -63,19 +63,15 @@ public abstract class PeopleCodeProg {
     if(this.hasInitialized) { return; }
     this.hasInitialized = true;
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_GetPROGTXT",
+        new String[]{this.bindVals[0], this.bindVals[1], this.bindVals[2],
+        this.bindVals[3], this.bindVals[4], this.bindVals[5], this.bindVals[6],
+        this.bindVals[7], this.bindVals[8], this.bindVals[9], this.bindVals[10],
+        this.bindVals[11], this.bindVals[12], this.bindVals[13]});
     ResultSet rs = null;
 
     try {
-      // Get program text.
-      pstmt = StmtLibrary.getPSPCMPROG_GetPROGTXT(this.bindVals[0], this.bindVals[1],
-                                                  this.bindVals[2], this.bindVals[3],
-                                                  this.bindVals[4], this.bindVals[5],
-                                                  this.bindVals[6], this.bindVals[7],
-                                                  this.bindVals[8], this.bindVals[9],
-                                                  this.bindVals[10], this.bindVals[11],
-                                                  this.bindVals[12], this.bindVals[13]);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       /*
        * Append the program bytecode; there could be multiple records
@@ -89,7 +85,7 @@ public abstract class PeopleCodeProg {
         this.appendProgBytes(rs.getBlob("PROGTXT"));
       }
       rs.close();
-      pstmt.close();
+      ostmt.close();
 
       if(this.progBytes.length != PROGLEN) {
         throw new OPSVMachRuntimeException("Number of bytes in " + this.getDescriptor() + " ("
@@ -98,15 +94,13 @@ public abstract class PeopleCodeProg {
 
       this.progRefsTable = new TreeMap<Integer, Reference>();
 
-      // Get program references.
-      pstmt = StmtLibrary.getPSPCMPROG_GetRefs(this.bindVals[0], this.bindVals[1],
-                                               this.bindVals[2], this.bindVals[3],
-                                               this.bindVals[4], this.bindVals[5],
-                                               this.bindVals[6], this.bindVals[7],
-                                               this.bindVals[8], this.bindVals[9],
-                                               this.bindVals[10], this.bindVals[11],
-                                               this.bindVals[12], this.bindVals[13]);
-      rs = pstmt.executeQuery();
+      ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_GetRefs",
+          new String[]{this.bindVals[0], this.bindVals[1], this.bindVals[2],
+          this.bindVals[3], this.bindVals[4], this.bindVals[5],
+          this.bindVals[6], this.bindVals[7], this.bindVals[8],
+          this.bindVals[9], this.bindVals[10], this.bindVals[11],
+          this.bindVals[12], this.bindVals[13]});
+      rs = ostmt.executeQuery();
       while(rs.next()) {
         this.progRefsTable.put(rs.getInt("NAMENUM"),
             new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
@@ -117,7 +111,7 @@ public abstract class PeopleCodeProg {
     } finally {
       try {
         if(rs != null) { rs.close(); }
-        if(pstmt != null) { pstmt.close(); }
+        if(ostmt != null) { ostmt.close(); }
       } catch(java.sql.SQLException sqle) {}
     }
 

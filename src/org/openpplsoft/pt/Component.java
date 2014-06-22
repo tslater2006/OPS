@@ -123,14 +123,14 @@ public class Component {
     if (this.hasListOfComponentPCBeenRetrieved) { return; }
     this.hasListOfComponentPCBeenRetrieved = true;
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_CompPCList",
+        new String[]{PSDefn.COMPONENT, this.ptPNLGRPNAME, PSDefn.MARKET,
+        this.ptMARKET});
     ResultSet rs = null;
 
     try {
       this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
-      pstmt = StmtLibrary.getPSPCMPROG_CompPCList(PSDefn.COMPONENT,
-          this.ptPNLGRPNAME, PSDefn.MARKET, this.ptMARKET);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
 
       while (rs.next()) {
         final String objectid3 = rs.getString("OBJECTID3").trim();
@@ -175,9 +175,9 @@ public class Component {
     } finally {
       try {
         if (rs != null) { rs.close(); }
-        if (pstmt != null) { pstmt.close(); }
+        if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or pstmt in finally block.");
+        log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
   }

@@ -121,14 +121,14 @@ public class Record {
       if(this.hasRecordPCBeenDiscovered) { return; }
       this.hasRecordPCBeenDiscovered = true;
 
-      PreparedStatement ostmt = null;
+      OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
+          new String[]{PSDefn.RECORD, this.RECNAME});
       ResultSet rs = null;
 
       try {
         this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
         this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
 
-        ostmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.RECORD, this.RECNAME);
         rs = ostmt.executeQuery();
 
         while(rs.next()) {

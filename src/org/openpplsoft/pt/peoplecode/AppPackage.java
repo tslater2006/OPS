@@ -8,7 +8,7 @@
 package org.openpplsoft.pt.peoplecode;
 
 import java.sql.*;
-import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.sql.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.pt.*;
 import org.apache.logging.log4j.*;
@@ -62,12 +62,12 @@ public class AppPackage {
     if(this.hasDiscoveredAppClassPC) { return; }
     this.hasDiscoveredAppClassPC = true;
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
+        new String[]{PSDefn.APP_PACKAGE, this.rootPkgName});
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.APP_PACKAGE, this.rootPkgName);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
       /*
        * NOTE: BE VERY CAREFUL HERE; not only is the result set not ordered by PROGSEQ, but
        * there may be multiple entries per program if it is greater than 28,000 bytes.
@@ -91,7 +91,7 @@ public class AppPackage {
     } finally {
       try {
         if(rs != null) { rs.close(); }
-        if(pstmt != null) { pstmt.close(); }
+        if(ostmt != null) { ostmt.close(); }
       } catch(java.sql.SQLException sqle) {}
     }
   }

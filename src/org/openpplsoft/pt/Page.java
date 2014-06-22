@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.sql.*;
 
 /**
  * Represents a PeopleTools page definition.
@@ -68,23 +68,24 @@ public class Page {
     if (this.hasInitialized) { return; }
     this.hasInitialized = true;
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLDEFN",
+        new String[]{this.ptPNLNAME});
     ResultSet rs = null;
 
     try {
-      pstmt = StmtLibrary.getPSPNLDEFN(this.ptPNLNAME);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
       // Do nothing with record for now.
       rs.next();
       rs.close();
-      pstmt.close();
+      ostmt.close();
 
       this.subpages = new ArrayList<PgToken>();
       this.secpages = new ArrayList<PgToken>();
       this.tokens = new ArrayList<PgToken>();
 
-      pstmt = StmtLibrary.getPSPNLFIELD(this.ptPNLNAME);
-      rs = pstmt.executeQuery();
+      ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLFIELD",
+          new String[]{this.ptPNLNAME});
+      rs = ostmt.executeQuery();
 
       /*
        * TODO(mquinn): Throw exception if no records were read
@@ -156,9 +157,9 @@ public class Page {
       } finally {
         try {
           if (rs != null) { rs.close(); }
-          if (pstmt != null) { pstmt.close(); }
+          if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or pstmt in finally block.");
+        log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
   }
@@ -251,14 +252,12 @@ public class Page {
     if (this.hasDiscoveredPagePC) { return; }
     this.hasDiscoveredPagePC = true;
 
-    PreparedStatement pstmt = null;
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
+        new String[]{PSDefn.PAGE, this.ptPNLNAME});
     ResultSet rs = null;
 
     try {
-      // Check to see if this page has any Page PeopleCode associated with it.
-      pstmt = StmtLibrary.getPSPCMPROG_RecordPCList(PSDefn.PAGE,
-          this.ptPNLNAME);
-      rs = pstmt.executeQuery();
+      rs = ostmt.executeQuery();
       while (rs.next()) {
         final PeopleCodeProg prog = new PagePeopleCodeProg(this.ptPNLNAME);
         this.pageActivateProg = DefnCache.getProgram(prog);
@@ -269,9 +268,9 @@ public class Page {
     } finally {
       try {
         if (rs != null) { rs.close(); }
-        if (pstmt != null) { pstmt.close(); }
+        if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or pstmt in finally block.");
+        log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
   }

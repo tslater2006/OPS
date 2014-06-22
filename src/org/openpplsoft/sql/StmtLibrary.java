@@ -103,12 +103,11 @@ public class StmtLibrary {
         }
       }
 
-      // Save last statement defn.
+      // Don't forget to save last statement defn.
       defn.sql = b.toString().replaceAll("\\n", "");
       log.debug("Saving defn; sql is: {}", defn.sql);
       staticSqlDefns.put(defn.uniqueLabel, defn);
 
-      br.close();
     } catch (final java.io.IOException ioe) {
       log.fatal(ioe.getMessage(), ioe);
       System.exit(ExitCode.FAILED_READ_FROM_STATIC_SQL_DEFN_FILE.getCode());
@@ -133,72 +132,6 @@ public class StmtLibrary {
       final String[] bindVals) {
     return new OPSStmt(staticSqlDefns.get(uniqueLabel).sql,
         bindVals, staticSqlDefns.get(uniqueLabel).emissionType);
-  }
-
-  public static PreparedStatement getPSPCMPROG_CompPCList(String b1, String b2, String b3, String b4) {
-    OPSStmt stmt = new OPSStmt("SELECT OBJECTID1,OBJECTVALUE1, OBJECTID2,OBJECTVALUE2, OBJECTID3,OBJECTVALUE3, OBJECTID4,OBJECTVALUE4, OBJECTID5,OBJECTVALUE5, OBJECTID6,OBJECTVALUE6, OBJECTID7,OBJECTVALUE7  FROM PSPCMPROG WHERE OBJECTID1 = ? AND OBJECTVALUE1 = ? AND  OBJECTID2 = ? AND OBJECTVALUE2 = ? ORDER BY OBJECTID1,OBJECTVALUE1, OBJECTID2,OBJECTVALUE2, OBJECTID3,OBJECTVALUE3, OBJECTID4,OBJECTVALUE4, OBJECTID5,OBJECTVALUE5, OBJECTID6,OBJECTVALUE6, OBJECTID7,OBJECTVALUE7");
-    stmt.bindVals.put(1, b1);
-    stmt.bindVals.put(2, b2);
-    stmt.bindVals.put(3, b3);
-    stmt.bindVals.put(4, b4);
-    return stmt.generateUnenforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSPCMPROG_RecordPCList(String b1, String b2) {
-    OPSStmt stmt = new OPSStmt("SELECT OBJECTID1,OBJECTVALUE1, OBJECTID2,OBJECTVALUE2, OBJECTID3,OBJECTVALUE3, OBJECTID4,OBJECTVALUE4, OBJECTID5,OBJECTVALUE5, OBJECTID6,OBJECTVALUE6, OBJECTID7,OBJECTVALUE7  FROM PSPCMPROG WHERE OBJECTID1 = ? AND OBJECTVALUE1 = ? ORDER BY OBJECTID1,OBJECTVALUE1, OBJECTID2,OBJECTVALUE2, OBJECTID3,OBJECTVALUE3, OBJECTID4,OBJECTVALUE4, OBJECTID5,OBJECTVALUE5, OBJECTID6,OBJECTVALUE6, OBJECTID7,OBJECTVALUE7");
-    stmt.bindVals.put(1, b1);
-    stmt.bindVals.put(2, b2);
-    return stmt.generateUnenforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSPCMPROG_GetPROGTXT(String b1, String b2, String b3, String b4, String b5, String b6, String b7, String b8, String b9, String b10, String b11, String b12, String b13, String b14) {
-    OPSStmt stmt = new OPSStmt("SELECT VERSION, PROGRUNLOC, NAMECOUNT, PROGLEN, PROGTXT, LICENSE_CODE, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID, PROGFLAGS, PROGEXTENDS, PROGSEQ FROM PSPCMPROG WHERE  OBJECTID1 = ? AND OBJECTVALUE1 = ? AND  OBJECTID2 = ? AND OBJECTVALUE2 = ? AND  OBJECTID3 = ? AND OBJECTVALUE3 = ? AND  OBJECTID4 = ? AND OBJECTVALUE4 = ? AND  OBJECTID5 = ? AND OBJECTVALUE5 = ? AND  OBJECTID6 = ? AND OBJECTVALUE6 = ? AND  OBJECTID7 = ? AND OBJECTVALUE7 = ? ORDER BY PROGSEQ");
-    stmt.bindVals.put(1, b1);
-    stmt.bindVals.put(2, b2);
-    stmt.bindVals.put(3, b3);
-    stmt.bindVals.put(4, b4);
-    stmt.bindVals.put(5, b5);
-    stmt.bindVals.put(6, b6);
-    stmt.bindVals.put(7, b7);
-    stmt.bindVals.put(8, b8);
-    stmt.bindVals.put(9, b9);
-    stmt.bindVals.put(10, b10);
-    stmt.bindVals.put(11, b11);
-    stmt.bindVals.put(12, b12);
-    stmt.bindVals.put(13, b13);
-    stmt.bindVals.put(14, b14);
-    return stmt.generateUnenforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSPCMPROG_GetRefs(String b1, String b2, String b3, String b4, String b5, String b6, String b7, String b8, String b9, String b10, String b11, String b12, String b13, String b14) {
-    OPSStmt stmt = new OPSStmt("SELECT RECNAME, REFNAME, PACKAGEROOT, QUALIFYPATH, NAMENUM FROM PSPCMNAME WHERE  OBJECTID1 = ? AND OBJECTVALUE1 = ? AND  OBJECTID2 = ? AND OBJECTVALUE2 = ? AND  OBJECTID3 = ? AND OBJECTVALUE3 = ? AND  OBJECTID4 = ? AND OBJECTVALUE4 = ? AND  OBJECTID5 = ? AND OBJECTVALUE5 = ? AND  OBJECTID6 = ? AND OBJECTVALUE6 = ? AND  OBJECTID7 = ? AND OBJECTVALUE7 = ? ORDER BY NAMENUM");
-    stmt.bindVals.put(1, b1);
-    stmt.bindVals.put(2, b2);
-    stmt.bindVals.put(3, b3);
-    stmt.bindVals.put(4, b4);
-    stmt.bindVals.put(5, b5);
-    stmt.bindVals.put(6, b6);
-    stmt.bindVals.put(7, b7);
-    stmt.bindVals.put(8, b8);
-    stmt.bindVals.put(9, b9);
-    stmt.bindVals.put(10, b10);
-    stmt.bindVals.put(11, b11);
-    stmt.bindVals.put(12, b12);
-    stmt.bindVals.put(13, b13);
-    stmt.bindVals.put(14, b14);
-    return stmt.generateUnenforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSPNLDEFN(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT VERSION, PNLTYPE, GRIDHORZ, GRIDVERT, FIELDCOUNT, MAXPNLFLDID, HELPCONTEXTNUM, PANELLEFT, PANELTOP, PANELRIGHT, PANELBOTTOM, PNLSTYLE, STYLESHEETNAME, PNLUSE, DEFERPROC, DESCR, POPUPMENU, LICENSE_CODE, TO_CHAR(CAST((LASTUPDDTTM) AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF'), LASTUPDOPRID, OBJECTOWNERID, DESCRLONG FROM PSPNLDEFN WHERE PNLNAME = ?");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateEnforcedPreparedStmt(conn);
-  }
-
-  public static PreparedStatement getPSPNLFIELD(String b1) {
-    OPSStmt stmt = new OPSStmt("SELECT PNLFLDID, FIELDTYPE, EDITSIZE, FIELDLEFT, FIELDTOP, FIELDRIGHT, FIELDBOTTOM, EDITLBLLEFT, EDITLBLTOP, EDITLBLRIGHT, EDITLBLBOTTOM, DSPLFORMAT, DSPLFILL, LBLTYPE, LBLLOC, LBLPADSIZE, LABEL_ID, LBLTEXT, FIELDUSE, FIELDUSETMP, DEFERPROC, OCCURSLEVEL, OCCURSCOUNT1, OCCURSCOUNT2, OCCURSCOUNT3, OCCURSOFFSET1, OCCURSOFFSET2, OCCURSOFFSET3, PNLFIELDNAME, RECNAME, FIELDNAME, SUBPNLNAME, ONVALUE, OFFVALUE, ASSOCFIELDNUM, FIELDSTYLE, LABELSTYLE, FIELDSIZETYPE, LABELSIZETYPE, PRCSNAME, PRCSTYPE, FORMATFAMILY, DISPFMTNAME, PROMPTFIELD, POPUPMENU, TREECTRLID, TREECTRLTYPE, MULTIRECTREE, NODECOUNT, GRDCOLUMNCOUNT, GRDSHOWCOLHDG, GRDSHOWROWHDG, GRDODDROWSTYLE, GRDEVENROWSTYLE, GRDACTIVETABSTYLE, GRDINACTIVETABSTYL, GRDNAVBARSTYLE, GRDLABELSTYLE, GRDLBLMSGSET, GRDLBLMSGNUM, GRDLBLALIGN, GRDACTTYPE, TABENABLE, PBDISPLAYTYPE, OPENNEWWINDOW, URLDYNAMIC,  URL_ID, GOTOPORTALNAME, GOTONODENAME, GOTOMENUNAME, GOTOPNLGRPNAME,  GOTOMKTNAME, GOTOPNLNAME, GOTOPNLACTION, SRCHBYPNLDATA, SCROLLACTION, TOOLACTION, CONTNAME, CONTNAMEOVER, CONTNAMEDISABLE, PTLBLIMGCOLLAPSE, PTLBLIMGEXPAND, SELINDICATORTYPE, PTADJHIDDENFIELDS, PTCOLLAPSEDATAAREA, PTDFLTVIEWEXPANDED, PTHIDEFIELDS, SHOWCOLHIDEROWS, PTLEBEXPANDFIELD, SHOWTABCNTLBTN, SECUREINVISIBLE, ENABLEASANCHOR, URLENCODEDBYAPP, USEDEFAULTLABEL, GRDALLOWCOLSORT FROM PSPNLFIELD WHERE PNLNAME = ? ORDER BY FIELDNUM");
-    stmt.bindVals.put(1, b1);
-    return stmt.generateEnforcedPreparedStmt(conn);
   }
 
   public static PreparedStatement getSearchRecordFillQuery() {

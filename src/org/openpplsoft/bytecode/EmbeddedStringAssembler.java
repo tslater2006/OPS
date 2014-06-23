@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -30,23 +30,45 @@ package org.openpplsoft.bytecode;
 
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Assembles embedded strings (string literals).
+ */
 public class EmbeddedStringAssembler extends PureStringAssembler {
 
-  String pre, post;
+  private String preStr, postStr;
 
-  public EmbeddedStringAssembler(byte _b, String _pre, String _post, int _format) {
-    super(_b);
-    this.pre = _pre;
-    this.post = _post;
-    this.formatBitmask = _format;
+  /**
+   * Creates a new embedded string assembler.
+   * @param b the starting byte of the bytecode instruction to
+   *   be assembled
+   * @param pre the character leading the embedded string (i.e., ")
+   * @param post the character closing the embedded string (i.e., ")
+   */
+  public EmbeddedStringAssembler(final byte b, final String pre,
+      final String post) {
+    this(b, pre, post, AFlag.SPACE_BEFORE_AND_AFTER);
   }
 
-  public EmbeddedStringAssembler(byte _b, String _pre, String _post) {
-    this(_b, _pre, _post, AFlag.SPACE_BEFORE_AND_AFTER);
+  /**
+   * Creates a new embedded string assembler.
+   * @param b the starting byte of the bytecode instruction to
+   *   be assembled
+   * @param pre the character leading the embedded string (i.e., ")
+   * @param post the character closing the embedded string (i.e., ")
+   * @param format the format bit mask to be used when assembling the
+   *   instruction into its equivalent textual form
+   */
+  public EmbeddedStringAssembler(final byte b, final String pre,
+      final String post, final int format) {
+    super(b);
+    this.preStr = pre;
+    this.postStr = post;
+    this.formatBitmask = format;
   }
 
-  public void assemble(PeopleCodeByteStream stream) {
-    stream.appendAssembledText(this.pre
-        + getString(stream).replace("\"", "\"\"") + this.post);
+  @Override
+  public void assemble(final PeopleCodeByteStream stream) {
+    stream.appendAssembledText(this.preStr
+        + getString(stream).replace("\"", "\"\"") + this.postStr);
   }
 }

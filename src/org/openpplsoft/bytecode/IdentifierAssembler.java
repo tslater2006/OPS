@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -30,16 +30,29 @@ package org.openpplsoft.bytecode;
 
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Assembles identifiers into their equivalent textual form.
+ */
 public class IdentifierAssembler extends StringAssembler {
 
-  public IdentifierAssembler(byte _b) {
-    this.startByte = _b;
+  /**
+   * Constructs a new identifier assembler.
+   * @param b the starting byte of the bytecode instruction
+   *   to assemble
+   */
+  public IdentifierAssembler(final byte b) {
+    this.startByte = b;
     this.formatBitmask = AFlag.SPACE_BEFORE | AFlag.SPACE_AFTER;
   }
 
-  public void assemble(PeopleCodeByteStream stream) {
-    stream.decrementCursor(); // current byte is 0x00, need to back up.
+  @Override
+  public void assemble(final PeopleCodeByteStream stream) {
+
+    // since current byte is 0x00, we need to move the cursor
+    // back first.
     stream.decrementCursor();
+    stream.decrementCursor();
+
     stream.appendAssembledText(getString(stream));
   }
 }

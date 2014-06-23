@@ -59,12 +59,7 @@ public class CommentAssembler extends ElementAssembler {
     this.formatBitmask = f;
   }
 
-  /**
-   * Assembles the imminent comment instruction in the byte stream
-   * into its textual equivalent.
-   * @param stream a bytecode stream that has a cursor positioned
-   *    on an instruction beginning with byte {@code getStartByte()}.
-   */
+  @Override
   public void assemble(final PeopleCodeByteStream stream) {
 
     final int WIDE_AND = 0xff,

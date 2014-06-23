@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -31,23 +31,39 @@ package org.openpplsoft.bytecode;
 import org.openpplsoft.pt.Reference;
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Assembles reference instructions into their
+ * equivalent textual form.
+ */
 public class ReferenceAssembler extends ElementAssembler {
 
-  public ReferenceAssembler(byte _b) {
-    this.startByte = _b;
+  /**
+   * Constructs a new reference assembler.
+   * @param b the starting byte of the reference bytecode
+   *   instruction to assemble
+   */
+  public ReferenceAssembler(final byte b) {
+    this.startByte = b;
     this.formatBitmask = AFlag.SPACE_BEFORE_AND_AFTER;
   }
 
-  public void assemble(PeopleCodeByteStream stream) {
+  @Override
+  public void assemble(final PeopleCodeByteStream stream) {
 
-    int b1 = (int) (stream.readNextByte() & 0xff);
-    int b2 = (int) (stream.readNextByte() & 0xff);
+    final int WIDE_AND = 0xff,
+              MULTIPLIER_SHIFT = 256,
+              CHAINED_REFERENCE_BYTE = 74,
+              QUOTED_REFERENCE_BYTE = 72;
 
-    int refIdx = b2 * 256 + b1 + 1;
-    Reference refObj = stream.getMappedReference(refIdx);
-    if(refObj == null) {
-      throw new OPSAssembleException("No reference is mapped to index " + refIdx + " on the "
-        + "program underlying this stream.");
+    final int b1 = (int) (stream.readNextByte() & WIDE_AND);
+    final int b2 = (int) (stream.readNextByte() & WIDE_AND);
+
+    final int refIdx = b2 * MULTIPLIER_SHIFT + b1 + 1;
+    final Reference refObj = stream.getMappedReference(refIdx);
+
+    if (refObj == null) {
+      throw new OPSAssembleException("No reference is mapped to index "
+        + refIdx + " on the program underlying this stream.");
     }
 
     String ref = refObj.getValue();
@@ -57,8 +73,9 @@ public class ReferenceAssembler extends ElementAssembler {
      * chained to an expression before it using the dot (".") operator,
      * we need to strip the defn type (Field,Record,Scroll) from the reference.
      */
-    if(this.startByte == 74 && (ref.startsWith("Field.") ||
-        ref.startsWith("Record.") || ref.startsWith("Scroll."))) {
+    if (this.startByte == CHAINED_REFERENCE_BYTE
+        && (ref.startsWith("Field.")
+        || ref.startsWith("Record.") || ref.startsWith("Scroll."))) {
       ref = ref.substring(ref.indexOf('.') + 1);
     }
 
@@ -69,18 +86,18 @@ public class ReferenceAssembler extends ElementAssembler {
      * compatibility reasons. I'm going to strip the quotes b/c the
      * interpreter expects definition literals without quotes.
      */
-    int p1 = ref.indexOf('.');
-    if(this.startByte == (byte) 72 && p1 > 0) {
-      String rec = ref.substring(0, p1);
+    final int p1 = ref.indexOf('.');
+    if (this.startByte == (byte) QUOTED_REFERENCE_BYTE && p1 > 0) {
+      final String rec = ref.substring(0, p1);
       //ORIGINAL LINE: ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
-      ref = rec.concat("."+ref.substring(p1+1));
+      ref = rec.concat("." + ref.substring(p1 + 1));
     }
 
     /*
      * Before emitting the reference text, emit the reference index.
      * This is required during component loading.
      */
-    stream.appendAssembledText("#ENTREF{"+refIdx+"}");
+    stream.appendAssembledText("#ENTREF{" + refIdx + "}");
     stream.appendAssembledText(ref);
   }
 }

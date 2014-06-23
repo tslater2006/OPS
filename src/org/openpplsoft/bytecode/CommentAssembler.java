@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -30,43 +30,79 @@ package org.openpplsoft.bytecode;
 
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Assembles PeopleCode comments from bytecode into their textual
+ * equivalent.
+ */
 public class CommentAssembler extends ElementAssembler {
 
   private byte b;
 
-  public CommentAssembler(byte _b) {
-    this(_b, AFlag.NEWLINE_BEFORE_AND_AFTER);
+  /**
+   * Creates a new instance of CommentAssembler.
+   * @param byteMarker the byte marker that this assembler
+   *   will be tasked with assembling.
+   */
+  public CommentAssembler(final byte byteMarker) {
+    this(byteMarker, AFlag.NEWLINE_BEFORE_AND_AFTER);
   }
 
-  public CommentAssembler(byte _b, int _f) {
-    this.b = _b;
-    this.format = _f;
+  /**
+   * Creates a new instance of CommentAssembler.
+   * @param byteMarker the byte marker that this assembler
+   *    will be tasked with assembling.
+   * @param formatBitmask the format bitmask to use
+   *    during assembly of instructions from the byte
+   *    stream
+   */
+  public CommentAssembler(final byte byteMarker,
+      final int formatBitmask) {
+    this.b = byteMarker;
+    this.format = formatBitmask;
   }
 
+  /**
+   * Returns the byte marker that this assembler is
+   * tasked with assembling.
+   * @return the byte marker that this assembler is
+   * tasked with assembling
+   */
   public byte getStartByte() {
-    return b;
+    return this.b;
   }
 
-  public void assemble(PeopleCodeByteStream stream) {
+  /**
+   * Assembles the imminent comment instruction in the byte stream
+   * into its textual equivalent.
+   * @param stream a bytecode stream that has a cursor positioned
+   *    on an instruction beginning with byte {@code getStartByte()}.
+   */
+  public void assemble(final PeopleCodeByteStream stream) {
+
+    final int WIDE_AND = 0xff,
+              NEWLINE_MARKER = 10,
+              COMM_LEN_BYTE2_MULTIPLIER = 256;
 
     // Length byte is wide ANDed and cast to integer.
-    int commLen = (int) stream.readNextByte() & 0xff;
-    commLen = commLen + ((int) stream.readNextByte() & 0xff) * 256;
+    int commLen = ((int) stream.readNextByte()) & WIDE_AND;
+    commLen = commLen + ((int) stream.readNextByte() & WIDE_AND)
+        * COMM_LEN_BYTE2_MULTIPLIER;
 
-    byte b;
-    for(int i=0; i < commLen
+    byte accumByte;
+    for (int i = 0; i < commLen
         && (stream.getCursorPos() < stream.getProgLenInBytes()); i++) {
-      b = stream.readNextByte();
-      if(b != 0) {
-        if(b == (byte) 10) {
+      accumByte = stream.readNextByte();
+      if (accumByte != 0) {
+        if (accumByte == (byte) NEWLINE_MARKER) {
           stream.appendAssembledText('\n');
         } else {
-          stream.appendAssembledText((char) b);
+          stream.appendAssembledText((char) accumByte);
         }
       }
     }
   }
 
+  @Override
   public boolean writesNonBlank() {
     return true;
   }

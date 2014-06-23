@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -28,7 +28,13 @@
 
 package org.openpplsoft.bytecode;
 
-public class AFlag {
+/**
+ * Defines formatting rules that are attachd to various
+ * bytecode instructions and used by the assembler when
+ * determining how to append to the accumulated text
+ * form of a program.
+ */
+public final class AFlag {
 
   public static final int PUNCTUATION = 0x0;
   public static final int SPACE_BEFORE = 0x1;
@@ -50,18 +56,32 @@ public class AFlag {
   public static final int COMMENT_ON_SAME_LINE = 0x20000;
   public static final int R_BRACKET = 0x80000;
   public static final int L_BRACKET = 0x40000;
-  public static final int SPACE_BEFORE_AND_AFTER = SPACE_BEFORE | SPACE_AFTER;
-  public static final int SPACE_BEFORE_AND_AFTER2 = SPACE_BEFORE2 | SPACE_BEFORE | SPACE_AFTER;
-  public static final int AND_STYLE = NEWLINE_AFTER | SPACE_BEFORE2 | SPACE_BEFORE | AND_INDICATOR;
-  public static final int FOR_STYLE = NEWLINE_BEFORE | SPACE_AFTER | INCREASE_INDENT;
-  public static final int IF_STYLE = NEWLINE_BEFORE | SPACE_BEFORE | SPACE_AFTER;
-  public static final int NEWLINE_BEFORE_AND_AFTER = NEWLINE_BEFORE | NEWLINE_AFTER;
-  public static final int NEWLINE_BEFORE_SPACE_AFTER = NEWLINE_BEFORE | SPACE_AFTER;
-  public static final int SPACE_BEFORE_NEWLINE_AFTER = SPACE_BEFORE | NEWLINE_AFTER;
-  public static final int THEN_STYLE = SPACE_BEFORE | SPACE_BEFORE2 | NEWLINE_AFTER |
-      SPACE_AFTER | INCREASE_INDENT;
-  public static final int ELSE_STYLE = NEWLINE_BEFORE | DECREASE_INDENT | NEWLINE_AFTER | INCREASE_INDENT;
-  public static final int ENDIF_STYLE = NEWLINE_BEFORE | SPACE_BEFORE | DECREASE_INDENT | NEWLINE_AFTER;
-  public static final int FUNCTION_STYLE = NEWLINE_BEFORE | SPACE_AFTER | INCREASE_INDENT | RESET_INDENT_BEFORE;
-  public static final int END_FUNCTION_STYLE = NEWLINE_BEFORE | RESET_INDENT_BEFORE;
+  public static final int SPACE_BEFORE_AND_AFTER =
+      SPACE_BEFORE | SPACE_AFTER;
+  public static final int SPACE_BEFORE_AND_AFTER2 = SPACE_BEFORE2
+      | SPACE_BEFORE | SPACE_AFTER;
+  public static final int AND_STYLE = NEWLINE_AFTER | SPACE_BEFORE2
+      | SPACE_BEFORE | AND_INDICATOR;
+  public static final int FOR_STYLE = NEWLINE_BEFORE
+      | SPACE_AFTER | INCREASE_INDENT;
+  public static final int IF_STYLE = NEWLINE_BEFORE
+      | SPACE_BEFORE | SPACE_AFTER;
+  public static final int NEWLINE_BEFORE_AND_AFTER =
+      NEWLINE_BEFORE | NEWLINE_AFTER;
+  public static final int NEWLINE_BEFORE_SPACE_AFTER =
+      NEWLINE_BEFORE | SPACE_AFTER;
+  public static final int SPACE_BEFORE_NEWLINE_AFTER =
+      SPACE_BEFORE | NEWLINE_AFTER;
+  public static final int THEN_STYLE = SPACE_BEFORE
+      | SPACE_BEFORE2 | NEWLINE_AFTER | SPACE_AFTER | INCREASE_INDENT;
+  public static final int ELSE_STYLE = NEWLINE_BEFORE | DECREASE_INDENT
+      | NEWLINE_AFTER | INCREASE_INDENT;
+  public static final int ENDIF_STYLE = NEWLINE_BEFORE | SPACE_BEFORE
+      | DECREASE_INDENT | NEWLINE_AFTER;
+  public static final int FUNCTION_STYLE = NEWLINE_BEFORE | SPACE_AFTER
+      | INCREASE_INDENT | RESET_INDENT_BEFORE;
+  public static final int END_FUNCTION_STYLE =
+      NEWLINE_BEFORE | RESET_INDENT_BEFORE;
+
+  private AFlag() {}
 }

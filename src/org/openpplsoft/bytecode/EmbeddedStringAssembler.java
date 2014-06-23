@@ -38,7 +38,7 @@ public class EmbeddedStringAssembler extends PureStringAssembler {
     super(_b);
     this.pre = _pre;
     this.post = _post;
-    this.format = _format;
+    this.formatBitmask = _format;
   }
 
   public EmbeddedStringAssembler(byte _b, String _pre, String _post) {

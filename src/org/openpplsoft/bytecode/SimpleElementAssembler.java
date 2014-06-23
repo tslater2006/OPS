@@ -32,27 +32,24 @@ import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
 public class SimpleElementAssembler extends ElementAssembler {
 
-  private byte b;
   private String t;
 
   public SimpleElementAssembler(byte _b, String _t, int _format) {
-    b = _b;
+    this.startByte = _b;
     t = _t;
-    format = _format;
+    this.formatBitmask = _format;
   }
 
   public SimpleElementAssembler(byte _b, String _t) {
     this(_b, _t, AFlag.SPACE_BEFORE_AND_AFTER);
   }
 
-  public byte getStartByte() {
-    return b;
-  }
-
+  @Override
   public void assemble(PeopleCodeByteStream stream) {
     stream.appendAssembledText(t);
   }
 
+  @Override
   public boolean writesNonBlank() {
     return t.trim().length() > 0;
   }

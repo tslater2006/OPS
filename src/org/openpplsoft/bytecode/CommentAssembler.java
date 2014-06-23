@@ -36,8 +36,6 @@ import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
  */
 public class CommentAssembler extends ElementAssembler {
 
-  private byte b;
-
   /**
    * Creates a new instance of CommentAssembler.
    * @param byteMarker the byte marker that this assembler
@@ -49,26 +47,16 @@ public class CommentAssembler extends ElementAssembler {
 
   /**
    * Creates a new instance of CommentAssembler.
-   * @param byteMarker the byte marker that this assembler
+   * @param b the byte marker that this assembler
    *    will be tasked with assembling.
-   * @param formatBitmask the format bitmask to use
+   * @param f the format bitmask to use
    *    during assembly of instructions from the byte
    *    stream
    */
-  public CommentAssembler(final byte byteMarker,
-      final int formatBitmask) {
-    this.b = byteMarker;
-    this.format = formatBitmask;
-  }
-
-  /**
-   * Returns the byte marker that this assembler is
-   * tasked with assembling.
-   * @return the byte marker that this assembler is
-   * tasked with assembling
-   */
-  public byte getStartByte() {
-    return this.b;
+  public CommentAssembler(final byte b,
+      final int f) {
+    this.startByte = b;
+    this.formatBitmask = f;
   }
 
   /**

@@ -33,15 +33,9 @@ import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
 public class ReferenceAssembler extends ElementAssembler {
 
-  byte b;
-
   public ReferenceAssembler(byte _b) {
-    this.b = _b;
-    this.format = AFlag.SPACE_BEFORE_AND_AFTER;
-  }
-
-  public byte getStartByte() {
-    return b;
+    this.startByte = _b;
+    this.formatBitmask = AFlag.SPACE_BEFORE_AND_AFTER;
   }
 
   public void assemble(PeopleCodeByteStream stream) {
@@ -63,7 +57,7 @@ public class ReferenceAssembler extends ElementAssembler {
      * chained to an expression before it using the dot (".") operator,
      * we need to strip the defn type (Field,Record,Scroll) from the reference.
      */
-    if(b == 74 && (ref.startsWith("Field.") ||
+    if(this.startByte == 74 && (ref.startsWith("Field.") ||
         ref.startsWith("Record.") || ref.startsWith("Scroll."))) {
       ref = ref.substring(ref.indexOf('.') + 1);
     }
@@ -76,7 +70,7 @@ public class ReferenceAssembler extends ElementAssembler {
      * interpreter expects definition literals without quotes.
      */
     int p1 = ref.indexOf('.');
-    if(b == (byte) 72 && p1 > 0) {
+    if(this.startByte == (byte) 72 && p1 > 0) {
       String rec = ref.substring(0, p1);
       //ORIGINAL LINE: ref = rec + ".\"" + ref.substring(p1 + 1) + "\"";
       ref = rec.concat("."+ref.substring(p1+1));

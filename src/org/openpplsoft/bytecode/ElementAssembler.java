@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -28,23 +28,41 @@
 
 package org.openpplsoft.bytecode;
 
-import java.lang.StringBuilder;
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Parent class for core elemental parts of a PeopleCode
+ * program's byte stream (i.e., comments, numbers, strings, etc).
+ */
 public abstract class ElementAssembler {
 
-  public int format;
+  protected byte startByte;
+  protected int formatBitmask;
+
+  /**
+   * All subclasses must implement this method
+   * with logic to assemble their corresponding bytecode
+   * instruction into its textual equivalent.
+   * @param stream the PeopleCode bytecode stream to assemble from
+   */
   public abstract void assemble(PeopleCodeByteStream stream);
-  public abstract byte getStartByte();
 
-  public int getFormat() {
-    return format;
+  /**
+   * Returns the start byte for the bytecode instructions this
+   * assembler is tasked with assembling.
+   * @return the start byte
+   */
+  public byte getStartByte() {
+    return this.startByte;
   }
 
-  public void setFormat(int format) {
-    this.format = format;
-  }
-
+  /**
+   * Returns whether or not this assembler writes non-blank
+   * characters (default is true for all assemblers, must
+   * be overriden by subclasses to specify otherwise).
+   * @return whether or not this assembler writes non-blank
+   * characters.
+   */
   public boolean writesNonBlank() {
     return true;
   }

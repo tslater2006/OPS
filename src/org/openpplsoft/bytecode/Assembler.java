@@ -232,7 +232,7 @@ public class Assembler {
       return b;
     }
 
-    //log.debug(String.format("Assembling byte: 0x%02X", b));
+    //log.debug(String.formatBitmask("Assembling byte: 0x%02X", b));
 
     final ElementAssembler a = assemblerTable.get(new Byte(b));
     if (a == null) {
@@ -241,37 +241,41 @@ public class Assembler {
           b, this.stream.prog.getDescriptor()));
     } else {
       this.isInDeclare = (this.isInDeclare
-          && !((this.lastAssembler != null && (this.lastAssembler.format
+          && !((this.lastAssembler != null && (this.lastAssembler.formatBitmask
               & AFlag.NEWLINE_AFTER) > 0)
-                    || (this.lastAssembler.format == AFlag.SEMICOLON)));
+                    || (this.lastAssembler.formatBitmask == AFlag.SEMICOLON)));
 
       if (this.lastAssembler != null
         && !this.isInDeclare
-        && (((this.lastAssembler.format & AFlag.INCREASE_INDENT) > 0)
-          || ((this.lastAssembler.format & AFlag.INCREASE_INDENT_ONCE) > 0
+        && (((this.lastAssembler.formatBitmask
+            & AFlag.INCREASE_INDENT) > 0)
+          || ((this.lastAssembler.formatBitmask
+            & AFlag.INCREASE_INDENT_ONCE) > 0
             && this.nIndent == 0))) {
         this.nIndent++;
       }
 
-      if ((a.format & AFlag.RESET_INDENT_BEFORE) > 0 && !this.isInDeclare) {
+      if ((a.formatBitmask & AFlag.RESET_INDENT_BEFORE) > 0
+          && !this.isInDeclare) {
         this.nIndent = 0;
       }
 
-      if ((a.format & AFlag.DECREASE_INDENT) > 0
+      if ((a.formatBitmask & AFlag.DECREASE_INDENT) > 0
           && this.nIndent > 0 && !this.isInDeclare) {
         this.nIndent--;
       }
 
       if (!this.firstLine
-        && a.format != AFlag.PUNCTUATION
-        && (a.format & AFlag.SEMICOLON) == 0
+        && a.formatBitmask != AFlag.PUNCTUATION
+        && (a.formatBitmask & AFlag.SEMICOLON) == 0
         && !this.isInDeclare
         && (((this.lastAssembler != null
-                && ((this.lastAssembler.format & AFlag.NEWLINE_AFTER) > 0)
-                  || (this.lastAssembler.format == AFlag.SEMICOLON))
-              &&  (a.format & AFlag.COMMENT_ON_SAME_LINE) == 0)
-          || ((a.format & AFlag.NEWLINE_BEFORE) > 0))
-          || ((a.format & AFlag.NEWLINE_ONCE) > 0 && !this.didNewline
+                && ((this.lastAssembler.formatBitmask
+                        & AFlag.NEWLINE_AFTER) > 0)
+                  || (this.lastAssembler.formatBitmask == AFlag.SEMICOLON))
+              &&  (a.formatBitmask & AFlag.COMMENT_ON_SAME_LINE) == 0)
+          || ((a.formatBitmask & AFlag.NEWLINE_BEFORE) > 0))
+          || ((a.formatBitmask & AFlag.NEWLINE_ONCE) > 0 && !this.didNewline
                 && this.stream.readAhead() != (byte) 21)) {
 
         this.stream.appendAssembledText('\n');
@@ -280,18 +284,20 @@ public class Assembler {
       } else {
         if (!this.startOfLine
           && !this.wroteSpace
-          && (a.format != AFlag.PUNCTUATION)
-          && (a.format != AFlag.SEMICOLON)
+          && (a.formatBitmask != AFlag.PUNCTUATION)
+          && (a.formatBitmask != AFlag.SEMICOLON)
             && (((this.lastAssembler != null
-                      && (this.lastAssembler.format & AFlag.SPACE_AFTER) > 0))
-              ||  (a.format & AFlag.SPACE_BEFORE) > 0)
+                      && (this.lastAssembler.formatBitmask
+                            & AFlag.SPACE_AFTER) > 0))
+              ||  (a.formatBitmask & AFlag.SPACE_BEFORE) > 0)
           && (this.lastAssembler == null
-              || ((this.lastAssembler.format != AFlag.PUNCTUATION
-                    && (this.lastAssembler.format & AFlag.NO_SPACE_AFTER) == 0)
-                         || ((a.format & AFlag.SPACE_BEFORE2) > 0)))
-          && (a.format & AFlag.NO_SPACE_BEFORE) == 0
-          && !((a.format & AFlag.L_BRACKET) > 0
-            && (this.lastAssembler.format & AFlag.R_BRACKET) > 0)) {
+              || ((this.lastAssembler.formatBitmask != AFlag.PUNCTUATION
+                    && (this.lastAssembler.formatBitmask
+                            & AFlag.NO_SPACE_AFTER) == 0)
+                         || ((a.formatBitmask & AFlag.SPACE_BEFORE2) > 0)))
+          && (a.formatBitmask & AFlag.NO_SPACE_BEFORE) == 0
+          && !((a.formatBitmask & AFlag.L_BRACKET) > 0
+            && (this.lastAssembler.formatBitmask & AFlag.R_BRACKET) > 0)) {
 
           this.stream.appendAssembledText(' ');
           this.wroteSpace = true;
@@ -309,14 +315,16 @@ public class Assembler {
     final int initialByteCursorPos = this.stream.getCursorPos();
     a.assemble(this.stream);
     this.wroteSpace = this.wroteSpace && !a.writesNonBlank();
-    this.isInDeclare = this.isInDeclare || (a.format & AFlag.IN_DECLARE) > 0;
+    this.isInDeclare = this.isInDeclare
+        || (a.formatBitmask & AFlag.IN_DECLARE) > 0;
     this.startOfLine = this.startOfLine && !a.writesNonBlank();
     this.didNewline = this.didNewline && (
         this.stream.getCursorPos() == initialByteCursorPos);
-    this.andIndicator = (a.format & AFlag.AND_INDICATOR) > 0
-      || (this.andIndicator && (a.format & AFlag.COMMENT_ON_SAME_LINE) != 0);
+    this.andIndicator = (a.formatBitmask & AFlag.AND_INDICATOR) > 0
+        || (this.andIndicator && (a.formatBitmask
+              & AFlag.COMMENT_ON_SAME_LINE) != 0);
     this.lastAssembler = a;
-    if ((a.format & AFlag.RESET_INDENT_AFTER) > 0) {
+    if ((a.formatBitmask & AFlag.RESET_INDENT_AFTER) > 0) {
       this.nIndent = 0;
     }
 

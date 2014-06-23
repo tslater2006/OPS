@@ -32,17 +32,12 @@ import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
 public class NumberAssembler extends ElementAssembler {
 
-  byte b;
-  int nBytes;
+  private int nBytes;
 
   public NumberAssembler(byte _b, int _nBytes) {
-    b = _b;
+    this.startByte = _b;
     nBytes = _nBytes;
-    format = AFlag.SPACE_BEFORE | AFlag.NO_SPACE_AFTER;
-  }
-
-  public byte getStartByte() {
-    return b;
+    this.formatBitmask = AFlag.SPACE_BEFORE | AFlag.NO_SPACE_AFTER;
   }
 
   public void assemble(PeopleCodeByteStream stream) {

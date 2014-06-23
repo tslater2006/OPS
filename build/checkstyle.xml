@@ -5,6 +5,9 @@
 
 <module name="Checker">
 
+  <!-- Enable selective disabling of warnings via @SuppressWarnings annotation. -->
+  <module name="SuppressWarningsFilter" />
+
   <!-- Ensures that there are no tab characters in the file. -->
   <module name="FileTabCharacter">
     <property name="eachLine" value="true"/>
@@ -43,6 +46,9 @@
 
   <!-- All Java AST specific tests live under TreeWalker module. -->
   <module name="TreeWalker">
+
+    <!-- Enable selective disabling of warnings via @SuppressWarnings annotation. -->
+    <module name="SuppressWarningsHolder"/>
 
     <!-- Enforce ordering of imports; static imports at the top, then java(x);
          a line must separate each group. -->

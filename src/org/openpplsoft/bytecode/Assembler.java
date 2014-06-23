@@ -236,7 +236,7 @@ public class Assembler {
 
     final ElementAssembler a = assemblerTable.get(new Byte(b));
     if (a == null) {
-      throw new EntAssembleException(String.format(
+      throw new OPSAssembleException(String.format(
           "Encountered unknown byte: 0x%02X on %s",
           b, this.stream.prog.getDescriptor()));
     } else {

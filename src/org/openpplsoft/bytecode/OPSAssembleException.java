@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -30,9 +30,17 @@ package org.openpplsoft.bytecode;
 
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
-public class EntAssembleException extends OPSVMachRuntimeException {
+/**
+ * Exception specific to issues encountered during the
+ * assembly of bytecode.
+ */
+public class OPSAssembleException extends OPSVMachRuntimeException {
 
-  public EntAssembleException(String msg) {
+  /**
+   * Constructs a new OPSAssembleException with the given message.
+   * @param msg the exception message
+   */
+  public OPSAssembleException(final String msg) {
     super(msg);
   }
 }

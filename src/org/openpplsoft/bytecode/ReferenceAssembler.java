@@ -46,7 +46,7 @@ public class ReferenceAssembler extends ElementAssembler {
     int refIdx = b2 * 256 + b1 + 1;
     Reference refObj = stream.getMappedReference(refIdx);
     if(refObj == null) {
-      throw new EntAssembleException("No reference is mapped to index " + refIdx + " on the "
+      throw new OPSAssembleException("No reference is mapped to index " + refIdx + " on the "
         + "program underlying this stream.");
     }
 

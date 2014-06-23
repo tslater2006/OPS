@@ -6,8 +6,8 @@
 \*===---------------------------------------------------------------------===*/
 
 /**
-* This is the root-level package in the OPS
-* codebase; it should contain only main entry
-* classes.
-*/
+ * This is the root-level package in the OPS
+ * codebase; it should contain only main entry
+ * classes.
+ */
 package org.openpplsoft;

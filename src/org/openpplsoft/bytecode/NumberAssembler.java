@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -30,46 +30,66 @@ package org.openpplsoft.bytecode;
 
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Assembles numbers from bytecode into text form.
+ */
 public class NumberAssembler extends ElementAssembler {
 
   private int nBytes;
 
-  public NumberAssembler(byte _b, int _nBytes) {
-    this.startByte = _b;
-    nBytes = _nBytes;
+  /**
+   * Constructs a new number assembler.
+   * @param b the starting byte of the bytecode instruction
+   *   to assemble
+   * @param n the number of bytes used in the instruction to
+   *   represent the numeric value encoded within
+   */
+  public NumberAssembler(final byte b, final int n) {
+    this.startByte = b;
+    this.nBytes = n;
     this.formatBitmask = AFlag.SPACE_BEFORE | AFlag.NO_SPACE_AFTER;
   }
 
-  public void assemble(PeopleCodeByteStream stream) {
+  @Override
+  public void assemble(final PeopleCodeByteStream stream) {
 
-    int dValue = 0;  // decimal position from far right going left
-    String out_number = "";
-    int num_bytes = nBytes - 3;
+    final int BYTES_TO_IGNORE = 3,
+              SHIFT_MULTIPLIER = 256,
+              WIDE_AND = 0xff;
 
-    stream.incrementCursor(); // skip first byte
+    // decimal position from far right going left
+    int dValue = 0;
+
+    String outNumber = "";
+    final int numBytes = this.nBytes - BYTES_TO_IGNORE;
+
+    // skip the first byte
+    stream.incrementCursor();
+
     dValue = (int) stream.readNextByte();
     long val = 0, fact = 1;
 
-    for(int i = 0; i < num_bytes; i++) {
-      val += fact * (long) (stream.readNextByte() & 0xff);
-      fact = fact * (long) 256;
+    for (int i = 0; i < numBytes; i++) {
+      val += fact * (long) (stream.readNextByte() & WIDE_AND);
+      fact = fact * (long) SHIFT_MULTIPLIER;
     }
 
-    out_number = Long.toString(val);
+    outNumber = Long.toString(val);
 
-    if(dValue > 0 && !out_number.equals("0")) {
+    if (dValue > 0 && !outNumber.equals("0")) {
 
-      while(dValue > out_number.length()) {
-        out_number = "0" + out_number;
+      while (dValue > outNumber.length()) {
+        outNumber = "0" + outNumber;
       }
-      out_number = out_number.substring(0, out_number.length() - dValue) + "." +
-             out_number.substring(out_number.length() - dValue);
 
-      if(out_number.startsWith(".")) {
-        out_number = "0" + out_number;
+      outNumber = outNumber.substring(0, outNumber.length() - dValue) + "."
+          + outNumber.substring(outNumber.length() - dValue);
+
+      if (outNumber.startsWith(".")) {
+        outNumber = "0" + outNumber;
       }
     }
 
-    stream.appendAssembledText(out_number);
+    stream.appendAssembledText(outNumber);
   }
 }

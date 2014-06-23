@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -28,18 +28,31 @@
 
 package org.openpplsoft.bytecode;
 
-import java.lang.StringBuilder;
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Assembles string bytecode instructions into their
+ * textual equivalent.
+ */
 public abstract class StringAssembler extends ElementAssembler {
 
-  public String getString(PeopleCodeByteStream stream) {
+  /**
+   * Iterates through the given bytecode stream to accumulate
+   * the text of the string to be assembled.
+   * @param stream the bytecode stream to assemble from
+   * @return the textual equivalent of the string bytecode
+   */
+  public String getString(final PeopleCodeByteStream stream) {
     byte b;
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
+    final int NEWLINE_MARKER = 0xA;
 
-    while((b = stream.readNextByte()) != 0) {
-      stream.incrementCursor();       //skip 0
-      if(b == (byte) 10) {
+    while ((b = stream.readNextByte()) != 0) {
+
+      // skip byte 0x00
+      stream.incrementCursor();
+
+      if (b == (byte) NEWLINE_MARKER) {
         builder.append('\n');
       } else {
         builder.append((char) b);

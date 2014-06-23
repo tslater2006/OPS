@@ -65,11 +65,11 @@ public class SimpleElementAssembler extends ElementAssembler {
 
   @Override
   public void assemble(final PeopleCodeByteStream stream) {
-    stream.appendAssembledText(t);
+    stream.appendAssembledText(this.text);
   }
 
   @Override
   public boolean writesNonBlank() {
-    return t.trim().length() > 0;
+    return this.text.trim().length() > 0;
   }
 }

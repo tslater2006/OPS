@@ -3,8 +3,8 @@
 |*                                                                           *|
 |*              This file is distributed under the MIT License.              *|
 |*                         See LICENSE.md for details.                       *|
-|*===---------------------------------------------------------------------===*|
-|* This file contains modified code derived from the excellent "Decode       *|
+\*===---------------------------------------------------------------------===*/
+/* This file contains modified code derived from the excellent "Decode       *\
 |* PeopleCode" open source project, maintained by Erik H                     *|
 |* and available under the ISC license at                                    *|
 |* http://sourceforge.net/projects/decodepcode/. The associated              *|
@@ -30,22 +30,41 @@ package org.openpplsoft.bytecode;
 
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
+/**
+ * Assembles simple elements (i.e., "<", "And", etc.).
+ */
 public class SimpleElementAssembler extends ElementAssembler {
 
-  private String t;
+  private String text;
 
-  public SimpleElementAssembler(byte _b, String _t, int _format) {
-    this.startByte = _b;
-    t = _t;
-    this.formatBitmask = _format;
+  /**
+   * Creates a new simple element assembler without
+   * a format bitmask explicitly defined.
+   * @param b the starting byte of the bytecode instruction
+   *   to assemble
+   * @param t the text equivalent of the starting byte
+   */
+  public SimpleElementAssembler(final byte b, final String t) {
+    this(b, t, AFlag.SPACE_BEFORE_AND_AFTER);
   }
 
-  public SimpleElementAssembler(byte _b, String _t) {
-    this(_b, _t, AFlag.SPACE_BEFORE_AND_AFTER);
+  /**
+   * Creates a new simple element assembler with a format
+   * bitmask.
+   * @param b the starting byte of the bytecode instruction to
+   *   assemble
+   * @param t the text equivalent of the starting byte
+   * @param f the format bitmask to use during assembly
+   */
+  public SimpleElementAssembler(final byte b, final String t,
+      final int f) {
+    this.startByte = b;
+    this.text = t;
+    this.formatBitmask = f;
   }
 
   @Override
-  public void assemble(PeopleCodeByteStream stream) {
+  public void assemble(final PeopleCodeByteStream stream) {
     stream.appendAssembledText(t);
   }
 

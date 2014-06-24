@@ -133,7 +133,11 @@
     <module name="MethodNameCheck">
       <!-- Validates identifiers for method names. -->
       <metadata name="altname" value="MethodName"/>
-      <property name="format" value="^[a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$"/>
+      <!-- MQUINN NOTE: Allow methods starting with "PT_" to signify a PeopleTools
+           method/function implementation, which are picked up by Java reflection
+           calls (i.e., PT_Fill, PT_Sort, etc.) -->
+      <property name="format"
+          value="^(PT_[A-Z][a-zA-Z]+)|([a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*)$"/>
     </module>
 
     <!-- Validates identifiers for method parameters against the

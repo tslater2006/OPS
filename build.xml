@@ -53,6 +53,7 @@
         <include name="org/openpplsoft/sql/*.java"/>
         <include name="org/openpplsoft/trace/*.java"/>
         <include name="org/openpplsoft/bytecode/*.java"/>
+        <include name="org/openpplsoft/types/*.java"/>
         <exclude name="**/package-info.java"/>
       </fileset>
     </checkstyle>

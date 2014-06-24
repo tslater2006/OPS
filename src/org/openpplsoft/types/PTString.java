@@ -13,103 +13,130 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import org.openpplsoft.runtime.*;
 
+/**
+ * Implementation of the PeopleTools string data type.
+ */
 public final class PTString extends PTPrimitiveType<String> {
 
   private static Type staticTypeFlag = Type.STRING;
   private String s;
 
+  /**
+   * Constructs a new instance of the string data type;
+   * can only be called by internal methods.
+   */
   protected PTString() {
     super(staticTypeFlag);
   }
 
+  @Override
   public String read() {
     return this.s;
   }
 
-  public void write(String newValue) {
+  @Override
+  public void write(final String newValue) {
     this.checkIsWriteable();
     this.s = newValue;
   }
 
-  public void systemWrite(String newValue) {
+  @Override
+  public void systemWrite(final String newValue) {
     this.checkIsSystemWriteable();
     this.s = newValue;
   }
 
-  public PTString concat(PTString other) {
+  /**
+   * Concatenates a string to this instance.
+   * @param other the string to concatenate
+   * @return a string object containing the concatenate
+   *   value
+   */
+  public PTString concat(final PTString other) {
     return Environment.getFromLiteralPool(
       this.read().concat(other.read()));
   }
 
+  @Override
   public void setDefault() {
     this.s = " ";
   }
 
-  public void copyValueFrom(PTPrimitiveType src) {
-    if(!(src instanceof PTString)) {
+  @Override
+  public void copyValueFrom(final PTPrimitiveType src) {
+    if (!(src instanceof PTString)) {
       throw new EntDataTypeException("Expected src to be PTString.");
     }
-    this.write(((PTString)src).read());
+    this.write(((PTString) src).read());
   }
 
-  public PTPrimitiveType add(PTPrimitiveType op) {
+  @Override
+  public PTPrimitiveType add(final PTPrimitiveType op) {
     throw new OPSVMachRuntimeException("add() not supported.");
   }
 
-  public PTPrimitiveType subtract(PTPrimitiveType op) {
+  @Override
+  public PTPrimitiveType subtract(final PTPrimitiveType op) {
     throw new OPSVMachRuntimeException("subtract() not supported.");
   }
 
-  public PTBoolean isEqual(PTPrimitiveType op) {
-    if(!(op instanceof PTString)) {
+  @Override
+  public PTBoolean isEqual(final PTPrimitiveType op) {
+    if (!(op instanceof PTString)) {
       throw new EntDataTypeException("Expected op to be PTString.");
     }
-    if(this.s.equals(((PTString)op).read())) {
+    if (this.s.equals(((PTString) op).read())) {
       return Environment.TRUE;
     }
     return Environment.FALSE;
   }
 
-  public PTBoolean isGreaterThan(PTPrimitiveType op) {
-    if(!(op instanceof PTString)) {
+  @Override
+  public PTBoolean isGreaterThan(final PTPrimitiveType op) {
+    if (!(op instanceof PTString)) {
       throw new EntDataTypeException("Expected op to be PTString.");
     }
-    if(this.s.compareTo(((PTString)op).read()) > 0) {
+    if (this.s.compareTo(((PTString) op).read()) > 0) {
       return Environment.TRUE;
     }
     return Environment.FALSE;
   }
 
-  public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
+  @Override
+  public PTBoolean isGreaterThanOrEqual(final PTPrimitiveType op) {
     throw new EntDataTypeException("isGreaterThanOrEqual not "
         + "supported.");
   }
 
-  public PTBoolean isLessThan(PTPrimitiveType op) {
-    if(!(op instanceof PTString)) {
+  @Override
+  public PTBoolean isLessThan(final PTPrimitiveType op) {
+    if (!(op instanceof PTString)) {
       throw new EntDataTypeException("Expected op to be PTString.");
     }
-    if(this.s.compareTo(((PTString)op).read()) < 0) {
+    if (this.s.compareTo(((PTString) op).read()) < 0) {
       return Environment.TRUE;
     }
     return Environment.FALSE;
   }
 
-  public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
-    throw new EntDataTypeException("isLessThanOrEqual not supported "+
-        "for strings.");
+  @Override
+  public PTBoolean isLessThanOrEqual(final PTPrimitiveType op) {
+    throw new EntDataTypeException("isLessThanOrEqual not supported "
+        + "for strings.");
   }
 
-  public boolean equals(Object obj) {
-    if(obj == this)
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj == this) {
       return true;
-    if(obj == null)
+    } else if (obj == null) {
       return false;
-    if(!(obj instanceof PTString))
+    } else if (!(obj instanceof PTString)) {
       return false;
+    }
 
-    PTString other = (PTString)obj;
-    if(this.read().equals(other.read())) {
+    final PTString other = (PTString) obj;
+    if (this.read().equals(other.read())) {
       return true;
     }
     return false;
@@ -123,40 +150,47 @@ public final class PTString extends PTPrimitiveType<String> {
         HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTString &&
-        this.getType() == a.getType());
+  @Override
+  public boolean typeCheck(final PTType a) {
+    return (a instanceof PTString
+        && this.getType() == a.getType());
   }
 
+  /**
+   * Creates a sentinel object or returns it from the cache
+   * if it already exists.
+   * @return the sentinel object
+   */
   public static PTString getSentinel() {
 
     // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTString)PTType.getCachedSentinel(cacheKey);
+    final String cacheKey = getCacheKey();
+    if (PTType.isSentinelCached(cacheKey)) {
+      return (PTString) PTType.getCachedSentinel(cacheKey);
     }
 
     // Otherwise, create a new sentinel type and cache it before returning it.
-    PTString sentinelObj = new PTString();
+    final PTString sentinelObj = new PTString();
     PTType.cacheSentinel(sentinelObj, cacheKey);
     return sentinelObj;
   }
 
+  @Override
   public PTPrimitiveType alloc() {
-    PTString newObj = new PTString();
+    final PTString newObj = new PTString();
     PTType.clone(this, newObj);
     return newObj;
   }
 
   private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
+    final StringBuilder b = new StringBuilder(staticTypeFlag.name());
     return b.toString();
   }
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append(",s=").append(s);
+    final StringBuilder b = new StringBuilder(super.toString());
+    b.append(",s=").append(this.s);
     return b.toString();
   }
 }

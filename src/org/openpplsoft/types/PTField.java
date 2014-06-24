@@ -11,7 +11,7 @@ import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public class PTField extends PTObjectType {
+public final class PTField extends PTObjectType {
 
   private static Type staticTypeFlag = Type.FIELD;
   private PTPrimitiveType value;

@@ -11,7 +11,7 @@ import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public class PTFieldLiteral extends PTObjectType {
+public final class PTFieldLiteral extends PTObjectType {
 
   private static Type staticTypeFlag = Type.FLD_LITERAL;
   public String RECNAME;

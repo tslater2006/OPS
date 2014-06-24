@@ -12,7 +12,7 @@ import java.util.*;
 import org.apache.logging.log4j.*;
 import java.lang.reflect.*;
 
-public class PTArray extends PTObjectType {
+public final class PTArray extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTArray.class.getName());
   private static Type staticTypeFlag = Type.ARRAY;

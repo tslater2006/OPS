@@ -8,9 +8,12 @@
 package org.openpplsoft.types;
 
 import java.util.EnumSet;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.openpplsoft.runtime.*;
 
-public class PTString extends PTPrimitiveType<String> {
+public final class PTString extends PTPrimitiveType<String> {
 
   private static Type staticTypeFlag = Type.STRING;
   private String s;
@@ -110,6 +113,14 @@ public class PTString extends PTPrimitiveType<String> {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 29, HBC_MULTIPLIER = 487;
+
+    return new HashCodeBuilder(HBC_INITIAL,
+        HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
   public boolean typeCheck(PTType a) {

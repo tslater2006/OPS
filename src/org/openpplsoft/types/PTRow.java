@@ -15,7 +15,7 @@ import org.openpplsoft.runtime.*;
  * I believe rows can contain rowsets and multiple records.
  * The exact details are still unclear to me. TODO: Keep this in mind.
  */
-public class PTRow extends PTObjectType {
+public final class PTRow extends PTObjectType {
 
   private static Type staticTypeFlag = Type.ROW;
   public PTRecord record;

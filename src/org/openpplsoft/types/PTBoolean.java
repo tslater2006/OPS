@@ -8,9 +8,12 @@
 package org.openpplsoft.types;
 
 import java.util.EnumSet;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.openpplsoft.runtime.*;
 
-public class PTBoolean extends PTPrimitiveType<Boolean> {
+public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
   private static Type staticTypeFlag = Type.BOOLEAN;
   private Boolean b;
@@ -95,6 +98,14 @@ public class PTBoolean extends PTPrimitiveType<Boolean> {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 41, HBC_MULTIPLIER = 337;
+
+    return new HashCodeBuilder(HBC_INITIAL,
+        HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
   public boolean typeCheck(PTType a) {

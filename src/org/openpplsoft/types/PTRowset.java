@@ -15,7 +15,7 @@ import org.openpplsoft.runtime.*;
 import java.lang.reflect.*;
 import org.apache.logging.log4j.*;
 
-public class PTRowset extends PTObjectType {
+public final class PTRowset extends PTObjectType {
 
   private static Type staticTypeFlag = Type.ROWSET;
   public Record recDefn;

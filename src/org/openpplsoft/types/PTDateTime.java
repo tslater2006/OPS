@@ -7,11 +7,15 @@
 
 package org.openpplsoft.types;
 
-import java.util.*;
 import java.text.SimpleDateFormat;
+
+import java.util.*;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.openpplsoft.runtime.*;
 
-public class PTDateTime extends PTPrimitiveType<String> {
+public final class PTDateTime extends PTPrimitiveType<String> {
 
   private static Type staticTypeFlag = Type.DATETIME;
   private String d;
@@ -102,6 +106,14 @@ public class PTDateTime extends PTPrimitiveType<String> {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 991, HBC_MULTIPLIER = 359;
+
+    return new HashCodeBuilder(HBC_INITIAL,
+        HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
   public boolean typeCheck(PTType a) {

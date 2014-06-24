@@ -13,7 +13,7 @@ import org.openpplsoft.types.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
 
-public class PTAppClassObj extends PTObjectType {
+public final class PTAppClassObj extends PTObjectType {
 
   private static Type staticTypeFlag = Type.APP_CLASS_OBJ;
   public AppClassPeopleCodeProg progDefn;

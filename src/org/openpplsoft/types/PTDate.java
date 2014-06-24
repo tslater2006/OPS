@@ -8,10 +8,14 @@
 package org.openpplsoft.types;
 
 import java.util.*;
+
 import java.text.SimpleDateFormat;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.openpplsoft.runtime.*;
 
-public class PTDate extends PTPrimitiveType<String> {
+public final class PTDate extends PTPrimitiveType<String> {
 
   private static Type staticTypeFlag = Type.DATE;
   private static String defaultDateOverride;
@@ -111,6 +115,14 @@ public class PTDate extends PTPrimitiveType<String> {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 71, HBC_MULTIPLIER = 967;
+
+    return new HashCodeBuilder(HBC_INITIAL,
+        HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
   public boolean typeCheck(PTType a) {

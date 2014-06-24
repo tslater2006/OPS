@@ -11,7 +11,7 @@ import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public class PTRecordLiteral extends PTObjectType {
+public final class PTRecordLiteral extends PTObjectType {
 
   private static Type staticTypeFlag = Type.REC_LITERAL;
   public String RECNAME;

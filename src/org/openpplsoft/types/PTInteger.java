@@ -8,10 +8,14 @@
 package org.openpplsoft.types;
 
 import java.util.EnumSet;
-import org.openpplsoft.runtime.*;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.apache.logging.log4j.*;
 
-public class PTInteger extends PTPrimitiveType<Integer> {
+import org.openpplsoft.runtime.*;
+
+public final class PTInteger extends PTPrimitiveType<Integer> {
 
   private static Logger log = LogManager.getLogger(PTInteger.class.getName());
   private static Type staticTypeFlag = Type.INTEGER;
@@ -75,6 +79,14 @@ public class PTInteger extends PTPrimitiveType<Integer> {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 359, HBC_MULTIPLIER = 7;
+
+    return new HashCodeBuilder(HBC_INITIAL,
+        HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

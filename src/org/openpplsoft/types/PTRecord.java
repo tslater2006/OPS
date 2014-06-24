@@ -16,7 +16,7 @@ import org.openpplsoft.sql.*;
 import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
 
-public class PTRecord extends PTObjectType {
+public final class PTRecord extends PTObjectType {
 
   private static Type staticTypeFlag = Type.RECORD;
   public Record recDefn;

@@ -11,7 +11,7 @@ import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public class PTDefnLiteral extends PTObjectType {
+public final class PTDefnLiteral extends PTObjectType {
 
   private static Type staticTypeFlag = Type.DEFN_LITERAL;
 

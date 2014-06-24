@@ -7,6 +7,10 @@
 
 package org.openpplsoft.types;
 
+/**
+ * Additional flags for PeopleTools type
+ * implementation objects.
+ */
 public enum TFlag {
   READONLY
 }

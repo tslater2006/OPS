@@ -24,6 +24,9 @@ import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
 
+/**
+ * Represents a PeopleTools rowset object.
+ */
 public final class PTRowset extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(
@@ -49,10 +52,19 @@ public final class PTRowset extends PTObjectType {
     }
   }
 
+  /**
+   * Create a new Rowset object that isn't attached to a specific
+   * record definition; can only be called by internal methods.
+   */
   protected PTRowset() {
     super(staticTypeFlag);
   }
 
+  /**
+   * Create a new Rowset object that's attached to a specific
+   * record definition; can only be called by internal methods.
+   * @param r the specific record defn to attach to the rowset
+   */
   protected PTRowset(final Record r) {
     super(staticTypeFlag);
 
@@ -65,6 +77,7 @@ public final class PTRowset extends PTObjectType {
     this.rows.add(this.emptyRow);
   }
 
+  @Override
   public PTType dotProperty(final String s) {
     if (s.equals("ActiveRowCount")) {
       return Environment.getFromLiteralPool(this.rows.size());
@@ -72,6 +85,7 @@ public final class PTRowset extends PTObjectType {
     return null;
   }
 
+  @Override
   public Callable dotMethod(final String s) {
     if (ptMethodTable.containsKey(s)) {
       return new Callable(ptMethodTable.get(s), this);
@@ -79,6 +93,10 @@ public final class PTRowset extends PTObjectType {
     return null;
   }
 
+  /**
+   * Get a row from the rowset; the index to use must be placed
+   * on the OPS runtime stack.
+   */
   public void getRow() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 1) {
@@ -107,6 +125,10 @@ public final class PTRowset extends PTObjectType {
     Environment.pushToCallStack(this.rows.get(idx - 1));
   }
 
+  /**
+   * Sort the rows in the rowset; the exact order ("A" for ascending,
+   * "D" for descending) must be passed on the OPS runtime stack.
+   */
   public void PT_Sort() {
 
     final LinkedList<String> fields = new LinkedList<String>();
@@ -246,6 +268,10 @@ public final class PTRowset extends PTObjectType {
     return merged;
   }
 
+  /**
+   * Flush the rowset (only a default empty row will be present
+   * after the flush).
+   */
   public void PT_Flush() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
@@ -260,6 +286,10 @@ public final class PTRowset extends PTObjectType {
     this.rows.add(this.emptyRow);
   }
 
+  /**
+   * Fill the rowset; the WHERE clause to use must be passed on the
+   * OPS runtime stack.
+   */
   public void PT_Fill() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() < 1) {
@@ -324,15 +354,21 @@ public final class PTRowset extends PTObjectType {
     }
   }
 
+  @Override
   public PTPrimitiveType castTo(final PTPrimitiveType t) {
     throw new EntDataTypeException("castTo() has not been implemented.");
   }
 
+  @Override
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTRowset
         && this.getType() == a.getType());
   }
 
+  /**
+   * Create a sentinel rowset object or retrieve it from the cache.
+   * @return the new/cached sentinel rowset object
+   */
   public static PTRowset getSentinel() {
 
     // If the sentinel has already been cached, return it immediately.
@@ -347,11 +383,14 @@ public final class PTRowset extends PTObjectType {
     return sentinelObj;
   }
 
-  /*
+  /**
+   * Allocate a new rowset object attached to a specific record defn.
    * Allocated rowsets must have an associated record defn in order
    * to determine the type of the value enclosed within them. However, this
    * defn is not part of the type itself; a Rowset variable can be assigned
    * any Rowset object, regardless of its underlying record defn.
+   * @param r the record defn to attach
+   * @return the newly allocated rowset object
    */
   public PTRowset alloc(final Record r) {
     final PTRowset newObj = new PTRowset(r);

@@ -151,7 +151,7 @@ public final class PTRowset extends PTObjectType {
             + "rowset; this is legal but not yet supported.");
       }
 
-      if (!this.emptyRow.record.hasField(fld.FIELDNAME)) {
+      if (!this.emptyRow.getRecord().hasField(fld.FIELDNAME)) {
         throw new OPSVMachRuntimeException("The field "
             + fld.FIELDNAME + " does not exist on the underlying "
             + "record.");
@@ -209,9 +209,9 @@ public final class PTRowset extends PTObjectType {
       for (int i = 0; i < sortFields.size(); i++) {
         final String order = sortOrders.get(i);
 
-        final PTPrimitiveType lVal = lRow.record
+        final PTPrimitiveType lVal = lRow.getRecord()
             .getField(sortFields.get(i)).getValue();
-        final PTPrimitiveType rVal = rRow.record
+        final PTPrimitiveType rVal = rRow.getRecord()
             .getField(sortFields.get(i)).getValue();
 
         if (lVal.isLessThan(rVal) == Environment.TRUE) {

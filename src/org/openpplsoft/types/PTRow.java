@@ -8,88 +8,125 @@
 package org.openpplsoft.types;
 
 import org.openpplsoft.pt.*;
-import java.util.*;
 import org.openpplsoft.runtime.*;
 
-/*
- * I believe rows can contain rowsets and multiple records.
- * The exact details are still unclear to me. TODO: Keep this in mind.
+/**
+ * Represents a PeopleTools row definition.
  */
 public final class PTRow extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.ROW;
-  public PTRecord record;
+ /*
+  * TODO(mquinn): Keep this in mind:
+  * I believe rows can contain rowsets and multiple records.
+  * The exact details are still unclear to me.
+  */
 
+  private static Type staticTypeFlag = Type.ROW;
+
+  private PTRecord record;
+
+  /**
+   * Create a new row object that isn't attached to a record
+   * definition; can only be called by internal methods.
+   */
   protected PTRow() {
     super(staticTypeFlag);
   }
 
-  protected PTRow(PTRecord rec) {
+  /**
+   * Create a new row object that is attached to a record
+   * definition; can only be called by internal methods.
+   * @param rec the record defn to attach
+   */
+  protected PTRow(final PTRecord rec) {
     super(staticTypeFlag);
     this.record = rec;
   }
 
-  public PTType dotProperty(String s) {
-    if(this.record.recDefn.RECNAME.equals(s)) {
+  /**
+   * Retrieve the record defn attached to this row object.
+   * @return the record defn attached to this row object
+   */
+  public PTRecord getRecord() {
+    return this.record;
+  }
+
+  @Override
+  public PTType dotProperty(final String s) {
+    if (this.record.recDefn.RECNAME.equals(s)) {
       return this.record;
     }
     return null;
   }
 
-  public Callable dotMethod(String s) {
+  @Override
+  public Callable dotMethod(final String s) {
     return null;
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
+  @Override
+  public PTPrimitiveType castTo(final PTPrimitiveType t) {
     throw new EntDataTypeException("castTo() has not been implemented.");
   }
 
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTRow &&
-        this.getType() == a.getType());
+  @Override
+  public boolean typeCheck(final PTType a) {
+    return (a instanceof PTRow
+        && this.getType() == a.getType());
   }
 
-  /*
-   * Calls to make a row read-only should make its
-   * record read-only as well.
-   */
   @Override
   public PTType setReadOnly() {
     super.setReadOnly();
-    if(this.record != null) {
+
+    /*
+     * Calls to make a row read-only should make its
+     * record read-only as well.
+     */
+    if (this.record != null) {
       this.record.setReadOnly();
     }
+
     return this;
   }
 
+  /**
+   * Creates a new, or retrieves a cached, sentinel row object.
+   * @return a sentinel row object
+   */
   public static PTRow getSentinel() {
 
     // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTRow)PTType.getCachedSentinel(cacheKey);
+    final String cacheKey = getCacheKey();
+    if (PTType.isSentinelCached(cacheKey)) {
+      return (PTRow) PTType.getCachedSentinel(cacheKey);
     }
 
     // Otherwise, create a new sentinel type and cache it before returning it.
-    PTRow sentinelObj = new PTRow();
+    final PTRow sentinelObj = new PTRow();
     PTType.cacheSentinel(sentinelObj, cacheKey);
     return sentinelObj;
   }
 
-  public PTRow alloc(PTRecord rec) {
-    PTRow newObj = new PTRow(rec);
+  /**
+   * Allocate a new row object with an attached record defn.
+   * @param rec the record defn to attach
+   * @return the newly allocated row object
+   */
+  public PTRow alloc(final PTRecord rec) {
+    final PTRow newObj = new PTRow(rec);
     PTType.clone(this, newObj);
     return newObj;
   }
 
   private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
+    final StringBuilder b = new StringBuilder(staticTypeFlag.name());
     return b.toString();
   }
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
+    final StringBuilder b = new StringBuilder(super.toString());
     b.append(",record=").append(this.record);
     return b.toString();
   }

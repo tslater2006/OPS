@@ -963,7 +963,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * The checks on GENERIC_ID below should be run in order of lowest scope
        * to highest scope for this reason.
        */
-      if (ComponentBuffer.getSearchRecord().recDefn
+      if (ComponentBuffer.getSearchRecord().getRecDefn()
             .RECNAME.equals(ctx.GENERIC_ID().getText())) {
         /*
          * Detect references to search record buffer.

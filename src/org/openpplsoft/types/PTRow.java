@@ -53,7 +53,7 @@ public final class PTRow extends PTObjectType {
 
   @Override
   public PTType dotProperty(final String s) {
-    if (this.record.recDefn.RECNAME.equals(s)) {
+    if (this.record.getRecDefn().RECNAME.equals(s)) {
       return this.record;
     }
     return null;

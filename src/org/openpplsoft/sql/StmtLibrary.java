@@ -156,7 +156,7 @@ public final class StmtLibrary {
   public static OPSStmt getSearchRecordFillQuery() {
 
     final PTRecord searchRec = ComponentBuffer.getSearchRecord();
-    final Record recDefn = searchRec.recDefn;
+    final Record recDefn = searchRec.getRecDefn();
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
     final List<String> bindVals = new ArrayList<String>();
 
@@ -300,7 +300,7 @@ public final class StmtLibrary {
 
         if (!rf.FIELDNAME.equals("EFFDT")) {
           query.append("?");
-          bindVals.add((String) recObj.fields.get(rf.FIELDNAME)
+          bindVals.add((String) recObj.getFields().get(rf.FIELDNAME)
               .getValue().read());
         } else {
           /*
@@ -361,7 +361,7 @@ public final class StmtLibrary {
         isFirstKey = false;
 
         query.append(rf.FIELDNAME).append("=?");
-        bindVals.add((String) recObj.fields.get(rf.FIELDNAME)
+        bindVals.add((String) recObj.getFields().get(rf.FIELDNAME)
           .getValue().read());
       }
     }

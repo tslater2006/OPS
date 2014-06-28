@@ -9,7 +9,7 @@ package org.openpplsoft.types;
 
 public abstract class PTPrimitiveType<T> extends PTType {
 
-  protected PTPrimitiveType(Type t) {
+  protected PTPrimitiveType(final Type t) {
     super(t);
   }
 
@@ -34,20 +34,20 @@ public abstract class PTPrimitiveType<T> extends PTType {
   public abstract PTPrimitiveType subtract(PTPrimitiveType op);
 
   protected void checkIsWriteable() {
-    if(this.isSentinel()) {
-      throw new EntDataTypeException("Attempted illegal write to a " +
-          "sentinel PTType object.");
+    if (this.isSentinel()) {
+      throw new EntDataTypeException("Attempted illegal write to a "
+          + "sentinel PTType object.");
     }
-    if(this.getFlags().contains(TFlag.READONLY)) {
-      throw new EntDataTypeException("Attempted illegal write to a " +
-          "readonly PTType object.");
+    if (this.getFlags().contains(TFlag.READONLY)) {
+      throw new EntDataTypeException("Attempted illegal write to a "
+          + "readonly PTType object.");
     }
   }
 
   protected void checkIsSystemWriteable() {
-    if(this.isSentinel()) {
-      throw new EntDataTypeException("Attempted illegal system write " +
-          "to a sentinel PTType object.");
+    if (this.isSentinel()) {
+      throw new EntDataTypeException("Attempted illegal system write "
+          + "to a sentinel PTType object.");
     }
   }
 }

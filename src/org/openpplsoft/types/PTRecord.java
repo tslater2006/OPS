@@ -187,7 +187,7 @@ public final class PTRecord extends PTObjectType {
    * Recursively sets the default value for every field object within
    * this record object.
    */
-  private void setDefault() {
+  public void setDefault() {
     for (Map.Entry<String, PTField> cursor : this.fields.entrySet()) {
       cursor.getValue().setDefault();
     }

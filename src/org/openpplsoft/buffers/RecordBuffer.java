@@ -125,11 +125,27 @@ public class RecordBuffer implements IStreamableBuffer {
   }
 
   /**
-   * UNDER DEVELOPMENT: Fill this record buffer as part of the
-   * first pass fill routine (under heavy development).
+   * Fill this record buffer as part of the
+   * first pass fill routine. In order to be filled, a record
+   * must 1) be a table or view (should be checked by caller)
+   * and 2) have either at least one
+   * required field OR have no keys. The fill may be aborted
+   * during the StmtLibrary call if a required key does not have
+   * a matching value in the scroll hierarchy.
    */
   public void firstPassFill() {
-    final OPSStmt ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
+
+    OPSStmt ostmt = null;
+
+    final Record recDefn = DefnCache.getRecord(this.recName);
+    if (recDefn.hasARequiredKeyField()) {
+      ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
+    } else if (recDefn.hasNoKeys()) {
+      ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
+    } else {
+      return;
+    }
+
     ResultSet rs = null;
 
     try {
@@ -147,7 +163,6 @@ public class RecordBuffer implements IStreamableBuffer {
 
       // NOTE: record may legitimately be empty.
       if (rs.next()) {
-        final Record recDefn = DefnCache.getRecord(this.recName);
         for (int i = 1; i <= numCols; i++) {
           final String colName = rsMetadata.getColumnName(i);
           final String colTypeName = rsMetadata.getColumnTypeName(i);

@@ -75,7 +75,7 @@ public final class Main {
       c.assembleComponentStructure();
       ComponentBuffer.printStructure();
       ComponentStructureVerifier.verify(profileToRun);
-      //ComponentBuffer.firstPassFill();
+      ComponentBuffer.firstPassFill();
 
       TraceFileVerifier.logVerificationSummary(false);
 

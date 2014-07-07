@@ -196,6 +196,9 @@ public final class StmtLibrary {
          */
         if (val == null && rf.FIELDNAME.equals("OPRID")) {
           val = (String) Environment.getSystemVar("%OperatorId").read();
+
+          // Write the value used into the OPRID field on the search record.
+          ((PTString) searchRec.getField(rf.FIELDNAME).getValue()).systemWrite(val);
         }
 
         query.append(rf.FIELDNAME);
@@ -424,18 +427,34 @@ public final class StmtLibrary {
     final Record recDefn = DefnCache.getRecord(rbuf.getRecName());
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
 
+    // If a non-required key exists, the SELECT clause will be limited
+    // to select only key fields.
+    boolean limitSelectClauseToKeys = false;
+    if (recDefn.hasANonRequiredKeyField()) {
+      limitSelectClauseToKeys = true;
+    }
+
+    boolean hasANonKeyField = recDefn.hasANonKeyField();
+
     /*
-     * Ensure all keys have an associated value in the scroll
+     * Ensure all required keys have an associated value in the scroll
      * buffer hierarchy. If any key does not, do not continue.
      */
     for (RecordField rf : rfList) {
-      if (rf.isSearchKey()
+      if (rf.isKey()
           && rbuf.getParentScrollBuffer()
             .getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
-        log.debug("Aborting first pass fill for Record.{}; "
-            + "value does not exist for search key: {}", rbuf.getRecName(),
-            rf.FIELDNAME);
-        return null;
+
+        if(rf.isRequired()) {
+          log.debug("Aborting first pass fill for Record.{}; "
+              + "value does not exist for search key: {}", rbuf.getRecName(),
+              rf.FIELDNAME);
+          return null;
+        } else {
+          // If a non-required key field does not have a matching value,
+          // we need to issue a query for all of the fields on the record.
+          limitSelectClauseToKeys = false;
+        }
       }
     }
 
@@ -446,10 +465,32 @@ public final class StmtLibrary {
     final List<String> bindVals = new ArrayList<String>();
 
     for (int i = 0; i < rfList.size(); i++) {
+      final RecordField rf = rfList.get(i);
+
+      // If record has at least one non-required key, SELECT clause
+      // must be limited to keys only.
+      if (limitSelectClauseToKeys && !rf.isKey()
+          && !rf.isSearchKey() && !rf.isAlternateSearchKey()) {
+        continue;
+      }
+
+      // Excluding OPRID for recs w/ non key fields present;
+      // this may be incorrect long-term.
+      if (rf.FIELDNAME.equals("OPRID") && limitSelectClauseToKeys) {
+        continue;
+      }
+
       if (i > 0) { query.append(", "); }
-      final String fieldname = rfList.get(i).FIELDNAME;
-      final PTType val = rfList.get(i)
+      final String fieldname = rf.FIELDNAME;
+      final PTType val = rf
           .getSentinelForUnderlyingValue();
+
+      // Apparently key fields that are dates or timestamps
+      // appear twice in SELECT clauses...
+      if ((val instanceof PTDate || val instanceof PTDateTime)
+          && rf.isKey()) {
+        query.append(fieldname).append(", ");
+      }
 
       if (val instanceof PTDate) {
         query.append("TO_CHAR(").append(fieldname)
@@ -466,7 +507,9 @@ public final class StmtLibrary {
 
     int i = 0;
     for (RecordField rf : rfList) {
-      if (rf.isSearchKey()) {
+      if (rf.isKey()
+          && rbuf.getParentScrollBuffer()
+            .getKeyValueFromHierarchy(rf.FIELDNAME) != null) {
         if (i == 0) { query.append(" WHERE "); }
         if (i > 0) { query.append(" AND "); }
         final String val = (String) rbuf.getParentScrollBuffer()
@@ -479,7 +522,14 @@ public final class StmtLibrary {
 
     i = 0;
     for (RecordField rf : rfList) {
-      if (rf.isSearchKey()) {
+      if (rf.isKey()) {
+
+        // Excluding OPRID for recs w/ non key fields present;
+        // this may be incorrect long-term.
+        if (rf.FIELDNAME.equals("OPRID") && limitSelectClauseToKeys) {
+          continue;
+        }
+
         if (i == 0) { query.append(" ORDER BY "); }
         if (i > 0) { query.append(", "); }
         query.append(rf.FIELDNAME);

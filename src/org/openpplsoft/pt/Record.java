@@ -187,6 +187,62 @@ public class Record {
     return false;
   }
 
+  /**
+   * Determines if a required key field exists on this record.
+   * @return true if a required key field exists, false otherwise
+   */
+  public boolean hasARequiredKeyField() {
+    for(Map.Entry<String, RecordField> cursor : this.fieldTable.entrySet()) {
+      RecordField rf = cursor.getValue();
+      if(rf.isKey() && rf.isRequired()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Determines if a non-required key field exists on this record.
+   * @return true if a non-required key field exists, false otherwise
+   */
+  public boolean hasANonRequiredKeyField() {
+    for(Map.Entry<String, RecordField> cursor : this.fieldTable.entrySet()) {
+      RecordField rf = cursor.getValue();
+      if(rf.isKey() && !rf.isRequired()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Determines if the record has no keys.
+   * @return true if no keys on record, false if at least one exists
+   */
+  public boolean hasNoKeys() {
+    for(Map.Entry<String, RecordField> cursor : this.fieldTable.entrySet()) {
+      RecordField rf = cursor.getValue();
+      if(rf.isKey()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Determines if the record has at least one non-key field.
+   * @return true if at least one non-key field exists, false otherwise
+   */
+  public boolean hasANonKeyField() {
+    for(Map.Entry<String, RecordField> cursor : this.fieldTable.entrySet()) {
+      RecordField rf = cursor.getValue();
+      if(!rf.isKey() && !rf.isSearchKey() && !rf.isAlternateSearchKey()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public ArrayList<RecordField> getExpandedFieldList() {
     ArrayList<RecordField> expandedFieldList = new ArrayList<RecordField>();
     for(Map.Entry<Integer, Object> cursor : this.fldAndSubrecordTable.entrySet()) {

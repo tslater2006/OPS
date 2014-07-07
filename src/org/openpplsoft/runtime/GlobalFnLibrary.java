@@ -226,9 +226,14 @@ public class GlobalFnLibrary {
         fldObj.recFieldDefn.FIELDNAME, fldObj.getValue().getType());
 
     switch(fldObj.getValue().getType()) {
+      /*
+       * TODO(mquinn): Read CLOB and chars from ResultSet rather than
+       * as string.
+       */
       case STRING:
-        if(colTypeName.equals("VARCHAR2")) {
-          ((PTString)fldObj.getValue()).write(
+        if(colTypeName.equals("VARCHAR2") || colTypeName.equals("CHAR")
+            || colTypeName.equals("CLOB")) {
+          ((PTString) fldObj.getValue()).write(
             rs.getString(colName));
         } else {
           throw new OPSVMachRuntimeException("Unexpected db " +
@@ -262,7 +267,11 @@ public class GlobalFnLibrary {
         }
         break;
       case DATETIME:
-        if(colTypeName.equals("VARCHAR2")) {
+        /*
+         * TODO(mquinn): May need to be split apart into separate
+         * statements with different types.
+         */
+        if(colTypeName.equals("VARCHAR2") || colTypeName.equals("TIMESTAMP")) {
           ((PTDateTime)fldObj.getValue()).write(
             rs.getString(colName));
         } else {

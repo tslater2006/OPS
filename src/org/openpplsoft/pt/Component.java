@@ -188,7 +188,6 @@ public class Component {
    * the record if it exists.
    */
   public void loadAndRunRecordPConSearchRecord() {
-
     final Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
     ComponentBuffer.setSearchRecord(PTRecord.getSentinel().alloc(recDefn));
 
@@ -213,9 +212,22 @@ public class Component {
    * search record for this component.
    */
   public void loadAndRunComponentPConSearchRecord() {
-
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
       if (prog.RECNAME != null && prog.RECNAME.equals(this.searchRecordToUse)) {
+        final PeopleCodeProg p = DefnCache.getProgram(prog);
+        final ExecContext eCtx = new ProgramExecContext(p);
+        final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+        interpreter.run();
+      }
+    }
+  }
+
+  /**
+   * Runs the PreBuild (Component PC) program if it exists.
+   */
+  public void runPreBuild() {
+    for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
+      if (prog.event.equals("PreBuild")) {
         final PeopleCodeProg p = DefnCache.getProgram(prog);
         final ExecContext eCtx = new ProgramExecContext(p);
         final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);

@@ -204,6 +204,10 @@ public final class ComponentBuffer {
         if (recDefn.isTable() || recDefn.isView()) {
           rbuf.firstPassFill();
         }
+      } else if(buf instanceof ScrollBuffer &&
+          ((ScrollBuffer) buf).getScrollLevel() != 0) {
+        // we only want scroll level 0; break beyond that
+        break;
       }
     }
   }

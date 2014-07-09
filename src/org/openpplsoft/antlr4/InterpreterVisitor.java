@@ -1224,18 +1224,29 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr());
     final PTType p2 = this.getNodeData(ctx.expr());
 
-    if (!evalConstruct.hasBranchBeenEmitted
-        || !evalConstruct.trueBranchExprSeen) {
+    // Always emit the first When branch of an Evaluate statement
+    if (!evalConstruct.hasBranchBeenEmitted) {
       this.emitStmt(ctx);
       evalConstruct.hasBranchBeenEmitted = true;
+
+    // If this isn't the first When branch, emit it only if a true
+    // When branch has not yet been seen *AND* if the last When branch
+    // seen did not have an empty statement list.
+    } else if(!evalConstruct.trueBranchExprSeen &&
+        !evalConstruct.wasLastWhenBranchStmtListEmpty) {
+      this.emitStmt(ctx);
     }
 
+    evalConstruct.wasLastWhenBranchStmtListEmpty =
+        (ctx.stmtList().getChildCount() == 0);
+
     /*
-     * If a previous branch evaluated to true and we're here, that means
-     * execution continues to fall through all branches until either a break
-     * is seen, or the evaluate construct ends.
+     * If p1.equals(p2), we have reached a When branch that evaluates
+     * to true; if they aren't equal, we must still check if we saw a true
+     * branch expr earlier b/c control may be falling through When branches
+     * (occurs until a Break is seen or the Evaluate statement ends).
      */
-    if (evalConstruct.trueBranchExprSeen || p1.equals(p2)) {
+    if (p1.equals(p2) || evalConstruct.trueBranchExprSeen) {
       evalConstruct.trueBranchExprSeen = true;
       visit(ctx.stmtList());
     }
@@ -1365,7 +1376,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
   private final class EvaluateConstruct {
     private PTType baseExpr;
-    private boolean hasBranchBeenEmitted, trueBranchExprSeen, breakSeen;
+    private boolean hasBranchBeenEmitted, trueBranchExprSeen, breakSeen,
+      wasLastWhenBranchStmtListEmpty;
     private EvaluateConstruct(final PTType p) {
       this.baseExpr = p;
     }

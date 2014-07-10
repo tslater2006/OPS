@@ -99,6 +99,14 @@ public class RecordBuffer implements IStreamableBuffer {
   }
 
   /**
+   * Get the record object underlying this record buffer.
+   * @return the underlying record object
+   */
+  public PTRecord getUnderlyingRecord() {
+    return this.underlyingRecord;
+  }
+
+  /**
    * Get the scroll level at which this record buffer exists.
    * @return the scroll level at which this record buffer exists
    */

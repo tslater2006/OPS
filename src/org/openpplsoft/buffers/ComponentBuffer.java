@@ -25,14 +25,14 @@ public final class ComponentBuffer {
 
   private static int currScrollLevel;
   private static ScrollBuffer currSB;
-  private static ScrollBuffer compBuffer;
+  private static ScrollBuffer lvlZeroScrollBuffer;
   private static PTRecord searchRecord;
 
   private ComponentBuffer() {}
 
   static {
-    compBuffer = new ScrollBuffer(0, null, null);
-    currSB = compBuffer;
+    lvlZeroScrollBuffer = new ScrollBuffer(0, null, null);
+    currSB = lvlZeroScrollBuffer;
   }
 
   /**
@@ -41,6 +41,14 @@ public final class ComponentBuffer {
    */
   public static PTRecord getSearchRecord() {
     return searchRecord;
+  }
+
+  /**
+   * Return the level 0 scroll buffer for this component buffer.
+   * @return the level 0 buffer
+   */
+  public static ScrollBuffer getLevelZeroScrollBuffer() {
+    return lvlZeroScrollBuffer;
   }
 
   /**
@@ -120,7 +128,7 @@ public final class ComponentBuffer {
    * @return the next buffer in the read sequence
    */
   public static IStreamableBuffer next() {
-    return compBuffer.next();
+    return lvlZeroScrollBuffer.next();
   }
 
   /**
@@ -129,7 +137,7 @@ public final class ComponentBuffer {
    * This reset call will propagate recursively to all child buffers.
    */
   public static void resetCursors() {
-    compBuffer.resetCursors();
+    lvlZeroScrollBuffer.resetCursors();
   }
 
   /**

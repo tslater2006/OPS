@@ -970,6 +970,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          */
         this.setNodeData(ctx, ComponentBuffer.getSearchRecord());
 
+      } else if (ComponentBuffer.getLevelZeroScrollBuffer()
+          .getRecBufferTable().containsKey(ctx.GENERIC_ID().getText())) {
+        /*
+         * Detect references to a record buffer in level 0 of the
+         * component buffer (i.e., "DERIVED_REGRM1"
+         * in "DERIVED_REGFRM1.GROUP_BOX...").
+         */
+        this.setNodeData(ctx, ComponentBuffer.getLevelZeroScrollBuffer()
+            .getRecBufferTable().get(ctx.GENERIC_ID().getText())
+            .getUnderlyingRecord());
+
       } else if (PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.containsKey(
         ctx.GENERIC_ID().getText().toUpperCase())) {
         /*
@@ -987,10 +998,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             ctx.GENERIC_ID().getText()));
 
       } else if (DefnCache.hasRecord(ctx.GENERIC_ID().getText())) {
-          log.debug("MQUINN HERE: {}", ctx.GENERIC_ID().getText());
         /*
-         * Detect references to record field literals
-         * (i.e., those passed to Sort on Rowsets).
+         * Detect references to record field literals, which look like
+         * references to component buffer records but are not actually
+         * in the component buffer.
+         * (i.e., record field literals passed to Sort() on Rowsets).
          */
         this.setNodeData(ctx, PTRecordLiteral.getSentinel().alloc(
           DefnCache.getRecord(ctx.GENERIC_ID().getText())));

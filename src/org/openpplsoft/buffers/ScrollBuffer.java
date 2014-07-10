@@ -26,16 +26,8 @@ public class ScrollBuffer implements IStreamableBuffer {
   private String primaryRecName;
   private ScrollBuffer parent;
   private Map<String, RecordBuffer> recBufferTable;
-  private List<RecordBuffer> orderedRecBuffers;
-
-  /*
-   * TODO(mquinn): I need to figure out how I'm going to integrate this
-   * with the buffer objects/concepts I've written to-date. Punting
-   * for now.
-   */
-  private Map<String, PTRecord> recEntryTable;
-
   private Map<String, ScrollBuffer> scrollBufferTable;
+  private List<RecordBuffer> orderedRecBuffers;
   private List<ScrollBuffer> orderedScrollBuffers;
 
   // Used for reading.
@@ -58,7 +50,6 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.orderedRecBuffers = new ArrayList<RecordBuffer>();
     this.scrollBufferTable = new HashMap<String, ScrollBuffer>();
     this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
-    this.recEntryTable = new HashMap<String, PTRecord>();
   }
 
   /**

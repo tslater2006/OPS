@@ -84,6 +84,9 @@ public class InterpretSupervisor {
       ((AppClassObjExecContext)context).methodOrGetterName != null) {
       methodOrFuncName = ((AppClassObjExecContext)context).methodOrGetterName;
     }
+    if(context instanceof FunctionExecContext) {
+      methodOrFuncName = ((FunctionExecContext) context).funcName;
+    }
 
     String descriptor = context.prog.getDescriptor();
     descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
@@ -100,8 +103,11 @@ public class InterpretSupervisor {
     boolean normalExit = true;
     try {
       interpreter.visit(context.startNode);
-    } catch(OPSReturnException ere) {
+    } catch (OPSReturnException opsre) {
       normalExit = false;
+    } catch (OPSFuncImplSignalException opsise) {
+      log.debug("Caught OPSFuncImplSignalException; switching to target function now.");
+      interpreter.visit(((FunctionExecContext) context).extFuncImplNode);
     }
 
     if(normalExit) {

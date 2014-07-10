@@ -229,6 +229,23 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   }
 
   /**
+   * Save function entry points in the parse tree for lookup during
+   * interpretation later.
+   * @param ctx the context node for the function declaration stmt
+   */
+  @Override
+  public void enterFuncDeclaration(
+      final PeopleCodeParser.FuncDeclarationContext ctx) {
+
+    log.debug("Saving parse tree node for Function *{}* in "
+        + "program {}", ctx.funcSignature().GENERIC_ID().getText(),
+        this.srcProg.getDescriptor());
+
+    this.srcProg.funcImplNodes.put(ctx.funcSignature()
+        .GENERIC_ID().getText(), ctx);
+  }
+
+  /**
    * Detect create stmts, which reference app classes. Upon
    * encountering one, we need to load the app class OnExecute
    * program corresponding to the class instance being created.

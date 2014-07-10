@@ -60,7 +60,7 @@ public class OPSDiagErrorListener extends DiagnosticErrorListener {
      */
     if (msg.startsWith("reportAmbiguity d=4 (stmt): ambigAlts={20, 21}")
           || msg.startsWith("reportAmbiguity d=13 (expr): ambigAlts={1, 2}")
-          || msg.startsWith("reportAmbiguity d=32 (funcDeclaration): "
+          || msg.startsWith("reportAmbiguity d=32 (funcSignature): "
               + "ambigAlts={1, 2}")
           || msg.startsWith("reportAmbiguity d=25 (classBlock): "
               + "ambigAlts={1, 2}")) {

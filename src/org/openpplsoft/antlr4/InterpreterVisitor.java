@@ -957,6 +957,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       this.setNodeData(ctx, a);
 
     } else if (ctx.GENERIC_ID() != null) {
+      //log.debug("Resolving GENERIC_ID: {}", ctx.GENERIC_ID().getText());
 
       /*
        * IMPORTANT NOTE: I believe it is possible to override system functions.
@@ -981,8 +982,33 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             .getRecBufferTable().get(ctx.GENERIC_ID().getText())
             .getUnderlyingRecord());
 
+      } else if (this.eCtx.prog.recordProgFnCalls.containsKey(
+          ctx.GENERIC_ID().getText())) {
+
+        log.debug("Resolved GENERIC_ID: {} to an external function "
+            + "referenced by this program.",
+            ctx.GENERIC_ID().getText());
+
+        /*
+         * Detect references to external functions imported via Declare.
+         */
+
+        // Ensure external program has been init'ed and parsed.
+        final PeopleCodeProg extProg = DefnCache.getProgram(this.eCtx.prog
+            .recordProgFnCalls.get(ctx.GENERIC_ID().getText()));
+        extProg.loadDefnsAndPrograms();
+
+        // Create an execution context pointing to the external program
+        // and the name of the function to execute.
+        this.setNodeCallable(ctx, new Callable(new FunctionExecContext(
+            extProg, ctx.GENERIC_ID().getText())));
+
       } else if (PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.containsKey(
         ctx.GENERIC_ID().getText().toUpperCase())) {
+
+        //log.debug("Resolved GENERIC_ID: {} to DEFN_LITERAL",
+        //    ctx.GENERIC_ID().getText());
+
         /*
          * Detect defn literal reserved words (i.e.,
          * "Menu" in "Menu.SA_LEARNER_SERVICES").
@@ -1364,6 +1390,37 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       this.repeatLastEmission();
     }
 
+    return null;
+  }
+
+  /**
+   * Called by ANTLR when a Function declaration
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitFuncDeclaration(
+      final PeopleCodeParser.FuncDeclarationContext ctx) {
+
+    if(this.eCtx instanceof FunctionExecContext) {
+        /**
+         * If this function is the function named in the execution
+         * context, continue interpretation; otherwise, signal to
+         * to the supervisor that it needs to switch to the correct
+         * ParseTree node.
+         */
+        if (((FunctionExecContext) this.eCtx).funcName.equals(
+            ctx.funcSignature().GENERIC_ID().getText())) {
+          this.emitStmt(ctx.funcSignature());
+          visit(ctx.stmtList());
+        } else {
+          throw new OPSFuncImplSignalException(ctx.
+              funcSignature().GENERIC_ID().getText());
+        }
+    } else {
+      throw new OPSVMachRuntimeException("Attempt to execute function body "
+          + "outside of FunctionExecContext is not yet supported.");
+    }
     return null;
   }
 

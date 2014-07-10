@@ -35,6 +35,7 @@ public abstract class PeopleCodeProg {
 
   public List<PeopleCodeProg> referencedProgs;
   public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
+  public Map<String, ParseTree> funcImplNodes;
   public Map<String, Boolean> importedRootAppPackages;
   public Map<Integer, Reference> progRefsTable;
   public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
@@ -179,6 +180,7 @@ public abstract class PeopleCodeProg {
 
     this.referencedProgs = new ArrayList<PeopleCodeProg>();
     this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
+    this.funcImplNodes = new HashMap<String, ParseTree>();
     this.importedRootAppPackages = new HashMap<String, Boolean>();
     this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
     this.importedAppClasses = new HashMap<String, List<AppPackagePath>>();

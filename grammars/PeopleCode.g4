@@ -97,7 +97,8 @@ methodImpl  : 'method' GENERIC_ID stmtList 'end-method' ;
 getImpl     : 'get' GENERIC_ID stmtList 'end-get' ;
 setImpl     : 'set' GENERIC_ID stmtList 'end-set' ;
 
-funcDeclaration : 'Function' GENERIC_ID formalParamList? returnType? ';'? stmtList 'End-Function' ;
+funcDeclaration : funcSignature stmtList 'End-Function' ;
+funcSignature   : 'Function' GENERIC_ID formalParamList? returnType? ';'? ;
 formalParamList : '(' ( param (',' param)* )? ')' ;
 param           : VAR_ID ('As' varType)? ;
 returnType      : 'Returns' varType ;

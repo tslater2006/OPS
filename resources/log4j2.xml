@@ -26,6 +26,7 @@
     <Logger name="org.openpplsoft.runtime" level="INFO"/>
     <Logger name="org.openpplsoft.runtime.DefnCache" level="WARN"/>
     <Logger name="org.openpplsoft.runtime.TraceFileVerifier" level="DEBUG"/>
+    <Logger name="org.openpplsoft.runtime.InterpretSupervisor" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime.ComponentStructureVerifier" level="WARN"/>
     <Logger name="org.openpplsoft.types" level="WARN"/>
     <Logger name="org.openpplsoft.pt.peoplecode" level="WARN"/>

@@ -162,6 +162,19 @@ public class GlobalFnLibrary {
     PT_CreateArrayRept();
   }
 
+  /**
+   * 
+   */
+  public static void PT_GetLevel0() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+    if(args.size() != 0) {
+      throw new OPSVMachRuntimeException("Expected zero arguments.");
+    }
+
+    throw new OPSVMachRuntimeException("TODO: Support GetLevel0 call.");
+  }
+
   public static void PT_CreateArrayRept() {
 
     List<PTType> args = Environment.getArgsFromCallStack();

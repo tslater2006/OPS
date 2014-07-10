@@ -987,6 +987,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             ctx.GENERIC_ID().getText()));
 
       } else if (DefnCache.hasRecord(ctx.GENERIC_ID().getText())) {
+          log.debug("MQUINN HERE: {}", ctx.GENERIC_ID().getText());
         /*
          * Detect references to record field literals
          * (i.e., those passed to Sort on Rowsets).
@@ -994,12 +995,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.setNodeData(ctx, PTRecordLiteral.getSentinel().alloc(
           DefnCache.getRecord(ctx.GENERIC_ID().getText())));
 
-      } else {
-        /*
-         * At this point, assume the GENERIC_ID is a FieldLiteral.
-         */
-        this.setNodeData(ctx, PTFieldLiteral.getSentinel().alloc(
-          ctx.GENERIC_ID().getText()));
       }
     }
     return null;

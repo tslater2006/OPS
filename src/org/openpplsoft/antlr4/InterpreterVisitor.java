@@ -1280,7 +1280,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      */
     if (!evalConstruct.trueBranchExprSeen) {
       visit(ctx.stmtList());
+
+      // Only emit End-Evaluate if no true branch has yet been seen.
+      this.emitStmt("End-Evaluate");
     }
+
     return null;
   }
 

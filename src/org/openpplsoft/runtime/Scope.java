@@ -28,7 +28,7 @@ public class Scope {
     APP_CLASS_OBJ_INSTANCE, APP_CLASS_OBJ_PROPERTY
   }
 
-  private Scope.Lvl level;
+  private Lvl level;
   private Map<String, PTType> symbolTable;
 
   /**
@@ -42,14 +42,22 @@ public class Scope {
 
   /**
    * Declares a variable in this scope attached to the provided identifier.
-   * If the variable has already been declared, an RTE will be thrown.
+   * If the variable has already been declared, an RTE will be thrown; the
+   * only exception to this is for Component-scoped variables, which are declared
+   * in every program in which they are referenced.
    * @param id the identifier to declare
    * @param type the type to declare
    */
   public void declareVar(final String id, final PTType type) {
     if (this.isIdResolvable(id)) {
-      throw new OPSVMachRuntimeException("Encountered attempt to re-declare "
-          + " variable (" + id + ") in scope level " + this.level);
+      if(this.level == Lvl.COMPONENT) {
+        // re-declaration of a Component-scoped var is normal, as this is
+        // how Component-scoped variables are shared among programs
+        return;
+      } else {
+        throw new OPSVMachRuntimeException("Encountered attempt to re-declare "
+            + " variable (" + id + ") in scope level " + this.level);
+      }
     }
     this.symbolTable.put(id, type);
   }

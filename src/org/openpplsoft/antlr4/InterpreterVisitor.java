@@ -644,7 +644,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       call.invokePtMethod();
     } else {
       this.supervisor.runImmediately(call.eCtx);
-      this.repeatLastEmission();
+      if(!(call.eCtx instanceof FunctionExecContext)) {
+        this.repeatLastEmission();
+      }
     }
 
     /*

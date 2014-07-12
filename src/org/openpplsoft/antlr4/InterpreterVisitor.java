@@ -569,6 +569,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   }
 
   /**
+   * Called by ANTLR when a dynamic reference ('@(...)')
+   * statement is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitExprDynamicReference(
+      final PeopleCodeParser.ExprDynamicReferenceContext ctx) {
+    throw new OPSVMachRuntimeException("TODO: Support dynamic reference.");
+  }
+
+  /**
    * Called by ANTLR when an identifier in an expression
    * statement is being visited in the parse tree.
    * @param ctx the associated ParseTree node

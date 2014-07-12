@@ -330,6 +330,33 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     return null;
   }
 
+  /**
+   * Called by ANTLR when a function impl signature is being
+   * visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitFuncSignature(final PeopleCodeParser.FuncSignatureContext ctx) {
+
+    visit(ctx.formalParamList());
+    final List<FormalParam> formalParams = new ArrayList<FormalParam>();
+    for (PeopleCodeParser.ParamContext pCtx
+        : ctx.formalParamList().param()) {
+      formalParams.add(new FormalParam(
+        this.getNodeData(pCtx.varType()), pCtx.VAR_ID().getText()));
+    }
+
+    PTType rType = null;
+    if (ctx.returnType() != null) {
+      visit(ctx.returnType());
+      rType = this.getNodeData(ctx.returnType().varType());
+    }
+
+    this.eCtx.prog.addFunction(
+        ctx.GENERIC_ID().getText(), formalParams, rType);
+    return null;
+  }
+
   /*==========================================================
    * <stmt> alternative handlers.
    *==========================================================*/
@@ -1398,8 +1425,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @param ctx the associated ParseTree node
    * @return null
    */
-  public Void visitFuncDeclaration(
-      final PeopleCodeParser.FuncDeclarationContext ctx) {
+  public Void visitFuncImpl(
+      final PeopleCodeParser.FuncImplContext ctx) {
 
     if(this.eCtx instanceof FunctionExecContext) {
         /**
@@ -1410,8 +1437,38 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          */
         if (((FunctionExecContext) this.eCtx).funcName.equals(
             ctx.funcSignature().GENERIC_ID().getText())) {
+
           this.emitStmt(ctx.funcSignature());
+          visit(ctx.funcSignature());
+
+          final Scope localScope = new Scope(Scope.Lvl.FUNCTION_LOCAL);
+          final List<FormalParam> formalParams =
+              this.eCtx.prog.funcTable
+                .get(ctx.funcSignature().GENERIC_ID().getText()).formalParams;
+
+          /*
+           * Ensure that each of the arguments passed to the method match
+           * the types of the formal parameters, and assign (by reference) those args
+           * to the identifiers in the formal parameter list of the method signature.
+           * If there's a mismatch, attempt to cast the argument provided to the type
+           * specified in the formal parameter definition.
+           */
+          for (FormalParam fp : formalParams) {
+            final PTType arg = Environment.popFromCallStack();
+            // The formal param may have no type, in which case it will be handled
+            // as if it had a type matching that of the supplied argument.
+            if (fp.type == null || fp.type.typeCheck(arg)) {
+              localScope.declareVar(fp.id, arg);
+            } else {
+              localScope.declareVar(fp.id,
+                  ((PTObjectType) arg).castTo((PTPrimitiveType) fp.type));
+            }
+          }
+
+          this.eCtx.pushScope(localScope);
           visit(ctx.stmtList());
+          this.eCtx.popScope();
+
         } else {
           throw new OPSFuncImplSignalException(ctx.
               funcSignature().GENERIC_ID().getText());
@@ -1420,6 +1477,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       throw new OPSVMachRuntimeException("Attempt to execute function body "
           + "outside of FunctionExecContext is not yet supported.");
     }
+
     return null;
   }
 

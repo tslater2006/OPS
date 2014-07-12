@@ -234,8 +234,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
    * @param ctx the context node for the function declaration stmt
    */
   @Override
-  public void enterFuncDeclaration(
-      final PeopleCodeParser.FuncDeclarationContext ctx) {
+  public void enterFuncImpl(
+      final PeopleCodeParser.FuncImplContext ctx) {
 
     log.debug("Saving parse tree node for Function *{}* in "
         + "program {}", ctx.funcSignature().GENERIC_ID().getText(),

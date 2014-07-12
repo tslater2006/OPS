@@ -27,7 +27,7 @@ stmt  : appClassImport          # StmtAppClassImport
       | methodImpl              # StmtMethodImpl
       | getImpl                 # StmtGetImpl
       | setImpl                 # StmtSetImpl
-      | funcDeclaration         # StmtFuncDeclaration
+      | funcImpl                # StmtFuncImpl
       | varDeclaration          # StmtVarDeclaration
       | ifStmt                  # StmtIf
       | forStmt                 # StmtFor
@@ -97,7 +97,7 @@ methodImpl  : 'method' GENERIC_ID stmtList 'end-method' ;
 getImpl     : 'get' GENERIC_ID stmtList 'end-get' ;
 setImpl     : 'set' GENERIC_ID stmtList 'end-set' ;
 
-funcDeclaration : funcSignature stmtList 'End-Function' ;
+funcImpl        : funcSignature stmtList 'End-Function' ;
 funcSignature   : 'Function' GENERIC_ID formalParamList? returnType? ';'? ;
 formalParamList : '(' ( param (',' param)* )? ')' ;
 param           : VAR_ID ('As' varType)? ;

@@ -24,6 +24,7 @@
 
     <Logger name="org.openpplsoft.sql" level="WARN"/>
     <Logger name="org.openpplsoft.runtime" level="INFO"/>
+    <Logger name="org.openpplsoft.runtime.Scope" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime.DefnCache" level="WARN"/>
     <Logger name="org.openpplsoft.runtime.Environment" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime.TraceFileVerifier" level="DEBUG"/>

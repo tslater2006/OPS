@@ -36,6 +36,7 @@ public abstract class PeopleCodeProg {
   public List<PeopleCodeProg> referencedProgs;
   public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
   public Map<String, ParseTree> funcImplNodes;
+  public Map<String, Function> funcTable;
   public Map<String, Boolean> importedRootAppPackages;
   public Map<Integer, Reference> progRefsTable;
   public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
@@ -45,6 +46,17 @@ public abstract class PeopleCodeProg {
   private boolean hasInitialized = false;
   private boolean haveLoadedDefnsAndPrograms = false;
   private boolean haveLexedAndParsed = false;
+
+  public class Function {
+    public String name;
+    public List<FormalParam> formalParams;
+    public PTType returnType;
+    public Function(String n, List<FormalParam> l, PTType r) {
+      this.name = n;
+      this.formalParams = l;
+      this.returnType = r;
+    }
+  }
 
   protected PeopleCodeProg() {}
 
@@ -181,6 +193,7 @@ public abstract class PeopleCodeProg {
     this.referencedProgs = new ArrayList<PeopleCodeProg>();
     this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
     this.funcImplNodes = new HashMap<String, ParseTree>();
+    this.funcTable = new HashMap<String, Function>();
     this.importedRootAppPackages = new HashMap<String, Boolean>();
     this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
     this.importedAppClasses = new HashMap<String, List<AppPackagePath>>();
@@ -239,6 +252,13 @@ public abstract class PeopleCodeProg {
     } catch(java.io.IOException ioe) {
       throw new OPSVMachRuntimeException(ioe.getMessage());
     }
+  }
+
+  public void addFunction(final String name,
+      final List<FormalParam> fp, final PTType rType) {
+    log.debug("Adding function to table: {}, {}, {}",
+        name, fp, rType);
+    this.funcTable.put(name, new Function(name, fp, rType));
   }
 }
 

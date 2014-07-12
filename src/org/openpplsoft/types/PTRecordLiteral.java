@@ -44,6 +44,14 @@ public final class PTRecordLiteral extends PTObjectType {
   }
 
   /**
+   * Returns the name of the record represented by this literal.
+   * @return the name of the record
+   */
+  public String getRecName() {
+    return this.ptRECNAME;
+  }
+
+  /**
    * Dot accesses on record field literals must
    * always return the appropriate FieldLiteral,
    * assuming the value for s is a valid field on

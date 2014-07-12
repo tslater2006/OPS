@@ -7,8 +7,11 @@
 
 package org.openpplsoft.types;
 
+import java.lang.reflect.Method;
+
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,23 +19,32 @@ import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 
 /**
- * Represents a PeopleTools row definition.
+ * Represents a PeopleTools row definition; contains
+ * 1 to n child records and 0 to m child rowsets.
  */
 public final class PTRow extends PTObjectType {
 
- /*
-  * TODO(mquinn): Keep this in mind:
-  * I believe rows can contain rowsets and multiple records.
-  * The exact details are still unclear to me.
-  */
-
   private static Type staticTypeFlag = Type.ROW;
+  private static Map<String, Method> ptMethodTable;
 
   // Maps record names to child record objects
   private Map<String, PTRecord> childRecordMap;
 
   // Maps scroll/rowset primary rec names to rowset objects
   private Map<String, PTRowset> childRowsetMap;
+
+  static {
+    final String PT_METHOD_PREFIX = "PT_";
+    // cache pointers to PeopleTools Row methods.
+    final Method[] methods = PTRow.class.getMethods();
+    ptMethodTable = new HashMap<String, Method>();
+    for (Method m : methods) {
+      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
+        ptMethodTable.put(m.getName().substring(
+            PT_METHOD_PREFIX.length()), m);
+      }
+    }
+  }
 
   /**
    * Create a new row object that isn't attached to a record
@@ -87,6 +99,25 @@ public final class PTRow extends PTObjectType {
     return this.childRecordMap.containsKey(recName);
   }
 
+  /**
+   * Implementation of GetRecord method for the PeopleTools
+   * row class.
+   */
+  public void PT_GetRecord() {
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    if (args.size() != 1) {
+      throw new OPSVMachRuntimeException("Expected only one arg.");
+    }
+
+    if(!(args.get(0) instanceof PTRecordLiteral)) {
+      throw new OPSVMachRuntimeException("Expected arg to GetRecord() to "
+          + "be a PTRecordLiteral.");
+    }
+    PTRecordLiteral recordLiteral = (PTRecordLiteral) args.get(0);
+
+    Environment.pushToCallStack(this.getRecord(recordLiteral.getRecName()));
+  }
+
   @Override
   public PTType dotProperty(final String s) {
     if (this.childRecordMap.containsKey(s)) {
@@ -97,6 +128,9 @@ public final class PTRow extends PTObjectType {
 
   @Override
   public Callable dotMethod(final String s) {
+    if (ptMethodTable.containsKey(s)) {
+      return new Callable(ptMethodTable.get(s), this);
+    }
     return null;
   }
 

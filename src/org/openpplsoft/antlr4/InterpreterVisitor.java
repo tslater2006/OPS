@@ -1494,6 +1494,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           visit(ctx.stmtList());
           this.eCtx.popScope();
 
+          this.emitStmt("End-Function");
+
         } else {
           throw new OPSFuncImplSignalException(ctx.
               funcSignature().GENERIC_ID().getText());

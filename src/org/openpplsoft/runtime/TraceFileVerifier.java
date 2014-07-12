@@ -67,7 +67,7 @@ public final class TraceFileVerifier {
         "\\s>>>>>\\s+Begin\\s+([A-Za-z\\._0-9]+)\\s+level"
         + "\\s+(\\d+)\\s+row\\s+(\\d+)");
     pcEndPattern = Pattern.compile("\\s+<<<\\s(end|end-ext)"
-        + "\\s+Nest=(\\d+)\\s+([A-Za-z0-9]*?)\\s+([A-Za-z\\._0-9]+)");
+        + "\\s+Nest=(\\d+)\\s+([A-Za-z0-9_]*?)\\s+([A-Za-z\\._0-9]+)");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?)[;]*$");

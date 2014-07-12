@@ -576,7 +576,21 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitExprDynamicReference(
       final PeopleCodeParser.ExprDynamicReferenceContext ctx) {
-    throw new OPSVMachRuntimeException("TODO: Support dynamic reference.");
+    visit(ctx.expr());
+
+    if(!(this.getNodeData(ctx.expr()) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Encountered input to dynamic "
+          + "reference translation that is not of type PTString; need to "
+          + "support this particular input type.");
+    }
+
+    String input = ((PTString) this.getNodeData(ctx.expr())).read();
+    PTType output = PTRecordLiteral.getSentinel().alloc(input);
+    log.debug("Translating dynamic reference input {} to {}",
+        input, output);
+
+    this.setNodeData(ctx, output);
+    return null;
   }
 
   /**

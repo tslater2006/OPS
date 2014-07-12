@@ -121,6 +121,24 @@ public final class PTRecordLiteral extends PTObjectType {
   }
 
   /**
+   * Allocates a new record literal object and attaches it
+   * to the record defn named in the provided argument.
+   * @param rStr the record name, prefixed with "Record."
+   * @return the newly allocated record literal object
+   */
+  public PTRecordLiteral alloc(final String rStr) {
+
+    if(!rStr.startsWith("Record.")) {
+      throw new OPSVMachRuntimeException("Expected rStr to start "
+          + "with 'Record.' while alloc'ing PTRecordLiteral.");
+    }
+    Record r = DefnCache.getRecord(rStr.replaceFirst("Record.", ""));
+    final PTRecordLiteral newObj = new PTRecordLiteral(r);
+    PTType.clone(this, newObj);
+    return newObj;
+  }
+
+  /**
    * Retrieves the cache key for this record literal.
    * @return the record literal's cache key
    */

@@ -261,5 +261,10 @@ public class Record {
     if(this.recordProgsByFieldTable == null) { return null; }
     return this.recordProgsByFieldTable.get(FLDNAME);
   }
+
+  @Override
+  public String toString() {
+    return this.RECNAME;
+  }
 }
 

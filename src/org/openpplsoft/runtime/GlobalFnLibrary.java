@@ -11,6 +11,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.regex.*;
 import org.openpplsoft.pt.*;
+import org.openpplsoft.buffers.*;
 import org.openpplsoft.types.*;
 import org.apache.logging.log4j.*;
 
@@ -163,7 +164,8 @@ public class GlobalFnLibrary {
   }
 
   /**
-   * 
+   * Makes the Rowset object representing the level 0
+   * component buffer available to caller.
    */
   public static void PT_GetLevel0() {
 
@@ -172,7 +174,7 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
 
-    throw new OPSVMachRuntimeException("TODO: Support GetLevel0 call.");
+    Environment.pushToCallStack(ComponentBuffer.ptGetLevel0());
   }
 
   public static void PT_CreateArrayRept() {

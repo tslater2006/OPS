@@ -13,9 +13,11 @@ import java.sql.ResultSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,9 +37,9 @@ public final class PTRowset extends PTObjectType {
   private static Type staticTypeFlag = Type.ROWSET;
   private static Map<String, Method> ptMethodTable;
 
-  private Record recDefn;
-  private PTRow emptyRow;
   private List<PTRow> rows;
+  private Record primaryRecDefn;
+  private Set<Record> registeredRecordDefns;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -68,13 +70,32 @@ public final class PTRowset extends PTObjectType {
   protected PTRowset(final Record r) {
     super(staticTypeFlag);
 
-    this.recDefn = r;
+    this.primaryRecDefn = r;
     this.rows = new ArrayList<PTRow>();
+    this.registeredRecordDefns = new HashSet<Record>();
 
-    // One row is always present in the rowset, even when flushed.
-    this.emptyRow = new PTRow(PTRecord.getSentinel().alloc(this.recDefn));
-    this.emptyRow.setReadOnly();
-    this.rows.add(this.emptyRow);
+    /*
+     * One row is always present in the rowset, even when flushed.
+     * Note that the given record defn could be null if this rowset contains
+     * the level 0 records for a level 0 scroll buffer in a component.
+     */
+    if (this.primaryRecDefn != null) {
+      this.registeredRecordDefns.add(r);
+    }
+    this.rows.add(PTRow.getSentinel().alloc(this.registeredRecordDefns));
+  }
+
+  /**
+   * Each row in a rowset contains the same underlying record
+   * definitions; this method alters existing rows to ensure
+   * that each has an allocated PTRecord for the newly registered
+   * record defn.
+   */
+  public void registerRecordDefn(final Record r) {
+    this.registeredRecordDefns.add(r);
+    for (PTRow row : this.rows) {
+      row.registerRecordDefn(r);
+    }
   }
 
   @Override
@@ -97,7 +118,7 @@ public final class PTRowset extends PTObjectType {
    * Get a row from the rowset; the index to use must be placed
    * on the OPS runtime stack.
    */
-  public void getRow() {
+  public void PT_GetRow() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 1) {
       throw new OPSVMachRuntimeException("Expected only one arg.");
@@ -121,13 +142,27 @@ public final class PTRowset extends PTObjectType {
           + this.rows.size());
     }
 
+    Environment.pushToCallStack(this.getRow(idx));
+  }
+
+  /**
+   * Return the row from the rowset corresponding to the given index;
+   * PeopleSoft RowSet indices start from 1, not 0.
+   * @param idx the index of the row to retrieve
+   * @return the row corresponding to idx
+   */
+  public PTRow getRow(int idx) {
     // Must subtract 1 from idx; rowset indices start at 1.
-    Environment.pushToCallStack(this.rows.get(idx - 1));
+    return this.rows.get(idx - 1);
   }
 
   /**
    * Sort the rows in the rowset; the exact order ("A" for ascending,
    * "D" for descending) must be passed on the OPS runtime stack.
+   * TODO(mquinn): Technically, rows can have multiple child records
+   * and 0 to n child rowsets. Keep this in mind in the event of
+   * future issues with this method, as I am deferring support for those
+   * scenarios.
    */
   public void PT_Sort() {
 
@@ -145,13 +180,13 @@ public final class PTRowset extends PTObjectType {
 
       final PTFieldLiteral fld =
           (PTFieldLiteral) Environment.popFromCallStack();
-      if (fld != null && !fld.RECNAME.equals(this.recDefn.RECNAME)) {
+      if (fld != null && !fld.RECNAME.equals(this.primaryRecDefn.RECNAME)) {
         throw new OPSVMachRuntimeException("Encountered a sort "
             + "field for a record other than the one underlying this "
             + "rowset; this is legal but not yet supported.");
       }
 
-      if (!this.emptyRow.getRecord().hasField(fld.FIELDNAME)) {
+      if (!this.primaryRecDefn.fieldTable.containsKey(fld.FIELDNAME)) {
         throw new OPSVMachRuntimeException("The field "
             + fld.FIELDNAME + " does not exist on the underlying "
             + "record.");
@@ -209,9 +244,9 @@ public final class PTRowset extends PTObjectType {
       for (int i = 0; i < sortFields.size(); i++) {
         final String order = sortOrders.get(i);
 
-        final PTPrimitiveType lVal = lRow.getRecord()
+        final PTPrimitiveType lVal = lRow.getRecord(this.primaryRecDefn.RECNAME)
             .getField(sortFields.get(i)).getValue();
-        final PTPrimitiveType rVal = rRow.getRecord()
+        final PTPrimitiveType rVal = rRow.getRecord(this.primaryRecDefn.RECNAME)
             .getField(sortFields.get(i)).getValue();
 
         if (lVal.isLessThan(rVal) == Environment.TRUE) {
@@ -283,7 +318,7 @@ public final class PTRowset extends PTObjectType {
   private void internalFlush() {
     // One row is always present in the rowset, even when flushed.
     this.rows.clear();
-    this.rows.add(this.emptyRow);
+    this.rows.add(PTRow.getSentinel().alloc(this.registeredRecordDefns));
   }
 
   /**
@@ -307,12 +342,12 @@ public final class PTRowset extends PTObjectType {
     // The rowset must be flushed before continuing.
     this.internalFlush();
 
-    final OPSStmt ostmt = StmtLibrary.prepareFillStmt(this.recDefn,
+    final OPSStmt ostmt = StmtLibrary.prepareFillStmt(this.primaryRecDefn,
         ((PTString) args.get(0)).read(), bindVals);
     ResultSet rs = null;
 
     try {
-      final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
+      final List<RecordField> rfList = this.primaryRecDefn.getExpandedFieldList();
       rs = ostmt.executeQuery();
 
       final int numCols = rs.getMetaData().getColumnCount();
@@ -331,10 +366,13 @@ public final class PTRowset extends PTObjectType {
           this.rows.clear();
         }
 
-        final PTRecord newRecord = PTRecord.getSentinel().alloc(this.recDefn);
+        final PTRow newRow = PTRow.getSentinel().alloc(this.registeredRecordDefns);
         GlobalFnLibrary
-            .readRecordFromResultSet(this.recDefn, newRecord, rs);
-        this.rows.add(new PTRow(newRecord));
+            .readRecordFromResultSet(
+            this.primaryRecDefn,
+            newRow.getRecord(this.primaryRecDefn.RECNAME),
+            rs);
+        this.rows.add(newRow);
         rowsRead++;
       }
 
@@ -406,8 +444,12 @@ public final class PTRowset extends PTObjectType {
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(":").append(this.recDefn.RECNAME);
-    b.append(",rows=").append(this.rows.size());
+    if(this.primaryRecDefn == null) {
+      b.append("!(CBUFFER-SCROLL-LEVEL-0-ROWSET)!");
+    }
+    b.append(":primaryRecDefn=").append(this.primaryRecDefn);
+    b.append(",numRows=").append(this.rows.size());
+    b.append(",registeredRecordDefns=").append(this.registeredRecordDefns);
     return b.toString();
   }
 }

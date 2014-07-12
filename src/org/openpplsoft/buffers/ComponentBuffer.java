@@ -47,8 +47,8 @@ public final class ComponentBuffer {
    * Return the level 0 scroll buffer for this component buffer.
    * @return the level 0 buffer
    */
-  public static ScrollBuffer getLevelZeroScrollBuffer() {
-    return lvlZeroScrollBuffer;
+  public static PTRowset ptGetLevel0() {
+    return lvlZeroScrollBuffer.ptGetRowset();
   }
 
   /**

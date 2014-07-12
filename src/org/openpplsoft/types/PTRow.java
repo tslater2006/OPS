@@ -7,6 +7,11 @@
 
 package org.openpplsoft.types;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 
@@ -23,7 +28,11 @@ public final class PTRow extends PTObjectType {
 
   private static Type staticTypeFlag = Type.ROW;
 
-  private PTRecord record;
+  // Maps record names to child record objects
+  private Map<String, PTRecord> childRecordMap;
+
+  // Maps scroll/rowset primary rec names to rowset objects
+  private Map<String, PTRowset> childRowsetMap;
 
   /**
    * Create a new row object that isn't attached to a record
@@ -34,27 +43,54 @@ public final class PTRow extends PTObjectType {
   }
 
   /**
-   * Create a new row object that is attached to a record
-   * definition; can only be called by internal methods.
-   * @param rec the record defn to attach
+   * Create a new row object that is attached to one or more record
+   * definitions; can only be called by internal methods.
+   * @param r the record defn to attach
    */
-  protected PTRow(final PTRecord rec) {
+  protected PTRow(final Set<Record> s) {
     super(staticTypeFlag);
-    this.record = rec;
+    this.childRecordMap = new HashMap<String, PTRecord>();
+    this.childRowsetMap = new HashMap<String, PTRowset>();
+
+    for(Record recDefn : s) {
+      this.childRecordMap.put(recDefn.RECNAME,
+          PTRecord.getSentinel().alloc(recDefn));
+    }
   }
 
   /**
-   * Retrieve the record defn attached to this row object.
-   * @return the record defn attached to this row object
+   * Registering a record defn that is currently
+   * unregistered will cause the row to contain a
+   * newly allocated record object for that defn.
+   * @param r the record defn to register
    */
-  public PTRecord getRecord() {
-    return this.record;
+  public void registerRecordDefn(final Record r) {
+    if(!this.childRecordMap.containsKey(r.RECNAME)) {
+      this.childRecordMap.put(r.RECNAME,
+          PTRecord.getSentinel().alloc(r));
+    }
+  }
+
+  /**
+   * Retrieve the record associated with the record name provided
+   * @return the record associated with the record name provided
+   */
+  public PTRecord getRecord(final String recName) {
+    return this.childRecordMap.get(recName);
+  }
+
+  /**
+   * Determines if the given record exists in the row.
+   * @return true if record exists, false otherwise
+   */
+  public boolean hasRecord(final String recName) {
+    return this.childRecordMap.containsKey(recName);
   }
 
   @Override
   public PTType dotProperty(final String s) {
-    if (this.record.getRecDefn().RECNAME.equals(s)) {
-      return this.record;
+    if (this.childRecordMap.containsKey(s)) {
+      return this.childRecordMap.get(s);
     }
     return null;
   }
@@ -79,12 +115,14 @@ public final class PTRow extends PTObjectType {
   public PTType setReadOnly() {
     super.setReadOnly();
 
-    /*
-     * Calls to make a row read-only should make its
-     * record read-only as well.
-     */
-    if (this.record != null) {
-      this.record.setReadOnly();
+    // Calls to make a row read-only must make its child records read-only.
+    for(Map.Entry<String, PTRecord> cursor: this.childRecordMap.entrySet()) {
+      cursor.getValue().setReadOnly();
+    }
+
+    // Calls to make a row read-only must make its child rowsets read-only.
+    for(Map.Entry<String, PTRowset> cursor: this.childRowsetMap.entrySet()) {
+      cursor.getValue().setReadOnly();
     }
 
     return this;
@@ -109,12 +147,12 @@ public final class PTRow extends PTObjectType {
   }
 
   /**
-   * Allocate a new row object with an attached record defn.
-   * @param rec the record defn to attach
+   * Allocate a new row object with a set of attached record defns.
+   * @param s the record defns to attach
    * @return the newly allocated row object
    */
-  public PTRow alloc(final PTRecord rec) {
-    final PTRow newObj = new PTRow(rec);
+  public PTRow alloc(final Set<Record> s) {
+    final PTRow newObj = new PTRow(s);
     PTType.clone(this, newObj);
     return newObj;
   }
@@ -126,8 +164,9 @@ public final class PTRow extends PTObjectType {
 
   @Override
   public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",record=").append(this.record);
-    return b.toString();
+    return new StringBuilder(super.toString())
+      .append(",childRecordRecDefns=").append(this.childRecordMap.keySet())
+      .append(",childRowsetRecDefns=").append(this.childRowsetMap.keySet())
+      .toString();
   }
 }

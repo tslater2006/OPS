@@ -587,7 +587,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * the indexing operation.
      */
     if (t instanceof PTRowset) {
-      ((PTRowset) t).getRow();
+      ((PTRowset) t).PT_GetRow();
     } else if (call.ptMethod != null) {
       call.invokePtMethod();
     } else {
@@ -971,16 +971,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          */
         this.setNodeData(ctx, ComponentBuffer.getSearchRecord());
 
-      } else if (ComponentBuffer.getLevelZeroScrollBuffer()
-          .getRecBufferTable().containsKey(ctx.GENERIC_ID().getText())) {
+      } else if (ComponentBuffer.ptGetLevel0().getRow(1)
+          .hasRecord(ctx.GENERIC_ID().getText())) {
         /*
-         * Detect references to a record buffer in level 0 of the
+         * Detect references to a record in level 0 of the
          * component buffer (i.e., "DERIVED_REGRM1"
          * in "DERIVED_REGFRM1.GROUP_BOX...").
          */
-        this.setNodeData(ctx, ComponentBuffer.getLevelZeroScrollBuffer()
-            .getRecBufferTable().get(ctx.GENERIC_ID().getText())
-            .getUnderlyingRecord());
+        this.setNodeData(ctx, ComponentBuffer.ptGetLevel0()
+            .getRow(1).getRecord(ctx.GENERIC_ID().getText()));
 
       } else if (this.eCtx.prog.recordProgFnCalls.containsKey(
           ctx.GENERIC_ID().getText())) {

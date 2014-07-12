@@ -40,15 +40,6 @@ public class RecordBuffer implements IStreamableBuffer {
   private Map<String, RecordFieldBuffer> fieldBufferTable;
   private List<RecordFieldBuffer> fieldBuffers;
 
-  /*
-   * IMPORTANT: I am using this to hold the actual data in the
-   * buffer rather than store it in the individual field buffers.
-   * At least for now, the RecordFieldBuffers are the authoritative source
-   * on *which* fields are available in the component. The PTRecord
-   * contains the data.
-   */
-  private PTRecord underlyingRecord;
-
   // Used for reading.
   private boolean hasEmittedSelf;
   private int fieldBufferCursor;
@@ -86,8 +77,6 @@ public class RecordBuffer implements IStreamableBuffer {
     if (EFFDT != null && EFFDT.isKey()) {
       this.addPageField(this.recName, "EFFDT");
     }
-
-    this.underlyingRecord = PTRecord.getSentinel().alloc(recDefn);
   }
 
   /**
@@ -96,14 +85,6 @@ public class RecordBuffer implements IStreamableBuffer {
    */
   public String getRecName() {
     return this.recName;
-  }
-
-  /**
-   * Get the record object underlying this record buffer.
-   * @return the underlying record object
-   */
-  public PTRecord getUnderlyingRecord() {
-    return this.underlyingRecord;
   }
 
   /**
@@ -174,19 +155,14 @@ public class RecordBuffer implements IStreamableBuffer {
         for (int i = 1; i <= numCols; i++) {
           final String colName = rsMetadata.getColumnName(i);
           final String colTypeName = rsMetadata.getColumnTypeName(i);
-          final PTField fldObj = this.underlyingRecord.getField(colName);
+          final PTField fldObj = this.sbuf.ptGetRowset().getRow(1)
+            .getRecord(this.recName).getField(colName);
           log.debug("Before: {} = {}", colName, fldObj);
           GlobalFnLibrary.readFieldFromResultSet(fldObj,
               colName, colTypeName, rs);
           log.debug("After: {} = {}", colName, fldObj);
         }
       }
-
-      /*
-       * TODO(mquinn): Fill underlying record fields with data.
-       */
-      rs.next();
-
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
       System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());

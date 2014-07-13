@@ -7,6 +7,8 @@
 
 package org.openpplsoft.types;
 
+import java.lang.reflect.Method;
+
 import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
@@ -14,9 +16,25 @@ import org.openpplsoft.runtime.*;
 public final class PTField extends PTObjectType {
 
   private static Type staticTypeFlag = Type.FIELD;
+  private static Map<String, Method> ptMethodTable;
+
   private PTPrimitiveType value;
   public RecordField recFieldDefn;
   public PTBoolean visibleProperty;
+
+  static {
+    final String PT_METHOD_PREFIX = "PT_";
+
+    // cache pointers to PeopleTools Field methods.
+    final Method[] methods = PTField.class.getMethods();
+    ptMethodTable = new HashMap<String, Method>();
+    for (Method m : methods) {
+      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
+        ptMethodTable.put(m.getName().substring(
+            PT_METHOD_PREFIX.length()), m);
+      }
+    }
+  }
 
   protected PTField() {
     super(staticTypeFlag);
@@ -47,8 +65,23 @@ public final class PTField extends PTObjectType {
     return null;
   }
 
-  public Callable dotMethod(String s) {
+  @Override
+  public Callable dotMethod(final String s) {
+    if (ptMethodTable.containsKey(s)) {
+      return new Callable(ptMethodTable.get(s), this);
+    }
     return null;
+  }
+
+  /**
+   * Implements the .SetDefault PeopleCode method for field objects.
+   */
+  public void PT_SetDefault() {
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    if (args.size() != 0) {
+      throw new OPSVMachRuntimeException("Expected no args.");
+    }
+    this.setDefault();
   }
 
   /*

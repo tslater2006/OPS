@@ -1227,6 +1227,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.emitStmt(ctx);
         this.hasVarDeclBeenEmitted = true;
       }
+    } else if((this.eCtx instanceof FunctionExecContext) &&
+      this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
+      this.emitStmt(ctx);
     }
     return null;
   }

@@ -24,7 +24,8 @@ public class Scope {
    */
   public enum Lvl {
     GLOBAL, COMPONENT,
-    PROGRAM_LOCAL, FUNCTION_LOCAL, METHOD_LOCAL,
+    PROGRAM_LOCAL,
+    FUNCTION_LOCAL, METHOD_LOCAL,
     APP_CLASS_OBJ_INSTANCE, APP_CLASS_OBJ_PROPERTY
   }
 
@@ -38,6 +39,10 @@ public class Scope {
   public Scope(final Scope.Lvl l) {
     this.level = l;
     this.symbolTable = new HashMap<String, PTType>();
+  }
+
+  public Lvl getLevel() {
+    return this.level;
   }
 
   /**

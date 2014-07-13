@@ -1035,6 +1035,44 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.setNodeData(ctx, ComponentBuffer.ptGetLevel0()
             .getRow(1).getRecord(ctx.GENERIC_ID().getText()));
 
+      } else if (this.eCtx.prog.funcImplNodes.containsKey(
+          ctx.GENERIC_ID().getText())) {
+
+        log.debug("Resolved GENERIC_ID: {} to an internal function "
+            + "within this program.",
+            ctx.GENERIC_ID().getText());
+
+        /*
+         * Detect references to internal functions (aren't imported
+         * via Declare).
+         */
+
+        // Create an execution context pointing to the currently
+        // running program and the name of the function to execute.
+        FunctionExecContext fec = new FunctionExecContext(
+            this.eCtx.prog, ctx.GENERIC_ID().getText());
+
+        // CRITICAL: Override the start node to be the function, rather
+        // than the program; according to PT rules, functions local to
+        // a program share the same program-local variables and thus
+        // should not be placed on the scope stack again.
+        fec.startNode = fec.funcNodeToRun;
+
+        // ALSO CRITICAL: For the same reason as above (for changing the
+        // start node), the PROGRAM_LOCAL scope of the current context
+        // must be placed on the scope stack of the execution context
+        // that is about to run, so that changes to those variables
+        // by the callee can be seen by the caller once the callee returns.
+        Scope progLocalScope = this.eCtx.scopeStack.getLast();
+        if (progLocalScope.getLevel() != Scope.Lvl.PROGRAM_LOCAL) {
+          throw new OPSVMachRuntimeException("Expected first scope on "
+              + "current program's scope stack to be PROGRAM_LOCAL; is "
+              + "actually: " + progLocalScope.getLevel());
+        }
+        fec.pushScope(progLocalScope);
+
+        this.setNodeCallable(ctx, new Callable(fec));
+
       } else if (this.eCtx.prog.recordProgFnCalls.containsKey(
           ctx.GENERIC_ID().getText())) {
 

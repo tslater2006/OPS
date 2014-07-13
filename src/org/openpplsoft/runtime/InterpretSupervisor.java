@@ -45,7 +45,7 @@ public class InterpretSupervisor {
 
     ExecContext context = execContextStack.peek();
 
-    boolean doEmitProgramMarkers = true;
+    boolean isThisProgSameAsInterruptedProg = false;
 
     /*
      * If another context is on the stack, it means that context was
@@ -57,7 +57,7 @@ public class InterpretSupervisor {
       // get the context that was interrupted by the call to run this context.
       ExecContext prevContext = execContextStack.get(1);
       if(prevContext.prog.getDescriptor().equals(context.prog.getDescriptor())) {
-        doEmitProgramMarkers = false;
+        isThisProgSameAsInterruptedProg = true;
       }
     }
 
@@ -91,7 +91,7 @@ public class InterpretSupervisor {
     String descriptor = context.prog.getDescriptor();
     descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
-    if(doEmitProgramMarkers) {
+    if(!isThisProgSameAsInterruptedProg) {
       TraceFileVerifier.submitEnforcedEmission(new PCStart(
         (execContextStack.size() == 1 ? "start" : "start-ext"),
         String.format("%02d", execContextStack.size() - 1),
@@ -107,7 +107,7 @@ public class InterpretSupervisor {
       normalExit = false;
     } catch (OPSFuncImplSignalException opsise) {
       log.debug("Caught OPSFuncImplSignalException; switching to target function now.");
-      interpreter.visit(((FunctionExecContext) context).extFuncImplNode);
+      interpreter.visit(((FunctionExecContext) context).funcNodeToRun);
     }
 
     if(normalExit) {
@@ -124,7 +124,7 @@ public class InterpretSupervisor {
       }
     }
 
-    if(doEmitProgramMarkers) {
+    if(!isThisProgSameAsInterruptedProg) {
       TraceFileVerifier.submitEnforcedEmission(new PCEnd(
         (execContextStack.size() == 1 ? "end" : "end-ext"),
         String.format("%02d", execContextStack.size() - 1),

@@ -18,12 +18,12 @@ import org.antlr.v4.runtime.tree.*;
 public class FunctionExecContext extends ExecContext {
 
   public String funcName;
-  public ParseTree extFuncImplNode;
+  public ParseTree funcNodeToRun;
 
   public FunctionExecContext(PeopleCodeProg prog, String fnName) {
     super(prog);
     this.funcName = fnName;
 
-    this.extFuncImplNode = prog.funcImplNodes.get(fnName);
+    this.funcNodeToRun = prog.funcImplNodes.get(fnName);
   }
 }

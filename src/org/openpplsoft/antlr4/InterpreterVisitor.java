@@ -9,6 +9,7 @@ package org.openpplsoft.antlr4;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Stack;
 
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -832,6 +833,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitExprEquality(
       final PeopleCodeParser.ExprEqualityContext ctx) {
     visit(ctx.expr(0));
+    log.debug("a1 = {}", this.getNodeData(ctx.expr(0)));
     final PTPrimitiveType a1 =
         (PTPrimitiveType) this.getNodeData(ctx.expr(0));
     visit(ctx.expr(1));
@@ -940,6 +942,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         ((AppClassPeopleCodeProg) this.eCtx.prog).methodTable.
             get(ctx.GENERIC_ID().getText()).formalParams;
 
+    final List<PTType> args = Environment.getArgsFromCallStack();
+
     /*
      * Ensure that each of the arguments passed to the method match
      * the types of the formal parameters, and assign (by reference) those args
@@ -947,8 +951,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * If there's a mismatch, attempt to cast the argument provided to the type
      * specified in the formal parameter definition.
      */
-    for (FormalParam fp : formalParams) {
-      final PTType arg = Environment.popFromCallStack();
+    for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
+      final FormalParam fp = formalParams.get(i);
+      final PTType arg = args.get(i);
       if (fp.type.typeCheck(arg)) {
         localScope.declareVar(fp.id, arg);
       } else {
@@ -1471,6 +1476,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * Load arguments to constructor onto call stack if
        * args have been provided.
        */
+      Environment.pushToCallStack(null);
       if (ctx.exprList() != null) {
         visit(ctx.exprList());
         for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
@@ -1484,6 +1490,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           new AppClassObjMethodExecContext(newObj, constructorName,
               newObj.progDefn.getMethodImplStartNode(constructorName), null);
       this.supervisor.runImmediately(constructorCtx);
+
+      // Constructors don't return anything
+      if(Environment.popFromCallStack() != null) {
+        throw new OPSVMachRuntimeException("After invoking create statement, "
+            + "expected stack frame null separator, but found non-null instead.");
+      }
+
       this.repeatLastEmission();
     }
 
@@ -1517,6 +1530,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
               this.eCtx.prog.funcTable
                 .get(ctx.funcSignature().GENERIC_ID().getText()).formalParams;
 
+          final List<PTType> args = Environment.getArgsFromCallStack();
+
           /*
            * Ensure that each of the arguments passed to the method match
            * the types of the formal parameters, and assign (by reference) those args
@@ -1524,8 +1539,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
            * If there's a mismatch, attempt to cast the argument provided to the type
            * specified in the formal parameter definition.
            */
-          for (FormalParam fp : formalParams) {
-            final PTType arg = Environment.popFromCallStack();
+          for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
+            final FormalParam fp = formalParams.get(i);
+            final PTType arg = args.get(i);
             // The formal param may have no type, in which case it will be handled
             // as if it had a type matching that of the supplied argument.
             if (fp.type == null || fp.type.typeCheck(arg)) {

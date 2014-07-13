@@ -1286,6 +1286,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         case "boolean":
           type = PTBoolean.getSentinel();
           break;
+        case "Field":
+          type = PTField.getSentinel();
+          break;
         default:
           throw new OPSVMachRuntimeException("Unexpected data type: "
               + ctx.GENERIC_ID().getText());

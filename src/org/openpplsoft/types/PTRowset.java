@@ -193,12 +193,12 @@ public final class PTRowset extends PTObjectType {
       }
       fields.push(fld.FIELDNAME);
 
-    } while (Environment.peekAtCallStack() != null);
+    } while (Environment.peekAtCallStack() !=
+        PTCallFrameBoundary.getSentinel());
 
     this.rows = this.mergeSortRows(this.rows, fields, orders);
 
-    /*
-    int i=1;
+    /*int i=1;
     log.debug("=========== Sorted Rowset ===========");
     for(PTRow row : this.rows) {
       PTRecord rec = row.record;
@@ -206,8 +206,7 @@ public final class PTRowset extends PTObjectType {
         i++, rec.fields.get("STRM"), rec.fields.get("ACAD_CAREER"),
         rec.fields.get("INSTITUTION"));
     }
-    log.debug("======== End Sorted Rowset =========");
-    */
+    log.debug("======== End Sorted Rowset =========");*/
   }
 
   private List<PTRow> mergeSortRows(final List<PTRow> rowsToSort,

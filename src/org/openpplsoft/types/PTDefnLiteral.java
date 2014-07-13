@@ -15,7 +15,7 @@ public final class PTDefnLiteral extends PTObjectType {
 
   private static Type staticTypeFlag = Type.DEFN_LITERAL;
 
-  protected PTDefnLiteral() {
+  private PTDefnLiteral() {
     super(staticTypeFlag);
   }
 

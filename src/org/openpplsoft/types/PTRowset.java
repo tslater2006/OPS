@@ -58,7 +58,7 @@ public final class PTRowset extends PTObjectType {
    * Create a new Rowset object that isn't attached to a specific
    * record definition; can only be called by internal methods.
    */
-  protected PTRowset() {
+  private PTRowset() {
     super(staticTypeFlag);
   }
 
@@ -67,7 +67,7 @@ public final class PTRowset extends PTObjectType {
    * record definition; can only be called by internal methods.
    * @param r the specific record defn to attach to the rowset
    */
-  protected PTRowset(final Record r) {
+  private PTRowset(final Record r) {
     super(staticTypeFlag);
 
     this.primaryRecDefn = r;

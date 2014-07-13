@@ -50,7 +50,7 @@ public final class PTRow extends PTObjectType {
    * Create a new row object that isn't attached to a record
    * definition; can only be called by internal methods.
    */
-  protected PTRow() {
+  private PTRow() {
     super(staticTypeFlag);
   }
 
@@ -59,7 +59,7 @@ public final class PTRow extends PTObjectType {
    * definitions; can only be called by internal methods.
    * @param r the record defn to attach
    */
-  protected PTRow(final Set<Record> s) {
+  private PTRow(final Set<Record> s) {
     super(staticTypeFlag);
     this.childRecordMap = new HashMap<String, PTRecord>();
     this.childRowsetMap = new HashMap<String, PTRowset>();

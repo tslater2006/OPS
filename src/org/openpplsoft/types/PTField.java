@@ -36,11 +36,11 @@ public final class PTField extends PTObjectType {
     }
   }
 
-  protected PTField() {
+  private PTField() {
     super(staticTypeFlag);
   }
 
-  protected PTField(RecordField rfd) {
+  private PTField(RecordField rfd) {
     super(staticTypeFlag);
     this.recFieldDefn = rfd;
     this.value = ((PTPrimitiveType)recFieldDefn

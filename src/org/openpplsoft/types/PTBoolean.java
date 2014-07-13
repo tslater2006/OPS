@@ -18,7 +18,7 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
   private static Type staticTypeFlag = Type.BOOLEAN;
   private Boolean b;
 
-  protected PTBoolean() {
+  private PTBoolean() {
     super(staticTypeFlag);
   }
 

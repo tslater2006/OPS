@@ -27,7 +27,7 @@ public final class PTRecordLiteral extends PTObjectType {
    * attached to a record defn; can only be called by
    * an internal method.
    */
-  protected PTRecordLiteral() {
+  private PTRecordLiteral() {
     super(staticTypeFlag);
   }
 
@@ -37,7 +37,7 @@ public final class PTRecordLiteral extends PTObjectType {
    * method.
    * @param r the record defn to attach
    */
-  protected PTRecordLiteral(final Record r) {
+  private PTRecordLiteral(final Record r) {
     super(staticTypeFlag);
     this.ptRECNAME = r.RECNAME;
     this.recDefn = r;

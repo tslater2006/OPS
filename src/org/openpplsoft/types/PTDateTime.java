@@ -20,7 +20,7 @@ public final class PTDateTime extends PTPrimitiveType<String> {
   private static Type staticTypeFlag = Type.DATETIME;
   private String d;
 
-  protected PTDateTime() {
+  private PTDateTime() {
     super(staticTypeFlag);
 
     // default value is current date and time.

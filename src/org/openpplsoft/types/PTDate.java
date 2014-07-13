@@ -21,7 +21,7 @@ public final class PTDate extends PTPrimitiveType<String> {
   private static String defaultDateOverride;
   private String d;
 
-  protected PTDate() {
+  private PTDate() {
     super(staticTypeFlag);
 
     // default value is current date unless date has been overridden for

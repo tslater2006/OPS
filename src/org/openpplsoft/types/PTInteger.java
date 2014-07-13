@@ -21,7 +21,7 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   private static Type staticTypeFlag = Type.INTEGER;
   private Integer i;
 
-  protected PTInteger() {
+  private PTInteger() {
     super(staticTypeFlag);
   }
 

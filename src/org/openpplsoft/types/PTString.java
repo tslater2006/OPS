@@ -25,7 +25,7 @@ public final class PTString extends PTPrimitiveType<String> {
    * Constructs a new instance of the string data type;
    * can only be called by internal methods.
    */
-  protected PTString() {
+  private PTString() {
     super(staticTypeFlag);
   }
 

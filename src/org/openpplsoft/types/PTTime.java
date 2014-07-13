@@ -26,7 +26,7 @@ public final class PTTime extends PTPrimitiveType<String> {
   /**
    * Constructs a new PTTime object.
    */
-  protected PTTime() {
+  private PTTime() {
     super(staticTypeFlag);
 
     // default value is current time.

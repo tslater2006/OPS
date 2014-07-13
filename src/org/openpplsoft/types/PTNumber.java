@@ -21,7 +21,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   private static Type staticTypeFlag = Type.NUMBER;
   private Double d;
 
-  protected PTNumber() {
+  private PTNumber() {
     super(staticTypeFlag);
   }
 

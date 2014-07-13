@@ -20,7 +20,7 @@ public final class PTAppClassObj extends PTObjectType {
   public Scope propertyScope;
   public Scope instanceScope;
 
-  protected PTAppClassObj(AppClassPeopleCodeProg prog) {
+  private PTAppClassObj(AppClassPeopleCodeProg prog) {
     super(staticTypeFlag);
     this.progDefn = prog;
     this.propertyScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_PROPERTY);

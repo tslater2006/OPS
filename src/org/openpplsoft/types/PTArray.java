@@ -32,7 +32,7 @@ public final class PTArray extends PTObjectType {
     }
   }
 
-  protected PTArray(int d, PTType b) {
+  private PTArray(int d, PTType b) {
     super(staticTypeFlag);
 
     if(d == 1 && b instanceof PTArray) {

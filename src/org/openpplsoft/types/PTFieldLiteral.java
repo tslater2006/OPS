@@ -17,16 +17,16 @@ public final class PTFieldLiteral extends PTObjectType {
   public String RECNAME;
   public String FIELDNAME;
 
-  protected PTFieldLiteral() {
+  private PTFieldLiteral() {
     super(staticTypeFlag);
   }
 
-  protected PTFieldLiteral(String f) {
+  private PTFieldLiteral(String f) {
     super(staticTypeFlag);
     this.FIELDNAME = f;
   }
 
-  protected PTFieldLiteral(String r, String f) {
+  private PTFieldLiteral(String r, String f) {
     super(staticTypeFlag);
     this.RECNAME = r;
     this.FIELDNAME = f;

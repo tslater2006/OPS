@@ -147,7 +147,7 @@ public class GlobalFnLibrary {
     }
 
     Environment.pushToCallStack(PTRowset.getSentinel().alloc(
-    DefnCache.getRecord(((PTString)args.get(0)).read())));
+        DefnCache.getRecord(((PTString)args.get(0)).read())));
   }
 
   public static void PT_CreateArray() {

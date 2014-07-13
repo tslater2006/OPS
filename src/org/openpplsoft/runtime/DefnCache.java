@@ -55,9 +55,7 @@ public final class DefnCache {
    */
   public static Record getRecord(final String recName) {
 
-    // Ignore requests for system records like PSXlATITEM.
-    if (recName == null || recName.length() == 0
-        || PSDefn.isSystemRecord(recName)) {
+    if (recName == null || recName.length() == 0){
       return null;
     }
 

@@ -622,8 +622,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final Callable call = this.getNodeCallable(ctx.expr());
     final PTType t = this.getNodeData(ctx.expr());
 
-    // null is used to separate call frames.
-    Environment.pushToCallStack(null);
+    Environment.pushToCallStack(PTCallFrameBoundary.getSentinel());
 
     // if args exist, push them onto the call stack.
     if (ctx.exprList() != null) {
@@ -651,16 +650,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     /*
-     * Pop the first value from the call stack. If it's null, the function
-     * did not emit a return value. If it's non-null, the next item on the stack
-     * must be the null separator (PeopleCode funcs can only return 1 value).
+     * Pop the first value from the call stack. If it's a call frame
+     * boundary, the function
+     * did not emit a return value. If it's not a call frame boundary
+     * the next item on the stack
+     * must be the boundary separator (PeopleCode funcs can only return 1 value).
      */
     final PTType a = Environment.popFromCallStack();
-    if (a != null) {
+    if (a != PTCallFrameBoundary.getSentinel()) {
       this.setNodeData(ctx, a);
     }
 
-    if (a != null && (Environment.popFromCallStack() != null)) {
+    if (a != PTCallFrameBoundary.getSentinel()
+         && (Environment.popFromCallStack() !=
+            PTCallFrameBoundary.getSentinel())) {
       throw new OPSVMachRuntimeException("More than one return value "
           + "was found on the call stack.");
     }
@@ -1476,7 +1479,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * Load arguments to constructor onto call stack if
        * args have been provided.
        */
-      Environment.pushToCallStack(null);
+      Environment.pushToCallStack(PTCallFrameBoundary.getSentinel());
       if (ctx.exprList() != null) {
         visit(ctx.exprList());
         for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
@@ -1492,9 +1495,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       this.supervisor.runImmediately(constructorCtx);
 
       // Constructors don't return anything
-      if(Environment.popFromCallStack() != null) {
+      if(Environment.popFromCallStack() !=
+          PTCallFrameBoundary.getSentinel()) {
         throw new OPSVMachRuntimeException("After invoking create statement, "
-            + "expected stack frame null separator, but found non-null instead.");
+            + "expected call frame boundary, but found data instead.");
       }
 
       this.repeatLastEmission();

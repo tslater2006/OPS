@@ -87,7 +87,7 @@ public class Environment {
 
   public static PTType popFromCallStack() {
     PTType p = callStack.pop();
-    log.debug("Pop\tCallStack\t\t" + (p == null ? "null" : p));
+    log.debug("Pop\tCallStack\t" + (p == null ? "null" : p));
     return p;
   }
 
@@ -161,7 +161,8 @@ public class Environment {
 
     List<PTType> args = new ArrayList<PTType>();
     PTType p;
-    while((p = Environment.peekAtCallStack()) != null) {
+    while((p = Environment.peekAtCallStack()) !=
+        PTCallFrameBoundary.getSentinel()) {
       args.add(Environment.popFromCallStack());
     }
 

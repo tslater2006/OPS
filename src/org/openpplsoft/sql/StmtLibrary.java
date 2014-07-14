@@ -394,17 +394,27 @@ public final class StmtLibrary {
       if (i > 0) { selectClause.append(","); }
       final String fieldname = rfList.get(i).FIELDNAME;
 
-      // Selected date fields must be wrapped with TO_CHAR directive.
+      /**
+       * For certain field types, wrap field names in
+       * appropriate function calls.
+       */
       if (rfList.get(i).getSentinelForUnderlyingValue()
           instanceof PTDate) {
         selectClause.append("TO_CHAR(").append(dottedAlias)
             .append(fieldname).append(",'YYYY-MM-DD')");
+
+      } else if (rfList.get(i).getSentinelForUnderlyingValue()
+          instanceof PTDateTime) {
+        selectClause.append("TO_CHAR(CAST((").append(dottedAlias)
+            .append(fieldname)
+            .append(") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')");
+
       } else {
         selectClause.append(dottedAlias).append(fieldname);
       }
     }
-    selectClause.append(" FROM PS_").append(recDefn.RECNAME)
-        .append(" ").append(tableAlias);
+    selectClause.append(" FROM ").append(recDefn
+        .getFullDatabaseRecordName()).append(" ").append(tableAlias);
 
     return selectClause.toString();
   }

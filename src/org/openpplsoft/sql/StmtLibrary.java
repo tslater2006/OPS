@@ -49,6 +49,7 @@ public final class StmtLibrary {
   private static Map<String, StaticSqlDefn> staticSqlDefns;
   private static Pattern bindIdxPattern;
   private static Pattern dateInPattern;
+  private static Pattern effDtCheckPattern;
 
   static {
     final ClassPathXmlApplicationContext ctx =
@@ -121,7 +122,10 @@ public final class StmtLibrary {
 
     // compile meta-SQL detection regex patterns.
     bindIdxPattern = Pattern.compile(":\\d+");
-    dateInPattern = Pattern.compile("%DATEIN\\((.+?)\\)");
+    dateInPattern = Pattern.compile("%(DATEIN|DateIn)\\((.+?)\\)");
+    effDtCheckPattern = Pattern.compile(
+      "%EffDtCheck\\(([A-Za-z_]+)\\s+([A-Za-z0-9_]+),"
+        + "\\s+([A-Za-z]+),\\s+(%[A-Za-z]+\\(\\?\\))\\)");
   }
 
   private StmtLibrary() {}
@@ -249,20 +253,57 @@ public final class StmtLibrary {
   public static OPSStmt prepareFillStmt(final Record recDefn,
       final String whereStr, final String[] bindVals) {
 
+    final String rootAlias = "FILL";
     final StringBuilder query = new StringBuilder(
-        generateSelectClause(recDefn, "FILL"));
+        generateSelectClause(recDefn, rootAlias));
 
     // Replace numeric bind sockets (":1") with "?".
     final Matcher bindIdxMatcher = bindIdxPattern.matcher(whereStr);
     String newWhereStr = bindIdxMatcher.replaceAll("?");
 
-    // Replace occurrences of %DATEIN(*) with TO_DATE(*,'YYYY-MM-DD')
+    // Expand any %EffDtCheck meta-SQL
+    final Matcher effDtCheckMatcher = effDtCheckPattern.matcher(newWhereStr);
+    while (effDtCheckMatcher.find()) {
+
+      final String effDtCheckRecord = effDtCheckMatcher.group(1);
+      final String effDtSubqueryAlias = effDtCheckMatcher.group(2);
+      final String effDtRootAlias = effDtCheckMatcher.group(3);
+      final String effDtBound = effDtCheckMatcher.group(4);
+
+      if(!rootAlias.equals(effDtRootAlias)) {
+        throw new OPSVMachRuntimeException("While preparing fill query, "
+          + "found %EffDtCheck that has a root alias (" + effDtRootAlias
+          + ") different than expected (" + rootAlias + ").");
+      }
+
+      StringBuilder effDtSubqueryBuilder = new StringBuilder(
+        "SELECT MAX(EFFDT) FROM ").append(effDtCheckRecord)
+        .append(" ").append(effDtSubqueryAlias).append(" WHERE");
+
+      final Record effDtRecord = DefnCache.getRecord(effDtCheckRecord);
+      for(Map.Entry<String, RecordField> cursor
+        : effDtRecord.fieldTable.entrySet()) {
+        final RecordField rf = cursor.getValue();
+        if(rf.isKey() && !rf.FIELDNAME.equals("EFFDT")) {
+          effDtSubqueryBuilder.append(" ").append(effDtSubqueryAlias)
+            .append(".").append(rf.FIELDNAME).append("=")
+            .append(effDtRootAlias).append(".").append(rf.FIELDNAME)
+            .append(" AND");
+        }
+      }
+
+      effDtSubqueryBuilder.append(" ").append(effDtSubqueryAlias)
+        .append(".EFFDT<=").append(effDtBound);
+
+      newWhereStr = effDtCheckMatcher.replaceAll(effDtRootAlias
+        + ".EFFDT=(" + effDtSubqueryBuilder.toString() + ")");
+    }
+
+    // Replace occurrences of %DATEIN/DateIn with TO_DATE(*,'YYYY-MM-DD')
     final Matcher dateInMatcher = dateInPattern.matcher(newWhereStr);
     while (dateInMatcher.find()) {
-
-      //log.debug("Found DATEIN: " + dateInMatcher.group(0));
       newWhereStr = dateInMatcher.replaceAll("TO_DATE("
-          + dateInMatcher.group(1) + ",'YYYY-MM-DD')");
+          + dateInMatcher.group(2) + ",'YYYY-MM-DD')");
     }
 
     query.append("  ").append(newWhereStr);

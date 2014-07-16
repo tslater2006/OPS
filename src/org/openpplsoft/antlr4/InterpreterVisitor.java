@@ -156,6 +156,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
   private void emitStmt(final String str) {
     /*
+     * Don't emit an End-If or End-For after emitting a Break.
+     */
+    if((str.equals("End-If") || str.equals("End-For"))
+        && ((this.lastEmission instanceof PCInstruction
+              && ((PCInstruction) this.lastEmission).getInstruction()
+                  .equals("Break")))) {
+      return;
+    }
+
+    /*
      * Don't emit an End-If statement after exiting a For loop
      * or If construct or if Else was previously seen.
      */

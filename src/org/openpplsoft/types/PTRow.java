@@ -109,13 +109,17 @@ public final class PTRow extends PTObjectType {
       throw new OPSVMachRuntimeException("Expected only one arg.");
     }
 
-    if(!(args.get(0) instanceof PTRecordLiteral)) {
+    PTRecord rec = null;
+    if(args.get(0) instanceof PTRecordLiteral) {
+      rec = this.getRecord(((PTRecordLiteral) args.get(0)).getRecName());
+    } else if (args.get(0) instanceof PTString) {
+      rec = this.getRecord(((PTString) args.get(0)).read());
+    } else {
       throw new OPSVMachRuntimeException("Expected arg to GetRecord() to "
-          + "be a PTRecordLiteral.");
+          + "be a PTRecordLiteral or PTString.");
     }
-    PTRecordLiteral recordLiteral = (PTRecordLiteral) args.get(0);
 
-    Environment.pushToCallStack(this.getRecord(recordLiteral.getRecName()));
+    Environment.pushToCallStack(rec);
   }
 
   @Override

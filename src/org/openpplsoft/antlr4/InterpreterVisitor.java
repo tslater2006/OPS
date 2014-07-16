@@ -46,7 +46,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private ParseTreeProperty<PTType> nodeData;
   private ParseTreeProperty<Callable> nodeCallables;
   private Stack<EvaluateConstruct> evalConstructStack;
-  private InterruptFlag interrupt;
   private IEmission lastEmission;
   private AccessLevel blockAccessLvl;
   private boolean hasVarDeclBeenEmitted;
@@ -425,7 +424,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     this.emitStmt(ctx);
     while (varId.isLessThanOrEqual(toExpr) == Environment.TRUE) {
-      visit(ctx.stmtList());
+
+      try {
+        visit(ctx.stmtList());
+      } catch (OPSBreakSignalException opsbse) {
+        break;
+      }
 
       // Increment and set new value of incrementing expression.
       final PTPrimitiveType incremented = (PTPrimitiveType) varId
@@ -443,13 +447,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * Called by ANTLR when a Break statement
    * is being visited in the parse tree.
    * @param ctx the associated ParseTree node
-   * @return null
+   * @return nothing; OPSVMachBreakSignalException is thrown
    */
   public Void visitStmtBreak(
       final PeopleCodeParser.StmtBreakContext ctx) {
     this.emitStmt(ctx);
-    this.interrupt = InterruptFlag.BREAK;
-    return null;
+    throw new OPSBreakSignalException();
   }
 
   /**
@@ -1326,10 +1329,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final List<PeopleCodeParser.WhenBranchContext> branches = ctx.whenBranch();
     for (PeopleCodeParser.WhenBranchContext branchCtx : branches) {
-      visit(branchCtx);
-      if (this.interrupt == InterruptFlag.BREAK) {
+      try {
+        visit(branchCtx);
+      } catch (OPSBreakSignalException opsbse) {
         evalConstruct.breakSeen = true;
-        this.interrupt = null;
         break;
       }
     }
@@ -1599,10 +1602,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     private EvaluateConstruct(final PTType p) {
       this.baseExpr = p;
     }
-  }
-
-  private enum InterruptFlag {
-    BREAK
   }
 }
 

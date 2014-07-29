@@ -35,6 +35,11 @@ public final class PTString extends PTPrimitiveType<String> {
   }
 
   @Override
+  public String readAsString() {
+    return this.s;
+  }
+
+  @Override
   public void write(final String newValue) {
     this.checkIsWriteable();
     this.s = newValue;

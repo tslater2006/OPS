@@ -40,6 +40,11 @@ public final class PTTime extends PTPrimitiveType<String> {
   }
 
   @Override
+  public String readAsString() {
+    return this.d;
+  }
+
+  @Override
   public void write(final String newValue) {
     this.checkIsWriteable();
     this.d = newValue;

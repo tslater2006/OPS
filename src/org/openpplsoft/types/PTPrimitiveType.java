@@ -14,6 +14,7 @@ public abstract class PTPrimitiveType<T> extends PTType {
   }
 
   public abstract T read();
+  public abstract String readAsString();
   public abstract void write(T newValue);
   public abstract void systemWrite(T newValue);
 

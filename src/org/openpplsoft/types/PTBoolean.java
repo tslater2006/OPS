@@ -26,6 +26,10 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     return this.b;
   }
 
+  public String readAsString() {
+    return this.b.toString();
+  }
+
   public void write(Boolean newValue) {
     this.checkIsWriteable();
     this.b = newValue;

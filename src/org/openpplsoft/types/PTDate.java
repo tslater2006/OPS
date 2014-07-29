@@ -42,6 +42,10 @@ public final class PTDate extends PTPrimitiveType<String> {
     return this.d;
   }
 
+  public String readAsString() {
+    return this.d;
+  }
+
   public void write(String newValue) {
     this.checkIsWriteable();
     this.d = newValue;

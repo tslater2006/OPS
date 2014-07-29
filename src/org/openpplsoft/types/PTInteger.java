@@ -29,6 +29,10 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
     return this.i;
   }
 
+  public String readAsString() {
+    return this.i.toString();
+  }
+
   public void write(Integer newValue) {
     this.checkIsWriteable();
     this.i = newValue;

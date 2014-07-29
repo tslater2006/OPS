@@ -19,6 +19,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
 
   private static Logger log = LogManager.getLogger(PTNumber.class.getName());
   private static Type staticTypeFlag = Type.NUMBER;
+
   private Double d;
 
   private PTNumber() {
@@ -27,6 +28,10 @@ public final class PTNumber extends PTPrimitiveType<Double> {
 
   public Double read() {
     return this.d;
+  }
+
+  public String readAsString() {
+    return d.toString();
   }
 
   public int read(PTInteger i) {

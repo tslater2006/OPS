@@ -334,7 +334,7 @@ public final class PTRowset extends PTObjectType {
     // Gather bind values following the WHERE string on the stack.
     final String[] bindVals = new String[args.size() - 1];
     for (int i = 1; i < args.size(); i++) {
-      bindVals[i - 1] = (String) ((PTPrimitiveType) args.get(i)).read();
+      bindVals[i - 1] = ((PTPrimitiveType) args.get(i)).readAsString();
       //log.debug("Fill query bind value {}: {}", i-1, bindVals[i-1]);
     }
 

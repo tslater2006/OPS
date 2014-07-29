@@ -50,7 +50,7 @@ public final class PTArray extends PTObjectType {
     if(index instanceof PTInteger) {
       idx = ((PTInteger)index).read();
     } else if(index instanceof PTNumber) {
-      idx = ((PTNumber)index).read(PTInteger.getSentinel());
+      idx = ((PTNumber)index).readAsInteger();
     } else {
       throw new OPSVMachRuntimeException("Unexpected type for index.");
     }

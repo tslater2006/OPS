@@ -130,7 +130,7 @@ public final class PTRowset extends PTObjectType {
     if (iterExpr instanceof PTInteger) {
       idx = ((PTInteger) iterExpr).read();
     } else if (iterExpr instanceof PTNumber) {
-      idx = ((PTNumber) iterExpr).read(PTInteger.getSentinel());
+      idx = ((PTNumber) iterExpr).readAsInteger();
     } else {
       throw new OPSVMachRuntimeException("Expected iterExpr to be"
           + " either integer or Number.");

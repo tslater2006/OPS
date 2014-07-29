@@ -20,6 +20,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   private static Logger log = LogManager.getLogger(PTNumber.class.getName());
   private static Type staticTypeFlag = Type.NUMBER;
 
+  private boolean isInteger;
   private Double d;
 
   private PTNumber() {
@@ -31,25 +32,36 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   }
 
   public String readAsString() {
+    if(this.isInteger) {
+      return Integer.toString(this.d.intValue());
+    }
     return d.toString();
   }
 
-  public int read(PTInteger i) {
+  /**
+   * TODO(mquinn): This could cause issues due to loss of precision;
+   * although this maybe intentional in alot of cases (i.e., 1.0 to 1
+   * in loop counters), it could be the cause of future problems.
+   */
+  public int readAsInteger() {
     return this.d.intValue();
   }
 
   public void write(int newValue) {
-        this.checkIsWriteable();
+    this.checkIsWriteable();
+    this.isInteger = true;
     this.d = new Double(newValue);
   }
 
   public void write(Double newValue) {
     this.checkIsWriteable();
+    this.isInteger = false;
     this.d = newValue;
   }
 
   public void systemWrite(Double newValue) {
     this.checkIsSystemWriteable();
+    this.isInteger = false;
     this.d = newValue;
   }
 

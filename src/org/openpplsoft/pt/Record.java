@@ -71,6 +71,7 @@ public class Record {
             rs.getString("FIELDNAME").trim(), rs.getInt("FIELDTYPE"));
         f.USEEDIT = rs.getInt("USEEDIT");
         f.FIELDNUM = rs.getInt("FIELDNUM");
+        f.LENGTH = rs.getInt("LENGTH");
         this.fieldTable.put(f.FIELDNAME, f);
         this.fldAndSubrecordTable.put(f.FIELDNUM, f);
           i++;

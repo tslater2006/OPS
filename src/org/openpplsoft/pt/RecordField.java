@@ -17,6 +17,7 @@ public class RecordField {
   public String FIELDNAME;
   public int USEEDIT;
   public int FIELDNUM;
+  public int LENGTH;
   private int typeFlag;
 
   private final int KEY_FLAG = 1;
@@ -36,9 +37,13 @@ public class RecordField {
 
   public PTType getSentinelForUnderlyingValue() {
     switch(this.typeFlag) {
-      case 0:
-        return PTString.getSentinel();
-      case 1: // TODO: 0 is char, 1 is long char: should I distinguish?
+      case 0:  // char
+        if(this.LENGTH == 1) {
+          return PTChar.getSentinel();
+        } else {
+          return PTString.getSentinel();
+        }
+      case 1: // long char
         return PTString.getSentinel();
       case 2:
         return PTNumber.getSentinel();

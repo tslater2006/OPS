@@ -1333,6 +1333,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.emitStmt(ctx);
 
     visit(ctx.expr());
+
+    log.debug("Interpreting Evaluate stmt; conditional value is {}",
+      this.getNodeData(ctx.expr()));
+
     final EvaluateConstruct evalConstruct = new EvaluateConstruct(
         this.getNodeData(ctx.expr()));
     this.evalConstructStack.push(evalConstruct);
@@ -1392,12 +1396,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         (ctx.stmtList().getChildCount() == 0);
 
     /*
-     * If p1.equals(p2), we have reached a When branch that evaluates
+     * If p1 equals p2, we have reached a When branch that evaluates
      * to true; if they aren't equal, we must still check if we saw a true
      * branch expr earlier b/c control may be falling through When branches
      * (occurs until a Break is seen or the Evaluate statement ends).
      */
-    if (p1.equals(p2) || evalConstruct.trueBranchExprSeen) {
+    PTBoolean eq = ((PTPrimitiveType) p1).isEqual((PTPrimitiveType) p2);
+    if (eq == Environment.TRUE || evalConstruct.trueBranchExprSeen) {
       evalConstruct.trueBranchExprSeen = true;
       visit(ctx.stmtList());
     }

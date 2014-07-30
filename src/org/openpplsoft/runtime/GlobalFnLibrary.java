@@ -245,9 +245,19 @@ public class GlobalFnLibrary {
        * TODO(mquinn): Read CLOB and chars from ResultSet rather than
        * as string.
        */
+      case CHAR:
+        if(colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
+          ((PTChar) fldObj.getValue()).write(
+            rs.getString(colName));
+        } else {
+          throw new OPSVMachRuntimeException("Unexpected db " +
+            "type for Type.CHAR: " + colTypeName + "; " +
+            "colName=" + colName);
+        }
+        break;
       case STRING:
-        if(colTypeName.equals("VARCHAR2") || colTypeName.equals("CHAR")
-            || colTypeName.equals("CLOB")) {
+        if(colTypeName.equals("VARCHAR2") || colTypeName.equals("CLOB")
+            || colTypeName.equals("CHAR")) {
           ((PTString) fldObj.getValue()).write(
             rs.getString(colName));
         } else {

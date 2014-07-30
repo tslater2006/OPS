@@ -201,7 +201,11 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder(super.toString());
-    b.append(",d=").append(this.d);
+    if(this.isInteger) {
+      b.append(",d(int)=").append(this.d.intValue());
+    } else {
+      b.append(",d=").append(this.d);
+    }
     return b.toString();
   }
 }

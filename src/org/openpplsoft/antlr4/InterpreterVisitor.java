@@ -438,6 +438,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       try {
         visit(ctx.stmtList());
       } catch (OPSBreakSignalException opsbse) {
+        this.emitStmt("Break");
         break;
       }
 
@@ -455,13 +456,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
   /**
    * Called by ANTLR when a Break statement
-   * is being visited in the parse tree.
+   * is being visited in the parse tree. The Break statement
+   * is *NOT* emitted by this method; it must be emitted when
+   * the exception is caught.
    * @param ctx the associated ParseTree node
    * @return nothing; OPSVMachBreakSignalException is thrown
    */
   public Void visitStmtBreak(
       final PeopleCodeParser.StmtBreakContext ctx) {
-    this.emitStmt(ctx);
     throw new OPSBreakSignalException();
   }
 
@@ -1342,10 +1344,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.evalConstructStack.push(evalConstruct);
 
     final List<PeopleCodeParser.WhenBranchContext> branches = ctx.whenBranch();
-    for (PeopleCodeParser.WhenBranchContext branchCtx : branches) {
+    for (int i = 0; i < branches.size(); i++) {
+      PeopleCodeParser.WhenBranchContext branchCtx = branches.get(i);
       try {
         visit(branchCtx);
       } catch (OPSBreakSignalException opsbse) {
+
+        // If this is the last When branch, the Break is self-evident
+        // and should not be emitted.
+        if(i < (branches.size() - 1)) {
+          this.emitStmt("Break");
+        }
+
         evalConstruct.breakSeen = true;
         break;
       }

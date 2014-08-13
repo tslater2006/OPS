@@ -130,7 +130,8 @@ public final class PTRecordLiteral extends PTObjectType {
 
     if(!rStr.startsWith("Record.")) {
       throw new OPSVMachRuntimeException("Expected rStr to start "
-          + "with 'Record.' while alloc'ing PTRecordLiteral.");
+          + "with 'Record.' while alloc'ing PTRecordLiteral; rStr = "
+          + rStr);
     }
     Record r = DefnCache.getRecord(rStr.replaceFirst("Record.", ""));
     final PTRecordLiteral newObj = new PTRecordLiteral(r);

@@ -608,6 +608,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       output = PTMenuLiteral.getSentinel().alloc(input);
     } else if (input.startsWith("BarName.")) {
       output = PTMenuBarLiteral.getSentinel().alloc(input);
+    } else if (input.startsWith("ItemName.")) {
+      output = PTMenuItemLiteral.getSentinel().alloc(input);
     } else {
       throw new OPSVMachRuntimeException("Unsupported dynamic reference "
           + "attempt: " + input);

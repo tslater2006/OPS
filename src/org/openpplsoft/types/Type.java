@@ -14,7 +14,7 @@ package org.openpplsoft.types;
 public enum Type {
   STRING, BOOLEAN, INTEGER, DEFN_LITERAL, RECORD, FIELD,
   APP_CLASS_OBJ, ARRAY, DATE, ROWSET, NUMBER, ROW, REC_LITERAL,
-  FLD_LITERAL, DATETIME, TIME, CHAR,
+  FLD_LITERAL, MENU_LITERAL, DATETIME, TIME, CHAR,
 
   // Separates call frames on the OPS runtime stack.
   CALL_FRAME_BOUNDARY

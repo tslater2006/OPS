@@ -601,10 +601,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     String input = ((PTString) this.getNodeData(ctx.expr())).read();
-    PTType output = PTRecordLiteral.getSentinel().alloc(input);
-    log.debug("Translating dynamic reference input {} to {}",
-        input, output);
+    PTType output;
+    if (input.startsWith("Record.")) {
+      output = PTRecordLiteral.getSentinel().alloc(input);
+    } else if (input.startsWith("MenuName.")) {
+      output = PTMenuLiteral.getSentinel().alloc(input);
+    } else {
+      throw new OPSVMachRuntimeException("Unsupported dynamic reference "
+          + "attempt: " + input);
+    }
 
+    log.debug("Translated dynamic reference input {} to {}",
+        input, output);
     this.setNodeData(ctx, output);
     return null;
   }

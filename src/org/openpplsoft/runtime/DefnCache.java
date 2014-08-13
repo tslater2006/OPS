@@ -26,6 +26,7 @@ public final class DefnCache {
   private static Map<String, PeopleCodeProg> programs;
   private static Map<String, Page> pages;
   private static Map<String, AppPackage> appPackages;
+  private static Map<String, Menu> menus;
 
   private static Logger log = LogManager.getLogger(DefnCache.class.getName());
 
@@ -34,6 +35,7 @@ public final class DefnCache {
     programs = new HashMap<String, PeopleCodeProg>();
     pages = new HashMap<String, Page>();
     appPackages = new HashMap<String, AppPackage>();
+    menus = new HashMap<String, Menu>();
   }
 
   private DefnCache() {}
@@ -136,5 +138,20 @@ public final class DefnCache {
    */
   public static PeopleCodeProg getProgram(final String progDescriptor) {
     return programs.get(progDescriptor);
+  }
+
+  /**
+   * Retrieve a menu from the cache by menu name.
+   * @param menuName the MENUNAME of the menu to retrieve
+   * @return the cached menu, or null if not in cache
+   */
+  public static Menu getMenu(final String menuName) {
+    Menu m = menus.get(menuName);
+    if (m == null) {
+      log.debug("Caching menu defn for {}", menuName);
+      m = new Menu(menuName);
+      menus.put(m.getMenuName(), m);
+    }
+    return m;
   }
 }

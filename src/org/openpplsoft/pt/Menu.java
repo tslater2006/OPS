@@ -61,5 +61,13 @@ public class Menu {
       }
     }
   }
+
+  /**
+   * Retrieve the MENUNAME for this Menu.
+   * @return the menu's MENUNAME value
+   */
+  public String getMenuName() {
+    return this.ptMENUNAME;
+  }
 }
 

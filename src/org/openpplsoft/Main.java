@@ -62,7 +62,7 @@ public final class Main {
 
       final Component c = new Component(
           (String) Environment.getSystemVar("%Component").read(), "GBL");
-      final Menu m = new Menu(
+      final Menu m = DefnCache.getMenu(
           (String) Environment.getSystemVar("%Menu").read());
 
       c.getListOfComponentPC();

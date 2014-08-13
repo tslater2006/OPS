@@ -32,7 +32,7 @@ public class Environment {
   private static Stack<PTType> callStack;
 
   private static String[] supportedGlobalVars = {"%EmployeeId",
-    "%OperatorId", "%Menu", "%Component"};
+    "%OperatorId", "%Menu", "%Component", "%Action_UpdateDisplay"};
 
   private static Logger log = LogManager.getLogger(Environment.class.getName());
 
@@ -62,6 +62,12 @@ public class Environment {
       systemVarTable.put(varName, (PTString)PTString.getSentinel()
                         .alloc().setReadOnly());
     }
+
+    // Set up constant system variables (these will never change during runtime).
+    PTString actionUpdateDisplay = (PTString) PTString.getSentinel().alloc();
+    actionUpdateDisplay.write("U");
+    actionUpdateDisplay.setReadOnly();
+    systemVarTable.put("Action_UpdateDisplay", actionUpdateDisplay);
 
     // Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
     systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));

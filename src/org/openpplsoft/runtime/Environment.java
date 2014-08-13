@@ -67,7 +67,7 @@ public class Environment {
     PTString actionUpdateDisplay = (PTString) PTString.getSentinel().alloc();
     actionUpdateDisplay.write("U");
     actionUpdateDisplay.setReadOnly();
-    systemVarTable.put("Action_UpdateDisplay", actionUpdateDisplay);
+    systemVarTable.put("%Action_UpdateDisplay", actionUpdateDisplay);
 
     // Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
     systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));

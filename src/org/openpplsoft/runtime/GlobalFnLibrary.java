@@ -10,6 +10,8 @@ package org.openpplsoft.runtime;
 import java.sql.*;
 import java.util.*;
 import java.util.regex.*;
+
+import org.openpplsoft.sql.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.buffers.*;
 import org.openpplsoft.types.*;
@@ -215,7 +217,57 @@ public class GlobalFnLibrary {
   }
 
   public static void PT_IsMenuItemAuthorized() {
-    throw new OPSVMachRuntimeException("Need to implement IsMenuItemAuthorized.");
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(!(args.get(0) instanceof PTMenuLiteral)
+        || !(args.get(1) instanceof PTMenuBarLiteral)
+        || !(args.get(2) instanceof PTMenuItemLiteral)
+        || !(args.get(3) instanceof PTPageLiteral)
+        || !(args.get(4) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("The arguments provided to "
+          + "IsMenuItemAuthorized do not match the expected types.");
+    }
+
+    String[] bindVals = {
+      ((PTMenuLiteral) args.get(0)).getMenuName(),
+      ((PTMenuBarLiteral) args.get(1)).getMenuBarName(),
+      ((PTMenuItemLiteral) args.get(2)).getMenuItemName(),
+      ((PTPageLiteral) args.get(3)).getPageName(),
+      ((PTString) Environment.getSystemVar("%OperatorId")).read()
+    };
+
+    /*
+     * IMPORTANT NOTE:
+     * The SQL retrieved here was handwritten by me (MQUINN) and not
+     * based on anything found in a tracefile, since there are no SQL
+     * stmts in/around the areas where IsMenuItemAuthorized is called in
+     * the tracefiles I have at this point. Keep this in mind in the event
+     * of future issues / changes.
+     */
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
+        "query.PSAUTHITEM_PSOPRCLS_IsMenuItemAuthorized",
+        bindVals);
+    ResultSet rs = null;
+
+    try {
+      rs = ostmt.executeQuery();
+      while (rs.next()) {
+        log.debug("Permission List: {}", rs.getString("PERMISSION_LIST_NAME"));
+        log.debug("Authorizedactions: {}", rs.getInt("AUTHORIZEDACTIONS"));
+      }
+    } catch (final java.sql.SQLException sqle) {
+      log.fatal(sqle.getMessage(), sqle);
+      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+    } finally {
+      try {
+        if (rs != null) { rs.close(); }
+        if (ostmt != null) { ostmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close rs and/or ostmt in finally block.");
+      }
+    }
+
+    throw new OPSVMachRuntimeException("TODO: Complete IsMenuItemAuthorized");
   }
 
   /*==================================*/

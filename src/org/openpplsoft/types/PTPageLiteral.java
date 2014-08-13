@@ -20,11 +20,10 @@ public final class PTPageLiteral extends PTObjectType {
   private static Type staticTypeFlag = Type.PAGE_LITERAL;
 
   private String ptPNLNAME;
-  private Page pageDefn;
 
   /**
    * Creates a new page literal object that isn't
-   * attached to a page defn; can only be called by
+   * attached to a page name; can only be called by
    * an internal method.
    */
   private PTPageLiteral() {
@@ -35,12 +34,11 @@ public final class PTPageLiteral extends PTObjectType {
    * Creates a new page literal that is attached to a
    * specific page defn; can only be called by an internal
    * method.
-   * @param p the page defn to attach
+   * @param pnlname the page name to attach
    */
-  private PTPageLiteral(final Page p) {
+  private PTPageLiteral(final String pnlname) {
     super(staticTypeFlag);
-    this.ptPNLNAME = p.getPNLNAME();
-    this.pageDefn = p;
+    this.ptPNLNAME = pnlname;
   }
 
   /**
@@ -92,18 +90,6 @@ public final class PTPageLiteral extends PTObjectType {
   }
 
   /**
-   * Allocates a new page literal object with a page defn
-   * attached.
-   * @param p the page defn to attach
-   * @return the newly allocated page literal object
-   */
-  public PTPageLiteral alloc(final Page p) {
-    final PTPageLiteral newObj = new PTPageLiteral(p);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  /**
    * Allocates a new page literal object and attaches it
    * to the page defn named in the provided argument.
    * @param pStr the page name, prefixed with "Page."
@@ -116,8 +102,9 @@ public final class PTPageLiteral extends PTObjectType {
           + "with 'Page.' while alloc'ing PTPageLiteral; pStr = "
           + pStr);
     }
-    Page p = DefnCache.getPage(pStr.replaceFirst("Page.", ""));
-    final PTPageLiteral newObj = new PTPageLiteral(p);
+
+    final PTPageLiteral newObj = new PTPageLiteral(
+        pStr.replaceFirst("Page.", ""));
     PTType.clone(this, newObj);
     return newObj;
   }

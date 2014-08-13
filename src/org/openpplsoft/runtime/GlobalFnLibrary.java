@@ -214,6 +214,10 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(newArray);
   }
 
+  public static void PT_IsMenuItemAuthorized() {
+    throw new OPSVMachRuntimeException("Need to implement IsMenuItemAuthorized.");
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

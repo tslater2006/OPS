@@ -236,6 +236,8 @@ public class GlobalFnLibrary {
       ((PTString) Environment.getSystemVar("%OperatorId")).read()
     };
 
+    final String actionMode = ((PTString) args.get(4)).read();
+
     /*
      * IMPORTANT NOTE:
      * The SQL retrieved here was handwritten by me (MQUINN) and not
@@ -251,9 +253,36 @@ public class GlobalFnLibrary {
 
     try {
       rs = ostmt.executeQuery();
+
+      /*
+       * Iterate over each record in the resultset; we are looking for
+       * the first one that allows the user to access the requested menu item
+       * in the mode provided as an argument.
+       * NOTE: I am checking simple equality b/w the mode arg and
+       * AUTHORIZEDACTIONS for now. AUTHORIZEDACTIONS is actually a bit mask.
+       * See the following for more information:
+       * - http://www.erpassociates.com/peoplesoft-corner-weblog/security/secrets-of-psauthitem.html
+       * - http://peoplesoftwiki.blogspot.com/2009/12/finding-barname-itemname-and-all-about.html
+       * - http://peoplesoft.ittoolbox.com/groups/technical-functional/peopletools-l/how-to-interpret-authorizedactons-with-components-under-barname-3522093
+       */
       while (rs.next()) {
-        log.debug("Permission List: {}", rs.getString("PERMISSION_LIST_NAME"));
-        log.debug("Authorizedactions: {}", rs.getInt("AUTHORIZEDACTIONS"));
+        final String permList = rs.getString("PERMISSION_LIST_NAME");
+        final int authorizedActions = rs.getInt("AUTHORIZEDACTIONS");
+
+        log.debug("IsMenuItemAuthorized: Checking: "
+            + "Permission List: {}; AUTHORIZEDACTIONS: {}",
+            rs.getString("PERMISSION_LIST_NAME"),
+            rs.getInt("AUTHORIZEDACTIONS"));
+
+        /*
+         * TODO(mquinn): This mapping is done adhoc right now, but once
+         * more action modes are added, an enum should be use; see the links
+         * listed above for exact mappings.
+         */
+        if (authorizedActions == 3 && actionMode.equals("U")) {
+          Environment.pushToCallStack(Environment.TRUE);
+          return;
+        }
       }
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
@@ -267,7 +296,9 @@ public class GlobalFnLibrary {
       }
     }
 
-    throw new OPSVMachRuntimeException("TODO: Complete IsMenuItemAuthorized");
+    // If no record permitted access for the given actionMode,
+    // access to the menu item is not authorized.
+    Environment.pushToCallStack(Environment.FALSE);
   }
 
   /*==================================*/

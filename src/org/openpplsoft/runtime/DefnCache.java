@@ -22,6 +22,7 @@ import org.openpplsoft.pt.peoplecode.*;
  */
 public final class DefnCache {
 
+  private static Map<String, Component> components;
   private static Map<String, Record> records;
   private static Map<String, PeopleCodeProg> programs;
   private static Map<String, Page> pages;
@@ -31,6 +32,7 @@ public final class DefnCache {
   private static Logger log = LogManager.getLogger(DefnCache.class.getName());
 
   static {
+    components = new HashMap<String, Component>();
     records = new HashMap<String, Record>();
     programs = new HashMap<String, PeopleCodeProg>();
     pages = new HashMap<String, Page>();
@@ -39,6 +41,31 @@ public final class DefnCache {
   }
 
   private DefnCache() {}
+
+  /**
+   * Retrieve a component defn from the cache. If no cache entry
+   * exists for the component, create one and initialize it.
+   * @param pnlgrpname the name of the component defn to retrieve/cache.
+   * @param market the name of the market for the component defn
+   * @return the cached record defn
+   */
+  public static Component getComponent(final String pnlgrpname,
+      final String market) {
+
+    if (pnlgrpname == null || pnlgrpname.length() == 0
+        || market == null || market.length() == 0){
+      return null;
+    }
+
+    final String key = pnlgrpname.concat(".").concat(market);
+    Component c = components.get(key);
+    if (c == null) {
+      log.debug("Caching component defn for {}", key);
+      c = new Component(pnlgrpname, market);
+      components.put(key, c);
+    }
+    return c;
+  }
 
   /**
    * Check if a record definition has been cached.

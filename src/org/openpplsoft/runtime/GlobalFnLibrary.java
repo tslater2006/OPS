@@ -217,6 +217,7 @@ public class GlobalFnLibrary {
   }
 
   public static void PT_IsMenuItemAuthorized() {
+
     List<PTType> args = Environment.getArgsFromCallStack();
 
     if(!(args.get(0) instanceof PTMenuLiteral)
@@ -237,6 +238,19 @@ public class GlobalFnLibrary {
     };
 
     final String actionMode = ((PTString) args.get(4)).read();
+
+    /*
+     * First, get the menu defn provided and ensure that all of the
+     * referenced component defns have been loaded into the defn cache.
+     * At this time, nothing is done with these component defns within this
+     * implementation of IsMenuItemAuthorized. However, this is clearly being
+     * done by the PT implementation, and since component defn SQL is enforced,
+     * it must also be done here as well in order to pass tracefile verification.
+     * TODO(mquinn): Note that this can potentially be skipped if/when running in
+     * an optimized mode that does not verify against a tracefile.
+     */
+    final Menu menuDefn = DefnCache.getMenu(bindVals[0]);
+    menuDefn.loadReferencedComponents();
 
     /*
      * IMPORTANT NOTE:
@@ -280,6 +294,7 @@ public class GlobalFnLibrary {
          * listed above for exact mappings.
          */
         if (authorizedActions == 3 && actionMode.equals("U")) {
+          log.debug("IsMenuItemAuthorized: found permissible record, returning True.");
           Environment.pushToCallStack(Environment.TRUE);
           return;
         }
@@ -298,6 +313,8 @@ public class GlobalFnLibrary {
 
     // If no record permitted access for the given actionMode,
     // access to the menu item is not authorized.
+    log.debug("IsMenuItemAuthorized: no permissible records found,"
+      + " returning False.");
     Environment.pushToCallStack(Environment.FALSE);
   }
 

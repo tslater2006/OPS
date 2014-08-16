@@ -60,7 +60,7 @@ public final class Main {
       Environment.setSystemVar("%OperatorId", "KADAMS");
       Environment.setSystemVar("%EmployeeId", "AA0001");
 
-      final Component c = new Component(
+      final Component c = DefnCache.getComponent(
           (String) Environment.getSystemVar("%Component").read(), "GBL");
       final Menu m = DefnCache.getMenu(
           (String) Environment.getSystemVar("%Menu").read());

@@ -10,6 +10,9 @@ package org.openpplsoft.pt;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +27,7 @@ public class Menu {
   private static Logger log = LogManager.getLogger(Menu.class.getName());
 
   private String ptMENUNAME;
+  private List<MenuItem> menuItems;
 
   /**
    * Create a representation of the menu defn with the
@@ -32,6 +36,7 @@ public class Menu {
    */
   public Menu(final String menuname) {
     this.ptMENUNAME = menuname;
+    this.menuItems = new ArrayList<MenuItem>();
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSMENUDEFN",
         new String[]{this.ptMENUNAME});
@@ -47,8 +52,17 @@ public class Menu {
       ostmt = StmtLibrary.getStaticSQLStmt("query.PSMENUITEM",
           new String[]{this.ptMENUNAME});
       rs = ostmt.executeQuery();
-      //Do nothing with records for now.
-      rs.next();
+
+      while(rs.next())  {
+        if (rs.getInt("ITEMTYPE") == 5) {
+          MenuItem item = new MenuItem();
+          item.BARNAME = rs.getString("BARNAME");
+          item.ITEMNAME = rs.getString("ITEMNAME");
+          item.PNLGRPNAME = rs.getString("PNLGRPNAME");
+          item.MARKET = rs.getString("MARKET");
+          this.menuItems.add(item);
+        }
+      }
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
       System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
@@ -62,12 +76,26 @@ public class Menu {
     }
   }
 
+  public void loadReferencedComponents() {
+    log.debug("Loading all components referenced by Menu.{}...",
+      this.ptMENUNAME);
+    for (MenuItem item : this.menuItems) {
+      DefnCache.getComponent(item.PNLGRPNAME, item.MARKET);
+    }
+    log.debug("Done loading all components referenced by Menu.{}",
+      this.ptMENUNAME);
+  }
+
   /**
    * Retrieve the MENUNAME for this Menu.
    * @return the menu's MENUNAME value
    */
   public String getMenuName() {
     return this.ptMENUNAME;
+  }
+
+  private class MenuItem {
+    private String BARNAME, ITEMNAME, PNLGRPNAME, MARKET;
   }
 }
 

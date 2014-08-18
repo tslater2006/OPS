@@ -28,6 +28,7 @@ public final class DefnCache {
   private static Map<String, Page> pages;
   private static Map<String, AppPackage> appPackages;
   private static Map<String, Menu> menus;
+  private static Map<Integer, MsgSet> msgSets;
 
   private static Logger log = LogManager.getLogger(DefnCache.class.getName());
 
@@ -38,6 +39,7 @@ public final class DefnCache {
     pages = new HashMap<String, Page>();
     appPackages = new HashMap<String, AppPackage>();
     menus = new HashMap<String, Menu>();
+    msgSets = new HashMap<Integer, MsgSet>();
   }
 
   private DefnCache() {}
@@ -178,6 +180,21 @@ public final class DefnCache {
       log.debug("Caching menu defn for {}", menuName);
       m = new Menu(menuName);
       menus.put(m.getMenuName(), m);
+    }
+    return m;
+  }
+
+  /**
+   * Retrieve a msg set from the cache by msg set number.
+   * @param msgSetNum the MESSAGE_SET_NBR of the msg set to retrieve
+   * @return the cached msg set, or null if not in cache
+   */
+  public static MsgSet getMsgSet(final int msgSetNum) {
+    MsgSet m = msgSets.get(msgSetNum);
+    if (m == null) {
+      log.debug("Caching msg set defn for {}", msgSetNum);
+      m = new MsgSet(msgSetNum);
+      msgSets.put(m.getMsgSetNbr(), m);
     }
     return m;
   }

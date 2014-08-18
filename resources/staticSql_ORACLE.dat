@@ -184,3 +184,19 @@ where a.MENUNAME = ?
   and a.BARITEMNAME = ?
   and a.PNLITEMNAME = ?
   and b.OPRID = ?
+
+=!========================================================================
+
+###[label]:   query.PSMSGSETDEFN
+#[enforced]:  true
+SELECT VERSION, DESCR FROM PSMSGSETDEFN WHERE MESSAGE_SET_NBR = ?
+
+=!========================================================================
+
+###[label]:   query.PSMSGCATDEFN
+#[enforced]:  true
+SELECT MESSAGE_NBR, MESSAGE_TEXT, 
+MSG_SEVERITY,    DESCRLONG, 
+TO_CHAR(CAST((LAST_UPDATE_DTTM) AS TIMESTAMP),
+'YYYY-MM-DD-HH24.MI.SS.FF') FROM PSMSGCATDEFN 
+WHERE MESSAGE_SET_NBR = ? ORDER BY MESSAGE_NBR

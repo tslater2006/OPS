@@ -10,7 +10,9 @@ package org.openpplsoft.pt;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +34,7 @@ public class Page {
   private List<PgToken> secpages;
   private List<PgToken> tokens;
   private PeopleCodeProg pageActivateProg;
+  private Set<Integer> referencedMsgSets;
   private boolean hasInitialized, hasDiscoveredPagePC;
 
   /**
@@ -82,6 +85,7 @@ public class Page {
       this.subpages = new ArrayList<PgToken>();
       this.secpages = new ArrayList<PgToken>();
       this.tokens = new ArrayList<PgToken>();
+      this.referencedMsgSets = new LinkedHashSet<Integer>();
 
       ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLFIELD",
           new String[]{this.ptPNLNAME});
@@ -99,6 +103,16 @@ public class Page {
         pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
         pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
         pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
+
+        /*
+         * IMPORTANT NOTE: If you are having issues related to extraneous/missing
+         * emissions of PSMSGSETDEFN/PSMSGCATDEFN, add/move/del calls to get msg
+         * set from cache using this nbr; I do not know the exact enumeration of
+         * FIELDTYPE values for which the msg set should be retrieved, but the
+         * cases under which such calls do appear have been verified as being
+         * required during tracefile verification.
+         */
+        int msgSetNbr = rs.getInt("GRDLBLMSGSET");
 
         switch (rs.getInt("FIELDTYPE")) {
           case PSDefn.PageFieldType.STATIC_TEXT:
@@ -128,6 +142,7 @@ public class Page {
           case PSDefn.PageFieldType.PUSHBTN_LINK_INST_MSG_ACTION:
             pf.flags.add(PFlag.PUSHBTN_LINK);
             this.tokens.add(pf);
+            if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
             break;
           case PSDefn.PageFieldType.SECPAGE:
             pf.flags.add(PFlag.PAGE);
@@ -149,6 +164,7 @@ public class Page {
                   + "either a blank RECNAME "
                   + "or FIELDNAME was encountered.");
             }
+            if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
           }
         }
       } catch (final java.sql.SQLException sqle) {
@@ -170,6 +186,7 @@ public class Page {
    */
   public void recursivelyLoadSubpages() {
     final Page loadedPage = DefnCache.getPage(this.ptPNLNAME);
+
     for (PgToken tok : loadedPage.subpages) {
       final Page p = DefnCache.getPage(tok.SUBPNLNAME);
       p.recursivelyLoadSubpages();
@@ -273,6 +290,19 @@ public class Page {
       } catch (final java.sql.SQLException sqle) {
         log.warn("Unable to close rs and/or ostmt in finally block.");
       }
+    }
+  }
+
+  /**
+   * Caches the msg sets referenced by the fields on this page. Note
+   * that this is required for tracefile verification, as the msgset
+   * queries are enforced. This can be skipped for optimal performance
+   * if tracefile verification is not needed.
+   * TODO(mquinn): Make this a nop when running with tracefile verification.
+   */
+  public void cacheReferencedMsgSets() {
+    for (int msgSet : this.referencedMsgSets) {
+      DefnCache.getMsgSet(msgSet);
     }
   }
 }

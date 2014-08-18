@@ -318,6 +318,11 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(Environment.FALSE);
   }
 
+  public static void PT_MsgGetText() {
+    List<PTType> args = Environment.getArgsFromCallStack();
+    throw new OPSVMachRuntimeException("TODO: Implement MsgGetText");
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

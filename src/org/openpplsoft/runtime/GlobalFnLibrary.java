@@ -32,6 +32,13 @@ public class GlobalFnLibrary {
       return doesContainValue(((PTField)p).getValue());
     } else if(p instanceof PTString) {
       return ((PTString)p).read() != null && !((PTString)p).read().equals(" ");
+    } else if(p instanceof PTRecord) {
+      /*
+       * IMPORTANT: I am not sure if this is accurate. PT documentation
+       * does not explicitly mention when a record is considered to logically
+       * be blank/empty.
+       */
+      return (((PTRecord) p).getRecDefn() != null);
     } else {
       throw new OPSVMachRuntimeException("Unexpected data type passed " +
         "to doesContainValue(ptdt).");

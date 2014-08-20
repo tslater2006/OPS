@@ -11,7 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +29,7 @@ public class MsgSet {
   private static Logger log = LogManager.getLogger(MsgSet.class.getName());
 
   private int ptMESSAGE_SET_NBR;
+  private Map<Integer, String> messages;
 
   /**
    * Create a representation of the msg set defn with the
@@ -51,9 +54,10 @@ public class MsgSet {
           new String[]{""+this.ptMESSAGE_SET_NBR});
       rs = ostmt.executeQuery();
 
+      this.messages = new HashMap<Integer, String>();
       while(rs.next())  {
-        // Do nothing with records for now.
-        // TODO: Store individual entries.
+        this.messages.put(rs.getInt("MESSAGE_NBR"),
+            rs.getString("MESSAGE_TEXT"));
       }
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
@@ -74,6 +78,10 @@ public class MsgSet {
    */
   public int getMsgSetNbr() {
     return this.ptMESSAGE_SET_NBR;
+  }
+
+  public String getMessage(final int msgNbr) {
+    return this.messages.get(msgNbr);
   }
 }
 

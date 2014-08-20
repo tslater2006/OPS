@@ -319,8 +319,34 @@ public class GlobalFnLibrary {
   }
 
   public static void PT_MsgGetText() {
+
     List<PTType> args = Environment.getArgsFromCallStack();
-    throw new OPSVMachRuntimeException("TODO: Implement MsgGetText");
+
+    if(args.size() != 3) {
+      throw new OPSVMachRuntimeException("Expected exactly 3 args to "
+          + "MsgGetText; altho var args to this fn are legal (see PT "
+          + "reference for defn) they are not supported at this time.");
+    }
+
+    if(!(args.get(0) instanceof PTNumber)
+        || !(args.get(1) instanceof PTNumber)
+        || !(args.get(2) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("The arguments provided to "
+          + "MsgGetText do not match the expected types.");
+    }
+
+    final int msgSetNbr = ((PTNumber) args.get(0)).readAsInteger();
+    final MsgSet msgSet = DefnCache.getMsgSet(msgSetNbr);
+
+    final int msgNbr = ((PTNumber) args.get(1)).readAsInteger();
+    final String msg = msgSet.getMessage(msgNbr);
+
+    if (msg == null) {
+      throw new OPSVMachRuntimeException("No msg found in MsgGetText; "
+          + "need to support return of default msg (third arg).");
+    }
+
+    Environment.pushToCallStack(Environment.getFromLiteralPool(msg));
   }
 
   /*==================================*/

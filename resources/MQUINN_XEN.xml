@@ -12,7 +12,7 @@
           http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
-  <context:property-placeholder location="classpath:ops.properties" />
+  <context:property-placeholder location="classpath:ops.properties"/>
 
   <bean id="dataSource"
     class="org.apache.commons.dbcp2.BasicDataSource"

@@ -612,6 +612,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       output = PTMenuItemLiteral.getSentinel().alloc(input);
     } else if (input.startsWith("Page.")) {
       output = PTPageLiteral.getSentinel().alloc(input);
+    } else if (input.startsWith("Component.")) {
+      output = PTComponentLiteral.getSentinel().alloc(input);
     } else {
       throw new OPSVMachRuntimeException("Unsupported dynamic reference "
           + "attempt: " + input);
@@ -669,6 +671,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      */
     if (t instanceof PTRowset) {
       ((PTRowset) t).PT_GetRow();
+    } else if(call == null) {
+      throw new OPSVMachRuntimeException("No Callable exists for fn expression: "
+          + ctx.expr().getText());
     } else if (call.ptMethod != null) {
       call.invokePtMethod();
     } else {

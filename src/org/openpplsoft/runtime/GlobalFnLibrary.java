@@ -356,6 +356,75 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(Environment.getFromLiteralPool(msg));
   }
 
+  public static void PT_GenerateComponentContentRelURL() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(args.size() != 8) {
+      throw new OPSVMachRuntimeException("Expected exactly 8 args to "
+          + "MsgGetText; altho var args to this fn are legal (see PT "
+          + "reference for defn) they are not supported at this time.");
+    }
+
+    if(!(args.get(0) instanceof PTString)
+        || !(args.get(1) instanceof PTString)
+        || !(args.get(2) instanceof PTMenuLiteral)
+        || !(args.get(3) instanceof PTString)
+        || !(args.get(4) instanceof PTComponentLiteral)
+        || !(args.get(5) instanceof PTPageLiteral)
+        || !(args.get(6) instanceof PTString)
+        || !(args.get(7) instanceof PTRecord)) {
+      throw new OPSVMachRuntimeException("The arguments provided to "
+          + "GenerateComponentContentRelUrl do not match the expected types.");
+    }
+
+    // the "c" in "psc" stands for component; this will never be "psp" here
+    // (since url is being generated for *component*)
+    final StringBuilder url = new StringBuilder("/psc/");
+
+    // append PS environment name (i.e., XENCSDEV, ENTCSDEV, etc.)
+    url.append(Environment.psEnvironmentName);
+
+    // append portal name (i.e., EMPLOYEE)
+    url.append("/").append(((PTString) args.get(0)).read());
+
+    // append node name (i.e., HRMS)
+    url.append("/").append(((PTString) args.get(1)).read());
+
+    // append "c" (for component)
+    url.append("/c/");
+
+    // append <menu>.<component>.<market>
+    url.append(((PTMenuLiteral) args.get(2)).getMenuName())
+       .append(".").append(((PTComponentLiteral) args.get(4)).getComponentName())
+       .append(".").append(((PTString) args.get(3)).read());
+
+    // append "?Page=<page>"
+    url.append("?Page=").append(((PTPageLiteral) args.get(5)).getPageName());
+
+    // append "&Action=<action>"
+    url.append("&Action=").append(((PTString) args.get(6)).read());
+
+    /*
+     * The keylist must be in alphabetical order by key.
+     */
+    Map<String, PTField> fieldsUnsorted = ((PTRecord) args.get(7)).getFields();
+    Map<String, PTField> fieldsKeyAscMap =
+        new TreeMap<String, PTField>(fieldsUnsorted);
+    for(Map.Entry<String, PTField> cursor : fieldsKeyAscMap.entrySet()) {
+      // NOTE: trim() is important here; blank values are a single space
+      // in PS and should be reduced to the empty string.
+      url.append("&").append(cursor.getKey()).append("=")
+          .append(cursor.getValue().getValue().readAsString().trim());
+    }
+
+    log.debug("GenerateComponentContentURL: From args, generated url: {}",
+      url.toString());
+
+    Environment.pushToCallStack(Environment.getFromLiteralPool(url.toString()));
+  }
+
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

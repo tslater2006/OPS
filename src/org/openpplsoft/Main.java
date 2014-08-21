@@ -52,8 +52,9 @@ public final class Main {
     PTDate.overrideDefaultDate(profileToRun.getTraceFileDate());
 
     try {
-      TraceFileVerifier.init(profileToRun);
       Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
+      TraceFileVerifier.init(profileToRun);
+      Environment.psEnvironmentName = (String) ctx.getBean("psEnvironmentName");
 
       Environment.setSystemVar("%Component", profileToRun.getComponentName());
       Environment.setSystemVar("%Menu", "SA_LEARNER_SERVICES");

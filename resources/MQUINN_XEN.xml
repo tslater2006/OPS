@@ -2,24 +2,36 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
           http://www.springframework.org/schema/beans 
             http://www.springframework.org/schema/beans/spring-beans.xsd
           http://www.springframework.org/schema/util
-            http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+            http://www.springframework.org/schema/util/spring-util-2.5.xsd
+          http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+  <context:property-placeholder location="classpath:ops.properties" />
 
   <bean id="dataSource"
     class="org.apache.commons.dbcp2.BasicDataSource"
     destroy-method="close"
     p:driverClassName="oracle.jdbc.driver.OracleDriver"
-    p:url="jdbc:oracle:thin:@10.0.0.88:1521:XENCSDEV"
+    p:url="jdbc:oracle:thin:@10.0.0.88:1521:${xen.sid}"
     p:username="SYSADM"
     p:password="SYSADM"/>
 
   <bean id="staticSqlDefnsResource"
     class="org.springframework.core.io.ClassPathResource">
     <constructor-arg value="staticSql_ORACLE.dat"/>
+  </bean>
+
+  <!-- Used in the generation of URLs (i.e., by
+       GenerateComponentContentRelUrl) -->
+  <bean id="psEnvironmentName"
+        class="java.lang.String">
+    <constructor-arg value="${xen.sid}"/>
   </bean>
 
   <!-- Component runtime profiles available on this host: -->

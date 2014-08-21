@@ -131,6 +131,8 @@ public final class PTArray extends PTObjectType {
 
   protected void internalPush(PTType value) {
 
+    log.debug("Pushing {} onto array {}.", value, this);
+
     /*
      * NOTE: This code can promote non-array values to arrays,
      * but it cannot "flatten" arrays to the appropriate base type,
@@ -144,9 +146,18 @@ public final class PTArray extends PTObjectType {
       if(value instanceof PTObjectType) {
         this.values.addLast(value);
       } else {
-        PTPrimitiveType clone = ((PTPrimitiveType)value).alloc();
-        clone.copyValueFrom(((PTPrimitiveType)value));
-        this.values.addLast(clone);
+        /*
+         * If the value is readonly, we can simply add it to the
+         * array, as we know its value will not change. Otherwise,
+         * create a clone of the object before pushing.
+         */
+        if (value.isReadOnly()) {
+          this.values.addLast(value);
+        } else {
+          PTPrimitiveType clone = ((PTPrimitiveType)value).alloc();
+          clone.copyValueFrom(((PTPrimitiveType)value));
+          this.values.addLast(clone);
+        }
       }
 
     } else if(this.baseType instanceof PTArray) {
@@ -167,6 +178,8 @@ public final class PTArray extends PTObjectType {
       throw new OPSVMachRuntimeException("Cannot Push onto array; "+
         "types are not compatible.");
     }
+
+    log.debug("After push, array is: {}.", this);
   }
 
   public void PT_Push() {

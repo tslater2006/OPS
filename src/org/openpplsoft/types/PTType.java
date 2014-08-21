@@ -127,6 +127,10 @@ public abstract class PTType {
     return this.sentinelFlag;
   }
 
+  public boolean isReadOnly() {
+    return this.flags.contains(TFlag.READONLY);
+  }
+
   /**
    * Mark the instance type object as a sentinel.
    * @return the instance itself (allows chained methods)

@@ -22,6 +22,9 @@ public class Environment {
   public static Scope globalScope;
   public static Scope componentScope;
 
+  // i.e., XENCSDEV, ENTCSDEV (appears in PS URLs)
+  public static String psEnvironmentName;
+
   private static Map<String, PTPrimitiveType> systemVarTable;
   private static Map<String, Callable> systemFuncTable;
 

@@ -648,6 +648,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitExprFnOrIdxCall(
       final PeopleCodeParser.ExprFnOrIdxCallContext ctx) {
 
+    //log.debug("BEGIN visitExprFnOrIdxCall; expr is {}", ctx.expr().getText());
+
     visit(ctx.expr());
 
     final Callable call = this.getNodeCallable(ctx.expr());
@@ -657,8 +659,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     // if args exist, push them onto the call stack.
     if (ctx.exprList() != null) {
-      visit(ctx.exprList());
       for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
+        //log.debug("VISITING arg: {}", argCtx.getText());
         visit(argCtx);
         Environment.pushToCallStack(this.getNodeData(argCtx));
       }
@@ -755,6 +757,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitExprDotAccess(
          final PeopleCodeParser.ExprDotAccessContext ctx) {
 
+    //log.debug("BEGIN visitExprDotAccess: id={}, expr={}",
+    //  ctx.id().getText(),
+    //  ctx.expr().getText());
+
     visit(ctx.expr());
     visit(ctx.id());
 
@@ -801,10 +807,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitExprArrayIndex(
       final PeopleCodeParser.ExprArrayIndexContext ctx) {
 
+    //log.debug("BEGIN visitExprArrayIndex; expr is {}", ctx.expr().getText());
+
     visit(ctx.expr());
     final PTArray arrayObj = (PTArray) this.getNodeData(ctx.expr());
 
-    visit(ctx.exprList());
     PTType index = null;
     for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
       visit(argCtx);
@@ -1528,7 +1535,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        */
       Environment.pushToCallStack(PTCallFrameBoundary.getSentinel());
       if (ctx.exprList() != null) {
-        visit(ctx.exprList());
         for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
           visit(argCtx);
           Environment.pushToCallStack(this.getNodeData(argCtx));

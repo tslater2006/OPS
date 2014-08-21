@@ -13,13 +13,20 @@
     class="org.apache.commons.dbcp2.BasicDataSource"
     destroy-method="close"
     p:driverClassName="oracle.jdbc.driver.OracleDriver"
-    p:url="jdbc:oracle:thin:@10.0.1.88:1521:ENTCSDEV"
+    p:url="jdbc:oracle:thin:@10.0.1.88:1521:${aws.sid}"
     p:username="SYSADM"
     p:password="SYSADM"/>
 
   <bean id="staticSqlDefnsResource"
     class="org.springframework.core.io.ClassPathResource">
     <constructor-arg value="staticSql_ORACLE.dat"/>
+  </bean>
+
+  <!-- Used in the generation of URLs (i.e., by
+       GenerateComponentContentRelUrl) -->
+  <bean id="psEnvironmentName"
+        class="java.lang.String">
+    <constructor-arg value="${aws.sid}"/>
   </bean>
 
   <!-- Component runtime profiles available on this host: -->

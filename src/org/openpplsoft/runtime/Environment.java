@@ -32,7 +32,8 @@ public class Environment {
   private static Stack<PTType> callStack;
 
   private static String[] supportedGlobalVars = {"%EmployeeId",
-    "%OperatorId", "%Menu", "%Component", "%Action_UpdateDisplay"};
+    "%OperatorId", "%Menu", "%Component", "%Action_UpdateDisplay",
+    "%Portal", "%Node"};
 
   private static Logger log = LogManager.getLogger(Environment.class.getName());
 

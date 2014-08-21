@@ -60,6 +60,15 @@ public final class Main {
       Environment.setSystemVar("%OperatorId", "KADAMS");
       Environment.setSystemVar("%EmployeeId", "AA0001");
 
+      /*
+       * The following system vars can theoretically vary among environments.
+       * However, at the moment, I am running this on identically configured
+       * vanilla PS instances. Therefore, I am not going to externalize these
+       * values for the time being.
+       */
+      Environment.setSystemVar("%Portal", "EMPLOYEE");
+      Environment.setSystemVar("%Node", "HRMS");
+
       final Component c = DefnCache.getComponent(
           (String) Environment.getSystemVar("%Component").read(), "GBL");
       final Menu m = DefnCache.getMenu(

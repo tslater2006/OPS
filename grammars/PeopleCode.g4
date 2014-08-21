@@ -51,7 +51,7 @@ expr  : '(' expr ')'                              # ExprParenthesized
       | createInvocation                          # ExprCreate
       | expr '.' id                               # ExprDotAccess
       | expr '[' exprList ']'                     # ExprArrayIndex // it appears that &array[&i, &j] is shorthand for &array[&i][&j]
-      |   expr '(' exprList? ')'                  # ExprFnOrIdxCall
+      | expr '(' exprList? ')'                    # ExprFnOrIdxCall
       | '-' expr                                  # ExprNegate
       | 'Not' expr                                # ExprNot
       | expr (m='*'|d='/') expr                   # ExprMulDiv

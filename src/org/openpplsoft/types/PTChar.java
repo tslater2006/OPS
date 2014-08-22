@@ -111,7 +111,8 @@ public final class PTChar extends PTPrimitiveType<Character> {
         /*
          * If op is an integer, comparison can continue.
          */
-        if(Character.getNumericValue(this.c) == op.read()) {
+        if(Character.getNumericValue(this.c)
+            == ((Integer) op.read()).intValue()) {
           return Environment.TRUE;
         }
 

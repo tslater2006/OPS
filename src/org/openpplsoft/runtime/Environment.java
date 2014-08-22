@@ -36,7 +36,7 @@ public class Environment {
 
   private static String[] supportedGlobalVars = {"%EmployeeId",
     "%OperatorId", "%Menu", "%Component", "%Action_UpdateDisplay",
-    "%Portal", "%Node"};
+    "%Portal", "%Node", "Action_Add"};
 
   private static Logger log = LogManager.getLogger(Environment.class.getName());
 
@@ -72,6 +72,11 @@ public class Environment {
     actionUpdateDisplay.write("U");
     actionUpdateDisplay.setReadOnly();
     systemVarTable.put("%Action_UpdateDisplay", actionUpdateDisplay);
+
+    PTString actionAdd = (PTString) PTString.getSentinel().alloc();
+    actionAdd.write("A");
+    actionAdd.setReadOnly();
+    systemVarTable.put("%Action_Add", actionAdd);
 
     // Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
     systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));

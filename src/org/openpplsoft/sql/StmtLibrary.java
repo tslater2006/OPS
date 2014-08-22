@@ -393,7 +393,6 @@ public final class StmtLibrary {
     final String tableAlias = "";
     final StringBuilder query = new StringBuilder(
         generateSelectClause(recDefn, tableAlias));
-    query.append("WHERE ");
 
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
     final List<String> bindVals = new ArrayList<String>();
@@ -401,8 +400,13 @@ public final class StmtLibrary {
     boolean isFirstKey = true;
     for (RecordField rf : rfList) {
       if (rf.isKey()) {
-        if (!isFirstKey) { query.append(" AND "); }
-        isFirstKey = false;
+
+        if (isFirstKey) {
+          query.append("WHERE ");
+          isFirstKey = false;
+        } else {
+          query.append(" AND ");
+        }
 
         query.append(rf.FIELDNAME).append("=?");
         bindVals.add((String) recObj.getFields().get(rf.FIELDNAME)

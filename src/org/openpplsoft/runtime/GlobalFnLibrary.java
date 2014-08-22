@@ -246,6 +246,11 @@ public class GlobalFnLibrary {
 
     final String actionMode = ((PTString) args.get(4)).read();
 
+    if (! (actionMode.equals("U") || actionMode.equals("A"))) {
+      throw new OPSVMachRuntimeException("Unknown action mode value "
+        + "(" + actionMode + ") encountered by IsMenuItemAuthorized.");
+    }
+
     /*
      * First, get the menu defn provided and ensure that all of the
      * referenced component defns have been loaded into the defn cache.
@@ -300,7 +305,11 @@ public class GlobalFnLibrary {
          * more action modes are added, an enum should be use; see the links
          * listed above for exact mappings.
          */
-        if (authorizedActions == 3 && actionMode.equals("U")) {
+        final int ADD_MASK = 1;
+        final int UPDATE_DISPLAY_MASK = 2;
+        if (   ((authorizedActions & ADD_MASK) > 0) && actionMode.equals("A")
+            || ((authorizedActions & UPDATE_DISPLAY_MASK) > 0)
+                   && actionMode.equals("U")) {
           log.debug("IsMenuItemAuthorized: found permissible record, returning True.");
           Environment.pushToCallStack(Environment.TRUE);
           return;

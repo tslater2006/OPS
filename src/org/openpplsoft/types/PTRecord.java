@@ -287,8 +287,14 @@ public final class PTRecord extends PTObjectType {
       }
 
       /*
-       * True should be returned only if exactly one row
-       * was read.
+       * VERY IMPORTANT!
+       * The PT documentation is somewhat vague and leaves room open to
+       * interpretation for some things (i.e., if multiple records are returned,
+       * is that an error?). Using the PS debugger, I found the answer to that
+       * question to be no; PT seems to stop reading after the first record, and
+       * the return value for SelectByKey is True. Just keep in mind that before
+       * modifying this code and the rest of this function, compare the official
+       * documentation with an actual debugging session first.
        */
       PTBoolean returnVal = Environment.FALSE;
       while (rs.next()) {
@@ -297,19 +303,10 @@ public final class PTRecord extends PTObjectType {
           GlobalFnLibrary.readRecordFromResultSet(
               this.recDefn, this, rs);
           returnVal = Environment.TRUE;
-        } else {
-          returnVal = Environment.FALSE;
-          throw new OPSVMachRuntimeException("Multiple rows "
-            + "returned by SelectByKey; although this is "
-            + "not an error, review the documentation to ensure "
-            + "necessary actions to set default values are being "
-            + "taken.");
-          //break;
+          break;
         }
       }
 
-      // Return true if record was read, false if
-      // 0 or multiple recs read.
       Environment.pushToCallStack(returnVal);
 
     } catch (final java.sql.SQLException sqle) {

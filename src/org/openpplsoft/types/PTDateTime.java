@@ -120,6 +120,10 @@ public final class PTDateTime extends PTPrimitiveType<String> {
         HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
+  public PTPrimitiveType castTo(PTPrimitiveType t) {
+    throw new EntDataTypeException("castTo() has not been implemented.");
+  }
+
   public boolean typeCheck(PTType a) {
     return (a instanceof PTDateTime &&
         this.getType() == a.getType());

@@ -39,6 +39,8 @@ public abstract class PTType {
     this.flags = EnumSet.noneOf(TFlag.class);
   }
 
+  public abstract PTPrimitiveType castTo(PTPrimitiveType t);
+
   /**
    * Determines if the provided type corresponds to this
    * object's type. This is implementation specific and thus

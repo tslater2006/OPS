@@ -155,6 +155,10 @@ public final class PTString extends PTPrimitiveType<String> {
         HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
+  public PTPrimitiveType castTo(PTPrimitiveType t) {
+    throw new EntDataTypeException("castTo() has not been implemented.");
+  }
+
   @Override
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTString

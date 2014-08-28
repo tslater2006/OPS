@@ -1002,7 +1002,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         localScope.declareVar(fp.id, arg);
       } else {
         localScope.declareVar(fp.id,
-            ((PTObjectType) arg).castTo((PTPrimitiveType) fp.type));
+            arg.castTo((PTPrimitiveType) fp.type));
       }
     }
 

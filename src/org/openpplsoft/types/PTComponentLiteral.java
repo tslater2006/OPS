@@ -59,8 +59,7 @@ public final class PTComponentLiteral extends PTObjectType {
     return null;
   }
 
-  @Override
-  public PTPrimitiveType castTo(final PTPrimitiveType t) {
+  public PTPrimitiveType castTo(PTPrimitiveType t) {
     throw new EntDataTypeException("castTo() has not been implemented.");
   }
 

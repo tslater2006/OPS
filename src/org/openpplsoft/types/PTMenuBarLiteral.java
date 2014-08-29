@@ -21,24 +21,14 @@ public final class PTMenuBarLiteral extends PTObjectType {
 
   private String ptBARNAME;
 
-  /**
-   * Creates a new menu bar literal object that isn't
-   * attached to a menu bar name; can only be called by
-   * an internal method.
-   */
-  private PTMenuBarLiteral() {
+  public PTMenuBarLiteral(final String bStr) {
     super(staticTypeFlag);
-  }
-
-  /**
-   * Creates a new menu bar literal that is attached to a
-   * specific menu bar name; can only be called by an internal
-   * method.
-   * @param m the menu bar name (BARNAME) to attach
-   */
-  private PTMenuBarLiteral(final String barname) {
-    super(staticTypeFlag);
-    this.ptBARNAME = barname;
+    if(!bStr.startsWith("BarName.")) {
+      throw new OPSVMachRuntimeException("Expected bStr to start "
+          + "with 'BarName.' while alloc'ing PTMenuBarLiteral; bStr = "
+          + bStr);
+    }
+    this.ptBARNAME = bStr.replaceFirst("BarName.", "");
   }
 
   /**
@@ -68,52 +58,6 @@ public final class PTMenuBarLiteral extends PTObjectType {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTMenuBarLiteral
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Retrieves a sentinel menu bar literal object from the cache,
-   * or creates it if it doesn't exist.
-   * @return the sentinel object
-   */
-  public static PTMenuBarLiteral getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTMenuBarLiteral) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTMenuBarLiteral sentinelObj = new PTMenuBarLiteral();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /**
-   * Allocates a new menu bar literal object and attaches it
-   * to the menu bar name named in the provided argument.
-   * @param bStr the menu bar name, prefixed with "BarName."
-   * @return the newly allocated menu bar literal object
-   */
-  public PTMenuBarLiteral alloc(final String bStr) {
-
-    if(!bStr.startsWith("BarName.")) {
-      throw new OPSVMachRuntimeException("Expected bStr to start "
-          + "with 'BarName.' while alloc'ing PTMenuBarLiteral; bStr = "
-          + bStr);
-    }
-    final PTMenuBarLiteral newObj = new PTMenuBarLiteral(
-        bStr.replaceFirst("BarName.", ""));
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  /**
-   * Retrieves the cache key for this menu bar literal.
-   * @return the menu bar literal's cache key
-   */
-  private static String getCacheKey() {
-    return new StringBuilder(staticTypeFlag.name()).toString();
   }
 
   @Override

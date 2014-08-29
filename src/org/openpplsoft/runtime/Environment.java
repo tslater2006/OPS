@@ -177,8 +177,7 @@ public class Environment {
 
     List<PTType> args = new ArrayList<PTType>();
     PTType p;
-    while((p = Environment.peekAtCallStack()) !=
-        PTCallFrameBoundary.getSentinel()) {
+    while(!((p = Environment.peekAtCallStack()) instanceof PTCallFrameBoundary)) {
       args.add(Environment.popFromCallStack());
     }
 

@@ -11,16 +11,15 @@ public final class PTCallFrameBoundary extends PTType {
 
   private static PTCallFrameBoundary singleton;
 
-  static {
-    singleton = new PTCallFrameBoundary();
-    singleton.setReadOnly();
-  }
-
   private PTCallFrameBoundary() {
     super(Type.CALL_FRAME_BOUNDARY);
   }
 
-  public static PTType getSentinel() {
+  public static PTCallFrameBoundary getSingleton() {
+    if (singleton == null) {
+      singleton = new PTCallFrameBoundary();
+      singleton.setReadOnly();
+    }
     return singleton;
   }
 

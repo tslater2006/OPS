@@ -655,7 +655,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final Callable call = this.getNodeCallable(ctx.expr());
     final PTType t = this.getNodeData(ctx.expr());
 
-    Environment.pushToCallStack(PTCallFrameBoundary.getSentinel());
+    Environment.pushToCallStack(PTCallFrameBoundary.getSingleton());
 
     // if args exist, push them onto the call stack.
     if (ctx.exprList() != null) {
@@ -693,13 +693,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * must be the boundary separator (PeopleCode funcs can only return 1 value).
      */
     final PTType a = Environment.popFromCallStack();
-    if (a != PTCallFrameBoundary.getSentinel()) {
+    if (!(a instanceof PTCallFrameBoundary)) {
       this.setNodeData(ctx, a);
     }
 
-    if (a != PTCallFrameBoundary.getSentinel()
-         && (Environment.popFromCallStack() !=
-            PTCallFrameBoundary.getSentinel())) {
+    if (!(a instanceof PTCallFrameBoundary)
+         && !(Environment.popFromCallStack() instanceof PTCallFrameBoundary)) {
       throw new OPSVMachRuntimeException("More than one return value "
           + "was found on the call stack.");
     }
@@ -1561,7 +1560,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * Load arguments to constructor onto call stack if
        * args have been provided.
        */
-      Environment.pushToCallStack(PTCallFrameBoundary.getSentinel());
+      Environment.pushToCallStack(PTCallFrameBoundary.getSingleton());
       if (ctx.exprList() != null) {
         for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
           visit(argCtx);
@@ -1576,8 +1575,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       this.supervisor.runImmediately(constructorCtx);
 
       // Constructors don't return anything
-      if(Environment.popFromCallStack() !=
-          PTCallFrameBoundary.getSentinel()) {
+      if(!(Environment.popFromCallStack() instanceof PTCallFrameBoundary)) {
         throw new OPSVMachRuntimeException("After invoking create statement, "
             + "expected call frame boundary, but found data instead.");
       }

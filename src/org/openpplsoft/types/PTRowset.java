@@ -193,8 +193,7 @@ public final class PTRowset extends PTObjectType {
       }
       fields.push(fld.FIELDNAME);
 
-    } while (Environment.peekAtCallStack() !=
-        PTCallFrameBoundary.getSentinel());
+    } while (!(Environment.peekAtCallStack() instanceof PTCallFrameBoundary));
 
     this.rows = this.mergeSortRows(this.rows, fields, orders);
 

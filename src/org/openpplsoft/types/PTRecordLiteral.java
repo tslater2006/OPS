@@ -77,11 +77,6 @@ public final class PTRecordLiteral extends PTObjectType {
   }
 
   @Override
-  public PTPrimitiveType castTo(final PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
-  @Override
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTRecordLiteral
         && this.getType() == a.getType());

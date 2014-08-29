@@ -276,8 +276,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final PTType type = this.getNodeData(ctx.varType());
     for (TerminalNode varId : ctx.VAR_ID()) {
+
+      /*
+       * Primitive variables must have space allocated for them
+       * immediately. Object variables should simply reference
+       * the constraint type value present in their declaration statement.
+       */
+      PTType t = type;
+      if (type instanceof PTTypeConstraint
+            && ((PTTypeConstraint) type).isUnderlyingClassPrimitive()) {
+        t = ((PTTypeConstraint) type).alloc();
+      } else if (type instanceof PTPrimitiveType) {
+        t = ((PTPrimitiveType) type).alloc();
+      }
+
+      log.debug("Adding instance identifier ({}) of type {}.",
+          varId.getText(), t);
       ((AppClassPeopleCodeProg) this.eCtx.prog).addInstanceIdentifier(
-          varId.getText(), type);
+          varId.getText(), t);
     }
     return null;
   }
@@ -491,16 +507,26 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       ((PTPrimitiveType) dst).copyValueFrom((PTPrimitiveType) src);
 
     } else if (dst instanceof PTPrimitiveType && src instanceof PTObjectType) {
-      //i.e., &str = SSR_STDNT_TERM0.EMPLID; field must be cast to string.
-      final PTPrimitiveType castedSrc =
-          ((PTObjectType) src).castTo((PTPrimitiveType) dst);
-      ((PTPrimitiveType) dst).copyValueFrom(castedSrc);
+      final PTPrimitiveType unboxedSrc;
+      if (src instanceof PTField) {
+        //i.e., &str = SSR_STDNT_TERM0.EMPLID; field must be cast to string.
+        unboxedSrc = ((PTField) src).getValue();
+      } else {
+        throw new OPSVMachRuntimeException("Unsupported combination of object "
+            + "src:" + src + " and primitive dst:" + dst);
+      }
+      ((PTPrimitiveType) dst).copyValueFrom(unboxedSrc);
 
     } else if (dst instanceof PTObjectType && src instanceof PTPrimitiveType) {
-      //i.e., SSR_STNDT_TERM0.EMPLID = "5"; field must be cast to string.
-      final PTPrimitiveType castedDst =
-          ((PTObjectType) dst).castTo((PTPrimitiveType) src);
-      castedDst.copyValueFrom((PTPrimitiveType) src);
+      final PTPrimitiveType unboxedDst;
+      if (dst instanceof PTField) {
+        //i.e., SSR_STNDT_TERM0.EMPLID = "5"; field must be cast to string.
+        unboxedDst = ((PTField) dst).getValue();
+      } else {
+        throw new OPSVMachRuntimeException("Unsupported combination of primitive "
+            + "src:" + src + " and object dst:" + dst);
+      }
+      unboxedDst.copyValueFrom((PTPrimitiveType) src);
 
     } else if (dst instanceof PTObjectType && src instanceof PTObjectType) {
       // Assuming lhs is an identifier; this may or may not hold true long term.
@@ -508,7 +534,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     } else {
       throw new OPSVMachRuntimeException("Assignment failed; unexpected "
-          + "type combination.");
+          + "type combination: src is " + src + ", dst is " + dst);
     }
 
     return null;
@@ -1025,11 +1051,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
       final FormalParam fp = formalParams.get(i);
       final PTType arg = args.get(i);
+      log.debug("fp is {}", fp);
       if (fp.type.typeCheck(arg)) {
         localScope.declareVar(fp.id, arg);
+      } else if (arg instanceof PTField
+          && fp.type.typeCheck(((PTField) arg).getValue())) {
+        localScope.declareVar(fp.id, ((PTField) arg).getValue());
       } else {
-        localScope.declareVar(fp.id,
-            arg.castTo((PTPrimitiveType) fp.type));
+        throw new OPSVMachRuntimeException("Unable to declare var; type check "
+            + "failed and PTField unboxing not relevant; fp is " + fp
+            + " and arg is " + arg);
       }
     }
 
@@ -1284,10 +1315,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         /*
          * Primitive variables must have space allocated for them
          * immediately. Object variables should simply reference
-         * the sentinel type value present in their declaration statement.
+         * the constraint type value present in their declaration statement.
          */
         PTType t = varType;
-        if (varType instanceof PTPrimitiveType) {
+        if (varType instanceof PTTypeConstraint
+            && ((PTTypeConstraint) varType).isUnderlyingClassPrimitive()) {
+          t = ((PTTypeConstraint) varType).alloc();
+          log.debug("After allocing from {}, t is {}", varType, t);
+        } else if (varType instanceof PTPrimitiveType) {
           t = ((PTPrimitiveType) varType).alloc();
         }
         log.debug("Declaring identifier ({}) with scope {} and type {}.",
@@ -1345,7 +1380,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           }
           break;
         case "string":
-          type = PTString.getSentinel();
+          type = new PTTypeConstraint<PTString>(PTString.class);
           break;
         case "date":
           type = PTDate.getSentinel();
@@ -1629,9 +1664,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             // as if it had a type matching that of the supplied argument.
             if (fp.type == null || fp.type.typeCheck(arg)) {
               localScope.declareVar(fp.id, arg);
+            } else if (arg instanceof PTField
+                && fp.type.typeCheck(((PTField) arg).getValue())) {
+              localScope.declareVar(fp.id, ((PTField) arg).getValue());
             } else {
-              localScope.declareVar(fp.id,
-                  ((PTObjectType) arg).castTo((PTPrimitiveType) fp.type));
+              throw new OPSVMachRuntimeException("Unable to declare var; type check "
+                  + "failed and PTField unboxing not relevant; fp is " + fp
+                  + " and arg is " + arg);
             }
           }
 

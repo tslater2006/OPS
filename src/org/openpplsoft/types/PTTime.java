@@ -150,10 +150,6 @@ public final class PTTime extends PTPrimitiveType<String> {
         .append(this.read()).toHashCode();
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
   @Override
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTTime

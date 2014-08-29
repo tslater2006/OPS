@@ -17,6 +17,4 @@ public abstract class PTObjectType extends PTType {
 
   public abstract PTType dotProperty(String s);
   public abstract Callable dotMethod(String s);
-  public abstract PTPrimitiveType castTo(PTPrimitiveType t);
-  public abstract boolean typeCheck(PTType a);
 }

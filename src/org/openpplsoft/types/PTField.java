@@ -97,14 +97,6 @@ public final class PTField extends PTObjectType {
     return this;
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    if(value.typeCheck(t)) {
-      return value;
-    }
-    throw new EntDataTypeException("Unable to cast PTField (" + this + ") to the " +
-        "type requested: " + t);
-  }
-
   public boolean typeCheck(PTType a) {
     return (a instanceof PTField &&
         this.getType() == a.getType());

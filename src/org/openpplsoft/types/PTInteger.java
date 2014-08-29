@@ -155,14 +155,6 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
     return Environment.FALSE;
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    if(t instanceof PTNumber) {
-      return Environment.getFromLiteralPool(this.i.doubleValue());
-    }
-    throw new EntDataTypeException("Casting of PTInteger to " + t + " is "
-        + "not supported at this time.");
-  }
-
   public boolean typeCheck(PTType a) {
     return (a instanceof PTInteger &&
         this.getType() == a.getType());

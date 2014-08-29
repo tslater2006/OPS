@@ -25,7 +25,7 @@ public final class PTString extends PTPrimitiveType<String> {
    * Constructs a new instance of the string data type;
    * can only be called by internal methods.
    */
-  private PTString() {
+  public PTString() {
     super(staticTypeFlag);
   }
 
@@ -163,10 +163,6 @@ public final class PTString extends PTPrimitiveType<String> {
 
     return new HashCodeBuilder(HBC_INITIAL,
         HBC_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
   }
 
   @Override

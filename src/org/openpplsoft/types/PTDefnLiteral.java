@@ -32,10 +32,6 @@ public final class PTDefnLiteral extends PTObjectType {
     return null;
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
   public boolean typeCheck(PTType a) {
     return (a instanceof PTDefnLiteral &&
         this.getType() == a.getType());

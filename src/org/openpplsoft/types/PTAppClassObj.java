@@ -115,10 +115,6 @@ public final class PTAppClassObj extends PTObjectType {
     return null;
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
   public boolean typeCheck(PTType a) {
     return (a instanceof PTAppClassObj &&
       this.getType() == a.getType() &&

@@ -59,11 +59,6 @@ public final class PTMenuLiteral extends PTObjectType {
   }
 
   @Override
-  public PTPrimitiveType castTo(final PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
-  @Override
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTMenuLiteral
         && this.getType() == a.getType());

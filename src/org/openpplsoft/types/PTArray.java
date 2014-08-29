@@ -73,10 +73,6 @@ public final class PTArray extends PTObjectType {
     return null;
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
   public boolean typeCheck(PTType a) {
     return (a instanceof PTArray  &&
       this.getType() == a.getType() &&

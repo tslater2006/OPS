@@ -40,10 +40,6 @@ public final class PTFieldLiteral extends PTObjectType {
     throw new OPSVMachRuntimeException("dotMethod not supported.");
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
   public boolean typeCheck(PTType a) {
     return (a instanceof PTFieldLiteral &&
       this.getType() == a.getType());

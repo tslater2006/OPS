@@ -178,10 +178,6 @@ public final class PTNumber extends PTPrimitiveType<Double> {
         HBC_MULTIPLIER).append(this.read()).toHashCode();
   }
 
-  public PTPrimitiveType castTo(PTPrimitiveType t) {
-    throw new EntDataTypeException("castTo() has not been implemented.");
-  }
-
   public boolean typeCheck(PTType a) {
     return (a instanceof PTNumber &&
         this.getType() == a.getType());

@@ -11,7 +11,11 @@ import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 public class EntDataTypeException extends OPSVMachRuntimeException {
 
-  public EntDataTypeException(String msg) {
+  public EntDataTypeException(final String msg) {
     super(msg);
+  }
+
+  public EntDataTypeException(final String msg, final Exception ex) {
+    super(msg, ex);
   }
 }

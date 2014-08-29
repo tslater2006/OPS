@@ -21,7 +21,6 @@ public abstract class PTPrimitiveType<T> extends PTType {
   public abstract PTPrimitiveType alloc();
   public abstract boolean equals(Object obj);
   public abstract int hashCode();
-  public abstract PTPrimitiveType castTo(PTPrimitiveType t);
   public abstract boolean typeCheck(PTType a);
   public abstract void setDefault();
   public abstract void copyValueFrom(PTPrimitiveType src);

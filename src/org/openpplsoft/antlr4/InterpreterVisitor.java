@@ -605,7 +605,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     if (input.startsWith("Record.")) {
       output = new PTRecordLiteral(input);
     } else if (input.startsWith("MenuName.")) {
-      output = PTMenuLiteral.getSentinel().alloc(input);
+      output = new PTMenuLiteral(input);
     } else if (input.startsWith("BarName.")) {
       output = PTMenuBarLiteral.getSentinel().alloc(input);
     } else if (input.startsWith("ItemName.")) {

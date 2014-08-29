@@ -22,23 +22,20 @@ public final class PTMenuLiteral extends PTObjectType {
   private String ptMENUNAME;
   private Menu menuDefn;
 
-  /**
-   * Creates a new menu literal object that isn't
-   * attached to a menu defn; can only be called by
-   * an internal method.
-   */
-  private PTMenuLiteral() {
+  public PTMenuLiteral(final Menu m) {
     super(staticTypeFlag);
+    this.ptMENUNAME = m.getMenuName();
+    this.menuDefn = m;
   }
 
-  /**
-   * Creates a new menu literal that is attached to a
-   * specific menu defn; can only be called by an internal
-   * method.
-   * @param m the menu defn to attach
-   */
-  private PTMenuLiteral(final Menu m) {
+  public PTMenuLiteral(final String mStr) {
     super(staticTypeFlag);
+    if(!mStr.startsWith("MenuName.")) {
+      throw new OPSVMachRuntimeException("Expected mStr to start "
+          + "with 'Menu.' while creating PTMenuLiteral; mStr = "
+          + mStr);
+    }
+    Menu m = DefnCache.getMenu(mStr.replaceFirst("MenuName.", ""));
     this.ptMENUNAME = m.getMenuName();
     this.menuDefn = m;
   }
@@ -70,64 +67,6 @@ public final class PTMenuLiteral extends PTObjectType {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTMenuLiteral
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Retrieves a sentinel menu literal object from the cache,
-   * or creates it if it doesn't exist.
-   * @return the sentinel object
-   */
-  public static PTMenuLiteral getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTMenuLiteral) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTMenuLiteral sentinelObj = new PTMenuLiteral();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /**
-   * Allocates a new menu literal object with a menu defn
-   * attached.
-   * @param m the menu defn to attach
-   * @return the newly allocated menu literal object
-   */
-  public PTMenuLiteral alloc(final Menu m) {
-    final PTMenuLiteral newObj = new PTMenuLiteral(m);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  /**
-   * Allocates a new menu literal object and attaches it
-   * to the menu defn named in the provided argument.
-   * @param mStr the menu name, prefixed with "Menu."
-   * @return the newly allocated menu literal object
-   */
-  public PTMenuLiteral alloc(final String mStr) {
-
-    if(!mStr.startsWith("MenuName.")) {
-      throw new OPSVMachRuntimeException("Expected mStr to start "
-          + "with 'Menu.' while alloc'ing PTMenuLiteral; mStr = "
-          + mStr);
-    }
-    Menu m = DefnCache.getMenu(mStr.replaceFirst("MenuName.", ""));
-    final PTMenuLiteral newObj = new PTMenuLiteral(m);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  /**
-   * Retrieves the cache key for this menu literal.
-   * @return the menu literal's cache key
-   */
-  private static String getCacheKey() {
-    return new StringBuilder(staticTypeFlag.name()).toString();
   }
 
   @Override

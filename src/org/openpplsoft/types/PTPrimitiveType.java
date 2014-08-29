@@ -36,22 +36,4 @@ public abstract class PTPrimitiveType<T> extends PTType {
   public abstract PTPrimitiveType subtract(PTPrimitiveType op);
   public abstract PTPrimitiveType mul(PTPrimitiveType op);
   public abstract PTPrimitiveType div(PTPrimitiveType op);
-
-  protected void checkIsWriteable() {
-    if (this.isSentinel()) {
-      throw new EntDataTypeException("Attempted illegal write to a "
-          + "sentinel PTType object.");
-    }
-    if (this.getFlags().contains(TFlag.READONLY)) {
-      throw new EntDataTypeException("Attempted illegal write to a "
-          + "readonly PTType object.");
-    }
-  }
-
-  protected void checkIsSystemWriteable() {
-    if (this.isSentinel()) {
-      throw new EntDataTypeException("Attempted illegal system write "
-          + "to a sentinel PTType object.");
-    }
-  }
 }

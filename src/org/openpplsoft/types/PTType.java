@@ -162,6 +162,24 @@ public abstract class PTType {
     this.type = t;
   }
 
+  protected void checkIsWriteable() {
+    if (this.isSentinel()) {
+      throw new EntDataTypeException("Attempted illegal write to a "
+          + "sentinel PTType object.");
+    }
+    if (this.getFlags().contains(TFlag.READONLY)) {
+      throw new EntDataTypeException("Attempted illegal write to a "
+          + "readonly PTType object.");
+    }
+  }
+
+  protected void checkIsSystemWriteable() {
+    if (this.isSentinel()) {
+      throw new EntDataTypeException("Attempted illegal system write "
+          + "to a sentinel PTType object.");
+    }
+  }
+
   /**
    * Get the set of type flags for this instance.
    * @return the set of enumerated type flags for this

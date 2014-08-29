@@ -21,24 +21,14 @@ public final class PTMenuItemLiteral extends PTObjectType {
 
   private String ptITEMNAME;
 
-  /**
-   * Creates a new menu item literal object that isn't
-   * attached to a menu item name; can only be called by
-   * an internal method.
-   */
-  private PTMenuItemLiteral() {
+  public PTMenuItemLiteral(final String iStr) {
     super(staticTypeFlag);
-  }
-
-  /**
-   * Creates a new menu item literal that is attached to a
-   * specific menu item name; can only be called by an internal
-   * method.
-   * @param itemname the menu item name (ITEMNAME) to attach
-   */
-  private PTMenuItemLiteral(final String itemname) {
-    super(staticTypeFlag);
-    this.ptITEMNAME = itemname;
+    if(!iStr.startsWith("ItemName.")) {
+      throw new OPSVMachRuntimeException("Expected iStr to start "
+          + "with 'ItemName.' while alloc'ing PTMenuItemLiteral; iStr = "
+          + iStr);
+    }
+    this.ptITEMNAME = iStr.replaceFirst("ItemName.", "");
   }
 
   /**
@@ -68,52 +58,6 @@ public final class PTMenuItemLiteral extends PTObjectType {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTMenuItemLiteral
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Retrieves a sentinel menu item literal object from the cache,
-   * or creates it if it doesn't exist.
-   * @return the sentinel object
-   */
-  public static PTMenuItemLiteral getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTMenuItemLiteral) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTMenuItemLiteral sentinelObj = new PTMenuItemLiteral();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /**
-   * Allocates a new menu item literal object and attaches it
-   * to the menu item name named in the provided argument.
-   * @param iStr the menu item name, prefixed with "ItemName."
-   * @return the newly allocated menu item literal object
-   */
-  public PTMenuItemLiteral alloc(final String iStr) {
-
-    if(!iStr.startsWith("ItemName.")) {
-      throw new OPSVMachRuntimeException("Expected iStr to start "
-          + "with 'ItemName.' while alloc'ing PTMenuItemLiteral; iStr = "
-          + iStr);
-    }
-    final PTMenuItemLiteral newObj = new PTMenuItemLiteral(
-        iStr.replaceFirst("ItemName.", ""));
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  /**
-   * Retrieves the cache key for this menu item literal.
-   * @return the menu item literal's cache key
-   */
-  private static String getCacheKey() {
-    return new StringBuilder(staticTypeFlag.name()).toString();
   }
 
   @Override

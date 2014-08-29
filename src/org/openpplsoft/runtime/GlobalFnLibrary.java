@@ -433,6 +433,39 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(Environment.getFromLiteralPool(url.toString()));
   }
 
+  public static void PT_Truncate() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(args.size() != 2
+        || !(args.get(0) instanceof PTNumber || args.get(0) instanceof PTInteger)
+        || !(args.get(1) instanceof PTNumber || args.get(1) instanceof PTInteger)) {
+      throw new OPSVMachRuntimeException("Expected exactly 2 args "
+          + "of type PTNumber/PTInteger to Truncate.");
+    }
+
+    double dec;
+    if (args.get(0) instanceof PTNumber) {
+      dec = ((PTNumber) args.get(0)).read();
+    } else {
+      dec = ((PTInteger) args.get(0)).read();
+    }
+
+    int numDecDigits;
+    if (args.get(1) instanceof PTNumber) {
+      numDecDigits = ((PTNumber) args.get(1)).readAsInteger();
+    } else {
+      numDecDigits = ((PTInteger) args.get(1)).read();
+    }
+
+    final long factor = (long) Math.pow(10, numDecDigits);
+    final double truncatedDec = (double) (Math.floor(dec * factor) / factor);
+
+    log.debug("Truncated {} to have {} decimal digits; result is: {}",
+      dec, numDecDigits, truncatedDec);
+
+    throw new OPSVMachRuntimeException("Complete Truncate.");
+  }
 
   /*==================================*/
   /* Shared OPS functions             */

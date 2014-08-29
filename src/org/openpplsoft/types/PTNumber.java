@@ -93,6 +93,16 @@ public final class PTNumber extends PTPrimitiveType<Double> {
     throw new OPSVMachRuntimeException("subtract() not supported.");
   }
 
+  @Override
+  public PTPrimitiveType mul(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("mul() not supported.");
+  }
+
+  @Override
+  public PTPrimitiveType div(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("div() not supported.");
+  }
+
   public PTBoolean isEqual(PTPrimitiveType op) {
     throw new EntDataTypeException("isEqual is not implemented for " +
         "numbers.");

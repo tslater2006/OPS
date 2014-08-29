@@ -72,6 +72,16 @@ public final class PTTime extends PTPrimitiveType<String> {
   }
 
   @Override
+  public PTPrimitiveType mul(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("mul() not supported.");
+  }
+
+  @Override
+  public PTPrimitiveType div(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("div() not supported.");
+  }
+
+  @Override
   public void setDefault() {
     this.d = null;
   }

@@ -86,6 +86,16 @@ public final class PTString extends PTPrimitiveType<String> {
   }
 
   @Override
+  public PTPrimitiveType mul(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("mul() not supported.");
+  }
+
+  @Override
+  public PTPrimitiveType div(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("div() not supported.");
+  }
+
+  @Override
   public PTBoolean isEqual(final PTPrimitiveType op) {
     if (!(op instanceof PTString)) {
       throw new EntDataTypeException("Expected op to be PTString.");

@@ -708,6 +708,34 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   }
 
   /**
+   * Called by ANTLR when a multiplication or division operation
+   * within an expression in a statement is being visited
+   * in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitExprMulDiv(
+      final PeopleCodeParser.ExprMulDivContext ctx) {
+
+    visit(ctx.expr(0));
+    final PTPrimitiveType lhs =
+        (PTPrimitiveType) this.getNodeData(ctx.expr(0));
+    visit(ctx.expr(1));
+    final PTPrimitiveType rhs =
+        (PTPrimitiveType) this.getNodeData(ctx.expr(1));
+
+    if (ctx.m != null) {
+      this.setNodeData(ctx, lhs.mul(rhs));
+    } else if (ctx.d != null) {
+      this.setNodeData(ctx, lhs.div(rhs));
+    } else {
+      throw new OPSVMachRuntimeException("Unsupported mul/div operation.");
+    }
+
+    return null;
+  }
+
+  /**
    * Called by ANTLR when an addition or subtraction operation
    * within an expression in a statement is being visited
    * in the parse tree.

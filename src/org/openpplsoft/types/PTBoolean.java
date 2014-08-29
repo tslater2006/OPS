@@ -59,6 +59,14 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     throw new OPSVMachRuntimeException("subtract() not supported.");
   }
 
+  public PTPrimitiveType mul(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("mul() not supported.");
+  }
+
+  public PTPrimitiveType div(PTPrimitiveType op) {
+    throw new OPSVMachRuntimeException("div() not supported.");
+  }
+
   public PTBoolean isEqual(PTPrimitiveType op) {
     if(!(op instanceof PTBoolean)) {
       throw new EntDataTypeException("Expected op to be PTBoolean.");

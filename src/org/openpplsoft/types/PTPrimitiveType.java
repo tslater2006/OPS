@@ -34,6 +34,8 @@ public abstract class PTPrimitiveType<T> extends PTType {
 
   public abstract PTPrimitiveType add(PTPrimitiveType op);
   public abstract PTPrimitiveType subtract(PTPrimitiveType op);
+  public abstract PTPrimitiveType mul(PTPrimitiveType op);
+  public abstract PTPrimitiveType div(PTPrimitiveType op);
 
   protected void checkIsWriteable() {
     if (this.isSentinel()) {

@@ -49,7 +49,8 @@ public class Environment {
     FALSE = (PTBoolean)PTBoolean.getSentinel().alloc().setReadOnly();
     FALSE.systemWrite(false);
 
-    DEFN_LITERAL = (PTDefnLiteral)PTDefnLiteral.getSentinel().alloc().setReadOnly();
+    DEFN_LITERAL = new PTDefnLiteral();
+    DEFN_LITERAL.setReadOnly();
 
     // Setup global and component scopes.
     globalScope = new Scope(Scope.Lvl.GLOBAL);

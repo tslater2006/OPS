@@ -603,7 +603,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     String input = ((PTString) this.getNodeData(ctx.expr())).read();
     PTType output;
     if (input.startsWith("Record.")) {
-      output = PTRecordLiteral.getSentinel().alloc(input);
+      output = new PTRecordLiteral(input);
     } else if (input.startsWith("MenuName.")) {
       output = PTMenuLiteral.getSentinel().alloc(input);
     } else if (input.startsWith("BarName.")) {
@@ -1198,7 +1198,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          * in the component buffer.
          * (i.e., record field literals passed to Sort() on Rowsets).
          */
-        this.setNodeData(ctx, PTRecordLiteral.getSentinel().alloc(
+        this.setNodeData(ctx, new PTRecordLiteral(
           DefnCache.getRecord(ctx.GENERIC_ID().getText())));
 
       }

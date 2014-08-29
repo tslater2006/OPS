@@ -22,22 +22,20 @@ public final class PTRecordLiteral extends PTObjectType {
   private String ptRECNAME;
   private Record recDefn;
 
-  /**
-   * Creates a new record literal object that isn't
-   * attached to a record defn; can only be called by
-   * an internal method.
-   */
-  private PTRecordLiteral() {
+  public PTRecordLiteral(final String rStr) {
     super(staticTypeFlag);
+
+    if(!rStr.startsWith("Record.")) {
+      throw new OPSVMachRuntimeException("Expected rStr to start "
+          + "with 'Record.' while creating PTRecordLiteral; rStr = "
+          + rStr);
+    }
+    Record r = DefnCache.getRecord(rStr.replaceFirst("Record.", ""));
+    this.ptRECNAME = r.RECNAME;
+    this.recDefn = r;
   }
 
-  /**
-   * Creates a new record literal that is attached to a
-   * specific record defn; can only be called by an internal
-   * method.
-   * @param r the record defn to attach
-   */
-  private PTRecordLiteral(final Record r) {
+  public PTRecordLiteral(final Record r) {
     super(staticTypeFlag);
     this.ptRECNAME = r.RECNAME;
     this.recDefn = r;
@@ -94,7 +92,7 @@ public final class PTRecordLiteral extends PTObjectType {
    * or creates it if it doesn't exist.
    * @return the sentinel object
    */
-  public static PTRecordLiteral getSentinel() {
+/*  public static PTRecordLiteral getSentinel() {
 
     // If the sentinel has already been cached, return it immediately.
     final String cacheKey = getCacheKey();
@@ -106,46 +104,15 @@ public final class PTRecordLiteral extends PTObjectType {
     final PTRecordLiteral sentinelObj = new PTRecordLiteral();
     PTType.cacheSentinel(sentinelObj, cacheKey);
     return sentinelObj;
-  }
-
-  /**
-   * Allocates a new record literal object with a record defn
-   * attached.
-   * @param r the record defn to attach
-   * @return the newly allocated record literal object
-   */
-  public PTRecordLiteral alloc(final Record r) {
-    final PTRecordLiteral newObj = new PTRecordLiteral(r);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  /**
-   * Allocates a new record literal object and attaches it
-   * to the record defn named in the provided argument.
-   * @param rStr the record name, prefixed with "Record."
-   * @return the newly allocated record literal object
-   */
-  public PTRecordLiteral alloc(final String rStr) {
-
-    if(!rStr.startsWith("Record.")) {
-      throw new OPSVMachRuntimeException("Expected rStr to start "
-          + "with 'Record.' while alloc'ing PTRecordLiteral; rStr = "
-          + rStr);
-    }
-    Record r = DefnCache.getRecord(rStr.replaceFirst("Record.", ""));
-    final PTRecordLiteral newObj = new PTRecordLiteral(r);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
+  }*/
 
   /**
    * Retrieves the cache key for this record literal.
    * @return the record literal's cache key
    */
-  private static String getCacheKey() {
+/*  private static String getCacheKey() {
     return new StringBuilder(staticTypeFlag.name()).toString();
-  }
+  }*/
 
   @Override
   public String toString() {

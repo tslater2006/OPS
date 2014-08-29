@@ -611,7 +611,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else if (input.startsWith("ItemName.")) {
       output = new PTMenuItemLiteral(input);
     } else if (input.startsWith("Page.")) {
-      output = PTPageLiteral.getSentinel().alloc(input);
+      output = new PTPageLiteral(input);
     } else if (input.startsWith("Component.")) {
       output = PTComponentLiteral.getSentinel().alloc(input);
     } else {

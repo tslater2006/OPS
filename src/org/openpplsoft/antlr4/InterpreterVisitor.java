@@ -613,7 +613,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else if (input.startsWith("Page.")) {
       output = new PTPageLiteral(input);
     } else if (input.startsWith("Component.")) {
-      output = PTComponentLiteral.getSentinel().alloc(input);
+      output = new PTComponentLiteral(input);
     } else {
       throw new OPSVMachRuntimeException("Unsupported dynamic reference "
           + "attempt: " + input);

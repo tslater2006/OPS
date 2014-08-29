@@ -21,24 +21,14 @@ public final class PTComponentLiteral extends PTObjectType {
 
   private String ptPNLGRPNAME;
 
-  /**
-   * Creates a new component literal object that isn't
-   * attached to a component name; can only be called by
-   * an internal method.
-   */
-  private PTComponentLiteral() {
+  public PTComponentLiteral(final String cStr) {
     super(staticTypeFlag);
-  }
-
-  /**
-   * Creates a new component literal that is attached to a
-   * specific component name; can only be called by an internal
-   * method.
-   * @param pnlgrpname the component name to attach
-   */
-  private PTComponentLiteral(final String pnlgrpname) {
-    super(staticTypeFlag);
-    this.ptPNLGRPNAME = pnlgrpname;
+    if(!cStr.startsWith("Component.")) {
+      throw new OPSVMachRuntimeException("Expected cStr to start "
+          + "with 'Component.' while creating PTComponentLiteral; cStr = "
+          + cStr);
+    }
+    this.ptPNLGRPNAME = cStr.replaceFirst("Component.", "");
   }
 
   /**
@@ -67,53 +57,6 @@ public final class PTComponentLiteral extends PTObjectType {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTComponentLiteral
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Retrieves a sentinel component literal object from the cache,
-   * or creates it if it doesn't exist.
-   * @return the sentinel object
-   */
-  public static PTComponentLiteral getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTComponentLiteral) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTComponentLiteral sentinelObj = new PTComponentLiteral();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /**
-   * Allocates a new component literal object and attaches it
-   * to the component name named in the provided argument.
-   * @param cStr the component name, prefixed with "Component."
-   * @return the newly allocated component literal object
-   */
-  public PTComponentLiteral alloc(final String cStr) {
-
-    if(!cStr.startsWith("Component.")) {
-      throw new OPSVMachRuntimeException("Expected cStr to start "
-          + "with 'Component.' while alloc'ing PTComponentLiteral; cStr = "
-          + cStr);
-    }
-
-    final PTComponentLiteral newObj = new PTComponentLiteral(
-        cStr.replaceFirst("Component.", ""));
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  /**
-   * Retrieves the cache key for this component literal.
-   * @return the component literal's cache key
-   */
-  private static String getCacheKey() {
-    return new StringBuilder(staticTypeFlag.name()).toString();
   }
 
   @Override

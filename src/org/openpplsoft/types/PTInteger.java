@@ -48,10 +48,13 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
-    if(!(src instanceof PTInteger)) {
+    if(src instanceof PTInteger) {
+      this.write(((PTInteger)src).read());
+    } else if (src instanceof PTNumber) {
+      this.write(((PTNumber)src).readAsInteger());
+    } else {
       throw new EntDataTypeException("Expected src to be PTInteger.");
     }
-    this.write(((PTInteger)src).read());
   }
 
   public PTPrimitiveType add(PTPrimitiveType op) {

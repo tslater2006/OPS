@@ -20,7 +20,7 @@ public final class PTAppClassObj extends PTObjectType {
   public Scope propertyScope;
   public Scope instanceScope;
 
-  private PTAppClassObj(AppClassPeopleCodeProg prog) {
+  public PTAppClassObj(AppClassPeopleCodeProg prog) {
     super(staticTypeFlag);
     this.progDefn = prog;
     this.propertyScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_PROPERTY);
@@ -31,16 +31,15 @@ public final class PTAppClassObj extends PTObjectType {
         this.progDefn.instanceTable.entrySet()) {
       AppClassPeopleCodeProg.Instance instance = cursor.getValue();
 
+      this.instanceScope.declareVar(instance.id, instance.typeConstraint);
+
       /*
        * Primitive instance variables must have space allocated for them
-       * immediately. Object instance variables should simply reference the
-       * sentinel type value present in their declaration statement.
+       * immediately.
        */
-      if(instance.type instanceof PTPrimitiveType) {
-        this.instanceScope.declareVar(instance.id,
-          ((PTPrimitiveType)instance.type).alloc());
-      } else {
-        this.instanceScope.declareVar(instance.id, instance.type);
+      if(instance.typeConstraint.isUnderlyingClassPrimitive()) {
+        this.instanceScope.assignVar(instance.id,
+            instance.typeConstraint.alloc());
       }
     }
 
@@ -49,18 +48,16 @@ public final class PTAppClassObj extends PTObjectType {
         this.progDefn.propertyTable.entrySet()) {
       AppClassPeopleCodeProg.Property property = cursor.getValue();
 
+      this.propertyScope.declareVar(property.id, property.typeConstraint);
+
       /*
        * Primitive properties *that lack getters* must have space allocated for them
-       * immediately. Object properties *that lack getters* should simply
-       * reference the sentinel type value present in their declaration statement.
+       * immediately.
        */
-      if(!property.hasGetter) {
-        if(property.type instanceof PTPrimitiveType) {
-          this.propertyScope.declareVar(property.id,
-            ((PTPrimitiveType)property.type).alloc());
-        } else {
-          this.propertyScope.declareVar(property.id, property.type);
-        }
+      if(!property.hasGetter &&
+            property.typeConstraint.isUnderlyingClassPrimitive()) {
+        this.propertyScope.declareVar(property.id,
+          property.typeConstraint);
       }
     }
   }
@@ -92,7 +89,7 @@ public final class PTAppClassObj extends PTObjectType {
       if(this.progDefn.propertyTable.get(s).hasGetter) {
         return new Callable(new AppClassObjGetterExecContext(this, s,
           this.progDefn.getPropGetterImplStartNode(s),
-          this.progDefn.propertyTable.get(s).type));
+          this.progDefn.propertyTable.get(s).typeConstraint));
       }
     }
 
@@ -104,7 +101,7 @@ public final class PTAppClassObj extends PTObjectType {
       if(this.progDefn.methodTable.get(s).aLevel == AccessLevel.PUBLIC) {
         return new Callable(new AppClassObjMethodExecContext(this, s,
           this.progDefn.getMethodImplStartNode(s),
-          this.progDefn.methodTable.get(s).returnType));
+          this.progDefn.methodTable.get(s).returnTypeConstraint));
       } else {
         throw new OPSVMachRuntimeException("Encountered request for non-public "+
           "method; need to determine if the calling entity is an obj "+

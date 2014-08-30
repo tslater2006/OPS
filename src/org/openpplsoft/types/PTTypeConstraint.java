@@ -7,20 +7,16 @@
 
 package org.openpplsoft.types;
 
-import java.util.Map;
-import java.util.HashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PTTypeConstraint<T extends PTType> extends PTType {
+public class PTTypeConstraint<T extends PTType> {
 
   private static Logger log = LogManager.getLogger(PTTypeConstraint.class.getName());
 
-  private Class<T> underlyingClass;
+  protected Class<T> underlyingClass;
 
   public PTTypeConstraint(final Class<T> clazz) {
-    super(Type.TYPE_CONSTRAINT);
     this.underlyingClass = clazz;
   }
 
@@ -28,8 +24,13 @@ public class PTTypeConstraint<T extends PTType> extends PTType {
     return PTPrimitiveType.class.isAssignableFrom(this.underlyingClass);
   }
 
+  public boolean isUnderlyingClassEqualTo(final Class clazz) {
+    return this.underlyingClass == clazz;
+  }
+
   public T alloc() {
     try {
+//      return Class.getDeclaredConstructor(this.underlyingClass).newInstance();
       return this.underlyingClass.newInstance();
     } catch (final InstantiationException ie) {
       throw new EntDataTypeException("Unable to dynamically instantiate "

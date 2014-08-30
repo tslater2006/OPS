@@ -33,20 +33,20 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
 
   public class Instance {
     public String id;
-    public PTType type;
-    public Instance(String i, PTType t) {
+    public PTTypeConstraint typeConstraint;
+    public Instance(String i, PTTypeConstraint tc) {
       this.id = i;
-      this.type = t;
+      this.typeConstraint = tc;
     }
   }
 
   public class Property {
     public String id;
-    public PTType type;
+    public PTTypeConstraint typeConstraint;
     public boolean hasGetter;
-    public Property(String i, PTType t, boolean g) {
+    public Property(String i, PTTypeConstraint t, boolean g) {
       this.id = i;
-      this.type = t;
+      this.typeConstraint = t;
       this.hasGetter = g;
     }
   }
@@ -55,12 +55,12 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     public AccessLevel aLevel;
     public String name;
     public List<FormalParam> formalParams;
-    public PTType returnType;
-    public Method(AccessLevel a, String n, List<FormalParam> l, PTType r) {
+    public PTTypeConstraint returnTypeConstraint;
+    public Method(AccessLevel a, String n, List<FormalParam> l, PTTypeConstraint rTc) {
       this.aLevel = a;
       this.name = n;
       this.formalParams = l;
-      this.returnType = r;
+      this.returnTypeConstraint = rTc;
     }
   }
 
@@ -160,23 +160,23 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     return this.propGetterImplStartNodes.containsKey(propertyName);
   }
 
-  public void addInstanceIdentifier(String id, PTType type) {
-    log.debug("Adding instance id to table: {}, {}", id, type);
-    this.instanceTable.put(id, new Instance(id, type));
+  public void addInstanceIdentifier(String id, PTTypeConstraint tc) {
+    log.debug("Adding instance id to table: {}, {}", id, tc);
+    this.instanceTable.put(id, new Instance(id, tc));
   }
 
-  public void addPropertyIdentifier(String id, PTType type,
+  public void addPropertyIdentifier(String id, PTTypeConstraint typeConstraint,
       boolean hasGetter) {
     log.debug("Adding property id to table: {}, {}, getter?{}",
-        id, type, hasGetter);
-    this.propertyTable.put(id, new Property(id, type, hasGetter));
+        id, typeConstraint, hasGetter);
+    this.propertyTable.put(id, new Property(id, typeConstraint, hasGetter));
   }
 
   public void addMethod(AccessLevel aLvl, String name,
-      List<FormalParam> fp, PTType rType) {
+      List<FormalParam> fp, PTTypeConstraint rTypeConstraint) {
     log.debug("Adding method to table: {}, {}, {}, {}",
-        aLvl.name(), name, fp, rType);
-    this.methodTable.put(name, new Method(aLvl, name, fp, rType));
+        aLvl.name(), name, fp, rTypeConstraint);
+    this.methodTable.put(name, new Method(aLvl, name, fp, rTypeConstraint));
   }
 
   public void setClassDeclNode(ParseTree node) {

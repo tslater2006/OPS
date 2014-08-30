@@ -36,9 +36,14 @@ public abstract class ExecContext {
     this.scopeStack.pop();
   }
 
-  public void declareLocalVar(String id, PTType p) {
+  public void declareLocalVar(String id, PTTypeConstraint tc) {
     Scope topMostScope = this.scopeStack.peekFirst();
-    topMostScope.declareVar(id, p);
+    topMostScope.declareVar(id, tc);
+  }
+
+  public void assignLocalVar(String id, PTType p) {
+    Scope topMostScope = this.scopeStack.peekFirst();
+    topMostScope.assignVar(id, p);
   }
 
   public PTType resolveIdentifier(String id) {

@@ -45,6 +45,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private InterpretSupervisor supervisor;
   private ParseTreeProperty<PTType> nodeData;
   private ParseTreeProperty<Callable> nodeCallables;
+  private ParseTreeProperty<PTTypeConstraint> nodeTypeConstraints;
   private Stack<EvaluateConstruct> evalConstructStack;
   private IEmission lastEmission;
   private AccessLevel blockAccessLvl;
@@ -64,7 +65,28 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.supervisor = s;
     this.nodeData = new ParseTreeProperty<PTType>();
     this.nodeCallables = new ParseTreeProperty<Callable>();
+    this.nodeTypeConstraints = new ParseTreeProperty<PTTypeConstraint>();
     this.evalConstructStack = new Stack<EvaluateConstruct>();
+  }
+
+  /**
+   * Allows a PTTypeConstraint to be associated with a ParseTree node
+   * for retrieval by other parts of the interpreter. Note that you
+   * cannot limit the node type to VarTypeContext nodes, as there can be
+   * other contexts that need to pass around a type constraint (i.e.,
+   * AppClassPathContext nodes). Also note that
+   * unlike data objects (PTType objects), these should *not* be bubbled
+   * up, as type constraints are only ever associated with a single var type node.
+   */
+  private void setNodeTypeConstraint(
+      final ParseTree node,
+      final PTTypeConstraint typeConstraint) {
+    this.nodeTypeConstraints.put(node, typeConstraint);
+  }
+
+  private PTTypeConstraint getNodeTypeConstraint(
+      final ParseTree node) {
+    return this.nodeTypeConstraints.get(node);
   }
 
   /**
@@ -74,6 +96,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @param a the data value to associate with {@code node}
    */
   private void setNodeData(final ParseTree node, final PTType a) {
+    if (node instanceof PeopleCodeParser.VarTypeContext) {
+      throw new OPSVMachRuntimeException("setNodeData called for VarTypeContext; "
+          + "are you sure this is correct? (shouldn't it be setNodeTypeConstraint?)");
+    }
     this.nodeData.put(node, a);
   }
 
@@ -85,6 +111,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    *    data value for
    */
   private PTType getNodeData(final ParseTree node) {
+    if (node instanceof PeopleCodeParser.VarTypeContext) {
+      throw new OPSVMachRuntimeException("getNodeData called for VarTypeContext; "
+          + "are you sure this is correct? (shouldn't it be getNodeTypeConstraint?)");
+    }
     return this.nodeData.get(node);
   }
 
@@ -274,26 +304,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "to be private; actual access level is: " + this.blockAccessLvl);
     }
 
-    final PTType type = this.getNodeData(ctx.varType());
+    final PTTypeConstraint tc = this.getNodeTypeConstraint(ctx.varType());
     for (TerminalNode varId : ctx.VAR_ID()) {
-
-      /*
-       * Primitive variables must have space allocated for them
-       * immediately. Object variables should simply reference
-       * the constraint type value present in their declaration statement.
-       */
-      PTType t = type;
-      if (type instanceof PTTypeConstraint
-            && ((PTTypeConstraint) type).isUnderlyingClassPrimitive()) {
-        t = ((PTTypeConstraint) type).alloc();
-      } else if (type instanceof PTPrimitiveType) {
-        t = ((PTPrimitiveType) type).alloc();
-      }
-
-      log.debug("Adding instance identifier ({}) of type {}.",
-          varId.getText(), t);
+      log.debug("Adding instance identifier ({}); type constraint: {}.",
+          varId.getText(), tc);
       ((AppClassPeopleCodeProg) this.eCtx.prog).addInstanceIdentifier(
-          varId.getText(), t);
+          varId.getText(), tc);
     }
     return null;
   }
@@ -314,7 +330,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     final String id = ctx.GENERIC_ID().getText();
-    final PTType type = this.getNodeData(ctx.varType());
     final boolean hasGetter = (ctx.g != null);
     final boolean hasSetter = (ctx.s != null);
     final boolean isReadOnly = (ctx.r != null);
@@ -324,8 +339,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "setters and/or readonly properties: " + ctx.getText());
     }
 
+    final PTTypeConstraint tc = this.getNodeTypeConstraint(ctx.varType());
     ((AppClassPeopleCodeProg) this.eCtx.prog).addPropertyIdentifier(
-      id, type, hasGetter);
+      id, tc, hasGetter);
     return null;
   }
 
@@ -341,18 +357,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final List<FormalParam> formalParams = new ArrayList<FormalParam>();
     for (PeopleCodeParser.ParamContext pCtx
         : ctx.formalParamList().param()) {
-      formalParams.add(new FormalParam(
-        this.getNodeData(pCtx.varType()), pCtx.VAR_ID().getText()));
+      formalParams.add(new FormalParam(pCtx.VAR_ID().getText(),
+        this.getNodeTypeConstraint(pCtx.varType())));
     }
 
-    PTType rType = null;
+    PTTypeConstraint rTypeConstraint = null;
     if (ctx.returnType() != null) {
       visit(ctx.returnType());
-      rType = this.getNodeData(ctx.returnType().varType());
+      rTypeConstraint = this.getNodeTypeConstraint(ctx.returnType().varType());
     }
 
     ((AppClassPeopleCodeProg) this.eCtx.prog).addMethod(
-      this.blockAccessLvl, ctx.GENERIC_ID().getText(), formalParams, rType);
+      this.blockAccessLvl, ctx.GENERIC_ID().getText(), formalParams, rTypeConstraint);
     return null;
   }
 
@@ -368,18 +384,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final List<FormalParam> formalParams = new ArrayList<FormalParam>();
     for (PeopleCodeParser.ParamContext pCtx
         : ctx.formalParamList().param()) {
-      formalParams.add(new FormalParam(
-        this.getNodeData(pCtx.varType()), pCtx.VAR_ID().getText()));
+      formalParams.add(new FormalParam(pCtx.VAR_ID().getText(),
+        this.getNodeTypeConstraint(pCtx.varType())));
     }
 
-    PTType rType = null;
+    PTTypeConstraint rTypeConstraint = null;
     if (ctx.returnType() != null) {
       visit(ctx.returnType());
-      rType = this.getNodeData(ctx.returnType().varType());
+      rTypeConstraint = this.getNodeTypeConstraint(ctx.returnType().varType());
     }
 
     this.eCtx.prog.addFunction(
-        ctx.GENERIC_ID().getText(), formalParams, rType);
+        ctx.GENERIC_ID().getText(), formalParams, rTypeConstraint);
     return null;
   }
 
@@ -565,7 +581,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PTType retVal = this.getNodeData(ctx.expr());
 
       if (this.eCtx instanceof AppClassObjExecContext) {
-        if (((AppClassObjExecContext) this.eCtx).expectedReturnType
+        if (((AppClassObjExecContext) this.eCtx).expectedReturnTypeConstraint
             .typeCheck(retVal)) {
           Environment.pushToCallStack(retVal);
         } else {
@@ -1039,29 +1055,22 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         ((AppClassPeopleCodeProg) this.eCtx.prog).methodTable.
             get(ctx.GENERIC_ID().getText()).formalParams;
 
-    final List<PTType> args = Environment.getArgsFromCallStack();
+    /*
+     * First, declare each formal parameter as a var in the local
+     * scope, using the associated type constraint.
+     */
+    for (FormalParam fp : formalParams) {
+      localScope.declareVar(fp.id, fp.typeConstraint);
+    }
 
     /*
-     * Ensure that each of the arguments passed to the method match
-     * the types of the formal parameters, and assign (by reference) those args
-     * to the identifiers in the formal parameter list of the method signature.
-     * If there's a mismatch, attempt to cast the argument provided to the type
-     * specified in the formal parameter definition.
+     * Then, assign each arg passed to the method to each of the
+     * newly declared formal parameter variables (type checking
+     * will be performed by invoked method).
      */
+    final List<PTType> args = Environment.getArgsFromCallStack();
     for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
-      final FormalParam fp = formalParams.get(i);
-      final PTType arg = args.get(i);
-      log.debug("fp is {}", fp);
-      if (fp.type.typeCheck(arg)) {
-        localScope.declareVar(fp.id, arg);
-      } else if (arg instanceof PTField
-          && fp.type.typeCheck(((PTField) arg).getValue())) {
-        localScope.declareVar(fp.id, ((PTField) arg).getValue());
-      } else {
-        throw new OPSVMachRuntimeException("Unable to declare var; type check "
-            + "failed and PTField unboxing not relevant; fp is " + fp
-            + " and arg is " + arg);
-      }
+      localScope.assignVar(formalParams.get(i).id, args.get(i));
     }
 
     this.eCtx.pushScope(localScope);
@@ -1292,54 +1301,46 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.varType());
 
     final String scope = ctx.varScope.getText();
-    final PTType varType = this.getNodeData(ctx.varType());
+    final PTTypeConstraint varTc = this.getNodeTypeConstraint(ctx.varType());
     boolean didInitializeAnIdentifier = false;
 
     final List<PeopleCodeParser.VarDeclaratorContext> varsToDeclare =
         ctx.varDeclarator();
     for (PeopleCodeParser.VarDeclaratorContext idCtx : varsToDeclare) {
+
+      // First, declare the var.
+      log.debug("Declaring identifier ({}) with scope {} and type constraint {}.",
+          idCtx.VAR_ID().getText(), scope, varTc);
+      this.declareIdentifier(scope, idCtx.VAR_ID().getText(), varTc);
+
       if (idCtx.expr() != null) {
+        // Initial value expr exists, so assign it to declared var.
         visit(idCtx.expr());
         final PTType initialValue = this.getNodeData(idCtx.expr());
-        if (varType.typeCheck(initialValue)) {
-          log.debug("Initializing identifier ({}) with scope {} and value {}.",
-              idCtx.VAR_ID().getText(), scope, initialValue);
-          this.declareIdentifier(scope, idCtx.VAR_ID().getText(), initialValue);
-          didInitializeAnIdentifier = true;
-        } else {
-          throw new OPSVMachRuntimeException("Type mismatch between declared "
-              + "variable type (" + varType + ") and its initialized value ("
-              + initialValue + ").");
-        }
-      } else {
+        this.assignIdentifier(scope, idCtx.VAR_ID().getText(), initialValue);
+        didInitializeAnIdentifier = true;
+      } else if (varTc.isUnderlyingClassPrimitive()) {
         /*
-         * Primitive variables must have space allocated for them
-         * immediately. Object variables should simply reference
-         * the constraint type value present in their declaration statement.
+         * If no initial value expr exists, *AND* the type constraint
+         * represents a primitive, a new primitive must be allocated
+         * immediately.
          */
-        PTType t = varType;
-        if (varType instanceof PTTypeConstraint
-            && ((PTTypeConstraint) varType).isUnderlyingClassPrimitive()) {
-          t = ((PTTypeConstraint) varType).alloc();
-          log.debug("After allocing from {}, t is {}", varType, t);
-        } else if (varType instanceof PTPrimitiveType) {
-          t = ((PTPrimitiveType) varType).alloc();
-        }
-        log.debug("Declaring identifier ({}) with scope {} and type {}.",
-            idCtx.VAR_ID().getText(), scope, t);
-        this.declareIdentifier(scope, idCtx.VAR_ID().getText(), t);
+        this.assignIdentifier(scope, idCtx.VAR_ID().getText(),
+            varTc.alloc());
       }
     }
 
     if (this.eCtx.prog instanceof AppClassPeopleCodeProg) {
-      if (!this.hasVarDeclBeenEmitted || varType instanceof PTRowset
-          || varType instanceof PTAppClassObj || varType instanceof PTRecord
+      if (!this.hasVarDeclBeenEmitted
+          || varTc.isUnderlyingClassEqualTo(PTRowset.class)
+          || varTc.isUnderlyingClassEqualTo(PTAppClassObj.class)
+          || varTc.isUnderlyingClassEqualTo(PTRecord.class)
           || didInitializeAnIdentifier) {
         this.emitStmt(ctx);
         this.hasVarDeclBeenEmitted = true;
       }
     } else if((this.eCtx instanceof FunctionExecContext) &&
-      this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
+        this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
       this.emitStmt(ctx);
     }
     return null;
@@ -1356,58 +1357,61 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.VarTypeContext ctx) {
 
     if (ctx.appClassPath() != null) {
-      visit(ctx.appClassPath());
-      this.setNodeData(ctx, this.getNodeData(ctx.appClassPath()));
+/*      visit(ctx.appClassPath());
+      this.setNodeData(ctx, this.getNodeData(ctx.appClassPath()));*/
+      throw new OPSVMachRuntimeException("TYPE SYSTEM: Create PTTypeConstraint "
+          + "for app class paths.");
     } else {
-      PTType nestedType = null;
-      if (ctx.varType() != null) {
-        if (!ctx.GENERIC_ID().getText().equals("array")) {
-          throw new OPSVMachRuntimeException("Encountered non-array var "
-              + "type preceding 'of' clause: " + ctx.getText());
-        }
-        visit(ctx.varType());
-        nestedType = this.getNodeData(ctx.varType());
+      PTTypeConstraint nestedTypeConstraint = null;
+      if (ctx.varType() != null
+            && !ctx.GENERIC_ID().getText().equals("array")) {
+        throw new OPSVMachRuntimeException("Encountered non-array var "
+            + "type preceding 'of' clause: " + ctx.getText());
       }
+      visit(ctx.varType());
+      nestedTypeConstraint = this.getNodeTypeConstraint(ctx.varType());
 
-      PTType type;
+      PTTypeConstraint typeConstraint;
       switch (ctx.GENERIC_ID().getText()) {
         case "array":
-          if (nestedType instanceof PTArray) {
+/*          if (nestedType instanceof PTArray) {
             type = PTArray.getSentinel(
               ((PTArray) nestedType).dimensions + 1, nestedType);
           } else {
             type = PTArray.getSentinel(1, nestedType);
           }
-          break;
+          break;*/
+          throw new OPSVMachRuntimeException("TYPE SYSTEM: Subclass "
+              + "PTTypeConstraint for use with arrays.");
         case "string":
-          type = new PTTypeConstraint<PTString>(PTString.class);
+          typeConstraint = new PTTypeConstraint<PTString>(PTString.class);
           break;
         case "date":
-          type = PTDate.getSentinel();
+          typeConstraint = new PTTypeConstraint<PTDate>(PTDate.class);
           break;
         case "integer":
-          type = PTInteger.getSentinel();
+          typeConstraint = new PTTypeConstraint<PTInteger>(PTInteger.class);
           break;
         case "Record":
-          type = PTRecord.getSentinel();
+          typeConstraint = new PTTypeConstraint<PTRecord>(PTRecord.class);
           break;
         case "Rowset":
-          type = PTRowset.getSentinel();
+          typeConstraint = new PTTypeConstraint<PTRowset>(PTRowset.class);
           break;
         case "number":
-          type = PTNumber.getSentinel();
+          typeConstraint = new PTTypeConstraint<PTNumber>(PTNumber.class);
           break;
         case "boolean":
-          type = PTBoolean.getSentinel();
+          typeConstraint = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
           break;
         case "Field":
-          type = PTField.getSentinel();
+          typeConstraint = new PTTypeConstraint<PTField>(PTField.class);
           break;
         default:
           throw new OPSVMachRuntimeException("Unexpected data type: "
               + ctx.GENERIC_ID().getText());
       }
-      this.setNodeData(ctx, type);
+      this.setNodeTypeConstraint(ctx, typeConstraint);
     }
     return null;
   }
@@ -1546,8 +1550,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final AppClassPeopleCodeProg progDefn =
         (AppClassPeopleCodeProg) DefnCache.getProgram(("AppClassPC."
             + ctx.getText() + ".OnExecute").replaceAll(":", "."));
-    this.setNodeData(ctx, PTAppClassObj.getSentinel(progDefn));
-    return null;
+    throw new OPSVMachRuntimeException("TODO: Finish passing app class type constraint.");
+ //   this.setNodeTypeConstraint(ctx,
+//        new PTAppClassObjTypeConstraint<PTAppClassObj>(PTAppClassObj.class, progDefn));
+//    return null;
   }
 
   /**
@@ -1648,30 +1654,22 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
               this.eCtx.prog.funcTable
                 .get(ctx.funcSignature().GENERIC_ID().getText()).formalParams;
 
-          final List<PTType> args = Environment.getArgsFromCallStack();
+          /*
+           * First, declare each formal parameter as a var in the local
+           * scope, using the associated type constraint.
+           */
+          for (FormalParam fp : formalParams) {
+            localScope.declareVar(fp.id, fp.typeConstraint);
+          }
 
           /*
-           * Ensure that each of the arguments passed to the method match
-           * the types of the formal parameters, and assign (by reference) those args
-           * to the identifiers in the formal parameter list of the method signature.
-           * If there's a mismatch, attempt to cast the argument provided to the type
-           * specified in the formal parameter definition.
+           * Then, assign each arg passed to the method to each of the
+           * newly declared formal parameter variables (type checking
+           * will be performed by invoked method).
            */
+          final List<PTType> args = Environment.getArgsFromCallStack();
           for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
-            final FormalParam fp = formalParams.get(i);
-            final PTType arg = args.get(i);
-            // The formal param may have no type, in which case it will be handled
-            // as if it had a type matching that of the supplied argument.
-            if (fp.type == null || fp.type.typeCheck(arg)) {
-              localScope.declareVar(fp.id, arg);
-            } else if (arg instanceof PTField
-                && fp.type.typeCheck(((PTField) arg).getValue())) {
-              localScope.declareVar(fp.id, ((PTField) arg).getValue());
-            } else {
-              throw new OPSVMachRuntimeException("Unable to declare var; type check "
-                  + "failed and PTField unboxing not relevant; fp is " + fp
-                  + " and arg is " + arg);
-            }
+            localScope.assignVar(formalParams.get(i).id, args.get(i));
           }
 
           this.eCtx.pushScope(localScope);
@@ -1693,16 +1691,34 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   }
 
   private void declareIdentifier(final String scope,
-      final String id, final PTType a) {
+      final String id, final PTTypeConstraint tc) {
     switch(scope) {
       case "Local":
-        this.eCtx.declareLocalVar(id, a);
+        this.eCtx.declareLocalVar(id, tc);
         break;
       case "Component":
-        Environment.componentScope.declareVar(id, a);
+        Environment.componentScope.declareVar(id, tc);
         break;
       case "Global":
-        Environment.globalScope.declareVar(id, a);
+        Environment.globalScope.declareVar(id, tc);
+        break;
+      default:
+        throw new OPSVMachRuntimeException("Encountered unexpected variable "
+            + " scope: " + scope);
+    }
+  }
+
+  private void assignIdentifier(final String scope,
+      final String id, final PTType t) {
+    switch(scope) {
+      case "Local":
+        this.eCtx.assignLocalVar(id, t);
+        break;
+      case "Component":
+        Environment.componentScope.assignVar(id, t);
+        break;
+      case "Global":
+        Environment.globalScope.assignVar(id, t);
         break;
       default:
         throw new OPSVMachRuntimeException("Encountered unexpected variable "

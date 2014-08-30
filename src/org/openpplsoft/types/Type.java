@@ -18,5 +18,5 @@ public enum Type {
   PAGE_LITERAL, COMPONENT_LITERAL, DATETIME, TIME, CHAR,
 
   // Separates call frames on the OPS runtime stack.
-  CALL_FRAME_BOUNDARY, TYPE_CONSTRAINT;
+  CALL_FRAME_BOUNDARY;
 }

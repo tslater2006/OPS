@@ -29,8 +29,18 @@ public class Scope {
     APP_CLASS_OBJ_INSTANCE, APP_CLASS_OBJ_PROPERTY
   }
 
+  private class SymbolTableEntry {
+    public String symbolId;
+    public PTTypeConstraint typeConstraint;
+    public PTType assignedValueRef;
+    public SymbolTableEntry(final String s, final PTTypeConstraint tc) {
+      this.symbolId = s;
+      this.typeConstraint = tc;
+    }
+  }
+
   private Lvl level;
-  private Map<String, PTType> symbolTable;
+  private Map<String, SymbolTableEntry> symbolTable;
 
   /**
    * Creates a new scope for the specified scope level.
@@ -38,7 +48,7 @@ public class Scope {
    */
   public Scope(final Scope.Lvl l) {
     this.level = l;
-    this.symbolTable = new HashMap<String, PTType>();
+    this.symbolTable = new HashMap<String, SymbolTableEntry>();
   }
 
   public Lvl getLevel() {
@@ -53,7 +63,14 @@ public class Scope {
    * @param id the identifier to declare
    * @param type the type to declare
    */
-  public void declareVar(final String id, final PTType type) {
+  public void declareVar(final String id, final PTTypeConstraint typeConstraint) {
+    if (typeConstraint == null) {
+      throw new OPSVMachRuntimeException("typeConstraint is null; this is prolly "
+          + "b/c a function formal param had no type; rather than allowing it to "
+          + "be null, create the Any type and have it be type compatible with "
+          + "anything. CONTINUE TO KEEP THIS EXCEPTION IF typeConstraint IS NULL.");
+    }
+
     if (this.isIdResolvable(id)) {
       if(this.level == Lvl.COMPONENT) {
         // re-declaration of a Component-scoped var is normal, as this is
@@ -64,7 +81,7 @@ public class Scope {
             + " variable (" + id + ") in scope level " + this.level);
       }
     }
-    this.symbolTable.put(id, type);
+    this.symbolTable.put(id, new SymbolTableEntry(id, typeConstraint));
   }
 
   /**
@@ -74,14 +91,18 @@ public class Scope {
    * @param newRef the reference to assign
    */
   public void assignVar(final String id, final PTType newRef) {
-    final PTType currRef = this.symbolTable.get(id);
+    SymbolTableEntry symEntry = this.symbolTable.get(id);
 
-    if (currRef.typeCheck(newRef)) {
-      this.symbolTable.put(id, newRef);
+    if (symEntry.typeConstraint.typeCheck(newRef)) {
+      symEntry.assignedValueRef = newRef;
+    } else if (newRef instanceof PTField
+        && symEntry.typeConstraint.typeCheck(((PTField) newRef).getValue())) {
+      symEntry.assignedValueRef = ((PTField) newRef).getValue();
     } else {
       throw new OPSVMachRuntimeException("Identifier assignment failed type "
-          + "check; currRef (" + currRef.toString() + ") and newRef ("
-          + newRef.toString() + ") are not type compatible.");
+          + "check and/or PTField unboxing; typeConstraint ("
+          + symEntry.typeConstraint + ") and newRef ("
+          + newRef + ") are not type compatible.");
     }
   }
 
@@ -91,7 +112,7 @@ public class Scope {
    * @return the current reference if declared, otherwise null
    */
   public PTType resolveVar(final String id) {
-    return this.symbolTable.get(id);
+    return this.symbolTable.get(id).assignedValueRef;
   }
 
   /**

@@ -16,14 +16,15 @@ public abstract class AppClassObjExecContext extends ExecContext {
 
   public String methodOrGetterName;
   public PTAppClassObj appClassObj;
-  public PTType expectedReturnType;
+  public PTTypeConstraint expectedReturnTypeConstraint;
 
-  public AppClassObjExecContext(PTAppClassObj obj, String m, ParseTree s, PTType r) {
+  public AppClassObjExecContext(final PTAppClassObj obj, final String m,
+      final ParseTree s, final PTTypeConstraint rTc) {
     super(obj.progDefn);
     this.appClassObj = obj;
     this.startNode = s;
     this.methodOrGetterName = m;
-    this.expectedReturnType = r;
+    this.expectedReturnTypeConstraint = rTc;
     this.pushScope(obj.propertyScope);
     this.pushScope(obj.instanceScope);
   }

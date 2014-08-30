@@ -7,21 +7,22 @@
 
 package org.openpplsoft.pt.peoplecode;
 
-import org.openpplsoft.types.*;
+import org.openpplsoft.types.PTTypeConstraint;
 
 public class FormalParam {
 
-  public PTType type;
   public String id;
+  public PTTypeConstraint typeConstraint;
 
-  public FormalParam(PTType t, String i) {
-    this.type = t;
+  public FormalParam(final String i, final PTTypeConstraint tc) {
     this.id = i;
+    this.typeConstraint = tc;
   }
 
   public String toString() {
-    StringBuilder b = new StringBuilder(this.id);
-    b.append(":").append(this.type);
+    StringBuilder b = new StringBuilder("FormalParam:id=");
+    b.append(this.id);
+    b.append(",typeConstraint=").append(this.typeConstraint);
     return b.toString();
   }
 }

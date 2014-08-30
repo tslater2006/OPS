@@ -70,7 +70,7 @@ public final class PTRecord extends PTObjectType {
    * Creates a new record object that isn't attached
    * to a record defn; can only be called by local methods.
    */
-  private PTRecord() {
+  public PTRecord() {
     super(staticTypeFlag);
   }
 

@@ -14,9 +14,9 @@ import org.antlr.v4.runtime.tree.*;
 
 public class AppClassObjMethodExecContext extends AppClassObjExecContext {
 
-  public AppClassObjMethodExecContext(PTAppClassObj obj, String m,
-      ParseTree s, PTType r) {
-    super(obj, m, s, r);
+  public AppClassObjMethodExecContext(final PTAppClassObj obj, final String m,
+      final ParseTree s, final PTTypeConstraint rTc) {
+    super(obj, m, s, rTc);
   }
 }
 

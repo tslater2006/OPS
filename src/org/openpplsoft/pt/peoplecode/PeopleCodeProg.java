@@ -50,11 +50,11 @@ public abstract class PeopleCodeProg {
   public class Function {
     public String name;
     public List<FormalParam> formalParams;
-    public PTType returnType;
-    public Function(String n, List<FormalParam> l, PTType r) {
+    public PTTypeConstraint returnTypeConstraint;
+    public Function(String n, List<FormalParam> l, PTTypeConstraint rtc) {
       this.name = n;
       this.formalParams = l;
-      this.returnType = r;
+      this.returnTypeConstraint = rtc;
     }
   }
 
@@ -255,10 +255,10 @@ public abstract class PeopleCodeProg {
   }
 
   public void addFunction(final String name,
-      final List<FormalParam> fp, final PTType rType) {
+      final List<FormalParam> fp, final PTTypeConstraint rTypeConstraint) {
     log.debug("Adding function to table: {}, {}, {}",
-        name, fp, rType);
-    this.funcTable.put(name, new Function(name, fp, rType));
+        name, fp, rTypeConstraint);
+    this.funcTable.put(name, new Function(name, fp, rTypeConstraint));
   }
 }
 

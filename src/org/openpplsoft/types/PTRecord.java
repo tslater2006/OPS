@@ -317,17 +317,15 @@ public final class PTRecord extends PTObjectType {
   /**
    * Overrides parent method because calls to make a record
    * read-only should make its fields read-only as well.
-   * @return this record object (enables method chaining)
    */
   @Override
-  public PTType setReadOnly() {
+  public void setReadOnly() {
     super.setReadOnly();
     if (this.fields != null) {
       for (Map.Entry<String, PTField> cursor : this.fields.entrySet()) {
         cursor.getValue().setReadOnly();
       }
     }
-    return this;
   }
 
   @Override

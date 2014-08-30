@@ -137,7 +137,7 @@ public final class PTRow extends PTObjectType {
   }
 
   @Override
-  public PTType setReadOnly() {
+  public void setReadOnly() {
     super.setReadOnly();
 
     // Calls to make a row read-only must make its child records read-only.
@@ -149,8 +149,6 @@ public final class PTRow extends PTObjectType {
     for(Map.Entry<String, PTRowset> cursor: this.childRowsetMap.entrySet()) {
       cursor.getValue().setReadOnly();
     }
-
-    return this;
   }
 
   @Override

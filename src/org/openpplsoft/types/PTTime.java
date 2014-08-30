@@ -50,7 +50,6 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   @Override
   public void systemWrite(final String newValue) {
-    this.checkIsSystemWriteable();
     this.d = newValue;
   }
 

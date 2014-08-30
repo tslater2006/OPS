@@ -47,7 +47,6 @@ public final class PTString extends PTPrimitiveType<String> {
 
   @Override
   public void systemWrite(final String newValue) {
-    this.checkIsSystemWriteable();
     this.s = newValue;
   }
 

@@ -60,7 +60,6 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   }
 
   public void systemWrite(Double newValue) {
-    this.checkIsSystemWriteable();
     this.isInteger = false;
     this.d = newValue;
   }

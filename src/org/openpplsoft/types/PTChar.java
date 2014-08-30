@@ -61,7 +61,6 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   @Override
   public void systemWrite(final Character newValue) {
-    this.checkIsSystemWriteable();
     this.c = newValue;
   }
 

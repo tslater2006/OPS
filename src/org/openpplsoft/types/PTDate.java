@@ -52,7 +52,6 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public void systemWrite(String newValue) {
-    this.checkIsSystemWriteable();
     this.d = newValue;
   }
 

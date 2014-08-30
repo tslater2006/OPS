@@ -36,7 +36,6 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
   }
 
   public void systemWrite(Boolean newValue) {
-    this.checkIsSystemWriteable();
     this.b = newValue;
   }
 

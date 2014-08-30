@@ -80,17 +80,16 @@ public final class PTField extends PTObjectType {
     this.setDefault();
   }
 
-  /*
+  /**
    * Calls to make a field read-only should make the
    * field's value read-only as well.
    */
   @Override
-  public PTType setReadOnly() {
+  public void setReadOnly() {
     super.setReadOnly();
     if(this.value != null) {
       this.value.setReadOnly();
     }
-    return this;
   }
 
   public boolean typeCheck(PTType a) {

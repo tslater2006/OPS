@@ -39,7 +39,6 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   }
 
   public void systemWrite(Integer newValue) {
-    this.checkIsSystemWriteable();
     this.i = newValue;
   }
 

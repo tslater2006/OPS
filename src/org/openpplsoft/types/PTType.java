@@ -25,6 +25,7 @@ public abstract class PTType {
   private EnumSet<TFlag> flags;
   private boolean sentinelFlag;
   private PTTypeConstraint originatingTypeConstraint;
+  private boolean isReadOnly;
 
   static {
     sentinelCache = new HashMap<String, PTType>();
@@ -39,6 +40,20 @@ public abstract class PTType {
     this.type = t;
     this.flags = EnumSet.noneOf(TFlag.class);
     this.originatingTypeConstraint = origTypeConstraint;
+  }
+
+  /**
+   * Marks this typed object as read-only.
+   */
+  public void setReadOnly() {
+    this.isReadOnly = true;
+  }
+
+  /**
+   * Returns whether this typed object is read-only.
+   */
+  public boolean isReadOnly() {
+    return this.isReadOnly;
   }
 
   public PTTypeConstraint getOriginatingTypeConstraint() {
@@ -113,28 +128,11 @@ public abstract class PTType {
   }
 
   /**
-   * Marks the instance type object as read-only.
-   * @return the instance itself (allows chained methods)
-   */
-  public PTType setReadOnly() {
-    if (this.isSentinel()) {
-      throw new EntDataTypeException("Encountered illegal attempt to "
-          + "make a sentinel PTType readonly.");
-    }
-    this.flags.add(TFlag.READONLY);
-    return this;
-  }
-
-  /**
    * Check if the instance is a sentinel type object.
    * @return whether or not the instance is a sentinel
    */
   protected boolean isSentinel() {
     return this.sentinelFlag;
-  }
-
-  public boolean isReadOnly() {
-    return this.flags.contains(TFlag.READONLY);
   }
 
   /**
@@ -167,20 +165,9 @@ public abstract class PTType {
   }
 
   protected void checkIsWriteable() {
-    if (this.isSentinel()) {
-      throw new EntDataTypeException("Attempted illegal write to a "
-          + "sentinel PTType object.");
-    }
-    if (this.getFlags().contains(TFlag.READONLY)) {
+    if (this.isReadOnly) {
       throw new EntDataTypeException("Attempted illegal write to a "
           + "readonly PTType object.");
-    }
-  }
-
-  protected void checkIsSystemWriteable() {
-    if (this.isSentinel()) {
-      throw new EntDataTypeException("Attempted illegal system write "
-          + "to a sentinel PTType object.");
     }
   }
 

@@ -46,4 +46,11 @@ public class PTTypeConstraint<T extends PTType> {
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());
   }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder("TypeConstraint:");
+    b.append(this.underlyingClass.getName());
+    return b.toString();
+  }
 }

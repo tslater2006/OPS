@@ -38,4 +38,11 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/
   }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder(super.toString());
+    b.append("[progDefn=").append(this.progDefn.getDescriptor()).append("]");
+    return b.toString();
+  }
 }

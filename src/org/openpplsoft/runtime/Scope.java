@@ -81,7 +81,19 @@ public class Scope {
             + " variable (" + id + ") in scope level " + this.level);
       }
     }
-    this.symbolTable.put(id, new SymbolTableEntry(id, typeConstraint));
+
+    SymbolTableEntry newEntry = new SymbolTableEntry(id, typeConstraint);
+    if(typeConstraint.isUnderlyingClassPrimitive()) {
+      // Primitives must have space allocated immediately.
+      newEntry.assignedValueRef = typeConstraint.alloc();
+    } else if(typeConstraint.isUnderlyingClassObject()) {
+      // Objects are always declared with null references.
+      newEntry.assignedValueRef = PTNull.getSingleton();
+    } else {
+        throw new OPSVMachRuntimeException("Type constraint provided at var "
+            + "declaration time is neither object nor primitive.");
+    }
+    this.symbolTable.put(id, newEntry);
   }
 
   /**
@@ -92,6 +104,12 @@ public class Scope {
    */
   public void assignVar(final String id, final PTType newRef) {
     SymbolTableEntry symEntry = this.symbolTable.get(id);
+
+    if (newRef == null) {
+      throw new OPSVMachRuntimeException("newRef is null (Java null) in "
+          + "assignVar; this is illegal and indicative of an assignment "
+          + "problem somewhere.");
+    }
 
     if (symEntry.typeConstraint.typeCheck(newRef)) {
       symEntry.assignedValueRef = newRef;
@@ -112,7 +130,13 @@ public class Scope {
    * @return the current reference if declared, otherwise null
    */
   public PTType resolveVar(final String id) {
-    return this.symbolTable.get(id).assignedValueRef;
+    PTType resolvedRef = this.symbolTable.get(id).assignedValueRef;
+    if (resolvedRef == null) {
+      throw new OPSVMachRuntimeException("resolvedRef is null (Java null) in "
+          + "resolveVar; this is illegal and indicative of an assignment "
+          + "problem somewhere.");
+    }
+    return resolvedRef;
   }
 
   /**

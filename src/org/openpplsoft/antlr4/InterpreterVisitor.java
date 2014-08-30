@@ -1313,20 +1313,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           idCtx.VAR_ID().getText(), scope, varTc);
       this.declareIdentifier(scope, idCtx.VAR_ID().getText(), varTc);
 
+      // If initial value expr exists, assign it to declared var.
       if (idCtx.expr() != null) {
-        // Initial value expr exists, so assign it to declared var.
         visit(idCtx.expr());
         final PTType initialValue = this.getNodeData(idCtx.expr());
         this.assignIdentifier(scope, idCtx.VAR_ID().getText(), initialValue);
         didInitializeAnIdentifier = true;
-      } else if (varTc.isUnderlyingClassPrimitive()) {
-        /*
-         * If no initial value expr exists, *AND* the type constraint
-         * represents a primitive, a new primitive must be allocated
-         * immediately.
-         */
-        this.assignIdentifier(scope, idCtx.VAR_ID().getText(),
-            varTc.alloc());
       }
     }
 

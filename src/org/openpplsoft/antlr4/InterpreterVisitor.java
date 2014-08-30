@@ -1357,19 +1357,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.VarTypeContext ctx) {
 
     if (ctx.appClassPath() != null) {
-/*      visit(ctx.appClassPath());
-      this.setNodeData(ctx, this.getNodeData(ctx.appClassPath()));*/
-      throw new OPSVMachRuntimeException("TYPE SYSTEM: Create PTTypeConstraint "
-          + "for app class paths.");
+      visit(ctx.appClassPath());
+      this.setNodeTypeConstraint(ctx,
+          this.getNodeTypeConstraint(ctx.appClassPath()));
     } else {
       PTTypeConstraint nestedTypeConstraint = null;
-      if (ctx.varType() != null
-            && !ctx.GENERIC_ID().getText().equals("array")) {
-        throw new OPSVMachRuntimeException("Encountered non-array var "
-            + "type preceding 'of' clause: " + ctx.getText());
+      if (ctx.varType() != null) {
+        if(!ctx.GENERIC_ID().getText().equals("array")) {
+          throw new OPSVMachRuntimeException("Encountered non-array var "
+              + "type preceding 'of' clause: " + ctx.getText());
+        }
+        visit(ctx.varType());
+        nestedTypeConstraint = this.getNodeTypeConstraint(ctx.varType());
       }
-      visit(ctx.varType());
-      nestedTypeConstraint = this.getNodeTypeConstraint(ctx.varType());
 
       PTTypeConstraint typeConstraint;
       switch (ctx.GENERIC_ID().getText()) {
@@ -1550,10 +1550,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final AppClassPeopleCodeProg progDefn =
         (AppClassPeopleCodeProg) DefnCache.getProgram(("AppClassPC."
             + ctx.getText() + ".OnExecute").replaceAll(":", "."));
-    throw new OPSVMachRuntimeException("TODO: Finish passing app class type constraint.");
- //   this.setNodeTypeConstraint(ctx,
-//        new PTAppClassObjTypeConstraint<PTAppClassObj>(PTAppClassObj.class, progDefn));
-//    return null;
+    this.setNodeTypeConstraint(ctx, new PTAppClassObjTypeConstraint(progDefn));
+    return null;
   }
 
   /**

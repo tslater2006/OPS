@@ -67,20 +67,12 @@ public final class PTRecord extends PTObjectType {
   }
 
   /**
-   * Creates a new record object that isn't attached
-   * to a record defn; can only be called by local methods.
-   */
-  public PTRecord() {
-    super(staticTypeFlag);
-  }
-
-  /**
    * Creates a new record object that is attached
    * to a record defn; can only be called by local methods.
    * @param r the record defn to attach
    */
-  private PTRecord(final Record r) {
-    super(staticTypeFlag);
+  public PTRecord(PTRecordTypeConstraint origTc, final Record r) {
+    super(staticTypeFlag, origTc);
 
     this.recDefn = r;
 
@@ -90,7 +82,7 @@ public final class PTRecord extends PTObjectType {
     this.fieldIdxTable = new LinkedHashMap<Integer, PTField>();
     int i = 1;
     for (RecordField rf : this.recDefn.getExpandedFieldList()) {
-      final PTField newFld = PTField.getSentinel().alloc(rf);
+      final PTField newFld = new PTFieldTypeConstraint().alloc(rf);
       this.fields.put(rf.FIELDNAME, newFld);
       this.fieldIdxTable.put(i++, newFld);
     }
@@ -342,44 +334,6 @@ public final class PTRecord extends PTObjectType {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTRecord
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Retrieves a sentinel record object from the cache, or creates
-   * it if one does not exist.
-   * @return the sentinel record object
-   */
-  public static PTRecord getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTRecord) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTRecord sentinelObj = new PTRecord();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /**
-   * Allocates a new record object with an attached record defn.
-   * Allocated records must have an associated record defn in order
-   * to determine the type of the value enclosed within them. However, this
-   * defn is not part of the type itself; a Record variable can be assigned
-   * any Record object, regardless of its underlying record defn.
-   * @param r the record defn to attach
-   * @return the newly allocated record object
-   */
-  public PTRecord alloc(final Record r) {
-    final PTRecord newObj = new PTRecord(r);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    return new StringBuilder(staticTypeFlag.name()).toString();
   }
 
   @Override

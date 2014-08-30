@@ -23,11 +23,9 @@ public final class PTTime extends PTPrimitiveType<String> {
   private static final Type staticTypeFlag = Type.TIME;
   private String d;
 
-  /**
-   * Constructs a new PTTime object.
-   */
-  private PTTime() {
-    super(staticTypeFlag);
+  public PTTime() {
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTTime>(PTTime.class));
 
     // default value is current time.
     this.d = new SimpleDateFormat("HH:mm:ss")
@@ -156,41 +154,10 @@ public final class PTTime extends PTPrimitiveType<String> {
         && this.getType() == a.getType());
   }
 
-  /**
-   * Retrieves the sentinel object for this type,
-   * or creates it if it has not already been created
-   * and cached.
-   * @return a sentinel object
-   */
-  public static PTTime getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTTime) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTTime sentinelObj = new PTTime();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  @Override
-  public PTPrimitiveType alloc() {
-    final PTTime newObj = new PTTime();
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
     b.append(",d=").append(this.d);
     return b.toString();
-  }
-
-  private static String getCacheKey() {
-    return new StringBuilder(staticTypeFlag.name()).toString();
   }
 }

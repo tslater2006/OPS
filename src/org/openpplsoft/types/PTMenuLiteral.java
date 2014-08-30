@@ -23,13 +23,15 @@ public final class PTMenuLiteral extends PTObjectType {
   private Menu menuDefn;
 
   public PTMenuLiteral(final Menu m) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
     this.ptMENUNAME = m.getMenuName();
     this.menuDefn = m;
   }
 
   public PTMenuLiteral(final String mStr) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
     if(!mStr.startsWith("MenuName.")) {
       throw new OPSVMachRuntimeException("Expected mStr to start "
           + "with 'Menu.' while creating PTMenuLiteral; mStr = "

@@ -7,7 +7,7 @@
 
 package org.openpplsoft.runtime;
 
-import org.openpplsoft.types.PTAppClassObj;
+import org.openpplsoft.types.PTAppClassObjTypeConstraint;
 
 /**
  * Execution of an app class requires evaluation starting
@@ -19,8 +19,8 @@ public class AppClassDeclExecContext extends ExecContext {
   /**
    * @param obj The app class around which to form an execution context.
    */
-  public AppClassDeclExecContext(final PTAppClassObj obj) {
-    super(obj.progDefn);
-    this.startNode = obj.progDefn.getClassDeclNode();
+  public AppClassDeclExecContext(final PTAppClassObjTypeConstraint tc) {
+    super(tc.getReqdProgDefn());
+    this.startNode = tc.getReqdProgDefn().getClassDeclNode();
   }
 }

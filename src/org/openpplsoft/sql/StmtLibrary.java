@@ -443,13 +443,13 @@ public final class StmtLibrary {
        * For certain field types, wrap field names in
        * appropriate function calls.
        */
-      if (rfList.get(i).getSentinelForUnderlyingValue()
-          instanceof PTDate) {
+      if (rfList.get(i).getTypeConstraintForUnderlyingValue()
+          .isUnderlyingClassEqualTo(PTDate.class)) {
         selectClause.append("TO_CHAR(").append(dottedAlias)
             .append(fieldname).append(",'YYYY-MM-DD')");
 
-      } else if (rfList.get(i).getSentinelForUnderlyingValue()
-          instanceof PTDateTime) {
+      } else if (rfList.get(i).getTypeConstraintForUnderlyingValue()
+          .isUnderlyingClassEqualTo(PTDateTime.class)) {
         selectClause.append("TO_CHAR(CAST((").append(dottedAlias)
             .append(fieldname)
             .append(") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')");
@@ -537,20 +537,21 @@ public final class StmtLibrary {
 
       if (i > 0) { query.append(", "); }
       final String fieldname = rf.FIELDNAME;
-      final PTType val = rf
-          .getSentinelForUnderlyingValue();
+      final PTTypeConstraint valTc = rf
+          .getTypeConstraintForUnderlyingValue();
 
       // Apparently key fields that are dates or timestamps
       // appear twice in SELECT clauses...
-      if ((val instanceof PTDate || val instanceof PTDateTime)
+      if ( (valTc.isUnderlyingClassEqualTo(PTDate.class)
+            || valTc.isUnderlyingClassEqualTo(PTDateTime.class))
           && rf.isKey()) {
         query.append(fieldname).append(", ");
       }
 
-      if (val instanceof PTDate) {
+      if (valTc.isUnderlyingClassEqualTo(PTDate.class)) {
         query.append("TO_CHAR(").append(fieldname)
           .append(",'YYYY-MM-DD')");
-      } else if (val instanceof PTDateTime) {
+      } else if (valTc.isUnderlyingClassEqualTo(PTDateTime.class)) {
         query.append("TO_CHAR(CAST((").append(fieldname)
           .append(") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')");
       } else {

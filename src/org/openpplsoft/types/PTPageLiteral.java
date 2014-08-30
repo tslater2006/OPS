@@ -22,7 +22,8 @@ public final class PTPageLiteral extends PTObjectType {
   private String ptPNLNAME;
 
   public PTPageLiteral(final String pStr) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTPageLiteral>(PTPageLiteral.class));
     if(!pStr.startsWith("Page.")) {
       throw new OPSVMachRuntimeException("Expected pStr to start "
           + "with 'Page.' while alloc'ing PTPageLiteral; pStr = "

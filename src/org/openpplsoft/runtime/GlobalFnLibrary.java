@@ -142,7 +142,7 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
-    PTRecord rec = PTRecord.getSentinel().alloc(
+    PTRecord rec = new PTRecordTypeConstraint().alloc(
         DefnCache.getRecord(((PTString)args.get(0)).read()));
     rec.setDefault();
     Environment.pushToCallStack(rec);
@@ -155,7 +155,7 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
-    Environment.pushToCallStack(PTRowset.getSentinel().alloc(
+    Environment.pushToCallStack(new PTRowsetTypeConstraint().alloc(
         DefnCache.getRecord(((PTString)args.get(0)).read())));
   }
 
@@ -203,10 +203,12 @@ public class GlobalFnLibrary {
      */
     PTArray newArray = null;
     if(args.get(0) instanceof PTArray) {
-      newArray = PTArray.getSentinel(((PTArray)args.get(0)).dimensions + 1,
-        (PTArray)args.get(0)).alloc();
+      PTArray arr = (PTArray) args.get(0);
+      newArray = new PTArrayTypeConstraint(arr.dimensions + 1,
+          arr.getOriginatingTypeConstraint()).alloc();
     } else {
-      newArray = PTArray.getSentinel(1, args.get(0)).alloc();
+      newArray = new PTArrayTypeConstraint(1,
+          args.get(0).getOriginatingTypeConstraint()).alloc();
     }
 
     /*

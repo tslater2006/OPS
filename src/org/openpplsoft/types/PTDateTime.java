@@ -20,8 +20,8 @@ public final class PTDateTime extends PTPrimitiveType<String> {
   private static Type staticTypeFlag = Type.DATETIME;
   private String d;
 
-  private PTDateTime() {
-    super(staticTypeFlag);
+  public PTDateTime(final PTTypeConstraint origTc) {
+    super(staticTypeFlag, origTc);
 
     // default value is current date and time.
     d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -133,31 +133,6 @@ public final class PTDateTime extends PTPrimitiveType<String> {
   public boolean typeCheck(PTType a) {
     return (a instanceof PTDateTime &&
         this.getType() == a.getType());
-  }
-
-  public static PTDateTime getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTDateTime)PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    PTDateTime sentinelObj = new PTDateTime();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  public PTPrimitiveType alloc() {
-    PTDateTime newObj = new PTDateTime();
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

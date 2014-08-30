@@ -22,7 +22,8 @@ public final class PTMenuItemLiteral extends PTObjectType {
   private String ptITEMNAME;
 
   public PTMenuItemLiteral(final String iStr) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTMenuItemLiteral>(PTMenuItemLiteral.class));
     if(!iStr.startsWith("ItemName.")) {
       throw new OPSVMachRuntimeException("Expected iStr to start "
           + "with 'ItemName.' while alloc'ing PTMenuItemLiteral; iStr = "

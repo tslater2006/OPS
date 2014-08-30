@@ -12,7 +12,8 @@ public final class PTCallFrameBoundary extends PTType {
   private static PTCallFrameBoundary singleton;
 
   private PTCallFrameBoundary() {
-    super(Type.CALL_FRAME_BOUNDARY);
+    super(Type.CALL_FRAME_BOUNDARY,
+        new PTTypeConstraint<PTCallFrameBoundary>(PTCallFrameBoundary.class));
   }
 
   public static PTCallFrameBoundary getSingleton() {

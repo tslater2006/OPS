@@ -17,7 +17,6 @@ public class Environment {
 
   public static PTBoolean TRUE;
   public static PTBoolean FALSE;
-  public static PTDefnLiteral DEFN_LITERAL;
 
   public static Scope globalScope;
   public static Scope componentScope;
@@ -43,14 +42,13 @@ public class Environment {
   static {
 
     // Load static boolean literals.
-    TRUE = (PTBoolean)PTBoolean.getSentinel().alloc().setReadOnly();
+    TRUE = new PTTypeConstraint<PTBoolean>(PTBoolean.class).alloc();
+    TRUE.setReadOnly();
     TRUE.systemWrite(true);
 
-    FALSE = (PTBoolean)PTBoolean.getSentinel().alloc().setReadOnly();
+    FALSE = new PTTypeConstraint<PTBoolean>(PTBoolean.class).alloc();
+    FALSE.setReadOnly();
     FALSE.systemWrite(false);
-
-    DEFN_LITERAL = new PTDefnLiteral();
-    DEFN_LITERAL.setReadOnly();
 
     // Setup global and component scopes.
     globalScope = new Scope(Scope.Lvl.GLOBAL);
@@ -64,17 +62,20 @@ public class Environment {
     // Allocate space for system vars, mark each as read-only.
     systemVarTable = new HashMap<String, PTPrimitiveType>();
     for(String varName : supportedGlobalVars) {
-      systemVarTable.put(varName, (PTString)PTString.getSentinel()
-                        .alloc().setReadOnly());
+      PTString newStr = new PTTypeConstraint<PTString>(PTString.class).alloc();
+      newStr.setReadOnly();
+      systemVarTable.put(varName, newStr);
     }
 
     // Set up constant system variables (these will never change during runtime).
-    PTString actionUpdateDisplay = (PTString) PTString.getSentinel().alloc();
+    PTString actionUpdateDisplay =
+        new PTTypeConstraint<PTString>(PTString.class).alloc();
     actionUpdateDisplay.write("U");
     actionUpdateDisplay.setReadOnly();
     systemVarTable.put("%Action_UpdateDisplay", actionUpdateDisplay);
 
-    PTString actionAdd = (PTString) PTString.getSentinel().alloc();
+    PTString actionAdd =
+        new PTTypeConstraint<PTString>(PTString.class).alloc();
     actionAdd.write("A");
     actionAdd.setReadOnly();
     systemVarTable.put("%Action_Add", actionAdd);
@@ -126,7 +127,7 @@ public class Environment {
     PTPrimitiveType a = null;
     switch(var) {
       case "%Date":
-        a = PTDate.getSentinel().alloc();
+        a = new PTTypeConstraint<PTDate>(PTDate.class).alloc();
         break;
       default:
         a = systemVarTable.get(var);
@@ -146,7 +147,8 @@ public class Environment {
   public static PTInteger getFromLiteralPool(Integer val) {
     PTInteger p = integerLiteralPool.get(val);
     if(p == null) {
-      p = (PTInteger)PTInteger.getSentinel().alloc().setReadOnly();
+      p = new PTTypeConstraint<PTInteger>(PTInteger.class).alloc();
+      p.setReadOnly();
       p.systemWrite(val);
       integerLiteralPool.put(val, p);
     }
@@ -156,7 +158,8 @@ public class Environment {
   public static PTNumber getFromLiteralPool(Double val) {
     PTNumber p = numberLiteralPool.get(val);
     if(p == null) {
-      p = (PTNumber)PTNumber.getSentinel().alloc().setReadOnly();
+      p = new PTTypeConstraint<PTNumber>(PTNumber.class).alloc();
+      p.setReadOnly();
       p.systemWrite(val);
       numberLiteralPool.put(val, p);
     }
@@ -166,7 +169,8 @@ public class Environment {
   public static PTString getFromLiteralPool(String val) {
     PTString p = stringLiteralPool.get(val);
     if(p == null) {
-      p = (PTString)PTString.getSentinel().alloc().setReadOnly();
+      p = new PTTypeConstraint<PTString>(PTString.class).alloc();
+      p.setReadOnly();
       p.systemWrite(val);
       stringLiteralPool.put(val, p);
     }

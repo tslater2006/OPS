@@ -14,9 +14,19 @@ import org.openpplsoft.runtime.*;
 public final class PTDefnLiteral extends PTObjectType {
 
   private static Type staticTypeFlag = Type.DEFN_LITERAL;
+  private static PTDefnLiteral singleton;
 
-  public PTDefnLiteral() {
-    super(staticTypeFlag);
+  private PTDefnLiteral() {
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTDefnLiteral>(PTDefnLiteral.class));
+  }
+
+  public static PTDefnLiteral getSingleton() {
+    if (singleton == null) {
+      singleton = new PTDefnLiteral();
+      singleton.setReadOnly();
+    }
+    return singleton;
   }
 
   /*

@@ -22,7 +22,8 @@ public final class PTComponentLiteral extends PTObjectType {
   private String ptPNLGRPNAME;
 
   public PTComponentLiteral(final String cStr) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTComponentLiteral>(PTComponentLiteral.class));
     if(!cStr.startsWith("Component.")) {
       throw new OPSVMachRuntimeException("Expected cStr to start "
           + "with 'Component.' while creating PTComponentLiteral; cStr = "

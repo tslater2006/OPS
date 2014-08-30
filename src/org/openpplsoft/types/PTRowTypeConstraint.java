@@ -7,36 +7,36 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.peoplecode.AppClassPeopleCodeProg;
+import org.openpplsoft.pt.Record;
+
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj> {
+public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
 
   private static Logger log = LogManager.getLogger(
-      PTAppClassObjTypeConstraint.class.getName());
+      PTRowTypeConstraint.class.getName());
 
-  private AppClassPeopleCodeProg requiredProgDefn;
-
-  public PTAppClassObjTypeConstraint(final AppClassPeopleCodeProg p) {
-    super(PTAppClassObj.class);
-    this.requiredProgDefn = p;
-  }
-
-  public AppClassPeopleCodeProg getReqdProgDefn() {
-    return this.requiredProgDefn;
+  public PTRowTypeConstraint() {
+    super(PTRow.class);
   }
 
   @Override
-  public PTAppClassObj alloc() {
-    return new PTAppClassObj(this, this.requiredProgDefn);
+  public PTRow alloc() {
+    throw new EntDataTypeException("Call to alloc() PTRow from type constraint "
+        + "without providing associated set of record defns is illegal.");
+  }
+
+  public PTRow alloc(final Set<Record> s) {
+    return new PTRow(this, s);
   }
 
   @Override
   public boolean typeCheck(PTType a) {
     throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTAppClassObjTypeConstraint.");
+        + "PTRowTypeConstraint.");
 /*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/
@@ -44,8 +44,6 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append("[requiredProgDefn=").append(this.requiredProgDefn.getDescriptor()).append("]");
-    return b.toString();
+    return super.toString();
   }
 }

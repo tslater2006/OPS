@@ -25,8 +25,8 @@ public final class PTString extends PTPrimitiveType<String> {
    * Constructs a new instance of the string data type;
    * can only be called by internal methods.
    */
-  public PTString() {
-    super(staticTypeFlag);
+  public PTString(final PTTypeConstraint origTc) {
+    super(staticTypeFlag, origTc);
   }
 
   @Override
@@ -169,37 +169,6 @@ public final class PTString extends PTPrimitiveType<String> {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTString
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Creates a sentinel object or returns it from the cache
-   * if it already exists.
-   * @return the sentinel object
-   */
-  public static PTString getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTString) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTString sentinelObj = new PTString();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  @Override
-  public PTPrimitiveType alloc() {
-    final PTString newObj = new PTString();
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    final StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

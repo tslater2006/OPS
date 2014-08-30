@@ -11,8 +11,8 @@ import org.openpplsoft.runtime.*;
 
 public abstract class PTObjectType extends PTType {
 
-  protected PTObjectType(Type t) {
-    super(t);
+  protected PTObjectType(Type t, PTTypeConstraint repTc) {
+    super(t, repTc);
   }
 
   public abstract PTType dotProperty(String s);

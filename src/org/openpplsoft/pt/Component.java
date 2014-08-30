@@ -189,7 +189,7 @@ public class Component {
    */
   public void loadAndRunRecordPConSearchRecord() {
     final Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
-    ComponentBuffer.setSearchRecord(PTRecord.getSentinel().alloc(recDefn));
+    ComponentBuffer.setSearchRecord(new PTRecordTypeConstraint().alloc(recDefn));
 
     if (!recDefn.hasAnyKeys()) {
       log.debug("No keys on search record.");

@@ -36,16 +36,12 @@ public final class PTField extends PTObjectType {
     }
   }
 
-  private PTField() {
-    super(staticTypeFlag);
-  }
-
-  private PTField(RecordField rfd) {
-    super(staticTypeFlag);
+  public PTField(PTFieldTypeConstraint origTc, RecordField rfd) {
+    super(staticTypeFlag, origTc);
     this.recFieldDefn = rfd;
-    this.value = ((PTPrimitiveType)recFieldDefn
-            .getSentinelForUnderlyingValue()).alloc();
-    this.visibleProperty = (PTBoolean)PTBoolean.getSentinel().alloc();
+    this.value = (PTPrimitiveType) recFieldDefn
+            .getTypeConstraintForUnderlyingValue().alloc();
+    this.visibleProperty = new PTTypeConstraint<PTBoolean>(PTBoolean.class).alloc();
   }
 
   public void setDefault() {
@@ -100,36 +96,6 @@ public final class PTField extends PTObjectType {
   public boolean typeCheck(PTType a) {
     return (a instanceof PTField &&
         this.getType() == a.getType());
-  }
-
-  public static PTField getSentinel() {
-    // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTField)PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    PTField sentinelObj = new PTField();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /*
-   * Allocated fields must have an associated record field defn in order
-   * to determine the type of the value enclosed within them. However, this
-   * defn is not part of the type itself; a Field variable can be assigned
-   * any Field object, regardless of its underlying record field defn.
-   */
-  public PTField alloc(RecordField recFieldDefn) {
-    PTField newObj = new PTField(recFieldDefn);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

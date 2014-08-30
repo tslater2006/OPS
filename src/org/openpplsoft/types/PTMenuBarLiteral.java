@@ -22,7 +22,8 @@ public final class PTMenuBarLiteral extends PTObjectType {
   private String ptBARNAME;
 
   public PTMenuBarLiteral(final String bStr) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTMenuBarLiteral>(PTMenuBarLiteral.class));
     if(!bStr.startsWith("BarName.")) {
       throw new OPSVMachRuntimeException("Expected bStr to start "
           + "with 'BarName.' while alloc'ing PTMenuBarLiteral; bStr = "

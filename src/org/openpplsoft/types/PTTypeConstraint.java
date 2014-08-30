@@ -7,6 +7,9 @@
 
 package org.openpplsoft.types;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,20 +27,31 @@ public class PTTypeConstraint<T extends PTType> {
     return PTPrimitiveType.class.isAssignableFrom(this.underlyingClass);
   }
 
+  public boolean isUnderlyingClassObject() {
+    return PTObjectType.class.isAssignableFrom(this.underlyingClass);
+  }
+
   public boolean isUnderlyingClassEqualTo(final Class clazz) {
     return this.underlyingClass == clazz;
   }
 
   public T alloc() {
     try {
-//      return Class.getDeclaredConstructor(this.underlyingClass).newInstance();
-      return this.underlyingClass.newInstance();
+      Constructor<T> cons = this.underlyingClass
+          .getConstructor(PTTypeConstraint.class);
+      return cons.newInstance(this);
+    } catch (final NoSuchMethodException nsme) {
+      throw new EntDataTypeException("Unable to dynamically instantiate "
+          + "underlying PT class for :" + this.underlyingClass, nsme);
+    } catch (final InvocationTargetException ite) {
+      throw new EntDataTypeException("Unable to dynamically instantiate "
+          + "underlying PT class for :" + this.underlyingClass, ite);
     } catch (final InstantiationException ie) {
       throw new EntDataTypeException("Unable to dynamically instantiate "
-          + "underlying class for PTTypeConstraint.", ie);
+          + "underlying PT class for :" + this.underlyingClass, ie);
     } catch (final IllegalAccessException iae) {
       throw new EntDataTypeException("Unable to dynamically instantiate "
-          + "underlying class for PTTypeConstraint.", iae);
+          + "underlying PT class for :" + this.underlyingClass, iae);
     }
   }
 
@@ -49,8 +63,8 @@ public class PTTypeConstraint<T extends PTType> {
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder("TypeConstraint:");
-    b.append(this.underlyingClass.getName());
+    StringBuilder b = new StringBuilder("TC:");
+    b.append(this.underlyingClass.getSimpleName());
     return b.toString();
   }
 }

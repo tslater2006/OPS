@@ -25,12 +25,8 @@ public final class PTChar extends PTPrimitiveType<Character> {
   private static Type staticTypeFlag = Type.CHAR;
   private Character c;
 
-  /**
-   * Constructs a new instance of the char data type;
-   * can only be called by internal methods.
-   */
-  private PTChar() {
-    super(staticTypeFlag);
+  public PTChar(PTTypeConstraint origTc) {
+    super(staticTypeFlag, origTc);
   }
 
   @Override
@@ -195,37 +191,6 @@ public final class PTChar extends PTPrimitiveType<Character> {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTChar
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Creates a sentinel object or returns it from the cache
-   * if it already exists.
-   * @return the sentinel object
-   */
-  public static PTChar getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTChar) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTChar sentinelObj = new PTChar();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  @Override
-  public PTPrimitiveType alloc() {
-    final PTChar newObj = new PTChar();
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    final StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

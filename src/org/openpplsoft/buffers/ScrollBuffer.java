@@ -53,7 +53,8 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
 
     Record primaryRecDefn = DefnCache.getRecord(this.primaryRecName);
-    this.rowset = PTRowset.getSentinel().alloc(primaryRecDefn);
+
+    this.rowset = new PTRowsetTypeConstraint().alloc(primaryRecDefn);
   }
 
   /**

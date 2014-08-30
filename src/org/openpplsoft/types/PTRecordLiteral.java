@@ -23,7 +23,8 @@ public final class PTRecordLiteral extends PTObjectType {
   private Record recDefn;
 
   public PTRecordLiteral(final String rStr) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
 
     if(!rStr.startsWith("Record.")) {
       throw new OPSVMachRuntimeException("Expected rStr to start "
@@ -36,7 +37,8 @@ public final class PTRecordLiteral extends PTObjectType {
   }
 
   public PTRecordLiteral(final Record r) {
-    super(staticTypeFlag);
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
     this.ptRECNAME = r.RECNAME;
     this.recDefn = r;
   }
@@ -62,7 +64,7 @@ public final class PTRecordLiteral extends PTObjectType {
     final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
     for (RecordField rf : rfList) {
       if (rf.FIELDNAME.equals(s)) {
-        return PTFieldLiteral.getSentinel().alloc(this.ptRECNAME, s);
+        return new PTFieldLiteral(this.ptRECNAME, s);
       }
     }
 
@@ -81,33 +83,6 @@ public final class PTRecordLiteral extends PTObjectType {
     return (a instanceof PTRecordLiteral
         && this.getType() == a.getType());
   }
-
-  /**
-   * Retrieves a sentinel record literal object from the cache,
-   * or creates it if it doesn't exist.
-   * @return the sentinel object
-   */
-/*  public static PTRecordLiteral getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTRecordLiteral) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTRecordLiteral sentinelObj = new PTRecordLiteral();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }*/
-
-  /**
-   * Retrieves the cache key for this record literal.
-   * @return the record literal's cache key
-   */
-/*  private static String getCacheKey() {
-    return new StringBuilder(staticTypeFlag.name()).toString();
-  }*/
 
   @Override
   public String toString() {

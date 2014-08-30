@@ -24,6 +24,7 @@ public abstract class PTType {
   private Type type;
   private EnumSet<TFlag> flags;
   private boolean sentinelFlag;
+  private PTTypeConstraint originatingTypeConstraint;
 
   static {
     sentinelCache = new HashMap<String, PTType>();
@@ -34,9 +35,14 @@ public abstract class PTType {
    * value provided. Can only be called by concrete subclasses.
    * @param t the enumerated flag of the type to create
    */
-  protected PTType(final Type t) {
+  protected PTType(final Type t, final PTTypeConstraint origTypeConstraint) {
     this.type = t;
     this.flags = EnumSet.noneOf(TFlag.class);
+    this.originatingTypeConstraint = origTypeConstraint;
+  }
+
+  public PTTypeConstraint getOriginatingTypeConstraint() {
+    return this.originatingTypeConstraint;
   }
 
   /**
@@ -102,7 +108,7 @@ public abstract class PTType {
 
     if (src instanceof PTArray) {
       ((PTArray) dest).dimensions = ((PTArray) src).dimensions;
-      ((PTArray) dest).baseType = ((PTArray) src).baseType;
+      ((PTArray) dest).baseTypeConstraint = ((PTArray) src).baseTypeConstraint;
     }
   }
 
@@ -201,10 +207,8 @@ public abstract class PTType {
 
   @Override
   public String toString() {
-    final StringBuilder b = new StringBuilder();
-    if (this.isSentinel()) {
-      b.append("(SENTINEL)");
-    }
+    final StringBuilder b = new StringBuilder("PTType:origTc=");
+    b.append(this.originatingTypeConstraint).append(",");
     b.append(this.type);
     if (this.flags.size() > 0) {
       b.append(this.flags);

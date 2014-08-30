@@ -20,8 +20,9 @@ public final class PTAppClassObj extends PTObjectType {
   public Scope propertyScope;
   public Scope instanceScope;
 
-  public PTAppClassObj(AppClassPeopleCodeProg prog) {
-    super(staticTypeFlag);
+  public PTAppClassObj(final PTAppClassObjTypeConstraint origTc,
+      final AppClassPeopleCodeProg prog) {
+    super(staticTypeFlag, origTc);
     this.progDefn = prog;
     this.propertyScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_PROPERTY);
     this.instanceScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
@@ -116,32 +117,6 @@ public final class PTAppClassObj extends PTObjectType {
     return (a instanceof PTAppClassObj &&
       this.getType() == a.getType() &&
       this.progDefn == ((PTAppClassObj)a).progDefn);
-  }
-
-  public static PTAppClassObj getSentinel(AppClassPeopleCodeProg prog) {
-
-    // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey(prog);
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTAppClassObj)PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    PTAppClassObj sentinelObj = new PTAppClassObj(prog);
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  public PTAppClassObj alloc() {
-    PTAppClassObj newObj = new PTAppClassObj(this.progDefn);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey(AppClassPeopleCodeProg prog) {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    b.append(":").append(prog.getDescriptor());
-    return b.toString();
   }
 
   @Override

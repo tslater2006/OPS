@@ -1220,7 +1220,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          * Detect defn literal reserved words (i.e.,
          * "Menu" in "Menu.SA_LEARNER_SERVICES").
          */
-        this.setNodeData(ctx, Environment.DEFN_LITERAL);
+        this.setNodeData(ctx, PTDefnLiteral.getSingleton());
 
       } else if (Environment.getSystemFuncPtr(
           ctx.GENERIC_ID().getText()) != null) {
@@ -1361,28 +1361,27 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       this.setNodeTypeConstraint(ctx,
           this.getNodeTypeConstraint(ctx.appClassPath()));
     } else {
-      PTTypeConstraint nestedTypeConstraint = null;
+      PTTypeConstraint nestedTc = null;
       if (ctx.varType() != null) {
         if(!ctx.GENERIC_ID().getText().equals("array")) {
           throw new OPSVMachRuntimeException("Encountered non-array var "
               + "type preceding 'of' clause: " + ctx.getText());
         }
         visit(ctx.varType());
-        nestedTypeConstraint = this.getNodeTypeConstraint(ctx.varType());
+        nestedTc = this.getNodeTypeConstraint(ctx.varType());
       }
 
       PTTypeConstraint typeConstraint;
       switch (ctx.GENERIC_ID().getText()) {
         case "array":
-/*          if (nestedType instanceof PTArray) {
-            type = PTArray.getSentinel(
-              ((PTArray) nestedType).dimensions + 1, nestedType);
+          if (nestedTc instanceof PTArrayTypeConstraint) {
+            typeConstraint = new PTArrayTypeConstraint(
+                ((PTArrayTypeConstraint) nestedTc).getReqdDimension() + 1,
+                    nestedTc);
           } else {
-            type = PTArray.getSentinel(1, nestedType);
+            typeConstraint = new PTArrayTypeConstraint(1, nestedTc);
           }
-          break;*/
-          throw new OPSVMachRuntimeException("TYPE SYSTEM: Subclass "
-              + "PTTypeConstraint for use with arrays.");
+          break;
         case "string":
           typeConstraint = new PTTypeConstraint<PTString>(PTString.class);
           break;
@@ -1393,10 +1392,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           typeConstraint = new PTTypeConstraint<PTInteger>(PTInteger.class);
           break;
         case "Record":
-          typeConstraint = new PTTypeConstraint<PTRecord>(PTRecord.class);
+          typeConstraint = new PTRecordTypeConstraint();
           break;
         case "Rowset":
-          typeConstraint = new PTTypeConstraint<PTRowset>(PTRowset.class);
+          typeConstraint = new PTRowsetTypeConstraint();
           break;
         case "number":
           typeConstraint = new PTTypeConstraint<PTNumber>(PTNumber.class);
@@ -1405,7 +1404,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           typeConstraint = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
           break;
         case "Field":
-          typeConstraint = new PTTypeConstraint<PTField>(PTField.class);
+          typeConstraint = new PTFieldTypeConstraint();
           break;
         default:
           throw new OPSVMachRuntimeException("Unexpected data type: "
@@ -1563,10 +1562,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitCreateInvocation(
       final PeopleCodeParser.CreateInvocationContext ctx) {
 
-    PTAppClassObj objType;
+    PTAppClassObjTypeConstraint objTc;
     if (ctx.appClassPath() != null) {
       visit(ctx.appClassPath());
-      objType = (PTAppClassObj) this.getNodeData(ctx.appClassPath());
+      objTc = (PTAppClassObjTypeConstraint)
+          this.getNodeTypeConstraint(ctx.appClassPath());
     } else {
       throw new OPSVMachRuntimeException("Encountered create invocation "
           + "without app class prefix; need to support this by resolving "
@@ -1579,13 +1579,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * This info is in the class declaration body at the start of the
      * program. If the class declaration has not yet been processed, do so now.
      */
-    if (!objType.progDefn.hasClassDefnBeenLoaded) {
-      objType.progDefn.loadDefnsAndPrograms();
-      final ExecContext classDeclCtx = new AppClassDeclExecContext(objType);
+    if (!objTc.getReqdProgDefn().hasClassDefnBeenLoaded) {
+      objTc.getReqdProgDefn().loadDefnsAndPrograms();
+      final ExecContext classDeclCtx = new AppClassDeclExecContext(objTc);
       this.supervisor.runImmediately(classDeclCtx);
     }
 
-    final PTAppClassObj newObj = objType.alloc();
+    final PTAppClassObj newObj = objTc.alloc();
     this.setNodeData(ctx, newObj);
 
     /*

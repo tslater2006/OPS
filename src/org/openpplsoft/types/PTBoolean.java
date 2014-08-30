@@ -18,8 +18,8 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
   private static Type staticTypeFlag = Type.BOOLEAN;
   private Boolean b;
 
-  private PTBoolean() {
-    super(staticTypeFlag);
+  public PTBoolean(PTTypeConstraint origTc) {
+    super(staticTypeFlag, origTc);
   }
 
   public Boolean read() {
@@ -123,30 +123,6 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
   public boolean typeCheck(PTType a) {
     return (a instanceof PTBoolean &&
       this.getType() == a.getType());
-  }
-
-  public static PTBoolean getSentinel() {
-    // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTBoolean)PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    PTBoolean sentinelObj = new PTBoolean();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  public PTPrimitiveType alloc() {
-    PTBoolean newObj = new PTBoolean();
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

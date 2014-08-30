@@ -12,31 +12,33 @@ import org.openpplsoft.pt.peoplecode.AppClassPeopleCodeProg;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj> {
+public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
 
   private static Logger log = LogManager.getLogger(
-      PTAppClassObjTypeConstraint.class.getName());
+      PTArrayTypeConstraint.class.getName());
 
-  private AppClassPeopleCodeProg requiredProgDefn;
+  private int reqdDimension;
+  private PTTypeConstraint reqdNestedTypeConstraint;
 
-  public PTAppClassObjTypeConstraint(final AppClassPeopleCodeProg p) {
-    super(PTAppClassObj.class);
-    this.requiredProgDefn = p;
+  public PTArrayTypeConstraint(final int dim, final PTTypeConstraint nestedTc) {
+    super(PTArray.class);
+    this.reqdDimension = dim;
+    this.reqdNestedTypeConstraint = nestedTc;
   }
 
-  public AppClassPeopleCodeProg getReqdProgDefn() {
-    return this.requiredProgDefn;
+  public int getReqdDimension() {
+    return this.reqdDimension;
   }
 
   @Override
-  public PTAppClassObj alloc() {
-    return new PTAppClassObj(this, this.requiredProgDefn);
+  public PTArray alloc() {
+    return new PTArray(this, this.reqdDimension, this.reqdNestedTypeConstraint);
   }
 
   @Override
   public boolean typeCheck(PTType a) {
     throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTAppClassObjTypeConstraint.");
+        + "PTArray.");
 /*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/
@@ -45,7 +47,9 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder(super.toString());
-    b.append("[requiredProgDefn=").append(this.requiredProgDefn.getDescriptor()).append("]");
+    b.append("[reqdDimension=").append(this.reqdDimension);
+    b.append(",reqdNestedTypeConstraint=").append(this.reqdNestedTypeConstraint);
+    b.append("]");
     return b.toString();
   }
 }

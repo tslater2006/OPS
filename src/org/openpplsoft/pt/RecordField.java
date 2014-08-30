@@ -35,33 +35,33 @@ public class RecordField {
     this.typeFlag = t;
   }
 
-  public PTType getSentinelForUnderlyingValue() {
+  public PTTypeConstraint getTypeConstraintForUnderlyingValue() {
     switch(this.typeFlag) {
       case 0:  // char
         if(this.LENGTH == 1) {
-          return PTChar.getSentinel();
+          return new PTTypeConstraint<PTChar>(PTChar.class);
         } else {
-          return PTString.getSentinel();
+          return new PTTypeConstraint<PTString>(PTString.class);
         }
       case 1: // long char
-        return PTString.getSentinel();
+        return new PTTypeConstraint<PTString>(PTString.class);
       case 2:
-        return PTNumber.getSentinel();
+        return new PTTypeConstraint<PTNumber>(PTNumber.class);
       case 3: // TODO: 2 is unsigned, 3 is signed: should I distinguish?
-        return PTNumber.getSentinel();
+        return new PTTypeConstraint<PTNumber>(PTNumber.class);
       case 4:
-        return PTDate.getSentinel();
+        return new PTTypeConstraint<PTDate>(PTDate.class);
       case 5:
-        return PTTime.getSentinel();
+        return new PTTypeConstraint<PTTime>(PTTime.class);
       case 6:
-        return PTDateTime.getSentinel();
+        return new PTTypeConstraint<PTDateTime>(PTDateTime.class);
       case 8: // TODO: 8 is image/attachment; doesn't need to be stored.
-        return PTString.getSentinel();
+        return new PTTypeConstraint<PTString>(PTString.class);
       case 9: // TODO: 9 is image reference; doesn't need to be stored.
-        return PTString.getSentinel();
+        return new PTTypeConstraint<PTString>(PTString.class);
         default:
       throw new OPSVMachRuntimeException("Unable to determine " +
-        "appropriate sentinel for underlying record field " +
+        "appropriate type constraint for underlying record field " +
         "value given a typeFlag of: " + this.typeFlag + "; " +
         "RECNAME=" + RECNAME + ", FIELDNAME=" + FIELDNAME);
     }

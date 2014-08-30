@@ -55,20 +55,12 @@ public final class PTRowset extends PTObjectType {
   }
 
   /**
-   * Create a new Rowset object that isn't attached to a specific
-   * record definition; can only be called by internal methods.
-   */
-  private PTRowset() {
-    super(staticTypeFlag);
-  }
-
-  /**
    * Create a new Rowset object that's attached to a specific
    * record definition; can only be called by internal methods.
    * @param r the specific record defn to attach to the rowset
    */
-  private PTRowset(final Record r) {
-    super(staticTypeFlag);
+  public PTRowset(PTRowsetTypeConstraint origTc, final Record r) {
+    super(staticTypeFlag, origTc);
 
     this.primaryRecDefn = r;
     this.rows = new ArrayList<PTRow>();
@@ -82,7 +74,7 @@ public final class PTRowset extends PTObjectType {
     if (this.primaryRecDefn != null) {
       this.registeredRecordDefns.add(r);
     }
-    this.rows.add(PTRow.getSentinel().alloc(this.registeredRecordDefns));
+    this.rows.add(new PTRowTypeConstraint().alloc(this.registeredRecordDefns));
   }
 
   /**
@@ -316,7 +308,7 @@ public final class PTRowset extends PTObjectType {
   private void internalFlush() {
     // One row is always present in the rowset, even when flushed.
     this.rows.clear();
-    this.rows.add(PTRow.getSentinel().alloc(this.registeredRecordDefns));
+    this.rows.add(new PTRowTypeConstraint().alloc(this.registeredRecordDefns));
   }
 
   /**
@@ -364,7 +356,7 @@ public final class PTRowset extends PTObjectType {
           this.rows.clear();
         }
 
-        final PTRow newRow = PTRow.getSentinel().alloc(this.registeredRecordDefns);
+        final PTRow newRow = new PTRowTypeConstraint().alloc(this.registeredRecordDefns);
         GlobalFnLibrary
             .readRecordFromResultSet(
             this.primaryRecDefn,
@@ -394,44 +386,6 @@ public final class PTRowset extends PTObjectType {
   public boolean typeCheck(final PTType a) {
     return (a instanceof PTRowset
         && this.getType() == a.getType());
-  }
-
-  /**
-   * Create a sentinel rowset object or retrieve it from the cache.
-   * @return the new/cached sentinel rowset object
-   */
-  public static PTRowset getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTRowset) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTRowset sentinelObj = new PTRowset();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /**
-   * Allocate a new rowset object attached to a specific record defn.
-   * Allocated rowsets must have an associated record defn in order
-   * to determine the type of the value enclosed within them. However, this
-   * defn is not part of the type itself; a Rowset variable can be assigned
-   * any Rowset object, regardless of its underlying record defn.
-   * @param r the record defn to attach
-   * @return the newly allocated rowset object
-   */
-  public PTRowset alloc(final Record r) {
-    final PTRowset newObj = new PTRowset(r);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    final StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

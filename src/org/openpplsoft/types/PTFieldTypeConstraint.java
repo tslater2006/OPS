@@ -7,36 +7,34 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.peoplecode.AppClassPeopleCodeProg;
+import org.openpplsoft.pt.RecordField;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj> {
+public class PTFieldTypeConstraint extends PTTypeConstraint<PTField> {
 
   private static Logger log = LogManager.getLogger(
-      PTAppClassObjTypeConstraint.class.getName());
+      PTFieldTypeConstraint.class.getName());
 
-  private AppClassPeopleCodeProg requiredProgDefn;
-
-  public PTAppClassObjTypeConstraint(final AppClassPeopleCodeProg p) {
-    super(PTAppClassObj.class);
-    this.requiredProgDefn = p;
-  }
-
-  public AppClassPeopleCodeProg getReqdProgDefn() {
-    return this.requiredProgDefn;
+  public PTFieldTypeConstraint() {
+    super(PTField.class);
   }
 
   @Override
-  public PTAppClassObj alloc() {
-    return new PTAppClassObj(this, this.requiredProgDefn);
+  public PTField alloc() {
+    throw new EntDataTypeException("Call to alloc() PTField from type constraint "
+        + "without providing associated record field defn is illegal.");
+  }
+
+  public PTField alloc(final RecordField rfDefn) {
+    return new PTField(this, rfDefn);
   }
 
   @Override
   public boolean typeCheck(PTType a) {
     throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTAppClassObjTypeConstraint.");
+        + "PTFieldTypeConstraint.");
 /*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/
@@ -44,8 +42,6 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append("[requiredProgDefn=").append(this.requiredProgDefn.getDescriptor()).append("]");
-    return b.toString();
+    return super.toString();
   }
 }

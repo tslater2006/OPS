@@ -47,26 +47,18 @@ public final class PTRow extends PTObjectType {
   }
 
   /**
-   * Create a new row object that isn't attached to a record
-   * definition; can only be called by internal methods.
-   */
-  private PTRow() {
-    super(staticTypeFlag);
-  }
-
-  /**
    * Create a new row object that is attached to one or more record
    * definitions; can only be called by internal methods.
    * @param r the record defn to attach
    */
-  private PTRow(final Set<Record> s) {
-    super(staticTypeFlag);
+  public PTRow(final PTRowTypeConstraint origTc, final Set<Record> s) {
+    super(staticTypeFlag, origTc);
     this.childRecordMap = new HashMap<String, PTRecord>();
     this.childRowsetMap = new HashMap<String, PTRowset>();
 
     for(Record recDefn : s) {
       this.childRecordMap.put(recDefn.RECNAME,
-          PTRecord.getSentinel().alloc(recDefn));
+          new PTRecordTypeConstraint().alloc(recDefn));
     }
   }
 
@@ -79,7 +71,7 @@ public final class PTRow extends PTObjectType {
   public void registerRecordDefn(final Record r) {
     if(!this.childRecordMap.containsKey(r.RECNAME)) {
       this.childRecordMap.put(r.RECNAME,
-          PTRecord.getSentinel().alloc(r));
+          new PTRecordTypeConstraint().alloc(r));
     }
   }
 
@@ -159,40 +151,6 @@ public final class PTRow extends PTObjectType {
     }
 
     return this;
-  }
-
-  /**
-   * Creates a new, or retrieves a cached, sentinel row object.
-   * @return a sentinel row object
-   */
-  public static PTRow getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    final String cacheKey = getCacheKey();
-    if (PTType.isSentinelCached(cacheKey)) {
-      return (PTRow) PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    final PTRow sentinelObj = new PTRow();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  /**
-   * Allocate a new row object with a set of attached record defns.
-   * @param s the record defns to attach
-   * @return the newly allocated row object
-   */
-  public PTRow alloc(final Set<Record> s) {
-    final PTRow newObj = new PTRow(s);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    final StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

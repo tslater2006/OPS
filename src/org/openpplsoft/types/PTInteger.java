@@ -21,8 +21,8 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   private static Type staticTypeFlag = Type.INTEGER;
   private Integer i;
 
-  public PTInteger() {
-    super(staticTypeFlag);
+  public PTInteger(PTTypeConstraint origTc) {
+    super(staticTypeFlag, origTc);
   }
 
   public Integer read() {
@@ -158,31 +158,6 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   public boolean typeCheck(PTType a) {
     return (a instanceof PTInteger &&
         this.getType() == a.getType());
-  }
-
-  public static PTInteger getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTInteger)PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    PTInteger sentinelObj = new PTInteger();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  public PTPrimitiveType alloc() {
-    PTInteger newObj = new PTInteger();
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

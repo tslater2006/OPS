@@ -17,17 +17,15 @@ public final class PTFieldLiteral extends PTObjectType {
   public String RECNAME;
   public String FIELDNAME;
 
-  private PTFieldLiteral() {
-    super(staticTypeFlag);
-  }
-
-  private PTFieldLiteral(String f) {
-    super(staticTypeFlag);
+  public PTFieldLiteral(String f) {
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTFieldLiteral>(PTFieldLiteral.class));
     this.FIELDNAME = f;
   }
 
-  private PTFieldLiteral(String r, String f) {
-    super(staticTypeFlag);
+  public PTFieldLiteral(String r, String f) {
+    super(staticTypeFlag,
+        new PTTypeConstraint<PTFieldLiteral>(PTFieldLiteral.class));
     this.RECNAME = r;
     this.FIELDNAME = f;
   }
@@ -43,37 +41,6 @@ public final class PTFieldLiteral extends PTObjectType {
   public boolean typeCheck(PTType a) {
     return (a instanceof PTFieldLiteral &&
       this.getType() == a.getType());
-  }
-
-  public static PTFieldLiteral getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTFieldLiteral)PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    PTFieldLiteral sentinelObj = new PTFieldLiteral();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  public PTFieldLiteral alloc(String FIELDNAME) {
-    PTFieldLiteral newObj = new PTFieldLiteral(FIELDNAME);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  public PTFieldLiteral alloc(String RECNAME, String FIELDNAME) {
-    PTFieldLiteral newObj = new PTFieldLiteral(RECNAME, FIELDNAME);
-    PTType.clone(this, newObj);
-    return newObj;
-  }
-
-  private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

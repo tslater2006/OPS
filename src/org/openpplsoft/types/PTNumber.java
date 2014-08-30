@@ -23,8 +23,8 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   private boolean isInteger;
   private Double d;
 
-  private PTNumber() {
-    super(staticTypeFlag);
+  public PTNumber(PTTypeConstraint origTc) {
+    super(staticTypeFlag, origTc);
   }
 
   public Double read() {
@@ -181,31 +181,6 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   public boolean typeCheck(PTType a) {
     return (a instanceof PTNumber &&
         this.getType() == a.getType());
-  }
-
-  public static PTNumber getSentinel() {
-
-    // If the sentinel has already been cached, return it immediately.
-    String cacheKey = getCacheKey();
-    if(PTType.isSentinelCached(cacheKey)) {
-      return (PTNumber)PTType.getCachedSentinel(cacheKey);
-    }
-
-    // Otherwise, create a new sentinel type and cache it before returning it.
-    PTNumber sentinelObj = new PTNumber();
-    PTType.cacheSentinel(sentinelObj, cacheKey);
-    return sentinelObj;
-  }
-
-  public PTPrimitiveType alloc() {
-    PTNumber newObj = new PTNumber();
-    PTType.clone(this, newObj);
-      return newObj;
-  }
-
-  private static String getCacheKey() {
-    StringBuilder b = new StringBuilder(staticTypeFlag.name());
-    return b.toString();
   }
 
   @Override

@@ -17,13 +17,10 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTComponentLiteral extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.COMPONENT_LITERAL;
-
   private String ptPNLGRPNAME;
 
   public PTComponentLiteral(final String cStr) {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTComponentLiteral>(PTComponentLiteral.class));
+    super(new PTTypeConstraint<PTComponentLiteral>(PTComponentLiteral.class));
     if(!cStr.startsWith("Component.")) {
       throw new OPSVMachRuntimeException("Expected cStr to start "
           + "with 'Component.' while creating PTComponentLiteral; cStr = "
@@ -48,12 +45,6 @@ public final class PTComponentLiteral extends PTObjectType {
   @Override
   public Callable dotMethod(final String s) {
     return null;
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTComponentLiteral
-        && this.getType() == a.getType());
   }
 
   @Override

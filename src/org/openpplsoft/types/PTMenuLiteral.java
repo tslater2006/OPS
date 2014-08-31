@@ -17,21 +17,17 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTMenuLiteral extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.MENU_LITERAL;
-
   private String ptMENUNAME;
   private Menu menuDefn;
 
   public PTMenuLiteral(final Menu m) {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
+    super(new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
     this.ptMENUNAME = m.getMenuName();
     this.menuDefn = m;
   }
 
   public PTMenuLiteral(final String mStr) {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
+    super(new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
     if(!mStr.startsWith("MenuName.")) {
       throw new OPSVMachRuntimeException("Expected mStr to start "
           + "with 'Menu.' while creating PTMenuLiteral; mStr = "
@@ -58,12 +54,6 @@ public final class PTMenuLiteral extends PTObjectType {
   @Override
   public Callable dotMethod(final String s) {
     return null;
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTMenuLiteral
-        && this.getType() == a.getType());
   }
 
   @Override

@@ -9,8 +9,8 @@ package org.openpplsoft.types;
 
 public abstract class PTPrimitiveType<T> extends PTType {
 
-  protected PTPrimitiveType(final Type t, final PTTypeConstraint repTc) {
-    super(t, repTc);
+  protected PTPrimitiveType(final PTTypeConstraint origTc) {
+    super(origTc);
   }
 
   public abstract T read();
@@ -20,7 +20,6 @@ public abstract class PTPrimitiveType<T> extends PTType {
 
   public abstract boolean equals(Object obj);
   public abstract int hashCode();
-  public abstract boolean typeCheck(PTType a);
   public abstract void setDefault();
   public abstract void copyValueFrom(PTPrimitiveType src);
 

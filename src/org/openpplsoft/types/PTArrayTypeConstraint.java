@@ -38,7 +38,7 @@ public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
   @Override
   public boolean typeCheck(PTType a) {
     throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTArray.");
+        + "PTArray; BE SURE TO CHECK DIMENSIONS AND BASE TYPE MATCH.");
 /*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/

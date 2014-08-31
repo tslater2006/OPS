@@ -15,7 +15,6 @@ import org.openpplsoft.runtime.*;
 
 public final class PTField extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.FIELD;
   private static Map<String, Method> ptMethodTable;
 
   private PTPrimitiveType value;
@@ -37,7 +36,7 @@ public final class PTField extends PTObjectType {
   }
 
   public PTField(PTFieldTypeConstraint origTc, RecordField rfd) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
     this.recFieldDefn = rfd;
     this.value = (PTPrimitiveType) recFieldDefn
             .getTypeConstraintForUnderlyingValue().alloc();
@@ -90,11 +89,6 @@ public final class PTField extends PTObjectType {
     if(this.value != null) {
       this.value.setReadOnly();
     }
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTField &&
-        this.getType() == a.getType());
   }
 
   @Override

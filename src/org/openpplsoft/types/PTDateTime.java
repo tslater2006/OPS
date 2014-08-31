@@ -17,11 +17,10 @@ import org.openpplsoft.runtime.*;
 
 public final class PTDateTime extends PTPrimitiveType<String> {
 
-  private static Type staticTypeFlag = Type.DATETIME;
   private String d;
 
   public PTDateTime(final PTTypeConstraint origTc) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
 
     // default value is current date and time.
     d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -127,11 +126,6 @@ public final class PTDateTime extends PTPrimitiveType<String> {
 
     return new HashCodeBuilder(HBC_INITIAL,
         HBC_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTDateTime &&
-        this.getType() == a.getType());
   }
 
   @Override

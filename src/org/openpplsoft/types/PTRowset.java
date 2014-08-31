@@ -34,7 +34,6 @@ public final class PTRowset extends PTObjectType {
   private static Logger log = LogManager.getLogger(
       PTRowset.class.getName());
 
-  private static Type staticTypeFlag = Type.ROWSET;
   private static Map<String, Method> ptMethodTable;
 
   private List<PTRow> rows;
@@ -60,7 +59,7 @@ public final class PTRowset extends PTObjectType {
    * @param r the specific record defn to attach to the rowset
    */
   public PTRowset(PTRowsetTypeConstraint origTc, final Record r) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
 
     this.primaryRecDefn = r;
     this.rows = new ArrayList<PTRow>();
@@ -380,12 +379,6 @@ public final class PTRowset extends PTObjectType {
         log.warn("Unable to close ostmt and/or rs in finally block.");
       }
     }
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTRowset
-        && this.getType() == a.getType());
   }
 
   @Override

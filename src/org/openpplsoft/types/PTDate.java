@@ -17,12 +17,11 @@ import org.openpplsoft.runtime.*;
 
 public final class PTDate extends PTPrimitiveType<String> {
 
-  private static Type staticTypeFlag = Type.DATE;
   private static String defaultDateOverride;
   private String d;
 
-  public PTDate(PTTypeConstraint origTc) {
-    super(staticTypeFlag, origTc);
+  public PTDate(final PTTypeConstraint origTc) {
+    super(origTc);
 
     // default value is current date unless date has been overridden for
     // tracefile verification purposes.
@@ -136,11 +135,6 @@ public final class PTDate extends PTPrimitiveType<String> {
 
     return new HashCodeBuilder(HBC_INITIAL,
         HBC_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTDate &&
-      this.getType() == a.getType());
   }
 
   @Override

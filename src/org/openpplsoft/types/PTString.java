@@ -18,7 +18,6 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTString extends PTPrimitiveType<String> {
 
-  private static Type staticTypeFlag = Type.STRING;
   private String s;
 
   /**
@@ -26,7 +25,7 @@ public final class PTString extends PTPrimitiveType<String> {
    * can only be called by internal methods.
    */
   public PTString(final PTTypeConstraint origTc) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
   }
 
   @Override
@@ -162,12 +161,6 @@ public final class PTString extends PTPrimitiveType<String> {
 
     return new HashCodeBuilder(HBC_INITIAL,
         HBC_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTString
-        && this.getType() == a.getType());
   }
 
   @Override

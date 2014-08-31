@@ -13,12 +13,10 @@ import org.openpplsoft.runtime.*;
 
 public final class PTDefnLiteral extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.DEFN_LITERAL;
   private static PTDefnLiteral singleton;
 
   private PTDefnLiteral() {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTDefnLiteral>(PTDefnLiteral.class));
+    super(new PTTypeConstraint<PTDefnLiteral>(PTDefnLiteral.class));
   }
 
   public static PTDefnLiteral getSingleton() {
@@ -40,11 +38,6 @@ public final class PTDefnLiteral extends PTObjectType {
 
   public Callable dotMethod(String s) {
     return null;
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTDefnLiteral &&
-        this.getType() == a.getType());
   }
 
   @Override

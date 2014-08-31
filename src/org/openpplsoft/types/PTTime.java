@@ -20,12 +20,10 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTTime extends PTPrimitiveType<String> {
 
-  private static final Type staticTypeFlag = Type.TIME;
   private String d;
 
   public PTTime() {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTTime>(PTTime.class));
+    super(new PTTypeConstraint<PTTime>(PTTime.class));
 
     // default value is current time.
     this.d = new SimpleDateFormat("HH:mm:ss")
@@ -145,12 +143,6 @@ public final class PTTime extends PTPrimitiveType<String> {
     final int HBC_INITIAL = 109, HBC_MULTIPLIER = 67;
     return new HashCodeBuilder(HBC_INITIAL, HBC_MULTIPLIER)
         .append(this.read()).toHashCode();
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTTime
-        && this.getType() == a.getType());
   }
 
   @Override

@@ -17,13 +17,10 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTMenuBarLiteral extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.MENUBAR_LITERAL;
-
   private String ptBARNAME;
 
   public PTMenuBarLiteral(final String bStr) {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTMenuBarLiteral>(PTMenuBarLiteral.class));
+    super(new PTTypeConstraint<PTMenuBarLiteral>(PTMenuBarLiteral.class));
     if(!bStr.startsWith("BarName.")) {
       throw new OPSVMachRuntimeException("Expected bStr to start "
           + "with 'BarName.' while alloc'ing PTMenuBarLiteral; bStr = "
@@ -48,12 +45,6 @@ public final class PTMenuBarLiteral extends PTObjectType {
   @Override
   public Callable dotMethod(final String s) {
     return null;
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTMenuBarLiteral
-        && this.getType() == a.getType());
   }
 
   @Override

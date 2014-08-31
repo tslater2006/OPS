@@ -33,7 +33,6 @@ public final class PTRecord extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTRecord.class.getName());
 
-  private static Type staticTypeFlag;
   private static Map<String, Method> ptMethodTable;
   private static Pattern dtPattern, datePattern, dotPattern;
 
@@ -42,8 +41,6 @@ public final class PTRecord extends PTObjectType {
   private Map<Integer, PTField> fieldIdxTable;
 
   static {
-    staticTypeFlag = Type.RECORD;
-
     dtPattern = Pattern.compile(
         "TO_CHAR\\(CAST\\(\\(([^\\)]*)\\)ASTIMESTAMP\\),"
         + "'YYYY-MM-DD-HH24\\.MI\\.SS\\.FF'\\)");
@@ -72,7 +69,7 @@ public final class PTRecord extends PTObjectType {
    * @param r the record defn to attach
    */
   public PTRecord(PTRecordTypeConstraint origTc, final Record r) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
 
     this.recDefn = r;
 
@@ -326,12 +323,6 @@ public final class PTRecord extends PTObjectType {
         cursor.getValue().setReadOnly();
       }
     }
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTRecord
-        && this.getType() == a.getType());
   }
 
   @Override

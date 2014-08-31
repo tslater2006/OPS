@@ -18,11 +18,10 @@ import org.openpplsoft.runtime.*;
 public final class PTInteger extends PTPrimitiveType<Integer> {
 
   private static Logger log = LogManager.getLogger(PTInteger.class.getName());
-  private static Type staticTypeFlag = Type.INTEGER;
   private Integer i;
 
   public PTInteger(PTTypeConstraint origTc) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
   }
 
   public Integer read() {
@@ -152,11 +151,6 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
       return Environment.TRUE;
     }
     return Environment.FALSE;
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTInteger &&
-        this.getType() == a.getType());
   }
 
   @Override

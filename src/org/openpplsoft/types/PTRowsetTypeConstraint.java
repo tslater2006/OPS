@@ -34,7 +34,7 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
   @Override
   public boolean typeCheck(PTType a) {
     throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTRowsetTypeConstraint.");
+        + "PTRowsetTypeConstraint; may not be necessary actually.");
 /*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/

@@ -15,14 +15,13 @@ import org.openpplsoft.runtime.*;
 
 public final class PTAppClassObj extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.APP_CLASS_OBJ;
   public AppClassPeopleCodeProg progDefn;
   public Scope propertyScope;
   public Scope instanceScope;
 
   public PTAppClassObj(final PTAppClassObjTypeConstraint origTc,
       final AppClassPeopleCodeProg prog) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
     this.progDefn = prog;
     this.propertyScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_PROPERTY);
     this.instanceScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
@@ -111,12 +110,6 @@ public final class PTAppClassObj extends PTObjectType {
       }
     }
     return null;
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTAppClassObj &&
-      this.getType() == a.getType() &&
-      this.progDefn == ((PTAppClassObj)a).progDefn);
   }
 
   @Override

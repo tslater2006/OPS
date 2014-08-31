@@ -19,17 +19,10 @@ import org.openpplsoft.pt.peoplecode.*;
  */
 public abstract class PTType {
 
-  private Type type;
   private PTTypeConstraint originatingTypeConstraint;
   private boolean isReadOnly;
 
-  /**
-   * Creates a new type object corresponding to the enumerated
-   * value provided. Can only be called by concrete subclasses.
-   * @param t the enumerated flag of the type to create
-   */
-  protected PTType(final Type t, final PTTypeConstraint origTypeConstraint) {
-    this.type = t;
+  protected PTType(final PTTypeConstraint origTypeConstraint) {
     this.originatingTypeConstraint = origTypeConstraint;
   }
 
@@ -50,16 +43,6 @@ public abstract class PTType {
   public PTTypeConstraint getOriginatingTypeConstraint() {
     return this.originatingTypeConstraint;
   }
-
-  /**
-   * Determines if the provided type corresponds to this
-   * object's type. This is implementation specific and thus
-   * must be implemented by subclasses.
-   * @param a the type object to check against
-   * @return whether the provided object has the same type
-   *    as this one.
-   */
-  public abstract boolean typeCheck(PTType a);
 
   /**
    * Clones a source type to a destination type object. The
@@ -86,14 +69,6 @@ public abstract class PTType {
     }*/
   }
 
-  /**
-   * Get the enumerated type of this instance.
-   * @return the enumerated type of this instance
-   */
-  public Type getType() {
-    return this.type;
-  }
-
   protected void checkIsWriteable() {
     if (this.isReadOnly) {
       throw new EntDataTypeException("Attempted illegal write to a "
@@ -104,8 +79,7 @@ public abstract class PTType {
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder("PTType:origTc=");
-    b.append(this.originatingTypeConstraint).append(",");
-    b.append(this.type);
+    b.append(this.originatingTypeConstraint);
     return b.toString();
   }
 }

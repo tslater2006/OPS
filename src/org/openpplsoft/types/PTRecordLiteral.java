@@ -17,14 +17,11 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTRecordLiteral extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.REC_LITERAL;
-
   private String ptRECNAME;
   private Record recDefn;
 
   public PTRecordLiteral(final String rStr) {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
+    super(new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
 
     if(!rStr.startsWith("Record.")) {
       throw new OPSVMachRuntimeException("Expected rStr to start "
@@ -37,8 +34,7 @@ public final class PTRecordLiteral extends PTObjectType {
   }
 
   public PTRecordLiteral(final Record r) {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
+    super(new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
     this.ptRECNAME = r.RECNAME;
     this.recDefn = r;
   }
@@ -76,12 +72,6 @@ public final class PTRecordLiteral extends PTObjectType {
   @Override
   public Callable dotMethod(final String s) {
     return null;
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTRecordLiteral
-        && this.getType() == a.getType());
   }
 
   @Override

@@ -34,7 +34,7 @@ public class PTFieldTypeConstraint extends PTTypeConstraint<PTField> {
   @Override
   public boolean typeCheck(PTType a) {
     throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTFieldTypeConstraint.");
+        + "PTFieldTypeConstraint (may not be necessary here actually).");
 /*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/

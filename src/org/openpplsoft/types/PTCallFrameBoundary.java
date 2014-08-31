@@ -12,8 +12,7 @@ public final class PTCallFrameBoundary extends PTType {
   private static PTCallFrameBoundary singleton;
 
   private PTCallFrameBoundary() {
-    super(Type.CALL_FRAME_BOUNDARY,
-        new PTTypeConstraint<PTCallFrameBoundary>(PTCallFrameBoundary.class));
+    super(new PTTypeConstraint<PTCallFrameBoundary>(PTCallFrameBoundary.class));
   }
 
   public static PTCallFrameBoundary getSingleton() {
@@ -22,12 +21,6 @@ public final class PTCallFrameBoundary extends PTType {
       singleton.setReadOnly();
     }
     return singleton;
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTCallFrameBoundary
-        && this.getType() == a.getType());
   }
 
   @Override

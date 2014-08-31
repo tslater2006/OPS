@@ -22,11 +22,10 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   private static Logger log = LogManager.getLogger(PTChar.class.getName());
 
-  private static Type staticTypeFlag = Type.CHAR;
   private Character c;
 
   public PTChar(PTTypeConstraint origTc) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
   }
 
   @Override
@@ -184,12 +183,6 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
     return new HashCodeBuilder(HBC_INITIAL,
         HBC_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTChar
-        && this.getType() == a.getType());
   }
 
   @Override

@@ -15,7 +15,6 @@ import java.lang.reflect.*;
 public final class PTArray extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTArray.class.getName());
-  private static Type staticTypeFlag = Type.ARRAY;
   public int dimensions;
   public PTTypeConstraint baseTypeConstraint;
   public LinkedList<PTType> values;
@@ -33,7 +32,7 @@ public final class PTArray extends PTObjectType {
   }
 
   public PTArray(PTArrayTypeConstraint origTc, int d, PTTypeConstraint baseTypeTc) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
 
     if(d == 1 && baseTypeTc instanceof PTArrayTypeConstraint) {
       throw new OPSVMachRuntimeException("Single dimension arrays cannot " +
@@ -72,15 +71,6 @@ public final class PTArray extends PTObjectType {
       return new Callable(ptMethodTable.get(s), this);
     }
     return null;
-  }
-
-  public boolean typeCheck(PTType a) {
-    throw new EntDataTypeException("Call to typeCheck on PTArray needs to "
-        + "be replaced by call to PTArrayTypeConstraint.");
-/*    return (a instanceof PTArray  &&
-      this.getType() == a.getType() &&
-      this.dimensions == ((PTArray)a).dimensions &&
-      this.baseTypeConstraint.typeCheck(((PTArray)a).baseType));*/
   }
 
   @Override

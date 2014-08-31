@@ -13,12 +13,10 @@ import org.openpplsoft.runtime.*;
 
 public final class PTNull extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.NULL;
   private static PTNull singleton;
 
   private PTNull() {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTNull>(PTNull.class));
+    super(new PTTypeConstraint<PTNull>(PTNull.class));
   }
 
   public static PTNull getSingleton() {
@@ -40,11 +38,6 @@ public final class PTNull extends PTObjectType {
 
   public Callable dotMethod(String s) {
     throw new EntDataTypeException("Illegal call to dotMethod on PTNull.");
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTNull &&
-        this.getType() == a.getType());
   }
 
   @Override

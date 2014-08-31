@@ -15,11 +15,10 @@ import org.openpplsoft.runtime.*;
 
 public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
-  private static Type staticTypeFlag = Type.BOOLEAN;
   private Boolean b;
 
   public PTBoolean(PTTypeConstraint origTc) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
   }
 
   public Boolean read() {
@@ -117,11 +116,6 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
     return new HashCodeBuilder(HBC_INITIAL,
         HBC_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTBoolean &&
-      this.getType() == a.getType());
   }
 
   @Override

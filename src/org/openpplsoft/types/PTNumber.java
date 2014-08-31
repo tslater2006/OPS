@@ -18,13 +18,12 @@ import org.openpplsoft.runtime.*;
 public final class PTNumber extends PTPrimitiveType<Double> {
 
   private static Logger log = LogManager.getLogger(PTNumber.class.getName());
-  private static Type staticTypeFlag = Type.NUMBER;
 
   private boolean isInteger;
   private Double d;
 
   public PTNumber(PTTypeConstraint origTc) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
   }
 
   public Double read() {
@@ -175,11 +174,6 @@ public final class PTNumber extends PTPrimitiveType<Double> {
 
     return new HashCodeBuilder(HBC_INITIAL,
         HBC_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  public boolean typeCheck(PTType a) {
-    return (a instanceof PTNumber &&
-        this.getType() == a.getType());
   }
 
   @Override

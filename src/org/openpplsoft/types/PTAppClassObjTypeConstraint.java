@@ -36,7 +36,7 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
   @Override
   public boolean typeCheck(PTType a) {
     throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTAppClassObjTypeConstraint.");
+        + "PTAppClassObjTypeConstraint; BE SURE TO CHECK PROGDEFN MATCH");
 /*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());*/

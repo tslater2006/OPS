@@ -17,13 +17,10 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTPageLiteral extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.PAGE_LITERAL;
-
   private String ptPNLNAME;
 
   public PTPageLiteral(final String pStr) {
-    super(staticTypeFlag,
-        new PTTypeConstraint<PTPageLiteral>(PTPageLiteral.class));
+    super(new PTTypeConstraint<PTPageLiteral>(PTPageLiteral.class));
     if(!pStr.startsWith("Page.")) {
       throw new OPSVMachRuntimeException("Expected pStr to start "
           + "with 'Page.' while alloc'ing PTPageLiteral; pStr = "
@@ -48,12 +45,6 @@ public final class PTPageLiteral extends PTObjectType {
   @Override
   public Callable dotMethod(final String s) {
     return null;
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTPageLiteral
-        && this.getType() == a.getType());
   }
 
   @Override

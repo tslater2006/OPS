@@ -491,79 +491,75 @@ public class GlobalFnLibrary {
   public static void readFieldFromResultSet(PTField fldObj,
       String colName, String colTypeName, ResultSet rs) throws SQLException {
 
-    log.debug("Copying {} with type {} from resultset to Field:{} "+
-        "with type flag {}", colName, colTypeName,
-        fldObj.recFieldDefn.FIELDNAME, fldObj.getValue().getType());
+    PTTypeConstraint origTc = fldObj.getValue().getOriginatingTypeConstraint();
 
-    switch(fldObj.getValue().getType()) {
+    log.debug("Copying {} with type {} from resultset to Field:{} "+
+        "with type constraint {}", colName, colTypeName,
+        fldObj.recFieldDefn.FIELDNAME, origTc);
+
+    if(origTc.isUnderlyingClassEqualTo(PTChar.class)) {
       /*
        * TODO(mquinn): Read CLOB and chars from ResultSet rather than
        * as string.
        */
-      case CHAR:
-        if(colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
-          ((PTChar) fldObj.getValue()).write(
-            rs.getString(colName));
+      if(colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
+        ((PTChar) fldObj.getValue()).write(
+          rs.getString(colName));
+      } else {
+        throw new OPSVMachRuntimeException("Unexpected db " +
+          "type for PTChar: " + colTypeName + "; " +
+          "colName=" + colName);
+      }
+    } else if (origTc.isUnderlyingClassEqualTo(PTString.class)) {
+      if(colTypeName.equals("VARCHAR2") || colTypeName.equals("CLOB")
+          || colTypeName.equals("CHAR")) {
+        ((PTString) fldObj.getValue()).write(
+          rs.getString(colName));
+      } else {
+        throw new OPSVMachRuntimeException("Unexpected db " +
+          "type for PTString: " + colTypeName + "; " +
+          "colName=" + colName);
+      }
+    } else if (origTc.isUnderlyingClassEqualTo(PTNumber.class)) {
+      if(colTypeName.equals("NUMBER")) {
+        if(rs.getDouble(colName) % 1 == 0) {
+          ((PTNumber)fldObj.getValue()).write(
+            rs.getInt(colName));
         } else {
-          throw new OPSVMachRuntimeException("Unexpected db " +
-            "type for Type.CHAR: " + colTypeName + "; " +
-            "colName=" + colName);
+          ((PTNumber)fldObj.getValue()).write(
+            rs.getDouble(colName));
         }
-        break;
-      case STRING:
-        if(colTypeName.equals("VARCHAR2") || colTypeName.equals("CLOB")
-            || colTypeName.equals("CHAR")) {
-          ((PTString) fldObj.getValue()).write(
-            rs.getString(colName));
-        } else {
-          throw new OPSVMachRuntimeException("Unexpected db " +
-            "type for Type.STRING: " + colTypeName + "; " +
-            "colName=" + colName);
-        }
-        break;
-      case NUMBER:
-        if(colTypeName.equals("NUMBER")) {
-          if(rs.getDouble(colName) % 1 == 0) {
-            ((PTNumber)fldObj.getValue()).write(
-              rs.getInt(colName));
-          } else {
-            ((PTNumber)fldObj.getValue()).write(
-              rs.getDouble(colName));
-          }
-        } else {
-          throw new OPSVMachRuntimeException("Unexpected db " +
-            "type for Type.NUMBER: " + colTypeName + "; " +
-            "colName=" + colName);
-        }
-        break;
-      case DATE:
-        if(colTypeName.equals("VARCHAR2")) {
-          ((PTDate)fldObj.getValue()).write(
-            rs.getString(colName));
-        } else {
-          throw new OPSVMachRuntimeException("Unexpected db " +
-            "type for Type.DATE: " + colTypeName + "; " +
-            "colName=" + colName);
-        }
-        break;
-      case DATETIME:
+      } else {
+        throw new OPSVMachRuntimeException("Unexpected db " +
+          "type for PTNumber: " + colTypeName + "; " +
+          "colName=" + colName);
+      }
+    } else if (origTc.isUnderlyingClassEqualTo(PTDate.class)) {
+      if(colTypeName.equals("VARCHAR2")) {
+        ((PTDate)fldObj.getValue()).write(
+          rs.getString(colName));
+      } else {
+        throw new OPSVMachRuntimeException("Unexpected db " +
+          "type for PTDate: " + colTypeName + "; " +
+          "colName=" + colName);
+      }
+    } else if (origTc.isUnderlyingClassEqualTo(PTDateTime.class)) {
         /*
          * TODO(mquinn): May need to be split apart into separate
          * statements with different types.
          */
-        if(colTypeName.equals("VARCHAR2") || colTypeName.equals("TIMESTAMP")) {
-          ((PTDateTime)fldObj.getValue()).write(
-            rs.getString(colName));
-        } else {
-          throw new OPSVMachRuntimeException("Unexpected db " +
-            "type for Type.DATETIME: " + colTypeName + "; " +
-            "colName=" + colName);
-        }
-        break;
-      default:
-        throw new OPSVMachRuntimeException("Unexpected field " +
-          "value type encountered when filling rowset: " +
-           fldObj.getValue().getType());
+      if(colTypeName.equals("VARCHAR2") || colTypeName.equals("TIMESTAMP")) {
+        ((PTDateTime)fldObj.getValue()).write(
+          rs.getString(colName));
+      } else {
+        throw new OPSVMachRuntimeException("Unexpected db "
+            + "type for PTDateTime: " + colTypeName + "; "
+            + "colName=" + colName);
+      }
+    } else {
+      throw new OPSVMachRuntimeException("Unexpected field "
+          + "value type constraint encountered when filling rowset: "
+          + origTc);
     }
   }
 }

@@ -24,7 +24,6 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTRow extends PTObjectType {
 
-  private static Type staticTypeFlag = Type.ROW;
   private static Map<String, Method> ptMethodTable;
 
   // Maps record names to child record objects
@@ -52,7 +51,7 @@ public final class PTRow extends PTObjectType {
    * @param r the record defn to attach
    */
   public PTRow(final PTRowTypeConstraint origTc, final Set<Record> s) {
-    super(staticTypeFlag, origTc);
+    super(origTc);
     this.childRecordMap = new HashMap<String, PTRecord>();
     this.childRowsetMap = new HashMap<String, PTRowset>();
 
@@ -128,12 +127,6 @@ public final class PTRow extends PTObjectType {
       return new Callable(ptMethodTable.get(s), this);
     }
     return null;
-  }
-
-  @Override
-  public boolean typeCheck(final PTType a) {
-    return (a instanceof PTRow
-        && this.getType() == a.getType());
   }
 
   @Override

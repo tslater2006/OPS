@@ -53,10 +53,10 @@ public abstract class PTType {
    */
   protected static void clone(final PTType src,
       final PTType dest) {
-      throw new EntDataTypeException("clone() called on PTType; need to "
+      throw new OPSDataTypeException("clone() called on PTType; need to "
           + "move and implement this elsewhere.");
 /*    if (src.type != dest.type) {
-      throw new EntDataTypeException("Attempted to clone PTType objects "
+      throw new OPSDataTypeException("Attempted to clone PTType objects "
           + "with different type enum flags (" + src.type + " to "
           + dest.type + ")");
     }
@@ -71,7 +71,7 @@ public abstract class PTType {
 
   protected void checkIsWriteable() {
     if (this.isReadOnly) {
-      throw new EntDataTypeException("Attempted illegal write to a "
+      throw new OPSDataTypeException("Attempted illegal write to a "
           + "readonly PTType object.");
     }
   }

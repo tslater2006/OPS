@@ -39,7 +39,7 @@ public final class PTComponentLiteral extends PTObjectType {
 
   @Override
   public PTType dotProperty(final String s) {
-    throw new EntDataTypeException("dotProperty() has not been implemented.");
+    throw new OPSDataTypeException("dotProperty() has not been implemented.");
   }
 
   @Override

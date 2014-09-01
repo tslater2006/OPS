@@ -113,7 +113,7 @@ public final class PTArray extends PTObjectType {
           this.values.addLast(clone);
         }
       } else {
-        throw new EntDataTypeException("Expected object or primitive when adding to "
+        throw new OPSDataTypeException("Expected object or primitive when adding to "
             + "array; found neither: " + value.getOriginatingTypeConstraint());
       }
 

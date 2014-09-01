@@ -23,7 +23,7 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
 
   @Override
   public PTRowset alloc() {
-    throw new EntDataTypeException("Call to alloc() PTRowset from type constraint "
+    throw new OPSDataTypeException("Call to alloc() PTRowset from type constraint "
         + "without providing associated record defn is illegal.");
   }
 

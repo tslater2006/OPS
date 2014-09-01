@@ -68,7 +68,7 @@ public final class PTString extends PTPrimitiveType<String> {
   @Override
   public void copyValueFrom(final PTPrimitiveType src) {
     if (!(src instanceof PTString)) {
-      throw new EntDataTypeException("Expected src to be PTString.");
+      throw new OPSDataTypeException("Expected src to be PTString.");
     }
     this.write(((PTString) src).read());
   }
@@ -96,7 +96,7 @@ public final class PTString extends PTPrimitiveType<String> {
   @Override
   public PTBoolean isEqual(final PTPrimitiveType op) {
     if (!(op instanceof PTString)) {
-      throw new EntDataTypeException("Expected op to be PTString.");
+      throw new OPSDataTypeException("Expected op to be PTString.");
     }
     if (this.s.equals(((PTString) op).read())) {
       return Environment.TRUE;
@@ -107,7 +107,7 @@ public final class PTString extends PTPrimitiveType<String> {
   @Override
   public PTBoolean isGreaterThan(final PTPrimitiveType op) {
     if (!(op instanceof PTString)) {
-      throw new EntDataTypeException("Expected op to be PTString.");
+      throw new OPSDataTypeException("Expected op to be PTString.");
     }
     if (this.s.compareTo(((PTString) op).read()) > 0) {
       return Environment.TRUE;
@@ -117,14 +117,14 @@ public final class PTString extends PTPrimitiveType<String> {
 
   @Override
   public PTBoolean isGreaterThanOrEqual(final PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThanOrEqual not "
+    throw new OPSDataTypeException("isGreaterThanOrEqual not "
         + "supported.");
   }
 
   @Override
   public PTBoolean isLessThan(final PTPrimitiveType op) {
     if (!(op instanceof PTString)) {
-      throw new EntDataTypeException("Expected op to be PTString.");
+      throw new OPSDataTypeException("Expected op to be PTString.");
     }
     if (this.s.compareTo(((PTString) op).read()) < 0) {
       return Environment.TRUE;
@@ -134,7 +134,7 @@ public final class PTString extends PTPrimitiveType<String> {
 
   @Override
   public PTBoolean isLessThanOrEqual(final PTPrimitiveType op) {
-    throw new EntDataTypeException("isLessThanOrEqual not supported "
+    throw new OPSDataTypeException("isLessThanOrEqual not supported "
         + "for strings.");
   }
 

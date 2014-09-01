@@ -55,11 +55,11 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
-    throw new EntDataTypeException("copyValueFrom is not yet supported.");
+    throw new OPSDataTypeException("copyValueFrom is not yet supported.");
   }
 
   public PTPrimitiveType add(PTPrimitiveType op) {
-    throw new EntDataTypeException("add() not supported.");
+    throw new OPSDataTypeException("add() not supported.");
   }
 
   public PTPrimitiveType subtract(PTPrimitiveType op) {
@@ -81,18 +81,18 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {
-    throw new EntDataTypeException("isEqual not implemented for " +
+    throw new OPSDataTypeException("isEqual not implemented for " +
       "Date.");
   }
 
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThan not implemented for " +
+    throw new OPSDataTypeException("isGreaterThan not implemented for " +
       "Date.");
   }
 
   public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
     if(!(op instanceof PTDate)) {
-      throw new EntDataTypeException("Expected op to be PTDate.");
+      throw new OPSDataTypeException("Expected op to be PTDate.");
     }
     if(this.d.compareTo(((PTDate)op).read()) >= 0) {
       return Environment.TRUE;
@@ -101,13 +101,13 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public PTBoolean isLessThan(PTPrimitiveType op) {
-    throw new EntDataTypeException("isLessThan is not supported for " +
+    throw new OPSDataTypeException("isLessThan is not supported for " +
       "Date.");
   }
 
   public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
     if(!(op instanceof PTDate)) {
-      throw new EntDataTypeException("Expected op to be PTDate.");
+      throw new OPSDataTypeException("Expected op to be PTDate.");
     }
     if(this.d.compareTo(((PTDate)op).read()) <= 0) {
       return Environment.TRUE;

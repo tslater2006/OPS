@@ -23,7 +23,7 @@ public class PTRecordTypeConstraint extends PTTypeConstraint<PTRecord> {
 
   @Override
   public PTRecord alloc() {
-    throw new EntDataTypeException("Call to alloc() PTRecord from type constraint "
+    throw new OPSDataTypeException("Call to alloc() PTRecord from type constraint "
         + "without providing associated record defn is illegal.");
   }
 

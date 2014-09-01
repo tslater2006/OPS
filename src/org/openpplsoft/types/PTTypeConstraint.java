@@ -47,16 +47,16 @@ public class PTTypeConstraint<T extends PTType> {
           .getConstructor(PTTypeConstraint.class);
       return cons.newInstance(this);
     } catch (final NoSuchMethodException nsme) {
-      throw new EntDataTypeException("Unable to dynamically instantiate "
+      throw new OPSDataTypeException("Unable to dynamically instantiate "
           + "underlying PT class for :" + this.underlyingClass, nsme);
     } catch (final InvocationTargetException ite) {
-      throw new EntDataTypeException("Unable to dynamically instantiate "
+      throw new OPSDataTypeException("Unable to dynamically instantiate "
           + "underlying PT class for :" + this.underlyingClass, ite);
     } catch (final InstantiationException ie) {
-      throw new EntDataTypeException("Unable to dynamically instantiate "
+      throw new OPSDataTypeException("Unable to dynamically instantiate "
           + "underlying PT class for :" + this.underlyingClass, ie);
     } catch (final IllegalAccessException iae) {
-      throw new EntDataTypeException("Unable to dynamically instantiate "
+      throw new OPSDataTypeException("Unable to dynamically instantiate "
           + "underlying PT class for :" + this.underlyingClass, iae);
     }
   }

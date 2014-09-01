@@ -73,7 +73,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
     } else if(src instanceof PTInteger) {
       this.write(new Double(((PTInteger)src).read()));
     } else {
-      throw new EntDataTypeException("Expected src to be PTNumber.");
+      throw new OPSDataTypeException("Expected src to be PTNumber.");
     }
   }
 
@@ -82,7 +82,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
          return Environment.getFromLiteralPool(
               this.read() + new Double(((PTInteger)op).read()));
     } else {
-      throw new EntDataTypeException("Unexpected op type "+
+      throw new OPSDataTypeException("Unexpected op type "+
         "provided to add().");
     }
   }
@@ -102,13 +102,13 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {
-    throw new EntDataTypeException("isEqual is not implemented for " +
+    throw new OPSDataTypeException("isEqual is not implemented for " +
         "numbers.");
   }
 
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
     if(!(op instanceof PTNumber)) {
-      throw new EntDataTypeException("Expected op to be PTNumber.");
+      throw new OPSDataTypeException("Expected op to be PTNumber.");
     }
     if(this.d.compareTo(((PTNumber)op).read()) > 0) {
       return Environment.TRUE;
@@ -117,7 +117,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
   }
 
   public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThanOrEqual not "
+    throw new OPSDataTypeException("isGreaterThanOrEqual not "
         + "supported.");
   }
 
@@ -131,7 +131,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
         return Environment.TRUE;
       }
     } else {
-      throw new EntDataTypeException("Expected op to be PTNumber "+
+      throw new OPSDataTypeException("Expected op to be PTNumber "+
           "or PTInteger.");
     }
     return Environment.FALSE;
@@ -147,7 +147,7 @@ public final class PTNumber extends PTPrimitiveType<Double> {
           return Environment.TRUE;
         }
     } else {
-      throw new EntDataTypeException("Expected op to be PTNumber "+
+      throw new OPSDataTypeException("Expected op to be PTNumber "+
           "or PTInteger.");
     }
     return Environment.FALSE;

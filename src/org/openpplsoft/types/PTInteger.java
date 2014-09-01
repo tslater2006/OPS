@@ -42,7 +42,7 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   }
 
   public void setDefault() {
-    throw new EntDataTypeException("setDefault not implemented.");
+    throw new OPSDataTypeException("setDefault not implemented.");
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
@@ -51,13 +51,13 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
     } else if (src instanceof PTNumber) {
       this.write(((PTNumber)src).readAsInteger());
     } else {
-      throw new EntDataTypeException("Expected src to be PTInteger.");
+      throw new OPSDataTypeException("Expected src to be PTInteger.");
     }
   }
 
   public PTPrimitiveType add(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
-      throw new EntDataTypeException("Expected op to be PTInteger.");
+      throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     return Environment.getFromLiteralPool(
       this.read() + ((PTInteger)op).read());
@@ -65,7 +65,7 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
 
   public PTPrimitiveType subtract(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
-      throw new EntDataTypeException("Expected op to be PTInteger.");
+      throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     return Environment.getFromLiteralPool(
       this.read() - ((PTInteger)op).read());
@@ -79,7 +79,7 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   @Override
   public PTPrimitiveType div(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
-      throw new EntDataTypeException("Expected op to be PTInteger.");
+      throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     return Environment.getFromLiteralPool(
       this.read() / ((PTInteger)op).read());
@@ -110,7 +110,7 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
 
   public PTBoolean isEqual(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
-      throw new EntDataTypeException("Expected op to be PTInteger.");
+      throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     if(this.i.compareTo(((PTInteger)op).read()) == 0) {
       return Environment.TRUE;
@@ -120,7 +120,7 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
 
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
-      throw new EntDataTypeException("Expected op to be PTInteger.");
+      throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     if(this.i.compareTo(((PTInteger)op).read()) > 0) {
       return Environment.TRUE;
@@ -129,13 +129,13 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   }
 
   public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThanOrEqual not "
+    throw new OPSDataTypeException("isGreaterThanOrEqual not "
         + "supported.");
   }
 
   public PTBoolean isLessThan(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
-      throw new EntDataTypeException("Expected op to be PTInteger.");
+      throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     if(this.i.compareTo(((PTInteger)op).read()) < 0) {
       return Environment.TRUE;
@@ -145,7 +145,7 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
 
   public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
-      throw new EntDataTypeException("Expected op to be PTInteger.");
+      throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     if(this.i.compareTo(((PTInteger)op).read()) <= 0) {
       return Environment.TRUE;

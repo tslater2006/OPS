@@ -71,7 +71,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
   @Override
   public void copyValueFrom(final PTPrimitiveType src) {
     if (!(src instanceof PTChar)) {
-      throw new EntDataTypeException("Expected src to be PTChar.");
+      throw new OPSDataTypeException("Expected src to be PTChar.");
     }
     this.write(((PTChar) src).read());
   }
@@ -121,7 +121,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
         }
 
     } else {
-      throw new EntDataTypeException("Expected op to be PTChar; is: " + op);
+      throw new OPSDataTypeException("Expected op to be PTChar; is: " + op);
     }
     return Environment.FALSE;
   }
@@ -129,7 +129,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
   @Override
   public PTBoolean isGreaterThan(final PTPrimitiveType op) {
     if (!(op instanceof PTChar)) {
-      throw new EntDataTypeException("Expected op to be PTChar.");
+      throw new OPSDataTypeException("Expected op to be PTChar.");
     }
     if (this.c.compareTo(((PTChar) op).read()) > 0) {
       return Environment.TRUE;
@@ -139,14 +139,14 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   @Override
   public PTBoolean isGreaterThanOrEqual(final PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThanOrEqual not "
+    throw new OPSDataTypeException("isGreaterThanOrEqual not "
         + "supported.");
   }
 
   @Override
   public PTBoolean isLessThan(final PTPrimitiveType op) {
     if (!(op instanceof PTChar)) {
-      throw new EntDataTypeException("Expected op to be PTChar.");
+      throw new OPSDataTypeException("Expected op to be PTChar.");
     }
     if (this.c.compareTo(((PTChar) op).read()) < 0) {
       return Environment.TRUE;
@@ -156,7 +156,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   @Override
   public PTBoolean isLessThanOrEqual(final PTPrimitiveType op) {
-    throw new EntDataTypeException("isLessThanOrEqual not supported "
+    throw new OPSDataTypeException("isLessThanOrEqual not supported "
         + "for PTChar.");
   }
 

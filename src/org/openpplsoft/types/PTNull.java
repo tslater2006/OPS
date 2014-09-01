@@ -33,11 +33,11 @@ public final class PTNull extends PTObjectType {
    * resolves to "SA_LEARNER_SERVICES".
    */
   public PTType dotProperty(String s) {
-    throw new EntDataTypeException("Illegal call to dotProperty on PTNull.");
+    throw new OPSDataTypeException("Illegal call to dotProperty on PTNull.");
   }
 
   public Callable dotMethod(String s) {
-    throw new EntDataTypeException("Illegal call to dotMethod on PTNull.");
+    throw new OPSDataTypeException("Illegal call to dotMethod on PTNull.");
   }
 
   @Override

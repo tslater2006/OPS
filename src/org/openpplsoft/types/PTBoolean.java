@@ -39,12 +39,12 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
   }
 
   public void setDefault() {
-    throw new EntDataTypeException("setDefault not implemented.");
+    throw new OPSDataTypeException("setDefault not implemented.");
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
     if(!(src instanceof PTBoolean)) {
-      throw new EntDataTypeException("Expected src to be PTBoolean.");
+      throw new OPSDataTypeException("Expected src to be PTBoolean.");
     }
     this.write(((PTBoolean)src).read());
   }
@@ -67,7 +67,7 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
   public PTBoolean isEqual(PTPrimitiveType op) {
     if(!(op instanceof PTBoolean)) {
-      throw new EntDataTypeException("Expected op to be PTBoolean.");
+      throw new OPSDataTypeException("Expected op to be PTBoolean.");
     }
     if(this.b.equals(((PTBoolean)op).read())) {
       return Environment.TRUE;
@@ -76,22 +76,22 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
   }
 
   public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThanOrEqual not "
+    throw new OPSDataTypeException("isGreaterThanOrEqual not "
       + "supported.");
   }
 
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThan not "
+    throw new OPSDataTypeException("isGreaterThan not "
       + "supported.");
   }
 
   public PTBoolean isLessThan(PTPrimitiveType op) {
-    throw new EntDataTypeException("isLessThan is not supported for " +
+    throw new OPSDataTypeException("isLessThan is not supported for " +
       "booleans.");
   }
 
   public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
-    throw new EntDataTypeException("isLessThanOrEqual is not supported for " +
+    throw new OPSDataTypeException("isLessThanOrEqual is not supported for " +
       "booleans.");
   }
 

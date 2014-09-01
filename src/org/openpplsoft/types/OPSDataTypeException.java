@@ -9,13 +9,13 @@ package org.openpplsoft.types;
 
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
-public class EntDataTypeException extends OPSVMachRuntimeException {
+public class OPSDataTypeException extends OPSVMachRuntimeException {
 
-  public EntDataTypeException(final String msg) {
+  public OPSDataTypeException(final String msg) {
     super(msg);
   }
 
-  public EntDataTypeException(final String msg, final Exception ex) {
+  public OPSDataTypeException(final String msg, final Exception ex) {
     super(msg, ex);
   }
 }

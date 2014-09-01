@@ -53,12 +53,12 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   @Override
   public void copyValueFrom(final PTPrimitiveType src) {
-    throw new EntDataTypeException("copyValueFrom is not yet supported.");
+    throw new OPSDataTypeException("copyValueFrom is not yet supported.");
   }
 
   @Override
   public PTPrimitiveType add(final PTPrimitiveType op) {
-    throw new EntDataTypeException("add() not supported.");
+    throw new OPSDataTypeException("add() not supported.");
   }
 
   @Override
@@ -83,20 +83,20 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   @Override
   public PTBoolean isEqual(final PTPrimitiveType op) {
-    throw new EntDataTypeException("isEqual not implemented for "
+    throw new OPSDataTypeException("isEqual not implemented for "
         + "Date.");
   }
 
   @Override
   public PTBoolean isGreaterThan(final PTPrimitiveType op) {
-    throw new EntDataTypeException("isGreaterThan not implemented for "
+    throw new OPSDataTypeException("isGreaterThan not implemented for "
         + "Date.");
   }
 
   @Override
   public PTBoolean isGreaterThanOrEqual(final PTPrimitiveType op) {
     if (!(op instanceof PTTime)) {
-      throw new EntDataTypeException("Expected op to be PTTime.");
+      throw new OPSDataTypeException("Expected op to be PTTime.");
     }
     if (this.d.compareTo(((PTTime) op).read()) >= 0) {
       return Environment.TRUE;
@@ -106,14 +106,14 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   @Override
   public PTBoolean isLessThan(final PTPrimitiveType op) {
-    throw new EntDataTypeException("isLessThan is not supported for "
+    throw new OPSDataTypeException("isLessThan is not supported for "
         + "Date.");
   }
 
   @Override
   public PTBoolean isLessThanOrEqual(final PTPrimitiveType op) {
     if (!(op instanceof PTTime)) {
-      throw new EntDataTypeException("Expected op to be PTTime.");
+      throw new OPSDataTypeException("Expected op to be PTTime.");
     }
     if (this.d.compareTo(((PTTime) op).read()) <= 0) {
       return Environment.TRUE;

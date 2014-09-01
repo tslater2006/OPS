@@ -22,8 +22,8 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   private String d;
 
-  public PTTime() {
-    super(new PTTypeConstraint<PTTime>(PTTime.class));
+  public PTTime(PTTypeConstraint origTc) {
+    super(origTc);
 
     // default value is current time.
     this.d = new SimpleDateFormat("HH:mm:ss")

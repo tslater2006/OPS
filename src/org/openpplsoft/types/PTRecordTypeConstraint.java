@@ -33,7 +33,8 @@ public class PTRecordTypeConstraint extends PTTypeConstraint<PTRecord> {
   * to determine the type of the value enclosed within them. However, this
   * defn is not part of the type itself; a Record variable can be assigned
   * any Record object, regardless of its underlying record defn (this is why
-  * the typeCheck method is not overriden by this class, there's no need to do so).
+  * the typeCheck and equals/hashCode methods are not overriden by this class,
+  * there's no need to do so).
   * @param recDefn the record defn to attach
   * @return the newly allocated record object
   */

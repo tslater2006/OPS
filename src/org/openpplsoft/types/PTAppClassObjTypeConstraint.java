@@ -7,6 +7,8 @@
 
 package org.openpplsoft.types;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.openpplsoft.pt.peoplecode.AppClassPeopleCodeProg;
 
 import org.apache.logging.log4j.LogManager;
@@ -44,6 +46,29 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
   public boolean typeCheck(PTType a) {
     return (a instanceof PTAppClassObj
         && (this.requiredProgDefn == ((PTAppClassObj) a).progDefn));
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (obj == null) {
+      return false;
+    } else if (!(obj instanceof PTAppClassObjTypeConstraint)) {
+      return false;
+    }
+
+    final PTAppClassObjTypeConstraint other = (PTAppClassObjTypeConstraint) obj;
+    return (this.underlyingClass == other.getUnderlyingClass()
+        && this.requiredProgDefn == other.getReqdProgDefn());
+  }
+
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 1009, HBC_MULTIPLIER = 179;
+
+    return new HashCodeBuilder(HBC_INITIAL, HBC_MULTIPLIER)
+      .append(this.underlyingClass).append(this.requiredProgDefn).toHashCode();
   }
 
   @Override

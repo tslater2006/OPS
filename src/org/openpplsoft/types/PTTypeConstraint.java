@@ -10,6 +10,8 @@ package org.openpplsoft.types;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,6 +35,10 @@ public class PTTypeConstraint<T extends PTType> {
 
   public boolean isUnderlyingClassEqualTo(final Class clazz) {
     return this.underlyingClass == clazz;
+  }
+
+  public Class<T> getUnderlyingClass() {
+    return this.underlyingClass;
   }
 
   public T alloc() {
@@ -59,6 +65,28 @@ public class PTTypeConstraint<T extends PTType> {
     log.debug("Constraint typecheck: underlying class is {}, a is {}",
       this.underlyingClass, a.getClass());
     return (this.underlyingClass == a.getClass());
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (obj == null) {
+      return false;
+    } else if (!(obj instanceof PTTypeConstraint<?>)) {
+      return false;
+    }
+
+    final PTTypeConstraint<?> other = (PTTypeConstraint<?>) obj;
+    return (this.underlyingClass == other.getUnderlyingClass());
+  }
+
+  @Override
+  public int hashCode() {
+    final int HBC_INITIAL = 3019, HBC_MULTIPLIER = 71;
+
+    return new HashCodeBuilder(HBC_INITIAL, HBC_MULTIPLIER)
+      .append(this.underlyingClass).toHashCode();
   }
 
   @Override

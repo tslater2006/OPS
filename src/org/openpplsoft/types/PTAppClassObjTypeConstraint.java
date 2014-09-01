@@ -33,13 +33,17 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
     return new PTAppClassObj(this, this.requiredProgDefn);
   }
 
+  /**
+   * Type checks on app class objects must involve the associated
+   * program definitions; if the objects are not of the same program
+   * defn, the type check must fail.
+   * @param a the typed object to type check
+   * @returns true if types match, false otherwise.
+   */
   @Override
   public boolean typeCheck(PTType a) {
-    throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTAppClassObjTypeConstraint; BE SURE TO CHECK PROGDEFN MATCH");
-/*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
-      this.underlyingClass, a.getClass());
-    return (this.underlyingClass == a.getClass());*/
+    return (a instanceof PTAppClassObj
+        && (this.requiredProgDefn == ((PTAppClassObj) a).progDefn));
   }
 
   @Override

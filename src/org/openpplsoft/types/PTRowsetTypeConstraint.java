@@ -27,17 +27,18 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
         + "without providing associated record defn is illegal.");
   }
 
+ /**
+  * Allocates a new rowset object with an attached record defn.
+  * Allocated rowsets must have an associated record defn in order
+  * to determine the type of records enclosed within them. However, this
+  * defn is not part of the type itself; a Rowset variable can be assigned
+  * any Rowset object, regardless of its underlying record defn (this is why
+  * the typeCheck method is not overriden by this class, there's no need to do so).
+  * @param recDefn the record defn to attach
+  * @return the newly allocated rowset object
+  */
   public PTRowset alloc(final Record recDefn) {
     return new PTRowset(this, recDefn);
-  }
-
-  @Override
-  public boolean typeCheck(PTType a) {
-    throw new EntDataTypeException("TODO: Override typeCheck on "
-        + "PTRowsetTypeConstraint; may not be necessary actually.");
-/*    log.debug("Constraint typecheck: underlying class is {}, a is {}",
-      this.underlyingClass, a.getClass());
-    return (this.underlyingClass == a.getClass());*/
   }
 
   @Override

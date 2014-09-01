@@ -44,31 +44,6 @@ public abstract class PTType {
     return this.originatingTypeConstraint;
   }
 
-  /**
-   * Clones a source type to a destination type object. The
-   * source and destination must have the same enumerated type
-   * flag.
-   * @param src the source type object to clone from
-   * @param dest the destination type object to clone to
-   */
-  protected static void clone(final PTType src,
-      final PTType dest) {
-      throw new OPSDataTypeException("clone() called on PTType; need to "
-          + "move and implement this elsewhere.");
-/*    if (src.type != dest.type) {
-      throw new OPSDataTypeException("Attempted to clone PTType objects "
-          + "with different type enum flags (" + src.type + " to "
-          + dest.type + ")");
-    }
-    dest.setType(src.getType());
-    dest.setFlags(src.getFlags());
-
-    if (src instanceof PTArray) {
-      ((PTArray) dest).dimensions = ((PTArray) src).dimensions;
-      ((PTArray) dest).baseTypeConstraint = ((PTArray) src).baseTypeConstraint;
-    }*/
-  }
-
   protected void checkIsWriteable() {
     if (this.isReadOnly) {
       throw new OPSDataTypeException("Attempted illegal write to a "

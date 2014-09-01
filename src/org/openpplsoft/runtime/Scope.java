@@ -65,10 +65,10 @@ public class Scope {
    */
   public void declareVar(final String id, final PTTypeConstraint typeConstraint) {
     if (typeConstraint == null) {
-      throw new OPSVMachRuntimeException("typeConstraint is null; this is prolly "
-          + "b/c a function formal param had no type; rather than allowing it to "
-          + "be null, create the Any type and have it be type compatible with "
-          + "anything. CONTINUE TO KEEP THIS EXCEPTION IF typeConstraint IS NULL.");
+      throw new OPSVMachRuntimeException("Illegal call to declareVar; typeConstraint is null."
+          + " It's possible that this call to declareVar is trying to declare a variable that "
+          + "has no type defined in PeopleCode, in which case the caller needs to pass a type "
+          + "constraint for the Any type.");
     }
 
     if (this.isIdResolvable(id)) {

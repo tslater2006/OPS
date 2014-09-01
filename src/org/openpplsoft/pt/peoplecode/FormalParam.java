@@ -7,6 +7,7 @@
 
 package org.openpplsoft.pt.peoplecode;
 
+import org.openpplsoft.types.PTAnyTypeConstraint;
 import org.openpplsoft.types.PTTypeConstraint;
 
 public class FormalParam {
@@ -17,6 +18,14 @@ public class FormalParam {
   public FormalParam(final String i, final PTTypeConstraint tc) {
     this.id = i;
     this.typeConstraint = tc;
+
+    /*
+     * If no type constraint is provided, assume the Any type,
+     * as happens in PeopleSoft.
+     */
+    if (this.typeConstraint == null) {
+      this.typeConstraint = new PTAnyTypeConstraint();
+    }
   }
 
   public String toString() {

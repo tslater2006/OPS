@@ -15,7 +15,7 @@ import org.apache.logging.log4j.*;
 
 import org.openpplsoft.runtime.*;
 
-public final class PTNumber extends PTPrimitiveType<Double> {
+public final class PTNumber extends PTNumberType<Double> {
 
   private static Logger log = LogManager.getLogger(PTNumber.class.getName());
 
@@ -77,7 +77,8 @@ public final class PTNumber extends PTPrimitiveType<Double> {
     }
   }
 
-  public PTPrimitiveType add(PTPrimitiveType op) {
+  @Override
+  public PTNumberType add(PTNumberType op) {
     if(op instanceof PTInteger) {
          return Environment.getFromLiteralPool(
               this.read() + new Double(((PTInteger)op).read()));
@@ -87,17 +88,18 @@ public final class PTNumber extends PTPrimitiveType<Double> {
     }
   }
 
-  public PTPrimitiveType subtract(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("subtract() not supported.");
+  @Override
+  public PTNumberType sub(PTNumberType op) {
+    throw new OPSVMachRuntimeException("sub() not supported.");
   }
 
   @Override
-  public PTPrimitiveType mul(PTPrimitiveType op) {
+  public PTNumberType mul(PTNumberType op) {
     throw new OPSVMachRuntimeException("mul() not supported.");
   }
 
   @Override
-  public PTPrimitiveType div(PTPrimitiveType op) {
+  public PTNumberType div(PTNumberType op) {
     throw new OPSVMachRuntimeException("div() not supported.");
   }
 

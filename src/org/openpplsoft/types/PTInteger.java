@@ -15,7 +15,7 @@ import org.apache.logging.log4j.*;
 
 import org.openpplsoft.runtime.*;
 
-public final class PTInteger extends PTPrimitiveType<Integer> {
+public final class PTInteger extends PTNumberType<Integer> {
 
   private static Logger log = LogManager.getLogger(PTInteger.class.getName());
   private Integer i;
@@ -55,7 +55,8 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
     }
   }
 
-  public PTPrimitiveType add(PTPrimitiveType op) {
+  @Override
+  public PTNumberType add(PTNumberType op) {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
@@ -63,7 +64,8 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
       this.read() + ((PTInteger)op).read());
   }
 
-  public PTPrimitiveType subtract(PTPrimitiveType op) {
+  @Override
+  public PTNumberType sub(PTNumberType op) {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
@@ -72,12 +74,12 @@ public final class PTInteger extends PTPrimitiveType<Integer> {
   }
 
   @Override
-  public PTPrimitiveType mul(PTPrimitiveType op) {
+  public PTNumberType mul(PTNumberType op) {
     throw new OPSVMachRuntimeException("mul() not supported.");
   }
 
   @Override
-  public PTPrimitiveType div(PTPrimitiveType op) {
+  public PTNumberType div(PTNumberType op) {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }

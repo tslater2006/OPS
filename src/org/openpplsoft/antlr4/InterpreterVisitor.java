@@ -449,20 +449,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "in For construct; not yet supported.");
     }
 
-    final PTPrimitiveType varId =
-        (PTPrimitiveType) this.eCtx.resolveIdentifier(
+    final PTNumberType varId =
+        (PTNumberType) this.eCtx.resolveIdentifier(
             ctx.VAR_ID().getText());
 
     visit(ctx.expr(0));
-    final PTPrimitiveType initialExpr =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(0));
+    final PTNumberType initialExpr =
+        (PTNumberType) this.getNodeData(ctx.expr(0));
 
     // Initialize incrementing expression.
     varId.copyValueFrom(initialExpr);
 
     visit(ctx.expr(1));
-    final PTPrimitiveType toExpr =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(1));
+    final PTNumberType toExpr =
+        (PTNumberType) this.getNodeData(ctx.expr(1));
 
     this.emitStmt(ctx);
     while (varId.isLessThanOrEqual(toExpr) == Environment.TRUE) {
@@ -475,9 +475,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
 
       // Increment and set new value of incrementing expression.
-      final PTPrimitiveType incremented = (PTPrimitiveType) varId
-        .add(Environment.getFromLiteralPool(1));
-      varId.copyValueFrom(incremented);
+      varId.copyValueFrom(varId.add(Environment.getFromLiteralPool(1)));
 
       this.emitStmt("End-For");
       this.emitStmt(ctx);
@@ -759,11 +757,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.ExprMulDivContext ctx) {
 
     visit(ctx.expr(0));
-    final PTPrimitiveType lhs =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(0));
+    final PTNumberType lhs =
+        (PTNumberType) this.getNodeData(ctx.expr(0));
     visit(ctx.expr(1));
-    final PTPrimitiveType rhs =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(1));
+    final PTNumberType rhs =
+        (PTNumberType) this.getNodeData(ctx.expr(1));
 
     if (ctx.m != null) {
       this.setNodeData(ctx, lhs.mul(rhs));
@@ -787,16 +785,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.ExprAddSubContext ctx) {
 
     visit(ctx.expr(0));
-    final PTPrimitiveType lhs =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(0));
+    final PTNumberType lhs =
+        (PTNumberType) this.getNodeData(ctx.expr(0));
     visit(ctx.expr(1));
-    final PTPrimitiveType rhs =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(1));
+    final PTNumberType rhs =
+        (PTNumberType) this.getNodeData(ctx.expr(1));
 
     if (ctx.a != null) {
       this.setNodeData(ctx, lhs.add(rhs));
     } else if (ctx.s != null) {
-      this.setNodeData(ctx, lhs.subtract(rhs));
+      this.setNodeData(ctx, lhs.sub(rhs));
     } else {
       throw new OPSVMachRuntimeException("Unsupported add/sub operation.");
     }

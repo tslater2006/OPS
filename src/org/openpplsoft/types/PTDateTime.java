@@ -48,24 +48,6 @@ public final class PTDateTime extends PTPrimitiveType<String> {
     throw new OPSDataTypeException("copyValueFrom is not yet supported.");
   }
 
-  public PTPrimitiveType add(PTPrimitiveType op) {
-    throw new OPSDataTypeException("add() not supported.");
-  }
-
-  public PTPrimitiveType subtract(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("subtract() not supported.");
-  }
-
-  @Override
-  public PTPrimitiveType mul(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("mul() not supported.");
-  }
-
-  @Override
-  public PTPrimitiveType div(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("div() not supported.");
-  }
-
   public void setDefault() {
     this.d = null;
   }

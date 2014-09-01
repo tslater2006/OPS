@@ -49,22 +49,6 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     this.write(((PTBoolean)src).read());
   }
 
-  public PTPrimitiveType add(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("add() not supported.");
-  }
-
-  public PTPrimitiveType subtract(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("subtract() not supported.");
-  }
-
-  public PTPrimitiveType mul(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("mul() not supported.");
-  }
-
-  public PTPrimitiveType div(PTPrimitiveType op) {
-    throw new OPSVMachRuntimeException("div() not supported.");
-  }
-
   public PTBoolean isEqual(PTPrimitiveType op) {
     if(!(op instanceof PTBoolean)) {
       throw new OPSDataTypeException("Expected op to be PTBoolean.");

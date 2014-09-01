@@ -7,7 +7,7 @@
 
 package org.openpplsoft.types;
 
-public abstract class PTPrimitiveType<T> extends PTType {
+public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType {
 
   protected PTPrimitiveType(final PTTypeConstraint origTc) {
     super(origTc);
@@ -28,9 +28,4 @@ public abstract class PTPrimitiveType<T> extends PTType {
   public abstract PTBoolean isGreaterThanOrEqual(PTPrimitiveType op);
   public abstract PTBoolean isLessThan(PTPrimitiveType op);
   public abstract PTBoolean isLessThanOrEqual(PTPrimitiveType op);
-
-  public abstract PTPrimitiveType add(PTPrimitiveType op);
-  public abstract PTPrimitiveType subtract(PTPrimitiveType op);
-  public abstract PTPrimitiveType mul(PTPrimitiveType op);
-  public abstract PTPrimitiveType div(PTPrimitiveType op);
 }

@@ -460,6 +460,20 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(Environment.getFromLiteralPool(truncatedBigDec));
   }
 
+  public static void PT_String() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTInteger)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg "
+          + "of type PTInteger to String.");
+    }
+
+    Environment.pushToCallStack(Environment.getFromLiteralPool(
+        ((PTInteger) args.get(0)).readAsString()));
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

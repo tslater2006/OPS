@@ -484,31 +484,10 @@ public class GlobalFnLibrary {
           + "of type PTString to GetHTMLText.");
     }
 
-    final String PSCONTDEFN_HTML_TYPE = "4";
-    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
-        "query.PSCONTDEFN",
-        new String[]{((PTString) args.get(0)).read(), PSCONTDEFN_HTML_TYPE});
-    ResultSet rs = null;
+    final HTML html = DefnCache.getHTML(((PTString) args.get(0)).read());
+    final PTString str = Environment.getFromLiteralPool(html.getHTMLText());
 
-    try {
-      rs = ostmt.executeQuery();
-
-      while (rs.next()) {
-        // Do nothing with record for now.
-      }
-    } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
-    }
-
-    throw new OPSVMachRuntimeException("TODO: Finish implementing GetHTMLText.");
+    Environment.pushToCallStack(str);
   }
 
   /*==================================*/

@@ -29,6 +29,7 @@ public final class DefnCache {
   private static Map<String, AppPackage> appPackages;
   private static Map<String, Menu> menus;
   private static Map<Integer, MsgSet> msgSets;
+  private static Map<String, HTML> html;
 
   private static Logger log = LogManager.getLogger(DefnCache.class.getName());
 
@@ -40,6 +41,7 @@ public final class DefnCache {
     appPackages = new HashMap<String, AppPackage>();
     menus = new HashMap<String, Menu>();
     msgSets = new HashMap<Integer, MsgSet>();
+    html = new HashMap<String, HTML>();
   }
 
   private DefnCache() {}
@@ -197,5 +199,15 @@ public final class DefnCache {
       msgSets.put(m.getMsgSetNbr(), m);
     }
     return m;
+  }
+
+  public static HTML getHTML(final String htmlDefnName) {
+    HTML h = html.get(htmlDefnName);
+    if (h == null) {
+      log.debug("Caching html defn for {}", htmlDefnName);
+      h = new HTML(htmlDefnName);
+      html.put(htmlDefnName, h);
+    }
+    return h;
   }
 }

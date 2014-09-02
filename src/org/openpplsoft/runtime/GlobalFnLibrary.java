@@ -448,7 +448,8 @@ public class GlobalFnLibrary {
 
     double dec;
     if (args.get(0) instanceof PTNumber) {
-      dec = ((PTNumber) args.get(0)).read();
+      throw new OPSVMachRuntimeException("Reimplement this part of Truncate.");
+//      dec = ((PTNumber) args.get(0)).read();
     } else {
       dec = ((PTInteger) args.get(0)).read();
     }
@@ -522,13 +523,7 @@ public class GlobalFnLibrary {
       }
     } else if (origTc.isUnderlyingClassEqualTo(PTNumber.class)) {
       if(colTypeName.equals("NUMBER")) {
-        if(rs.getDouble(colName) % 1 == 0) {
-          ((PTNumber)fldObj.getValue()).write(
-            rs.getInt(colName));
-        } else {
-          ((PTNumber)fldObj.getValue()).write(
-            rs.getDouble(colName));
-        }
+        ((PTNumber) fldObj.getValue()).write(rs.getBigDecimal(colName));
       } else {
         throw new OPSVMachRuntimeException("Unexpected db " +
           "type for PTNumber: " + colTypeName + "; " +

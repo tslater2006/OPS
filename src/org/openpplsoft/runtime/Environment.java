@@ -7,6 +7,7 @@
 
 package org.openpplsoft.runtime;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.lang.reflect.Method;
 import org.openpplsoft.types.*;
@@ -29,7 +30,7 @@ public class Environment {
 
   private static Map<Integer, PTInteger> integerLiteralPool;
   private static Map<String, PTString> stringLiteralPool;
-  private static Map<Double, PTNumber> numberLiteralPool;
+  private static Map<BigDecimal, PTNumber> numberLiteralPool;
 
   private static Stack<PTType> callStack;
 
@@ -57,7 +58,7 @@ public class Environment {
     // Create memory pools for supported data types.
     integerLiteralPool = new HashMap<Integer, PTInteger>();
     stringLiteralPool = new HashMap<String, PTString>();
-    numberLiteralPool = new HashMap<Double, PTNumber>();
+    numberLiteralPool = new HashMap<BigDecimal, PTNumber>();
 
     // Allocate space for system vars, mark each as read-only.
     systemVarTable = new HashMap<String, PTPrimitiveType>();
@@ -155,9 +156,9 @@ public class Environment {
     return p;
   }
 
-  public static PTNumber getFromLiteralPool(Double val) {
+  public static PTNumber getFromLiteralPool(BigDecimal val) {
     PTNumber p = numberLiteralPool.get(val);
-    if(p == null) {
+    if (p == null) {
       p = new PTTypeConstraint<PTNumber>(PTNumber.class).alloc();
       p.setReadOnly();
       p.systemWrite(val);

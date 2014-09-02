@@ -7,7 +7,7 @@
 
 package org.openpplsoft.types;
 
-import java.util.EnumSet;
+import java.math.BigDecimal;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -15,65 +15,61 @@ import org.apache.logging.log4j.*;
 
 import org.openpplsoft.runtime.*;
 
-public final class PTNumber extends PTNumberType<Double> {
+public final class PTNumber extends PTNumberType<BigDecimal> {
 
   private static Logger log = LogManager.getLogger(PTNumber.class.getName());
 
   private boolean isInteger;
-  private Double d;
+  private BigDecimal bigDec;
 
-  public PTNumber(PTTypeConstraint origTc) {
+  public PTNumber(final PTTypeConstraint origTc) {
     super(origTc);
   }
 
-  public Double read() {
-    return this.d;
+  public BigDecimal read() {
+    return this.bigDec;
   }
 
   public String readAsString() {
-    if(this.isInteger) {
-      return Integer.toString(this.d.intValue());
-    }
-    return d.toString();
+    return this.bigDec.toString();
   }
 
-  /**
-   * TODO(mquinn): This could cause issues due to loss of precision;
-   * although this maybe intentional in alot of cases (i.e., 1.0 to 1
-   * in loop counters), it could be the cause of future problems.
-   */
   public int readAsInteger() {
-    return this.d.intValue();
+    /*
+     * IMPORTANT NOTE: I'm using intValueExact here
+     * because I want to see if any situations arise where
+     * a Number can't be converted to an int exactly (intValueExact
+     * throws ArithmeticEception if the BigDecimal object has a nonzero
+     * fractional part or if it will overflow an int.
+     */
+    return this.bigDec.intValueExact();
   }
 
-  public void write(int newValue) {
+  public void write(final BigDecimal newValue) {
     this.checkIsWriteable();
-    this.isInteger = true;
-    this.d = new Double(newValue);
+
+    // NOTE: BigDecimal objects are immutable, so no need to instantate new
+    // object here.
+    this.bigDec = newValue;
   }
 
-  public void write(Double newValue) {
-    this.checkIsWriteable();
-    this.isInteger = false;
-    this.d = newValue;
-  }
-
-  public void systemWrite(Double newValue) {
-    this.isInteger = false;
-    this.d = newValue;
+  public void systemWrite(BigDecimal newValue) {
+    // NOTE: BigDecimal objects are immutable, so no need to instantate new
+    // object here.
+    this.bigDec = newValue;
   }
 
   public void setDefault() {
-    this.d = 0.0;
+    this.bigDec = BigDecimal.ZERO;
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
     if(src instanceof PTNumber) {
-      this.write(((PTNumber)src).read());
+      this.write(((PTNumber) src).read());
     } else if(src instanceof PTInteger) {
-      this.write(new Double(((PTInteger)src).read()));
+      this.write(new BigDecimal(((PTInteger) src).read()));
     } else {
-      throw new OPSDataTypeException("Expected src to be PTNumber.");
+      throw new OPSDataTypeException("Expected src to be PTNumber or PTInteger.");
     }
   }
 
@@ -81,10 +77,9 @@ public final class PTNumber extends PTNumberType<Double> {
   public PTNumberType add(PTNumberType op) {
     if(op instanceof PTInteger) {
          return Environment.getFromLiteralPool(
-              this.read() + new Double(((PTInteger)op).read()));
+              this.bigDec.add(new BigDecimal(((PTInteger) op).read())));
     } else {
-      throw new OPSDataTypeException("Unexpected op type "+
-        "provided to add().");
+      throw new OPSDataTypeException("Expected PTInteger.");
     }
   }
 
@@ -109,12 +104,14 @@ public final class PTNumber extends PTNumberType<Double> {
   }
 
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
-    if(!(op instanceof PTNumber)) {
+    if(op instanceof PTNumber) {
+      if(this.bigDec.compareTo(((PTNumber) op).read()) > 0) {
+        return Environment.TRUE;
+      }
+    } else {
       throw new OPSDataTypeException("Expected op to be PTNumber.");
     }
-    if(this.d.compareTo(((PTNumber)op).read()) > 0) {
-      return Environment.TRUE;
-    }
+
     return Environment.FALSE;
   }
 
@@ -125,11 +122,11 @@ public final class PTNumber extends PTNumberType<Double> {
 
   public PTBoolean isLessThan(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
-      if(this.d.compareTo(((PTNumber)op).read()) < 0) {
+      if(this.bigDec.compareTo(((PTNumber) op).read()) < 0) {
         return Environment.TRUE;
       }
     } else if(op instanceof PTInteger) {
-      if(this.d.compareTo(new Double(((PTInteger)op).read())) < 0) {
+      if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) < 0) {
         return Environment.TRUE;
       }
     } else {
@@ -141,13 +138,13 @@ public final class PTNumber extends PTNumberType<Double> {
 
   public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
-      if(this.d.compareTo(((PTNumber)op).read()) <= 0) {
+      if(this.bigDec.compareTo(((PTNumber) op).read()) <= 0) {
         return Environment.TRUE;
       }
     } else if(op instanceof PTInteger) {
-        if(this.d.compareTo(new Double(((PTInteger)op).read())) <= 0) {
-          return Environment.TRUE;
-        }
+      if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) <= 0) {
+        return Environment.TRUE;
+      }
     } else {
       throw new OPSDataTypeException("Expected op to be PTNumber "+
           "or PTInteger.");
@@ -163,8 +160,12 @@ public final class PTNumber extends PTNumberType<Double> {
     if(!(obj instanceof PTNumber))
       return false;
 
+    /*
+     * Do NOT forget that equals() will not do here;
+     * BigDecimal objects must be compared via compareTo().
+     */
     PTNumber other = (PTNumber)obj;
-    if(this.read().equals(other.read())) {
+    if(this.bigDec.compareTo(other.read()) == 0) {
       return true;
     }
     return false;
@@ -175,17 +176,13 @@ public final class PTNumber extends PTNumberType<Double> {
     final int HBC_INITIAL = 563, HBC_MULTIPLIER = 281;
 
     return new HashCodeBuilder(HBC_INITIAL,
-        HBC_MULTIPLIER).append(this.read()).toHashCode();
+        HBC_MULTIPLIER).append(this.bigDec).toHashCode();
   }
 
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder(super.toString());
-    if(this.isInteger) {
-      b.append(",d(int)=").append(this.d.intValue());
-    } else {
-      b.append(",d=").append(this.d);
-    }
+    b.append(",bigDec=").append(this.bigDec);
     return b.toString();
   }
 }

@@ -124,7 +124,7 @@ public final class PTRowset extends PTObjectType {
       idx = ((PTNumber) iterExpr).readAsInteger();
     } else {
       throw new OPSVMachRuntimeException("Expected iterExpr to be"
-          + " either integer or Number.");
+          + " either PTInteger or PTNumber.");
     }
 
     if (idx < 1 || idx > this.rows.size()) {

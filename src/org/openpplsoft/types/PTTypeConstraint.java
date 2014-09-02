@@ -62,9 +62,11 @@ public class PTTypeConstraint<T extends PTType> {
   }
 
   public boolean typeCheck(final PTType a) {
-    log.debug("Constraint typecheck: underlying class is {}, a is {}",
-      this.underlyingClass, a.getClass());
-    return (this.underlyingClass == a.getClass());
+    boolean result = (this.underlyingClass == a.getClass()
+        || (this.underlyingClass == PTNumber.class && a instanceof PTInteger));
+    log.debug("~TYPECHECK: {} <----- {} ? {}",
+      this.underlyingClass.getSimpleName(), a.getClass().getSimpleName(), result);
+    return result;
   }
 
   @Override

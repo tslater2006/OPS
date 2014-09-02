@@ -1269,7 +1269,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     } else if (ctx.DecimalLiteral() != null) {
       throw new OPSVMachRuntimeException("Encountered a decimal literal; "
-        + "get a PTNumber from the literal pool.");
+        + "get a PTNumber from the literal pool; IT IS ABSOLUTELY IMPORTANT"
+        + " THAT YOU DO NOT CONVERT THE DECIMAL LITERAL TEXT FROM STRING TO DOUBLE "
+        + " WHEN CREATING THE BIGDECIMAL TO PASS AS ARG TO getFromLiteralPool;"
+        + " you risk creating a BigDecimal with an inexact value. Just pass the text"
+        + " of the parsed decimal literal token to the BigDecimal constructor.");
 
     } else if (ctx.StringLiteral() != null) {
       /*

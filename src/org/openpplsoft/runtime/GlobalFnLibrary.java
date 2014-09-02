@@ -7,6 +7,9 @@
 
 package org.openpplsoft.runtime;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import java.sql.*;
 import java.util.*;
 import java.util.regex.*;
@@ -440,34 +443,21 @@ public class GlobalFnLibrary {
     List<PTType> args = Environment.getArgsFromCallStack();
 
     if(args.size() != 2
-        || !(args.get(0) instanceof PTNumber || args.get(0) instanceof PTInteger)
-        || !(args.get(1) instanceof PTNumber || args.get(1) instanceof PTInteger)) {
+        || !(args.get(0) instanceof PTNumber)
+        || !(args.get(1) instanceof PTInteger)) {
       throw new OPSVMachRuntimeException("Expected exactly 2 args "
-          + "of type PTNumber/PTInteger to Truncate.");
+          + "of type PTNumber and PTNumber/PTInteger to Truncate.");
     }
 
-    double dec;
-    if (args.get(0) instanceof PTNumber) {
-      throw new OPSVMachRuntimeException("Reimplement this part of Truncate.");
-//      dec = ((PTNumber) args.get(0)).read();
-    } else {
-      dec = ((PTInteger) args.get(0)).read();
-    }
+    final BigDecimal bigDec = ((PTNumber) args.get(0)).read();
+    final int desiredDecimalDigits = ((PTInteger) args.get(1)).read();
 
-    int numDecDigits;
-    if (args.get(1) instanceof PTNumber) {
-      numDecDigits = ((PTNumber) args.get(1)).readAsInteger();
-    } else {
-      numDecDigits = ((PTInteger) args.get(1)).read();
-    }
-
-    final long factor = (long) Math.pow(10, numDecDigits);
-    final double truncatedDec = (double) (Math.floor(dec * factor) / factor);
+    BigDecimal truncatedBigDec = bigDec.setScale(desiredDecimalDigits, RoundingMode.DOWN);
 
     log.debug("Truncated {} to have {} decimal digits; result is: {}",
-      dec, numDecDigits, truncatedDec);
+      bigDec, desiredDecimalDigits, truncatedBigDec);
 
-    throw new OPSVMachRuntimeException("Complete Truncate.");
+    Environment.pushToCallStack(Environment.getFromLiteralPool(truncatedBigDec));
   }
 
   /*==================================*/

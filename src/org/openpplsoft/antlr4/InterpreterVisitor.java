@@ -1329,6 +1329,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           || varTc.isUnderlyingClassEqualTo(PTRowset.class)
           || varTc.isUnderlyingClassEqualTo(PTAppClassObj.class)
           || varTc.isUnderlyingClassEqualTo(PTRecord.class)
+          || (varTc.isUnderlyingClassEqualTo(PTNumber.class)
+              && varsToDeclare.size() == 1
+              && !didInitializeAnIdentifier)
           || didInitializeAnIdentifier) {
         this.emitStmt(ctx);
         this.hasVarDeclBeenEmitted = true;

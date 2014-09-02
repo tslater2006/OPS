@@ -474,6 +474,43 @@ public class GlobalFnLibrary {
         ((PTInteger) args.get(0)).readAsString()));
   }
 
+  public static void PT_GetHTMLText() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg "
+          + "of type PTString to GetHTMLText.");
+    }
+
+    final String PSCONTDEFN_HTML_TYPE = "4";
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
+        "query.PSCONTDEFN",
+        new String[]{((PTString) args.get(0)).read(), PSCONTDEFN_HTML_TYPE});
+    ResultSet rs = null;
+
+    try {
+      rs = ostmt.executeQuery();
+
+      while (rs.next()) {
+        // Do nothing with record for now.
+      }
+    } catch (final java.sql.SQLException sqle) {
+      log.fatal(sqle.getMessage(), sqle);
+      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+    } finally {
+      try {
+        if (rs != null) { rs.close(); }
+        if (ostmt != null) { ostmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close rs and/or ostmt in finally block.");
+      }
+    }
+
+    throw new OPSVMachRuntimeException("TODO: Finish implementing GetHTMLText.");
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

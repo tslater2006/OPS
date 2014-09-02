@@ -30,7 +30,12 @@ public class InterpretSupervisor {
 
   public void run() {
 
-    this.runTopOfStack();
+    try {
+      this.runTopOfStack();
+    } catch (final OPSVMachRuntimeException opsvmre) {
+      this.fatallyLogContextStack();
+      throw opsvmre;
+    }
 
     if(this.execContextStack.size() != 0) {
       throw new OPSVMachRuntimeException("Expected exec context stack to be empty.");
@@ -141,5 +146,14 @@ public class InterpretSupervisor {
 
   public ExecContext getThisExecContext() {
     return this.execContextStack.peek();
+  }
+
+  private void fatallyLogContextStack() {
+    String indent = "";
+    for (int i = this.execContextStack.size() - 1; i >= 0; i--) {
+      ExecContext e = this.execContextStack.get(i);
+      log.fatal("!!! PC Call Stack !!! {} |-> {}", indent, e.prog);
+      indent = indent.concat("    ");
+    }
   }
 }

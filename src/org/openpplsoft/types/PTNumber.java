@@ -98,11 +98,24 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     throw new OPSVMachRuntimeException("div() not supported.");
   }
 
+  @Override
   public PTBoolean isEqual(PTPrimitiveType op) {
-    throw new OPSDataTypeException("isEqual is not implemented for " +
-        "numbers.");
+    if(op instanceof PTNumber) {
+      if(this.bigDec.compareTo(((PTNumber) op).read()) == 0) {
+        return Environment.TRUE;
+      }
+    } else if(op instanceof PTInteger) {
+      if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) == 0) {
+        return Environment.TRUE;
+      }
+    } else {
+      throw new OPSDataTypeException("Expected op to be PTNumber or PTInteger.");
+    }
+
+    return Environment.FALSE;
   }
 
+  @Override
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
       if(this.bigDec.compareTo(((PTNumber) op).read()) > 0) {
@@ -115,11 +128,13 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     return Environment.FALSE;
   }
 
+  @Override
   public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
     throw new OPSDataTypeException("isGreaterThanOrEqual not "
         + "supported.");
   }
 
+  @Override
   public PTBoolean isLessThan(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
       if(this.bigDec.compareTo(((PTNumber) op).read()) < 0) {
@@ -136,6 +151,7 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     return Environment.FALSE;
   }
 
+  @Override
   public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
       if(this.bigDec.compareTo(((PTNumber) op).read()) <= 0) {
@@ -152,6 +168,7 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     return Environment.FALSE;
   }
 
+  @Override
   public boolean equals(Object obj) {
     if(obj == this)
       return true;

@@ -1269,7 +1269,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     } else if (ctx.DecimalLiteral() != null) {
       throw new OPSVMachRuntimeException("Encountered a decimal literal; "
-        + "need to create a BigDecimal memory pool and type.");
+        + "get a PTNumber from the literal pool.");
 
     } else if (ctx.StringLiteral() != null) {
       /*

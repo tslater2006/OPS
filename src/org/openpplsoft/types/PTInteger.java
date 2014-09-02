@@ -7,6 +7,7 @@
 
 package org.openpplsoft.types;
 
+import java.math.BigDecimal;
 import java.util.EnumSet;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -20,7 +21,7 @@ public final class PTInteger extends PTNumberType<Integer> {
   private static Logger log = LogManager.getLogger(PTInteger.class.getName());
   private Integer i;
 
-  public PTInteger(PTTypeConstraint origTc) {
+  public PTInteger(final PTTypeConstraint origTc) {
     super(origTc);
   }
 
@@ -32,12 +33,12 @@ public final class PTInteger extends PTNumberType<Integer> {
     return this.i.toString();
   }
 
-  public void write(Integer newValue) {
+  public void write(final Integer newValue) {
     this.checkIsWriteable();
     this.i = newValue;
   }
 
-  public void systemWrite(Integer newValue) {
+  public void systemWrite(final Integer newValue) {
     this.i = newValue;
   }
 
@@ -45,13 +46,13 @@ public final class PTInteger extends PTNumberType<Integer> {
     throw new OPSDataTypeException("setDefault not implemented.");
   }
 
-  public void copyValueFrom(PTPrimitiveType src) {
+  public void copyValueFrom(final PTPrimitiveType src) {
     if(src instanceof PTInteger) {
-      this.write(((PTInteger)src).read());
+      this.write(((PTInteger) src).read());
     } else if (src instanceof PTNumber) {
-      this.write(((PTNumber)src).readAsInteger());
+      this.write(((PTNumber) src).readAsInteger());
     } else {
-      throw new OPSDataTypeException("Expected src to be PTInteger.");
+      throw new OPSDataTypeException("Expected src to be PTInteger or PTNumber.");
     }
   }
 
@@ -78,13 +79,19 @@ public final class PTInteger extends PTNumberType<Integer> {
     throw new OPSVMachRuntimeException("mul() not supported.");
   }
 
+  /**
+   * CRITICAL NOTE: PeopleTools *NEVER* uses integer division, even if both
+   * are operands are integers. Floating decimal point division is always used. See
+   * http://docs.oracle.com/cd/E38689_01/pt853pbr0/eng/pt/tpcd/concept_DataTypes-074b53.html
+   * for associated documentation.
+   */
   @Override
   public PTNumberType div(PTNumberType op) {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
     return Environment.getFromLiteralPool(
-      this.read() / ((PTInteger)op).read());
+      new BigDecimal(this.read()).divide(new BigDecimal(((PTInteger) op).read())));
   }
 
   public boolean equals(Object obj) {

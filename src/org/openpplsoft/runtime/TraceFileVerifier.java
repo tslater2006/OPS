@@ -70,7 +70,7 @@ public final class TraceFileVerifier {
         + "\\s+Nest=(\\d+)\\s+([A-Za-z0-9_]*?)\\s+([A-Za-z\\._0-9]+)");
 
     // Note: this pattern excludes any and all trailing semicolons.
-    pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?)[;]*$");
+    pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
   }
 
   private TraceFileVerifier() {}

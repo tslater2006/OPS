@@ -383,7 +383,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
     final int tokPos = ctx.getStart().getTokenIndex();
     final List<Token> refChannel = this.tokens.getHiddenTokensToLeft(tokPos,
-      PeopleCodeLexer.REFERENCES);
+      PeopleCodeLexer.REFERENCES_CHANNEL);
 
     if (refChannel != null) {
       final Token refTok = refChannel.get(0);

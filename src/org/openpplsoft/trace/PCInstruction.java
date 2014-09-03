@@ -7,6 +7,9 @@
 
 package org.openpplsoft.trace;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
@@ -17,18 +20,18 @@ public class PCInstruction implements IEmission {
 
   private String instruction;
 
+  // These are used in determining which instructions should be
+  // emitted; only used by OPS-constructed PCInstruction objects,
+  // not PCInstruction objects created from the tracefile.
+  public Token sourceToken;
+  public ParserRuleContext sourceContext;
+
   /**
    * Creates a new PCInstruction instance.
    * @param i the PeopleCode instruction that was executed
    */
   public PCInstruction(final String i) {
     this.instruction = i;
-
-    // Remove trailing semicolons.
-    if (this.instruction.charAt(i.length() - 1) == ';') {
-      this.instruction = this.instruction.substring(0,
-          this.instruction.length() - 1);
-    }
   }
 
   /**

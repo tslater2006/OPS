@@ -8,8 +8,8 @@
 grammar PeopleCode;
 
 @lexer::members {
-  public static final int REFERENCES = 1;
-  public static final int WHITESPACE = 2;
+  public static final int REFERENCES_CHANNEL = 1;
+  public static final int WHITESPACE_CHANNEL = 2;
 }
 
 //******************************************************//
@@ -93,23 +93,23 @@ constant          : 'Constant' VAR_ID '=' expr ;
 property          : 'property' varType GENERIC_ID g='get'? s='set'? r='readonly'? ;
 instance          : 'instance' varType VAR_ID (',' VAR_ID)* ;
 
-methodImpl  : 'method' GENERIC_ID stmtList 'end-method' ;
+methodImpl  : 'method' GENERIC_ID stmtList endmethod='end-method' ;
 getImpl     : 'get' GENERIC_ID stmtList 'end-get' ;
 setImpl     : 'set' GENERIC_ID stmtList 'end-set' ;
 
-funcImpl        : funcSignature stmtList 'End-Function' ;
+funcImpl        : funcSignature stmtList endfunction='End-Function' ;
 funcSignature   : 'Function' GENERIC_ID formalParamList? returnType? ';'? ;
 formalParamList : '(' ( param (',' param)* )? ')' ;
 param           : VAR_ID ('As' varType)? ;
 returnType      : 'Returns' varType ;
 
-ifStmt  : 'If' expr 'Then' ';'? stmtList ('Else' ';'? stmtList)? 'End-If' ;
+ifStmt  : 'If' expr 'Then' ';'? stmtList (elsetok='Else' ';'? stmtList)? endif='End-If' ;
 
-forStmt : 'For' VAR_ID '=' expr 'To' expr (';' | ('Step' expr))? stmtList 'End-For' ;
+forStmt : 'For' VAR_ID '=' expr 'To' expr (';' | ('Step' expr))? stmtList endfor='End-For' ;
 
 whileStmt : 'While' expr ';'? stmtList 'End-While' ;
 
-evaluateStmt    : 'Evaluate' expr whenBranch+ whenOtherBranch? 'End-Evaluate' ;
+evaluateStmt    : 'Evaluate' expr whenBranch+ whenOtherBranch? endevaluate='End-Evaluate' ;
 whenBranch      : 'When' (op='='|op='>')? expr stmtList ;
 whenOtherBranch : 'When-Other' stmtList ;
 
@@ -142,7 +142,7 @@ REM       : WS [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1 : '/*' .*? '*/' -> skip;
 COMMENT_2 : '<*' .*? '*>' -> skip;
 COMMENT_3 : '/+' .*? '+/' ';'? -> skip;
-WS        : [ \t\r\n]+ -> channel(WHITESPACE);
+WS        : [ \t\r\n]+ -> channel(WHITESPACE_CHANNEL);
 
 // Reference indices are emitted on a separate channel.
-ENT_REF_IDX : '#ENTREF{' IntegerLiteral '}' -> channel(REFERENCES) ;
+ENT_REF_IDX : '#ENTREF{' IntegerLiteral '}' -> channel(REFERENCES_CHANNEL) ;

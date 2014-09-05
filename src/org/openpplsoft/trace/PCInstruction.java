@@ -7,8 +7,16 @@
 
 package org.openpplsoft.trace;
 
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -17,6 +25,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * instruction.
  */
 public class PCInstruction implements IEmission {
+
+  private static Logger log =
+      LogManager.getLogger(PCInstruction.class.getName());
 
   private String instruction;
 
@@ -32,6 +43,17 @@ public class PCInstruction implements IEmission {
    */
   public PCInstruction(final String i) {
     this.instruction = i;
+
+    // Although the interpreter will never emit an instruction emission
+    // containing a comment, the tracefile includes comments that appear
+    // on the same line as PC instructions. Therefore, if there is a trailing
+    // comment on this instruction, it should be removed to ensure that
+    // tracefile verification doesn't fail for otherwise equivalent emissions.
+    Pattern commPattern = Pattern.compile("\\s+/\\*(.+?)\\*/\\s*$");
+    Matcher commMatcher = commPattern.matcher(this.instruction);
+    if (commMatcher.find()) {
+      this.instruction = commMatcher.replaceAll("");
+    }
   }
 
   /**

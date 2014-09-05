@@ -259,7 +259,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       /*====================================================*/
 
       // Don't emit an End-If or End-For after emitting a Break.
-      if((i.startsWith("End-If") || i.startsWith("End-For"))
+      if(i.startsWith("End-If")
           && prev.getInstruction().startsWith("Break")) {
         this.pendingInstrEmissions.removeFirst();
         this.inspectedInstrEmissions.addLast(instr);

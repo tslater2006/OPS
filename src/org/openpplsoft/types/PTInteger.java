@@ -8,6 +8,8 @@
 package org.openpplsoft.types;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import java.util.EnumSet;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -90,8 +92,23 @@ public final class PTInteger extends PTNumberType<Integer> {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
-    return Environment.getFromLiteralPool(
-      new BigDecimal(this.read()).divide(new BigDecimal(((PTInteger) op).read())));
+
+    /*
+     * I am passing 32 as the scale to the divide method because the PeopleTools
+     * documentation (see link above in Javadoc for this method) says that the
+     * Number data type allows for a max of 32 digits to the right of the decimal.
+     * I am passing HALF_EVEN as the rounding mode b/c that's what Java uses for
+     * decimal and float arithmetic. These arguments are required, otherwise an
+     * ArithmeticException will be thrown the first time a division occurs that
+     * does not result in a quotient with a terminating expansion.
+     */
+    BigDecimal quotient =
+        new BigDecimal(this.read()).divide(
+            new BigDecimal(((PTInteger) op).read()), 32, RoundingMode.HALF_EVEN);
+    log.debug("Divided {} by {} to get {}.", this.read(), ((PTInteger) op).read(),
+        quotient);
+
+    return Environment.getFromLiteralPool(quotient);
   }
 
   public boolean equals(Object obj) {

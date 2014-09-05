@@ -522,6 +522,49 @@ public class GlobalFnLibrary {
         Environment.getFromLiteralPool(htmlStr));
   }
 
+  public static void PT_Proper() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg, "
+          + "of type PTString to Proper.");
+    }
+
+    String str = ((PTString) args.get(0)).read();
+
+    // If the str is less than 2 chars long, return it's uppercased form.
+    if (str.length() < 2) {
+      Environment.pushToCallStack(
+          Environment.getFromLiteralPool(str.toUpperCase()));
+    }
+
+    /*
+     * Otherwise, we know str is at least two chars long, so
+     * uppercase the first character in the string and lowercase
+     * the rest; regex will be used to uppercase those chars
+     * that follow a whitespace character (NOTE: PT documentation says
+     * "non-letter" but in testing, this is most definitely not the case,
+     * only chars following whitespace are upper-cased).
+     */
+    str = "" + Character.toUpperCase(str.charAt(0))
+          + str.substring(1).toLowerCase();
+
+    final Pattern bindPattern = Pattern.compile("\\s+[a-zA-Z]");
+    final Matcher bindMatcher = bindPattern.matcher(str);
+
+    final StringBuffer sb = new StringBuffer();
+    while (bindMatcher.find()) {
+      bindMatcher.appendReplacement(sb, bindMatcher.group().toUpperCase());
+    }
+    bindMatcher.appendTail(sb);
+
+    // At this point, string is ready to be returned to caller.
+    Environment.pushToCallStack(
+        Environment.getFromLiteralPool(sb.toString()));
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

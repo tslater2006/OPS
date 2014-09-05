@@ -57,7 +57,16 @@ public class HTML {
 
       if(rs.next())  {
         final Blob blob = rs.getBlob("CONTDATA");
-        this.ptCONTDATA = new String(blob.getBytes(1, (int) blob.length()));
+
+        StringBuilder builder = new StringBuilder();
+        byte[] arr = blob.getBytes(1, (int) blob.length());
+        for (byte b : arr) {
+          if (b > 0) {
+            builder.append(Character.toString((char) b));
+          }
+        }
+
+        this.ptCONTDATA = builder.toString();
 
         if (rs.next()) {
           throw new OPSVMachRuntimeException("Multiple records found for HTML defn; "

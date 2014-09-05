@@ -33,6 +33,7 @@
     <Logger name="org.openpplsoft.runtime.GlobalFnLibrary" level="DEBUG"/>
     <Logger name="org.openpplsoft.types" level="DEBUG"/>
     <Logger name="org.openpplsoft.pt.Menu" level="DEBUG"/>
+    <Logger name="org.openpplsoft.pt.HTML" level="DEBUG"/>
     <Logger name="org.openpplsoft.pt.peoplecode" level="WARN"/>
     <Logger name="org.openpplsoft.pt.peoplecode.PeopleCodeProg" level="all"/>
     <Logger name="org.openpplsoft.pt.peoplecode.AppClassPeopleCodeProg" level="all"/>

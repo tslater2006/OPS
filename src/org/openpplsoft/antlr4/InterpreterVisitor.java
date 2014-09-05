@@ -956,23 +956,29 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     //log.debug("BEGIN visitExprArrayIndex; expr is {}", ctx.expr().getText());
 
     visit(ctx.expr());
-    final PTArray arrayObj = (PTArray) this.getNodeData(ctx.expr());
+    PTType t = this.getNodeData(ctx.expr());
 
-    PTType index = null;
     for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
       visit(argCtx);
-      if (index != null) {
-        throw new OPSVMachRuntimeException("Multiple array indexes "
-            + "is not yet supported.");
+      PTType indexExpr = this.getNodeData(argCtx);
+//      log.debug("About to index into {} with index expr {}.",
+//        t, indexExpr);
+
+      if (!(t instanceof PTArray)) {
+        throw new OPSVMachRuntimeException("Object to index into is "
+            + "not an array; illegal object: " + t);
       }
-      index = this.getNodeData(argCtx);
-      break;
+
+      /*
+       * Because multiple expressions are supported in an array
+       * indexing expression (i.e., &arr[1, 5]), we need to overwrite
+       * the current array beind indexed into b/c there may be another
+       * expression that will index into the array resulting here:
+       */
+      t = ((PTArray) t).getElement(indexExpr);
     }
 
-    //log.debug("About to index into {} with index {}.",
-    //  arrayObj, index);
-
-    this.setNodeData(ctx, arrayObj.getElement(index));
+    this.setNodeData(ctx, t);
     return null;
   }
 

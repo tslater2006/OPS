@@ -495,7 +495,6 @@ public class GlobalFnLibrary {
     }
 
     String htmlStr = html.getHTMLText();
-    log.debug("Initial html str: {}", htmlStr);
 
     // Replace bind placeholders in HTML defn with provided values.
     for(int i = 1; i < args.size(); i++) {
@@ -517,15 +516,10 @@ public class GlobalFnLibrary {
       }
 
       htmlStr = bindMatcher.replaceAll(((PTString) args.get(i)).read());
-      log.debug("Revised html {}", htmlStr);
     }
 
-    log.debug("Final HTML text: {}", htmlStr);
-
-    throw new OPSVMachRuntimeException("Complete GetHTMLText.");
-
-//    Environment.pushToCallStack(
-  //      Environment.getFromLiteralPool(htmlStr));
+    Environment.pushToCallStack(
+        Environment.getFromLiteralPool(htmlStr));
   }
 
   /*==================================*/

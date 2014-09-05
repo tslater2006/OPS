@@ -565,6 +565,21 @@ public class GlobalFnLibrary {
         Environment.getFromLiteralPool(sb.toString()));
   }
 
+  public static void PT_Lower() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg, "
+          + "of type PTString to Lower.");
+    }
+
+    Environment.pushToCallStack(
+        Environment.getFromLiteralPool(
+            ((PTString) args.get(0)).read().toLowerCase()));
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

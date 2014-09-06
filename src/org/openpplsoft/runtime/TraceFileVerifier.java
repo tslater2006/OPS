@@ -39,7 +39,8 @@ public final class TraceFileVerifier {
   private static int currTraceLineNbr;
   private static BufferedReader traceFileReader;
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
-      pcBeginPattern, pcInstrPattern, pcEndPattern;
+      pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
+      pcRelDispProcEndPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -68,6 +69,10 @@ public final class TraceFileVerifier {
         + "\\s+(\\d+)\\s+row\\s+(\\d+)");
     pcEndPattern = Pattern.compile("\\s+<<<\\s(end|end-ext)"
         + "\\s+Nest=(\\d+)\\s+([A-Za-z0-9_]*?)\\s+([A-Za-z\\._0-9]+)");
+    pcRelDispProcStartPattern =
+        Pattern.compile("Starting\\sRelated\\sDisplay\\sprocessing");
+    pcRelDispProcEndPattern =
+        Pattern.compile("Finished\\sRelated\\sDisplay\\sprocessing");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -210,50 +215,64 @@ public final class TraceFileVerifier {
           if (bindValMatcher.find()) {
             psStmt.getBindVals().put(Integer.parseInt(bindValMatcher
                 .group(GROUP1)), bindValMatcher.group(GROUP2));
-            } else {
-              // statement has one or more bind values.
-              return psStmt;
-            }
+          } else {
+            // statement has one or more bind values.
+            return psStmt;
           }
-          // statement has no bind values.
-          return psStmt;
         }
+        // statement has no bind values.
+        return psStmt;
+      }
 
-        final Matcher pcStartMatcher = pcStartPattern.matcher(currTraceLine);
-        if (pcStartMatcher.find()) {
-          // We don't want the next call to check this line again.
-          currTraceLine = getNextTraceLine();
-          return new PCStart(pcStartMatcher.group(GROUP1),
-              pcStartMatcher.group(GROUP2), pcStartMatcher.group(GROUP3),
-              pcStartMatcher.group(GROUP4));
-        }
+      final Matcher pcStartMatcher = pcStartPattern.matcher(currTraceLine);
+      if (pcStartMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new PCStart(pcStartMatcher.group(GROUP1),
+            pcStartMatcher.group(GROUP2), pcStartMatcher.group(GROUP3),
+            pcStartMatcher.group(GROUP4));
+      }
 
-        final Matcher pcBeginMatcher = pcBeginPattern.matcher(currTraceLine);
-        if (pcBeginMatcher.find()) {
-          // We don't want the next call to check this line again.
-          currTraceLine = getNextTraceLine();
-          return new PCBegin(pcBeginMatcher.group(GROUP1),
-              pcBeginMatcher.group(GROUP2), pcBeginMatcher.group(GROUP3));
-        }
+      final Matcher pcBeginMatcher = pcBeginPattern.matcher(currTraceLine);
+      if (pcBeginMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new PCBegin(pcBeginMatcher.group(GROUP1),
+            pcBeginMatcher.group(GROUP2), pcBeginMatcher.group(GROUP3));
+      }
 
-        final Matcher pcInstrMatcher = pcInstrPattern.matcher(currTraceLine);
-        if (pcInstrMatcher.find()) {
-          // We don't want the next call to check this line again.
-          currTraceLine = getNextTraceLine();
-          return new PCInstruction(pcInstrMatcher.group(GROUP1));
-        }
+      final Matcher pcInstrMatcher = pcInstrPattern.matcher(currTraceLine);
+      if (pcInstrMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new PCInstruction(pcInstrMatcher.group(GROUP1));
+      }
 
-        final Matcher pcEndMatcher = pcEndPattern.matcher(currTraceLine);
-        if (pcEndMatcher.find()) {
-          // We don't want the next call to check this line again.
-          currTraceLine = getNextTraceLine();
-          return new PCEnd(pcEndMatcher.group(GROUP1),
-              pcEndMatcher.group(GROUP2), pcEndMatcher.group(GROUP3),
-              pcEndMatcher.group(GROUP4));
+      final Matcher pcEndMatcher = pcEndPattern.matcher(currTraceLine);
+      if (pcEndMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new PCEnd(pcEndMatcher.group(GROUP1),
+            pcEndMatcher.group(GROUP2), pcEndMatcher.group(GROUP3),
+            pcEndMatcher.group(GROUP4));
+      }
+
+      final Matcher pcRelDispProcStartMatcher =
+          pcRelDispProcStartPattern.matcher(currTraceLine);
+      if (pcRelDispProcStartMatcher.find()) {
+
+        // Discard all tracefile emissions until end of rel disp proc is seen.
+        while ((currTraceLine = getNextTraceLine()) != null) {
+          final Matcher pcRelDispProcEndMatcher =
+              pcRelDispProcEndPattern.matcher(currTraceLine);
+          if (pcRelDispProcEndMatcher.find()) {
+            break;
+          }
         }
-      } while ((currTraceLine = getNextTraceLine()) != null);
-      return null;
-    }
+      }
+    } while ((currTraceLine = getNextTraceLine()) != null);
+    return null;
+  }
 
   private static String getNextTraceLine() {
     String line = null;

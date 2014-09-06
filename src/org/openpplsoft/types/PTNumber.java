@@ -190,10 +190,10 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 563, HBC_MULTIPLIER = 281;
+    final int HCB_INITIAL = 563, HCB_MULTIPLIER = 281;
 
-    return new HashCodeBuilder(HBC_INITIAL,
-        HBC_MULTIPLIER).append(this.bigDec).toHashCode();
+    return new HashCodeBuilder(HCB_INITIAL,
+        HCB_MULTIPLIER).append(this.bigDec).toHashCode();
   }
 
   @Override

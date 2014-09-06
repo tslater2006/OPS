@@ -85,9 +85,9 @@ public class PTTypeConstraint<T extends PTType> {
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 3019, HBC_MULTIPLIER = 71;
+    final int HCB_INITIAL = 3019, HCB_MULTIPLIER = 71;
 
-    return new HashCodeBuilder(HBC_INITIAL, HBC_MULTIPLIER)
+    return new HashCodeBuilder(HCB_INITIAL, HCB_MULTIPLIER)
       .append(this.underlyingClass).toHashCode();
   }
 

@@ -65,9 +65,9 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 1009, HBC_MULTIPLIER = 179;
+    final int HCB_INITIAL = 1009, HCB_MULTIPLIER = 179;
 
-    return new HashCodeBuilder(HBC_INITIAL, HBC_MULTIPLIER)
+    return new HashCodeBuilder(HCB_INITIAL, HCB_MULTIPLIER)
       .append(this.underlyingClass).append(this.requiredProgDefn).toHashCode();
   }
 

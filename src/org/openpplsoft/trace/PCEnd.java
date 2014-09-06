@@ -59,10 +59,10 @@ public class PCEnd implements IEmission {
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 433, HBC_MULTIPLIER = 83;
+    final int HCB_INITIAL = 433, HCB_MULTIPLIER = 83;
 
-    final HashCodeBuilder hbc = new HashCodeBuilder(HBC_INITIAL,
-        HBC_MULTIPLIER).append(this.endTag).append(this.nest)
+    final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
+        HCB_MULTIPLIER).append(this.endTag).append(this.nest)
         .append(this.methodName).append(this.progDescriptor);
 
     return hbc.toHashCode();

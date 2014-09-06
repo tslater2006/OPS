@@ -60,10 +60,10 @@ public class PCStart implements IEmission {
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 103, HBC_MULTIPLIER = 277;
+    final int HCB_INITIAL = 103, HCB_MULTIPLIER = 277;
 
-    final HashCodeBuilder hbc = new HashCodeBuilder(HBC_INITIAL,
-        HBC_MULTIPLIER).append(this.startTag).append(this.nest)
+    final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
+        HCB_MULTIPLIER).append(this.startTag).append(this.nest)
         .append(this.methodName).append(this.progDescriptor);
 
     return hbc.toHashCode();

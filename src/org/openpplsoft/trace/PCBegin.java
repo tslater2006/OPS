@@ -55,10 +55,10 @@ public class PCBegin implements IEmission {
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 17, HBC_MULTIPLIER = 37;
+    final int HCB_INITIAL = 17, HCB_MULTIPLIER = 37;
 
-    final HashCodeBuilder hbc = new HashCodeBuilder(HBC_INITIAL,
-        HBC_MULTIPLIER).append(this.progDescriptor)
+    final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
+        HCB_MULTIPLIER).append(this.progDescriptor)
         .append(this.level).append(this.row);
 
     return hbc.toHashCode();

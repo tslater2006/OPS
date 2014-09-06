@@ -113,10 +113,10 @@ public final class PTDate extends PTPrimitiveType<String> {
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 71, HBC_MULTIPLIER = 967;
+    final int HCB_INITIAL = 71, HCB_MULTIPLIER = 967;
 
-    return new HashCodeBuilder(HBC_INITIAL,
-        HBC_MULTIPLIER).append(this.read()).toHashCode();
+    return new HashCodeBuilder(HCB_INITIAL,
+        HCB_MULTIPLIER).append(this.read()).toHashCode();
   }
 
   @Override

@@ -120,8 +120,8 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   @Override
   public int hashCode() {
-    final int HBC_INITIAL = 109, HBC_MULTIPLIER = 67;
-    return new HashCodeBuilder(HBC_INITIAL, HBC_MULTIPLIER)
+    final int HCB_INITIAL = 109, HCB_MULTIPLIER = 67;
+    return new HashCodeBuilder(HCB_INITIAL, HCB_MULTIPLIER)
         .append(this.read()).toHashCode();
   }
 

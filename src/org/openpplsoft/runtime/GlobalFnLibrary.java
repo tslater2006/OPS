@@ -349,22 +349,35 @@ public class GlobalFnLibrary {
           + "reference for defn) they are not supported at this time.");
     }
 
-    if(!(args.get(0) instanceof PTNumber)
-        || !(args.get(1) instanceof PTNumber)
+    if(!(args.get(0) instanceof PTNumber || args.get(0) instanceof PTInteger)
+        || !(args.get(1) instanceof PTNumber || args.get(0) instanceof PTInteger)
         || !(args.get(2) instanceof PTString)) {
       throw new OPSVMachRuntimeException("The arguments provided to "
           + "MsgGetText do not match the expected types.");
     }
 
-    final int msgSetNbr = ((PTNumber) args.get(0)).readAsInteger();
+    final int msgSetNbr;
+    if (args.get(0) instanceof PTNumber) {
+      msgSetNbr = ((PTNumber) args.get(0)).readAsInteger();
+    } else {
+      msgSetNbr = ((PTInteger) args.get(0)).read();
+    }
     final MsgSet msgSet = DefnCache.getMsgSet(msgSetNbr);
 
-    final int msgNbr = ((PTNumber) args.get(1)).readAsInteger();
+    final int msgNbr;
+    if (args.get(0) instanceof PTNumber) {
+      msgNbr = ((PTNumber) args.get(1)).readAsInteger();
+    } else {
+      msgNbr = ((PTInteger) args.get(1)).read();
+    }
     final String msg = msgSet.getMessage(msgNbr);
 
     if (msg == null) {
-      throw new OPSVMachRuntimeException("No msg found in MsgGetText; "
-          + "need to support return of default msg (third arg).");
+      log.debug("MsgGetText found no msg with setnbr={} and msgnbr={}; "
+          + "returning default message provided: {}", msgSetNbr, msgNbr,
+          ((PTString) args.get(2)).read());
+      Environment.pushToCallStack(args.get(2));
+      return;
     }
 
     Environment.pushToCallStack(Environment.getFromLiteralPool(msg));

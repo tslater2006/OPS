@@ -48,10 +48,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private ParseTreeProperty<Callable> nodeCallables;
   private ParseTreeProperty<PTTypeConstraint> nodeTypeConstraints;
   private Stack<EvaluateConstruct> evalConstructStack;
-  private LinkedList<PCInstruction> inspectedInstrEmissions;
-  private LinkedList<PCInstruction> pendingInstrEmissions;
   private AccessLevel blockAccessLvl;
   private PeopleCodeParser.StmtBreakContext lastSeenBreakContext;
+  private InterpreterEmissionsFilter eFilter;
   private boolean hasVarDeclBeenEmitted;
 
   /**
@@ -70,8 +69,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.nodeCallables = new ParseTreeProperty<Callable>();
     this.nodeTypeConstraints = new ParseTreeProperty<PTTypeConstraint>();
     this.evalConstructStack = new Stack<EvaluateConstruct>();
-    this.inspectedInstrEmissions = new LinkedList<PCInstruction>();
-    this.pendingInstrEmissions = new LinkedList<PCInstruction>();
+    this.eFilter = new InterpreterEmissionsFilter(this.tokens);
   }
 
   /**
@@ -163,144 +161,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
     if (this.nodeCallables.get(src) != null) {
       this.nodeCallables.put(dest, this.nodeCallables.get(src));
-    }
-  }
-
-  private String getSemicolonsAfterTokenIdx(final int tokIdx) {
-    int i = tokIdx;
-    final StringBuilder b = new StringBuilder();
-    //log.debug("Looking at {}", this.tokens.get(i).getText());
-    while (this.tokens.get(i).getText().equals(";")) {
-      b.append(";");
-      i++;
-    }
-    return b.toString();
-  }
-
-  private void emitStmt(final Token tok) {
-    final StringBuilder b = new StringBuilder(tok.getText());
-    b.append(this.getSemicolonsAfterTokenIdx(tok.getTokenIndex()+1));
-
-    final PCInstruction instr = new PCInstruction(b.toString());
-    instr.sourceToken = tok;
-    this.pendingInstrEmissions.addLast(instr);
-    this.flushPendingInstrEmissions();
-  }
-
-  private void emitStmt(final ParserRuleContext ctx) {
-    final StringBuffer line = new StringBuffer();
-    final Interval interval = ctx.getSourceInterval();
-
-    int i = interval.a;
-    boolean newlineSeen = false;
-    while (i <= interval.b) {
-      final Token t = this.tokens.get(i);
-      if (t.getChannel() == PeopleCodeLexer.REFERENCES_CHANNEL) {
-        i++;
-        continue;
-      }
-      if (t.getText().contains("\n")) {
-        newlineSeen = true;
-        break;
-      }
-      line.append(t.getText());
-      i++;
-    }
-
-    // Only look for semicolons if a newline wasn't seen.
-    if (!newlineSeen) {
-      line.append(this.getSemicolonsAfterTokenIdx(i));
-    }
-
-    final PCInstruction instr = new PCInstruction(line.toString());
-    instr.sourceContext = ctx;
-    this.pendingInstrEmissions.addLast(instr);
-    this.flushPendingInstrEmissions();
-  }
-
-  private void repeatLastInstrEmission() {
-    if (this.pendingInstrEmissions.size() > 0) {
-      this.pendingInstrEmissions.addLast(
-          this.pendingInstrEmissions.getLast());
-    } else if (this.inspectedInstrEmissions.size() == 0) {
-      throw new OPSVMachRuntimeException("Unable to repeat last instruction "
-          + "emission, no emissions have been submitted yet.");
-    } else {
-      this.pendingInstrEmissions.addLast(
-          this.inspectedInstrEmissions.getLast());
-    }
-    this.flushPendingInstrEmissions();
-  }
-
-  private void flushPendingInstrEmissions() {
-
-    // Start with the first pending instruction
-    // emission and work to end of list; we cannot use an Iterator
-    // here because removal of the current element is not possible when
-    // lookahead is required
-    while (this.pendingInstrEmissions.size() > 0) {
-      final PCInstruction instr = this.pendingInstrEmissions.getFirst();
-      final String i = instr.getInstruction();
-
-      // If no instructions have been inspected yet,
-      // emit this one without additional checking.
-      if (this.inspectedInstrEmissions.size() == 0) {
-        this.pendingInstrEmissions.removeFirst();
-        TraceFileVerifier.submitEnforcedEmission(instr);
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      // Guaranteed to be non-null given immediately preceding check.
-      final PCInstruction prev = this.inspectedInstrEmissions.getLast();
-
-      /*====================================================*/
-      /* BEGIN checks involving previous emission           */
-      /*====================================================*/
-
-      // Don't emit an End-If after emitting a Break.
-      if(i.startsWith("End-If")
-          && prev.getInstruction().startsWith("Break")) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      /*
-       * The tracefile frequently excludes end-of-control-construct
-       * instructions that appear in quick succession; usually only the first
-       * and last such statments are listed in the tracefile. The conditional
-       * below implements that logic.
-       */
-      if((i.startsWith("End-If") || i.startsWith("End-Evaluate"))
-          && (prev.getInstruction().startsWith("For")
-              || prev.getInstruction().startsWith("End-If")
-              || prev.getInstruction().startsWith("Else")
-              || prev.getInstruction().startsWith("If")
-              || prev.getInstruction().startsWith("End-Evaluate"))) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      // Don't emit this instruction emission if the previously
-      // inspected emission (*regardless of whether it was actually
-      // submitted to the trace file verifier or not*) lacked a
-      // trailing semicolon and was an assignment stmt.
-      if ((prev.sourceContext instanceof PeopleCodeParser.StmtAssignContext)
-          && !prev.getInstruction().endsWith(";")) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      /*
-       * At this point, the pending instruction emission is cleared
-       * for submission to the trace file verifier.
-       */
-      this.pendingInstrEmissions.removeFirst();
-      TraceFileVerifier.submitEnforcedEmission(instr);
-      this.inspectedInstrEmissions.addLast(instr);
     }
   }
 
@@ -493,7 +353,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @return null
    */
   public Void visitIfStmt(final PeopleCodeParser.IfStmtContext ctx) {
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
 
     // Get value of conditional expression.
     visit(ctx.expr());
@@ -505,14 +365,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     if (exprResult) {
       visit(ctx.stmtList(0));
       if (ctx.stmtList(1) != null) {
-        this.emitStmt(ctx.elsetok);
+        this.eFilter.emit(ctx.elsetok);
       } else {
-        this.emitStmt(ctx.endif);
+        this.eFilter.emit(ctx.endif);
       }
     } else {
       if (ctx.stmtList(1) != null) {
         visit(ctx.stmtList(1));
-        this.emitStmt(ctx.endif);
+        this.eFilter.emit(ctx.endif);
       }
     }
 
@@ -547,21 +407,21 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final PTNumberType toExpr =
         (PTNumberType) this.getNodeData(ctx.expr(1));
 
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
     while (varId.isLessThanOrEqual(toExpr) == Environment.TRUE) {
 
       try {
         visit(ctx.stmtList());
       } catch (OPSBreakSignalException opsbse) {
-        this.emitStmt(this.lastSeenBreakContext);
+        this.eFilter.emit(this.lastSeenBreakContext);
         break;
       }
 
       // Increment and set new value of incrementing expression.
       varId.copyValueFrom(varId.add(Environment.getFromLiteralPool(1)));
 
-      this.emitStmt(ctx.endfor);
-      this.emitStmt(ctx);
+      this.eFilter.emit(ctx.endfor);
+      this.eFilter.emit(ctx);
     }
 
     return null;
@@ -589,7 +449,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitStmtAssign(
       final PeopleCodeParser.StmtAssignContext ctx) {
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
     visit(ctx.expr(1));
     final PTType src = this.getNodeData(ctx.expr(1));
     visit(ctx.expr(0));
@@ -645,7 +505,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @return null
    */
   public Void visitStmtExpr(final PeopleCodeParser.StmtExprContext ctx) {
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
     visit(ctx.expr());
     return null;
   }
@@ -657,7 +517,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @return null
    */
   public Void visitStmtReturn(final PeopleCodeParser.StmtReturnContext ctx) {
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
     if (ctx.expr() != null) {
       visit(ctx.expr());
       final PTType retVal = this.getNodeData(ctx.expr());
@@ -805,7 +665,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else {
       this.supervisor.runImmediately(call.eCtx);
       if(!(call.eCtx instanceof FunctionExecContext)) {
-        this.repeatLastInstrEmission();
+        this.eFilter.repeatLastEmission();
       }
     }
 
@@ -943,7 +803,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             + "one value.");
       }
       this.setNodeData(ctx, args.get(0));
-      this.repeatLastInstrEmission();
+      this.eFilter.repeatLastEmission();
     }
 
     return null;
@@ -1136,7 +996,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitMethodImpl(
       final PeopleCodeParser.MethodImplContext ctx) {
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
 
     final Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
     final List<FormalParam> formalParams =
@@ -1165,7 +1025,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.stmtList());
     this.eCtx.popScope();
 
-    this.emitStmt(ctx.endmethod);
+    this.eFilter.emit(ctx.endmethod);
     return null;
   }
 
@@ -1177,7 +1037,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitGetImpl(
       final PeopleCodeParser.GetImplContext ctx) {
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
 
     final Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
     this.eCtx.pushScope(localScope);
@@ -1423,12 +1283,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
               && varsToDeclare.size() == 1
               && !didInitializeAnIdentifier)
           || didInitializeAnIdentifier) {
-        this.emitStmt(ctx);
+        this.eFilter.emit(ctx);
         this.hasVarDeclBeenEmitted = true;
       }
     } else if((this.eCtx instanceof FunctionExecContext) &&
         this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
-      this.emitStmt(ctx);
+      this.eFilter.emit(ctx);
     }
     return null;
   }
@@ -1510,7 +1370,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitEvaluateStmt(
       final PeopleCodeParser.EvaluateStmtContext ctx) {
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
 
     visit(ctx.expr());
 
@@ -1534,7 +1394,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         // If this is the last When branch, the Break is self-evident
         // and should not be emitted.
         if(i < (branches.size() - 1)) {
-          this.emitStmt(this.lastSeenBreakContext);
+          this.eFilter.emit(this.lastSeenBreakContext);
         }
 
         evalConstruct.breakSeen = true;
@@ -1572,7 +1432,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     // Always emit the first When branch of an Evaluate statement
     if (!evalConstruct.hasBranchBeenEmitted) {
-      this.emitStmt(ctx);
+      this.eFilter.emit(ctx);
       evalConstruct.hasBranchBeenEmitted = true;
 
     // If this isn't the first When branch, emit it only if a true
@@ -1580,7 +1440,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     // seen did not have an empty statement list.
     } else if(!evalConstruct.trueBranchExprSeen &&
         !evalConstruct.wasLastWhenBranchStmtListEmpty) {
-      this.emitStmt(ctx);
+      this.eFilter.emit(ctx);
     }
 
     evalConstruct.wasLastWhenBranchStmtListEmpty =
@@ -1611,7 +1471,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.WhenOtherBranchContext ctx) {
 
     final EvaluateConstruct evalConstruct = this.evalConstructStack.peek();
-    this.emitStmt(ctx);
+    this.eFilter.emit(ctx);
 
     /*
      * Execution cannot fall through to When-Other; if no break was seen
@@ -1622,7 +1482,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       visit(ctx.stmtList());
 
       // Only emit End-Evaluate if no true branch has yet been seen.
-      this.emitStmt(evalConstruct.endEvaluateToken);
+      this.eFilter.emit(evalConstruct.endEvaluateToken);
     }
 
     return null;
@@ -1709,7 +1569,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             + "expected call frame boundary, but found data instead.");
       }
 
-      this.repeatLastInstrEmission();
+      this.eFilter.repeatLastEmission();
     }
 
     return null;
@@ -1734,7 +1594,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         if (((FunctionExecContext) this.eCtx).funcName.equals(
             ctx.funcSignature().GENERIC_ID().getText())) {
 
-          this.emitStmt(ctx.funcSignature());
+          this.eFilter.emit(ctx.funcSignature());
           visit(ctx.funcSignature());
 
           final Scope localScope = new Scope(Scope.Lvl.FUNCTION_LOCAL);
@@ -1764,7 +1624,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           visit(ctx.stmtList());
           this.eCtx.popScope();
 
-          this.emitStmt(ctx.endfunction);
+          this.eFilter.emit(ctx.endfunction);
 
         } else {
           throw new OPSFuncImplSignalException(ctx.

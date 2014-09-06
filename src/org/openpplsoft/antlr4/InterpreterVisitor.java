@@ -258,7 +258,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       /* BEGIN checks involving previous emission           */
       /*====================================================*/
 
-      // Don't emit an End-If or End-For after emitting a Break.
+      // Don't emit an End-If after emitting a Break.
       if(i.startsWith("End-If")
           && prev.getInstruction().startsWith("Break")) {
         this.pendingInstrEmissions.removeFirst();
@@ -266,13 +266,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         continue;
       }
 
-      // Don't emit an End-If statement after exiting a For loop
-      // or If construct or if Else was previously seen.
-      if(i.startsWith("End-If")
+      /*
+       * The tracefile frequently excludes end-of-control-construct
+       * instructions that appear in quick succession; usually only the first
+       * and last such statments are listed in the tracefile. The conditional
+       * below implements that logic.
+       */
+      if((i.startsWith("End-If") || i.startsWith("End-Evaluate"))
           && (prev.getInstruction().startsWith("For")
               || prev.getInstruction().startsWith("End-If")
               || prev.getInstruction().startsWith("Else")
-              || prev.getInstruction().startsWith("If"))) {
+              || prev.getInstruction().startsWith("If")
+              || prev.getInstruction().startsWith("End-Evaluate"))) {
         this.pendingInstrEmissions.removeFirst();
         this.inspectedInstrEmissions.addLast(instr);
         continue;

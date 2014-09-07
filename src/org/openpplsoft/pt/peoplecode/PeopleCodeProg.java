@@ -280,12 +280,6 @@ public abstract class PeopleCodeProg {
     return this.funcTable.get(funcName.toLowerCase());
   }
 
-  public boolean hasFunctionNamed(final String funcName) {
-    // Remember: keys in table are lower-cased b/c PS does not distinguish
-    // b/w function names of differing cases.
-    return this.funcTable.containsKey(funcName.toLowerCase());
-  }
-
   public void registerFunctionImpl(final String funcName,
       final PeopleCodeParser.FuncImplContext parseTreeNode) {
 
@@ -301,5 +295,10 @@ public abstract class PeopleCodeProg {
     // b/w function names of differing cases.
     return this.funcImplNodes.get(funcName.toLowerCase());
   }
-}
 
+  public boolean hasFunctionImplNamed(final String funcName) {
+    // Remember: keys in table are lower-cased b/c PS does not distinguish
+    // b/w function names of differing cases.
+    return this.funcImplNodes.containsKey(funcName.toLowerCase());
+  }
+}

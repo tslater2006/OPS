@@ -1099,7 +1099,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.setNodeData(ctx, ComponentBuffer.ptGetLevel0()
             .getRow(1).getRecord(ctx.GENERIC_ID().getText()));
 
-      } else if (this.eCtx.prog.hasFunctionNamed(
+      } else if (this.eCtx.prog.hasFunctionImplNamed(
           ctx.GENERIC_ID().getText())) {
 
         log.debug("Resolved GENERIC_ID: {} to an internal function "

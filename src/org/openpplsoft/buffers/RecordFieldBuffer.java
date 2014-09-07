@@ -52,6 +52,10 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     return this.fldName;
   }
 
+  public Record getRecDefn() {
+    return this.recDefn;
+  }
+
   /**
    * Expands the entire parent record into the parent
    * record buffer based on PeopleTools logic.

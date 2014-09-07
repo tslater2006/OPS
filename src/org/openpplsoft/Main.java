@@ -88,6 +88,7 @@ public final class Main {
 
       ComponentBuffer.firstPassFill();
       c.runPreBuild();
+      c.runFieldDefaultPrograms();
 
       TraceFileVerifier.logVerificationSummary(false);
 

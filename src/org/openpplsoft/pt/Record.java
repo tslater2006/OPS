@@ -20,11 +20,11 @@ public class Record {
   public String RELLANGRECNAME;
   public int RECTYPE;
 
-  public HashMap<String, RecordField> fieldTable;
+  public Map<String, RecordField> fieldTable;
   public TreeMap<Integer, Object> fldAndSubrecordTable;
-  public ArrayList<String> subRecordNames;
-  public HashMap<String, ArrayList<PeopleCodeProg>> recordProgsByFieldTable;
-  public ArrayList<PeopleCodeProg> orderedRecordProgs;
+  public List<String> subRecordNames;
+  public Map<String, List<PeopleCodeProg>> recordProgsByFieldTable;
+  public List<PeopleCodeProg> orderedRecordProgs;
 
   private static Logger log = LogManager.getLogger(Record.class.getName());
 
@@ -127,7 +127,7 @@ public class Record {
       ResultSet rs = null;
 
       try {
-        this.recordProgsByFieldTable = new HashMap<String, ArrayList<PeopleCodeProg>>();
+        this.recordProgsByFieldTable = new HashMap<String, List<PeopleCodeProg>>();
         this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
 
         rs = ostmt.executeQuery();
@@ -137,7 +137,7 @@ public class Record {
               rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
           prog = DefnCache.getProgram(prog);
 
-          ArrayList<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
+          List<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
               .get(rs.getString("OBJECTVALUE2"));
           if(fieldProgList == null) {
             fieldProgList = new ArrayList<PeopleCodeProg>();
@@ -258,8 +258,8 @@ public class Record {
     return false;
   }
 
-  public ArrayList<RecordField> getExpandedFieldList() {
-    ArrayList<RecordField> expandedFieldList = new ArrayList<RecordField>();
+  public List<RecordField> getExpandedFieldList() {
+    List<RecordField> expandedFieldList = new ArrayList<RecordField>();
     for(Map.Entry<Integer, Object> cursor : this.fldAndSubrecordTable.entrySet()) {
       Object obj = cursor.getValue();
       if(obj instanceof RecordField) {
@@ -272,7 +272,7 @@ public class Record {
     return expandedFieldList;
   }
 
-  public ArrayList<PeopleCodeProg> getRecordProgsForField(String FLDNAME) {
+  public List<PeopleCodeProg> getRecordProgsForField(String FLDNAME) {
     if(this.recordProgsByFieldTable == null) { return null; }
     return this.recordProgsByFieldTable.get(FLDNAME);
   }

@@ -237,6 +237,36 @@ public class Component {
   }
 
   /**
+   * Iterates through each field in the component buffer and runs its
+   * FieldDefault program, if one has been written.
+   */
+  public void runFieldDefaultPrograms() {
+    IStreamableBuffer buf;
+
+    ComponentBuffer.resetCursors();
+    while ((buf = ComponentBuffer.next()) != null) {
+      if (buf instanceof RecordFieldBuffer) {
+        Record recDefn = ((RecordFieldBuffer) buf).getRecDefn();
+        List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
+            ((RecordFieldBuffer) buf).getFldName());
+
+        if (recProgList == null) {
+          continue;
+        }
+
+        for(PeopleCodeProg prog : recProgList) {
+          if (prog.event.equals("FieldDefault")) {
+            final PeopleCodeProg p = DefnCache.getProgram(prog);
+            final ExecContext eCtx = new ProgramExecContext(p);
+            final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+            interpreter.run();
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * If the search record contains at least one key, fill the
    * search record with data.
    */

@@ -35,8 +35,8 @@ public abstract class PeopleCodeProg {
 
   public List<PeopleCodeProg> referencedProgs;
   public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
-  public Map<String, ParseTree> funcImplNodes;
-  public Map<String, Function> funcTable;
+  private Map<String, FuncImpl> funcImplNodes;
+  private Map<String, Function> funcTable;
   public Map<String, Boolean> importedRootAppPackages;
   public Map<Integer, Reference> progRefsTable;
   public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
@@ -46,6 +46,15 @@ public abstract class PeopleCodeProg {
   private boolean hasInitialized = false;
   private boolean haveLoadedDefnsAndPrograms = false;
   private boolean haveLexedAndParsed = false;
+
+  public class FuncImpl {
+    public String funcName;
+    public PeopleCodeParser.FuncImplContext parseTreeNode;
+    public FuncImpl(String fName, PeopleCodeParser.FuncImplContext node) {
+      this.funcName = fName;
+      this.parseTreeNode = node;
+    }
+  }
 
   public class Function {
     public String name;
@@ -192,7 +201,7 @@ public abstract class PeopleCodeProg {
 
     this.referencedProgs = new ArrayList<PeopleCodeProg>();
     this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
-    this.funcImplNodes = new HashMap<String, ParseTree>();
+    this.funcImplNodes = new HashMap<String, FuncImpl>();
     this.funcTable = new HashMap<String, Function>();
     this.importedRootAppPackages = new HashMap<String, Boolean>();
     this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
@@ -258,7 +267,39 @@ public abstract class PeopleCodeProg {
       final List<FormalParam> fp, final PTTypeConstraint rTypeConstraint) {
     log.debug("Adding function to table: {}, {}, {}",
         name, fp, rTypeConstraint);
-    this.funcTable.put(name, new Function(name, fp, rTypeConstraint));
+
+    // IT IS IMPORTANT to use the lowercase version of the function name
+    // as the key here; PT allows the caller of a function to use a different
+    // combination of letter cases than that defined in the function's signature.
+    this.funcTable.put(name.toLowerCase(), new Function(name, fp, rTypeConstraint));
+  }
+
+  public Function getFunction(final String funcName) {
+    // Remember: keys in table are lower-cased b/c PS does not distinguish
+    // b/w function names of differing cases.
+    return this.funcTable.get(funcName.toLowerCase());
+  }
+
+  public boolean hasFunctionNamed(final String funcName) {
+    // Remember: keys in table are lower-cased b/c PS does not distinguish
+    // b/w function names of differing cases.
+    return this.funcTable.containsKey(funcName.toLowerCase());
+  }
+
+  public void registerFunctionImpl(final String funcName,
+      final PeopleCodeParser.FuncImplContext parseTreeNode) {
+
+    // IT IS IMPORTANT to use the lowercase version of the function name
+    // as the key here; PT allows the caller of a function to use a different
+    // combination of letter cases than that defined in the function's signature.
+    this.funcImplNodes.put(funcName.toLowerCase(),
+        new FuncImpl(funcName, parseTreeNode));
+  }
+
+  public FuncImpl getFunctionImpl(final String funcName) {
+    // Remember: keys in table are lower-cased b/c PS does not distinguish
+    // b/w function names of differing cases.
+    return this.funcImplNodes.get(funcName.toLowerCase());
   }
 }
 

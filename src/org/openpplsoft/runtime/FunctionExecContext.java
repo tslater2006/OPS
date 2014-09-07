@@ -22,8 +22,14 @@ public class FunctionExecContext extends ExecContext {
 
   public FunctionExecContext(PeopleCodeProg prog, String fnName) {
     super(prog);
-    this.funcName = fnName;
 
-    this.funcNodeToRun = prog.funcImplNodes.get(fnName);
+    // REMEMBER: We deliberately used the function name in the
+    // FuncImpl object rather than the one passed as argument here,
+    // because PS doesn't distinguish b/w upper and lower case function
+    // names, but the tracefile uses the one associated with the actual
+    // function implementation, *not* the one used by the caller.
+    PeopleCodeProg.FuncImpl fImpl = prog.getFunctionImpl(fnName);
+    this.funcName = fImpl.funcName;
+    this.funcNodeToRun = fImpl.parseTreeNode;
   }
 }

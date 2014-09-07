@@ -98,9 +98,9 @@ public class InterpretSupervisor {
 
     if(!isThisProgSameAsInterruptedProg) {
       TraceFileVerifier.submitEnforcedEmission(new PCStart(
-        (execContextStack.size() == 1 ? "start" : "start-ext"),
-        String.format("%02d", execContextStack.size() - 1),
-        methodOrFuncName, descriptor));
+          (execContextStack.size() == 1 ? "start" : "start-ext"),
+              String.format("%02d", execContextStack.size() - 1),
+                  methodOrFuncName, descriptor));
       TraceFileVerifier.submitEnforcedEmission(new PCBegin(descriptor, "0", "0"));
     }
 

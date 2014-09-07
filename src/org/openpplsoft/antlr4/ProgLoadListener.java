@@ -241,8 +241,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
         + "program {}", ctx.funcSignature().GENERIC_ID().getText(),
         this.srcProg.getDescriptor());
 
-    this.srcProg.funcImplNodes.put(ctx.funcSignature()
-        .GENERIC_ID().getText(), ctx);
+    this.srcProg.registerFunctionImpl(
+        ctx.funcSignature().GENERIC_ID().getText(), ctx);
   }
 
   /**

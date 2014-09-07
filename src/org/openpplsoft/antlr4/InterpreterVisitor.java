@@ -1099,7 +1099,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.setNodeData(ctx, ComponentBuffer.ptGetLevel0()
             .getRow(1).getRecord(ctx.GENERIC_ID().getText()));
 
-      } else if (this.eCtx.prog.funcImplNodes.containsKey(
+      } else if (this.eCtx.prog.hasFunctionNamed(
           ctx.GENERIC_ID().getText())) {
 
         log.debug("Resolved GENERIC_ID: {} to an internal function "
@@ -1599,8 +1599,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
           final Scope localScope = new Scope(Scope.Lvl.FUNCTION_LOCAL);
           final List<FormalParam> formalParams =
-              this.eCtx.prog.funcTable
-                .get(ctx.funcSignature().GENERIC_ID().getText()).formalParams;
+              this.eCtx.prog.getFunction(
+                ctx.funcSignature().GENERIC_ID().getText()).formalParams;
 
           /*
            * First, declare each formal parameter as a var in the local

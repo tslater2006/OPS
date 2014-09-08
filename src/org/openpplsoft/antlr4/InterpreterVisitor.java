@@ -461,7 +461,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final PTType dst = this.getNodeData(ctx.expr(0));
 
     /*
-     * primitive = primitive : write from rhs to lhs, ignore identifier
+     * primitive = primitive : write from rhs to lhs
      * primitive = object : attempt cast from src type to destination type
      * object = primitive : attempt cast from destination type to src type
      * object = object : get var identifier, make it point to rhs object
@@ -1024,23 +1024,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         ((AppClassPeopleCodeProg) this.eCtx.prog).methodTable.
             get(ctx.GENERIC_ID().getText()).formalParams;
 
-    /*
-     * First, declare each formal parameter as a var in the local
-     * scope, using the associated type constraint.
-     */
-    for (FormalParam fp : formalParams) {
-      localScope.declareVar(fp.id, fp.typeConstraint);
-    }
-
-    /*
-     * Then, assign each arg passed to the method to each of the
-     * newly declared formal parameter variables (type checking
-     * will be performed by invoked method).
-     */
-    final List<PTType> args = Environment.getArgsFromCallStack();
-    for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
-      localScope.assignVar(formalParams.get(i).id, args.get(i));
-    }
+    // This logic is externalized from this method b/c visitMethodImpl
+    // shares the same logic.
+    this.bindArgsToFormalParams(localScope, formalParams);
 
     this.eCtx.pushScope(localScope);
     visit(ctx.stmtList());
@@ -1644,23 +1630,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
               this.eCtx.prog.getFunction(
                 ctx.funcSignature().GENERIC_ID().getText()).formalParams;
 
-          /*
-           * First, declare each formal parameter as a var in the local
-           * scope, using the associated type constraint.
-           */
-          for (FormalParam fp : formalParams) {
-            localScope.declareVar(fp.id, fp.typeConstraint);
-          }
-
-          /*
-           * Then, assign each arg passed to the method to each of the
-           * newly declared formal parameter variables (type checking
-           * will be performed by invoked method).
-           */
-          final List<PTType> args = Environment.getArgsFromCallStack();
-          for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
-            localScope.assignVar(formalParams.get(i).id, args.get(i));
-          }
+          // This logic is externalized from this method b/c visitMethodImpl
+          // shares the same logic.
+          this.bindArgsToFormalParams(localScope, formalParams);
 
           this.eCtx.pushScope(localScope);
           visit(ctx.stmtList());
@@ -1713,6 +1685,41 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       default:
         throw new OPSVMachRuntimeException("Encountered unexpected variable "
             + " scope: " + scope);
+    }
+  }
+
+  private void bindArgsToFormalParams(final Scope localScope,
+      final List<FormalParam> formalParams) {
+
+    /*
+     * First, declare each formal parameter as a var in the local
+     * scope, using the associated type constraint.
+     */
+    for (FormalParam fp : formalParams) {
+      localScope.declareVar(fp.id, fp.typeConstraint);
+    }
+
+    /*
+     * Then, assign each arg passed to the method to each of the
+     * newly declared formal parameter variables (type checking
+     * will be performed by invoked method).
+     */
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
+      PTType arg = args.get(i);
+
+      /*
+       * If a read-only primitive is on the call stack, its value must
+       * be copied to a newly allocated primitive that isn't read-only, otherwise
+       * the VM will halt if the callee attempts to write to it. Note that objects
+       * are always passed by reference, so the read-only status of any objects
+       * passed to a method/function should be preserved.
+       */
+      if (arg instanceof PTPrimitiveType && arg.isReadOnly()) {
+        arg = arg.getOriginatingTypeConstraint().alloc();
+        ((PTPrimitiveType) arg).copyValueFrom((PTPrimitiveType) args.get(i));
+      }
+      localScope.assignVar(formalParams.get(i).id, arg);
     }
   }
 

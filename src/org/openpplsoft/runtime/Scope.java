@@ -10,6 +10,9 @@ package org.openpplsoft.runtime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.openpplsoft.types.*;
 
 /**
@@ -17,6 +20,8 @@ import org.openpplsoft.types.*;
  * scope level within a PeopleCode program.
  */
 public class Scope {
+
+  private static Logger log = LogManager.getLogger(Scope.class.getName());
 
   /**
    * Enumerates the various scope levels available
@@ -93,6 +98,8 @@ public class Scope {
         throw new OPSVMachRuntimeException("Type constraint provided at var "
             + "declaration time is neither object nor primitive.");
     }
+    log.debug("Declared {} with assignedValueRef = {}", id,
+        newEntry.assignedValueRef);
     this.symbolTable.put(id, newEntry);
   }
 
@@ -100,27 +107,42 @@ public class Scope {
    * Assigns a value to the variable attached to the provided identifier.
    * If the variable has not been declared, an RTE will be thrown.
    * @param id the identifier to assign to
-   * @param newRef the reference to assign
+   * @param newVal the reference to assign
    */
-  public void assignVar(final String id, final PTType newRef) {
+  public void assignVar(final String id, final PTType newVal) {
     SymbolTableEntry symEntry = this.symbolTable.get(id);
 
-    if (newRef == null) {
-      throw new OPSVMachRuntimeException("newRef is null (Java null) in "
+    if (newVal == null) {
+      throw new OPSVMachRuntimeException("newVal is null (Java null) in "
           + "assignVar; this is illegal and indicative of an assignment "
           + "problem somewhere.");
     }
 
-    if (symEntry.typeConstraint.typeCheck(newRef)) {
-      symEntry.assignedValueRef = newRef;
-    } else if (newRef instanceof PTField
-        && symEntry.typeConstraint.typeCheck(((PTField) newRef).getValue())) {
-      symEntry.assignedValueRef = ((PTField) newRef).getValue();
+    if (symEntry.typeConstraint.typeCheck(newVal)) {
+
+      /*
+       * Primitive identifiers are always passed/stored by value, whereas
+       * object identifiers are assigned references to new values.
+       */
+      if(symEntry.typeConstraint.isUnderlyingClassPrimitive()) {
+        ((PTPrimitiveType) symEntry.assignedValueRef).copyValueFrom(
+            (PTPrimitiveType) newVal);
+      } else if(symEntry.typeConstraint.isUnderlyingClassObject()) {
+        symEntry.assignedValueRef = newVal;
+      } else {
+          throw new OPSVMachRuntimeException("Symbol table entry type constraint "
+              + "for identifier to assign to is neither object nor primitive.");
+      }
+
+    } else if (newVal instanceof PTField
+        && symEntry.typeConstraint.typeCheck(((PTField) newVal).getValue())) {
+      // Unwrap the enclosed value and assign that value to the provided identifier.
+      this.assignVar(id, ((PTField) newVal).getValue());
     } else {
       throw new OPSVMachRuntimeException("Identifier assignment failed type "
           + "check and/or PTField unboxing; typeConstraint ("
-          + symEntry.typeConstraint + ") and newRef ("
-          + newRef + ") are not type compatible.");
+          + symEntry.typeConstraint + ") and newVal ("
+          + newVal + ") are not type compatible.");
     }
   }
 

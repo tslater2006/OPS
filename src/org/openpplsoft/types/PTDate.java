@@ -55,7 +55,10 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
-    throw new OPSDataTypeException("copyValueFrom is not yet supported.");
+    if (!(src instanceof PTDate)) {
+      throw new OPSDataTypeException("Expected src to be PTDate.");
+    }
+    this.write(((PTDate) src).read());
   }
 
   public void setDefault() {

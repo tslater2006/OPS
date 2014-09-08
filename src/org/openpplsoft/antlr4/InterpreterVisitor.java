@@ -1707,18 +1707,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final List<PTType> args = Environment.getArgsFromCallStack();
     for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
       PTType arg = args.get(i);
-
-      /*
-       * If a read-only primitive is on the call stack, its value must
-       * be copied to a newly allocated primitive that isn't read-only, otherwise
-       * the VM will halt if the callee attempts to write to it. Note that objects
-       * are always passed by reference, so the read-only status of any objects
-       * passed to a method/function should be preserved.
-       */
-      if (arg instanceof PTPrimitiveType && arg.isReadOnly()) {
-        arg = arg.getOriginatingTypeConstraint().alloc();
-        ((PTPrimitiveType) arg).copyValueFrom((PTPrimitiveType) args.get(i));
-      }
       localScope.assignVar(formalParams.get(i).id, arg);
     }
   }

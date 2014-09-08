@@ -98,9 +98,23 @@ public class Environment {
     }
   }
 
-  public static void pushToCallStack(PTType p) {
-    log.debug("Push\tCallStack\t" + (p == null ? "null" : p));
-    callStack.push(p);
+  /**
+   * Pushes the provided PT data value to the call stack. If the
+   * value is of primitive type, a copy of it will be placed on the call stack,
+   * since PT only supports pass-by-reference of objects; primitives are passed
+   * by value.
+   */
+  public static void pushToCallStack(final PTType p) {
+    if (p instanceof PTPrimitiveType) {
+      PTType copiedPrimitive = p.getOriginatingTypeConstraint().alloc();
+      ((PTPrimitiveType) copiedPrimitive).copyValueFrom((PTPrimitiveType) p);
+      log.debug("Push\tCallStack\t"
+          + (copiedPrimitive == null ? "null" : copiedPrimitive));
+      callStack.push(copiedPrimitive);
+    } else {
+      log.debug("Push\tCallStack\t" + (p == null ? "null" : p));
+      callStack.push(p);
+    }
   }
 
   public static PTType popFromCallStack() {

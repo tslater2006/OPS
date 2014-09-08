@@ -481,19 +481,35 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       ((PTPrimitiveType) dst).copyValueFrom(unboxedSrc);
 
     } else if (dst instanceof PTObjectType && src instanceof PTPrimitiveType) {
-      final PTPrimitiveType unboxedDst;
-      if (dst instanceof PTField) {
-        //i.e., SSR_STNDT_TERM0.EMPLID = "5"; field must be cast to string.
-        unboxedDst = ((PTField) dst).getValue();
+
+      if (ctx.expr(0) instanceof PeopleCodeParser.ExprIdContext &&
+           ((PeopleCodeParser.ExprIdContext) ctx.expr(0)).id().VAR_ID() != null) {
+        this.eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
       } else {
-        throw new OPSVMachRuntimeException("Unsupported combination of primitive "
-            + "src:" + src + " and object dst:" + dst);
+        /*
+         * If dst is not a variable, assume it is a complex type that first
+         * requires unboxing to its enclosed primitive.
+         */
+        final PTPrimitiveType unboxedDst;
+        if (dst instanceof PTField) {
+          //i.e., SSR_STNDT_TERM0.EMPLID = "5"; field must be cast to string.
+          unboxedDst = ((PTField) dst).getValue();
+        } else {
+          throw new OPSVMachRuntimeException("Unsupported combination of primitive "
+              + "src:" + src + " and object dst:" + dst);
+        }
+        unboxedDst.copyValueFrom((PTPrimitiveType) src);
       }
-      unboxedDst.copyValueFrom((PTPrimitiveType) src);
 
     } else if (dst instanceof PTObjectType && src instanceof PTObjectType) {
-      // Assuming lhs is an identifier; this may or may not hold true long term.
-      this.eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
+
+      if (ctx.expr(0) instanceof PeopleCodeParser.ExprIdContext &&
+           ((PeopleCodeParser.ExprIdContext) ctx.expr(0)).id().VAR_ID() != null) {
+        this.eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
+      } else {
+        throw new OPSVMachRuntimeException("Expected var identifier as dst in "
+            + "assignment from source object to destination object.");
+      }
 
     } else {
       throw new OPSVMachRuntimeException("Assignment failed; unexpected "

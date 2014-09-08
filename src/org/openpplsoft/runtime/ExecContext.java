@@ -26,6 +26,12 @@ public abstract class ExecContext {
     this.scopeStack = new LinkedList<Scope>();
   }
 
+  public class OPSVMachIdentifierResolutionException extends Exception {
+    public OPSVMachIdentifierResolutionException(final String msg) {
+      super(msg);
+    }
+  }
+
   public void pushScope(Scope s) {
     // Place the scope at the front of the linked list.
     this.scopeStack.push(s);
@@ -46,7 +52,8 @@ public abstract class ExecContext {
     topMostScope.assignVar(id, p);
   }
 
-  public PTType resolveIdentifier(String id) {
+  public PTType resolveIdentifier(String id)
+      throws OPSVMachIdentifierResolutionException {
 
     /*
      * Search through the stack of scopes;
@@ -69,8 +76,9 @@ public abstract class ExecContext {
       return Environment.globalScope.resolveVar(id);
     }
 
-    throw new OPSVMachRuntimeException("Unable to resolve identifier (" +
-        id + ") to PTType after checking all scopes.");
+    throw new OPSVMachIdentifierResolutionException(
+        "Unable to resolve identifier ("
+        + id + ") to PTType after checking all scopes.");
   }
 
   public void assignToIdentifier(String id, PTType p) {

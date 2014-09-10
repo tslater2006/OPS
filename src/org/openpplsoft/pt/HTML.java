@@ -58,6 +58,12 @@ public class HTML {
       if(rs.next())  {
         final Blob blob = rs.getBlob("CONTDATA");
 
+        if (blob.length() > (long) Integer.MAX_VALUE) {
+          throw new OPSVMachRuntimeException("Length of Blob for CONTDATA in GetHTML "
+              + "is greater than Integer.MAX_VALUE, which means multiple calls to "
+              + "getBytes must be made.");
+        }
+
         StringBuilder builder = new StringBuilder();
         byte[] arr = blob.getBytes(1, (int) blob.length());
         for (byte b : arr) {
@@ -66,6 +72,7 @@ public class HTML {
           }
         }
 
+        blob.free();
         this.ptCONTDATA = builder.toString();
 
         if (rs.next()) {

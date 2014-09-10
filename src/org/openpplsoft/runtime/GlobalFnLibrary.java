@@ -605,43 +605,30 @@ public class GlobalFnLibrary {
     }
 
     final SQL sql = DefnCache.getSQL(((PTString) args.get(0)).read());
+    final PTPrimitiveType[] bindVals = new PTPrimitiveType[args.size() - 1];
 
-    throw new  OPSVMachRuntimeException("TODO: Complete GetSQL.");
-
-    // If no additional args were provided, there is no need to look for
-    // bind placeholders in the html text.
-/*    if (args.size() == 1) {
-      Environment.pushToCallStack(
-        Environment.getFromLiteralPool(html.getHTMLText()));
-      return;
+    for (int i = 1; i < args.size(); i++) {
+      PTType bVal = args.get(i);
+      if (bVal instanceof PTPrimitiveType) {
+        bindVals[i - 1] = (PTPrimitiveType) bVal;
+      } else if (bVal instanceof PTField
+          && ((PTField) bVal).getValue() instanceof PTPrimitiveType) {
+        // If a Field object is passed as a bind value, it must be unboxed
+        // and its unboxed value must be primitive.
+        bindVals[i - 1] = (PTPrimitiveType) ((PTField) bVal).getValue();
+      } else {
+        throw new OPSVMachRuntimeException("Illegal bind value supplied to GetSQL; "
+            + "expected primitive but got: " + args.get(i));
+      }
     }
 
-    String htmlStr = html.getHTMLText();
+    PTSQL sqlObj = new PTSQLTypeConstraint().alloc(sql, bindVals);
 
-    // Replace bind placeholders in HTML defn with provided values.
-    for(int i = 1; i < args.size(); i++) {
-      if (!(args.get(i) instanceof PTString)) {
-          throw new OPSVMachRuntimeException("Expected arg to GetHTMLText "
-              + "passed as bind value to be of type PTString.");
-      }
+    // Execute the underlying SQL, thereby making the associated ResultSet
+    // available for operations like Fetch.
+    sqlObj.executeSql();
 
-      Pattern bindPattern = Pattern.compile("%BIND\\(:" + i + "\\)");
-      Matcher bindMatcher = bindPattern.matcher(htmlStr);
-
-      if(!bindMatcher.find()) {
-          throw new OPSVMachRuntimeException("Expected a bind placeholder "
-              + "in html text (%BIND(:" + i + ") but found none; this may "
-              + "not be a true problem (it may be possible that not every "
-              + "value will be bound for every HTML defn) but I am making this "
-              + "an exception for now to determine 1) if this is the case and 2) "
-              + "if any bind placeholders are not in full uppercase (i.e., %Bind).");
-      }
-
-      htmlStr = bindMatcher.replaceAll(((PTString) args.get(i)).read());
-    }
-
-    Environment.pushToCallStack(
-        Environment.getFromLiteralPool(htmlStr));*/
+    Environment.pushToCallStack(sqlObj);
   }
 
   /*==================================*/

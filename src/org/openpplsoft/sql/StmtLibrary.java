@@ -242,6 +242,16 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
+  public static OPSStmt prepareSqlFromSQLDefn(final SQL sqlDefn,
+    final String[] bindVals) {
+
+    // Replace numeric bind sockets (":1") with "?".
+    final Matcher bindIdxMatcher = bindIdxPattern.matcher(sqlDefn.getSQLText());
+    final String newSql = bindIdxMatcher.replaceAll("?");
+
+    return new OPSStmt(newSql, bindVals, OPSStmt.EmissionType.ENFORCED);
+  }
+
 
   /**
    * Generates an OPSStmt that will fill the given record.

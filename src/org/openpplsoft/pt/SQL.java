@@ -7,9 +7,11 @@
 
 package org.openpplsoft.pt;
 
+import java.io.BufferedReader;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Blob;
+import java.sql.Clob;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ public class SQL {
   private static Logger log = LogManager.getLogger(SQL.class.getName());
 
   private String ptSQLID;
+  private String ptSQLTEXT;
 
   /*
    * Although this value can vary among SQL objects, the most
@@ -60,21 +63,36 @@ public class SQL {
       rs.close();
       ostmt.close();
 
-/*      ostmt = StmtLibrary.getStaticSQLStmt("query.PSCONTENT", bindVals);
+      ostmt = StmtLibrary.getStaticSQLStmt("query.PSSQLDESCR", bindVals);
       rs = ostmt.executeQuery();
+      //Do nothing with record for now.
+      rs.next();
+      rs.close();
+      ostmt.close();
 
+      ostmt = StmtLibrary.getStaticSQLStmt("query.PSSQLTEXTDEFN", bindVals);
+      rs = ostmt.executeQuery();
       if(rs.next())  {
-        final Blob blob = rs.getBlob("CONTDATA");
+        final Clob clob = rs.getClob("SQLTEXT");
 
-        StringBuilder builder = new StringBuilder();
-        byte[] arr = blob.getBytes(1, (int) blob.length());
-        for (byte b : arr) {
-          if (b > 0) {
-            builder.append(Character.toString((char) b));
-          }
+        if (clob.length() > (long) Integer.MAX_VALUE) {
+          throw new OPSVMachRuntimeException("Clob is longer than maximum possible "
+              + "length of String; unable to store SQLTEXT in String.");
         }
 
-        this.ptCONTDATA = builder.toString();
+        final StringBuilder sqlTextBuilder = new StringBuilder();
+        final BufferedReader clobReader = new BufferedReader(
+            clob.getCharacterStream());
+
+        String line;
+        while(null != (line = clobReader.readLine())) {
+            sqlTextBuilder.append(line);
+            log.debug("SQL line {}", line);
+        }
+        clobReader.close();
+
+        clob.free();
+        this.ptSQLTEXT = sqlTextBuilder.toString();
 
         if (rs.next()) {
           throw new OPSVMachRuntimeException("Multiple records found for SQL defn; "
@@ -82,10 +100,13 @@ public class SQL {
         }
       } else {
         throw new OPSVMachRuntimeException("No records found; unable to get SQL defn.");
-      }*/
+      }
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
       System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+    } catch (final java.io.IOException ioe) {
+      log.fatal(ioe.getMessage(), ioe);
+      System.exit(ExitCode.GENERIC_IO_EXCEPTION.getCode());
     } finally {
       try {
         if (rs != null) { rs.close(); }
@@ -94,6 +115,18 @@ public class SQL {
         log.warn("Unable to close rs and/or ostmt in finally block.");
       }
     }
+  }
+
+  public String getSQLText() {
+    return this.ptSQLTEXT;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder("SQL(defn):");
+    b.append("SQLID=").append(this.ptSQLID);
+    b.append(";SQLTEXT=").append(this.ptSQLTEXT);
+    return b.toString();
   }
 }
 

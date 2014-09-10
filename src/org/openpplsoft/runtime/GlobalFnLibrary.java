@@ -594,6 +594,56 @@ public class GlobalFnLibrary {
             ((PTString) args.get(0)).read().toLowerCase()));
   }
 
+  public static void PT_GetSQL() {
+
+    List<PTType> args = Environment.getArgsFromCallStack();
+
+    if(args.size() == 0
+        || !(args.get(0) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected at least 1 arg, "
+          + "the first being of type PTString to GetHTMLText.");
+    }
+
+    final SQL sql = DefnCache.getSQL(((PTString) args.get(0)).read());
+
+    throw new  OPSVMachRuntimeException("TODO: Complete GetSQL.");
+
+    // If no additional args were provided, there is no need to look for
+    // bind placeholders in the html text.
+/*    if (args.size() == 1) {
+      Environment.pushToCallStack(
+        Environment.getFromLiteralPool(html.getHTMLText()));
+      return;
+    }
+
+    String htmlStr = html.getHTMLText();
+
+    // Replace bind placeholders in HTML defn with provided values.
+    for(int i = 1; i < args.size(); i++) {
+      if (!(args.get(i) instanceof PTString)) {
+          throw new OPSVMachRuntimeException("Expected arg to GetHTMLText "
+              + "passed as bind value to be of type PTString.");
+      }
+
+      Pattern bindPattern = Pattern.compile("%BIND\\(:" + i + "\\)");
+      Matcher bindMatcher = bindPattern.matcher(htmlStr);
+
+      if(!bindMatcher.find()) {
+          throw new OPSVMachRuntimeException("Expected a bind placeholder "
+              + "in html text (%BIND(:" + i + ") but found none; this may "
+              + "not be a true problem (it may be possible that not every "
+              + "value will be bound for every HTML defn) but I am making this "
+              + "an exception for now to determine 1) if this is the case and 2) "
+              + "if any bind placeholders are not in full uppercase (i.e., %Bind).");
+      }
+
+      htmlStr = bindMatcher.replaceAll(((PTString) args.get(i)).read());
+    }
+
+    Environment.pushToCallStack(
+        Environment.getFromLiteralPool(htmlStr));*/
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

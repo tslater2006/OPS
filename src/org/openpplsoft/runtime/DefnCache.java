@@ -30,6 +30,7 @@ public final class DefnCache {
   private static Map<String, Menu> menus;
   private static Map<Integer, MsgSet> msgSets;
   private static Map<String, HTML> html;
+  private static Map<String, SQL> sql;
 
   private static Logger log = LogManager.getLogger(DefnCache.class.getName());
 
@@ -42,6 +43,7 @@ public final class DefnCache {
     menus = new HashMap<String, Menu>();
     msgSets = new HashMap<Integer, MsgSet>();
     html = new HashMap<String, HTML>();
+    sql = new HashMap<String, SQL>();
   }
 
   private DefnCache() {}
@@ -204,10 +206,20 @@ public final class DefnCache {
   public static HTML getHTML(final String htmlDefnName) {
     HTML h = html.get(htmlDefnName);
     if (h == null) {
-      log.debug("Caching html defn for {}", htmlDefnName);
+      log.debug("Caching HTML defn for {}", htmlDefnName);
       h = new HTML(htmlDefnName);
       html.put(htmlDefnName, h);
     }
     return h;
+  }
+
+  public static SQL getSQL(final String sqlDefnName) {
+    SQL s = sql.get(sqlDefnName);
+    if (s == null) {
+      log.debug("Caching SQL defn for {}", sqlDefnName);
+      s = new SQL(sqlDefnName);
+      sql.put(sqlDefnName, s);
+    }
+    return s;
   }
 }

@@ -27,11 +27,6 @@ public final class PTNull extends PTObjectType {
     return singleton;
   }
 
-  /*
-   * Accesses on a defn literal reserved word always
-   * resolve to the string itself; i.e., Menu.SA_LEARNER_SERVICES
-   * resolves to "SA_LEARNER_SERVICES".
-   */
   public PTType dotProperty(String s) {
     throw new OPSDataTypeException("Illegal call to dotProperty on PTNull.");
   }

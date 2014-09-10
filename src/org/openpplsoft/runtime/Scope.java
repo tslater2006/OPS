@@ -37,8 +37,9 @@ public class Scope {
   private class SymbolTableEntry {
     public String symbolId;
     public PTTypeConstraint typeConstraint;
-    public PTType assignedValueRef;
+    public PTReference ref;
     public SymbolTableEntry(final String s, final PTTypeConstraint tc) {
+      this.ref = new PTReference();
       this.symbolId = s;
       this.typeConstraint = tc;
     }
@@ -88,18 +89,13 @@ public class Scope {
     }
 
     SymbolTableEntry newEntry = new SymbolTableEntry(id, typeConstraint);
+
+    // Primitive references must be initialized (can't be null).
     if(typeConstraint.isUnderlyingClassPrimitive()) {
-      // Primitives must have space allocated immediately.
-      newEntry.assignedValueRef = typeConstraint.alloc();
-    } else if(typeConstraint.isUnderlyingClassObject()) {
-      // Objects are always declared with null references.
-      newEntry.assignedValueRef = PTNull.getSingleton();
-    } else {
-        throw new OPSVMachRuntimeException("Type constraint provided at var "
-            + "declaration time is neither object nor primitive.");
+      newEntry.ref.pointTo(typeConstraint.alloc());
     }
-    log.debug("Declared {} with assignedValueRef = {}", id,
-        newEntry.assignedValueRef);
+
+    log.debug("Declared {} with ref = {}", id, newEntry.ref);
     this.symbolTable.put(id, newEntry);
   }
 
@@ -119,23 +115,12 @@ public class Scope {
     }
 
     if (symEntry.typeConstraint.typeCheck(newVal)) {
-
       /*
-       * Primitive identifiers are always passed/stored by value, whereas
-       * object identifiers are assigned references to new values.
+       * Regardless of whether the newVal is an object or primitive, assignment
+       * to identifiers alters the reference, not the existing referenced value.
        */
-      if(symEntry.typeConstraint.isUnderlyingClassPrimitive()) {
-        ((PTPrimitiveType) symEntry.assignedValueRef).copyValueFrom(
-            (PTPrimitiveType) newVal);
-      } else if(symEntry.typeConstraint.isUnderlyingClassObject()) {
-        symEntry.assignedValueRef = newVal;
-      } else {
-          throw new OPSVMachRuntimeException("Symbol table entry type constraint "
-              + "for identifier to assign to is neither object nor primitive.");
-      }
-
-    } else if (newVal instanceof PTField
-        && symEntry.typeConstraint.typeCheck(((PTField) newVal).getValue())) {
+      symEntry.ref.pointTo(newVal);
+    } else if (newVal instanceof PTField) {
       // Unwrap the enclosed value and assign that value to the provided identifier.
       this.assignVar(id, ((PTField) newVal).getValue());
     } else {
@@ -147,18 +132,12 @@ public class Scope {
   }
 
   /**
-   * Retrieves the current reference assigned to the provided identifier.
+   * Retrieves the reference assigned to the provided identifier.
    * @param id the identifier to resolve
-   * @return the current reference if declared, otherwise null
+   * @return the reference if the identifier has been declared, otherwise null
    */
-  public PTType resolveVar(final String id) {
-    PTType resolvedRef = this.symbolTable.get(id).assignedValueRef;
-    if (resolvedRef == null) {
-      throw new OPSVMachRuntimeException("resolvedRef is null (Java null) in "
-          + "resolveVar; this is illegal and indicative of an assignment "
-          + "problem somewhere.");
-    }
-    return resolvedRef;
+  public PTReference resolveVar(final String id) {
+    return this.symbolTable.get(id).ref;
   }
 
   /**

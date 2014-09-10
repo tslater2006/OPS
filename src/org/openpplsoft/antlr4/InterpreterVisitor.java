@@ -460,13 +460,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr(0));
     final PTType dst = this.getNodeData(ctx.expr(0));
 
+    if (dst instanceof PTReference && src instanceof PTReference) {
+      ((PTReference) dst).pointTo(((PTReference) src).deref());
+    } else {
+      throw new OPSVMachRuntimeException("Assignment failed; unexpected "
+          + "type combination: src is " + src + ", dst is " + dst);
+    }
+
     /*
      * primitive = primitive : write from rhs to lhs
      * primitive = object : attempt cast from src type to destination type
      * object = primitive : attempt cast from destination type to src type
      * object = object : get var identifier, make it point to rhs object
      */
-    if (dst instanceof PTPrimitiveType && src instanceof PTPrimitiveType) {
+/*    if (dst instanceof PTPrimitiveType && src instanceof PTPrimitiveType) {
       ((PTPrimitiveType) dst).copyValueFrom((PTPrimitiveType) src);
 
     } else if (dst instanceof PTPrimitiveType && src instanceof PTObjectType) {
@@ -485,12 +492,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       if (ctx.expr(0) instanceof PeopleCodeParser.ExprIdContext &&
            ((PeopleCodeParser.ExprIdContext) ctx.expr(0)).id().VAR_ID() != null) {
         this.eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
-      } else {
+      } else {*/
         /*
          * If dst is not a variable, assume it is a complex type that first
          * requires unboxing to its enclosed primitive.
          */
-        final PTPrimitiveType unboxedDst;
+  /*      final PTPrimitiveType unboxedDst;
         if (dst instanceof PTField) {
           //i.e., SSR_STNDT_TERM0.EMPLID = "5"; field must be cast to string.
           unboxedDst = ((PTField) dst).getValue();
@@ -509,12 +516,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       } else {
         throw new OPSVMachRuntimeException("Expected var identifier as dst in "
             + "assignment from source object to destination object.");
-      }
-
-    } else {
-      throw new OPSVMachRuntimeException("Assignment failed; unexpected "
-          + "type combination: src is " + src + ", dst is " + dst);
-    }
+      }*/
 
     return null;
   }

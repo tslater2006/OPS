@@ -25,6 +25,9 @@ import org.apache.logging.log4j.Logger;
 import org.openpplsoft.sql.*;
 import org.openpplsoft.trace.*;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
 /**
  * Accepts emissions from the OPS runtime and verifies
  * them against a PS tracefile; the exact tracefile is
@@ -97,8 +100,7 @@ public final class TraceFileVerifier {
       System.exit(ExitCode.TRACE_FILE_NOT_FOUND.getCode());
     }
 
-    ignoreStmtsInFile(System.getProperty("ignore_stmts_file"));
-    ignoreStmtsInFile(System.getProperty("defn_stmts_file"));
+    ignoreStmtsInFile("ignoredSql_ORACLE.dat");
   }
 
   /**
@@ -111,8 +113,9 @@ public final class TraceFileVerifier {
    */
   public static void ignoreStmtsInFile(final String filename) {
     try {
-      final BufferedReader ignoreFileReader = new BufferedReader(new FileReader(
-          new File(filename)));
+      final Resource ignoredSqlRsrc = new ClassPathResource(filename);
+      final BufferedReader ignoreFileReader = new BufferedReader(
+          new FileReader(ignoredSqlRsrc.getFile()));
 
       String line;
       while ((line = ignoreFileReader.readLine()) != null) {

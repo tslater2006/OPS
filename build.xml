@@ -121,8 +121,6 @@
       <arg value="${envi}"/>
       <arg value="${comp}"/>
 
-      <sysproperty key="ignore_stmts_file" value="conf/ignore_stmts.conf"/>
-      <sysproperty key="defn_stmts_file" value="conf/defn_stmts.conf"/>
       <sysproperty key="cacheProgText" value="true"/>
 
       <!-- Required for use with Oracle JDBC driver. -->

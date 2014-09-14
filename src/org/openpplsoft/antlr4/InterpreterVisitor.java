@@ -1667,8 +1667,43 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     // Declare and initialize each identifier with the matching arg value.
     for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
       PTType arg = args.get(i);
-      localScope.declareAndInitVar(formalParams.get(i).id,
-          formalParams.get(i).typeConstraint, arg);
+      FormalParam fp = formalParams.get(i);
+
+      if (this.eCtx instanceof AppClassObjExecContext) {
+        /**
+         * App class obj methods only allow references to be passed
+         * when using the "out" reserved word in the formal parameter
+         * definition. This is not supported at this time, so I am
+         * unwrapping all references for now.
+         * TODO(mquinn): Keep this in mind.
+         */
+        if (arg instanceof PTReference) {
+          arg = ((PTReference) arg).deref();
+        }
+      } else {
+        throw new OPSVMachRuntimeException("Unexpected execution context "
+            + "in which args are being bound to formal parameters.");
+      }
+
+      try {
+        localScope.declareAndInitVar(fp.id, fp.typeConstraint, arg);
+      } catch (final OPSTypeCheckException opstce1) {
+        /**
+         * It's possible that the argument is a field object that
+         * needs to have its "default method" (getValue()) called prior
+         * to binding it to the formal param identifier.
+         */
+        if (arg instanceof PTField) {
+          try {
+            localScope.declareAndInitVar(fp.id, fp.typeConstraint,
+              ((PTField) arg).getValue());
+          } catch (final OPSTypeCheckException opstce2) {
+            throw opstce2;
+          }
+        } else {
+            throw opstce1;
+        }
+      }
     }
   }
 

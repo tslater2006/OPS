@@ -192,6 +192,23 @@ public class Environment {
     return p;
   }
 
+  public static List<PTType> getDereferencedArgsFromCallStack() {
+    List<PTType> args = new ArrayList<PTType>();
+    PTType p;
+    while(!((p = Environment.peekAtCallStack()) instanceof PTCallFrameBoundary)) {
+      PTType arg = Environment.popFromCallStack();
+      if (arg instanceof PTReference) {
+        arg = ((PTReference) arg).deref();
+      }
+      args.add(arg);
+    }
+
+    // The last argument appears at the top of the stack,
+    // so we need to reverse the argument list here before returning it.
+    Collections.reverse(args);
+    return args;
+  }
+
   public static List<PTType> getArgsFromCallStack() {
 
     List<PTType> args = new ArrayList<PTType>();

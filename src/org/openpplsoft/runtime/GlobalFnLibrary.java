@@ -58,7 +58,7 @@ public class GlobalFnLibrary {
    * if one or more contain a value.
    */
   public static void PT_None() {
-    for(PTType arg : Environment.getArgsFromCallStack()) {
+    for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(doesContainValue(arg)) {
         Environment.pushToCallStack(Environment.FALSE);
         return;
@@ -72,7 +72,7 @@ public class GlobalFnLibrary {
    * if one or more do not.
    */
   public static void PT_All() {
-    for(PTType arg : Environment.getArgsFromCallStack()) {
+    for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(!doesContainValue(arg)) {
         Environment.pushToCallStack(Environment.FALSE);
         return;
@@ -81,24 +81,30 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(Environment.TRUE);
   }
 
+  /**
+   * TODO(mquinn): Implement this function.
+   */
   public static void PT_Hide() {
-    Environment.getArgsFromCallStack();
-    // Not yet implemented.
+    Environment.getDereferencedArgsFromCallStack();
   }
 
+  /**
+   * TODO(mquinn): Implement this function.
+   */
   public static void PT_SetSearchDialogBehavior() {
-    Environment.getArgsFromCallStack();
-    // Not yet implemented.
+    Environment.getDereferencedArgsFromCallStack();
   }
 
+  /**
+   * TODO(mquinn): Implement this function.
+   */
   public static void PT_AllowEmplIdChg() {
-    Environment.getArgsFromCallStack();
-    // Not yet implemented.
+    Environment.getDereferencedArgsFromCallStack();
   }
 
   public static void PT_Rept() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 2) {
       throw new OPSVMachRuntimeException("Expected two args.");
     }
@@ -117,7 +123,7 @@ public class GlobalFnLibrary {
 
   public static void PT_Len() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 && !(args.get(0) instanceof PTString)) {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
@@ -132,7 +138,7 @@ public class GlobalFnLibrary {
    */
   public static void PT_IsModalComponent() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
@@ -141,7 +147,7 @@ public class GlobalFnLibrary {
 
   public static void PT_CreateRecord() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
@@ -154,7 +160,7 @@ public class GlobalFnLibrary {
 
   public static void PT_CreateRowset() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
@@ -182,7 +188,7 @@ public class GlobalFnLibrary {
    */
   public static void PT_GetLevel0() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
@@ -192,7 +198,7 @@ public class GlobalFnLibrary {
 
   public static void PT_CreateArrayRept() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 2 || (!(args.get(1) instanceof PTInteger))) {
       throw new OPSVMachRuntimeException("Expected two args, with the second "
           + "being an integer.");
@@ -231,7 +237,7 @@ public class GlobalFnLibrary {
 
   public static void PT_IsMenuItemAuthorized() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(!(args.get(0) instanceof PTMenuLiteral)
         || !(args.get(1) instanceof PTMenuBarLiteral)
@@ -342,7 +348,7 @@ public class GlobalFnLibrary {
 
   public static void PT_MsgGetText() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 3) {
       throw new OPSVMachRuntimeException("Expected exactly 3 args to "
@@ -386,7 +392,7 @@ public class GlobalFnLibrary {
 
   public static void PT_GenerateComponentContentRelURL() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 8) {
       throw new OPSVMachRuntimeException("Expected exactly 8 args to "
@@ -456,7 +462,7 @@ public class GlobalFnLibrary {
 
   public static void PT_Truncate() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 2
         || !(args.get(0) instanceof PTNumber)
@@ -478,7 +484,7 @@ public class GlobalFnLibrary {
 
   public static void PT_String() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 1
         || !(args.get(0) instanceof PTInteger)) {
@@ -492,7 +498,7 @@ public class GlobalFnLibrary {
 
   public static void PT_GetHTMLText() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() == 0
         || !(args.get(0) instanceof PTString)) {
@@ -540,7 +546,7 @@ public class GlobalFnLibrary {
 
   public static void PT_Proper() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 1
         || !(args.get(0) instanceof PTString)) {
@@ -583,7 +589,7 @@ public class GlobalFnLibrary {
 
   public static void PT_Lower() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 1
         || !(args.get(0) instanceof PTString)) {
@@ -598,7 +604,7 @@ public class GlobalFnLibrary {
 
   public static void PT_GetSQL() {
 
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() == 0
         || !(args.get(0) instanceof PTString)) {

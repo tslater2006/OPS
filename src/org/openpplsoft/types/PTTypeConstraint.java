@@ -63,7 +63,9 @@ public class PTTypeConstraint<T extends PTType> {
 
   public boolean typeCheck(final PTType a) {
     boolean result = (this.underlyingClass == a.getClass()
-        || (this.underlyingClass == PTNumber.class && a instanceof PTInteger));
+        || (this.isUnderlyingClassObject() && a == PTNull.getSingleton())
+        || (this.underlyingClass == PTNumber.class && a instanceof PTInteger)
+    );
     log.debug("~TYPECHECK: {} <----- {} ? {}",
       this.underlyingClass.getSimpleName(), a.getClass().getSimpleName(), result);
     return result;

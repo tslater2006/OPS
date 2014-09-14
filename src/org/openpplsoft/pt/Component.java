@@ -293,7 +293,7 @@ public class Component {
         for (int i = 1; i <= numCols; i++) {
           final String colName = rsMetadata.getColumnName(i);
           final String colTypeName = rsMetadata.getColumnTypeName(i);
-          final PTField fldObj = searchRecord.getField(colName);
+          final PTField fldObj = searchRecord.getFieldRef(colName).deref();
           GlobalFnLibrary.readFieldFromResultSet(fldObj,
               colName, colTypeName, rs);
         }

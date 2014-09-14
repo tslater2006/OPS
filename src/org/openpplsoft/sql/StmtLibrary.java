@@ -189,7 +189,7 @@ public final class StmtLibrary {
       if (rf.isKey() || rf.isSearchKey()) {
         if (i > 0) { query.append(" AND "); }
 
-        String val = (String) searchRec.getField(rf.FIELDNAME)
+        String val = (String) searchRec.getFieldRef(rf.FIELDNAME).deref()
             .getValue().read();
 
         /*
@@ -202,7 +202,8 @@ public final class StmtLibrary {
           val = (String) Environment.getSystemVar("%OperatorId").read();
 
           // Write the value used into the OPRID field on the search record.
-          ((PTString) searchRec.getField(rf.FIELDNAME).getValue()).systemWrite(val);
+          ((PTString) searchRec.getFieldRef(rf.FIELDNAME).deref()
+              .getValue()).systemWrite(val);
         }
 
         query.append(rf.FIELDNAME);
@@ -354,8 +355,8 @@ public final class StmtLibrary {
 
         if (!rf.FIELDNAME.equals("EFFDT")) {
           query.append("?");
-          bindVals.add((String) recObj.getFields().get(rf.FIELDNAME)
-              .getValue().read());
+          bindVals.add((String) recObj.getFieldRef(rf.FIELDNAME)
+              .deref().getValue().read());
         } else {
           /*
            * Insert subquery for EFFDT field.
@@ -419,7 +420,7 @@ public final class StmtLibrary {
         }
 
         query.append(rf.FIELDNAME).append("=?");
-        bindVals.add((String) recObj.getFields().get(rf.FIELDNAME)
+        bindVals.add((String) recObj.getFieldRef(rf.FIELDNAME).deref()
           .getValue().read());
       }
     }

@@ -34,19 +34,8 @@ public class Scope {
     APP_CLASS_OBJ_INSTANCE, APP_CLASS_OBJ_PROPERTY
   }
 
-  private class SymbolTableEntry {
-    public String symbolId;
-    public PTTypeConstraint typeConstraint;
-    public PTReference ref;
-    public SymbolTableEntry(final String s, final PTTypeConstraint tc) {
-      this.ref = new PTReference();
-      this.symbolId = s;
-      this.typeConstraint = tc;
-    }
-  }
-
   private Lvl level;
-  private Map<String, SymbolTableEntry> symbolTable;
+  private Map<String, PTReference<PTType>> symbolTable;
 
   /**
    * Creates a new scope for the specified scope level.
@@ -54,11 +43,21 @@ public class Scope {
    */
   public Scope(final Scope.Lvl l) {
     this.level = l;
-    this.symbolTable = new HashMap<String, SymbolTableEntry>();
+    this.symbolTable = new HashMap<String, PTReference<PTType>>();
   }
 
   public Lvl getLevel() {
     return this.level;
+  }
+
+  public void declareVar(final String id, final PTTypeConstraint tc) {
+
+    if(tc.isUnderlyingClassPrimitive()) {
+      // Primitive references must be initialized (can't be null).
+      this.declareAndInitVar(id, tc, tc.alloc());
+    } else {
+      this.declareAndInitVar(id, tc, PTNull.getSingleton());
+    }
   }
 
   /**
@@ -69,12 +68,17 @@ public class Scope {
    * @param id the identifier to declare
    * @param type the type to declare
    */
-  public void declareVar(final String id, final PTTypeConstraint typeConstraint) {
-    if (typeConstraint == null) {
-      throw new OPSVMachRuntimeException("Illegal call to declareVar; typeConstraint is null."
-          + " It's possible that this call to declareVar is trying to declare a variable that "
-          + "has no type defined in PeopleCode, in which case the caller needs to pass a type "
-          + "constraint for the Any type.");
+  public void declareAndInitVar(final String id, final PTTypeConstraint tc,
+      final PTType initialValue) {
+
+    if (tc == null) {
+      throw new OPSVMachRuntimeException("Type constraint passed to "
+          + "declareAndInitVar is null.");
+    }
+
+    if (initialValue == null) {
+      throw new OPSVMachRuntimeException("Initial value passed to "
+          + "declareAndInitVar is null, must be a PTType object.");
     }
 
     if (this.isIdResolvable(id)) {
@@ -88,47 +92,9 @@ public class Scope {
       }
     }
 
-    SymbolTableEntry newEntry = new SymbolTableEntry(id, typeConstraint);
-
-    // Primitive references must be initialized (can't be null).
-    if(typeConstraint.isUnderlyingClassPrimitive()) {
-      newEntry.ref.pointTo(typeConstraint.alloc());
-    }
-
-    log.debug("Declared {} with ref = {}", id, newEntry.ref);
-    this.symbolTable.put(id, newEntry);
-  }
-
-  /**
-   * Assigns a value to the variable attached to the provided identifier.
-   * If the variable has not been declared, an RTE will be thrown.
-   * @param id the identifier to assign to
-   * @param newVal the reference to assign
-   */
-  public void assignVar(final String id, final PTType newVal) {
-    SymbolTableEntry symEntry = this.symbolTable.get(id);
-
-    if (newVal == null) {
-      throw new OPSVMachRuntimeException("newVal is null (Java null) in "
-          + "assignVar; this is illegal and indicative of an assignment "
-          + "problem somewhere.");
-    }
-
-    if (symEntry.typeConstraint.typeCheck(newVal)) {
-      /*
-       * Regardless of whether the newVal is an object or primitive, assignment
-       * to identifiers alters the reference, not the existing referenced value.
-       */
-      symEntry.ref.pointTo(newVal);
-    } else if (newVal instanceof PTField) {
-      // Unwrap the enclosed value and assign that value to the provided identifier.
-      this.assignVar(id, ((PTField) newVal).getValue());
-    } else {
-      throw new OPSVMachRuntimeException("Identifier assignment failed type "
-          + "check and/or PTField unboxing; typeConstraint ("
-          + symEntry.typeConstraint + ") and newVal ("
-          + newVal + ") are not type compatible.");
-    }
+    PTReference<PTType> newSymTableRef = new PTReference<PTType>(tc, initialValue);
+    log.debug("Declared {} with ref = {}", id, newSymTableRef);
+    this.symbolTable.put(id, newSymTableRef);
   }
 
   /**
@@ -136,8 +102,8 @@ public class Scope {
    * @param id the identifier to resolve
    * @return the reference if the identifier has been declared, otherwise null
    */
-  public PTReference resolveVar(final String id) {
-    return this.symbolTable.get(id).ref;
+  public PTReference<PTType> resolveVar(final String id) {
+    return this.symbolTable.get(id);
   }
 
   /**

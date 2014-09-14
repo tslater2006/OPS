@@ -43,9 +43,12 @@ public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
 
   @Override
   public boolean typeCheck(PTType a) {
-    return (a instanceof PTArray
-        && (this.reqdDimension == ((PTArray) a).dimensions)
-        && this.reqdNestedTypeConstraint.equals(((PTArray) a).baseTypeConstraint));
+    return (a == PTNull.getSingleton()
+            || (a instanceof PTArray
+              && (this.reqdDimension == ((PTArray) a).dimensions)
+              && this.reqdNestedTypeConstraint.equals(((PTArray) a)
+                    .baseTypeConstraint))
+    );
   }
 
   @Override

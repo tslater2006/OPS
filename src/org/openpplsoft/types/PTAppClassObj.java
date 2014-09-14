@@ -30,35 +30,14 @@ public final class PTAppClassObj extends PTObjectType {
     for(Map.Entry<String, AppClassPeopleCodeProg.Instance> cursor :
         this.progDefn.instanceTable.entrySet()) {
       AppClassPeopleCodeProg.Instance instance = cursor.getValue();
-
       this.instanceScope.declareVar(instance.id, instance.typeConstraint);
-
-      /*
-       * Primitive instance variables must have space allocated for them
-       * immediately.
-       */
-      if(instance.typeConstraint.isUnderlyingClassPrimitive()) {
-        this.instanceScope.assignVar(instance.id,
-            instance.typeConstraint.alloc());
-      }
     }
 
     // Load property identifiers into property scope.
     for(Map.Entry<String, AppClassPeopleCodeProg.Property> cursor :
         this.progDefn.propertyTable.entrySet()) {
       AppClassPeopleCodeProg.Property property = cursor.getValue();
-
       this.propertyScope.declareVar(property.id, property.typeConstraint);
-
-      /*
-       * Primitive properties *that lack getters* must have space allocated for them
-       * immediately.
-       */
-      if(!property.hasGetter &&
-            property.typeConstraint.isUnderlyingClassPrimitive()) {
-        this.propertyScope.declareVar(property.id,
-          property.typeConstraint);
-      }
     }
   }
 

@@ -234,9 +234,9 @@ public final class PTRowset extends PTObjectType {
         final String order = sortOrders.get(i);
 
         final PTPrimitiveType lVal = lRow.getRecord(this.primaryRecDefn.RECNAME)
-            .getField(sortFields.get(i)).getValue();
+            .getFieldRef(sortFields.get(i)).deref().getValue();
         final PTPrimitiveType rVal = rRow.getRecord(this.primaryRecDefn.RECNAME)
-            .getField(sortFields.get(i)).getValue();
+            .getFieldRef(sortFields.get(i)).deref().getValue();
 
         if (lVal.isLessThan(rVal) == Environment.TRUE) {
           if (order.equals("A")) {

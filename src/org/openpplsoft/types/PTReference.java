@@ -11,41 +11,62 @@ import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public final class PTReference extends PTObjectType {
+public class PTReference<T extends PTType> extends PTType {
 
-  private PTType referencedValue;
+  protected T referencedValue;
+  private boolean isImmutable;
 
-  public PTReference() {
-    super(new PTTypeConstraint<PTReference>(PTReference.class));
-    this.referencedValue = PTNull.getSingleton();
+  public PTReference(final PTTypeConstraint origTc) {
+    super(origTc);
+
+    if (origTc.isUnderlyingClassPrimitive()) {
+      throw new OPSVMachRuntimeException("Illegal attempt to create a "
+          + "reference with a primitive type constraint without providing "
+          + "an initial value for the reference to point to.");
+    }
   }
 
-  public PTReference(final PTType initialRef) {
-    super(new PTTypeConstraint<PTReference>(PTReference.class));
-    this.referencedValue = initialRef;
+  public PTReference(final PTTypeConstraint origTc, final T initialRef) {
+    super(origTc);
+    this.pointTo(initialRef);
+
+    // References to primitives are always immutable.
+    if (origTc.isUnderlyingClassPrimitive()) {
+      this.makeImmutable();
+    }
   }
 
-  public void pointTo(final PTType newRef) {
-    this.referencedValue = newRef;
+  public void pointTo(final T newRef) {
+    if (this.isImmutable) {
+      throw new OPSVMachRuntimeException("Illegal attempt to point immutable "
+          + "reference " + this + " to new object: " + newRef);
+    }
+    if (this.getOriginatingTypeConstraint().typeCheck(newRef)) {
+      this.referencedValue = newRef;
+    } else {
+      throw new OPSVMachRuntimeException("Unable to point reference to newRef; "
+          + "newRef (" + newRef + ") is not type compatible with this "
+          + "reference's (" + this + ") underlying type constraint.");
+    }
   }
 
-  public PTType deref() {
+  public T deref() {
     return this.referencedValue;
   }
 
-  public PTType dotProperty(String s) {
-    throw new OPSDataTypeException("Illegal call to dotProperty on PTReference.");
-  }
-
-  public Callable dotMethod(String s) {
-    throw new OPSDataTypeException("Illegal call to dotMethod on PTReference.");
+  public void makeImmutable() {
+    this.isImmutable = true;
   }
 
   @Override
   public String toString() {
-    final StringBuilder b = new StringBuilder("[*REF*]");
+    final StringBuilder b = new StringBuilder();
+    if (this.isImmutable) {
+      b.append("[*IMMUTABLE_REF*]");
+    } else {
+      b.append("[*MUTABLE_REF*]");
+    }
     b.append(super.toString()).append(";referencedValue=").append(this.referencedValue);
     return b.toString();
   }
 }
-

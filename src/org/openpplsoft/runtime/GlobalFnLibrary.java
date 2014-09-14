@@ -436,14 +436,16 @@ public class GlobalFnLibrary {
     /*
      * The keylist must be in alphabetical order by key.
      */
-    Map<String, PTField> fieldsUnsorted = ((PTRecord) args.get(7)).getFields();
-    Map<String, PTField> fieldsKeyAscMap =
-        new TreeMap<String, PTField>(fieldsUnsorted);
-    for(Map.Entry<String, PTField> cursor : fieldsKeyAscMap.entrySet()) {
+    Map<String, PTImmutableReference<PTField>> fieldsUnsorted
+        = ((PTRecord) args.get(7)).getFieldRefs();
+    Map<String, PTImmutableReference<PTField>> fieldsKeyAscMap =
+        new TreeMap<String, PTImmutableReference<PTField>>(fieldsUnsorted);
+    for(Map.Entry<String, PTImmutableReference<PTField>> cursor
+        : fieldsKeyAscMap.entrySet()) {
       // NOTE: trim() is important here; blank values are a single space
       // in PS and should be reduced to the empty string.
       url.append("&").append(cursor.getKey()).append("=")
-          .append(cursor.getValue().getValue().readAsString().trim());
+          .append(cursor.getValue().deref().getValue().readAsString().trim());
     }
 
     log.debug("GenerateComponentContentURL: From args, generated url: {}",
@@ -642,9 +644,9 @@ public class GlobalFnLibrary {
     int numCols = rsMetadata.getColumnCount();
 
     for(int i = 1; i <= numCols; i++) {
-      String colName = rsMetadata.getColumnName(i);
-      String colTypeName = rsMetadata.getColumnTypeName(i);
-      PTField fldObj = recObj.getField(colName);
+      final String colName = rsMetadata.getColumnName(i);
+      final String colTypeName = rsMetadata.getColumnTypeName(i);
+      final PTField fldObj = recObj.getFieldRef(colName).deref();
       GlobalFnLibrary.readFieldFromResultSet(fldObj,
         colName, colTypeName, rs);
     }

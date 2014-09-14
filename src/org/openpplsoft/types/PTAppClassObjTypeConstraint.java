@@ -44,8 +44,10 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
    */
   @Override
   public boolean typeCheck(PTType a) {
-    return (a instanceof PTAppClassObj
-        && (this.requiredProgDefn == ((PTAppClassObj) a).progDefn));
+    return (a == PTNull.getSingleton()
+              || (a instanceof PTAppClassObj
+                && (this.requiredProgDefn == ((PTAppClassObj) a).progDefn))
+    );
   }
 
   @Override

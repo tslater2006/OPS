@@ -42,14 +42,15 @@ public abstract class ExecContext {
     this.scopeStack.pop();
   }
 
-  public void declareLocalVar(String id, PTTypeConstraint tc) {
+  public void declareLocalVar(final String id, final PTTypeConstraint tc) {
     Scope topMostScope = this.scopeStack.peekFirst();
     topMostScope.declareVar(id, tc);
   }
 
-  public void assignLocalVar(String id, PTType p) {
+  public void declareAndInitLocalVar(final String id, final PTTypeConstraint tc,
+      final PTType initialVal) {
     Scope topMostScope = this.scopeStack.peekFirst();
-    topMostScope.assignVar(id, p);
+    topMostScope.declareAndInitVar(id, tc, initialVal);
   }
 
   public PTType resolveIdentifier(String id)
@@ -79,35 +80,6 @@ public abstract class ExecContext {
     throw new OPSVMachIdentifierResolutionException(
         "Unable to resolve identifier ("
         + id + ") to PTType after checking all scopes.");
-  }
-
-  public void assignToIdentifier(String id, PTType p) {
-    /*
-     * Search through the stack of scopes;
-     * most recently pushed scopes get first priority,
-     * so search from front of list (stack) to back.
-     */
-    for(Scope scope : this.scopeStack) {
-      if(scope.isIdResolvable(id)) {
-        scope.assignVar(id, p);
-        return;
-      }
-    }
-
-    // If id is not in any local scopes, check the Component scope.
-    if(Environment.componentScope.isIdResolvable(id)) {
-      Environment.componentScope.assignVar(id, p);
-      return;
-    }
-
-    // If id is still not resolved, check the Global scope.
-    if(Environment.globalScope.isIdResolvable(id)) {
-      Environment.globalScope.assignVar(id, p);
-      return;
-    }
-
-    throw new OPSVMachRuntimeException("Unable to resolve identifier (" +
-        id + ") in any scope before assigning to identifier.");
   }
 }
 

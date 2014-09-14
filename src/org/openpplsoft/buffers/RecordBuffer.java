@@ -156,7 +156,7 @@ public class RecordBuffer implements IStreamableBuffer {
           final String colName = rsMetadata.getColumnName(i);
           final String colTypeName = rsMetadata.getColumnTypeName(i);
           final PTField fldObj = this.sbuf.ptGetRowset().getRow(1)
-            .getRecord(this.recName).getField(colName);
+            .getRecord(this.recName).getFieldRef(colName).deref();
           log.debug("Before: {} = {}", colName, fldObj);
           GlobalFnLibrary.readFieldFromResultSet(fldObj,
               colName, colTypeName, rs);

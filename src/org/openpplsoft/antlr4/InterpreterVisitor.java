@@ -452,6 +452,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @param ctx the associated ParseTree node
    * @return null
    */
+  @SuppressWarnings("unchecked")
   public Void visitStmtAssign(
       final PeopleCodeParser.StmtAssignContext ctx) {
     this.eFilter.emit(ctx);
@@ -460,11 +461,27 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr(0));
     final PTType dst = this.getNodeData(ctx.expr(0));
 
-    if (dst instanceof PTReference && src instanceof PTReference) {
-      ((PTReference) dst).pointTo(((PTReference) src).deref());
+    if (!(dst instanceof PTReference)) {
+      throw new OPSVMachRuntimeException("Illegal assignment; not a valid l-value: "
+          + dst);
+    }
+
+    final PTReference lRef = (PTReference) dst;
+    if (src instanceof PTReference) {
+      lRef.pointTo(((PTReference) src).deref());
+    } else if (src instanceof PTPrimitiveType) {
+
+      if (lRef.deref() instanceof PTField) {
+        ((PTField) lRef.deref()).getValue().copyValueFrom((PTPrimitiveType) src);
+      } else {
+        throw new OPSVMachRuntimeException("TODO: Handle more possibilities of "
+            + "assignment when src is a primitive.");
+      }
+    } else if(src instanceof PTObjectType) {
+      lRef.pointTo(src);
     } else {
       throw new OPSVMachRuntimeException("Assignment failed; unexpected "
-          + "type combination: src is " + src + ", dst is " + dst);
+          + "src: " + src + "; lRef is " + lRef);
     }
 
     /*
@@ -1290,17 +1307,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         ctx.varDeclarator();
     for (PeopleCodeParser.VarDeclaratorContext idCtx : varsToDeclare) {
 
-      // First, declare the var.
-      log.debug("Declaring identifier ({}) with scope {} and type constraint {}.",
-          idCtx.VAR_ID().getText(), scope, varTc);
-      this.declareIdentifier(scope, idCtx.VAR_ID().getText(), varTc);
-
-      // If initial value expr exists, assign it to declared var.
       if (idCtx.expr() != null) {
+        // If initial value expr exists, declare *and* initialize the var.
         visit(idCtx.expr());
         final PTType initialValue = this.getNodeData(idCtx.expr());
-        this.assignIdentifier(scope, idCtx.VAR_ID().getText(), initialValue);
+        this.declareAndInitIdentifier(scope,
+            idCtx.VAR_ID().getText(), varTc, initialValue);
         didInitializeAnIdentifier = true;
+      } else {
+        // Otherwise, just declare the identifier.
+        this.declareIdentifier(scope, idCtx.VAR_ID().getText(), varTc);
       }
     }
 
@@ -1672,17 +1688,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
   }
 
-  private void assignIdentifier(final String scope,
-      final String id, final PTType t) {
+  private void declareAndInitIdentifier(final String scope,
+      final String id, final PTTypeConstraint tc, final PTType initialVal) {
     switch(scope) {
       case "Local":
-        this.eCtx.assignLocalVar(id, t);
+        this.eCtx.declareAndInitLocalVar(id, tc, initialVal);
         break;
       case "Component":
-        Environment.componentScope.assignVar(id, t);
+        Environment.componentScope.declareAndInitVar(id, tc, initialVal);
         break;
       case "Global":
-        Environment.globalScope.assignVar(id, t);
+        Environment.globalScope.declareAndInitVar(id, tc, initialVal);
         break;
       default:
         throw new OPSVMachRuntimeException("Encountered unexpected variable "
@@ -1693,23 +1709,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private void bindArgsToFormalParams(final Scope localScope,
       final List<FormalParam> formalParams) {
 
-    /*
-     * First, declare each formal parameter as a var in the local
-     * scope, using the associated type constraint.
-     */
-    for (FormalParam fp : formalParams) {
-      localScope.declareVar(fp.id, fp.typeConstraint);
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    if (args.size() != formalParams.size()) {
+      throw new OPSVMachRuntimeException("Unable to bind args to formal "
+          + "params due to size mismatch.");
     }
 
-    /*
-     * Then, assign each arg passed to the method to each of the
-     * newly declared formal parameter variables (type checking
-     * will be performed by invoked method).
-     */
-    final List<PTType> args = Environment.getArgsFromCallStack();
+    // Declare and initialize each identifier with the matching arg value.
     for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
       PTType arg = args.get(i);
-      localScope.assignVar(formalParams.get(i).id, arg);
+      localScope.declareAndInitVar(formalParams.get(i).id,
+          formalParams.get(i).typeConstraint, arg);
     }
   }
 

@@ -37,8 +37,8 @@ public final class PTRecord extends PTObjectType {
   private static Pattern dtPattern, datePattern, dotPattern;
 
   private Record recDefn;
-  private Map<String, PTField> fields;
-  private Map<Integer, PTField> fieldIdxTable;
+  private Map<String, PTImmutableReference<PTField>> fieldRefs;
+  private Map<Integer, PTImmutableReference<PTField>> fieldRefIdxTable;
 
   static {
     dtPattern = Pattern.compile(
@@ -75,13 +75,15 @@ public final class PTRecord extends PTObjectType {
 
     // this map is linked in order to preserve
     // the order in which fields are added.
-    this.fields = new LinkedHashMap<String, PTField>();
-    this.fieldIdxTable = new LinkedHashMap<Integer, PTField>();
+    this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTField>>();
+    this.fieldRefIdxTable = new LinkedHashMap<Integer, PTImmutableReference<PTField>>();
     int i = 1;
     for (RecordField rf : this.recDefn.getExpandedFieldList()) {
-      final PTField newFld = new PTFieldTypeConstraint().alloc(rf);
-      this.fields.put(rf.FIELDNAME, newFld);
-      this.fieldIdxTable.put(i++, newFld);
+      PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();
+      final PTImmutableReference<PTField> newFldRef
+          = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(rf));
+      this.fieldRefs.put(rf.FIELDNAME, newFldRef);
+      this.fieldRefIdxTable.put(i++, newFldRef);
     }
   }
 
@@ -94,17 +96,17 @@ public final class PTRecord extends PTObjectType {
   }
 
   /**
-   * Retrieves the fields within this record.
-   * @return a map of the field names to the fields
-   *   themselves
+   * Retrieves the field references within this record.
+   * @return a map of the field names to the immutable references
+   *    to those fields.
    */
-  public Map<String, PTField> getFields() {
-    return this.fields;
+  public Map<String, PTImmutableReference<PTField>> getFieldRefs() {
+    return this.fieldRefs;
   }
 
   @Override
   public PTType dotProperty(final String s) {
-    return this.fields.get(s);
+    return this.fieldRefs.get(s);
   }
 
   @Override
@@ -122,7 +124,7 @@ public final class PTRecord extends PTObjectType {
    * @return true if the field exists, false otherwise
    */
   public boolean hasField(final String fldName) {
-    return this.fields.containsKey(fldName);
+    return this.fieldRefs.containsKey(fldName);
   }
 
   /**
@@ -131,7 +133,7 @@ public final class PTRecord extends PTObjectType {
    * @param fldName the name of the field to retrieve
    * @return the field object corresponding to the provided name
    */
-  public PTField getField(final String fldName) {
+  public PTImmutableReference<PTField> getFieldRef(final String fldName) {
 
     String unwrappedFldName = fldName;
 
@@ -163,13 +165,13 @@ public final class PTRecord extends PTObjectType {
       }
     }
 
-    if (!this.fields.containsKey(unwrappedFldName)) {
-      throw new OPSVMachRuntimeException("Call to getField with "
+    if (!this.fieldRefs.containsKey(unwrappedFldName)) {
+      throw new OPSVMachRuntimeException("Call to getFieldRef with "
           + "unwrappedFldName=" + unwrappedFldName
           + " did not match any field on this record: "
           + this.toString());
     }
-    return this.fields.get(unwrappedFldName);
+    return this.fieldRefs.get(unwrappedFldName);
   }
 
   /**
@@ -177,8 +179,9 @@ public final class PTRecord extends PTObjectType {
    * this record object.
    */
   public void setDefault() {
-    for (Map.Entry<String, PTField> cursor : this.fields.entrySet()) {
-      cursor.getValue().setDefault();
+    for (Map.Entry<String, PTImmutableReference<PTField>> cursor
+        : this.fieldRefs.entrySet()) {
+      cursor.getValue().deref().setDefault();
     }
   }
 
@@ -318,9 +321,10 @@ public final class PTRecord extends PTObjectType {
   @Override
   public void setReadOnly() {
     super.setReadOnly();
-    if (this.fields != null) {
-      for (Map.Entry<String, PTField> cursor : this.fields.entrySet()) {
-        cursor.getValue().setReadOnly();
+    if (this.fieldRefs != null) {
+      for (Map.Entry<String, PTImmutableReference<PTField>> cursor
+          : this.fieldRefs.entrySet()) {
+        cursor.getValue().deref().setReadOnly();
       }
     }
   }
@@ -329,7 +333,7 @@ public final class PTRecord extends PTObjectType {
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
     b.append(":").append(this.recDefn.RECNAME);
-    b.append(",fields=").append(this.fields);
+    b.append(",fieldRefs=").append(this.fieldRefs);
     return b.toString();
   }
 }

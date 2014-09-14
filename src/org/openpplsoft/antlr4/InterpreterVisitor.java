@@ -484,57 +484,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "src: " + src + "; lRef is " + lRef);
     }
 
-    /*
-     * primitive = primitive : write from rhs to lhs
-     * primitive = object : attempt cast from src type to destination type
-     * object = primitive : attempt cast from destination type to src type
-     * object = object : get var identifier, make it point to rhs object
-     */
-/*    if (dst instanceof PTPrimitiveType && src instanceof PTPrimitiveType) {
-      ((PTPrimitiveType) dst).copyValueFrom((PTPrimitiveType) src);
-
-    } else if (dst instanceof PTPrimitiveType && src instanceof PTObjectType) {
-      final PTPrimitiveType unboxedSrc;
-      if (src instanceof PTField) {
-        //i.e., &str = SSR_STDNT_TERM0.EMPLID; field must be cast to string.
-        unboxedSrc = ((PTField) src).getValue();
-      } else {
-        throw new OPSVMachRuntimeException("Unsupported combination of object "
-            + "src:" + src + " and primitive dst:" + dst);
-      }
-      ((PTPrimitiveType) dst).copyValueFrom(unboxedSrc);
-
-    } else if (dst instanceof PTObjectType && src instanceof PTPrimitiveType) {
-
-      if (ctx.expr(0) instanceof PeopleCodeParser.ExprIdContext &&
-           ((PeopleCodeParser.ExprIdContext) ctx.expr(0)).id().VAR_ID() != null) {
-        this.eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
-      } else {*/
-        /*
-         * If dst is not a variable, assume it is a complex type that first
-         * requires unboxing to its enclosed primitive.
-         */
-  /*      final PTPrimitiveType unboxedDst;
-        if (dst instanceof PTField) {
-          //i.e., SSR_STNDT_TERM0.EMPLID = "5"; field must be cast to string.
-          unboxedDst = ((PTField) dst).getValue();
-        } else {
-          throw new OPSVMachRuntimeException("Unsupported combination of primitive "
-              + "src:" + src + " and object dst:" + dst);
-        }
-        unboxedDst.copyValueFrom((PTPrimitiveType) src);
-      }
-
-    } else if (dst instanceof PTObjectType && src instanceof PTObjectType) {
-
-      if (ctx.expr(0) instanceof PeopleCodeParser.ExprIdContext &&
-           ((PeopleCodeParser.ExprIdContext) ctx.expr(0)).id().VAR_ID() != null) {
-        this.eCtx.assignToIdentifier(ctx.expr(0).getText(), src);
-      } else {
-        throw new OPSVMachRuntimeException("Expected var identifier as dst in "
-            + "assignment from source object to destination object.");
-      }*/
-
     return null;
   }
 

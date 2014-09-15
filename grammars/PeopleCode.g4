@@ -138,7 +138,7 @@ VAR_ID      : '&' GENERIC_ID ;
 SYS_VAR_ID  : '%' GENERIC_ID ;
 GENERIC_ID  : [a-zA-Z] [0-9a-zA-Z_#]* ;
 
-REM       : WS [rR][eE][mM] WS .*? ';' -> skip;
+REM       : WS? [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1 : '/*' .*? '*/' -> skip;
 COMMENT_2 : '<*' .*? '*>' -> skip;
 COMMENT_3 : '/+' .*? '+/' ';'? -> skip;

@@ -468,7 +468,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final PTReference lRef = (PTReference) dst;
     if (src instanceof PTReference) {
-      lRef.pointTo(((PTReference) src).deref());
+
+      final PTReference rRef = (PTReference) src;
+      if (lRef.deref() instanceof PTPrimitiveType
+            && rRef.deref() instanceof PTPrimitiveType) {
+        // Primitive values are always written into primitive destinations.
+        ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) rRef.deref());
+      } else {
+        lRef.pointTo(rRef.deref());
+      }
     } else if (src instanceof PTPrimitiveType) {
 
       if (lRef.deref() instanceof PTField) {
@@ -764,7 +772,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr());
     visit(ctx.id());
 
-    final PTObjectType obj = (PTObjectType) this.getNodeData(ctx.expr());
+    PTObjectType obj = null;
+    final PTType rawObj = this.getNodeData(ctx.expr());
+    // Expecting either a raw object or a ref to one.
+    if (rawObj instanceof PTObjectType) {
+      obj = (PTObjectType) rawObj;
+    } else if (rawObj instanceof PTReference &&
+        ((PTReference) rawObj).deref() instanceof PTObjectType) {
+      obj = (PTObjectType) ((PTReference) rawObj).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either an object or a reference "
+          + "to one in visitExprDotAccess.");
+    }
+
     final PTType prop = obj.dotProperty(ctx.id().getText());
     final Callable call = obj.dotMethod(ctx.id().getText());
 

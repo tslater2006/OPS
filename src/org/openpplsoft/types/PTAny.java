@@ -9,7 +9,12 @@ package org.openpplsoft.types;
 
 import org.openpplsoft.runtime.*;
 
-public class PTAny extends PTObjectType {
+/**
+ * An identifier of type Any accepts objects and primitives
+ * of any type; Any is not a concrete type, thus it extends
+ * neither PTPrimitiveType nor PTObjectType.
+ */
+public class PTAny extends PTType {
 
   private PTType enclosedValue;
 
@@ -20,18 +25,6 @@ public class PTAny extends PTObjectType {
 
   public void setEnclosedValue(final PTType v) {
     this.enclosedValue = v;
-  }
-
-  @Override
-  public PTType dotProperty(final String s) {
-    throw new OPSVMachRuntimeException("dotProperty not supported "
-        + "for PTAny.");
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    throw new OPSVMachRuntimeException("dotMethod not supported "
-        + "for PTAny.");
   }
 
   @Override

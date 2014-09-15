@@ -315,7 +315,7 @@ public final class PTRowset extends PTObjectType {
    * OPS runtime stack.
    */
   public void PT_Fill() {
-    final List<PTType> args = Environment.getArgsFromCallStack();
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() < 1) {
       throw new OPSVMachRuntimeException(
           "Expected at least one string arg.");

@@ -392,10 +392,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "in For construct; not yet supported.");
     }
 
-    PTNumberType varId = null;
+    PTNumberType counter = null;
     try {
-      varId = (PTNumberType) this.eCtx.resolveIdentifier(
-          ctx.VAR_ID().getText());
+      counter = this.getOrDerefNumber(
+          this.eCtx.resolveIdentifier(ctx.VAR_ID().getText()));
     } catch(final ExecContext.OPSVMachIdentifierResolutionException ire) {
       throw new OPSVMachRuntimeException("Unable to resolve var id in For "
           + "stmt.", ire);
@@ -406,14 +406,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         (PTNumberType) this.getNodeData(ctx.expr(0));
 
     // Initialize incrementing expression.
-    varId.copyValueFrom(initialExpr);
+    counter.copyValueFrom(initialExpr);
 
     visit(ctx.expr(1));
     final PTNumberType toExpr =
-        (PTNumberType) this.getNodeData(ctx.expr(1));
+        this.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
 
     this.eFilter.emit(ctx);
-    while (varId.isLessThanOrEqual(toExpr) == Environment.TRUE) {
+    while (counter.isLessThanOrEqual(toExpr) == Environment.TRUE) {
 
       try {
         visit(ctx.stmtList());
@@ -423,7 +423,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
 
       // Increment and set new value of incrementing expression.
-      varId.copyValueFrom(varId.add(Environment.getFromLiteralPool(1)));
+      counter.copyValueFrom(counter.add(Environment.getFromLiteralPool(1)));
 
       this.eFilter.emit(ctx.endfor);
       this.eFilter.emit(ctx);
@@ -1746,6 +1746,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else {
       throw new OPSVMachRuntimeException("Expected either an object or a reference "
           + "to one (getOrDerefObject).");
+    }
+  }
+
+  private PTNumberType getOrDerefNumber(final PTType rawExpr) {
+    if (rawExpr instanceof PTNumberType) {
+      return (PTNumberType) rawExpr;
+    } else if (rawExpr instanceof PTReference
+        && ((PTReference) rawExpr).deref() instanceof PTNumberType) {
+      return (PTNumberType) ((PTReference) rawExpr).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a number or a reference "
+          + "to one (getOrDerefNumber).");
     }
   }
 

@@ -516,7 +516,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.eFilter.emit(ctx);
     if (ctx.expr() != null) {
       visit(ctx.expr());
-      final PTType retVal = this.getNodeData(ctx.expr());
+
+      PTType retVal = this.getNodeData(ctx.expr());
+      if (retVal instanceof PTReference) {
+        // References cannot be returned; dereference first.
+        retVal = ((PTReference) retVal).deref();
+      }
 
       if (this.eCtx instanceof AppClassObjExecContext) {
         if (((AppClassObjExecContext) this.eCtx).expectedReturnTypeConstraint

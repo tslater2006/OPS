@@ -482,8 +482,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       if (lRef.deref() instanceof PTField) {
         ((PTField) lRef.deref()).getValue().copyValueFrom((PTPrimitiveType) src);
       } else {
-        throw new OPSVMachRuntimeException("TODO: Handle more possibilities of "
-            + "assignment when src is a primitive.");
+        ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) src);
       }
     } else if(src instanceof PTObjectType) {
       lRef.pointTo(src);
@@ -1389,11 +1388,22 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     visit(ctx.expr());
 
-    log.debug("Interpreting Evaluate stmt; conditional value is {}",
-      this.getNodeData(ctx.expr()));
+    PTPrimitiveType baseExpr = null;
+    final PTType rawBaseExpr = this.getNodeData(ctx.expr());
+    // Expecting either a raw primitive or a ref to one.
+    if (rawBaseExpr instanceof PTPrimitiveType) {
+      baseExpr = (PTPrimitiveType) rawBaseExpr;
+    } else if (rawBaseExpr instanceof PTReference &&
+        ((PTReference) rawBaseExpr).deref() instanceof PTPrimitiveType) {
+      baseExpr = (PTPrimitiveType) ((PTReference) rawBaseExpr).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
+          + "to one as the base expr for an Evaluate statement.");
+    }
 
-    final EvaluateConstruct evalConstruct = new EvaluateConstruct(
-        this.getNodeData(ctx.expr()));
+    log.debug("Interpreting Evaluate stmt; conditional base value is {}", baseExpr);
+
+    final EvaluateConstruct evalConstruct = new EvaluateConstruct(baseExpr);
     this.evalConstructStack.push(evalConstruct);
 
     // Store reference to End-Evaluate token for emission by other methods.

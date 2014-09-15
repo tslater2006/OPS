@@ -61,7 +61,7 @@ public class PTTypeConstraint<T extends PTType> {
     }
   }
 
-  public boolean typeCheck(final PTType a) throws OPSTypeCheckException {
+  public void typeCheck(final PTType a) throws OPSTypeCheckException {
     boolean result = (this.underlyingClass == a.getClass()
         || (this.isUnderlyingClassObject() && a == PTNull.getSingleton())
         || (this.underlyingClass == PTNumber.class && a instanceof PTInteger)
@@ -73,7 +73,6 @@ public class PTTypeConstraint<T extends PTType> {
           + a + ") is not type compatible with this type constraint ("
           + this + ").");
     }
-    return result;
   }
 
   @Override

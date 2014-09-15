@@ -32,8 +32,9 @@ public class PTAnyTypeConstraint extends PTTypeConstraint<PTAny> {
    * of the provided object's underlying class.
    */
   @Override
-  public boolean typeCheck(final PTType a) {
-    return true;
+  public void typeCheck(final PTType a) {
+    // Do nothing; never throws type check exception b/c everything
+    // is type-compatible with Any.
   }
 
   @Override

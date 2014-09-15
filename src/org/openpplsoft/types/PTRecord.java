@@ -80,10 +80,15 @@ public final class PTRecord extends PTObjectType {
     int i = 1;
     for (RecordField rf : this.recDefn.getExpandedFieldList()) {
       PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();
-      final PTImmutableReference<PTField> newFldRef
-          = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(rf));
-      this.fieldRefs.put(rf.FIELDNAME, newFldRef);
-      this.fieldRefIdxTable.put(i++, newFldRef);
+
+      try {
+        final PTImmutableReference<PTField> newFldRef
+            = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(rf));
+        this.fieldRefs.put(rf.FIELDNAME, newFldRef);
+        this.fieldRefIdxTable.put(i++, newFldRef);
+      } catch (final OPSTypeCheckException opstce) {
+        throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
+      }
     }
   }
 

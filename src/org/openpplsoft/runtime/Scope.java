@@ -51,12 +51,15 @@ public class Scope {
   }
 
   public void declareVar(final String id, final PTTypeConstraint tc) {
-
-    if(tc.isUnderlyingClassPrimitive()) {
-      // Primitive references must be initialized (can't be null).
-      this.declareAndInitVar(id, tc, tc.alloc());
-    } else {
-      this.declareAndInitVar(id, tc, PTNull.getSingleton());
+    try {
+      if(tc.isUnderlyingClassPrimitive()) {
+        // Primitive references must be initialized (can't be null).
+        this.declareAndInitVar(id, tc, tc.alloc());
+      } else {
+        this.declareAndInitVar(id, tc, PTNull.getSingleton());
+      }
+    } catch (final OPSTypeCheckException opstce) {
+      throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
   }
 
@@ -69,7 +72,7 @@ public class Scope {
    * @param type the type to declare
    */
   public void declareAndInitVar(final String id, final PTTypeConstraint tc,
-      final PTType initialValue) {
+      final PTType initialValue) throws OPSTypeCheckException {
 
     if (tc == null) {
       throw new OPSVMachRuntimeException("Type constraint passed to "

@@ -91,7 +91,11 @@ public final class PTArray extends PTObjectType {
      * but it cannot "flatten" arrays to the appropriate base type,
      * which will likely be required down the line.
      */
-    if(this.baseTypeConstraint.typeCheck(value)) {
+    try {
+
+      // Ensure value matches base type constraint before continuing.
+      this.baseTypeConstraint.typeCheck(value);
+
       /*
        * Objects should be added by reference; primitives
        * should have new versions of themselves created.
@@ -117,23 +121,24 @@ public final class PTArray extends PTObjectType {
             + "array; found neither: " + value.getOriginatingTypeConstraint());
       }
 
-    } else if(this.baseTypeConstraint instanceof PTArrayTypeConstraint) {
+    } catch (final OPSTypeCheckException opstce) {
 
-      PTArray promotedVal = null;
-      if(((PTArrayTypeConstraint) this.baseTypeConstraint).getReqdDimension() == 1) {
-        promotedVal = new PTArrayTypeConstraint(1,
-            value.getOriginatingTypeConstraint()).alloc();
+      if(this.baseTypeConstraint instanceof PTArrayTypeConstraint) {
+        PTArray promotedVal = null;
+        if(((PTArrayTypeConstraint) this.baseTypeConstraint).getReqdDimension() == 1) {
+          promotedVal = new PTArrayTypeConstraint(1,
+              value.getOriginatingTypeConstraint()).alloc();
+        } else {
+          promotedVal = new PTArrayTypeConstraint(
+              ((PTArrayTypeConstraint) this.baseTypeConstraint).getReqdDimension(),
+                  this.baseTypeConstraint).alloc();
+        }
+        promotedVal.internalPush(value);
+        this.values.addLast(promotedVal);
       } else {
-        promotedVal = new PTArrayTypeConstraint(
-            ((PTArrayTypeConstraint) this.baseTypeConstraint).getReqdDimension(),
-                this.baseTypeConstraint).alloc();
+        throw new OPSVMachRuntimeException("Cannot Push onto array; "+
+          "types are not compatible.", opstce);
       }
-      promotedVal.internalPush(value);
-      this.values.addLast(promotedVal);
-
-    } else {
-      throw new OPSVMachRuntimeException("Cannot Push onto array; "+
-        "types are not compatible.");
     }
 
     log.debug("After push, array is: {}.", this);

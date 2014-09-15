@@ -44,11 +44,15 @@ public final class PTField extends PTObjectType {
     final PTTypeConstraint<PTBoolean> visibleTc
         = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
 
-    this.valueRef
-        = new PTImmutableReference<PTPrimitiveType>(valueTc,
-            (PTPrimitiveType) valueTc.alloc());
-    this.visiblePropertyRef
-        = new PTImmutableReference<PTBoolean>(visibleTc, visibleTc.alloc());
+    try {
+      this.valueRef
+          = new PTImmutableReference<PTPrimitiveType>(valueTc,
+              (PTPrimitiveType) valueTc.alloc());
+      this.visiblePropertyRef
+          = new PTImmutableReference<PTBoolean>(visibleTc, visibleTc.alloc());
+    } catch (final OPSTypeCheckException opstce) {
+      throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
+    }
   }
 
   public void setDefault() {

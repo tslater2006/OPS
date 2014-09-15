@@ -467,28 +467,41 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     final PTReference lRef = (PTReference) dst;
+    PTType rawSrc = src;
+
     if (src instanceof PTReference) {
+      rawSrc = ((PTReference) src).deref();
+    }
 
-      final PTReference rRef = (PTReference) src;
-      if (lRef.deref() instanceof PTPrimitiveType
-            && rRef.deref() instanceof PTPrimitiveType) {
-        // Primitive values are always written into primitive destinations.
-        ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) rRef.deref());
+    if (rawSrc instanceof PTPrimitiveType) {
+      if (lRef.deref() instanceof PTPrimitiveType) {
+        ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) rawSrc);
+      } else if (lRef.deref() instanceof PTField) {
+        ((PTField) lRef.deref()).getValue().copyValueFrom((PTPrimitiveType) rawSrc);
       } else {
-        lRef.pointTo(rRef.deref());
+        throw new OPSVMachRuntimeException("Assignment failed; rawSrc is primitive "
+            + "but lRef dereferences to neither a primitive nor a PTField.");
       }
-    } else if (src instanceof PTPrimitiveType) {
-
-      if (lRef.deref() instanceof PTField) {
-        ((PTField) lRef.deref()).getValue().copyValueFrom((PTPrimitiveType) src);
-      } else {
-        ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) src);
+    } else if(rawSrc instanceof PTObjectType) {
+      try {
+        lRef.pointTo(rawSrc);
+      } catch (final OPSImmutableRefAttemptedChangeException opsirace) {
+        if (rawSrc instanceof PTField && lRef.deref() instanceof PTPrimitiveType) {
+          // If lRef refers to a primitive and rawSrc is a Field, re-attempt the
+          // assignment, this time copying the value from
+          // the Field's underlying value to the referred primitive.
+          ((PTPrimitiveType) lRef.deref()).copyValueFrom(((PTField) rawSrc).getValue());
+        } else {
+          throw new OPSVMachRuntimeException("Assignment failed, even after "
+              + "checking if rawSrc is a PTField that needs to be unwrapped "
+              + "to its enclosed value.", opsirace);
+        }
+      } catch (final OPSTypeCheckException opstce) {
+        throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
       }
-    } else if(src instanceof PTObjectType) {
-      lRef.pointTo(src);
     } else {
       throw new OPSVMachRuntimeException("Assignment failed; unexpected "
-          + "src: " + src + "; lRef is " + lRef);
+          + "rawSrc: " + src + "; lRef is " + lRef);
     }
 
     return null;
@@ -524,12 +537,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
 
       if (this.eCtx instanceof AppClassObjExecContext) {
-        if (((AppClassObjExecContext) this.eCtx).expectedReturnTypeConstraint
-            .typeCheck(retVal)) {
+        try {
+          ((AppClassObjExecContext) this.eCtx)
+              .expectedReturnTypeConstraint.typeCheck(retVal);
           Environment.pushToCallStack(retVal);
-        } else {
+        } catch (final OPSTypeCheckException opstce) {
           throw new OPSVMachRuntimeException("Value returned in app class "
-              + "obj execution context does not match the expected type.");
+              + "obj execution context does not match the expected type.", opstce);
         }
       } else {
         throw new OPSVMachRuntimeException("Must type check return values "
@@ -1657,19 +1671,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
   private void declareAndInitIdentifier(final String scope,
       final String id, final PTTypeConstraint tc, final PTType initialVal) {
-    switch(scope) {
-      case "Local":
-        this.eCtx.declareAndInitLocalVar(id, tc, initialVal);
-        break;
-      case "Component":
-        Environment.componentScope.declareAndInitVar(id, tc, initialVal);
-        break;
-      case "Global":
-        Environment.globalScope.declareAndInitVar(id, tc, initialVal);
-        break;
-      default:
-        throw new OPSVMachRuntimeException("Encountered unexpected variable "
-            + " scope: " + scope);
+    try {
+      switch(scope) {
+        case "Local":
+          this.eCtx.declareAndInitLocalVar(id, tc, initialVal);
+          break;
+        case "Component":
+          Environment.componentScope.declareAndInitVar(id, tc, initialVal);
+          break;
+        case "Global":
+          Environment.globalScope.declareAndInitVar(id, tc, initialVal);
+          break;
+        default:
+          throw new OPSVMachRuntimeException("Encountered unexpected variable "
+              + " scope: " + scope);
+      }
+    } catch (final OPSTypeCheckException opstce) {
+      throw new OPSVMachRuntimeException("Failed to declare and initialize "
+          + "identifier; type check exception occurred.", opstce);
     }
   }
 
@@ -1714,12 +1733,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         if (arg instanceof PTField) {
           try {
             localScope.declareAndInitVar(fp.id, fp.typeConstraint,
-              ((PTField) arg).getValue());
+                ((PTField) arg).getValue());
           } catch (final OPSTypeCheckException opstce2) {
-            throw opstce2;
+            throw new OPSVMachRuntimeException("Failed to bind arg to param, "
+                + "even after unwrapping the arg of type Field, due to type "
+                + "check exception.", opstce2);
           }
         } else {
-            throw opstce1;
+            throw new OPSVMachRuntimeException(opstce1.getMessage(), opstce1);
         }
       }
     }

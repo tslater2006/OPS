@@ -20,7 +20,8 @@ public final class PTImmutableReference<T extends PTType> extends PTReference<T>
    * create a constructor that does not accept an arg of type T for
    * use as the initial value to point to.
    */
-  public PTImmutableReference(final PTTypeConstraint origTc, final T initialRef) {
+  public PTImmutableReference(final PTTypeConstraint origTc, final T initialRef)
+      throws OPSTypeCheckException {
     super(origTc, initialRef);
     this.makeImmutable();
   }

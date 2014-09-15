@@ -42,13 +42,17 @@ public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
   }
 
   @Override
-  public boolean typeCheck(PTType a) {
-    return (a == PTNull.getSingleton()
-            || (a instanceof PTArray
+  public void typeCheck(PTType a) throws OPSTypeCheckException {
+    boolean result =
+        (a == PTNull.getSingleton()
+         || (a instanceof PTArray
               && (this.reqdDimension == ((PTArray) a).dimensions)
               && this.reqdNestedTypeConstraint.equals(((PTArray) a)
-                    .baseTypeConstraint))
-    );
+                    .baseTypeConstraint)));
+    if (!result) {
+      throw new OPSTypeCheckException("This type constraint (" + this + ") and "
+          + "a (" + a + ") are not type-compatible.");
+    }
   }
 
   @Override

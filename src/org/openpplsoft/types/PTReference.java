@@ -23,9 +23,15 @@ public class PTReference<T extends PTType> extends PTType {
    * create a constructor that does not accept an arg of type T for
    * use as the initial value to point to.
    */
-  public PTReference(final PTTypeConstraint origTc, final T initialRef) {
+  public PTReference(final PTTypeConstraint origTc, final T initialRef)
+      throws OPSTypeCheckException {
     super(origTc);
-    this.pointTo(initialRef);
+
+    try {
+      this.pointTo(initialRef);
+    } catch (final OPSImmutableRefAttemptedChangeException opsirae) {
+      throw new OPSVMachRuntimeException(opsirae.getMessage(), opsirae);
+    }
 
     // References to primitives are always immutable.
     if (origTc.isUnderlyingClassPrimitive()) {
@@ -33,18 +39,15 @@ public class PTReference<T extends PTType> extends PTType {
     }
   }
 
-  public void pointTo(final T newRef) {
+  public void pointTo(final T newRef) throws OPSImmutableRefAttemptedChangeException,
+      OPSTypeCheckException {
     if (this.isImmutable) {
-      throw new OPSVMachRuntimeException("Illegal attempt to point immutable "
+      throw new OPSImmutableRefAttemptedChangeException(
+          "Illegal attempt to point immutable "
           + "reference " + this + " to new object: " + newRef);
     }
-    if (this.getOriginatingTypeConstraint().typeCheck(newRef)) {
-      this.referencedValue = newRef;
-    } else {
-      throw new OPSVMachRuntimeException("Unable to point reference to newRef; "
-          + "newRef (" + newRef + ") is not type compatible with this "
-          + "reference's (" + this + ") underlying type constraint.");
-    }
+    this.getOriginatingTypeConstraint().typeCheck(newRef);
+    this.referencedValue = newRef;
   }
 
   public T deref() {

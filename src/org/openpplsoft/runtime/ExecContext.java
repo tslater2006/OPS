@@ -50,7 +50,11 @@ public abstract class ExecContext {
   public void declareAndInitLocalVar(final String id, final PTTypeConstraint tc,
       final PTType initialVal) {
     Scope topMostScope = this.scopeStack.peekFirst();
-    topMostScope.declareAndInitVar(id, tc, initialVal);
+    try {
+      topMostScope.declareAndInitVar(id, tc, initialVal);
+    } catch (final OPSTypeCheckException opstce) {
+      throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
+    }
   }
 
   public PTType resolveIdentifier(String id)

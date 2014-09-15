@@ -43,11 +43,15 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
    * @returns true if types match, false otherwise.
    */
   @Override
-  public boolean typeCheck(PTType a) {
-    return (a == PTNull.getSingleton()
-              || (a instanceof PTAppClassObj
-                && (this.requiredProgDefn == ((PTAppClassObj) a).progDefn))
-    );
+  public void typeCheck(PTType a) throws OPSTypeCheckException {
+    boolean result =
+        (a == PTNull.getSingleton()
+          || (a instanceof PTAppClassObj
+               && (this.requiredProgDefn == ((PTAppClassObj) a).progDefn)));
+    if (!result) {
+      throw new OPSTypeCheckException("This type constraint (" + this + ") and "
+          + "a (" + a + ") are not type-compatible.");
+    }
   }
 
   @Override

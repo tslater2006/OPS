@@ -7,9 +7,9 @@
 
 package org.openpplsoft.types;
 
-public class OPSTypeCheckException extends Exception {
+public class OPSImmutableRefAttemptedChangeException extends Exception {
 
-  public OPSTypeCheckException(final String msg) {
+  public OPSImmutableRefAttemptedChangeException(final String msg) {
     super(msg);
   }
 }

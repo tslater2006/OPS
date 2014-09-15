@@ -140,7 +140,7 @@ public final class PTArray extends PTObjectType {
   }
 
   public void PT_Push() {
-    List<PTType> args = Environment.getArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1) {
       throw new OPSVMachRuntimeException("Expected one argument.");
     }

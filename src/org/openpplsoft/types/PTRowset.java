@@ -110,7 +110,7 @@ public final class PTRowset extends PTObjectType {
    * on the OPS runtime stack.
    */
   public void PT_GetRow() {
-    final List<PTType> args = Environment.getArgsFromCallStack();
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() != 1) {
       throw new OPSVMachRuntimeException("Expected only one arg.");
     }

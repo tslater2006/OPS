@@ -16,16 +16,13 @@ public class PTReference<T extends PTType> extends PTType {
   protected T referencedValue;
   private boolean isImmutable;
 
-  public PTReference(final PTTypeConstraint origTc) {
-    super(origTc);
-
-    if (origTc.isUnderlyingClassPrimitive()) {
-      throw new OPSVMachRuntimeException("Illegal attempt to create a "
-          + "reference with a primitive type constraint without providing "
-          + "an initial value for the reference to point to.");
-    }
-  }
-
+  /**
+   * Creating a reference must involve an inital value to refer to,
+   * otherwise this.referencedValue will be null (Java null) and
+   * will cause NPEs when callers use the result of deref(). Do not
+   * create a constructor that does not accept an arg of type T for
+   * use as the initial value to point to.
+   */
   public PTReference(final PTTypeConstraint origTc, final T initialRef) {
     super(origTc);
     this.pointTo(initialRef);

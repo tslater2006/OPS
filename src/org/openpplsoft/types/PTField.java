@@ -17,9 +17,9 @@ public final class PTField extends PTObjectType {
 
   private static Map<String, Method> ptMethodTable;
 
-  private PTPrimitiveType value;
-  public RecordField recFieldDefn;
-  public PTBoolean visibleProperty;
+  private RecordField recFieldDefn;
+  private PTImmutableReference<PTPrimitiveType> valueRef;
+  private PTImmutableReference<PTBoolean> visiblePropertyRef;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -38,24 +38,36 @@ public final class PTField extends PTObjectType {
   public PTField(PTFieldTypeConstraint origTc, RecordField rfd) {
     super(origTc);
     this.recFieldDefn = rfd;
-    this.value = (PTPrimitiveType) recFieldDefn
-            .getTypeConstraintForUnderlyingValue().alloc();
-    this.visibleProperty = new PTTypeConstraint<PTBoolean>(PTBoolean.class).alloc();
+
+    final PTTypeConstraint valueTc
+        = recFieldDefn.getTypeConstraintForUnderlyingValue();
+    final PTTypeConstraint<PTBoolean> visibleTc
+        = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
+
+    this.valueRef
+        = new PTImmutableReference<PTPrimitiveType>(valueTc,
+            (PTPrimitiveType) valueTc.alloc());
+    this.visiblePropertyRef
+        = new PTImmutableReference<PTBoolean>(visibleTc, visibleTc.alloc());
   }
 
   public void setDefault() {
-    value.setDefault();
+    valueRef.deref().setDefault();
   }
 
   public PTPrimitiveType getValue() {
-    return this.value;
+    return this.valueRef.deref();
   }
 
-  public PTType dotProperty(String s) {
+  public RecordField getRecordFieldDefn() {
+    return this.recFieldDefn;
+  }
+
+  public PTImmutableReference dotProperty(String s) {
     if(s.equals("Value")) {
-      return this.value;
+      return this.valueRef;
     } else if(s.equals("Visible")) {
-      return this.visibleProperty;
+      return this.visiblePropertyRef;
     }
     return null;
   }
@@ -86,8 +98,8 @@ public final class PTField extends PTObjectType {
   @Override
   public void setReadOnly() {
     super.setReadOnly();
-    if(this.value != null) {
-      this.value.setReadOnly();
+    if(this.valueRef != null) {
+      this.valueRef.setReadOnly();
     }
   }
 
@@ -95,7 +107,7 @@ public final class PTField extends PTObjectType {
   public String toString() {
     StringBuilder b = new StringBuilder(super.toString());
     b.append(":").append(recFieldDefn.FIELDNAME);
-    b.append(",value=").append(value.toString());
+    b.append(",valueRef=").append(valueRef.toString());
     return b.toString();
   }
 }

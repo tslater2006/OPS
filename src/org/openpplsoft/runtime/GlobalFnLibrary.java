@@ -665,7 +665,7 @@ public class GlobalFnLibrary {
 
     log.debug("Copying {} with type {} from resultset to Field:{} "+
         "with type constraint {}", colName, colTypeName,
-        fldObj.recFieldDefn.FIELDNAME, origTc);
+        fldObj.getRecordFieldDefn().FIELDNAME, origTc);
 
     if(origTc.isUnderlyingClassEqualTo(PTChar.class)) {
       /*

@@ -874,24 +874,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitExprComparison(
       final PeopleCodeParser.ExprComparisonContext ctx) {
     visit(ctx.expr(0));
-    final PTPrimitiveType a1 =
+    final PTPrimitiveType lhs =
         (PTPrimitiveType) this.getNodeData(ctx.expr(0));
     visit(ctx.expr(1));
-    final PTPrimitiveType a2 =
+    final PTPrimitiveType rhs =
         (PTPrimitiveType) this.getNodeData(ctx.expr(1));
 
     PTBoolean result;
     if (ctx.l != null) {
-      result = a1.isLessThan(a2);
+      result = lhs.isLessThan(rhs);
       log.debug("isLessThan: {}? {}", ctx.getText(), result);
     } else if (ctx.g != null) {
-      result = a1.isGreaterThan(a2);
+      result = lhs.isGreaterThan(rhs);
       log.debug("isGreaterThan: {}? {}", ctx.getText(), result);
     } else if (ctx.ge != null) {
-      result = a1.isGreaterThanOrEqual(a2);
+      result = lhs.isGreaterThanOrEqual(rhs);
       log.debug("isGreaterThanOrEqual: {}? {}", ctx.getText(), result);
     } else if (ctx.le != null) {
-      result = a1.isLessThanOrEqual(a2);
+      result = lhs.isLessThanOrEqual(rhs);
       log.debug("isLessThanOrEqual: {}? {}", ctx.getText(), result);
     } else {
       throw new OPSVMachRuntimeException("Unknown comparison "
@@ -910,21 +910,42 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitExprEquality(
       final PeopleCodeParser.ExprEqualityContext ctx) {
+
     visit(ctx.expr(0));
-    log.debug("a1 = {}", this.getNodeData(ctx.expr(0)));
-    final PTPrimitiveType a1 =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(0));
+    PTPrimitiveType lhs = null;
+    final PTType rawLhs = this.getNodeData(ctx.expr(0));
+    // Expecting either a raw primitive or a ref to one.
+    if (rawLhs instanceof PTPrimitiveType) {
+      lhs = (PTPrimitiveType) rawLhs;
+    } else if (rawLhs instanceof PTReference &&
+        ((PTReference) rawLhs).deref() instanceof PTPrimitiveType) {
+      lhs = (PTPrimitiveType) ((PTReference) rawLhs).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
+          + "to one as the lhs for an equality expression.");
+    }
+
     visit(ctx.expr(1));
-    final PTPrimitiveType a2 =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(1));
+    PTPrimitiveType rhs = null;
+    final PTType rawRhs = this.getNodeData(ctx.expr(1));
+    // Expecting either a raw primitive or a ref to one.
+    if (rawRhs instanceof PTPrimitiveType) {
+      rhs = (PTPrimitiveType) rawRhs;
+    } else if (rawRhs instanceof PTReference &&
+        ((PTReference) rawRhs).deref() instanceof PTPrimitiveType) {
+      rhs = (PTPrimitiveType) ((PTReference) rawRhs).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
+          + "to one as the rhs for an equality expression.");
+    }
 
     PTBoolean result;
     if (ctx.e != null) {
-      result = a1.isEqual(a2);
+      result = lhs.isEqual(rhs);
       log.debug("isEqual: {}? {}", ctx.getText(), result);
 
     } else if (ctx.i != null) {
-      result = a1.isEqual(a2);
+      result = lhs.isEqual(rhs);
       if (result == Environment.TRUE) {
         result = Environment.FALSE;
       } else {

@@ -780,19 +780,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr());
     visit(ctx.id());
 
-    PTObjectType obj = null;
-    final PTType rawObj = this.getNodeData(ctx.expr());
-    // Expecting either a raw object or a ref to one.
-    if (rawObj instanceof PTObjectType) {
-      obj = (PTObjectType) rawObj;
-    } else if (rawObj instanceof PTReference &&
-        ((PTReference) rawObj).deref() instanceof PTObjectType) {
-      obj = (PTObjectType) ((PTReference) rawObj).deref();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either an object or a reference "
-          + "to one in visitExprDotAccess.");
-    }
-
+    final PTObjectType obj = this.getOrDerefObject(this.getNodeData(ctx.expr()));
     final PTType prop = obj.dotProperty(ctx.id().getText());
     final Callable call = obj.dotMethod(ctx.id().getText());
 
@@ -873,12 +861,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitExprComparison(
       final PeopleCodeParser.ExprComparisonContext ctx) {
+
     visit(ctx.expr(0));
-    final PTPrimitiveType lhs =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(0));
+    final PTPrimitiveType lhs = this.getOrDerefPrimitive(
+        this.getNodeData(ctx.expr(0)));
+
     visit(ctx.expr(1));
-    final PTPrimitiveType rhs =
-        (PTPrimitiveType) this.getNodeData(ctx.expr(1));
+    final PTPrimitiveType rhs = this.getOrDerefPrimitive(
+        this.getNodeData(ctx.expr(1)));
 
     PTBoolean result;
     if (ctx.l != null) {
@@ -912,32 +902,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.ExprEqualityContext ctx) {
 
     visit(ctx.expr(0));
-    PTPrimitiveType lhs = null;
-    final PTType rawLhs = this.getNodeData(ctx.expr(0));
-    // Expecting either a raw primitive or a ref to one.
-    if (rawLhs instanceof PTPrimitiveType) {
-      lhs = (PTPrimitiveType) rawLhs;
-    } else if (rawLhs instanceof PTReference &&
-        ((PTReference) rawLhs).deref() instanceof PTPrimitiveType) {
-      lhs = (PTPrimitiveType) ((PTReference) rawLhs).deref();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
-          + "to one as the lhs for an equality expression.");
-    }
+    final PTPrimitiveType lhs = this.getOrDerefPrimitive(
+        this.getNodeData(ctx.expr(0)));
 
     visit(ctx.expr(1));
-    PTPrimitiveType rhs = null;
-    final PTType rawRhs = this.getNodeData(ctx.expr(1));
-    // Expecting either a raw primitive or a ref to one.
-    if (rawRhs instanceof PTPrimitiveType) {
-      rhs = (PTPrimitiveType) rawRhs;
-    } else if (rawRhs instanceof PTReference &&
-        ((PTReference) rawRhs).deref() instanceof PTPrimitiveType) {
-      rhs = (PTPrimitiveType) ((PTReference) rawRhs).deref();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
-          + "to one as the rhs for an equality expression.");
-    }
+    final PTPrimitiveType rhs = this.getOrDerefPrimitive(
+        this.getNodeData(ctx.expr(1)));
 
     PTBoolean result;
     if (ctx.e != null) {
@@ -1417,20 +1387,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.eFilter.emit(ctx);
 
     visit(ctx.expr());
-
-    PTPrimitiveType baseExpr = null;
-    final PTType rawBaseExpr = this.getNodeData(ctx.expr());
-    // Expecting either a raw primitive or a ref to one.
-    if (rawBaseExpr instanceof PTPrimitiveType) {
-      baseExpr = (PTPrimitiveType) rawBaseExpr;
-    } else if (rawBaseExpr instanceof PTReference &&
-        ((PTReference) rawBaseExpr).deref() instanceof PTPrimitiveType) {
-      baseExpr = (PTPrimitiveType) ((PTReference) rawBaseExpr).deref();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
-          + "to one as the base expr for an Evaluate statement.");
-    }
-
+    final PTPrimitiveType baseExpr = this.getOrDerefPrimitive(
+        this.getNodeData(ctx.expr()));
     log.debug("Interpreting Evaluate stmt; conditional base value is {}", baseExpr);
 
     final EvaluateConstruct evalConstruct = new EvaluateConstruct(baseExpr);
@@ -1764,6 +1722,30 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             throw opstce1;
         }
       }
+    }
+  }
+
+  private PTPrimitiveType getOrDerefPrimitive(final PTType rawExpr) {
+    if (rawExpr instanceof PTPrimitiveType) {
+      return (PTPrimitiveType) rawExpr;
+    } else if (rawExpr instanceof PTReference
+        && ((PTReference) rawExpr).deref() instanceof PTPrimitiveType) {
+      return (PTPrimitiveType) ((PTReference) rawExpr).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
+          + "to one (getOrDerefPrimitive).");
+    }
+  }
+
+  private PTObjectType getOrDerefObject(final PTType rawExpr) {
+    if (rawExpr instanceof PTObjectType) {
+      return (PTObjectType) rawExpr;
+    } else if (rawExpr instanceof PTReference
+        && ((PTReference) rawExpr).deref() instanceof PTObjectType) {
+      return (PTObjectType) ((PTReference) rawExpr).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either an object or a reference "
+          + "to one (getOrDerefObject).");
     }
   }
 

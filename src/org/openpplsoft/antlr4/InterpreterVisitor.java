@@ -748,11 +748,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.ExprAddSubContext ctx) {
 
     visit(ctx.expr(0));
-    final PTNumberType lhs =
-        (PTNumberType) this.getNodeData(ctx.expr(0));
+    final PTNumberType lhs = this.getOrDerefNumber(
+        this.getNodeData(ctx.expr(0)));
+
     visit(ctx.expr(1));
-    final PTNumberType rhs =
-        (PTNumberType) this.getNodeData(ctx.expr(1));
+    final PTNumberType rhs = this.getOrDerefNumber(
+        this.getNodeData(ctx.expr(1)));
 
     if (ctx.a != null) {
       this.setNodeData(ctx, lhs.add(rhs));

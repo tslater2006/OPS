@@ -358,7 +358,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     // Get value of conditional expression.
     visit(ctx.expr());
     final boolean exprResult =
-        ((PTBoolean) this.getNodeData(ctx.expr())).read();
+        getOrDerefBoolean(this.getNodeData(ctx.expr())).read();
 
     // If expression evaluates to true, visit the conditional body;
     // otherwise, visit the Else body if it exists.
@@ -841,11 +841,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     //log.debug("BEGIN visitExprArrayIndex; expr is {}", ctx.expr().getText());
 
     visit(ctx.expr());
-    PTType t = this.getNodeData(ctx.expr());
+    PTType t = this.getOrDeref(this.getNodeData(ctx.expr()));
 
     for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
       visit(argCtx);
-      PTType indexExpr = this.getNodeData(argCtx);
+      PTType indexExpr = getOrDeref(this.getNodeData(argCtx));
 //      log.debug("About to index into {} with index expr {}.",
 //        t, indexExpr);
 
@@ -1745,6 +1745,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
   }
 
+  private PTType getOrDeref(final PTType rawExpr) {
+    if (rawExpr instanceof PTReference) {
+      return ((PTReference) rawExpr).deref();
+    }
+    return rawExpr;
+  }
+
   private PTPrimitiveType getOrDerefPrimitive(final PTType rawExpr) {
     if (rawExpr instanceof PTPrimitiveType) {
       return (PTPrimitiveType) rawExpr;
@@ -1778,6 +1785,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else {
       throw new OPSVMachRuntimeException("Expected either a number or a reference "
           + "to one (getOrDerefNumber).");
+    }
+  }
+
+  private PTBoolean getOrDerefBoolean(final PTType rawExpr) {
+    if (rawExpr instanceof PTBoolean) {
+      return (PTBoolean) rawExpr;
+    } else if (rawExpr instanceof PTReference
+        && ((PTReference) rawExpr).deref() instanceof PTBoolean) {
+      return (PTBoolean) ((PTReference) rawExpr).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a boolean or a reference "
+          + "to one (getOrDerefBoolean).");
     }
   }
 

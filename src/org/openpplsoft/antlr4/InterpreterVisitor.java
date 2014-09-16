@@ -413,7 +413,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
 
     this.eFilter.emit(ctx);
-    while (counter.isLessThanOrEqual(toExpr) == Environment.TRUE) {
+    while (counter.isLessThanOrEqual(toExpr).read()) {
 
       try {
         visit(ctx.stmtList());
@@ -423,7 +423,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
 
       // Increment and set new value of incrementing expression.
-      counter.copyValueFrom(counter.add(Environment.getFromLiteralPool(1)));
+      counter.copyValueFrom(counter.add(new PTInteger(1)));
 
       this.eFilter.emit(ctx.endfor);
       this.eFilter.emit(ctx);
@@ -930,10 +930,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     } else if (ctx.i != null) {
       result = lhs.isEqual(rhs);
-      if (result == Environment.TRUE) {
-        result = Environment.FALSE;
+      if (result.read()) {
+        result = new PTBoolean(false);
       } else {
-        result = Environment.TRUE;
+        result = new PTBoolean(true);
       }
       log.debug("isNotEqual: {}? {}", ctx.getText(), result);
 
@@ -964,7 +964,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * otherwise evaluate rhs and bubble up its value.
        */
       if (lhs.read()) {
-        this.setNodeData(ctx, Environment.TRUE);
+        this.setNodeData(ctx, new PTBoolean(true));
       } else {
         visit(ctx.expr(1));
         this.setNodeData(ctx, this.getNodeData(ctx.expr(1)));
@@ -976,9 +976,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PTBoolean rhs = (PTBoolean) this.getNodeData(ctx.expr(1));
 
       if (lhs.read() && rhs.read()) {
-        this.setNodeData(ctx, Environment.TRUE);
+        this.setNodeData(ctx, new PTBoolean(true));
       } else {
-        this.setNodeData(ctx, Environment.FALSE);
+        this.setNodeData(ctx, new PTBoolean(false));
       }
     } else {
       throw new OPSInterpretException("Unsupported boolean comparison "
@@ -1233,17 +1233,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     if (ctx.IntegerLiteral() != null) {
 
-      final PTType ptr = Environment.getFromLiteralPool(
-          new Integer(ctx.IntegerLiteral().getText()));
+      final PTType ptr = new PTInteger(new Integer(ctx.IntegerLiteral().getText()));
       this.setNodeData(ctx, ptr);
 
     } else if (ctx.BoolLiteral() != null) {
 
       final String b = ctx.BoolLiteral().getText();
       if (b.equals("True") || b.equals("true")) {
-        this.setNodeData(ctx, Environment.TRUE);
+        this.setNodeData(ctx, new PTBoolean(true));
       } else {
-        this.setNodeData(ctx, Environment.FALSE);
+        this.setNodeData(ctx, new PTBoolean(false));
       }
 
     } else if (ctx.DecimalLiteral() != null) {
@@ -1260,8 +1259,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * strings ("") are a possibility here.
        */
       final String str = ctx.StringLiteral().getText();
-      this.setNodeData(ctx, Environment.getFromLiteralPool(
-          str.substring(1, str.length() - 1)));
+      this.setNodeData(ctx, new PTString(str.substring(1, str.length() - 1)));
     } else {
       throw new OPSVMachRuntimeException("Unable to resolve literal to "
           + "a terminal node.");
@@ -1358,13 +1356,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           }
           break;
         case "string":
-          typeConstraint = new PTTypeConstraint<PTString>(PTString.class);
+          typeConstraint = PTString.getTc();
           break;
         case "date":
-          typeConstraint = new PTTypeConstraint<PTDate>(PTDate.class);
+          typeConstraint = PTDate.getTc();
           break;
         case "integer":
-          typeConstraint = new PTTypeConstraint<PTInteger>(PTInteger.class);
+          typeConstraint = PTInteger.getTc();
           break;
         case "Record":
           typeConstraint = new PTRecordTypeConstraint();
@@ -1373,10 +1371,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           typeConstraint = new PTRowsetTypeConstraint();
           break;
         case "number":
-          typeConstraint = new PTTypeConstraint<PTNumber>(PTNumber.class);
+          typeConstraint = PTNumber.getTc();
           break;
         case "boolean":
-          typeConstraint = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
+          typeConstraint = PTBoolean.getTc();
           break;
         case "Field":
           typeConstraint = new PTFieldTypeConstraint();
@@ -1480,7 +1478,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * (occurs until a Break is seen or the Evaluate statement ends).
      */
     PTBoolean eq = ((PTPrimitiveType) p1).isEqual((PTPrimitiveType) p2);
-    if (eq == Environment.TRUE || evalConstruct.trueBranchExprSeen) {
+    if (eq.read() || evalConstruct.trueBranchExprSeen) {
       evalConstruct.trueBranchExprSeen = true;
       visit(ctx.stmtList());
     }

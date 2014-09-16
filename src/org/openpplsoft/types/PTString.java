@@ -18,14 +18,25 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTString extends PTPrimitiveType<String> {
 
+  private static PTTypeConstraint<PTString> stringTc;
+
+  static {
+    stringTc = new PTTypeConstraint<PTString>(PTString.class);
+  }
+
   private String s;
 
-  /**
-   * Constructs a new instance of the string data type;
-   * can only be called by internal methods.
-   */
+  public PTString(final String initialVal) {
+    super(stringTc);
+    this.s = initialVal;
+  }
+
   public PTString(final PTTypeConstraint origTc) {
     super(origTc);
+  }
+
+  public static PTTypeConstraint<PTString> getTc() {
+    return stringTc;
   }
 
   @Override
@@ -56,8 +67,7 @@ public final class PTString extends PTPrimitiveType<String> {
    *   value
    */
   public PTString concat(final PTString other) {
-    return Environment.getFromLiteralPool(
-      this.read().concat(other.read()));
+    return new PTString(this.read().concat(other.read()));
   }
 
   @Override
@@ -79,9 +89,9 @@ public final class PTString extends PTPrimitiveType<String> {
       throw new OPSDataTypeException("Expected op to be PTString.");
     }
     if (this.s.equals(((PTString) op).read())) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
@@ -90,9 +100,9 @@ public final class PTString extends PTPrimitiveType<String> {
       throw new OPSDataTypeException("Expected op to be PTString.");
     }
     if (this.s.compareTo(((PTString) op).read()) > 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
@@ -107,9 +117,9 @@ public final class PTString extends PTPrimitiveType<String> {
       throw new OPSDataTypeException("Expected op to be PTString.");
     }
     if (this.s.compareTo(((PTString) op).read()) < 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override

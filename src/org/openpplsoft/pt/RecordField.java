@@ -39,26 +39,26 @@ public class RecordField {
     switch(this.typeFlag) {
       case 0:  // char
         if(this.LENGTH == 1) {
-          return new PTTypeConstraint<PTChar>(PTChar.class);
+          return PTChar.getTc();
         } else {
-          return new PTTypeConstraint<PTString>(PTString.class);
+          return PTString.getTc();
         }
       case 1: // long char
-        return new PTTypeConstraint<PTString>(PTString.class);
+        return PTString.getTc();
       case 2:
-        return new PTTypeConstraint<PTNumber>(PTNumber.class);
+        return PTNumber.getTc();
       case 3: // TODO: 2 is unsigned, 3 is signed: should I distinguish?
-        return new PTTypeConstraint<PTNumber>(PTNumber.class);
+        return PTNumber.getTc();
       case 4:
-        return new PTTypeConstraint<PTDate>(PTDate.class);
+        return PTDate.getTc();
       case 5:
-        return new PTTypeConstraint<PTTime>(PTTime.class);
+        return PTTime.getTc();
       case 6:
-        return new PTTypeConstraint<PTDateTime>(PTDateTime.class);
+        return PTDateTime.getTc();
       case 8: // TODO: 8 is image/attachment; doesn't need to be stored.
-        return new PTTypeConstraint<PTString>(PTString.class);
+        return PTString.getTc();
       case 9: // TODO: 9 is image reference; doesn't need to be stored.
-        return new PTTypeConstraint<PTString>(PTString.class);
+        return PTString.getTc();
         default:
       throw new OPSVMachRuntimeException("Unable to determine " +
         "appropriate type constraint for underlying record field " +

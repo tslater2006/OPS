@@ -16,21 +16,14 @@ import org.apache.logging.log4j.*;
 
 public class Environment {
 
-  public static PTBoolean TRUE;
-  public static PTBoolean FALSE;
-
   public static Scope globalScope;
   public static Scope componentScope;
 
   // i.e., XENCSDEV, ENTCSDEV (appears in PS URLs)
   public static String psEnvironmentName;
 
-  private static Map<String, PTPrimitiveType> systemVarTable;
+  private static Map<String, String> systemVarTable;
   private static Map<String, Callable> systemFuncTable;
-
-  private static Map<Integer, PTInteger> integerLiteralPool;
-  private static Map<String, PTString> stringLiteralPool;
-  private static Map<BigDecimal, PTNumber> numberLiteralPool;
 
   private static Stack<PTType> callStack;
 
@@ -42,52 +35,25 @@ public class Environment {
 
   static {
 
-    // Load static boolean literals.
-    TRUE = new PTTypeConstraint<PTBoolean>(PTBoolean.class).alloc();
-    TRUE.setReadOnly();
-    TRUE.systemWrite(true);
-
-    FALSE = new PTTypeConstraint<PTBoolean>(PTBoolean.class).alloc();
-    FALSE.setReadOnly();
-    FALSE.systemWrite(false);
-
     // Setup global and component scopes.
     globalScope = new Scope(Scope.Lvl.GLOBAL);
     componentScope = new Scope(Scope.Lvl.COMPONENT);
 
-    // Create memory pools for supported data types.
-    integerLiteralPool = new HashMap<Integer, PTInteger>();
-    stringLiteralPool = new HashMap<String, PTString>();
-    numberLiteralPool = new HashMap<BigDecimal, PTNumber>();
-
-    // Allocate space for system vars, mark each as read-only.
-    systemVarTable = new HashMap<String, PTPrimitiveType>();
+    // Set up system var table.
+    systemVarTable = new HashMap<String, String>();
     for(String varName : supportedGlobalVars) {
-      PTString newStr = new PTTypeConstraint<PTString>(PTString.class).alloc();
-      newStr.setReadOnly();
-      systemVarTable.put(varName, newStr);
+      systemVarTable.put(varName, null);
     }
 
     // Set up constant system variables (these will never change during runtime).
-    PTString actionUpdateDisplay =
-        new PTTypeConstraint<PTString>(PTString.class).alloc();
-    actionUpdateDisplay.write("U");
-    actionUpdateDisplay.setReadOnly();
-    systemVarTable.put("%Action_UpdateDisplay", actionUpdateDisplay);
-
-    PTString actionAdd =
-        new PTTypeConstraint<PTString>(PTString.class).alloc();
-    actionAdd.write("A");
-    actionAdd.setReadOnly();
-    systemVarTable.put("%Action_Add", actionAdd);
-
-    // Set up system variable aliases. TODO: When I have a few of these, create these dynamically.
-    systemVarTable.put("%UserId", systemVarTable.get("%OperatorId"));
+    systemVarTable.put("%Action_UpdateDisplay", "U");
+    systemVarTable.put("%Action_Add", "A");
 
     // Initialize the call stack.
     callStack = new Stack<PTType>();
 
-    // Cache references to global PT functions to avoid repeated reflection lookups at runtime.
+    // Cache references to global PT functions t
+    // avoid repeated reflection lookups at runtime.
     Method[] methods = GlobalFnLibrary.class.getMethods();
     systemFuncTable = new HashMap<String, Callable>();
     for(Method m : methods) {
@@ -131,10 +97,8 @@ public class Environment {
     return callStack.size();
   }
 
-  public static void setSystemVar(String var, String value) {
-    // Assuming var is mapped to a PTString for now.
-    ((PTString)systemVarTable.get(var)).systemWrite(
-      Environment.getFromLiteralPool(value).read());
+  public static void setSystemVar(final String var, final String value) {
+    systemVarTable.put(var, value);
   }
 
   public static PTPrimitiveType getSystemVar(String var) {
@@ -142,10 +106,12 @@ public class Environment {
     PTPrimitiveType a = null;
     switch(var) {
       case "%Date":
-        a = new PTTypeConstraint<PTDate>(PTDate.class).alloc();
+        a = PTDate.getTc().alloc();
         break;
+      case "%UserId":
+        a = new PTString(systemVarTable.get("%OperatorId"));
       default:
-        a = systemVarTable.get(var);
+        a = new PTString(systemVarTable.get(var));
     }
 
     if(a == null) {
@@ -157,39 +123,6 @@ public class Environment {
 
   public static Callable getSystemFuncPtr(String func) {
     return systemFuncTable.get(func);
-  }
-
-  public static PTInteger getFromLiteralPool(Integer val) {
-    PTInteger p = integerLiteralPool.get(val);
-    if(p == null) {
-      p = new PTTypeConstraint<PTInteger>(PTInteger.class).alloc();
-      p.setReadOnly();
-      p.systemWrite(val);
-      integerLiteralPool.put(val, p);
-    }
-    return p;
-  }
-
-  public static PTNumber getFromLiteralPool(BigDecimal val) {
-    PTNumber p = numberLiteralPool.get(val);
-    if (p == null) {
-      p = new PTTypeConstraint<PTNumber>(PTNumber.class).alloc();
-      p.setReadOnly();
-      p.systemWrite(val);
-      numberLiteralPool.put(val, p);
-    }
-    return p;
-  }
-
-  public static PTString getFromLiteralPool(String val) {
-    PTString p = stringLiteralPool.get(val);
-    if(p == null) {
-      p = new PTTypeConstraint<PTString>(PTString.class).alloc();
-      p.setReadOnly();
-      p.systemWrite(val);
-      stringLiteralPool.put(val, p);
-    }
-    return p;
   }
 
   public static List<PTType> getDereferencedArgsFromCallStack() {

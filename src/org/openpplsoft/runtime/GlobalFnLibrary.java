@@ -60,11 +60,11 @@ public class GlobalFnLibrary {
   public static void PT_None() {
     for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(doesContainValue(arg)) {
-        Environment.pushToCallStack(Environment.FALSE);
+        Environment.pushToCallStack(new PTBoolean(false));
         return;
       }
     }
-    Environment.pushToCallStack(Environment.TRUE);
+    Environment.pushToCallStack(new PTBoolean(true));
   }
 
   /*
@@ -74,11 +74,11 @@ public class GlobalFnLibrary {
   public static void PT_All() {
     for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(!doesContainValue(arg)) {
-        Environment.pushToCallStack(Environment.FALSE);
+        Environment.pushToCallStack(new PTBoolean(false));
         return;
       }
     }
-    Environment.pushToCallStack(Environment.TRUE);
+    Environment.pushToCallStack(new PTBoolean(true));
   }
 
   /**
@@ -117,8 +117,7 @@ public class GlobalFnLibrary {
       b.append(str.read());
     }
 
-    Environment.pushToCallStack(Environment.getFromLiteralPool(
-      b.toString()));
+    Environment.pushToCallStack(new PTString(b.toString()));
     }
 
   public static void PT_Len() {
@@ -128,8 +127,8 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
-    Environment.pushToCallStack(Environment.getFromLiteralPool(
-      ((PTString)args.get(0)).read().length()));
+    Environment.pushToCallStack(
+        new PTInteger(((PTString) args.get(0)).read().length()));
   }
 
   /*
@@ -142,7 +141,7 @@ public class GlobalFnLibrary {
     if(args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
-    Environment.pushToCallStack(Environment.FALSE);
+    Environment.pushToCallStack(new PTBoolean(false));
   }
 
   public static void PT_CreateRecord() {
@@ -323,7 +322,7 @@ public class GlobalFnLibrary {
             || ((authorizedActions & UPDATE_DISPLAY_MASK) > 0)
                    && actionMode.equals("U")) {
           log.debug("IsMenuItemAuthorized: found permissible record, returning True.");
-          Environment.pushToCallStack(Environment.TRUE);
+          Environment.pushToCallStack(new PTBoolean(true));
           return;
         }
       }
@@ -343,7 +342,7 @@ public class GlobalFnLibrary {
     // access to the menu item is not authorized.
     log.debug("IsMenuItemAuthorized: no permissible records found,"
       + " returning False.");
-    Environment.pushToCallStack(Environment.FALSE);
+    Environment.pushToCallStack(new PTBoolean(false));
   }
 
   public static void PT_MsgGetText() {
@@ -387,7 +386,7 @@ public class GlobalFnLibrary {
       return;
     }
 
-    Environment.pushToCallStack(Environment.getFromLiteralPool(msg));
+    Environment.pushToCallStack(new PTString(msg));
   }
 
   public static void PT_GenerateComponentContentRelURL() {
@@ -457,7 +456,7 @@ public class GlobalFnLibrary {
     log.debug("GenerateComponentContentURL: From args, generated url: {}",
       url.toString());
 
-    Environment.pushToCallStack(Environment.getFromLiteralPool(url.toString()));
+    Environment.pushToCallStack(new PTString(url.toString()));
   }
 
   public static void PT_Truncate() {
@@ -479,7 +478,7 @@ public class GlobalFnLibrary {
     log.debug("Truncated {} to have {} decimal digits; result is: {}",
       bigDec, desiredDecimalDigits, truncatedBigDec);
 
-    Environment.pushToCallStack(Environment.getFromLiteralPool(truncatedBigDec));
+    Environment.pushToCallStack(new PTNumber(truncatedBigDec));
   }
 
   public static void PT_String() {
@@ -492,8 +491,8 @@ public class GlobalFnLibrary {
           + "of type PTInteger to String.");
     }
 
-    Environment.pushToCallStack(Environment.getFromLiteralPool(
-        ((PTInteger) args.get(0)).readAsString()));
+    Environment.pushToCallStack(
+        new PTString(((PTInteger) args.get(0)).readAsString()));
   }
 
   public static void PT_GetHTMLText() {
@@ -511,8 +510,7 @@ public class GlobalFnLibrary {
     // If no additional args were provided, there is no need to look for
     // bind placeholders in the html text.
     if (args.size() == 1) {
-      Environment.pushToCallStack(
-        Environment.getFromLiteralPool(html.getHTMLText()));
+      Environment.pushToCallStack(new PTString(html.getHTMLText()));
       return;
     }
 
@@ -540,8 +538,7 @@ public class GlobalFnLibrary {
       htmlStr = bindMatcher.replaceAll(((PTString) args.get(i)).read());
     }
 
-    Environment.pushToCallStack(
-        Environment.getFromLiteralPool(htmlStr));
+    Environment.pushToCallStack(new PTString(htmlStr));
   }
 
   public static void PT_Proper() {
@@ -558,8 +555,7 @@ public class GlobalFnLibrary {
 
     // If the str is less than 2 chars long, return it's uppercased form.
     if (str.length() < 2) {
-      Environment.pushToCallStack(
-          Environment.getFromLiteralPool(str.toUpperCase()));
+      Environment.pushToCallStack(new PTString(str.toUpperCase()));
     }
 
     /*
@@ -583,8 +579,7 @@ public class GlobalFnLibrary {
     bindMatcher.appendTail(sb);
 
     // At this point, string is ready to be returned to caller.
-    Environment.pushToCallStack(
-        Environment.getFromLiteralPool(sb.toString()));
+    Environment.pushToCallStack(new PTString(sb.toString()));
   }
 
   public static void PT_Lower() {
@@ -598,8 +593,7 @@ public class GlobalFnLibrary {
     }
 
     Environment.pushToCallStack(
-        Environment.getFromLiteralPool(
-            ((PTString) args.get(0)).read().toLowerCase()));
+        new PTString(((PTString) args.get(0)).read().toLowerCase()));
   }
 
   public static void PT_GetSQL() {

@@ -33,7 +33,7 @@ public final class PTDefnLiteral extends PTObjectType {
    * resolves to "SA_LEARNER_SERVICES".
    */
   public PTType dotProperty(String s) {
-    return Environment.getFromLiteralPool(s);
+    return new PTString(s);
   }
 
   public Callable dotMethod(String s) {

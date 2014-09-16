@@ -12,18 +12,18 @@ import org.openpplsoft.pt.Record;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PTAnyTypeConstraint extends PTTypeConstraint<PTAny> {
+public class PTAnyTypeConstraint extends PTTypeConstraint<PTType> {
 
   private static Logger log = LogManager.getLogger(
       PTAnyTypeConstraint.class.getName());
 
   public PTAnyTypeConstraint() {
-    super(PTAny.class);
+    super(PTType.class);
   }
 
   @Override
-  public PTAny alloc() {
-    return new PTAny(this);
+  public PTType alloc() {
+    return PTNull.getSingleton();
   }
 
   /**

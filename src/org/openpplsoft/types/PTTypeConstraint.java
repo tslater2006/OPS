@@ -21,7 +21,7 @@ public class PTTypeConstraint<T extends PTType> {
 
   protected Class<T> underlyingClass;
 
-  public PTTypeConstraint(final Class<T> clazz) {
+  protected PTTypeConstraint(final Class<T> clazz) {
     this.underlyingClass = clazz;
   }
 

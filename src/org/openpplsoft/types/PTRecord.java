@@ -234,11 +234,11 @@ public final class PTRecord extends PTObjectType {
        * Although multiple rows may exist in the ResultSet,
        * only one row is read by SelectByKeyEffDt.
        */
-      PTBoolean returnVal = Environment.FALSE;
+      PTBoolean returnVal = new PTBoolean(false);
       if (rs.next()) {
         GlobalFnLibrary.readRecordFromResultSet(
           this.recDefn, this, rs);
-        returnVal = Environment.TRUE;
+        returnVal = new PTBoolean(true);
       }
 
       // Return true if record was read, false otherwise.
@@ -293,13 +293,13 @@ public final class PTRecord extends PTObjectType {
        * modifying this code and the rest of this function, compare the official
        * documentation with an actual debugging session first.
        */
-      PTBoolean returnVal = Environment.FALSE;
+      PTBoolean returnVal = new PTBoolean(false);
       while (rs.next()) {
         // is this the first row in rs?
         if (rs.isFirst()) {
           GlobalFnLibrary.readRecordFromResultSet(
               this.recDefn, this, rs);
-          returnVal = Environment.TRUE;
+          returnVal = new PTBoolean(true);
           break;
         }
       }

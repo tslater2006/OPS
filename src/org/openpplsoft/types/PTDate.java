@@ -17,7 +17,13 @@ import org.openpplsoft.runtime.*;
 
 public final class PTDate extends PTPrimitiveType<String> {
 
+  private static PTTypeConstraint<PTDate> dateTc;
   private static String defaultDateOverride;
+
+  static {
+    dateTc = new PTTypeConstraint<PTDate>(PTDate.class);
+  }
+
   private String d;
 
   public PTDate(final PTTypeConstraint origTc) {
@@ -31,6 +37,10 @@ public final class PTDate extends PTPrimitiveType<String> {
       d = new SimpleDateFormat("yyyy-MM-dd")
             .format(Calendar.getInstance().getTime());
     }
+  }
+
+  public static PTTypeConstraint<PTDate> getTc() {
+    return dateTc;
   }
 
   public static void overrideDefaultDate(final String d) {
@@ -80,9 +90,9 @@ public final class PTDate extends PTPrimitiveType<String> {
       throw new OPSDataTypeException("Expected op to be PTDate.");
     }
     if(this.d.compareTo(((PTDate)op).read()) >= 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   public PTBoolean isLessThan(PTPrimitiveType op) {
@@ -95,9 +105,9 @@ public final class PTDate extends PTPrimitiveType<String> {
       throw new OPSDataTypeException("Expected op to be PTDate.");
     }
     if(this.d.compareTo(((PTDate)op).read()) <= 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   public boolean equals(Object obj) {

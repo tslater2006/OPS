@@ -61,7 +61,7 @@ public final class PTArray extends PTObjectType {
 
   public PTType dotProperty(String s) {
     if(s.equals("Len")) {
-      return Environment.getFromLiteralPool(values.size());
+      return new PTInteger(values.size());
     }
     return null;
   }

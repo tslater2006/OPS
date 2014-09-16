@@ -18,12 +18,26 @@ import org.openpplsoft.runtime.*;
 public final class PTNumber extends PTNumberType<BigDecimal> {
 
   private static Logger log = LogManager.getLogger(PTNumber.class.getName());
+  private static PTTypeConstraint<PTNumber> numTc;
+
+  static {
+    numTc = new PTTypeConstraint<PTNumber>(PTNumber.class);
+  }
 
   private boolean isInteger;
   private BigDecimal bigDec;
 
+  public PTNumber(final BigDecimal initialVal) {
+    super(numTc);
+    this.bigDec = initialVal;
+  }
+
   public PTNumber(final PTTypeConstraint origTc) {
     super(origTc);
+  }
+
+  public static PTTypeConstraint<PTNumber> getTc() {
+    return numTc;
   }
 
   public BigDecimal read() {
@@ -76,7 +90,7 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   @Override
   public PTNumberType add(PTNumberType op) {
     if(op instanceof PTInteger) {
-         return Environment.getFromLiteralPool(
+         return new PTNumber(
               this.bigDec.add(new BigDecimal(((PTInteger) op).read())));
     } else {
       throw new OPSDataTypeException("Expected PTInteger.");
@@ -102,30 +116,30 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   public PTBoolean isEqual(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
       if(this.bigDec.compareTo(((PTNumber) op).read()) == 0) {
-        return Environment.TRUE;
+        return new PTBoolean(true);
       }
     } else if(op instanceof PTInteger) {
       if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) == 0) {
-        return Environment.TRUE;
+        return new PTBoolean(true);
       }
     } else {
       throw new OPSDataTypeException("Expected op to be PTNumber or PTInteger.");
     }
 
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
       if(this.bigDec.compareTo(((PTNumber) op).read()) > 0) {
-        return Environment.TRUE;
+        return new PTBoolean(true);
       }
     } else {
       throw new OPSDataTypeException("Expected op to be PTNumber.");
     }
 
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
@@ -138,34 +152,34 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   public PTBoolean isLessThan(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
       if(this.bigDec.compareTo(((PTNumber) op).read()) < 0) {
-        return Environment.TRUE;
+        return new PTBoolean(true);
       }
     } else if(op instanceof PTInteger) {
       if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) < 0) {
-        return Environment.TRUE;
+        return new PTBoolean(true);
       }
     } else {
       throw new OPSDataTypeException("Expected op to be PTNumber "+
           "or PTInteger.");
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
   public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
       if(this.bigDec.compareTo(((PTNumber) op).read()) <= 0) {
-        return Environment.TRUE;
+        return new PTBoolean(true);
       }
     } else if(op instanceof PTInteger) {
       if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) <= 0) {
-        return Environment.TRUE;
+        return new PTBoolean(true);
       }
     } else {
       throw new OPSDataTypeException("Expected op to be PTNumber "+
           "or PTInteger.");
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override

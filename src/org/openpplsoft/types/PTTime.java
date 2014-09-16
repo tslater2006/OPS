@@ -20,7 +20,13 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTTime extends PTPrimitiveType<String> {
 
+  private static PTTypeConstraint<PTTime> timeTc;
+
   private String d;
+
+  static {
+    timeTc = new PTTypeConstraint<PTTime>(PTTime.class);
+  }
 
   public PTTime(PTTypeConstraint origTc) {
     super(origTc);
@@ -28,6 +34,10 @@ public final class PTTime extends PTPrimitiveType<String> {
     // default value is current time.
     this.d = new SimpleDateFormat("HH:mm:ss")
         .format(Calendar.getInstance().getTime());
+  }
+
+  public static PTTypeConstraint<PTTime> getTc() {
+    return timeTc;
   }
 
   @Override
@@ -79,9 +89,9 @@ public final class PTTime extends PTPrimitiveType<String> {
       throw new OPSDataTypeException("Expected op to be PTTime.");
     }
     if (this.d.compareTo(((PTTime) op).read()) >= 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
@@ -96,9 +106,9 @@ public final class PTTime extends PTPrimitiveType<String> {
       throw new OPSDataTypeException("Expected op to be PTTime.");
     }
     if (this.d.compareTo(((PTTime) op).read()) <= 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override

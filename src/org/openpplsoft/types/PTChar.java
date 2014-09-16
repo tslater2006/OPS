@@ -21,11 +21,20 @@ import org.openpplsoft.runtime.*;
 public final class PTChar extends PTPrimitiveType<Character> {
 
   private static Logger log = LogManager.getLogger(PTChar.class.getName());
+  private static PTTypeConstraint<PTChar> charTc;
 
   private Character c;
 
+  static {
+    charTc = new PTTypeConstraint<PTChar>(PTChar.class);
+  }
+
   public PTChar(PTTypeConstraint origTc) {
     super(origTc);
+  }
+
+  public static PTTypeConstraint<PTChar> getTc() {
+    return charTc;
   }
 
   @Override
@@ -79,7 +88,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
   @Override
   public PTBoolean isEqual(final PTPrimitiveType op) {
     if (op instanceof PTChar && this.c.equals(((PTChar) op).read())) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
 
     } else if(op instanceof PTString) {
         /*
@@ -88,7 +97,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
         PTString str = (PTString) op;
         if(str.read().length() == 1
             && this.c.equals(str.read().charAt(0))) {
-          return Environment.TRUE;
+          return new PTBoolean(true);
         }
 
     } else if(op instanceof PTInteger) {
@@ -97,13 +106,13 @@ public final class PTChar extends PTPrimitiveType<Character> {
          */
         if(Character.getNumericValue(this.c)
             == ((Integer) op.read()).intValue()) {
-          return Environment.TRUE;
+          return new PTBoolean(true);
         }
 
     } else {
       throw new OPSDataTypeException("Expected op to be PTChar; is: " + op);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
@@ -112,9 +121,9 @@ public final class PTChar extends PTPrimitiveType<Character> {
       throw new OPSDataTypeException("Expected op to be PTChar.");
     }
     if (this.c.compareTo(((PTChar) op).read()) > 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override
@@ -129,9 +138,9 @@ public final class PTChar extends PTPrimitiveType<Character> {
       throw new OPSDataTypeException("Expected op to be PTChar.");
     }
     if (this.c.compareTo(((PTChar) op).read()) < 0) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   @Override

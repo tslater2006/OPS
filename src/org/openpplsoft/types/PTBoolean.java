@@ -15,10 +15,25 @@ import org.openpplsoft.runtime.*;
 
 public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
+  private static PTTypeConstraint<PTBoolean> boolTc;
+
   private Boolean b;
+
+  static {
+    boolTc = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
+  }
+
+  public PTBoolean(final Boolean initialVal) {
+    super(boolTc);
+    this.b = initialVal;
+  }
 
   public PTBoolean(PTTypeConstraint origTc) {
     super(origTc);
+  }
+
+  public static PTTypeConstraint<PTBoolean> getTc() {
+    return boolTc;
   }
 
   public Boolean read() {
@@ -54,9 +69,9 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
       throw new OPSDataTypeException("Expected op to be PTBoolean.");
     }
     if(this.b.equals(((PTBoolean)op).read())) {
-      return Environment.TRUE;
+      return new PTBoolean(true);
     }
-    return Environment.FALSE;
+    return new PTBoolean(false);
   }
 
   public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {

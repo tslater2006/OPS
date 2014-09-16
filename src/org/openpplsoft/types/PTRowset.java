@@ -92,7 +92,7 @@ public final class PTRowset extends PTObjectType {
   @Override
   public PTType dotProperty(final String s) {
     if (s.equals("ActiveRowCount")) {
-      return Environment.getFromLiteralPool(this.rows.size());
+      return new PTInteger(this.rows.size());
     }
     return null;
   }
@@ -238,7 +238,7 @@ public final class PTRowset extends PTObjectType {
         final PTPrimitiveType rVal = rRow.getRecord(this.primaryRecDefn.RECNAME)
             .getFieldRef(sortFields.get(i)).deref().getValue();
 
-        if (lVal.isLessThan(rVal) == Environment.TRUE) {
+        if (lVal.isLessThan(rVal).read()) {
           if (order.equals("A")) {
             merged.add(lRow);
             l++;
@@ -247,7 +247,7 @@ public final class PTRowset extends PTObjectType {
             r++;
           }
           break;
-        } else if (lVal.isGreaterThan(rVal) == Environment.TRUE) {
+        } else if (lVal.isGreaterThan(rVal).read()) {
           if (order.equals("A")) {
             merged.add(rRow);
             r++;
@@ -366,7 +366,7 @@ public final class PTRowset extends PTObjectType {
       }
 
       // Return the number of rows read from the fill operation.
-      Environment.pushToCallStack(Environment.getFromLiteralPool(rowsRead));
+      Environment.pushToCallStack(new PTInteger(rowsRead));
 
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);

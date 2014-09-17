@@ -721,10 +721,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     visit(ctx.expr(0));
     final PTNumberType lhs =
-        (PTNumberType) this.getNodeData(ctx.expr(0));
+        this.getOrDerefNumber(this.getNodeData(ctx.expr(0)));
     visit(ctx.expr(1));
     final PTNumberType rhs =
-        (PTNumberType) this.getNodeData(ctx.expr(1));
+        this.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
 
     if (ctx.m != null) {
       this.setNodeData(ctx, lhs.mul(rhs));

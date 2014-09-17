@@ -675,6 +675,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final PTType a = Environment.popFromCallStack();
     if (!(a instanceof PTCallFrameBoundary)) {
       this.setNodeData(ctx, a);
+
+      /*
+       * Unlike app class method calls, statements involving function calls
+       * should only be re-emitted if they involve an assignment apparently.
+       * Rather than mess with checking instanceof on context objects, etc.,
+       * I'm going to re-emit if a function call resulted in a return value.
+       * If there are issues with this, it will have to involve checking
+       * whether the last emitted context was an instanceof ExprStmtAssign.
+       */
+      if (call != null && call.eCtx != null
+            && call.eCtx instanceof FunctionExecContext) {
+        this.eFilter.repeatLastEmission();
+      }
     }
 
     if (!(a instanceof PTCallFrameBoundary)
@@ -1395,7 +1408,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       PeopleCodeParser.WhenBranchContext branchCtx = branches.get(i);
       try {
         visit(branchCtx);
-      } catch (OPSBreakSignalException opsbse) {
+      } catch (final OPSBreakSignalException opsbse) {
 
         // If this is the last When branch, the Break is self-evident
         // and should not be emitted.
@@ -1485,7 +1498,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * if no true branches were seen.
      */
     if (!evalConstruct.trueBranchExprSeen) {
-      visit(ctx.stmtList());
+      try {
+        visit(ctx.stmtList());
+      } catch (final OPSBreakSignalException opsbse) {
+        this.eFilter.emit(this.lastSeenBreakContext);
+        evalConstruct.breakSeen = true;
+      }
 
       // Only emit End-Evaluate if no true branch has yet been seen.
       this.eFilter.emit(evalConstruct.endEvaluateToken);

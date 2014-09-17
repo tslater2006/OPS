@@ -478,9 +478,32 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) rawSrc);
       } else if (lRef.deref() instanceof PTField) {
         ((PTField) lRef.deref()).getValue().copyValueFrom((PTPrimitiveType) rawSrc);
+
+      // NOTE: You must look at the type constraint of the *reference* in the
+      // conditional directly below this comment, not the
+      // value it points to, b/c the value could be null and as of this writing,
+      // PTNull is a singleton and thus per-null originating type constraints
+      // are not associated with it.
+      } else if (lRef.getOriginatingTypeConstraint()
+          instanceof PTAnyTypeConstraint) {
+        /*
+         * Variables of type Any can point to objects or primitives. If an object
+         * (or Null) is asigned to the identifier, a new primitive must be alloc'ed
+         * containing a copy of the value in source operand.
+         */
+        PTPrimitiveType primCopy = (PTPrimitiveType)
+            ((PTPrimitiveType) rawSrc).getOriginatingTypeConstraint().alloc();
+        primCopy.copyValueFrom((PTPrimitiveType) rawSrc);
+        try {
+          lRef.pointTo(primCopy);
+        } catch (final OPSImmutableRefAttemptedChangeException opsirace) {
+          throw new OPSVMachRuntimeException(opsirace.getMessage(), opsirace);
+        } catch (final OPSTypeCheckException opstce) {
+          throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
+        }
       } else {
         throw new OPSVMachRuntimeException("Assignment failed; rawSrc is primitive "
-            + "but lRef dereferences to neither a primitive nor a PTField.");
+            + "but lRef dereferences to neither a primitive nor a PTField: " + lRef.deref());
       }
     } else if(rawSrc instanceof PTObjectType) {
       try {

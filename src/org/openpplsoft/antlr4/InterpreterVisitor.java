@@ -958,7 +958,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     if (ctx.op.getText().equals("Or")) {
       visit(ctx.expr(0));
-      final PTBoolean lhs = (PTBoolean) this.getNodeData(ctx.expr(0));
+      final PTBoolean lhs = this.getOrDerefBoolean(this.getNodeData(ctx.expr(0)));
 
       /*
        * Short-circuit evaluation: if lhs is true, this expression is true,
@@ -972,9 +972,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
     } else if (ctx.op.getText().equals("And")) {
       visit(ctx.expr(0));
-      final PTBoolean lhs = (PTBoolean) this.getNodeData(ctx.expr(0));
+      final PTBoolean lhs = this.getOrDerefBoolean(this.getNodeData(ctx.expr(0)));
       visit(ctx.expr(1));
-      final PTBoolean rhs = (PTBoolean) this.getNodeData(ctx.expr(1));
+      final PTBoolean rhs = this.getOrDerefBoolean(this.getNodeData(ctx.expr(1)));
 
       if (lhs.read() && rhs.read()) {
         this.setNodeData(ctx, new PTBoolean(true));

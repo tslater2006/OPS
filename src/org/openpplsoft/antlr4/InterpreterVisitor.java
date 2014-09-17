@@ -1706,7 +1706,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       FormalParam fp = formalParams.get(i);
 
       if (this.eCtx instanceof AppClassObjExecContext) {
-        /**
+        /*
          * App class obj methods only allow references to be passed
          * when using the "out" reserved word in the formal parameter
          * definition. This is not supported at this time, so I am
@@ -1716,6 +1716,33 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         if (arg instanceof PTReference) {
           arg = ((PTReference) arg).deref();
         }
+
+        /*
+         * App class obj methods do not allow pass-by-reference of
+         * primitives, unlike PeopleCode functions. The only exception to
+         * this involves use of the "out" reserved word, which is not supported
+         * at this time.
+         * TODO: Keep this in mind.
+         */
+        if (arg instanceof PTPrimitiveType) {
+          PTPrimitiveType primCopy = (PTPrimitiveType)
+              ((PTPrimitiveType) arg).getOriginatingTypeConstraint().alloc();
+          primCopy.copyValueFrom((PTPrimitiveType) arg);
+          arg = primCopy;
+        }
+      } else if (this.eCtx instanceof FunctionExecContext) {
+        /*
+         * PeopleCode functions allow pass-by-reference for both primitives
+         * and objects. If any raw typed object is on the call stack, it
+         * must first be wrapped in a reference.
+         */
+        if (!(arg instanceof PTReference)) {
+          try {
+            arg = new PTReference<PTType>(arg.getOriginatingTypeConstraint(), arg);
+          } catch (final OPSTypeCheckException opstce) {
+            throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
+          }
+        }
       } else {
         throw new OPSVMachRuntimeException("Unexpected execution context "
             + "in which args are being bound to formal parameters.");
@@ -1724,7 +1751,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       try {
         localScope.declareAndInitVar(fp.id, fp.typeConstraint, arg);
       } catch (final OPSTypeCheckException opstce1) {
-        /**
+        /*
          * It's possible that the argument is a field object that
          * needs to have its "default method" (getValue()) called prior
          * to binding it to the formal param identifier.

@@ -998,10 +998,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitExprConcat(
       final PeopleCodeParser.ExprConcatContext ctx) {
+
     visit(ctx.expr(0));
-    final PTString lhs = (PTString) this.getNodeData(ctx.expr(0));
+    final PTString lhs =
+        (PTString) this.getOrDerefPrimitive(this.getNodeData(ctx.expr(0)));
     visit(ctx.expr(1));
-    final PTString rhs = (PTString) this.getNodeData(ctx.expr(1));
+    final PTString rhs =
+        (PTString) this.getOrDerefPrimitive(this.getNodeData(ctx.expr(1)));
 
     this.setNodeData(ctx, lhs.concat(rhs));
     return null;
@@ -1705,18 +1708,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       PTType arg = args.get(i);
       FormalParam fp = formalParams.get(i);
 
-      if (this.eCtx instanceof AppClassObjExecContext) {
-        /*
-         * App class obj methods only allow references to be passed
-         * when using the "out" reserved word in the formal parameter
-         * definition. This is not supported at this time, so I am
-         * unwrapping all references for now.
-         * TODO(mquinn): Keep this in mind.
-         */
-        if (arg instanceof PTReference) {
-          arg = ((PTReference) arg).deref();
-        }
+      /*
+       * For all execution contexts, any args that are references must
+       * be unwrapped to their raw types, otherwise the formal parameter
+       * identifier references created at the call site will refer to
+       * the references themselves.
+       */
+      if (arg instanceof PTReference) {
+        arg = ((PTReference) arg).deref();
+      }
 
+      if (this.eCtx instanceof AppClassObjExecContext) {
         /*
          * App class obj methods do not allow pass-by-reference of
          * primitives, unlike PeopleCode functions. The only exception to
@@ -1733,16 +1735,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       } else if (this.eCtx instanceof FunctionExecContext) {
         /*
          * PeopleCode functions allow pass-by-reference for both primitives
-         * and objects. If any raw typed object is on the call stack, it
-         * must first be wrapped in a reference.
+         * and objects, so there is no need to copy primitives here, unlike
+         * for app class execution contexts.
          */
-        if (!(arg instanceof PTReference)) {
-          try {
-            arg = new PTReference<PTType>(arg.getOriginatingTypeConstraint(), arg);
-          } catch (final OPSTypeCheckException opstce) {
-            throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
-          }
-        }
       } else {
         throw new OPSVMachRuntimeException("Unexpected execution context "
             + "in which args are being bound to formal parameters.");
@@ -1787,7 +1782,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       return (PTPrimitiveType) ((PTReference) rawExpr).deref();
     } else {
       throw new OPSVMachRuntimeException("Expected either a primitive or a reference "
-          + "to one (getOrDerefPrimitive).");
+          + "to one (getOrDerefPrimitive): " + rawExpr);
     }
   }
 

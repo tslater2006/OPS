@@ -10,6 +10,7 @@ package org.openpplsoft.types;
 import java.lang.reflect.Method;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ public final class PTSQL extends PTObjectType {
   private PTPrimitiveType[] bindVals;
   private OPSStmt ostmt;
   private ResultSet rs;
+  private ResultSetMetaData rsMetaData;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -92,6 +94,7 @@ public final class PTSQL extends PTObjectType {
 
     try {
       this.rs = ostmt.executeQuery();
+      this.rsMetaData = rs.getMetaData();
     } catch (final java.sql.SQLException sqle) {
       log.fatal(sqle.getMessage(), sqle);
       System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
@@ -100,12 +103,70 @@ public final class PTSQL extends PTObjectType {
 
   @Override
   public PTType dotProperty(final String s) {
-    throw new OPSDataTypeException("dotProperty on PTSQL is not supported.");
+    return null;
   }
 
   @Override
   public Callable dotMethod(final String s) {
-    throw new OPSDataTypeException("dotMethod on PTSQL is not supported.");
+    if (ptMethodTable.containsKey(s)) {
+      return new Callable(ptMethodTable.get(s), this);
+    }
+    return null;
+  }
+
+  /**
+   * Returns True if a row was fetched; false otherwise.
+   */
+  public void PT_Fetch() {
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    if (args.size() == 0) {
+      throw new OPSVMachRuntimeException("Expected at least one arg.");
+    }
+
+    try {
+      if (rs.next()) {
+        if (this.rsMetaData.getColumnCount() != args.size()) {
+          throw new OPSVMachRuntimeException("Fetch failed; the number of args "
+              + "passed to Fetch must equal the number of columns returned by the "
+              + "underlying SQL statement.");
+        }
+
+        for (int i = 0; i < args.size() && i < this.rsMetaData.getColumnCount(); i++) {
+          final PTType arg = args.get(i);
+          if (!(arg instanceof PTReference)) {
+            throw new OPSVMachRuntimeException("Fetch failed; expected a reference "
+                + "(variable) as one of the arguments but found: " + arg);
+          }
+
+          /**
+           * TODO(mquinn): Because we cannot rely on the arg's type (can be Any)
+           * to determine how to read the underlying field from the database,
+           * I will likely need to access Field metadata to determine exactly
+           * which raw PTType should be created. Until then, I am passing only
+           * strings. This works for now but will need to change.
+           */
+          final String colName = this.rsMetaData.getColumnName(i+1);
+          final String colTypeName = this.rsMetaData.getColumnTypeName(i+1);
+          switch(colTypeName) {
+            case "VARCHAR":
+              GlobalFnLibrary.assign(arg, new PTString(rs.getString(colName)));
+              break;
+            case "VARCHAR2":
+              GlobalFnLibrary.assign(arg, new PTString(rs.getString(colName)));
+              break;
+            default:
+              throw new OPSVMachRuntimeException("Unexpected colTypeName in Fetch: "
+                  + colTypeName);
+          }
+        }
+
+        Environment.pushToCallStack(new PTBoolean(true));
+      } else {
+        Environment.pushToCallStack(new PTBoolean(false));
+      }
+    } catch (final java.sql.SQLException sqe) {
+      throw new OPSVMachRuntimeException(sqe.getMessage(), sqe);
+    }
   }
 
   @Override

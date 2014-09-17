@@ -277,6 +277,8 @@ public abstract class PeopleCodeProg {
   public Function getFunction(final String funcName) {
     // Remember: keys in table are lower-cased b/c PS does not distinguish
     // b/w function names of differing cases.
+    log.debug("Retrieving func {}: {}", funcName,
+        this.funcTable.get(funcName.toLowerCase()));
     return this.funcTable.get(funcName.toLowerCase());
   }
 

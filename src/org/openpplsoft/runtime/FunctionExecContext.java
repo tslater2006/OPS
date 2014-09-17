@@ -9,6 +9,8 @@ package org.openpplsoft.runtime;
 
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.types.PTTypeConstraint;
+
 import org.antlr.v4.runtime.tree.*;
 
 /**
@@ -20,7 +22,7 @@ public class FunctionExecContext extends ExecContext {
   public String funcName;
   public ParseTree funcNodeToRun;
 
-  public FunctionExecContext(PeopleCodeProg prog, String fnName) {
+  public FunctionExecContext(final PeopleCodeProg prog, final String fnName) {
     super(prog);
 
     // REMEMBER: We deliberately used the function name in the

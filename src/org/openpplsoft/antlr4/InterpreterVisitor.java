@@ -486,6 +486,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitStmtReturn(final PeopleCodeParser.StmtReturnContext ctx) {
     this.eFilter.emit(ctx);
+
+    // If the Return expression is non-null, it must be type-checked against
+    // the type declared in the method or function signature.
     if (ctx.expr() != null) {
       visit(ctx.expr());
 
@@ -495,22 +498,35 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         retVal = ((PTReference) retVal).deref();
       }
 
-      log.debug("Return value is: {}",  retVal);
-
+      PTTypeConstraint rTc = null;
       if (this.eCtx instanceof AppClassObjExecContext) {
-        try {
-          ((AppClassObjExecContext) this.eCtx)
-              .expectedReturnTypeConstraint.typeCheck(retVal);
-          Environment.pushToCallStack(retVal);
-        } catch (final OPSTypeCheckException opstce) {
-          throw new OPSVMachRuntimeException("Value returned in app class "
-              + "obj execution context does not match the expected type.", opstce);
-        }
+        rTc = ((AppClassObjExecContext) this.eCtx)
+            .expectedReturnTypeConstraint;
+      } else if (this.eCtx instanceof FunctionExecContext) {
+        // Unlike app classes, which have all method signatures in the initial
+        // class block declaration, function signatures are parsed on-demand, prior
+        // to being interpreted. Thus, the expected return type constraint of a
+        // function is not necessarily known at the moment the FunctionExecContext
+        // is instantiated, so it must be retrieved now, since we know the function
+        // signature had to be processed in order for the function to be executing
+        // in the first place.
+        rTc = this.eCtx.prog.getFunction(((FunctionExecContext) this.eCtx).funcName)
+            .returnTypeConstraint;
       } else {
-        throw new OPSVMachRuntimeException("Must type check return values "
-            + "in non-app class execution contexts.");
+        throw new OPSVMachRuntimeException("Return statement encountered in "
+            + "unexpected execution context; unable to typecheck it.");
+      }
+
+      try {
+        rTc.typeCheck(retVal);
+        Environment.pushToCallStack(retVal);
+      } catch (final OPSTypeCheckException opstce) {
+        throw new OPSVMachRuntimeException("Return statement expression ("
+            + retVal + ") does not match the expected return type ("
+            + rTc + ").", opstce);
       }
     }
+
     throw new OPSReturnException(ctx.getText());
   }
 

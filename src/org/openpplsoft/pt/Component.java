@@ -253,17 +253,45 @@ public class Component {
         final Record recDefn = recFldBuf.getRecDefn();
         final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
             recFldBuf.getFldName());
+        final PTField fldObj =
+            ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
+                recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref();
+        final PTPrimitiveType fldValue = fldObj.getValue();
 
-        if (recProgList == null) {
+        // If field is not blank, don't continue field default processing on it.
+        if (!fldValue.isBlank()) {
           continue;
         }
 
-        for(PeopleCodeProg prog : recProgList) {
+        // Must check for *non-constant* (i.e., from a field on another record)
+        // possibility first.
+        if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
+          throw new OPSVMachRuntimeException("TODO: Support non constant field default.");
+          // continue;
+        }
+
+        if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
+          throw new OPSVMachRuntimeException("TODO: Support constant field default.");
+          // continue;
+        }
+
+        // At this point, if no field default value exists, and if there are no
+        // FieldDefault programs on this record, nothing more to do; skip to next
+        // record field buffer.
+        if (recProgList == null) {
+          continue;
+        } else {
+          throw new OPSVMachRuntimeException("TODO: Instead of looping through "
+              + "FieldDefault programs on the record, explicitly look up this "
+              + "record field to see if a program exists.");
+        }
+
+        /*for(PeopleCodeProg prog : recProgList) {
           if (prog.event.equals("FieldDefault")) {
             final PeopleCodeProg p = DefnCache.getProgram(prog);
             final ExecContext eCtx = new ProgramExecContext(p);
             final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-            interpreter.run();
+            interpreter.run();*/
 
             /*
              * If the field's value is marked as updated after running
@@ -273,7 +301,7 @@ public class Component {
              * the comp buffer access code below needs to be genericized to
              * other scroll levels.
              */
-            final PTPrimitiveType fldValue =
+           /* final PTPrimitiveType fldValue =
                 ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
                 recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref()
                 .getValue();
@@ -282,7 +310,7 @@ public class Component {
                 recDefn.RECNAME, recFldBuf.getFldName(), "from peoplecode"));
             }
           }
-        }
+        }*/
       }
     }
   }

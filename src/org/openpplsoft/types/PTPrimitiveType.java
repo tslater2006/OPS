@@ -38,6 +38,7 @@ public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType
   public void write(T newValue) {
     this.checkIsWriteable();
     this.value = newValue;
+    this.markAsUpdated();
   }
 
   public void systemWrite(T newValue) {
@@ -48,7 +49,7 @@ public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType
     this.updatedFlag = true;
   }
 
-  public boolean getUpdatedFlag() {
+  public boolean isMarkedAsUpdated() {
     return this.updatedFlag;
   }
 

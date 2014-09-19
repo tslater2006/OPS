@@ -78,6 +78,6 @@ public class PCFldDefaultEmission implements IEmission {
   @Override
   public String toString() {
     return "-: " + this.ptRECNAME + "." + this.ptFLDNAME
-        + (this.constantFlag ? " constant " : " ") + this.defaultedValue;
+        + (this.constantFlag ? " constant " : " ") + "default " + this.defaultedValue;
   }
 }

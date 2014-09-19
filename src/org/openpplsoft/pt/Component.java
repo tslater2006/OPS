@@ -22,6 +22,7 @@ import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
+import org.openpplsoft.trace.*;
 import org.openpplsoft.types.*;
 
 /**
@@ -246,9 +247,10 @@ public class Component {
     ComponentBuffer.resetCursors();
     while ((buf = ComponentBuffer.next()) != null) {
       if (buf instanceof RecordFieldBuffer) {
-        Record recDefn = ((RecordFieldBuffer) buf).getRecDefn();
-        List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
-            ((RecordFieldBuffer) buf).getFldName());
+        final RecordFieldBuffer recFldBuf = ((RecordFieldBuffer) buf);
+        final Record recDefn = recFldBuf.getRecDefn();
+        final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
+            recFldBuf.getFldName());
 
         if (recProgList == null) {
           continue;
@@ -260,6 +262,23 @@ public class Component {
             final ExecContext eCtx = new ProgramExecContext(p);
             final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
             interpreter.run();
+
+            /*
+             * If the field's value is marked as updated after running
+             * the FieldDefault event, we must emit a line saying as much
+             * for tracefile verification purposes.
+             * TODO(mquinn): This only supports level 0 record fields for now;
+             * the comp buffer access code below needs to be genericized to
+             * other scroll levels.
+             */
+            final PTPrimitiveType fldValue =
+                ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
+                recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref()
+                .getValue();
+            if (fldValue.isMarkedAsUpdated()) {
+              TraceFileVerifier.submitEnforcedEmission(new PCFldDefaultEmission(
+                recDefn.RECNAME, recFldBuf.getFldName(), "from peoplecode"));
+            }
           }
         }
       }

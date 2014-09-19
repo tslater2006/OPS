@@ -23,8 +23,6 @@ public final class PTChar extends PTPrimitiveType<Character> {
   private static Logger log = LogManager.getLogger(PTChar.class.getName());
   private static PTTypeConstraint<PTChar> charTc;
 
-  private Character c;
-
   static {
     charTc = new PTTypeConstraint<PTChar>(PTChar.class);
   }
@@ -35,22 +33,6 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   public static PTTypeConstraint<PTChar> getTc() {
     return charTc;
-  }
-
-  @Override
-  public Character read() {
-    return this.c;
-  }
-
-  @Override
-  public String readAsString() {
-    return Character.toString(this.c);
-  }
-
-  @Override
-  public void write(final Character newValue) {
-    this.checkIsWriteable();
-    this.c = newValue;
   }
 
   public void write(final String newValue) {
@@ -64,17 +46,12 @@ public final class PTChar extends PTPrimitiveType<Character> {
       throw new OPSVMachRuntimeException("Illegal attempt to write empty "
           + "string to PTChar.");
     }
-    this.c = newValue.charAt(0);
-  }
-
-  @Override
-  public void systemWrite(final Character newValue) {
-    this.c = newValue;
+    this.value = newValue.charAt(0);
   }
 
   @Override
   public void setDefault() {
-    this.c = ' ';
+    this.value = ' ';
   }
 
   @Override
@@ -87,7 +64,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   @Override
   public PTBoolean isEqual(final PTPrimitiveType op) {
-    if (op instanceof PTChar && this.c.equals(((PTChar) op).read())) {
+    if (op instanceof PTChar && this.value.equals(((PTChar) op).read())) {
       return new PTBoolean(true);
 
     } else if(op instanceof PTString) {
@@ -96,7 +73,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
          */
         PTString str = (PTString) op;
         if(str.read().length() == 1
-            && this.c.equals(str.read().charAt(0))) {
+            && this.value.equals(str.read().charAt(0))) {
           return new PTBoolean(true);
         }
 
@@ -104,7 +81,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
         /*
          * If op is an integer, comparison can continue.
          */
-        if(Character.getNumericValue(this.c)
+        if(Character.getNumericValue(this.value)
             == ((Integer) op.read()).intValue()) {
           return new PTBoolean(true);
         }
@@ -120,7 +97,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
     if (!(op instanceof PTChar)) {
       throw new OPSDataTypeException("Expected op to be PTChar.");
     }
-    if (this.c.compareTo(((PTChar) op).read()) > 0) {
+    if (this.value.compareTo(((PTChar) op).read()) > 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -137,7 +114,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
     if (!(op instanceof PTChar)) {
       throw new OPSDataTypeException("Expected op to be PTChar.");
     }
-    if (this.c.compareTo(((PTChar) op).read()) < 0) {
+    if (this.value.compareTo(((PTChar) op).read()) < 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -164,20 +141,5 @@ public final class PTChar extends PTPrimitiveType<Character> {
       return true;
     }
     return false;
-  }
-
-  @Override
-  public int hashCode() {
-    final int HCB_INITIAL = 31, HCB_MULTIPLIER = 419;
-
-    return new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",c=").append(this.c.toString());
-    return b.toString();
   }
 }

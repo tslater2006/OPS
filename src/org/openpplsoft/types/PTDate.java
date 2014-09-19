@@ -24,17 +24,15 @@ public final class PTDate extends PTPrimitiveType<String> {
     dateTc = new PTTypeConstraint<PTDate>(PTDate.class);
   }
 
-  private String d;
-
   public PTDate(final PTTypeConstraint origTc) {
     super(origTc);
 
     // default value is current date unless date has been overridden for
     // tracefile verification purposes.
     if(defaultDateOverride != null) {
-      this.d = defaultDateOverride;
+      this.value = defaultDateOverride;
     } else {
-      d = new SimpleDateFormat("yyyy-MM-dd")
+      this.value = new SimpleDateFormat("yyyy-MM-dd")
             .format(Calendar.getInstance().getTime());
     }
   }
@@ -47,23 +45,6 @@ public final class PTDate extends PTPrimitiveType<String> {
     defaultDateOverride = d;
   }
 
-  public String read() {
-    return this.d;
-  }
-
-  public String readAsString() {
-    return this.d;
-  }
-
-  public void write(String newValue) {
-    this.checkIsWriteable();
-    this.d = newValue;
-  }
-
-  public void systemWrite(String newValue) {
-    this.d = newValue;
-  }
-
   public void copyValueFrom(PTPrimitiveType src) {
     if (!(src instanceof PTDate)) {
       throw new OPSDataTypeException("Expected src to be PTDate.");
@@ -72,7 +53,7 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public void setDefault() {
-    this.d = null;
+    this.value = null;
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {
@@ -89,7 +70,7 @@ public final class PTDate extends PTPrimitiveType<String> {
     if(!(op instanceof PTDate)) {
       throw new OPSDataTypeException("Expected op to be PTDate.");
     }
-    if(this.d.compareTo(((PTDate)op).read()) >= 0) {
+    if(this.value.compareTo(((PTDate)op).read()) >= 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -104,7 +85,7 @@ public final class PTDate extends PTPrimitiveType<String> {
     if(!(op instanceof PTDate)) {
       throw new OPSDataTypeException("Expected op to be PTDate.");
     }
-    if(this.d.compareTo(((PTDate)op).read()) <= 0) {
+    if(this.value.compareTo(((PTDate)op).read()) <= 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -122,20 +103,5 @@ public final class PTDate extends PTPrimitiveType<String> {
       return true;
     }
     return false;
-  }
-
-  @Override
-  public int hashCode() {
-    final int HCB_INITIAL = 71, HCB_MULTIPLIER = 967;
-
-    return new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append(",d=").append(this.d);
-    return b.toString();
   }
 }

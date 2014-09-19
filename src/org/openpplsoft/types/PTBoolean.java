@@ -7,17 +7,11 @@
 
 package org.openpplsoft.types;
 
-import java.util.EnumSet;
-
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import org.openpplsoft.runtime.*;
 
 public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
   private static PTTypeConstraint<PTBoolean> boolTc;
-
-  private Boolean b;
 
   static {
     boolTc = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
@@ -25,7 +19,7 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
   public PTBoolean(final Boolean initialVal) {
     super(boolTc);
-    this.b = initialVal;
+    this.value = initialVal;
   }
 
   public PTBoolean(PTTypeConstraint origTc) {
@@ -34,23 +28,6 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
   public static PTTypeConstraint<PTBoolean> getTc() {
     return boolTc;
-  }
-
-  public Boolean read() {
-    return this.b;
-  }
-
-  public String readAsString() {
-    return this.b.toString();
-  }
-
-  public void write(Boolean newValue) {
-    this.checkIsWriteable();
-    this.b = newValue;
-  }
-
-  public void systemWrite(Boolean newValue) {
-    this.b = newValue;
   }
 
   public void setDefault() {
@@ -68,7 +45,7 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     if(!(op instanceof PTBoolean)) {
       throw new OPSDataTypeException("Expected op to be PTBoolean.");
     }
-    if(this.b.equals(((PTBoolean)op).read())) {
+    if(this.value.equals(((PTBoolean)op).read())) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -94,6 +71,7 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
       "booleans.");
   }
 
+  @Override
   public boolean equals(Object obj) {
     if(obj == this)
       return true;
@@ -102,26 +80,11 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     if(!(obj instanceof PTBoolean))
       return false;
 
-    PTBoolean other = (PTBoolean)obj;
+    PTBoolean other = (PTBoolean) obj;
     if(this.read().equals(other.read())) {
       return true;
     }
     return false;
-  }
-
-  @Override
-  public int hashCode() {
-    final int HCB_INITIAL = 41, HCB_MULTIPLIER = 337;
-
-    return new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append(",b=").append(this.b);
-    return b.toString();
   }
 }
 

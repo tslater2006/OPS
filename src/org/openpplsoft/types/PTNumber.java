@@ -9,8 +9,6 @@ package org.openpplsoft.types;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import org.apache.logging.log4j.*;
 
 import org.openpplsoft.runtime.*;
@@ -24,12 +22,9 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     numTc = new PTTypeConstraint<PTNumber>(PTNumber.class);
   }
 
-  private boolean isInteger;
-  private BigDecimal bigDec;
-
   public PTNumber(final BigDecimal initialVal) {
     super(numTc);
-    this.bigDec = initialVal;
+    this.value = initialVal;
   }
 
   public PTNumber(final PTTypeConstraint origTc) {
@@ -40,14 +35,6 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     return numTc;
   }
 
-  public BigDecimal read() {
-    return this.bigDec;
-  }
-
-  public String readAsString() {
-    return this.bigDec.toString();
-  }
-
   public int readAsInteger() {
     /*
      * IMPORTANT NOTE: I'm using intValueExact here
@@ -56,25 +43,11 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
      * throws ArithmeticEception if the BigDecimal object has a nonzero
      * fractional part or if it will overflow an int.
      */
-    return this.bigDec.intValueExact();
-  }
-
-  public void write(final BigDecimal newValue) {
-    this.checkIsWriteable();
-
-    // NOTE: BigDecimal objects are immutable, so no need to instantate new
-    // object here.
-    this.bigDec = newValue;
-  }
-
-  public void systemWrite(BigDecimal newValue) {
-    // NOTE: BigDecimal objects are immutable, so no need to instantate new
-    // object here.
-    this.bigDec = newValue;
+    return this.value.intValueExact();
   }
 
   public void setDefault() {
-    this.bigDec = BigDecimal.ZERO;
+    this.value = BigDecimal.ZERO;
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
@@ -91,7 +64,7 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   public PTNumberType add(PTNumberType op) {
     if(op instanceof PTInteger) {
          return new PTNumber(
-              this.bigDec.add(new BigDecimal(((PTInteger) op).read())));
+              this.value.add(new BigDecimal(((PTInteger) op).read())));
     } else {
       throw new OPSDataTypeException("Expected PTInteger.");
     }
@@ -115,11 +88,11 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   @Override
   public PTBoolean isEqual(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
-      if(this.bigDec.compareTo(((PTNumber) op).read()) == 0) {
+      if(this.value.compareTo(((PTNumber) op).read()) == 0) {
         return new PTBoolean(true);
       }
     } else if(op instanceof PTInteger) {
-      if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) == 0) {
+      if(this.value.compareTo(new BigDecimal(((PTInteger) op).read())) == 0) {
         return new PTBoolean(true);
       }
     } else {
@@ -132,7 +105,7 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   @Override
   public PTBoolean isGreaterThan(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
-      if(this.bigDec.compareTo(((PTNumber) op).read()) > 0) {
+      if(this.value.compareTo(((PTNumber) op).read()) > 0) {
         return new PTBoolean(true);
       }
     } else {
@@ -151,11 +124,11 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   @Override
   public PTBoolean isLessThan(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
-      if(this.bigDec.compareTo(((PTNumber) op).read()) < 0) {
+      if(this.value.compareTo(((PTNumber) op).read()) < 0) {
         return new PTBoolean(true);
       }
     } else if(op instanceof PTInteger) {
-      if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) < 0) {
+      if(this.value.compareTo(new BigDecimal(((PTInteger) op).read())) < 0) {
         return new PTBoolean(true);
       }
     } else {
@@ -168,11 +141,11 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   @Override
   public PTBoolean isLessThanOrEqual(PTPrimitiveType op) {
     if(op instanceof PTNumber) {
-      if(this.bigDec.compareTo(((PTNumber) op).read()) <= 0) {
+      if(this.value.compareTo(((PTNumber) op).read()) <= 0) {
         return new PTBoolean(true);
       }
     } else if(op instanceof PTInteger) {
-      if(this.bigDec.compareTo(new BigDecimal(((PTInteger) op).read())) <= 0) {
+      if(this.value.compareTo(new BigDecimal(((PTInteger) op).read())) <= 0) {
         return new PTBoolean(true);
       }
     } else {
@@ -196,24 +169,9 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
      * BigDecimal objects must be compared via compareTo().
      */
     PTNumber other = (PTNumber)obj;
-    if(this.bigDec.compareTo(other.read()) == 0) {
+    if(this.value.compareTo(other.read()) == 0) {
       return true;
     }
     return false;
-  }
-
-  @Override
-  public int hashCode() {
-    final int HCB_INITIAL = 563, HCB_MULTIPLIER = 281;
-
-    return new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.bigDec).toHashCode();
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append(",bigDec=").append(this.bigDec);
-    return b.toString();
   }
 }

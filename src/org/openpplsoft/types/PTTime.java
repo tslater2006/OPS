@@ -11,8 +11,6 @@ import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import org.openpplsoft.runtime.*;
 
 /**
@@ -22,8 +20,6 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   private static PTTypeConstraint<PTTime> timeTc;
 
-  private String d;
-
   static {
     timeTc = new PTTypeConstraint<PTTime>(PTTime.class);
   }
@@ -32,33 +28,12 @@ public final class PTTime extends PTPrimitiveType<String> {
     super(origTc);
 
     // default value is current time.
-    this.d = new SimpleDateFormat("HH:mm:ss")
+    this.value = new SimpleDateFormat("HH:mm:ss")
         .format(Calendar.getInstance().getTime());
   }
 
   public static PTTypeConstraint<PTTime> getTc() {
     return timeTc;
-  }
-
-  @Override
-  public String read() {
-    return this.d;
-  }
-
-  @Override
-  public String readAsString() {
-    return this.d;
-  }
-
-  @Override
-  public void write(final String newValue) {
-    this.checkIsWriteable();
-    this.d = newValue;
-  }
-
-  @Override
-  public void systemWrite(final String newValue) {
-    this.d = newValue;
   }
 
   @Override
@@ -68,7 +43,7 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   @Override
   public void setDefault() {
-    this.d = null;
+    this.value = null;
   }
 
   @Override
@@ -88,7 +63,7 @@ public final class PTTime extends PTPrimitiveType<String> {
     if (!(op instanceof PTTime)) {
       throw new OPSDataTypeException("Expected op to be PTTime.");
     }
-    if (this.d.compareTo(((PTTime) op).read()) >= 0) {
+    if (this.value.compareTo(((PTTime) op).read()) >= 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -105,7 +80,7 @@ public final class PTTime extends PTPrimitiveType<String> {
     if (!(op instanceof PTTime)) {
       throw new OPSDataTypeException("Expected op to be PTTime.");
     }
-    if (this.d.compareTo(((PTTime) op).read()) <= 0) {
+    if (this.value.compareTo(((PTTime) op).read()) <= 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -126,19 +101,5 @@ public final class PTTime extends PTPrimitiveType<String> {
       return true;
     }
     return false;
-  }
-
-  @Override
-  public int hashCode() {
-    final int HCB_INITIAL = 109, HCB_MULTIPLIER = 67;
-    return new HashCodeBuilder(HCB_INITIAL, HCB_MULTIPLIER)
-        .append(this.read()).toHashCode();
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",d=").append(this.d);
-    return b.toString();
   }
 }

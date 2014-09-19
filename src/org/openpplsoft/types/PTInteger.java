@@ -10,10 +10,6 @@ package org.openpplsoft.types;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import java.util.EnumSet;
-
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import org.apache.logging.log4j.*;
 
 import org.openpplsoft.runtime.*;
@@ -27,11 +23,9 @@ public final class PTInteger extends PTNumberType<Integer> {
     intTc = new PTTypeConstraint<PTInteger>(PTInteger.class);
   }
 
-  private Integer i;
-
   public PTInteger(final Integer initialVal) {
     super(intTc);
-    this.i = initialVal;
+    this.value = initialVal;
   }
 
   public PTInteger(final PTTypeConstraint origTc) {
@@ -40,23 +34,6 @@ public final class PTInteger extends PTNumberType<Integer> {
 
   public static PTTypeConstraint<PTInteger> getTc() {
     return intTc;
-  }
-
-  public Integer read() {
-    return this.i;
-  }
-
-  public String readAsString() {
-    return this.i.toString();
-  }
-
-  public void write(final Integer newValue) {
-    this.checkIsWriteable();
-    this.i = newValue;
-  }
-
-  public void systemWrite(final Integer newValue) {
-    this.i = newValue;
   }
 
   public void setDefault() {
@@ -124,34 +101,11 @@ public final class PTInteger extends PTNumberType<Integer> {
     return new PTNumber(quotient);
   }
 
-  public boolean equals(Object obj) {
-    if(obj == this)
-      return true;
-    if(obj == null)
-      return false;
-    if(!(obj instanceof PTInteger))
-      return false;
-
-    PTInteger other = (PTInteger)obj;
-    if(this.read().equals(other.read())) {
-      return true;
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    final int HCB_INITIAL = 359, HCB_MULTIPLIER = 7;
-
-    return new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.read()).toHashCode();
-  }
-
   public PTBoolean isEqual(PTPrimitiveType op) {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
-    if(this.i.compareTo(((PTInteger)op).read()) == 0) {
+    if(this.value.compareTo(((PTInteger)op).read()) == 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -161,7 +115,7 @@ public final class PTInteger extends PTNumberType<Integer> {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
-    if(this.i.compareTo(((PTInteger)op).read()) > 0) {
+    if(this.value.compareTo(((PTInteger)op).read()) > 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -176,7 +130,7 @@ public final class PTInteger extends PTNumberType<Integer> {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
-    if(this.i.compareTo(((PTInteger)op).read()) < 0) {
+    if(this.value.compareTo(((PTInteger)op).read()) < 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
@@ -186,16 +140,24 @@ public final class PTInteger extends PTNumberType<Integer> {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");
     }
-    if(this.i.compareTo(((PTInteger)op).read()) <= 0) {
+    if(this.value.compareTo(((PTInteger)op).read()) <= 0) {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
   }
 
-  @Override
-  public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append(",i=").append(this.i);
-    return b.toString();
+  public boolean equals(Object obj) {
+    if(obj == this)
+      return true;
+    if(obj == null)
+      return false;
+    if(!(obj instanceof PTInteger))
+      return false;
+
+    PTInteger other = (PTInteger)obj;
+    if(this.read().equals(other.read())) {
+      return true;
+    }
+    return false;
   }
 }

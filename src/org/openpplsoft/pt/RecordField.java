@@ -18,6 +18,8 @@ public class RecordField {
   public int USEEDIT;
   public int FIELDNUM;
   public int LENGTH;
+  public String DEFRECNAME;
+  public String DEFFIELDNAME;
   private int typeFlag;
 
   private final int KEY_FLAG = 1;
@@ -89,6 +91,16 @@ public class RecordField {
 
   public boolean isRequired() {
     return ((this.USEEDIT & this.REQUIRED_FLAG) > 0);
+  }
+
+  public boolean hasDefaultConstantValue() {
+    return this.DEFRECNAME.trim().length() == 0
+        && this.DEFFIELDNAME.trim().length() > 0;
+  }
+
+  public boolean hasDefaultNonConstantValue() {
+    return this.DEFRECNAME.trim().length() > 0
+        && this.DEFFIELDNAME.trim().length() > 0;
   }
 }
 

@@ -26,15 +26,6 @@ public final class PTDate extends PTPrimitiveType<String> {
 
   public PTDate(final PTTypeConstraint origTc) {
     super(origTc);
-
-    // default value is current date unless date has been overridden for
-    // tracefile verification purposes.
-    if(defaultDateOverride != null) {
-      this.value = defaultDateOverride;
-    } else {
-      this.value = new SimpleDateFormat("yyyy-MM-dd")
-            .format(Calendar.getInstance().getTime());
-    }
   }
 
   public static PTTypeConstraint<PTDate> getTc() {
@@ -53,7 +44,19 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public void setDefault() {
-    this.value = null;
+    // default value is current date unless date has been overridden for
+    // tracefile verification purposes.
+    if(defaultDateOverride != null) {
+      this.value = defaultDateOverride;
+    } else {
+      this.value = new SimpleDateFormat("yyyy-MM-dd")
+          .format(Calendar.getInstance().getTime());
+    }
+  }
+
+  public boolean isBlank() {
+    throw new OPSVMachRuntimeException("isBlank() called on PTDate; need "
+        + "to determine what PT considers a blank date.");
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

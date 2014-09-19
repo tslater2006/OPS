@@ -49,6 +49,11 @@ public final class PTString extends PTPrimitiveType<String> {
   }
 
   @Override
+  public boolean isBlank() {
+    return this.value.equals(" ");
+  }
+
+  @Override
   public void copyValueFrom(final PTPrimitiveType src) {
     if (!(src instanceof PTString)) {
       throw new OPSDataTypeException("Expected src to be PTString.");

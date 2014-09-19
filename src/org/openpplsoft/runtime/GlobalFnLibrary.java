@@ -34,8 +34,7 @@ public class GlobalFnLibrary {
     if(p instanceof PTField) {
       return doesContainValue(((PTField)p).getValue());
     } else if(p instanceof PTString) {
-      return ((PTString) p).read() != null
-          && ((PTString) p).read().trim().length() > 0;
+      return ((PTString) p).read().trim().length() > 0;
     } else if(p instanceof PTRecord) {
       /*
        * IMPORTANT: I am not sure if this is accurate. PT documentation

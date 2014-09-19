@@ -37,7 +37,11 @@ public final class PTInteger extends PTNumberType<Integer> {
   }
 
   public void setDefault() {
-    throw new OPSDataTypeException("setDefault not implemented.");
+    this.value = 0;
+  }
+
+  public boolean isBlank() {
+    return (this.value == 0);
   }
 
   public void copyValueFrom(final PTPrimitiveType src) {

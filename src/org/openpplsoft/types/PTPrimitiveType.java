@@ -15,11 +15,14 @@ public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType
 
   protected PTPrimitiveType(final PTTypeConstraint origTc) {
     super(origTc);
+    this.setDefault();
   }
 
   public abstract boolean equals(Object obj);
-  public abstract void setDefault();
   public abstract void copyValueFrom(PTPrimitiveType src);
+
+  public abstract void setDefault();
+  public abstract boolean isBlank();
 
   public abstract PTBoolean isEqual(PTPrimitiveType op);
   public abstract PTBoolean isGreaterThan(PTPrimitiveType op);

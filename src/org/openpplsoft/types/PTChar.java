@@ -27,7 +27,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
     charTc = new PTTypeConstraint<PTChar>(PTChar.class);
   }
 
-  public PTChar(PTTypeConstraint origTc) {
+  public PTChar(final PTTypeConstraint origTc) {
     super(origTc);
   }
 
@@ -52,6 +52,11 @@ public final class PTChar extends PTPrimitiveType<Character> {
   @Override
   public void setDefault() {
     this.value = ' ';
+  }
+
+  @Override
+  public boolean isBlank() {
+    return (this.value == ' ');
   }
 
   @Override

@@ -50,6 +50,10 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     this.value = BigDecimal.ZERO;
   }
 
+  public boolean isBlank() {
+    return (this.value.compareTo(BigDecimal.ZERO) == 0);
+  }
+
   public void copyValueFrom(PTPrimitiveType src) {
     if(src instanceof PTNumber) {
       this.write(((PTNumber) src).read());

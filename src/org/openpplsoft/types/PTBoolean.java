@@ -22,7 +22,7 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     this.value = initialVal;
   }
 
-  public PTBoolean(PTTypeConstraint origTc) {
+  public PTBoolean(final PTTypeConstraint origTc) {
     super(origTc);
   }
 
@@ -31,7 +31,12 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
   }
 
   public void setDefault() {
-    throw new OPSDataTypeException("setDefault not implemented.");
+    this.value = false;
+  }
+
+  public boolean isBlank() {
+    throw new OPSVMachRuntimeException("isBlank() called on PTBoolean; need "
+        + "to determine if false really does constitute a blank value in PT.");
   }
 
   public void copyValueFrom(PTPrimitiveType src) {

@@ -189,29 +189,28 @@ public final class StmtLibrary {
       if (rf.isKey() || rf.isSearchKey()) {
         if (i > 0) { query.append(" AND "); }
 
-        String val = (String) searchRec.getFieldRef(rf.FIELDNAME).deref()
-            .getValue().read();
+        final PTPrimitiveType val = searchRec
+            .getFieldRef(rf.FIELDNAME).deref().getValue();
 
         /*
-         * If this is the OPRID field and it has a null value
+         * If this is the OPRID field and it is blank
          * in the search record, default it to the system var value.
          * TODO(mquinn): If multiple fields require this kind of defaulting,
          * abstract this into the underlying RecordField object.
          */
-        if (val == null && rf.FIELDNAME.equals("OPRID")) {
-          val = (String) Environment.getSystemVar("%OperatorId").read();
-
+        if (val.isBlank() && rf.FIELDNAME.equals("OPRID")) {
           // Write the value used into the OPRID field on the search record.
           ((PTString) searchRec.getFieldRef(rf.FIELDNAME).deref()
-              .getValue()).systemWrite(val);
+              .getValue()).systemWrite(
+                  (String) Environment.getSystemVar("%OperatorId").read());
         }
 
         query.append(rf.FIELDNAME);
         if (rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
-          query.append(" LIKE '").append(val).append("%'");
+          query.append(" LIKE '").append((String) val.read()).append("%'");
         } else {
           query.append("=?");
-          bindVals.add(val);
+          bindVals.add((String) val.read());
         }
 
         i++;

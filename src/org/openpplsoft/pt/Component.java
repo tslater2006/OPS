@@ -238,10 +238,12 @@ public class Component {
   }
 
   /**
-   * Iterates through each field in the component buffer and runs its
-   * FieldDefault program, if one has been written.
+   * Iterates through each field in the component buffer and runs default
+   * processing on it; this could mean giving it a predefined constant value,
+   * looking up the default value from another table, or running a FieldDefault
+   * program to set the value programmatically.
    */
-  public void runFieldDefaultPrograms() {
+  public void runFieldDefaultProcessing() {
     IStreamableBuffer buf;
 
     ComponentBuffer.resetCursors();

@@ -23,10 +23,6 @@ public final class PTDateTime extends PTPrimitiveType<String> {
 
   public PTDateTime(final PTTypeConstraint origTc) {
     super(origTc);
-
-    // default value is current date and time.
-    this.value = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        .format(Calendar.getInstance().getTime());
   }
 
   public static PTTypeConstraint<PTDateTime> getTc() {
@@ -38,7 +34,15 @@ public final class PTDateTime extends PTPrimitiveType<String> {
   }
 
   public void setDefault() {
-    this.value = null;
+    // default value is current date and time.
+    this.value = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        .format(Calendar.getInstance().getTime());
+  }
+
+  @Override
+  public boolean isBlank() {
+    throw new OPSVMachRuntimeException("isBlank() called on PTDateTime; need to "
+        + "determine what PT considers a blank datetime value.");
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

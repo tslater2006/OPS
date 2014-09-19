@@ -110,6 +110,7 @@ public class Environment {
         break;
       case "%UserId":
         a = new PTString(systemVarTable.get("%OperatorId"));
+        break;
       default:
         a = new PTString(systemVarTable.get(var));
     }

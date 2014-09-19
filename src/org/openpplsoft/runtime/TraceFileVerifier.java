@@ -43,7 +43,7 @@ public final class TraceFileVerifier {
   private static BufferedReader traceFileReader;
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
-      pcRelDispProcEndPattern;
+      pcRelDispProcEndPattern, pcFldDefaultPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -76,6 +76,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Starting\\sRelated\\sDisplay\\sprocessing");
     pcRelDispProcEndPattern =
         Pattern.compile("Finished\\sRelated\\sDisplay\\sprocessing");
+    pcFldDefaultPattern =
+        Pattern.compile("([A-Z_0-9]+)\\.([A-Z_0-9]+)\\s+(constant\\s+)?default\\s+(.+?)$");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -258,6 +260,19 @@ public final class TraceFileVerifier {
         return new PCEnd(pcEndMatcher.group(GROUP1),
             pcEndMatcher.group(GROUP2), pcEndMatcher.group(GROUP3),
             pcEndMatcher.group(GROUP4));
+      }
+
+      final Matcher pcFldDefaultMatcher = pcFldDefaultPattern.matcher(currTraceLine);
+      if (pcFldDefaultMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        final PCFldDefaultEmission fldDefEmission =
+            new PCFldDefaultEmission(pcFldDefaultMatcher.group(GROUP1),
+            pcFldDefaultMatcher.group(GROUP2), pcFldDefaultMatcher.group(GROUP4));
+        if (pcFldDefaultMatcher.group(GROUP3) != null) {
+          fldDefEmission.setConstantFlag();
+        }
+        return fldDefEmission;
       }
 
       final Matcher pcRelDispProcStartMatcher =

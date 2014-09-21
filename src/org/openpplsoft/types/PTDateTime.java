@@ -7,18 +7,37 @@
 
 package org.openpplsoft.types;
 
-import java.text.SimpleDateFormat;
+import org.openpplsoft.runtime.*;
 
 import java.util.*;
 
-import org.openpplsoft.runtime.*;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
-public final class PTDateTime extends PTPrimitiveType<String> {
+public final class PTDateTime extends PTPrimitiveType<DateTime> {
 
   private static PTTypeConstraint<PTDateTime> dateTimeTc;
+  private static final String PS_DATE_TIME_FMT1 = "yyyy-MM-dd-HH.mm.ss.SSSSSS";
+  private static final String PS_DATE_TIME_FMT2 = "yyyy-MM-dd HH:mm:ss";
 
   static {
     dateTimeTc = new PTTypeConstraint<PTDateTime>(PTDateTime.class);
+  }
+
+  public PTDateTime(final String initialValue) {
+    super(dateTimeTc);
+    if (initialValue != null) {
+      try {
+        final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT1);
+        this.value = dtf.parseDateTime(initialValue);
+      } catch (final java.lang.IllegalArgumentException iae) {
+        final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT2);
+        this.value = dtf.parseDateTime(initialValue);
+      }
+    } else {
+      this.value = null;
+    }
   }
 
   public PTDateTime(final PTTypeConstraint origTc) {
@@ -30,19 +49,27 @@ public final class PTDateTime extends PTPrimitiveType<String> {
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
-    throw new OPSDataTypeException("copyValueFrom is not yet supported.");
+    if (!(src instanceof PTDateTime)) {
+      throw new OPSDataTypeException("Expected src to be PTDateTime.");
+    }
+    this.write(((PTDateTime) src).read());
+  }
+
+  @Override
+  public String readAsString() {
+    final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT2);
+    return dtf.print(this.value);
   }
 
   public void setDefault() {
-    // default value is current date and time.
-    this.value = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        .format(Calendar.getInstance().getTime());
+    // In App Designer debugging, PT shows "<no value>" for newly created,
+    // uninitialized date variables, so using a Java null to simulate.
+    this.value = null;
   }
 
   @Override
   public boolean isBlank() {
-    throw new OPSVMachRuntimeException("isBlank() called on PTDateTime; need to "
-        + "determine what PT considers a blank datetime value.");
+    return (this.value == null);
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

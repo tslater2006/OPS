@@ -712,8 +712,8 @@ public class GlobalFnLibrary {
          * statements with different types.
          */
       if(colTypeName.equals("VARCHAR2") || colTypeName.equals("TIMESTAMP")) {
-        ((PTDateTime)fldObj.getValue()).write(
-          rs.getString(colName));
+        ((PTDateTime)fldObj.getValue()).copyValueFrom(
+          new PTDateTime(rs.getString(colName)));
       } else {
         throw new OPSVMachRuntimeException("Unexpected db "
             + "type for PTDateTime: " + colTypeName + "; "

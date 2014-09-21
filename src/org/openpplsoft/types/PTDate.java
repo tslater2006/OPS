@@ -8,20 +8,49 @@
 package org.openpplsoft.types;
 
 import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import java.text.SimpleDateFormat;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.openpplsoft.runtime.*;
 
-public final class PTDate extends PTPrimitiveType<String> {
+public final class PTDate extends PTPrimitiveType<Date> {
 
   private static PTTypeConstraint<PTDate> dateTc;
-  private static String defaultDateOverride;
+  private static final String PS_DATE_FORMAT = "yyyy-MM-dd";
+
+  private static Logger log = LogManager.getLogger(PTDate.class.getName());
 
   static {
     dateTc = new PTTypeConstraint<PTDate>(PTDate.class);
+  }
+
+  public PTDate(final Date initialValue) {
+    super(dateTc);
+    this.value = initialValue;
+  }
+
+  public PTDate(final String initialValue) {
+    super(dateTc);
+    if (initialValue != null) {
+      try {
+        // A non-null string must match the PeopleSoft date format.
+        final DateFormat df = new SimpleDateFormat(PS_DATE_FORMAT);
+        this.value = df.parse(initialValue);
+      } catch (final ParseException pe) {
+        throw new OPSVMachRuntimeException(pe.getMessage(), pe);
+      }
+    } else {
+      // Null is a legitimate value, as that represents a blank date.
+      this.value = null;
+    }
   }
 
   public PTDate(final PTTypeConstraint origTc) {
@@ -32,8 +61,10 @@ public final class PTDate extends PTPrimitiveType<String> {
     return dateTc;
   }
 
-  public static void overrideDefaultDate(final String d) {
-    defaultDateOverride = d;
+  @Override
+  public String readAsString() {
+    final DateFormat df = new SimpleDateFormat(PS_DATE_FORMAT);
+    return df.format(this.value);
   }
 
   public void copyValueFrom(PTPrimitiveType src) {
@@ -44,19 +75,13 @@ public final class PTDate extends PTPrimitiveType<String> {
   }
 
   public void setDefault() {
-    // default value is current date unless date has been overridden for
-    // tracefile verification purposes.
-    if(defaultDateOverride != null) {
-      this.value = defaultDateOverride;
-    } else {
-      this.value = new SimpleDateFormat("yyyy-MM-dd")
-          .format(Calendar.getInstance().getTime());
-    }
+    // In App Designer debugging, PT shows "<no value>" for newly created,
+    // uninitialized date variables, so using a Java null to simulate.
+    this.value = null;
   }
 
   public boolean isBlank() {
-    throw new OPSVMachRuntimeException("isBlank() called on PTDate; need "
-        + "to determine what PT considers a blank date.");
+    return (this.value == null);
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

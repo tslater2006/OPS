@@ -376,7 +376,7 @@ public final class StmtLibrary {
               } else {
                 query.append("B.EFFDT<=TO_DATE(")
                    .append("?,'YYYY-MM-DD')");
-                bindVals.add(effDt.read());
+                bindVals.add(effDt.readAsString());
               }
               isFirstKeyOnSub = false;
             }

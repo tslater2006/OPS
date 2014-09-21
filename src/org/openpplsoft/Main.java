@@ -47,19 +47,17 @@ public final class Main {
     ComponentRuntimeProfile profileToRun =
         (ComponentRuntimeProfile) ctx.getBean(args[1]);
 
-    // Since we are verifying against a tracefile, we have to override
-    // the default date value with the date the tracefile was generated on.
-    PTDate.overrideDefaultDate(profileToRun.getTraceFileDate());
-
     try {
       Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
       TraceFileVerifier.init(profileToRun);
       Environment.psEnvironmentName = (String) ctx.getBean("psEnvironmentName");
 
-      Environment.setSystemVar("%Component", profileToRun.getComponentName());
-      Environment.setSystemVar("%Menu", "SA_LEARNER_SERVICES");
-      Environment.setSystemVar("%OperatorId", "KADAMS");
-      Environment.setSystemVar("%EmployeeId", "AA0001");
+      Environment.setSystemVar("%Component", new PTString(profileToRun.getComponentName()));
+      Environment.setSystemVar("%Menu", new PTString("SA_LEARNER_SERVICES"));
+      Environment.setSystemVar("%OperatorId", new PTString("KADAMS"));
+      Environment.setSystemVar("%EmployeeId", new PTString("AA0001"));
+      Environment.setSystemVar("%Action_UpdateDisplay", new PTString("U"));
+      Environment.setSystemVar("%Action_Add", new PTString("A"));
 
       /*
        * The following system vars can theoretically vary among environments.
@@ -67,8 +65,12 @@ public final class Main {
        * vanilla PS instances. Therefore, I am not going to externalize these
        * values for the time being.
        */
-      Environment.setSystemVar("%Portal", "EMPLOYEE");
-      Environment.setSystemVar("%Node", "HRMS");
+      Environment.setSystemVar("%Portal", new PTString("EMPLOYEE"));
+      Environment.setSystemVar("%Node", new PTString("HRMS"));
+
+      // Since we are verifying against a tracefile, we have to override
+      // the default current date with the date the tracefile was generated on.
+      Environment.setSystemVar("%Date", profileToRun.getTraceFileDate());
 
       final Component c = DefnCache.getComponent(
           (String) Environment.getSystemVar("%Component").read(), "GBL");

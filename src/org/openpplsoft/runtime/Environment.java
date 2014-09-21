@@ -22,37 +22,25 @@ public class Environment {
   // i.e., XENCSDEV, ENTCSDEV (appears in PS URLs)
   public static String psEnvironmentName;
 
-  private static Map<String, String> systemVarTable;
+  private static Map<String, PTPrimitiveType> systemVarTable;
   private static Map<String, Callable> systemFuncTable;
 
   private static Stack<PTType> callStack;
-
-  private static String[] supportedGlobalVars = {"%EmployeeId",
-    "%OperatorId", "%Menu", "%Component", "%Action_UpdateDisplay",
-    "%Portal", "%Node", "Action_Add"};
 
   private static Logger log = LogManager.getLogger(Environment.class.getName());
 
   static {
 
+    systemVarTable = new HashMap<String, PTPrimitiveType>();
+
     // Setup global and component scopes.
     globalScope = new Scope(Scope.Lvl.GLOBAL);
     componentScope = new Scope(Scope.Lvl.COMPONENT);
 
-    // Set up system var table.
-    systemVarTable = new HashMap<String, String>();
-    for(String varName : supportedGlobalVars) {
-      systemVarTable.put(varName, null);
-    }
-
-    // Set up constant system variables (these will never change during runtime).
-    systemVarTable.put("%Action_UpdateDisplay", "U");
-    systemVarTable.put("%Action_Add", "A");
-
     // Initialize the call stack.
     callStack = new Stack<PTType>();
 
-    // Cache references to global PT functions t
+    // Cache references to global PT functions to
     // avoid repeated reflection lookups at runtime.
     Method[] methods = GlobalFnLibrary.class.getMethods();
     systemFuncTable = new HashMap<String, Callable>();
@@ -97,29 +85,38 @@ public class Environment {
     return callStack.size();
   }
 
-  public static void setSystemVar(final String var, final String value) {
+  public static void setSystemVar(final String var, final PTPrimitiveType value) {
+    value.setReadOnly();
     systemVarTable.put(var, value);
   }
 
-  public static PTPrimitiveType getSystemVar(String var) {
+  public static PTPrimitiveType getSystemVar(final String var) {
 
     PTPrimitiveType a = null;
     switch(var) {
-      case "%Date":
-        a = PTDate.getTc().alloc();
-        break;
       case "%UserId":
-        a = new PTString(systemVarTable.get("%OperatorId"));
+        a = systemVarTable.get("%OperatorId");
         break;
       default:
-        a = new PTString(systemVarTable.get(var));
+        a = systemVarTable.get(var);
     }
 
     if(a == null) {
       throw new OPSVMachRuntimeException("Attempted to access a system var "
        + "that is undefined: " + var);
     }
-    return a;
+
+    /*
+     * There may be instances where a system variable is passed
+     * as an expression to a function that may then write to the
+     * identifier the arg has been bound to. Those cases require that we always
+     * pass a copy of the system variable, rather than the system variable itself,
+     * as the sysvar is read-only and such a write will trigger an RTE.
+     */
+    final PTPrimitiveType copy =
+        (PTPrimitiveType) a.getOriginatingTypeConstraint().alloc();
+    copy.copyValueFrom(a);
+    return copy;
   }
 
   public static Callable getSystemFuncPtr(String func) {

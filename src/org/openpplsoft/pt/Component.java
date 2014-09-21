@@ -280,18 +280,16 @@ public class Component {
         // record field buffer.
         if (recProgList == null) {
           continue;
-        } else {
-          throw new OPSVMachRuntimeException("TODO: Instead of looping through "
-              + "FieldDefault programs on the record, explicitly look up this "
-              + "record field to see if a program exists.");
         }
 
-        /*for(PeopleCodeProg prog : recProgList) {
+        // Otherwise, if a FieldDefault program exists for this record field,
+        // execute it.
+        for(PeopleCodeProg prog : recProgList) {
           if (prog.event.equals("FieldDefault")) {
             final PeopleCodeProg p = DefnCache.getProgram(prog);
             final ExecContext eCtx = new ProgramExecContext(p);
             final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-            interpreter.run();*/
+            interpreter.run();
 
             /*
              * If the field's value is marked as updated after running
@@ -301,16 +299,12 @@ public class Component {
              * the comp buffer access code below needs to be genericized to
              * other scroll levels.
              */
-           /* final PTPrimitiveType fldValue =
-                ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
-                recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref()
-                .getValue();
             if (fldValue.isMarkedAsUpdated()) {
               TraceFileVerifier.submitEnforcedEmission(new PCFldDefaultEmission(
                 recDefn.RECNAME, recFldBuf.getFldName(), "from peoplecode"));
             }
           }
-        }*/
+        }
       }
     }
   }

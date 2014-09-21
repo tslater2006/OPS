@@ -10,8 +10,14 @@ package org.openpplsoft.runtime;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Date;
 import java.util.regex.*;
 
 import org.openpplsoft.sql.*;
@@ -692,9 +698,9 @@ public class GlobalFnLibrary {
           "colName=" + colName);
       }
     } else if (origTc.isUnderlyingClassEqualTo(PTDate.class)) {
-      if(colTypeName.equals("VARCHAR2")) {
-        ((PTDate)fldObj.getValue()).write(
-          rs.getString(colName));
+      if (colTypeName.equals("VARCHAR2")) {
+        ((PTDate) fldObj.getValue()).copyValueFrom(
+            new PTDate(rs.getString(colName)));
       } else {
         throw new OPSVMachRuntimeException("Unexpected db " +
           "type for PTDate: " + colTypeName + "; " +

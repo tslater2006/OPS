@@ -253,65 +253,80 @@ public class Component {
         final Record recDefn = recFldBuf.getRecDefn();
         final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
             recFldBuf.getFldName());
+       /*
+        * TODO(mquinn): This only supports level 0 record fields for now;
+        * the comp buffer access code below needs to be genericized to
+        * other scroll levels.
+        */
         final PTField fldObj =
             ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
                 recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref();
         final PTPrimitiveType fldValue = fldObj.getValue();
+        String defaultToEmit = null;
+        boolean defaultIsConstant = false;
 
         // If field is not blank, don't continue field default processing on it.
         if (!fldValue.isBlank()) {
           continue;
-        }
 
         // Must check for *non-constant* (i.e., from a field on another record)
-        // possibility first.
-        if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
+        // possibility first (before checking for constant default).
+        } else if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
           throw new OPSVMachRuntimeException("TODO: Support non constant field default.");
-          // continue;
-        }
 
-        if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
+        } else if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
+          final String defValue = recFldBuf.getRecFldDefn().DEFFIELDNAME;
           log.debug("Record: {}, field: {}", recDefn.RECNAME, recFldBuf.getFldName());
-          log.debug("Constant default: {}", recFldBuf.getRecFldDefn().DEFFIELDNAME);
-          /*
-           * TODO: For %date, query the database for sysdate and use that value.
-           * You cannot manually create a DateTime object b/c PS relies on the database
-           * for time values. You also need to do something about emissions, since the current
-           * sysdate will not match the one in the tracefile.
-           */
-          throw new OPSVMachRuntimeException("TODO: Support constant field default.");
-          // continue;
-        }
+          log.debug("Constant default: {}", defValue);
+
+          if (defValue.equals("%date")) {
+            if (fldValue instanceof PTDateTime) {
+              ((PTDateTime) fldValue).writeSYSDATE();
+              defaultToEmit = fldValue.readAsString();
+              defaultIsConstant = true;
+            } else {
+              throw new OPSVMachRuntimeException("Expected PTDateTime for record field with "
+                  + "constant value set to %date.");
+            }
+          } else {
+            throw new OPSVMachRuntimeException("Record field has a constant default value "
+                + "that was not expected: " + defValue);
+          }
 
         // At this point, if no field default value exists, and if there are no
         // FieldDefault programs on this record, nothing more to do; skip to next
         // record field buffer.
-        if (recProgList == null) {
+        } else if (recProgList == null) {
           continue;
-        }
 
         // Otherwise, if a FieldDefault program exists for this record field,
         // execute it.
-        for(PeopleCodeProg prog : recProgList) {
-          if (prog.event.equals("FieldDefault")) {
-            final PeopleCodeProg p = DefnCache.getProgram(prog);
-            final ExecContext eCtx = new ProgramExecContext(p);
-            final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-            interpreter.run();
-
-            /*
-             * If the field's value is marked as updated after running
-             * the FieldDefault event, we must emit a line saying as much
-             * for tracefile verification purposes.
-             * TODO(mquinn): This only supports level 0 record fields for now;
-             * the comp buffer access code below needs to be genericized to
-             * other scroll levels.
-             */
-            if (fldValue.isMarkedAsUpdated()) {
-              TraceFileVerifier.submitEnforcedEmission(new PCFldDefaultEmission(
-                recDefn.RECNAME, recFldBuf.getFldName(), "from peoplecode"));
+        } else {
+          for(PeopleCodeProg prog : recProgList) {
+            if (prog.event.equals("FieldDefault")) {
+              final PeopleCodeProg p = DefnCache.getProgram(prog);
+              final ExecContext eCtx = new ProgramExecContext(p);
+              final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+              interpreter.run();
+              defaultToEmit = "from peoplecode";
+              defaultIsConstant = false;
+              break;
             }
           }
+        }
+
+       /*
+        * If the field's value is marked as updated after running
+        * the FieldDefault event, we must emit a line saying as much
+        * for tracefile verification purposes.
+        */
+        if (fldValue.isMarkedAsUpdated()) {
+          final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
+              recDefn.RECNAME, recFldBuf.getFldName(), defaultToEmit);
+          if (defaultIsConstant) {
+            fdEmission.setConstantFlag();
+          }
+          TraceFileVerifier.submitEnforcedEmission(fdEmission);
         }
       }
     }

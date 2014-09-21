@@ -241,4 +241,9 @@ SELECT MARKET, DBTYPE, TO_CHAR(EFFDT,'YYYY-MM-DD'), SEQNUM, SQLTEXT,
 EFFDT FROM PSSQLTEXTDEFN WHERE SQLID = ? AND SQLTYPE = ? ORDER BY MARKET, 
 DBTYPE, EFFDT DESC , SEQNUM
 
+=!========================================================================
+
+###[label]:   query.SYSDATE
+#[enforced]:  false
+select sysdate from dual
 

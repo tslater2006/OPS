@@ -7,15 +7,22 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.runtime.*;
-
 import java.util.*;
+import java.sql.ResultSet;
+
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.sql.*;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public final class PTDateTime extends PTPrimitiveType<DateTime> {
+
+  private static final Logger log = LogManager.getLogger(PTDateTime.class.getName());
 
   private static PTTypeConstraint<PTDateTime> dateTimeTc;
   private static final String PS_DATE_TIME_FMT1 = "yyyy-MM-dd-HH.mm.ss.SSSSSS";
@@ -105,6 +112,26 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
       return new PTBoolean(true);
     }
     return new PTBoolean(false);
+  }
+
+  public void writeSYSDATE() {
+    final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.SYSDATE", new String[]{});
+    ResultSet rs = null;
+    try {
+      rs = ostmt.executeQuery();
+      rs.next();
+      this.write(new DateTime(rs.getTimestamp("sysdate")));
+    } catch (final java.sql.SQLException sqle) {
+      log.fatal(sqle.getMessage(), sqle);
+      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+    } finally {
+      try {
+        if (rs != null) { rs.close(); }
+        if (ostmt != null) { ostmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close ostmt and/or rs in finally block.");
+      }
+    }
   }
 
   public boolean equals(Object obj) {

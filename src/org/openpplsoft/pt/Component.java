@@ -271,6 +271,14 @@ public class Component {
         }
 
         if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
+          log.debug("Record: {}, field: {}", recDefn.RECNAME, recFldBuf.getFldName());
+          log.debug("Constant default: {}", recFldBuf.getRecFldDefn().DEFFIELDNAME);
+          /*
+           * TODO: For %date, query the database for sysdate and use that value.
+           * You cannot manually create a DateTime object b/c PS relies on the database
+           * for time values. You also need to do something about emissions, since the current
+           * sysdate will not match the one in the tracefile.
+           */
           throw new OPSVMachRuntimeException("TODO: Support constant field default.");
           // continue;
         }

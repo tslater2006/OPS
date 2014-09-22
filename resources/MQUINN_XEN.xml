@@ -40,14 +40,14 @@
     class="org.openpplsoft.runtime.ComponentRuntimeProfile">
     <constructor-arg value="SSS_STUDENT_CENTER"/>
     <constructor-arg value="003_KADAMS_SSS_STUDENT_CENTER.tracesql"/>
-    <constructor-arg value="2013-11-16"/>
+    <constructor-arg value="2013-10-04"/>
   </bean>
 
   <bean id="CLASS_SEARCH"
     class="org.openpplsoft.runtime.ComponentRuntimeProfile">
     <constructor-arg value="CLASS_SEARCH"/>
     <constructor-arg value="004_KADAMS_CLASS_SEARCH.tracesql"/>
-    <constructor-arg value="2013-11-16"/>
+    <constructor-arg value="2013-11-06"/>
   </bean>
 
   <bean id="SSR_SSENRL_LIST"

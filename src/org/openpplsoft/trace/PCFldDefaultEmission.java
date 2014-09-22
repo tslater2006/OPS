@@ -7,6 +7,7 @@
 
 package org.openpplsoft.trace;
 
+import org.openpplsoft.runtime.Environment;
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 import java.util.regex.Matcher;
@@ -32,6 +33,7 @@ public class PCFldDefaultEmission implements IEmission {
 
   public String ptRECNAME, ptFLDNAME, defaultedValue;
   public boolean constantFlag;
+  public String metaValue = null;
 
   public PCFldDefaultEmission(final String recName, final String fldName,
       final String value) {
@@ -42,6 +44,14 @@ public class PCFldDefaultEmission implements IEmission {
 
   public void setConstantFlag() {
     this.constantFlag = true;
+  }
+
+  /**
+   * A meta value is something like "%date", from which
+   * the actual field constant value is derived.
+   */
+  public void setMetaValue(final String mv) {
+    this.metaValue = mv;
   }
 
   @Override
@@ -57,11 +67,30 @@ public class PCFldDefaultEmission implements IEmission {
     final PCFldDefaultEmission other = (PCFldDefaultEmission) obj;
     if (this.ptRECNAME.equals(other.ptRECNAME)
         && this.ptFLDNAME.equals(other.ptFLDNAME)
-        && this.defaultedValue.equals(other.defaultedValue)
         && this.constantFlag == other.constantFlag) {
-      return true;
-    }
 
+      if ("%date".equals(this.metaValue)) {
+        // If this emission has a "%date" meta-value, it was interpreted by the
+        // interpreter; instead of comparing the other emission against this one,
+        // which will surely fail since the tracefile was generated on a different
+        // date than the one the interpreter considers to be today, compare the other
+        // emission against %Date, which has its value overriden with the trace file
+        // date for the component profile being run.
+        return other.defaultedValue.startsWith(
+            Environment.getSystemVar("%Date").readAsString());
+      } else if ("%date".equals(other.metaValue)) {
+        // If the other emission has a "%date" meta-value, it was interpreted by the
+        // interpreter; instead of comparing this emission against the other one,
+        // which will surely fail since the tracefile was generated on a different
+        // date than the one the interpreter considers to be today, compare this
+        // emission against %Date, which has its value overriden with the trace file
+        // date for the component profile being run.
+        return this.defaultedValue.startsWith(
+            Environment.getSystemVar("%Date").readAsString());
+      } else {
+        return this.defaultedValue.equals(other.defaultedValue);
+      }
+    }
     return false;
   }
 

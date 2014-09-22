@@ -262,8 +262,7 @@ public class Component {
             ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
                 recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref();
         final PTPrimitiveType fldValue = fldObj.getValue();
-        String defaultToEmit = null;
-        boolean defaultIsConstant = false;
+        PCFldDefaultEmission fdEmission = null;
 
         // If field is not blank, don't continue field default processing on it.
         if (!fldValue.isBlank()) {
@@ -282,8 +281,10 @@ public class Component {
           if (defValue.equals("%date")) {
             if (fldValue instanceof PTDateTime) {
               ((PTDateTime) fldValue).writeSYSDATE();
-              defaultToEmit = fldValue.readAsString();
-              defaultIsConstant = true;
+              fdEmission = new PCFldDefaultEmission(recDefn.RECNAME,
+                  recFldBuf.getFldName(), fldValue.readAsString());
+              fdEmission.setConstantFlag();
+              fdEmission.setMetaValue(defValue);
             } else {
               throw new OPSVMachRuntimeException("Expected PTDateTime for record field with "
                   + "constant value set to %date.");
@@ -308,8 +309,8 @@ public class Component {
               final ExecContext eCtx = new ProgramExecContext(p);
               final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
               interpreter.run();
-              defaultToEmit = "from peoplecode";
-              defaultIsConstant = false;
+              fdEmission = new PCFldDefaultEmission(recDefn.RECNAME,
+                  recFldBuf.getFldName(), "from peoplecode");
               break;
             }
           }
@@ -317,15 +318,10 @@ public class Component {
 
        /*
         * If the field's value is marked as updated after running
-        * the FieldDefault event, we must emit a line saying as much
+        * field processing for the record field, we must emit a line saying as much
         * for tracefile verification purposes.
         */
         if (fldValue.isMarkedAsUpdated()) {
-          final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
-              recDefn.RECNAME, recFldBuf.getFldName(), defaultToEmit);
-          if (defaultIsConstant) {
-            fdEmission.setConstantFlag();
-          }
           TraceFileVerifier.submitEnforcedEmission(fdEmission);
         }
       }

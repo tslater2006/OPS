@@ -311,6 +311,7 @@ public class Component {
         // Otherwise, if a FieldDefault program exists for this record field,
         // execute it.
         } else {
+          boolean fieldDefaultProgRun = false;
           for(PeopleCodeProg prog : recProgList) {
             if (prog.event.equals("FieldDefault")) {
               final PeopleCodeProg p = DefnCache.getProgram(prog);
@@ -319,8 +320,13 @@ public class Component {
               interpreter.run();
 
               fdEmission.setDefaultedValue("from peoplecode");
+              fieldDefaultProgRun = true;
               break;
             }
+          }
+
+          if (!fieldDefaultProgRun) {
+            continue;
           }
         }
 

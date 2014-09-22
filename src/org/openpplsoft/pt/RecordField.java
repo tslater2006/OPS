@@ -94,6 +94,8 @@ public class RecordField {
   }
 
   public boolean hasDefaultConstantValue() {
+    log.debug("hasDefaultConstantValue ({}.{})? DEFRECNAME={}, DEFFIELDNAME={}",
+        this.RECNAME, this.FIELDNAME, this.DEFRECNAME, this.DEFFIELDNAME);
     return this.DEFRECNAME.trim().length() == 0
         && this.DEFFIELDNAME.trim().length() > 0;
   }

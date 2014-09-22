@@ -262,7 +262,8 @@ public class Component {
             ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
                 recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref();
         final PTPrimitiveType fldValue = fldObj.getValue();
-        PCFldDefaultEmission fdEmission = null;
+        final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
+            recDefn.RECNAME, recFldBuf.getFldName());
 
         // If field is not blank, don't continue field default processing on it.
         if (!fldValue.isBlank()) {
@@ -275,24 +276,31 @@ public class Component {
 
         } else if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
           final String defValue = recFldBuf.getRecFldDefn().DEFFIELDNAME;
-          log.debug("Record: {}, field: {}", recDefn.RECNAME, recFldBuf.getFldName());
-          log.debug("Constant default: {}", defValue);
 
-          if (defValue.equals("%date")) {
-            if (fldValue instanceof PTDateTime) {
+          // First check if the value is actually a meta value (i.e., "%date")
+          if (defValue.startsWith("%")) {
+            if (defValue.equals("%date") && fldValue instanceof PTDateTime) {
               ((PTDateTime) fldValue).writeSYSDATE();
-              fdEmission = new PCFldDefaultEmission(recDefn.RECNAME,
-                  recFldBuf.getFldName(), fldValue.readAsString());
-              fdEmission.setConstantFlag();
               fdEmission.setMetaValue(defValue);
             } else {
-              throw new OPSVMachRuntimeException("Expected PTDateTime for record field with "
-                  + "constant value set to %date.");
+              throw new OPSVMachRuntimeException("Unexpected defValue (" + defValue + ") "
+                  + "and field (" + fldValue + ") combination.");
             }
+
+          // If not a meta value, interpret the value as a raw constant (i.e., "Y" or "9999").
           } else {
-            throw new OPSVMachRuntimeException("Record field has a constant default value "
-                + "that was not expected: " + defValue);
+            if (fldValue instanceof PTString) {
+              ((PTString) fldValue).write(defValue);
+            } else if (fldValue instanceof PTChar && defValue.length() == 1) {
+              ((PTChar) fldValue).write(defValue.charAt(0));
+            } else {
+              throw new OPSVMachRuntimeException("Expected PTString or PTChar for field value "
+                  + "while attempting to write field default: " + defValue);
+            }
           }
+
+          fdEmission.setDefaultedValue(fldValue.readAsString());
+          fdEmission.setConstantFlag();
 
         // At this point, if no field default value exists, and if there are no
         // FieldDefault programs on this record, nothing more to do; skip to next
@@ -309,8 +317,8 @@ public class Component {
               final ExecContext eCtx = new ProgramExecContext(p);
               final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
               interpreter.run();
-              fdEmission = new PCFldDefaultEmission(recDefn.RECNAME,
-                  recFldBuf.getFldName(), "from peoplecode");
+
+              fdEmission.setDefaultedValue("from peoplecode");
               break;
             }
           }

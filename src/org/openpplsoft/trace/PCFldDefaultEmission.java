@@ -35,11 +35,20 @@ public class PCFldDefaultEmission implements IEmission {
   public boolean constantFlag;
   public String metaValue = null;
 
+  public PCFldDefaultEmission(final String recName, final String fldName) {
+    this.ptRECNAME = recName;
+    this.ptFLDNAME = fldName;
+  }
+
   public PCFldDefaultEmission(final String recName, final String fldName,
       final String value) {
     this.ptRECNAME = recName;
     this.ptFLDNAME = fldName;
     this.defaultedValue = value;
+  }
+
+  public void setDefaultedValue(final String v) {
+    this.defaultedValue = v;
   }
 
   public void setConstantFlag() {

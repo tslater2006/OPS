@@ -61,10 +61,18 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   @Override
   public void copyValueFrom(final PTPrimitiveType src) {
-    if (!(src instanceof PTChar)) {
-      throw new OPSDataTypeException("Expected src to be PTChar.");
+    if (src instanceof PTChar) {
+      this.write(((PTChar) src).read());
+    } else if (src instanceof PTString) {
+      final String str = ((PTString) src).read();
+      if (str.length() > 1) {
+        throw new OPSDataTypeException("Cannot write string longer than 1 char to "
+            + "PTChar: " + src);
+      }
+      this.write(str.charAt(0));
+    } else {
+      throw new OPSDataTypeException("Expected src to be PTChar or PTString.");
     }
-    this.write(((PTChar) src).read());
   }
 
   @Override

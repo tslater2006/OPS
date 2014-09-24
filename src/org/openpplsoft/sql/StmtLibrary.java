@@ -428,6 +428,18 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
+  public static String mqTemp(final Record recDefn) {
+    final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
+        recDefn, "");
+    final StringBuilder b = new StringBuilder();
+    for (int i = 0; i < aliasedFields.length; i++) {
+      if (i > 0) { b.append(", "); }
+      b.append(aliasedFields[i]);
+    }
+
+    return b.toString();
+  }
+
   /**
    * Generates the SELECT clause given a record defn.
    * @param recDefn the record definition to select from
@@ -443,10 +455,27 @@ public final class StmtLibrary {
     }
 
     final StringBuilder selectClause = new StringBuilder("SELECT ");
+
+    final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
+        recDefn, dottedAlias);
+    for (int i = 0; i < aliasedFields.length; i++) {
+      if (i > 0) { selectClause.append(","); }
+      selectClause.append(aliasedFields[i]);
+    }
+
+    selectClause.append(" FROM ").append(recDefn
+        .getFullDatabaseRecordName()).append(" ").append(tableAlias);
+
+    return selectClause.toString();
+  }
+
+  private static String[] getOptionallyAliasedFieldsToSelect(final Record recDefn,
+      final String dottedAlias) {
+
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
+    final String[] aliasedFields = new String[rfList.size()];
 
     for (int i = 0; i < rfList.size(); i++) {
-      if (i > 0) { selectClause.append(","); }
       final String fieldname = rfList.get(i).FIELDNAME;
 
       /**
@@ -455,23 +484,20 @@ public final class StmtLibrary {
        */
       if (rfList.get(i).getTypeConstraintForUnderlyingValue()
           .isUnderlyingClassEqualTo(PTDate.class)) {
-        selectClause.append("TO_CHAR(").append(dottedAlias)
-            .append(fieldname).append(",'YYYY-MM-DD')");
+        aliasedFields[i] = "TO_CHAR(" + dottedAlias
+            + fieldname + ",'YYYY-MM-DD')";
 
       } else if (rfList.get(i).getTypeConstraintForUnderlyingValue()
           .isUnderlyingClassEqualTo(PTDateTime.class)) {
-        selectClause.append("TO_CHAR(CAST((").append(dottedAlias)
-            .append(fieldname)
-            .append(") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')");
+        aliasedFields[i] = "TO_CHAR(CAST((" + dottedAlias + fieldname
+            + ") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')";
 
       } else {
-        selectClause.append(dottedAlias).append(fieldname);
+        aliasedFields[i] = dottedAlias + fieldname;
       }
     }
-    selectClause.append(" FROM ").append(recDefn
-        .getFullDatabaseRecordName()).append(" ").append(tableAlias);
 
-    return selectClause.toString();
+    return aliasedFields;
   }
 
   /**

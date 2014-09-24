@@ -272,7 +272,14 @@ public class Component {
         // Must check for *non-constant* (i.e., from a field on another record)
         // possibility first (before checking for constant default).
         } else if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
-          throw new OPSVMachRuntimeException("TODO: Support non constant field default.");
+            log.debug("Rec:{}, fld: {}", recFldBuf.getRecFldDefn().DEFRECNAME,
+                recFldBuf.getRecFldDefn().DEFFIELDNAME);
+            final String defRecName = recFldBuf.getRecFldDefn().DEFRECNAME;
+            final String defFldName = recFldBuf.getRecFldDefn().DEFFIELDNAME;
+            final Record defRecDefn = DefnCache.getRecord(defRecName);
+            String queryStr = StmtLibrary.mqTemp(defRecDefn);
+            log.debug("To be emitted: {}", queryStr);
+            throw new OPSVMachRuntimeException("TODO: Support non constant field default.");
 
         } else if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
           final String defValue = recFldBuf.getRecFldDefn().DEFFIELDNAME;

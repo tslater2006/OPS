@@ -428,16 +428,63 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
-  public static String mqTemp(final Record recDefn) {
+  /**
+   * @param defaultRecDefn the record defn named in DEFRECNAME for the record
+   * field with the default value
+   * @param recFldBuf the buffer for the record field being defaulted
+   */
+  public static OPSStmt generateNonConstantFieldDefaultQuery(
+        final Record defaultRecDefn, final RecordFieldBuffer recFldBuf) {
+
     final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
-        recDefn, "");
-    final StringBuilder b = new StringBuilder();
+        defaultRecDefn, "");
+    final List<RecordField> rfList = defaultRecDefn.getExpandedFieldList();
+
+    final StringBuilder query = new StringBuilder("SELECT ");
+    final List<String> bindVals = new ArrayList<String>();
+
     for (int i = 0; i < aliasedFields.length; i++) {
-      if (i > 0) { b.append(", "); }
-      b.append(aliasedFields[i]);
+      if (i > 0) { query.append(", "); }
+      query.append(aliasedFields[i]);
     }
 
-    return b.toString();
+    query.append(" FROM PS_").append(defaultRecDefn.RECNAME);
+
+    int i = 0;
+    for (RecordField rf : rfList) {
+      if (rf.isKey()) {
+        final String keyValue = (String) recFldBuf.getParentRecordBuffer()
+            .getParentScrollBuffer().getKeyValueFromHierarchy(rf.FIELDNAME).read();
+
+        if (keyValue == null) {
+          throw new OPSVMachRuntimeException("Failed to generate non constant "
+              + "field default query; a value for a key on the record could "
+              + "not be found in the component buffer.");
+        } else {
+          if (i == 0) { query.append(" WHERE "); }
+          if (i > 0) { query.append(" AND "); }
+          query.append(rf.FIELDNAME).append("=?");
+          bindVals.add(keyValue);
+          i++;
+        }
+      }
+    }
+
+    i = 0;
+    for (RecordField rf : rfList) {
+      if (rf.isKey()) {
+        if (i == 0) { query.append(" ORDER BY "); }
+        if (i > 0) { query.append(", "); }
+        query.append(rf.FIELDNAME);
+        if (rf.isDescendingKey()) {
+          query.append(" DESC");
+        }
+        i++;
+      }
+    }
+
+    return new OPSStmt(query.toString(), bindVals.toArray(
+        new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
   /**
@@ -507,7 +554,7 @@ public final class StmtLibrary {
    * @return the OPSStmt to be executed
    */
   public static OPSStmt prepareFirstPassFillQuery(
-    final RecordBuffer rbuf) {
+      final RecordBuffer rbuf) {
 
     /*
      * Iterate over the fields in the expanded record field list
@@ -536,11 +583,10 @@ public final class StmtLibrary {
           && rbuf.getParentScrollBuffer()
             .getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
 
-        if(rf.isRequired()) {
-          log.debug("Aborting first pass fill for Record.{}; "
-              + "value does not exist for search key: {}", rbuf.getRecName(),
-              rf.FIELDNAME);
-          return null;
+        if (rf.isRequired()) {
+          throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
+              + rbuf.getRecName() + "; value does not exist for search key: "
+              + rf.FIELDNAME);
         } else {
           // If a non-required key field does not have a matching value,
           // we need to issue a query for all of the fields on the record.

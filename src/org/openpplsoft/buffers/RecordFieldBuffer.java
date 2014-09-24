@@ -44,6 +44,10 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     }
   }
 
+  public RecordBuffer getParentRecordBuffer() {
+    return this.parentRecordBuffer;
+  }
+
   /**
    * Retrieves the FLDNAME for the underlying record field.
    * @return the underlying record's FLDNAME

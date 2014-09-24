@@ -258,9 +258,16 @@ public class Component {
         * the comp buffer access code below needs to be genericized to
         * other scroll levels.
         */
-        final PTField fldObj =
-            ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
-                recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref();
+        PTField fldObj = null;
+        try {
+          fldObj =
+              ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
+                  recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref();
+        } catch (final NullPointerException npe) {
+          throw new OPSVMachRuntimeException("TODO: Support field default "
+              + "processing for scroll levels above 0.");
+        }
+
         final PTPrimitiveType fldValue = fldObj.getValue();
         final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
             recDefn.RECNAME, recFldBuf.getFldName());
@@ -272,15 +279,42 @@ public class Component {
         // Must check for *non-constant* (i.e., from a field on another record)
         // possibility first (before checking for constant default).
         } else if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
-            log.debug("Rec:{}, fld: {}", recFldBuf.getRecFldDefn().DEFRECNAME,
-                recFldBuf.getRecFldDefn().DEFFIELDNAME);
             final String defRecName = recFldBuf.getRecFldDefn().DEFRECNAME;
             final String defFldName = recFldBuf.getRecFldDefn().DEFFIELDNAME;
             final Record defRecDefn = DefnCache.getRecord(defRecName);
-            String queryStr = StmtLibrary.mqTemp(defRecDefn);
-            log.debug("To be emitted: {}", queryStr);
-            throw new OPSVMachRuntimeException("TODO: Support non constant field default.");
-
+            final OPSStmt ostmt =
+                StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, recFldBuf);
+            ResultSet rs = null;
+            try {
+              rs = ostmt.executeQuery();
+              /*
+               * Keep in mind that zero records may legitimately be returned here,
+               * in which case the field will remain blank.
+               */
+              if (rs.next()) {
+                log.debug("Will default to: {}", rs.getString(defFldName));
+                throw new OPSVMachRuntimeException("TODO: This code has not been "
+                    + "run yet for a field that actually generates a record from "
+                    + "which to default (queries so far have returned 0 records; "
+                    + "need to read *defFldName* from resultset and write that to "
+                    + "the field. ALSO REMEMBER TO UNCOMMENT THE CODE BELOW.");
+/*                if (rs.next()) {
+                  throw new OPSVMachRuntimeException(
+                      "Result set for default non constant field default query "
+                      + "returned multiple records; only expected one.");
+                }*/
+              }
+            } catch (final java.sql.SQLException sqle) {
+              log.fatal(sqle.getMessage(), sqle);
+              System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+            } finally {
+              try {
+                if (rs != null) { rs.close(); }
+                if (ostmt != null) { ostmt.close(); }
+              } catch (final java.sql.SQLException sqle) {
+                log.warn("Unable to close rs and/or ostmt in finally block.");
+            }
+          }
         } else if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
           final String defValue = recFldBuf.getRecFldDefn().DEFFIELDNAME;
 

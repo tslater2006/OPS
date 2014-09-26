@@ -102,11 +102,9 @@ public class SQL {
         throw new OPSVMachRuntimeException("No records found; unable to get SQL defn.");
       }
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } catch (final java.io.IOException ioe) {
-      log.fatal(ioe.getMessage(), ioe);
-      System.exit(ExitCode.GENERIC_IO_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     } finally {
       try {
         if (rs != null) { rs.close(); }

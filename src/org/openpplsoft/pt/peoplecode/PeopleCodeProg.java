@@ -127,9 +127,8 @@ public abstract class PeopleCodeProg {
         this.progRefsTable.put(rs.getInt("NAMENUM"),
             new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
       }
-    } catch(java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+    } catch(final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } finally {
       try {
         if(rs != null) { rs.close(); }
@@ -157,12 +156,10 @@ public abstract class PeopleCodeProg {
       while((b = stream.read()) != -1) {
         bytes.add(b);
       }
-    } catch(java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
-    } catch(java.io.IOException ioe) {
-      log.fatal(ioe.getMessage(), ioe);
-      System.exit(ExitCode.FAILED_READ_FROM_BLOB_STREAM.getCode());
+    } catch(final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    } catch(final java.io.IOException ioe) {
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     } finally {
       try {
         if(stream != null) { stream.close(); }

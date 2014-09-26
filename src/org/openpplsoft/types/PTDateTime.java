@@ -122,8 +122,7 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
       rs.next();
       this.write(new DateTime(rs.getTimestamp("sysdate")));
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } finally {
       try {
         if (rs != null) { rs.close(); }

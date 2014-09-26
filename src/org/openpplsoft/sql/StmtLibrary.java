@@ -59,8 +59,7 @@ public final class StmtLibrary {
     try {
       conn = ds.getConnection();
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.UNABLE_TO_ACQUIRE_DB_CONN.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
 
     /*
@@ -110,8 +109,7 @@ public final class StmtLibrary {
       staticSqlDefns.put(defn.uniqueLabel, defn);
 
     } catch (final java.io.IOException ioe) {
-      log.fatal(ioe.getMessage(), ioe);
-      System.exit(ExitCode.FAILED_READ_FROM_STATIC_SQL_DEFN_FILE.getCode());
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     } finally {
       try {
         if (br != null) { br.close(); }

@@ -83,8 +83,7 @@ public class HTML {
         throw new OPSVMachRuntimeException("No records found; unable to get HTML defn.");
       }
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } finally {
       try {
         if (rs != null) { rs.close(); }

@@ -96,8 +96,7 @@ public final class PTSQL extends PTObjectType {
       this.rs = ostmt.executeQuery();
       this.rsMetaData = rs.getMetaData();
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
   }
 

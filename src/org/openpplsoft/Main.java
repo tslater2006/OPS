@@ -94,10 +94,10 @@ public final class Main {
 
       TraceFileVerifier.logVerificationSummary(false);
 
-    } catch (final OPSVMachRuntimeException evmre) {
-      log.fatal(evmre.getMessage(), evmre);
+    } catch (final OPSVMachRuntimeException opsvmre) {
+      log.fatal(opsvmre.getMessage(), opsvmre);
       TraceFileVerifier.logVerificationSummary(true);
-      System.exit(ExitCode.ENT_VIRTUAL_MACH_RUNTIME_EXCEPTION.getCode());
+      System.exit(1);
     }
   }
 

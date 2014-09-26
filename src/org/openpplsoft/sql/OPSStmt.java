@@ -67,8 +67,7 @@ public class OPSStmt extends SQLStmt {
         this.pstmt.setString(cursor.getKey(), cursor.getValue());
       }
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.FAILED_TO_CREATE_PSTMT_FROM_CONN.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
   }
 

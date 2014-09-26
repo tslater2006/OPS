@@ -103,8 +103,7 @@ public class Component {
         this.pages.add(p);
       }
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } finally {
       try {
         if (rs != null) { rs.close(); }
@@ -171,8 +170,7 @@ public class Component {
         this.orderedComponentProgs.add((ComponentPeopleCodeProg) prog);
       }
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } finally {
       try {
         if (rs != null) { rs.close(); }
@@ -305,8 +303,7 @@ public class Component {
                 }*/
               }
             } catch (final java.sql.SQLException sqle) {
-              log.fatal(sqle.getMessage(), sqle);
-              System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+              throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
             } finally {
               try {
                 if (rs != null) { rs.close(); }
@@ -421,8 +418,7 @@ public class Component {
         }
       }
     } catch (final java.sql.SQLException sqle) {
-      log.fatal(sqle.getMessage(), sqle);
-      System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } finally {
       try {
         if (rs != null) { rs.close(); }

@@ -108,9 +108,8 @@ public class Record {
             new String[]{this.RECNAME});
         rs = ostmt.executeQuery();
         rs.next();        // Do nothing with records for now.
-      } catch(java.sql.SQLException sqle) {
-        log.fatal(sqle.getMessage(), sqle);
-        System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      } catch(final java.sql.SQLException sqle) {
+        throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
       } finally {
         try {
           if(rs != null) { rs.close(); }
@@ -149,9 +148,8 @@ public class Record {
           this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
           this.orderedRecordProgs.add(prog);
         }
-      } catch(java.sql.SQLException sqle) {
-        log.fatal(sqle.getMessage(), sqle);
-        System.exit(ExitCode.GENERIC_SQL_EXCEPTION.getCode());
+      } catch(final java.sql.SQLException sqle) {
+        throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
       } finally {
         try {
           if(rs != null) { rs.close(); }

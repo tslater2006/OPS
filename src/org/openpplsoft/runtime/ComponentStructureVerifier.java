@@ -32,9 +32,8 @@ public class ComponentStructureVerifier {
 
     try {
       reader = new BufferedReader(new FileReader(structureFile));
-    } catch(java.io.FileNotFoundException fnfe) {
-      log.fatal(fnfe.getMessage(), fnfe);
-      System.exit(ExitCode.COMP_STRUCTURE_FILE_NOT_FOUND.getCode());
+    } catch(final java.io.FileNotFoundException fnfe) {
+      throw new OPSVMachRuntimeException(fnfe.getMessage(), fnfe);
     }
 
     String line = null;
@@ -45,9 +44,8 @@ public class ComponentStructureVerifier {
 
       try {
         line = reader.readLine().trim();
-      } catch(java.io.IOException ioe) {
-        log.fatal(ioe.getMessage(), ioe);
-        System.exit(ExitCode.FAILED_READ_FROM_COMP_STRUCT_FILE.getCode());
+      } catch(final java.io.IOException ioe) {
+        throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
       }
 
       lineParts = line.split(";");
@@ -103,9 +101,8 @@ public class ComponentStructureVerifier {
       if(!reader.readLine().trim().equals("END-COMPONENT-STRUCTURE")) {
         throw new OPSVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
       }
-    } catch(java.io.IOException ioe) {
-      log.fatal(ioe.getMessage(), ioe);
-      System.exit(ExitCode.FAILED_READ_FROM_COMP_STRUCT_FILE.getCode());
+    } catch(final java.io.IOException ioe) {
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     }
     hasBeenVerified = true;
   }

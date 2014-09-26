@@ -98,8 +98,7 @@ public final class TraceFileVerifier {
       traceFileReader = new BufferedReader(new FileReader(
           new File("trace/" + profile.getTraceFileName())));
     } catch (final java.io.FileNotFoundException fnfe) {
-      log.fatal(fnfe.getMessage(), fnfe);
-      System.exit(ExitCode.TRACE_FILE_NOT_FOUND.getCode());
+      throw new OPSVMachRuntimeException(fnfe.getMessage(), fnfe);
     }
 
     ignoreStmtsInFile("ignoredSql_ORACLE.dat");
@@ -125,11 +124,9 @@ public final class TraceFileVerifier {
       }
       ignoreFileReader.close();
     } catch (final java.io.FileNotFoundException fnfe) {
-      log.fatal(fnfe.getMessage(), fnfe);
-      System.exit(ExitCode.IGNORE_STMTS_FILE_NOT_FOUND.getCode());
+      throw new OPSVMachRuntimeException(fnfe.getMessage(), fnfe);
     } catch (final java.io.IOException ioe) {
-      log.fatal(ioe.getMessage(), ioe);
-      System.exit(ExitCode.FAILED_READ_FROM_IGNORE_STMTS_FILE.getCode());
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     }
   }
 
@@ -299,8 +296,7 @@ public final class TraceFileVerifier {
       line = traceFileReader.readLine();
       currTraceLineNbr++;
     } catch (final java.io.IOException ioe) {
-      log.fatal(ioe.getMessage(), ioe);
-      System.exit(ExitCode.FAILED_READ_FROM_TRACE_FILE.getCode());
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     }
     return line;
   }

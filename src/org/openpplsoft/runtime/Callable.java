@@ -49,12 +49,10 @@ public class Callable {
       } else {
         this.ptMethod.invoke(this.ptMethodClass);
       }
-    } catch(java.lang.IllegalAccessException iae) {
-      log.fatal(iae.getMessage(), iae);
-      System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
-    } catch(java.lang.reflect.InvocationTargetException ite) {
-      log.fatal(ite.getMessage(), ite);
-      System.exit(ExitCode.REFLECT_FAIL_SYS_FN_INVOCATION.getCode());
+    } catch(final java.lang.IllegalAccessException iae) {
+      throw new OPSVMachRuntimeException(iae.getMessage(), iae);
+    } catch(final java.lang.reflect.InvocationTargetException ite) {
+      throw new OPSVMachRuntimeException(ite.getMessage(), ite);
     }
   }
 }

@@ -8,10 +8,12 @@
 package org.openpplsoft.types;
 
 import java.util.*;
+
+import java.sql.ResultSet;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-
 import java.text.SimpleDateFormat;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -20,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.sql.*;
 
 public final class PTDate extends PTPrimitiveType<Date> {
 
@@ -82,6 +85,25 @@ public final class PTDate extends PTPrimitiveType<Date> {
 
   public boolean isBlank() {
     return (this.value == null);
+  }
+
+  public void writeSYSDATE() {
+    final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.SYSDATE", new String[]{});
+    ResultSet rs = null;
+    try {
+      rs = ostmt.executeQuery();
+      rs.next();
+      this.write(new Date(rs.getTimestamp("sysdate").getTime()));
+    } catch (final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    } finally {
+      try {
+        if (rs != null) { rs.close(); }
+        if (ostmt != null) { ostmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close ostmt and/or rs in finally block.");
+      }
+    }
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

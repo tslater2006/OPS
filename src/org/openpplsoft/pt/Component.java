@@ -320,6 +320,9 @@ public class Component {
               if (defValue.equals("%date") && fldValue instanceof PTDateTime) {
                 ((PTDateTime) fldValue).writeSYSDATE();
                 fdEmission.setMetaValue(defValue);
+              } else if (defValue.equals("%date") && fldValue instanceof PTDate) {
+                ((PTDate) fldValue).writeSYSDATE();
+                fdEmission.setMetaValue(defValue);
               } else {
                 throw new OPSVMachRuntimeException("Unexpected defValue (" + defValue + ") "
                     + "and field (" + fldValue + ") combination.");

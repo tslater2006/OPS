@@ -101,6 +101,8 @@ public class RecordField {
   }
 
   public boolean hasDefaultNonConstantValue() {
+    log.debug("hasDefaultNonConstantValue ({}.{})? DEFRECNAME={}, DEFFIELDNAME={}",
+        this.RECNAME, this.FIELDNAME, this.DEFRECNAME, this.DEFFIELDNAME);
     return this.DEFRECNAME.trim().length() > 0
         && this.DEFFIELDNAME.trim().length() > 0;
   }

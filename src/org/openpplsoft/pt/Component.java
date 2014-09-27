@@ -273,6 +273,15 @@ public class Component {
           if (!fldValue.isBlank()) {
             continue;
 
+          // If field is a key, its value will be based on the keys defined on
+          // fields in higher scroll levels, so don't perform field default processing.
+          // NOTE: I am making an exception here for EFFDT, I don't know at this time
+          // whether this is accurate and/or complete.
+          // TODO(mquinn): Keep this in mind.
+          } else if(fldObj.getRecordFieldDefn().isKey() && !fldObj.getRecordFieldDefn()
+              .FIELDNAME.equals("EFFDT")) {
+            continue;
+
           // Must check for *non-constant* (i.e., from a field on another record)
           // possibility first (before checking for constant default).
           } else if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
@@ -282,6 +291,10 @@ public class Component {
               final OPSStmt ostmt =
                   StmtLibrary.generateNonConstantFieldDefaultQuery(
                       defRecDefn, recFldBuf);
+
+              log.debug("Querying {}.{} for default value for field {}.{}",
+                  defRecName, defFldName, currRecBuf.getRecName(), recFldBuf.getFldName());
+
               ResultSet rs = null;
               try {
                 rs = ostmt.executeQuery();

@@ -243,138 +243,139 @@ public class Component {
    */
   public void runFieldDefaultProcessing() {
     IStreamableBuffer buf;
+    ScrollBuffer currSb = null;
+    RecordBuffer currRecBuf = null;
 
     ComponentBuffer.resetCursors();
     while ((buf = ComponentBuffer.next()) != null) {
-      if (buf instanceof RecordFieldBuffer) {
+      if (buf instanceof ScrollBuffer) {
+        currSb = (ScrollBuffer) buf;
+      } else if (buf instanceof RecordBuffer) {
+        currRecBuf = (RecordBuffer) buf;
+      } else if (buf instanceof RecordFieldBuffer) {
         final RecordFieldBuffer recFldBuf = ((RecordFieldBuffer) buf);
-        final Record recDefn = recFldBuf.getRecDefn();
-        final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
-            recFldBuf.getFldName());
-       /*
-        * TODO(mquinn): This only supports level 0 record fields for now;
-        * the comp buffer access code below needs to be genericized to
-        * other scroll levels.
-        */
-        PTField fldObj = null;
-        try {
-          fldObj =
-              ComponentBuffer.ptGetLevel0().getRow(1).getRecord(
-                  recDefn.RECNAME).getFieldRef(recFldBuf.getFldName()).deref();
-        } catch (final NullPointerException npe) {
-          throw new OPSVMachRuntimeException("TODO: Support field default "
-              + "processing for scroll levels above 0.");
-        }
 
-        final PTPrimitiveType fldValue = fldObj.getValue();
-        final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
-            recDefn.RECNAME, recFldBuf.getFldName());
+        log.debug("DefFldProc: {}.{}", currRecBuf.getRecName(), recFldBuf.getFldName());
 
-        // If field is not blank, don't continue field default processing on it.
-        if (!fldValue.isBlank()) {
-          continue;
+        final PTRowset scrollRowset = currSb.ptGetRowset();
+        for (int i = 1; i <= scrollRowset.getActiveRowCount(); i++) {
+          final PTField fldObj = scrollRowset.getRow(i).getRecord(
+              currRecBuf.getRecName()).getFieldRef(recFldBuf.getFldName()).deref();
+          final PTPrimitiveType fldValue = fldObj.getValue();
+          final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
+              currRecBuf.getRecName(), recFldBuf.getFldName());
 
-        // Must check for *non-constant* (i.e., from a field on another record)
-        // possibility first (before checking for constant default).
-        } else if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
-            final String defRecName = recFldBuf.getRecFldDefn().DEFRECNAME;
-            final String defFldName = recFldBuf.getRecFldDefn().DEFFIELDNAME;
-            final Record defRecDefn = DefnCache.getRecord(defRecName);
-            final OPSStmt ostmt =
-                StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, recFldBuf);
-            ResultSet rs = null;
-            try {
-              rs = ostmt.executeQuery();
-              /*
-               * Keep in mind that zero records may legitimately be returned here,
-               * in which case the field will remain blank.
-               */
-              if (rs.next()) {
-                log.debug("Will default to: {}", rs.getString(defFldName));
-                throw new OPSVMachRuntimeException("TODO: This code has not been "
-                    + "run yet for a field that actually generates a record from "
-                    + "which to default (queries so far have returned 0 records; "
-                    + "need to read *defFldName* from resultset and write that to "
-                    + "the field. ALSO REMEMBER TO UNCOMMENT THE CODE BELOW.");
-/*                if (rs.next()) {
-                  throw new OPSVMachRuntimeException(
-                      "Result set for default non constant field default query "
-                      + "returned multiple records; only expected one.");
-                }*/
-              }
-            } catch (final java.sql.SQLException sqle) {
-              throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-            } finally {
-              try {
-                if (rs != null) { rs.close(); }
-                if (ostmt != null) { ostmt.close(); }
-              } catch (final java.sql.SQLException sqle) {
-                log.warn("Unable to close rs and/or ostmt in finally block.");
-            }
-          }
-        } else if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
-          final String defValue = recFldBuf.getRecFldDefn().DEFFIELDNAME;
+          final Record recDefn = DefnCache.getRecord(currRecBuf.getRecName());
+          final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
+              recFldBuf.getFldName());
 
-          // First check if the value is actually a meta value (i.e., "%date")
-          if (defValue.startsWith("%")) {
-            if (defValue.equals("%date") && fldValue instanceof PTDateTime) {
-              ((PTDateTime) fldValue).writeSYSDATE();
-              fdEmission.setMetaValue(defValue);
-            } else {
-              throw new OPSVMachRuntimeException("Unexpected defValue (" + defValue + ") "
-                  + "and field (" + fldValue + ") combination.");
-            }
-
-          // If not a meta value, interpret the value as a raw constant (i.e., "Y" or "9999").
-          } else {
-            if (fldValue instanceof PTString) {
-              ((PTString) fldValue).write(defValue);
-            } else if (fldValue instanceof PTChar && defValue.length() == 1) {
-              ((PTChar) fldValue).write(defValue.charAt(0));
-            } else {
-              throw new OPSVMachRuntimeException("Expected PTString or PTChar for field value "
-                  + "while attempting to write field default: " + defValue);
-            }
-          }
-
-          fdEmission.setDefaultedValue(fldValue.readAsString());
-          fdEmission.setConstantFlag();
-
-        // At this point, if no field default value exists, and if there are no
-        // FieldDefault programs on this record, nothing more to do; skip to next
-        // record field buffer.
-        } else if (recProgList == null) {
-          continue;
-
-        // Otherwise, if a FieldDefault program exists for this record field,
-        // execute it.
-        } else {
-          boolean fieldDefaultProgRun = false;
-          for(PeopleCodeProg prog : recProgList) {
-            if (prog.event.equals("FieldDefault")) {
-              final PeopleCodeProg p = DefnCache.getProgram(prog);
-              final ExecContext eCtx = new ProgramExecContext(p);
-              final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-              interpreter.run();
-
-              fdEmission.setDefaultedValue("from peoplecode");
-              fieldDefaultProgRun = true;
-              break;
-            }
-          }
-
-          if (!fieldDefaultProgRun) {
+          // If field is not blank, don't continue field default processing on it.
+          if (!fldValue.isBlank()) {
             continue;
-          }
-        }
 
-       /*
-        * If the field's value is marked as updated after running
-        * field processing for the record field, we must emit a line saying as much
-        * for tracefile verification purposes.
-        */
-        if (fldValue.isMarkedAsUpdated()) {
-          TraceFileVerifier.submitEnforcedEmission(fdEmission);
+          // Must check for *non-constant* (i.e., from a field on another record)
+          // possibility first (before checking for constant default).
+          } else if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
+              final String defRecName = recFldBuf.getRecFldDefn().DEFRECNAME;
+              final String defFldName = recFldBuf.getRecFldDefn().DEFFIELDNAME;
+              final Record defRecDefn = DefnCache.getRecord(defRecName);
+              final OPSStmt ostmt =
+                  StmtLibrary.generateNonConstantFieldDefaultQuery(
+                      defRecDefn, recFldBuf);
+              ResultSet rs = null;
+              try {
+                rs = ostmt.executeQuery();
+                /*
+                 * Keep in mind that zero records may legitimately be returned here,
+                 * in which case the field will remain blank.
+                 */
+                if (rs.next()) {
+                  log.debug("Will default to: {}", rs.getString(defFldName));
+                  throw new OPSVMachRuntimeException("TODO: This code has not been "
+                      + "run yet for a field that actually generates a record from "
+                      + "which to default (queries so far have returned 0 records; "
+                      + "need to read *defFldName* from resultset and write that to "
+                      + "the field. ALSO REMEMBER TO UNCOMMENT THE CODE BELOW.");
+  /*                if (rs.next()) {
+                    throw new OPSVMachRuntimeException(
+                        "Result set for default non constant field default query "
+                        + "returned multiple records; only expected one.");
+                  }*/
+                }
+              } catch (final java.sql.SQLException sqle) {
+                throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+              } finally {
+                try {
+                  if (rs != null) { rs.close(); }
+                  if (ostmt != null) { ostmt.close(); }
+                } catch (final java.sql.SQLException sqle) {
+                  log.warn("Unable to close rs and/or ostmt in finally block.");
+              }
+            }
+          } else if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
+            final String defValue = recFldBuf.getRecFldDefn().DEFFIELDNAME;
+
+            // First check if the value is actually a meta value (i.e., "%date")
+            if (defValue.startsWith("%")) {
+              if (defValue.equals("%date") && fldValue instanceof PTDateTime) {
+                ((PTDateTime) fldValue).writeSYSDATE();
+                fdEmission.setMetaValue(defValue);
+              } else {
+                throw new OPSVMachRuntimeException("Unexpected defValue (" + defValue + ") "
+                    + "and field (" + fldValue + ") combination.");
+              }
+
+            // If not a meta value, interpret the value as a raw constant (i.e., "Y" or "9999").
+            } else {
+              if (fldValue instanceof PTString) {
+                ((PTString) fldValue).write(defValue);
+              } else if (fldValue instanceof PTChar && defValue.length() == 1) {
+                ((PTChar) fldValue).write(defValue.charAt(0));
+              } else {
+                throw new OPSVMachRuntimeException("Expected PTString or PTChar for field value "
+                    + "while attempting to write field default: " + defValue);
+              }
+            }
+
+            fdEmission.setDefaultedValue(fldValue.readAsString());
+            fdEmission.setConstantFlag();
+
+          // At this point, if no field default value exists, and if there are no
+          // FieldDefault programs on this record, nothing more to do; skip to next
+          // record field buffer.
+          } else if (recProgList == null) {
+            continue;
+
+          // Otherwise, if a FieldDefault program exists for this record field,
+          // execute it.
+          } else {
+            boolean fieldDefaultProgRun = false;
+            for(PeopleCodeProg prog : recProgList) {
+              if (prog.event.equals("FieldDefault")) {
+                final PeopleCodeProg p = DefnCache.getProgram(prog);
+                final ExecContext eCtx = new ProgramExecContext(p);
+                final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+                interpreter.run();
+
+                fdEmission.setDefaultedValue("from peoplecode");
+                fieldDefaultProgRun = true;
+                break;
+              }
+            }
+
+            if (!fieldDefaultProgRun) {
+              continue;
+            }
+          }
+
+         /*
+          * If the field's value is marked as updated after running
+          * field processing for the record field, we must emit a line saying as much
+          * for tracefile verification purposes.
+          */
+          if (fldValue.isMarkedAsUpdated()) {
+            TraceFileVerifier.submitEnforcedEmission(fdEmission);
+          }
         }
       }
     }

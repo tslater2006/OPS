@@ -89,10 +89,14 @@ public final class PTRowset extends PTObjectType {
     }
   }
 
+  public int getActiveRowCount() {
+    return this.rows.size();
+  }
+
   @Override
   public PTType dotProperty(final String s) {
     if (s.equals("ActiveRowCount")) {
-      return new PTInteger(this.rows.size());
+      return new PTInteger(this.getActiveRowCount());
     }
     return null;
   }

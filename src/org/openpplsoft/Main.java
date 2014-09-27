@@ -90,7 +90,7 @@ public final class Main {
 
       ComponentBuffer.firstPassFill();
       c.runPreBuild();
-      c.runFieldDefaultProcessing();
+      c.runDefaultProcessing();
 
       TraceFileVerifier.logVerificationSummary(false);
 

@@ -236,15 +236,89 @@ public class Component {
   }
 
   /**
+   * @return Whether or not at least one FieldFormula program was run.
+   */
+  public boolean runFieldFormula() {
+    IStreamableBuffer buf;
+    ScrollBuffer currSb = null;
+    RecordBuffer currRecBuf = null;
+    boolean wasFieldFormulaProgramRun = false;
+
+    ComponentBuffer.resetCursors();
+    while ((buf = ComponentBuffer.next()) != null) {
+      if (buf instanceof ScrollBuffer) {
+        currSb = (ScrollBuffer) buf;
+      } else if (buf instanceof RecordBuffer) {
+        currRecBuf = (RecordBuffer) buf;
+      } else if (buf instanceof RecordFieldBuffer) {
+        final RecordFieldBuffer recFldBuf = ((RecordFieldBuffer) buf);
+        final PTRowset scrollRowset = currSb.ptGetRowset();
+
+        for (int i = 1; i <= scrollRowset.getActiveRowCount(); i++) {
+          final Record recDefn = DefnCache.getRecord(currRecBuf.getRecName());
+          final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
+              recFldBuf.getFldName());
+
+          if (recProgList == null) {
+            continue;
+          }
+
+          for(PeopleCodeProg prog : recProgList) {
+            if (prog.event.equals("FieldFormula")) {
+              final PeopleCodeProg p = DefnCache.getProgram(prog);
+              final ExecContext eCtx = new ProgramExecContext(p);
+              final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+              interpreter.run();
+              wasFieldFormulaProgramRun = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    return wasFieldFormulaProgramRun;
+  }
+
+  /**
+   * For the flowchart, see:
+   * http://docs.oracle.com/cd/E18083_01/pt851pbr0/eng/psbooks/tpcd/chapter.htm?File=tpcd/htm/tpcd07.htm%23g037ee99c9453fb39_ef90c_10c791ddc07__4acchttp://docs.oracle.com/cd/E18083_01/pt851pbr0/eng/psbooks/tpcd/chapter.htm?File=tpcd/htm/tpcd07.htm%23g037ee99c9453fb39_ef90c_10c791ddc07__4acc
+   */
+  public void runDefaultProcessing() {
+    // First, run field-level default processing; continue to do so
+    // until a pass indicates that either 1) there are no blank fields
+    // remaining or 2) no field was changed during the pass.
+    boolean doContinue;
+    do {
+      doContinue = this.runFieldLevelDefaultProcessing();
+    } while (doContinue);
+
+    // Next, run the FieldFormula program for all fields in all rows
+    // of the component.
+    boolean wereAnyFieldFormulaProgsRun = this.runFieldFormula();
+
+    // If any field formula programs were run, continue to run default
+    // processing as before.
+    if (wereAnyFieldFormulaProgsRun) {
+      do {
+        doContinue = this.runFieldLevelDefaultProcessing();
+      } while (doContinue);
+    }
+  }
+
+  /**
    * Iterates through each field in the component buffer and runs default
    * processing on it; this could mean giving it a predefined constant value,
    * looking up the default value from another table, or running a FieldDefault
    * program to set the value programmatically.
    */
-  public void runFieldDefaultProcessing() {
+  private boolean runFieldLevelDefaultProcessing() {
     IStreamableBuffer buf;
     ScrollBuffer currSb = null;
     RecordBuffer currRecBuf = null;
+
+    boolean wasBlankFieldSeen = false;
+    boolean wasFieldChanged = false;
 
     ComponentBuffer.resetCursors();
     while ((buf = ComponentBuffer.next()) != null) {
@@ -280,6 +354,12 @@ public class Component {
           // TODO(mquinn): Keep this in mind.
           } else if(fldObj.getRecordFieldDefn().isKey() && !fldObj.getRecordFieldDefn()
               .FIELDNAME.equals("EFFDT")) {
+
+            if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
+              log.debug("Ignoring key with non-constant default value "
+                  + "during field default processing: {}.{}", currRecBuf.getRecName(),
+                  recFldBuf.getFldName());
+            }
             continue;
 
           // Must check for *non-constant* (i.e., from a field on another record)
@@ -387,14 +467,21 @@ public class Component {
          /*
           * If the field's value is marked as updated after running
           * field processing for the record field, we must emit a line saying as much
-          * for tracefile verification purposes.
+          * for tracefile verification purposes; additionally, this must be reflected
+          * in this method's return value.
           */
           if (fldValue.isMarkedAsUpdated()) {
+            wasFieldChanged = true;
             TraceFileVerifier.submitEnforcedEmission(fdEmission);
+            fldValue.clearUpdatedFlag();
+          } else if (fldValue.isBlank()) {
+            wasBlankFieldSeen = true;
           }
         }
       }
     }
+
+    return (wasFieldChanged && wasBlankFieldSeen);
   }
 
   /**

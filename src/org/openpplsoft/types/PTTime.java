@@ -46,8 +46,7 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   @Override
   public boolean isBlank() {
-    throw new OPSVMachRuntimeException("isBlank() called on PTTime; need to "
-        + "determine what PT considers a blank time value.");
+    return (this.value == null);
   }
 
   @Override

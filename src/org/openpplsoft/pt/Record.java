@@ -202,6 +202,20 @@ public class Record {
     return false;
   }
 
+  /*
+   * TODO: This method is tentative. It may need to use the expanded field list
+   * rather than the root field list. It also may be too expansive.
+   */
+  public boolean hasAnySearchKeys() {
+    for(Map.Entry<String, RecordField> cursor : this.fieldTable.entrySet()) {
+      RecordField rf = cursor.getValue();
+      if(rf.isSearchKey()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Determines if a required key field exists on this record.
    * @return true if a required key field exists, false otherwise

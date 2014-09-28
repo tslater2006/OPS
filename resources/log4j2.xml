@@ -43,7 +43,7 @@
     <Logger name="org.openpplsoft.antlr4" level="DEBUG"/>
     <Logger name="org.openpplsoft.pt.pages" level="DEBUG"/>
     <Logger name="org.openpplsoft.buffers" level="WARN"/>
-    <Logger name="org.openpplsoft.buffers.ComponentBuffer" level="WARN"/>
+    <Logger name="org.openpplsoft.buffers.ComponentBuffer" level="DEBUG"/>
     <Logger name="org.openpplsoft.buffers.RecordBuffer" level="DEBUG"/>
   </Loggers>
 </Configuration>

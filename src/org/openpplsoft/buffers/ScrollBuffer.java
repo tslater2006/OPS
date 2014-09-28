@@ -167,6 +167,10 @@ public class ScrollBuffer implements IStreamableBuffer {
     return sb;
   }
 
+  public List<RecordBuffer> getOrderedRecBuffers() {
+    return this.orderedRecBuffers;
+  }
+
   /**
    * Gets the next child buffer in the read sequence.
    * @return the next child buffer in the read sequence

@@ -7,6 +7,9 @@
 
 package org.openpplsoft.buffers;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -216,6 +219,29 @@ public final class ComponentBuffer {
           ((ScrollBuffer) buf).getScrollLevel() != 0) {
         // we only want scroll level 0; break beyond that
         break;
+      }
+    }
+  }
+
+  public static void printContents() {
+    log.debug("======= COMPONENT BUFFER =========");
+    log.debug("== BEGIN SEARCH RECORD ===========");
+    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+        : searchRecord.getFieldRefs().entrySet()) {
+      final PTPrimitiveType fldValue = entry.getValue().deref().getValue();
+      log.debug("{}={}", entry.getKey(), fldValue.readAsCompBufferOutput());
+    }
+    log.debug("== END SEARCH RECORD =============");
+
+    final PTRowset lvlZeroRowset = lvlZeroScrollBuffer.ptGetRowset();
+    for (int i = 1; i <= lvlZeroRowset.getActiveRowCount(); i++) {
+      log.debug("Level 0, row {}", i - 1);
+      for (RecordBuffer recBuf : lvlZeroScrollBuffer.getOrderedRecBuffers()) {
+        final List<RecordFieldBuffer> recFldBuffers = recBuf.getFieldBuffers();
+        for (RecordFieldBuffer recFldBuf : recFldBuffers) {
+          log.debug("{}={}", recFldBuf.getFldName(), lvlZeroRowset.getRow(i).getRecord(
+              recBuf.getRecName()).getFieldRef(recFldBuf.getFldName()).deref().getValue().readAsCompBufferOutput());
+        }
       }
     }
   }

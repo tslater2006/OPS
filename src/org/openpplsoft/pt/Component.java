@@ -492,7 +492,7 @@ public class Component {
 
     final Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
 
-    if (!recDefn.hasAnyKeys()) {
+    if (!recDefn.hasAnySearchKeys()) {
       return;
     }
 

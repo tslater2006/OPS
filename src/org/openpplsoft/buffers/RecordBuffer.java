@@ -194,6 +194,10 @@ public class RecordBuffer implements IStreamableBuffer {
     }
   }
 
+  public List<RecordFieldBuffer> getFieldBuffers() {
+    return this.fieldBuffers;
+  }
+
   /**
    * Expand any and all subrecords for the underlying record
    * definition into this RecordBuffer.

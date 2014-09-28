@@ -38,6 +38,14 @@ public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType
     return this.value.toString();
   }
 
+  public String readAsCompBufferOutput() {
+    if (this.isBlank()) {
+      return "''";
+    } else {
+      return "'" + this.readAsString() + "'";
+    }
+  }
+
   public void write(T newValue) {
     this.checkIsWriteable();
     this.value = newValue;

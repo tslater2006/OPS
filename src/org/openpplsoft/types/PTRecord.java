@@ -41,6 +41,10 @@ public final class PTRecord extends PTObjectType {
   private Map<Integer, PTImmutableReference<PTField>> fieldRefIdxTable;
 
   static {
+    /*
+     * "ASTIMESTAMP" is not a typo; no spaces exist in the name as
+     * returned in the ResultSet.
+     */
     dtPattern = Pattern.compile(
         "TO_CHAR\\(CAST\\(\\(([^\\)]*)\\)ASTIMESTAMP\\),"
         + "'YYYY-MM-DD-HH24\\.MI\\.SS\\.FF'\\)");
@@ -144,8 +148,6 @@ public final class PTRecord extends PTObjectType {
 
     /*
      * Unwrap datetime fields.
-     * "ASTIMESTAMP" is not a typo; no spaces exist in the name as
-     * returned in the ResultSet.
      */
     final Matcher dtMatcher = dtPattern.matcher(unwrappedFldName);
     if (dtMatcher.find()) {

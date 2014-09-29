@@ -99,6 +99,8 @@ public class RecordField {
 
   public PeopleCodeProg getProgramForEvent(final PCEvent event) {
     final Record recDefn = DefnCache.getRecord(this.RECNAME);
+    recDefn.discoverRecordPC();
+
     final List<PeopleCodeProg> recFldProgs = recDefn.getRecordProgsForField(this.FIELDNAME);
     if (recFldProgs != null) {
       for (PeopleCodeProg prog : recFldProgs) {

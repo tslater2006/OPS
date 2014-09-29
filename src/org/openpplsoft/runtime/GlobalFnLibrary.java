@@ -191,13 +191,14 @@ public class GlobalFnLibrary {
    * component buffer available to caller.
    */
   public static void PT_GetLevel0() {
+    throw new OPSVMachRuntimeException("TODO: Reimplement GetLevel0 system fn.");
 
-    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+/*    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
 
-    Environment.pushToCallStack(ComponentBuffer.ptGetLevel0());
+    Environment.pushToCallStack(ComponentBuffer.ptGetLevel0());*/
   }
 
   public static void PT_CreateArrayRept() {

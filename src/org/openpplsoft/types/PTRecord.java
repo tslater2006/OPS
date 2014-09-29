@@ -29,7 +29,7 @@ import org.openpplsoft.sql.*;
 /**
  * Represents a PeopleTools record object.
  */
-public final class PTRecord extends PTObjectType {
+public final class PTRecord extends PTObjectType implements IPCEventListener {
 
   private static Logger log = LogManager.getLogger(PTRecord.class.getName());
 
@@ -93,6 +93,15 @@ public final class PTRecord extends PTObjectType {
       } catch (final OPSTypeCheckException opstce) {
         throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
       }
+    }
+  }
+
+  public void fireEvent(final PCEvent event) {
+
+    // Fire event on each field in this record.
+    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+        : this.fieldRefs.entrySet()) {
+      entry.getValue().deref().fireEvent(event);
     }
   }
 

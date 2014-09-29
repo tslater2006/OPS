@@ -26,10 +26,13 @@ public final class ComponentBuffer {
   private static Logger log =
       LogManager.getLogger(ComponentBuffer.class.getName());
 
+  private static Component compDefn;
+
   private static int currScrollLevel;
   private static ScrollBuffer currSB;
   private static ScrollBuffer lvlZeroScrollBuffer;
-  private static PTRecord searchRecord;
+
+  private static PTRow cBuffer;
 
   private ComponentBuffer() {}
 
@@ -39,27 +42,26 @@ public final class ComponentBuffer {
   }
 
   /**
-   * Return the search record underlying this component.
-   * @return the underlying search record
+   * Initializes the component buffer with the provided Component defn.
    */
+  public static void init(final Component c) {
+    compDefn = c;
+    final Record searchRecDefn = DefnCache.getRecord(compDefn.getSearchRecordName());
+    cBuffer = new PTRowTypeConstraint().alloc(searchRecDefn);
+
+    compDefn.getListOfComponentPC();
+  }
+
+  public static void fireEvent(final PCEvent event) {
+    cBuffer.fireEvent(event);
+  }
+
   public static PTRecord getSearchRecord() {
-    return searchRecord;
+    return cBuffer.getRecord(compDefn.getSearchRecordName());
   }
 
-  /**
-   * Return the level 0 scroll buffer for this component buffer.
-   * @return the level 0 buffer
-   */
-  public static PTRowset ptGetLevel0() {
-    return lvlZeroScrollBuffer.ptGetRowset();
-  }
-
-  /**
-   * Set the search record to be used by this component.
-   * @param r the search record to use
-   */
-  public static void setSearchRecord(final PTRecord r) {
-    searchRecord = r;
+  public static Component getComponentDefn() {
+    return compDefn;
   }
 
   /**
@@ -223,7 +225,11 @@ public final class ComponentBuffer {
     }
   }
 
-  public static void printContents() {
+  public static void generateFromStructure() {
+    log.debug("Generating component structure...");
+  }
+
+/*  public static void printContents() {
     log.debug("======= COMPONENT BUFFER =========");
     log.debug("== BEGIN SEARCH RECORD ===========");
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
@@ -244,5 +250,5 @@ public final class ComponentBuffer {
         }
       }
     }
-  }
+  }*/
 }

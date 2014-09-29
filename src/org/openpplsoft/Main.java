@@ -77,9 +77,10 @@ public final class Main {
       final Menu m = DefnCache.getMenu(
           (String) Environment.getSystemVar("%Menu").read());
 
-      c.getListOfComponentPC();
-      c.loadAndRunRecordPConSearchRecord();
-      c.loadAndRunComponentPConSearchRecord();
+      ComponentBuffer.init(c);
+      ComponentBuffer.fireEvent(PCEvent.SEARCH_INIT);
+//      c.loadAndRunRecordPConSearchRecord();
+  //    c.loadAndRunComponentPConSearchRecord();
       c.fillSearchRecord();
 
       c.loadPages();
@@ -87,12 +88,14 @@ public final class Main {
       c.assembleComponentStructure();
       ComponentBuffer.printStructure();
       ComponentStructureVerifier.verify(profileToRun);
+      ComponentBuffer.generateFromStructure();
 
+/*
       ComponentBuffer.firstPassFill();
       c.runPreBuild();
 
       // TEMPORARY
-      ComponentBuffer.printContents();
+      ComponentBuffer.printContents();*/
 //      c.runDefaultProcessing();
 
       TraceFileVerifier.logVerificationSummary(false);

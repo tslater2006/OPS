@@ -29,7 +29,7 @@ import org.openpplsoft.sql.*;
 /**
  * Represents a PeopleTools rowset object.
  */
-public final class PTRowset extends PTObjectType {
+public final class PTRowset extends PTObjectType implements IPCEventListener {
 
   private static Logger log = LogManager.getLogger(
       PTRowset.class.getName());
@@ -76,17 +76,8 @@ public final class PTRowset extends PTObjectType {
     this.rows.add(new PTRowTypeConstraint().alloc(this.registeredRecordDefns));
   }
 
-  /**
-   * Each row in a rowset contains the same underlying record
-   * definitions; this method alters existing rows to ensure
-   * that each has an allocated PTRecord for the newly registered
-   * record defn.
-   */
-  public void registerRecordDefn(final Record r) {
-    this.registeredRecordDefns.add(r);
-    for (PTRow row : this.rows) {
-      row.registerRecordDefn(r);
-    }
+  public void fireEvent(final PCEvent event) {
+    throw new OPSVMachRuntimeException("TODO: Implement fireEvent for PTRowset.");
   }
 
   public int getActiveRowCount() {

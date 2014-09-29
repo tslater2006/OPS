@@ -246,7 +246,6 @@ public class Page {
 
       final Record recDefn = DefnCache.getRecord(recName);
       log.debug("Issuing PC List Request for {}", recDefn.RECNAME);
-      recDefn.discoverRecordPC();
 
       /*
        * If this record contains subrecords, requests for their

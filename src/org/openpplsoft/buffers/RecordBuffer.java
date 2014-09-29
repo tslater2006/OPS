@@ -155,12 +155,15 @@ public class RecordBuffer implements IStreamableBuffer {
         for (int i = 1; i <= numCols; i++) {
           final String colName = rsMetadata.getColumnName(i);
           final String colTypeName = rsMetadata.getColumnTypeName(i);
-          final PTField fldObj = this.sbuf.ptGetRowset().getRow(1)
-            .getRecord(this.recName).getFieldRef(colName).deref();
-          log.debug("Before: {} = {}", colName, fldObj);
+/*          final PTField fldObj = this.sbuf.ptGetRowset().getRow(1)
+            .getRecord(this.recName).getFieldRef(colName).deref();*/
+          throw new OPSVMachRuntimeException("TODO: Replace commented code above with "
+              + "code to properly get a level 0 record and field from the newly implemented "
+              + "component buffer rowsets and rows (and uncomment code below).");
+/*          log.debug("Before: {} = {}", colName, fldObj);
           GlobalFnLibrary.readFieldFromResultSet(fldObj,
               colName, colTypeName, rs);
-          log.debug("After: {} = {}", colName, fldObj);
+          log.debug("After: {} = {}", colName, fldObj);*/
         }
       }
     } catch (final java.sql.SQLException sqle) {

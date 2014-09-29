@@ -7,9 +7,13 @@
 
 package org.openpplsoft.pt;
 
+import java.util.List;
+
 import org.apache.logging.log4j.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.types.*;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.pt.*;
 
 public class RecordField {
 
@@ -91,6 +95,19 @@ public class RecordField {
 
   public boolean isRequired() {
     return ((this.USEEDIT & this.REQUIRED_FLAG) > 0);
+  }
+
+  public PeopleCodeProg getProgramForEvent(final PCEvent event) {
+    final Record recDefn = DefnCache.getRecord(this.RECNAME);
+    final List<PeopleCodeProg> recFldProgs = recDefn.getRecordProgsForField(this.FIELDNAME);
+    if (recFldProgs != null) {
+      for (PeopleCodeProg prog : recFldProgs) {
+        if (prog.event.equals(event.getName())) {
+          return prog;
+        }
+      }
+    }
+    return null;
   }
 
   public boolean hasDefaultConstantValue() {

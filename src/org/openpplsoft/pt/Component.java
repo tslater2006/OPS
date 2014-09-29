@@ -181,103 +181,35 @@ public class Component {
     }
   }
 
-  /**
-   * If the search record for this component contains one or more keys,
-   * execute the SearchInit Record PeopleCode program attached to
-   * the record if it exists.
-   */
-  public void loadAndRunRecordPConSearchRecord() {
-    final Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
-    ComponentBuffer.setSearchRecord(new PTRecordTypeConstraint().alloc(recDefn));
-
-    if (!recDefn.hasAnyKeys()) {
-      log.debug("No keys on search record.");
-      return;
-    }
-
-    recDefn.discoverRecordPC();
-    for (PeopleCodeProg prog : recDefn.orderedRecordProgs) {
-      if (prog.event.equals("SearchInit")) {
-        final PeopleCodeProg p = DefnCache.getProgram(prog);
-        final ExecContext eCtx = new ProgramExecContext(p);
-        final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-        interpreter.run();
+  public ComponentPeopleCodeProg getProgramForRecordFieldEvent(
+      final PCEvent event, final RecordField recFldDefn) {
+    for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
+      if (prog.RECNAME != null && prog.RECNAME.equals(recFldDefn.RECNAME)
+          && prog.FLDNAME != null && prog.FLDNAME.equals(recFldDefn.FIELDNAME)
+          && prog.event.equals(event.getName())) {
+        return prog;
       }
     }
+    return null;
   }
 
-  /**
-   * Run any and all Component PeopleCode programs attached to the
-   * search record for this component.
-   */
-  public void loadAndRunComponentPConSearchRecord() {
-    for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-      if (prog.RECNAME != null && prog.RECNAME.equals(this.searchRecordToUse)) {
-        final PeopleCodeProg p = DefnCache.getProgram(prog);
-        final ExecContext eCtx = new ProgramExecContext(p);
-        final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-        interpreter.run();
-      }
-    }
+  public String getSearchRecordName() {
+    return this.searchRecordToUse;
   }
 
   /**
    * Runs the PreBuild (Component PC) program if it exists.
    */
   public void runPreBuild() {
-    for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-      if (prog.event.equals("PreBuild")) {
-        final PeopleCodeProg p = DefnCache.getProgram(prog);
-        final ExecContext eCtx = new ProgramExecContext(p);
-        final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-        interpreter.run();
-      }
-    }
+    throw new OPSVMachRuntimeException("TODO: Fire PreBuild from ComponentBuffer.");
   }
 
   /**
    * @return Whether or not at least one FieldFormula program was run.
    */
   public boolean runFieldFormula() {
-    IStreamableBuffer buf;
-    ScrollBuffer currSb = null;
-    RecordBuffer currRecBuf = null;
-    boolean wasFieldFormulaProgramRun = false;
-
-    ComponentBuffer.resetCursors();
-    while ((buf = ComponentBuffer.next()) != null) {
-      if (buf instanceof ScrollBuffer) {
-        currSb = (ScrollBuffer) buf;
-      } else if (buf instanceof RecordBuffer) {
-        currRecBuf = (RecordBuffer) buf;
-      } else if (buf instanceof RecordFieldBuffer) {
-        final RecordFieldBuffer recFldBuf = ((RecordFieldBuffer) buf);
-        final PTRowset scrollRowset = currSb.ptGetRowset();
-
-        for (int i = 1; i <= scrollRowset.getActiveRowCount(); i++) {
-          final Record recDefn = DefnCache.getRecord(currRecBuf.getRecName());
-          final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
-              recFldBuf.getFldName());
-
-          if (recProgList == null) {
-            continue;
-          }
-
-          for(PeopleCodeProg prog : recProgList) {
-            if (prog.event.equals("FieldFormula")) {
-              final PeopleCodeProg p = DefnCache.getProgram(prog);
-              final ExecContext eCtx = new ProgramExecContext(p);
-              final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-              interpreter.run();
-              wasFieldFormulaProgramRun = true;
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    return wasFieldFormulaProgramRun;
+    throw new OPSVMachRuntimeException("TODO: Reimplement runFieldFormula, this time "
+        + "iterating through rows of rowsets in component buffer.");
   }
 
   /**
@@ -313,175 +245,9 @@ public class Component {
    * program to set the value programmatically.
    */
   private boolean runFieldLevelDefaultProcessing() {
-    IStreamableBuffer buf;
-    ScrollBuffer currSb = null;
-    RecordBuffer currRecBuf = null;
-
-    boolean wasBlankFieldSeen = false;
-    boolean wasFieldChanged = false;
-
-    ComponentBuffer.resetCursors();
-    while ((buf = ComponentBuffer.next()) != null) {
-      if (buf instanceof ScrollBuffer) {
-        currSb = (ScrollBuffer) buf;
-      } else if (buf instanceof RecordBuffer) {
-        currRecBuf = (RecordBuffer) buf;
-      } else if (buf instanceof RecordFieldBuffer) {
-        final RecordFieldBuffer recFldBuf = ((RecordFieldBuffer) buf);
-
-        log.debug("DefFldProc: {}.{}", currRecBuf.getRecName(), recFldBuf.getFldName());
-
-        final PTRowset scrollRowset = currSb.ptGetRowset();
-        for (int i = 1; i <= scrollRowset.getActiveRowCount(); i++) {
-          final PTField fldObj = scrollRowset.getRow(i).getRecord(
-              currRecBuf.getRecName()).getFieldRef(recFldBuf.getFldName()).deref();
-          final PTPrimitiveType fldValue = fldObj.getValue();
-          final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
-              currRecBuf.getRecName(), recFldBuf.getFldName());
-
-          final Record recDefn = DefnCache.getRecord(currRecBuf.getRecName());
-          final List<PeopleCodeProg> recProgList = recDefn.getRecordProgsForField(
-              recFldBuf.getFldName());
-
-          // If field is not blank, don't continue field default processing on it.
-          if (!fldValue.isBlank()) {
-            continue;
-
-          // If field is a key, its value will be based on the keys defined on
-          // fields in higher scroll levels, so don't perform field default processing.
-          // NOTE: I am making an exception here for EFFDT, I don't know at this time
-          // whether this is accurate and/or complete.
-          // TODO(mquinn): Keep this in mind.
-          } else if(fldObj.getRecordFieldDefn().isKey() && !fldObj.getRecordFieldDefn()
-              .FIELDNAME.equals("EFFDT")) {
-
-            if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
-              log.debug("Ignoring key with non-constant default value "
-                  + "during field default processing: {}.{}", currRecBuf.getRecName(),
-                  recFldBuf.getFldName());
-            }
-            continue;
-
-          // Must check for *non-constant* (i.e., from a field on another record)
-          // possibility first (before checking for constant default).
-          } else if (recFldBuf.getRecFldDefn().hasDefaultNonConstantValue()) {
-              final String defRecName = recFldBuf.getRecFldDefn().DEFRECNAME;
-              final String defFldName = recFldBuf.getRecFldDefn().DEFFIELDNAME;
-              final Record defRecDefn = DefnCache.getRecord(defRecName);
-              final OPSStmt ostmt =
-                  StmtLibrary.generateNonConstantFieldDefaultQuery(
-                      defRecDefn, recFldBuf);
-
-              log.debug("Querying {}.{} for default value for field {}.{}",
-                  defRecName, defFldName, currRecBuf.getRecName(), recFldBuf.getFldName());
-
-              ResultSet rs = null;
-              try {
-                rs = ostmt.executeQuery();
-                /*
-                 * Keep in mind that zero records may legitimately be returned here,
-                 * in which case the field will remain blank.
-                 */
-                if (rs.next()) {
-                  log.debug("Will default to: {}", rs.getString(defFldName));
-                  throw new OPSVMachRuntimeException("TODO: This code has not been "
-                      + "run yet for a field that actually generates a record from "
-                      + "which to default (queries so far have returned 0 records; "
-                      + "need to read *defFldName* from resultset and write that to "
-                      + "the field. ALSO REMEMBER TO UNCOMMENT THE CODE BELOW.");
-  /*                if (rs.next()) {
-                    throw new OPSVMachRuntimeException(
-                        "Result set for default non constant field default query "
-                        + "returned multiple records; only expected one.");
-                  }*/
-                }
-              } catch (final java.sql.SQLException sqle) {
-                throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-              } finally {
-                try {
-                  if (rs != null) { rs.close(); }
-                  if (ostmt != null) { ostmt.close(); }
-                } catch (final java.sql.SQLException sqle) {
-                  log.warn("Unable to close rs and/or ostmt in finally block.");
-              }
-            }
-          } else if (recFldBuf.getRecFldDefn().hasDefaultConstantValue()) {
-            final String defValue = recFldBuf.getRecFldDefn().DEFFIELDNAME;
-
-            // First check if the value is actually a meta value (i.e., "%date")
-            if (defValue.startsWith("%")) {
-              if (defValue.equals("%date") && fldValue instanceof PTDateTime) {
-                ((PTDateTime) fldValue).writeSYSDATE();
-                fdEmission.setMetaValue(defValue);
-              } else if (defValue.equals("%date") && fldValue instanceof PTDate) {
-                ((PTDate) fldValue).writeSYSDATE();
-                fdEmission.setMetaValue(defValue);
-              } else {
-                throw new OPSVMachRuntimeException("Unexpected defValue (" + defValue + ") "
-                    + "and field (" + fldValue + ") combination.");
-              }
-
-            // If not a meta value, interpret the value as a raw constant (i.e., "Y" or "9999").
-            } else {
-              if (fldValue instanceof PTString) {
-                ((PTString) fldValue).write(defValue);
-              } else if (fldValue instanceof PTChar && defValue.length() == 1) {
-                ((PTChar) fldValue).write(defValue.charAt(0));
-              } else {
-                throw new OPSVMachRuntimeException("Expected PTString or PTChar for field value "
-                    + "while attempting to write field default: " + defValue);
-              }
-            }
-
-            fdEmission.setDefaultedValue(fldValue.readAsString());
-            fdEmission.setConstantFlag();
-
-          // At this point, if no field default value exists, and if there are no
-          // FieldDefault programs on this record, nothing more to do; skip to next
-          // record field buffer.
-          } else if (recProgList == null) {
-            continue;
-
-          // Otherwise, if a FieldDefault program exists for this record field,
-          // execute it.
-          } else {
-            boolean fieldDefaultProgRun = false;
-            for(PeopleCodeProg prog : recProgList) {
-              if (prog.event.equals("FieldDefault")) {
-                final PeopleCodeProg p = DefnCache.getProgram(prog);
-                final ExecContext eCtx = new ProgramExecContext(p);
-                final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
-                interpreter.run();
-
-                fdEmission.setDefaultedValue("from peoplecode");
-                fieldDefaultProgRun = true;
-                break;
-              }
-            }
-
-            if (!fieldDefaultProgRun) {
-              continue;
-            }
-          }
-
-         /*
-          * If the field's value is marked as updated after running
-          * field processing for the record field, we must emit a line saying as much
-          * for tracefile verification purposes; additionally, this must be reflected
-          * in this method's return value.
-          */
-          if (fldValue.isMarkedAsUpdated()) {
-            wasFieldChanged = true;
-            TraceFileVerifier.submitEnforcedEmission(fdEmission);
-            fldValue.clearUpdatedFlag();
-          } else if (fldValue.isBlank()) {
-            wasBlankFieldSeen = true;
-          }
-        }
-      }
-    }
-
-    return (wasFieldChanged && wasBlankFieldSeen);
+    throw new OPSVMachRuntimeException("TODO: Re-implement runFieldLevelDefaultProcessing, "
+        + "iterating over rows in rowsets this time rather than scroll buffers (see git history "
+        + "for logic to use here).");
   }
 
   /**

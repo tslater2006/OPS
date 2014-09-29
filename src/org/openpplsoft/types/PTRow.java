@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,15 +23,15 @@ import org.openpplsoft.runtime.*;
  * Represents a PeopleTools row definition; contains
  * 1 to n child records and 0 to m child rowsets.
  */
-public final class PTRow extends PTObjectType {
+public final class PTRow extends PTObjectType implements IPCEventListener {
 
   private static Map<String, Method> ptMethodTable;
 
   // Maps record names to child record objects
-  private Map<String, PTRecord> childRecordMap;
+  private Map<String, PTRecord> recordMap = new LinkedHashMap<String, PTRecord>();
 
   // Maps scroll/rowset primary rec names to rowset objects
-  private Map<String, PTRowset> childRowsetMap;
+  private Map<String, PTRowset> rowsetMap = new LinkedHashMap<String, PTRowset>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -46,31 +47,37 @@ public final class PTRow extends PTObjectType {
   }
 
   /**
-   * Create a new row object that is attached to one or more record
-   * definitions; can only be called by internal methods.
+   * Create a new row object that is attached to only one record
+   * defn.
    * @param r the record defn to attach
+   */
+  public PTRow(final PTRowTypeConstraint origTc, final Record r) {
+    super(origTc);
+    this.recordMap.put(r.RECNAME, new PTRecordTypeConstraint().alloc(r));
+  }
+
+  /**
+   * Create a new row object that is attached to one or more record defns.
+   * @param s the set of record defns to attach
    */
   public PTRow(final PTRowTypeConstraint origTc, final Set<Record> s) {
     super(origTc);
-    this.childRecordMap = new HashMap<String, PTRecord>();
-    this.childRowsetMap = new HashMap<String, PTRowset>();
-
     for(Record recDefn : s) {
-      this.childRecordMap.put(recDefn.RECNAME,
+      this.recordMap.put(recDefn.RECNAME,
           new PTRecordTypeConstraint().alloc(recDefn));
     }
   }
 
-  /**
-   * Registering a record defn that is currently
-   * unregistered will cause the row to contain a
-   * newly allocated record object for that defn.
-   * @param r the record defn to register
-   */
-  public void registerRecordDefn(final Record r) {
-    if(!this.childRecordMap.containsKey(r.RECNAME)) {
-      this.childRecordMap.put(r.RECNAME,
-          new PTRecordTypeConstraint().alloc(r));
+  public void fireEvent(final PCEvent event) {
+
+    // Fire event on each record in this row.
+    for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
+      entry.getValue().fireEvent(event);
+    }
+
+    // Fire event on each rowset in this row.
+    for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
+      entry.getValue().fireEvent(event);
     }
   }
 
@@ -79,7 +86,7 @@ public final class PTRow extends PTObjectType {
    * @return the record associated with the record name provided
    */
   public PTRecord getRecord(final String recName) {
-    return this.childRecordMap.get(recName);
+    return this.recordMap.get(recName);
   }
 
   /**
@@ -87,7 +94,7 @@ public final class PTRow extends PTObjectType {
    * @return true if record exists, false otherwise
    */
   public boolean hasRecord(final String recName) {
-    return this.childRecordMap.containsKey(recName);
+    return this.recordMap.containsKey(recName);
   }
 
   /**
@@ -115,8 +122,8 @@ public final class PTRow extends PTObjectType {
 
   @Override
   public PTType dotProperty(final String s) {
-    if (this.childRecordMap.containsKey(s)) {
-      return this.childRecordMap.get(s);
+    if (this.recordMap.containsKey(s)) {
+      return this.recordMap.get(s);
     }
     return null;
   }
@@ -134,12 +141,12 @@ public final class PTRow extends PTObjectType {
     super.setReadOnly();
 
     // Calls to make a row read-only must make its child records read-only.
-    for(Map.Entry<String, PTRecord> cursor: this.childRecordMap.entrySet()) {
+    for(Map.Entry<String, PTRecord> cursor: this.recordMap.entrySet()) {
       cursor.getValue().setReadOnly();
     }
 
     // Calls to make a row read-only must make its child rowsets read-only.
-    for(Map.Entry<String, PTRowset> cursor: this.childRowsetMap.entrySet()) {
+    for(Map.Entry<String, PTRowset> cursor: this.rowsetMap.entrySet()) {
       cursor.getValue().setReadOnly();
     }
   }
@@ -147,8 +154,8 @@ public final class PTRow extends PTObjectType {
   @Override
   public String toString() {
     return new StringBuilder(super.toString())
-      .append(",childRecordRecDefns=").append(this.childRecordMap.keySet())
-      .append(",childRowsetRecDefns=").append(this.childRowsetMap.keySet())
+      .append(",childRecordRecDefns=").append(this.recordMap.keySet())
+      .append(",childRowsetRecDefns=").append(this.rowsetMap.keySet())
       .toString();
   }
 }

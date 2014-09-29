@@ -101,6 +101,7 @@ public final class DefnCache {
       records.put(recName, r);
     }
     r.init();
+    r.discoverRecordPC();
     return r;
   }
 

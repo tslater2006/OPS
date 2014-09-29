@@ -33,6 +33,10 @@ public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
     return new PTRow(this, s);
   }
 
+  public PTRow alloc(final Record r) {
+    return new PTRow(this, r);
+  }
+
   @Override
   public String toString() {
     return super.toString();

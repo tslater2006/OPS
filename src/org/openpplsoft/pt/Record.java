@@ -23,8 +23,8 @@ public class Record {
   public Map<String, RecordField> fieldTable;
   public TreeMap<Integer, Object> fldAndSubrecordTable;
   public List<String> subRecordNames;
-  public Map<String, List<PeopleCodeProg>> recordProgsByFieldTable;
-  public List<PeopleCodeProg> orderedRecordProgs;
+  public Map<String, List<PeopleCodeProg>> recordProgsByFieldTable
+      = new HashMap<String, List<PeopleCodeProg>>();
 
   private static Logger log = LogManager.getLogger(Record.class.getName());
 
@@ -128,9 +128,6 @@ public class Record {
       ResultSet rs = null;
 
       try {
-        this.recordProgsByFieldTable = new HashMap<String, List<PeopleCodeProg>>();
-        this.orderedRecordProgs = new ArrayList<PeopleCodeProg>();
-
         rs = ostmt.executeQuery();
 
         while(rs.next()) {
@@ -146,7 +143,6 @@ public class Record {
 
           fieldProgList.add(prog);
           this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
-          this.orderedRecordProgs.add(prog);
         }
       } catch(final java.sql.SQLException sqle) {
         throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
@@ -287,7 +283,6 @@ public class Record {
   }
 
   public List<PeopleCodeProg> getRecordProgsForField(String FLDNAME) {
-    if(this.recordProgsByFieldTable == null) { return null; }
     return this.recordProgsByFieldTable.get(FLDNAME);
   }
 

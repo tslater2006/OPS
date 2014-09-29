@@ -9,11 +9,13 @@ package org.openpplsoft.types;
 
 import java.lang.reflect.Method;
 
+import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.peoplecode.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public final class PTField extends PTObjectType {
+public final class PTField extends PTObjectType implements IPCEventListener {
 
   private static Map<String, Method> ptMethodTable;
 
@@ -52,6 +54,26 @@ public final class PTField extends PTObjectType {
           = new PTImmutableReference<PTBoolean>(visibleTc, visibleTc.alloc());
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
+    }
+  }
+
+  public void fireEvent(final PCEvent event) {
+
+    // If a Record PeopleCode program has been written for this event, run it now.
+    final PeopleCodeProg recProg = this.recFieldDefn.getProgramForEvent(event);
+    if (recProg != null) {
+      final ExecContext eCtx = new ProgramExecContext(recProg);
+      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      interpreter.run();
+    }
+
+    // If a Component PeopleCode program has been written for this event, run it now.
+    final PeopleCodeProg compProg = ComponentBuffer.getComponentDefn()
+        .getProgramForRecordFieldEvent(event, this.recFieldDefn);
+    if (compProg != null) {
+      final ExecContext eCtx = new ProgramExecContext(compProg);
+      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      interpreter.run();
     }
   }
 

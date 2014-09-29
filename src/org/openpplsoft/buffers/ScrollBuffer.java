@@ -29,7 +29,6 @@ public class ScrollBuffer implements IStreamableBuffer {
   private Map<String, ScrollBuffer> scrollBufferTable;
   private List<RecordBuffer> orderedRecBuffers;
   private List<ScrollBuffer> orderedScrollBuffers;
-  private PTRowset rowset;
 
   // Used for reading.
   private boolean hasEmittedSelf;
@@ -51,10 +50,6 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.orderedRecBuffers = new ArrayList<RecordBuffer>();
     this.scrollBufferTable = new HashMap<String, ScrollBuffer>();
     this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
-
-    Record primaryRecDefn = DefnCache.getRecord(this.primaryRecName);
-
-    this.rowset = new PTRowsetTypeConstraint().alloc(primaryRecDefn);
   }
 
   /**
@@ -63,16 +58,6 @@ public class ScrollBuffer implements IStreamableBuffer {
    */
   public int getScrollLevel() {
     return this.scrollLevel;
-  }
-
-  /**
-   * Retrieves the underlying rowset for this buffer; data is stored
-   * in the rowset, while the buffer dictates which fields are actually
-   * in the component buffer.
-   * @return the underlying rowset for this scroll buffer
-   */
-  public PTRowset ptGetRowset() {
-    return this.rowset;
   }
 
   /**
@@ -141,10 +126,6 @@ public class ScrollBuffer implements IStreamableBuffer {
           this.primaryRecName);
       this.recBufferTable.put(r.getRecName(), r);
       this.orderedRecBuffers.add(r);
-
-      // All rows in the underlying PTRowset will need to have
-      // child records for this definition.
-      this.rowset.registerRecordDefn(DefnCache.getRecord(tok.RECNAME));
     }
     r.addPageField(tok.RECNAME, tok.FIELDNAME);
   }

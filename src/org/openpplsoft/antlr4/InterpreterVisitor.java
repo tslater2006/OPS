@@ -1105,24 +1105,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * The checks on GENERIC_ID below should be run in order of lowest scope
        * to highest scope for this reason.
        */
-      if (ComponentBuffer.getSearchRecord().getRecDefn()
-            .RECNAME.equals(ctx.GENERIC_ID().getText())) {
-        /*
-         * Detect references to search record buffer.
-         */
-        this.setNodeData(ctx, ComponentBuffer.getSearchRecord());
 
-      } else if (ComponentBuffer.ptGetLevel0().getRow(1)
-          .hasRecord(ctx.GENERIC_ID().getText())) {
-        /*
-         * Detect references to a record in level 0 of the
-         * component buffer (i.e., "DERIVED_REGRM1"
-         * in "DERIVED_REGFRM1.GROUP_BOX...").
-         */
-        this.setNodeData(ctx, ComponentBuffer.ptGetLevel0()
-            .getRow(1).getRecord(ctx.GENERIC_ID().getText()));
+      /*
+       * TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       * Add checks back in to *contextually* resolve component
+       * buffer references (i.e., a prog running on a record in one
+       * row has context in that row, rather than another.
+       */
 
-      } else if (this.eCtx.prog.hasFunctionImplNamed(
+      if (this.eCtx.prog.hasFunctionImplNamed(
           ctx.GENERIC_ID().getText())) {
 
         log.debug("Resolved GENERIC_ID: {} to an internal function "

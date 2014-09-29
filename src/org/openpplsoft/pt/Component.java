@@ -193,6 +193,18 @@ public class Component {
     return null;
   }
 
+  public ComponentPeopleCodeProg getProgramForRecordEvent(
+      final PCEvent event, final Record recDefn) {
+    for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
+      if (prog.RECNAME != null && prog.RECNAME.equals(recDefn.RECNAME)
+          && prog.FLDNAME == null
+          && prog.event.equals(event.getName())) {
+        return prog;
+      }
+    }
+    return null;
+  }
+
   public String getSearchRecordName() {
     return this.searchRecordToUse;
   }

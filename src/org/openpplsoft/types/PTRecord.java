@@ -25,6 +25,8 @@ import org.apache.logging.log4j.Logger;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
+import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.buffers.*;
 
 /**
  * Represents a PeopleTools record object.
@@ -103,6 +105,20 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
       entry.getValue().deref().fireEvent(event);
+    }
+
+    /*
+     * If a Component PeopleCode program has been written for this event, run it now.
+     * Note that there is no way to define a Record PeopleCode program on a record
+     * (must be attached to a Record Field) so we only check for Component PeopleCode here.
+     */
+    final PeopleCodeProg compProg = ComponentBuffer.getComponentDefn()
+        .getProgramForRecordEvent(event, this.recDefn);
+    if (compProg != null) {
+      final ExecContext eCtx = new ProgramExecContext(compProg);
+      eCtx.setCBufferContextEntity(this);
+      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      interpreter.run();
     }
   }
 

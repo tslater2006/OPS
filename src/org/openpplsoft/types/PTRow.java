@@ -56,7 +56,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
   public PTRow(final PTRowTypeConstraint origTc, final PTRowset pRowset, final Record r) {
     super(origTc);
     this.parentRowset = pRowset;
-    this.recordMap.put(r.RECNAME, new PTRecordTypeConstraint().alloc(r));
+    this.recordMap.put(r.RECNAME, new PTRecordTypeConstraint().alloc(this, r));
   }
 
   /**
@@ -68,7 +68,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     this.parentRowset = pRowset;
     for(Record recDefn : s) {
       this.recordMap.put(recDefn.RECNAME,
-          new PTRecordTypeConstraint().alloc(recDefn));
+          new PTRecordTypeConstraint().alloc(this, recDefn));
     }
   }
 
@@ -86,7 +86,12 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {
-    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Row.");
+    if (this.recordMap.containsKey(identifier)) {
+      return this.recordMap.get(identifier);
+    } else if (this.parentRowset != null) {
+      return this.parentRowset.resolveContextualCBufferReference(identifier);
+    }
+    return null;
   }
 
   /**

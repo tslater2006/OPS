@@ -19,6 +19,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
 
+  private PTRecord parentRecord;
   private RecordField recFieldDefn;
   private PTImmutableReference<PTPrimitiveType> valueRef;
   private PTImmutableReference<PTBoolean> visiblePropertyRef;
@@ -37,8 +38,9 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public PTField(PTFieldTypeConstraint origTc, RecordField rfd) {
+  public PTField(final PTFieldTypeConstraint origTc, final PTRecord pRecord, final RecordField rfd) {
     super(origTc);
+    this.parentRecord = pRecord;
     this.recFieldDefn = rfd;
 
     final PTTypeConstraint valueTc
@@ -80,7 +82,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {
-    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Field.");
+    if (this.parentRecord != null) {
+      return this.parentRecord.resolveContextualCBufferReference(identifier);
+    }
+    return null;
   }
 
   public void setDefault() {

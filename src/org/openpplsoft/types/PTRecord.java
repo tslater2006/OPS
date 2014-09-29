@@ -36,6 +36,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   private static Map<String, Method> ptMethodTable;
   private static Pattern dtPattern, datePattern, dotPattern;
 
+  private PTRow parentRow;
   private Record recDefn;
   private Map<String, PTImmutableReference<PTField>> fieldRefs;
   private Map<Integer, PTImmutableReference<PTField>> fieldRefIdxTable;
@@ -72,9 +73,9 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
    * to a record defn; can only be called by local methods.
    * @param r the record defn to attach
    */
-  public PTRecord(PTRecordTypeConstraint origTc, final Record r) {
+  public PTRecord(PTRecordTypeConstraint origTc, final PTRow pRow, final Record r) {
     super(origTc);
-
+    this.parentRow = pRow;
     this.recDefn = r;
 
     // this map is linked in order to preserve
@@ -87,7 +88,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
       try {
         final PTImmutableReference<PTField> newFldRef
-            = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(rf));
+            = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(this, rf));
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);
       } catch (final OPSTypeCheckException opstce) {
@@ -106,7 +107,12 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {
-    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Record.");
+    if (identifier.equals(this.recDefn.RECNAME)) {
+      return this;
+    } else if (this.parentRow != null) {
+      return this.parentRow.resolveContextualCBufferReference(identifier);
+    }
+    return null;
   }
 
   /**

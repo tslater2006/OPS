@@ -83,7 +83,10 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {
-    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Rowset.");
+    if (this.parentRow != null) {
+      return this.parentRow.resolveContextualCBufferReference(identifier);
+    }
+    return null;
   }
 
   public int getActiveRowCount() {

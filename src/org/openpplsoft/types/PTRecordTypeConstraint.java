@@ -23,8 +23,7 @@ public class PTRecordTypeConstraint extends PTTypeConstraint<PTRecord> {
 
   @Override
   public PTRecord alloc() {
-    throw new OPSDataTypeException("Call to alloc() PTRecord from type constraint "
-        + "without providing associated record defn is illegal.");
+    throw new OPSDataTypeException("Call to alloc() PTRecord without args is illegal.");
   }
 
  /**
@@ -38,8 +37,8 @@ public class PTRecordTypeConstraint extends PTTypeConstraint<PTRecord> {
   * @param recDefn the record defn to attach
   * @return the newly allocated record object
   */
-  public PTRecord alloc(final Record recDefn) {
-    return new PTRecord(this, recDefn);
+  public PTRecord alloc(final PTRow parentRow, final Record recDefn) {
+    return new PTRecord(this, parentRow, recDefn);
   }
 
   @Override

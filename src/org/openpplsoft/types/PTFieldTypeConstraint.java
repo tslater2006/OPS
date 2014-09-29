@@ -23,12 +23,11 @@ public class PTFieldTypeConstraint extends PTTypeConstraint<PTField> {
 
   @Override
   public PTField alloc() {
-    throw new OPSDataTypeException("Call to alloc() PTField from type constraint "
-        + "without providing associated record field defn is illegal.");
+    throw new OPSDataTypeException("Call to alloc() PTField without args is illegal.");
   }
 
-  public PTField alloc(final RecordField rfDefn) {
-    return new PTField(this, rfDefn);
+  public PTField alloc(final PTRecord parentRecord, final RecordField rfDefn) {
+    return new PTField(this, parentRecord, rfDefn);
   }
 
   @Override

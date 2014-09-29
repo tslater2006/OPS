@@ -156,8 +156,11 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
-    PTRecord rec = new PTRecordTypeConstraint().alloc(
-        DefnCache.getRecord(((PTString)args.get(0)).read()));
+    final Record recDefn = DefnCache.getRecord(((PTString) args.get(0)).read());
+
+    // Create a new standalone record, which by definition has no (null) parent.
+    final PTRecord rec = new PTRecordTypeConstraint().alloc(null, recDefn);
+
     rec.setDefault();
     Environment.pushToCallStack(rec);
   }
@@ -171,8 +174,8 @@ public class GlobalFnLibrary {
 
     final Record recDefn = DefnCache.getRecord(((PTString) args.get(0)).read());
 
-    // Create a new rowset with no (null) parent
-    final PTRowset newRowset = new PTRowsetTypeConstraint().alloc(null, recDefn);
+    // Create a new standalone rowset, which by definition has no (null) parent.
+   final PTRowset newRowset = new PTRowsetTypeConstraint().alloc(null, recDefn);
 
     Environment.pushToCallStack(newRowset);
   }

@@ -23,7 +23,7 @@ import org.openpplsoft.runtime.*;
  * Represents a PeopleTools row definition; contains
  * 1 to n child records and 0 to m child rowsets.
  */
-public final class PTRow extends PTObjectType implements IPCEventListener {
+public final class PTRow extends PTObjectType implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
 
@@ -79,6 +79,10 @@ public final class PTRow extends PTObjectType implements IPCEventListener {
     for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().fireEvent(event);
     }
+  }
+
+  public PTType resolveContextualCBufferReference(final String identifier) {
+    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Row.");
   }
 
   /**

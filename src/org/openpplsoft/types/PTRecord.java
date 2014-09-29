@@ -29,7 +29,7 @@ import org.openpplsoft.sql.*;
 /**
  * Represents a PeopleTools record object.
  */
-public final class PTRecord extends PTObjectType implements IPCEventListener {
+public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(PTRecord.class.getName());
 
@@ -103,6 +103,10 @@ public final class PTRecord extends PTObjectType implements IPCEventListener {
         : this.fieldRefs.entrySet()) {
       entry.getValue().deref().fireEvent(event);
     }
+  }
+
+  public PTType resolveContextualCBufferReference(final String identifier) {
+    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Record.");
   }
 
   /**

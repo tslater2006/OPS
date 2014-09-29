@@ -9,6 +9,7 @@ package org.openpplsoft.types;
 
 import org.openpplsoft.pt.PCEvent;
 
-public interface IPCEventListener {
+public interface ICBufferEntity {
   void fireEvent(final PCEvent event);
+  PTType resolveContextualCBufferReference(final String identifier);
 }

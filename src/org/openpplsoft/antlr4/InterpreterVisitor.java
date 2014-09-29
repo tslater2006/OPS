@@ -1105,20 +1105,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * The checks on GENERIC_ID below should be run in order of lowest scope
        * to highest scope for this reason.
        */
+      final String id = ctx.GENERIC_ID().getText();
+      final PTType resolvedCBufferRef = this.eCtx.resolveContextualCBufferReference(id);
+      if (resolvedCBufferRef != null) {
+        this.setNodeData(ctx, resolvedCBufferRef);
 
-      /*
-       * TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       * Add checks back in to *contextually* resolve component
-       * buffer references (i.e., a prog running on a record in one
-       * row has context in that row, rather than another.
-       */
-
-      if (this.eCtx.prog.hasFunctionImplNamed(
-          ctx.GENERIC_ID().getText())) {
+      } else if (this.eCtx.prog.hasFunctionImplNamed(id)) {
 
         log.debug("Resolved GENERIC_ID: {} to an internal function "
-            + "within this program.",
-            ctx.GENERIC_ID().getText());
+            + "within this program.", id);
 
         /*
          * Detect references to internal functions (aren't imported
@@ -1128,7 +1123,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         // Create an execution context pointing to the currently
         // running program and the name of the function to execute.
         FunctionExecContext fec = new FunctionExecContext(
-            this.eCtx.prog, ctx.GENERIC_ID().getText());
+            this.eCtx.prog, id);
 
         // CRITICAL: Override the start node to be the function, rather
         // than the program; according to PT rules, functions local to
@@ -1151,12 +1146,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         this.setNodeCallable(ctx, new Callable(fec));
 
-      } else if (this.eCtx.prog.recordProgFnCalls.containsKey(
-          ctx.GENERIC_ID().getText())) {
+      } else if (this.eCtx.prog.recordProgFnCalls.containsKey(id)) {
 
         log.debug("Resolved GENERIC_ID: {} to an external function "
-            + "referenced by this program.",
-            ctx.GENERIC_ID().getText());
+            + "referenced by this program.", id);
 
         /*
          * Detect references to external functions imported via Declare.
@@ -1164,16 +1157,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         // Ensure external program has been init'ed and parsed.
         final PeopleCodeProg extProg = DefnCache.getProgram(this.eCtx.prog
-            .recordProgFnCalls.get(ctx.GENERIC_ID().getText()));
+            .recordProgFnCalls.get(id));
         extProg.loadDefnsAndPrograms();
 
         // Create an execution context pointing to the external program
         // and the name of the function to execute.
         this.setNodeCallable(ctx, new Callable(new FunctionExecContext(
-            extProg, ctx.GENERIC_ID().getText())));
+            extProg, id)));
 
       } else if (PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.containsKey(
-        ctx.GENERIC_ID().getText().toUpperCase())) {
+        id.toUpperCase())) {
 
         //log.debug("Resolved GENERIC_ID: {} to DEFN_LITERAL",
         //    ctx.GENERIC_ID().getText());
@@ -1184,24 +1177,20 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          */
         this.setNodeData(ctx, PTDefnLiteral.getSingleton());
 
-      } else if (Environment.getSystemFuncPtr(
-          ctx.GENERIC_ID().getText()) != null) {
+      } else if (Environment.getSystemFuncPtr(id) != null) {
         /*
          * Detect system function references.
          */
-        this.setNodeCallable(ctx, Environment.getSystemFuncPtr(
-            ctx.GENERIC_ID().getText()));
+        this.setNodeCallable(ctx, Environment.getSystemFuncPtr(id));
 
-      } else if (DefnCache.hasRecord(ctx.GENERIC_ID().getText())) {
+      } else if (DefnCache.hasRecord(id)) {
         /*
          * Detect references to record field literals, which look like
          * references to component buffer records but are not actually
          * in the component buffer.
          * (i.e., record field literals passed to Sort() on Rowsets).
          */
-        this.setNodeData(ctx, new PTRecordLiteral(
-          DefnCache.getRecord(ctx.GENERIC_ID().getText())));
-
+        this.setNodeData(ctx, new PTRecordLiteral(DefnCache.getRecord(id)));
       }
     }
     return null;

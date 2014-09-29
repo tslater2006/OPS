@@ -29,7 +29,7 @@ import org.openpplsoft.sql.*;
 /**
  * Represents a PeopleTools rowset object.
  */
-public final class PTRowset extends PTObjectType implements IPCEventListener {
+public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(
       PTRowset.class.getName());
@@ -78,6 +78,10 @@ public final class PTRowset extends PTObjectType implements IPCEventListener {
 
   public void fireEvent(final PCEvent event) {
     throw new OPSVMachRuntimeException("TODO: Implement fireEvent for PTRowset.");
+  }
+
+  public PTType resolveContextualCBufferReference(final String identifier) {
+    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Rowset.");
   }
 
   public int getActiveRowCount() {

@@ -15,7 +15,7 @@ import org.openpplsoft.pt.peoplecode.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public final class PTField extends PTObjectType implements IPCEventListener {
+public final class PTField extends PTObjectType implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
 
@@ -63,6 +63,7 @@ public final class PTField extends PTObjectType implements IPCEventListener {
     final PeopleCodeProg recProg = this.recFieldDefn.getProgramForEvent(event);
     if (recProg != null) {
       final ExecContext eCtx = new ProgramExecContext(recProg);
+      eCtx.setCBufferContextEntity(this);
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
       interpreter.run();
     }
@@ -72,9 +73,14 @@ public final class PTField extends PTObjectType implements IPCEventListener {
         .getProgramForRecordFieldEvent(event, this.recFieldDefn);
     if (compProg != null) {
       final ExecContext eCtx = new ProgramExecContext(compProg);
+      eCtx.setCBufferContextEntity(this);
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
       interpreter.run();
     }
+  }
+
+  public PTType resolveContextualCBufferReference(final String identifier) {
+    throw new OPSVMachRuntimeException("TODO: Implement resolveContextualCBuffer... for Field.");
   }
 
   public void setDefault() {

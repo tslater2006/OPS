@@ -79,8 +79,6 @@ public final class Main {
 
       ComponentBuffer.init(c);
       ComponentBuffer.fireEvent(PCEvent.SEARCH_INIT);
-//      c.loadAndRunRecordPConSearchRecord();
-  //    c.loadAndRunComponentPConSearchRecord();
       c.fillSearchRecord();
 
       c.loadPages();

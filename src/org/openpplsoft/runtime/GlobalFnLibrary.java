@@ -169,8 +169,12 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected single string arg.");
     }
 
-    Environment.pushToCallStack(new PTRowsetTypeConstraint().alloc(
-        DefnCache.getRecord(((PTString)args.get(0)).read())));
+    final Record recDefn = DefnCache.getRecord(((PTString) args.get(0)).read());
+
+    // Create a new rowset with no (null) parent
+    final PTRowset newRowset = new PTRowsetTypeConstraint().alloc(null, recDefn);
+
+    Environment.pushToCallStack(newRowset);
   }
 
   public static void PT_CreateArray() {

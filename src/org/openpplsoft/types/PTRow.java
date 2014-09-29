@@ -27,6 +27,8 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
 
+  private PTRowset parentRowset;
+
   // Maps record names to child record objects
   private Map<String, PTRecord> recordMap = new LinkedHashMap<String, PTRecord>();
 
@@ -51,8 +53,9 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
    * defn.
    * @param r the record defn to attach
    */
-  public PTRow(final PTRowTypeConstraint origTc, final Record r) {
+  public PTRow(final PTRowTypeConstraint origTc, final PTRowset pRowset, final Record r) {
     super(origTc);
+    this.parentRowset = pRowset;
     this.recordMap.put(r.RECNAME, new PTRecordTypeConstraint().alloc(r));
   }
 
@@ -60,8 +63,9 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
    * Create a new row object that is attached to one or more record defns.
    * @param s the set of record defns to attach
    */
-  public PTRow(final PTRowTypeConstraint origTc, final Set<Record> s) {
+  public PTRow(final PTRowTypeConstraint origTc, final PTRowset pRowset, final Set<Record> s) {
     super(origTc);
+    this.parentRowset = pRowset;
     for(Record recDefn : s) {
       this.recordMap.put(recDefn.RECNAME,
           new PTRecordTypeConstraint().alloc(recDefn));

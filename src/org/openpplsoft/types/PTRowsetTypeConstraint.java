@@ -23,8 +23,7 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
 
   @Override
   public PTRowset alloc() {
-    throw new OPSDataTypeException("Call to alloc() PTRowset from type constraint "
-        + "without providing associated record defn is illegal.");
+    throw new OPSDataTypeException("Call to alloc() PTRowset without args is illegal.");
   }
 
  /**
@@ -38,8 +37,8 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
   * @param recDefn the record defn to attach
   * @return the newly allocated rowset object
   */
-  public PTRowset alloc(final Record recDefn) {
-    return new PTRowset(this, recDefn);
+  public PTRowset alloc(final PTRow parentRow, final Record recDefn) {
+    return new PTRowset(this, parentRow, recDefn);
   }
 
   @Override

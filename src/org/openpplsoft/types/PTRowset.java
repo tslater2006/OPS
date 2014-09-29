@@ -36,6 +36,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
 
+  private PTRow parentRow;
   private List<PTRow> rows;
   private Record primaryRecDefn;
   private Set<Record> registeredRecordDefns;
@@ -58,8 +59,9 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
    * record definition; can only be called by internal methods.
    * @param r the specific record defn to attach to the rowset
    */
-  public PTRowset(PTRowsetTypeConstraint origTc, final Record r) {
+  public PTRowset(PTRowsetTypeConstraint origTc, final PTRow pRow, final Record r) {
     super(origTc);
+    this.parentRow = pRow;
 
     this.primaryRecDefn = r;
     this.rows = new ArrayList<PTRow>();
@@ -73,7 +75,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     if (this.primaryRecDefn != null) {
       this.registeredRecordDefns.add(r);
     }
-    this.rows.add(new PTRowTypeConstraint().alloc(this.registeredRecordDefns));
+    this.rows.add(new PTRowTypeConstraint().alloc(this, this.registeredRecordDefns));
   }
 
   public void fireEvent(final PCEvent event) {
@@ -306,7 +308,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
   private void internalFlush() {
     // One row is always present in the rowset, even when flushed.
     this.rows.clear();
-    this.rows.add(new PTRowTypeConstraint().alloc(this.registeredRecordDefns));
+    this.rows.add(new PTRowTypeConstraint().alloc(this, this.registeredRecordDefns));
   }
 
   /**
@@ -354,7 +356,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
           this.rows.clear();
         }
 
-        final PTRow newRow = new PTRowTypeConstraint().alloc(this.registeredRecordDefns);
+        final PTRow newRow = new PTRowTypeConstraint().alloc(this, this.registeredRecordDefns);
         GlobalFnLibrary
             .readRecordFromResultSet(
             this.primaryRecDefn,

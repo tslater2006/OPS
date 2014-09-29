@@ -47,7 +47,9 @@ public final class ComponentBuffer {
   public static void init(final Component c) {
     compDefn = c;
     final Record searchRecDefn = DefnCache.getRecord(compDefn.getSearchRecordName());
-    cBuffer = new PTRowTypeConstraint().alloc(searchRecDefn);
+
+    // Allocate a new row (with null parent) for use as the component buffer.
+    cBuffer = new PTRowTypeConstraint().alloc(null, searchRecDefn);
 
     compDefn.getListOfComponentPC();
   }

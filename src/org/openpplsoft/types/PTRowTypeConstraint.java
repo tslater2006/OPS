@@ -25,16 +25,15 @@ public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
 
   @Override
   public PTRow alloc() {
-    throw new OPSDataTypeException("Call to alloc() PTRow from type constraint "
-        + "without providing associated set of record defns is illegal.");
+    throw new OPSDataTypeException("Call to alloc() PTRow without args is illegal.");
   }
 
-  public PTRow alloc(final Set<Record> s) {
-    return new PTRow(this, s);
+  public PTRow alloc(final PTRowset parentRowset, final Set<Record> s) {
+    return new PTRow(this, parentRowset, s);
   }
 
-  public PTRow alloc(final Record r) {
-    return new PTRow(this, r);
+  public PTRow alloc(final PTRowset parentRowset, final Record r) {
+    return new PTRow(this, parentRowset, r);
   }
 
   @Override

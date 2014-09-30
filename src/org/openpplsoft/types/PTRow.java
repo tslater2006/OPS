@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 
@@ -31,9 +32,12 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
 
   // Maps record names to child record objects
   private Map<String, PTRecord> recordMap = new LinkedHashMap<String, PTRecord>();
+  private Set<Record> registeredRecordDefns = new HashSet<Record>();
 
   // Maps scroll/rowset primary rec names to rowset objects
   private Map<String, PTRowset> rowsetMap = new LinkedHashMap<String, PTRowset>();
+  private Map<String, ScrollBuffer> registeredChildScrollDefns =
+      new LinkedHashMap<String, ScrollBuffer>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -48,27 +52,44 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  /**
-   * Create a new row object that is attached to only one record
-   * defn.
-   * @param r the record defn to attach
-   */
-  public PTRow(final PTRowTypeConstraint origTc, final PTRowset pRowset, final Record r) {
+  public PTRow(final PTRowTypeConstraint origTc, final PTRowset pRowset,
+      final Set<Record> recDefnsToRegister,
+      final Map<String, ScrollBuffer> childScrollDefnsToRegister) {
     super(origTc);
     this.parentRowset = pRowset;
-    this.recordMap.put(r.RECNAME, new PTRecordTypeConstraint().alloc(this, r));
+
+    // Register all record defns in the provided set.
+    for(final Record recDefn : recDefnsToRegister) {
+      this.registerRecordDefn(recDefn);
+    }
+
+    // Register all child scroll defns in the provided map.
+    for(Map.Entry<String, ScrollBuffer> entry
+        : childScrollDefnsToRegister.entrySet()) {
+      this.registerChildScrollDefn(entry.getValue());
+    }
   }
 
-  /**
-   * Create a new row object that is attached to one or more record defns.
-   * @param s the set of record defns to attach
-   */
-  public PTRow(final PTRowTypeConstraint origTc, final PTRowset pRowset, final Set<Record> s) {
-    super(origTc);
-    this.parentRowset = pRowset;
-    for(Record recDefn : s) {
+  public void registerRecordDefn(final Record recDefn) {
+    // Only register the record defn it hasn't already been registered.
+    if (!this.registeredRecordDefns.contains(recDefn)) {
+      this.registeredRecordDefns.add(recDefn);
       this.recordMap.put(recDefn.RECNAME,
           new PTRecordTypeConstraint().alloc(this, recDefn));
+    }
+  }
+
+  public void registerChildScrollDefn(final ScrollBuffer childScrollDefn) {
+    if (this.registeredChildScrollDefns.containsKey(
+        childScrollDefn.getPrimaryRecName())) {
+      throw new OPSVMachRuntimeException("Halting on call to register child "
+          + "scroll defn with a primary record name that has already been registerd; "
+          + "registering it again would overwrite a potentially different defn.");
+    } else {
+      this.registeredChildScrollDefns.put(
+          childScrollDefn.getPrimaryRecName(), childScrollDefn);
+      this.rowsetMap.put(childScrollDefn.getPrimaryRecName(),
+          childScrollDefn.allocRowset(this));
     }
   }
 

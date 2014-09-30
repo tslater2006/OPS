@@ -52,6 +52,36 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
   }
 
+  public PTRowset allocRowset(final PTRow parentRow) {
+
+    // If this is the level zero scroll buffer, its primary record name will
+    // be null, since it has no primary record.
+    Record primaryRecDefn = null;
+    if (this.primaryRecName != null) {
+      primaryRecDefn = DefnCache.getRecord(this.primaryRecName);
+    }
+
+    // Create a rowset with no parent; the caller is responsible for setting
+    // the parent row.
+    final PTRowset rowset = new PTRowsetTypeConstraint()
+        .alloc(parentRow, primaryRecDefn);
+
+    // For each record buffer in this scroll, register the underlying record
+    // defn in the rowset (and thus its newly created child row as well).
+    for (final RecordBuffer recBuf : this.orderedRecBuffers) {
+      rowset.registerRecordDefn(DefnCache.getRecord(recBuf.getRecName()));
+    }
+
+    // For each child scroll in this scroll, register it in the rowset
+    // (and thus in its newly created child row as well, where this method
+    // will be called to allocate a new child rowset).
+    for (final ScrollBuffer scrollBuf : this.orderedScrollBuffers) {
+      rowset.registerChildScrollDefn(scrollBuf);
+    }
+
+    return rowset;
+  }
+
   /**
    * Get the scroll level on which this scroll buffer exists.
    * @return this scroll buffer's scroll level
@@ -150,6 +180,10 @@ public class ScrollBuffer implements IStreamableBuffer {
 
   public List<RecordBuffer> getOrderedRecBuffers() {
     return this.orderedRecBuffers;
+  }
+
+  public List<ScrollBuffer> getOrderedScrollBuffers() {
+    return this.orderedScrollBuffers;
   }
 
   /**

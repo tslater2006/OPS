@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
@@ -39,7 +41,9 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
   private PTRow parentRow;
   private List<PTRow> rows;
   private Record primaryRecDefn;
+
   private Set<Record> registeredRecordDefns;
+  private Map<String, ScrollBuffer> registeredChildScrollDefns;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -59,13 +63,14 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
    * record definition; can only be called by internal methods.
    * @param r the specific record defn to attach to the rowset
    */
-  public PTRowset(PTRowsetTypeConstraint origTc, final PTRow pRow, final Record r) {
+  public PTRowset(final PTRowsetTypeConstraint origTc, final PTRow pRow, final Record r) {
     super(origTc);
     this.parentRow = pRow;
 
     this.primaryRecDefn = r;
     this.rows = new ArrayList<PTRow>();
     this.registeredRecordDefns = new HashSet<Record>();
+    this.registeredChildScrollDefns = new LinkedHashMap<String, ScrollBuffer>();
 
     /*
      * One row is always present in the rowset, even when flushed.
@@ -75,11 +80,39 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     if (this.primaryRecDefn != null) {
       this.registeredRecordDefns.add(r);
     }
-    this.rows.add(new PTRowTypeConstraint().alloc(this, this.registeredRecordDefns));
+    this.rows.add(new PTRowTypeConstraint().alloc(
+        this, this.registeredRecordDefns, this.registeredChildScrollDefns));
+  }
+
+  public void registerRecordDefn(final Record recDefn) {
+    this.registeredRecordDefns.add(recDefn);
+
+    // Each row must also have this record registered.
+    for (final PTRow row : this.rows) {
+      row.registerRecordDefn(recDefn);
+    }
+  }
+
+  public void registerChildScrollDefn(final ScrollBuffer childScrollDefn) {
+    if (this.registeredChildScrollDefns.containsKey(
+        childScrollDefn.getPrimaryRecName())) {
+      throw new OPSVMachRuntimeException("Halting on call to register child "
+          + "scroll defn with a primary record name that has already been registerd; "
+          + "registering it again would overwrite a potentially different defn.");
+    } else {
+      this.registeredChildScrollDefns.put(
+          childScrollDefn.getPrimaryRecName(), childScrollDefn);
+    }
+
+    for (final PTRow row : this.rows) {
+      row.registerChildScrollDefn(childScrollDefn);
+    }
   }
 
   public void fireEvent(final PCEvent event) {
-    throw new OPSVMachRuntimeException("TODO: Implement fireEvent for PTRowset.");
+    for (final PTRow row : this.rows) {
+      row.fireEvent(event);
+    }
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {
@@ -311,7 +344,8 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
   private void internalFlush() {
     // One row is always present in the rowset, even when flushed.
     this.rows.clear();
-    this.rows.add(new PTRowTypeConstraint().alloc(this, this.registeredRecordDefns));
+    this.rows.add(new PTRowTypeConstraint().alloc(
+        this, this.registeredRecordDefns, this.registeredChildScrollDefns));
   }
 
   /**
@@ -359,7 +393,8 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
           this.rows.clear();
         }
 
-        final PTRow newRow = new PTRowTypeConstraint().alloc(this, this.registeredRecordDefns);
+        final PTRow newRow = new PTRowTypeConstraint().alloc(
+            this, this.registeredRecordDefns, this.registeredChildScrollDefns);
         GlobalFnLibrary
             .readRecordFromResultSet(
             this.primaryRecDefn,

@@ -8,8 +8,10 @@
 package org.openpplsoft.types;
 
 import org.openpplsoft.pt.Record;
+import org.openpplsoft.buffers.ScrollBuffer;
 
 import java.util.Set;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,12 +30,16 @@ public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
     throw new OPSDataTypeException("Call to alloc() PTRow without args is illegal.");
   }
 
-  public PTRow alloc(final PTRowset parentRowset, final Set<Record> s) {
-    return new PTRow(this, parentRowset, s);
-  }
-
-  public PTRow alloc(final PTRowset parentRowset, final Record r) {
-    return new PTRow(this, parentRowset, r);
+  /**
+   * DO NOT FORGET that allocating a row is always done within the context of a
+   * rowset, and that the row must have the same registered record and child scroll
+   * definitions as its parent rowset. Do not make additional versions of alloc()
+   * here without considering what could go wrong if certain args are ommitted or
+   * defaulted incorrectly.
+   */
+  public PTRow alloc(final PTRowset parentRowset, final Set<Record> recordDefns,
+      final Map<String, ScrollBuffer> childScrollDefns) {
+    return new PTRow(this, parentRowset, recordDefns, childScrollDefns);
   }
 
   @Override

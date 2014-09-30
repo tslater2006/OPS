@@ -86,7 +86,7 @@ public final class Main {
       c.assembleComponentStructure();
       ComponentBuffer.printStructure();
       ComponentStructureVerifier.verify(profileToRun);
-      ComponentBuffer.generateFromStructure();
+      ComponentBuffer.materialize();
 
 /*
       ComponentBuffer.firstPassFill();

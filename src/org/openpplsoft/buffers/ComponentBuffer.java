@@ -32,7 +32,7 @@ public final class ComponentBuffer {
   private static ScrollBuffer currSB;
   private static ScrollBuffer lvlZeroScrollBuffer;
 
-  private static PTRow cBuffer;
+  private static PTRowset cBuffer;
 
   private ComponentBuffer() {}
 
@@ -46,10 +46,11 @@ public final class ComponentBuffer {
    */
   public static void init(final Component c) {
     compDefn = c;
-    final Record searchRecDefn = DefnCache.getRecord(compDefn.getSearchRecordName());
 
     // Allocate a new row (with null parent) for use as the component buffer.
-    cBuffer = new PTRowTypeConstraint().alloc(null, searchRecDefn);
+    final Record searchRecDefn = DefnCache.getRecord(
+        compDefn.getSearchRecordName());
+    cBuffer = new PTRowsetTypeConstraint().alloc(null, searchRecDefn);
 
     compDefn.getListOfComponentPC();
   }
@@ -58,8 +59,12 @@ public final class ComponentBuffer {
     cBuffer.fireEvent(event);
   }
 
+  public static void materialize() {
+    cBuffer.registerChildScrollDefn(lvlZeroScrollBuffer);
+  }
+
   public static PTRecord getSearchRecord() {
-    return cBuffer.getRecord(compDefn.getSearchRecordName());
+    return cBuffer.getRow(1).getRecord(compDefn.getSearchRecordName());
   }
 
   public static Component getComponentDefn() {
@@ -225,10 +230,6 @@ public final class ComponentBuffer {
         break;
       }
     }
-  }
-
-  public static void generateFromStructure() {
-    log.debug("Generating component structure...");
   }
 
 /*  public static void printContents() {

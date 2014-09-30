@@ -79,7 +79,7 @@ public final class Main {
 
       ComponentBuffer.init(c);
       ComponentBuffer.fireEvent(PCEvent.SEARCH_INIT);
-      c.fillSearchRecord();
+      ComponentBuffer.fillSearchRecord();
 
       c.loadPages();
 

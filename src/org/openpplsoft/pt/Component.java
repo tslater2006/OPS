@@ -263,55 +263,6 @@ public class Component {
   }
 
   /**
-   * If the search record contains at least one key, fill the
-   * search record with data.
-   */
-  public void fillSearchRecord() {
-
-    final Record recDefn = DefnCache.getRecord(this.searchRecordToUse);
-
-    if (!recDefn.hasAnySearchKeys()) {
-      return;
-    }
-
-    OPSStmt ostmt = StmtLibrary.getSearchRecordFillQuery();
-    ResultSet rs = null;
-
-    try {
-      rs = ostmt.executeQuery();
-
-      final ResultSetMetaData rsMetadata = rs.getMetaData();
-      final int numCols = rsMetadata.getColumnCount();
-
-      // search record may legitimately be empty, check before continuing.
-      if (rs.next()) {
-        final PTRecord searchRecord = ComponentBuffer.getSearchRecord();
-        for (int i = 1; i <= numCols; i++) {
-          final String colName = rsMetadata.getColumnName(i);
-          final String colTypeName = rsMetadata.getColumnTypeName(i);
-          final PTField fldObj = searchRecord.getFieldRef(colName).deref();
-          GlobalFnLibrary.readFieldFromResultSet(fldObj,
-              colName, colTypeName, rs);
-        }
-        if (rs.next()) {
-          throw new OPSVMachRuntimeException(
-              "Result set for search record fill has more than "
-              + "one record.");
-        }
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
-    }
-  }
-
-  /**
    * Recursively loads the subpages and secpages attached to this
    * component.
    */

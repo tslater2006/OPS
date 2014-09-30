@@ -10,12 +10,16 @@ package org.openpplsoft.buffers;
 import java.util.List;
 import java.util.Map;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.sql.*;
 import org.openpplsoft.types.*;
 
 /**
@@ -27,6 +31,7 @@ public final class ComponentBuffer {
       LogManager.getLogger(ComponentBuffer.class.getName());
 
   private static Component compDefn;
+  private static Record searchRecDefn;
 
   private static int currScrollLevel;
   private static ScrollBuffer currSB;
@@ -48,8 +53,7 @@ public final class ComponentBuffer {
     compDefn = c;
 
     // Allocate a new row (with null parent) for use as the component buffer.
-    final Record searchRecDefn = DefnCache.getRecord(
-        compDefn.getSearchRecordName());
+    searchRecDefn = DefnCache.getRecord(compDefn.getSearchRecordName());
     cBuffer = new PTRowsetTypeConstraint().alloc(null, searchRecDefn);
 
     compDefn.getListOfComponentPC();
@@ -78,6 +82,53 @@ public final class ComponentBuffer {
    */
   public static ScrollBuffer getCurrentScrollBuffer() {
     return currSB;
+  }
+
+  /**
+   * If the search record contains at least one key, fill the
+   * search record with data.
+   */
+  public static void fillSearchRecord() {
+
+    if (!searchRecDefn.hasAnySearchKeys()) {
+      return;
+    }
+
+    OPSStmt ostmt = StmtLibrary.getSearchRecordFillQuery();
+    ResultSet rs = null;
+
+    try {
+      rs = ostmt.executeQuery();
+
+      final ResultSetMetaData rsMetadata = rs.getMetaData();
+      final int numCols = rsMetadata.getColumnCount();
+
+      // search record may legitimately be empty, check before continuing.
+      if (rs.next()) {
+        final PTRecord searchRecord = ComponentBuffer.getSearchRecord();
+        for (int i = 1; i <= numCols; i++) {
+          final String colName = rsMetadata.getColumnName(i);
+          final String colTypeName = rsMetadata.getColumnTypeName(i);
+          final PTField fldObj = searchRecord.getFieldRef(colName).deref();
+          GlobalFnLibrary.readFieldFromResultSet(fldObj,
+              colName, colTypeName, rs);
+        }
+        if (rs.next()) {
+          throw new OPSVMachRuntimeException(
+              "Result set for search record fill has more than "
+              + "one record.");
+        }
+      }
+    } catch (final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    } finally {
+      try {
+        if (rs != null) { rs.close(); }
+        if (ostmt != null) { ostmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close rs and/or ostmt in finally block.");
+      }
+    }
   }
 
   /**

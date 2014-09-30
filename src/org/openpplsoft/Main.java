@@ -81,9 +81,7 @@ public final class Main {
       ComponentBuffer.fireEvent(PCEvent.SEARCH_INIT);
       ComponentBuffer.fillSearchRecord();
 
-      c.loadPages();
-
-      c.assembleComponentStructure();
+      ComponentBuffer.assembleStructure();
       ComponentBuffer.printStructure();
       ComponentStructureVerifier.verify(profileToRun);
       ComponentBuffer.materialize();

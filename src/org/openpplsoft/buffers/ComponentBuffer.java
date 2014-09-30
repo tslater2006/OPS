@@ -9,6 +9,7 @@ package org.openpplsoft.buffers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -127,6 +128,92 @@ public final class ComponentBuffer {
         if (ostmt != null) { ostmt.close(); }
       } catch (final java.sql.SQLException sqle) {
         log.warn("Unable to close rs and/or ostmt in finally block.");
+      }
+    }
+  }
+
+  /**
+   * Reads the stream of page fields for each page in this
+   * component definition, then builds appropriate buffers
+   * to create the complete component buffer.
+   */
+  public static void assembleStructure() {
+
+    for (Page p : compDefn.getPages()) {
+      p.recursivelyLoadSubpages();
+    }
+
+    for (Page p : compDefn.getPages()) {
+      p.recursivelyLoadSecpages();
+    }
+
+    PgToken tok;
+    PgTokenStream pfs;
+
+    final byte REL_DISP_FLAG = (byte) 16;
+
+    for (Page p : compDefn.getPages()) {
+      pfs = new PgTokenStream(p.getPNLNAME());
+
+      final Stack<ScrollMarker> scrollMarkers = new Stack<ScrollMarker>();
+      scrollMarkers.push(new ScrollMarker(0, null, PFlag.PAGE));
+
+      while ((tok = pfs.next()) != null) {
+
+        //log.debug(tok);
+
+        if (tok.flags.contains(PFlag.PAGE)) {
+          final ScrollMarker sm = new ScrollMarker();
+          sm.src = PFlag.PAGE;
+          sm.primaryRecName = scrollMarkers.peek().primaryRecName;
+          sm.scrollLevel = scrollMarkers.peek().scrollLevel;
+          scrollMarkers.push(sm);
+          continue;
+        }
+
+        if (tok.flags.contains(PFlag.END_OF_PAGE)) {
+          while (scrollMarkers.peek().src == PFlag.SCROLL_START) {
+            // pop interim scroll levels.
+            scrollMarkers.pop();
+          }
+          // pop the matching page.
+          scrollMarkers.pop();
+          continue;
+        }
+
+        if (tok.flags.contains(PFlag.SCROLL_START)) {
+
+          // This scroll may appear right after an unended scroll;
+          // if so, pop the previous one.
+          final ScrollMarker topSm = scrollMarkers.peek();
+          if (topSm.src == PFlag.SCROLL_START
+              && !tok.primaryRecName.equals(topSm.primaryRecName)) {
+            scrollMarkers.pop();
+          }
+
+          final ScrollMarker sm = new ScrollMarker();
+          sm.src = PFlag.SCROLL_START;
+          sm.primaryRecName = tok.primaryRecName;
+          sm.scrollLevel = scrollMarkers.peek().scrollLevel + tok.OCCURSLEVEL;
+          scrollMarkers.push(sm);
+          continue;
+        }
+
+        // Remember: don't "continue" here, since SCROLL_LVL_DECREMENT
+        // can be attached to regular fields.
+        if (tok.flags.contains(PFlag.SCROLL_LVL_DECREMENT)) {
+          scrollMarkers.pop();
+        }
+
+        if (tok.doesBelongInComponentStructure()) {
+          ComponentBuffer.addPageField(tok, scrollMarkers.peek().scrollLevel,
+            scrollMarkers.peek().primaryRecName);
+        }
+      }
+
+      if (scrollMarkers.size() != 0) {
+        throw new OPSVMachRuntimeException("Scroll marker stack size "
+            + "exceeds 0 at the end of the page token stream.");
       }
     }
   }
@@ -305,4 +392,18 @@ public final class ComponentBuffer {
       }
     }
   }*/
+
+  private static class ScrollMarker {
+    private String primaryRecName;
+    private int scrollLevel;
+    private PFlag src;
+
+    public ScrollMarker() {}
+
+    public ScrollMarker(final int s, final String p, final PFlag a) {
+      this.scrollLevel = s;
+      this.primaryRecName = p;
+      this.src = a;
+    }
+  }
 }

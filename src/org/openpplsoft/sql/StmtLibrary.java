@@ -552,7 +552,7 @@ public final class StmtLibrary {
    * @return the OPSStmt to be executed
    */
   public static OPSStmt prepareFirstPassFillQuery(
-      final RecordBuffer rbuf) {
+      final PTRecord record) {
 
     /*
      * Iterate over the fields in the expanded record field list
@@ -560,7 +560,7 @@ public final class StmtLibrary {
      * a key, add it to the WHERE clause and get its value from the
      * scroll buffer chain.
      */
-    final Record recDefn = DefnCache.getRecord(rbuf.getRecName());
+    final Record recDefn = record.getRecDefn();
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
 
     // If a non-required key exists, the SELECT clause will be limited
@@ -577,18 +577,21 @@ public final class StmtLibrary {
      * buffer hierarchy. If any key does not, do not continue.
      */
     for (RecordField rf : rfList) {
-      if (rf.isKey()
-          && rbuf.getParentScrollBuffer()
-            .getKeyValueFromHierarchy(rf.FIELDNAME) == null) {
 
-        if (rf.isRequired()) {
-          throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
-              + rbuf.getRecName() + "; value does not exist for search key: "
-              + rf.FIELDNAME);
-        } else {
-          // If a non-required key field does not have a matching value,
-          // we need to issue a query for all of the fields on the record.
-          limitSelectClauseToKeys = false;
+      if (rf.isKey()) {
+
+        try {
+          record.findValueForKeyInCBufferContext(rf.FIELDNAME);
+        } catch (final OPSCBufferKeyLookupException opscbkle) {
+          if (rf.isRequired()) {
+            throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
+                + recDefn.RECNAME + "; value does not exist for search key: "
+                + rf.FIELDNAME);
+          } else {
+            // If a non-required key field does not have a matching value,
+            // we need to issue a query for all of the fields on the record.
+            limitSelectClauseToKeys = false;
+          }
         }
       }
     }
@@ -639,17 +642,23 @@ public final class StmtLibrary {
       }
     }
 
-    query.append(" FROM PS_").append(rbuf.getRecName());
+    query.append(" FROM PS_").append(recDefn.RECNAME);
 
     int i = 0;
     for (RecordField rf : rfList) {
-      if (rf.isKey()
-          && rbuf.getParentScrollBuffer()
-            .getKeyValueFromHierarchy(rf.FIELDNAME) != null) {
+      if (rf.isKey()) {
+
+        String val = null;
+        try {
+          val = record.findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
+        } catch (final OPSCBufferKeyLookupException opscbkle) {
+          // If key value cannot be resolved, do not include it (see logic above).
+          continue;
+        }
+
         if (i == 0) { query.append(" WHERE "); }
         if (i > 0) { query.append(" AND "); }
-        final String val = (String) rbuf.getParentScrollBuffer()
-            .getKeyValueFromHierarchy(rf.FIELDNAME).read();
+
         query.append(rf.FIELDNAME).append("=?");
         bindVals.add(val);
         i++;

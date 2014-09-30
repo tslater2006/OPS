@@ -7,11 +7,9 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.PCEvent;
+public class OPSCBufferKeyLookupException extends Exception {
 
-public interface ICBufferEntity {
-  void fireEvent(final PCEvent event);
-  PTType resolveContextualCBufferReference(final String identifier);
-  PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName) throws OPSCBufferKeyLookupException;
+  public OPSCBufferKeyLookupException(final String msg) {
+    super(msg);
+  }
 }

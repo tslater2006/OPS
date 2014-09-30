@@ -10,6 +10,7 @@ package org.openpplsoft.types;
 import java.lang.reflect.Method;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -129,6 +130,11 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
       return this.parentRow.resolveContextualCBufferReference(identifier);
     }
     return null;
+  }
+
+  public PTPrimitiveType findValueForKeyInCBufferContext(
+      final String fieldName) throws OPSCBufferKeyLookupException {
+    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTRecord.");
   }
 
   /**
@@ -342,6 +348,62 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
       Environment.pushToCallStack(returnVal);
 
+    } catch (final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    } finally {
+      try {
+        if (rs != null) { rs.close(); }
+        if (ostmt != null) { ostmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close rs and/or ostmt in finally block.");
+      }
+    }
+  }
+
+  /**
+   * TODO: This likely needs to be renamed. It is meant for use
+   * when filling records in scroll level 0, but the logic here
+   * will likely need to be genericized to other scrolls once
+   * I get to that point.
+   */
+  public void firstPassFill() {
+
+    OPSStmt ostmt = null;
+
+    final Record recDefn = DefnCache.getRecord(this.recDefn.RECNAME);
+    if (recDefn.hasARequiredKeyField() || recDefn.hasNoKeys()) {
+      ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
+    } else {
+      return;
+    }
+
+    ResultSet rs = null;
+
+    try {
+
+      /*
+       * If null comes back, one or more key values is not
+       * available, and thus the fill cannot be run.
+       */
+      if (ostmt == null) { return; }
+
+      rs = ostmt.executeQuery();
+
+      final ResultSetMetaData rsMetadata = rs.getMetaData();
+      final int numCols = rsMetadata.getColumnCount();
+
+      // NOTE: record may legitimately be empty.
+      if (rs.next()) {
+        for (int i = 1; i <= numCols; i++) {
+          final String colName = rsMetadata.getColumnName(i);
+          final String colTypeName = rsMetadata.getColumnTypeName(i);
+          final PTField fldObj = this.getFieldRef(colName).deref();
+          log.debug("Before: {} = {}", colName, fldObj);
+          GlobalFnLibrary.readFieldFromResultSet(fldObj,
+              colName, colTypeName, rs);
+          log.debug("After: {} = {}", colName, fldObj);
+        }
+      }
     } catch (final java.sql.SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } finally {

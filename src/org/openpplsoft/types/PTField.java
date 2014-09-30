@@ -88,6 +88,11 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public PTPrimitiveType findValueForKeyInCBufferContext(
+      final String fieldName) throws OPSCBufferKeyLookupException {
+    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTField.");
+  }
+
   public void setDefault() {
     valueRef.deref().setDefault();
   }

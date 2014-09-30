@@ -115,12 +115,21 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public PTPrimitiveType findValueForKeyInCBufferContext(
+      final String fieldName) throws OPSCBufferKeyLookupException {
+    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTRow.");
+  }
+
   /**
    * Retrieve the record associated with the record name provided
    * @return the record associated with the record name provided
    */
   public PTRecord getRecord(final String recName) {
     return this.recordMap.get(recName);
+  }
+
+  public PTRowset getRowset(final String primaryRecName) {
+    return this.rowsetMap.get(primaryRecName);
   }
 
   /**
@@ -168,6 +177,10 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
       return new Callable(ptMethodTable.get(s), this);
     }
     return null;
+  }
+
+  public Map<String, PTRecord> getRecordMap() {
+    return this.recordMap;
   }
 
   @Override

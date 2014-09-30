@@ -337,35 +337,32 @@ public final class ComponentBuffer {
   }
 
   /**
-   * TODO(mquinn): complete this method.
-   * Filling the component buffer involves multiple passes, total
-   * involved is dynamic I believe. I'm calling this just the first
-   * pass for now. The goal is to delegate as much of the filling part
-   * to the buffers themselves, as that will be the same across all passes.
+   * Fill this record buffer as part of the
+   * first pass fill routine. In order to be filled, a record
+   * must 1) be a table or view (should be checked by caller)
+   * and 2) have either at least one
+   * required field OR have no keys. The fill may be aborted
+   * during the StmtLibrary call if a required key does not have
+   * a matching value in the scroll hierarchy.
    */
   public static void firstPassFill() {
-    IStreamableBuffer buf;
 
-    ComponentBuffer.resetCursors();
-    while ((buf = ComponentBuffer.next()) != null) {
+    // Remember: null is used to get the rowset b/c the rowset
+    // at scroll level zero has no (null) primary record name.
+    final PTRow levelZeroRow = cBuffer.getRow(1).getRowset(null).getRow(1);
 
-      if (buf instanceof RecordBuffer) {
-        final RecordBuffer rbuf = (RecordBuffer) buf;
-
-        /*
-         * For the first pass, only fill table and view
-         * (i.e., not derived) buffers; individual calls may
-         * be aborted if record conditions are not met (see
-         * method implementation for details).
-         */
-        final Record recDefn = DefnCache.getRecord(rbuf.getRecName());
-        if (recDefn.isTable() || recDefn.isView()) {
-          rbuf.firstPassFill();
-        }
-      } else if(buf instanceof ScrollBuffer &&
-          ((ScrollBuffer) buf).getScrollLevel() != 0) {
-        // we only want scroll level 0; break beyond that
-        break;
+    for (Map.Entry<String, PTRecord> entry
+        : levelZeroRow.getRecordMap().entrySet()) {
+      final PTRecord record = entry.getValue();
+      final Record recDefn = record.getRecDefn();
+     /*
+      * For the first pass, only fill table and view
+      * (i.e., not derived) buffers; individual calls may
+      * be aborted if record conditions are not met (see
+      * method implementation for details).
+      */
+      if (recDefn.isTable() || recDefn.isView()) {
+        record.firstPassFill();
       }
     }
   }

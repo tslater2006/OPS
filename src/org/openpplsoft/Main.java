@@ -86,9 +86,9 @@ public final class Main {
       ComponentStructureVerifier.verify(profileToRun);
       ComponentBuffer.materialize();
 
-/*
       ComponentBuffer.firstPassFill();
-      c.runPreBuild();
+
+/*      c.runPreBuild();
 
       // TEMPORARY
       ComponentBuffer.printContents();*/

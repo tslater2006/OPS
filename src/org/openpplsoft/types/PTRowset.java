@@ -122,6 +122,11 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public PTPrimitiveType findValueForKeyInCBufferContext(
+      final String fieldName) throws OPSCBufferKeyLookupException {
+    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTRowset.");
+  }
+
   public int getActiveRowCount() {
     return this.rows.size();
   }

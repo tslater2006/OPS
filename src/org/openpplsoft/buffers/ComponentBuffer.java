@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
+import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
 import org.openpplsoft.types.*;
@@ -61,7 +62,24 @@ public final class ComponentBuffer {
   }
 
   public static void fireEvent(final PCEvent event) {
-    cBuffer.fireEvent(event);
+
+    /*
+     * If a Component PeopleCode program has been written for this component,
+     * i.e., PreBuild or PostBuild, run it now.
+     */
+    final PeopleCodeProg compProg = compDefn.getProgramForEvent(event);
+    if (compProg != null) {
+      final ExecContext eCtx = new ProgramExecContext(compProg);
+
+      // IMPORTANT: Buffer context for Component-level events like PreBuild
+      // and PostBuild involve the (only) row in the level 0 scroll (rowset).
+      eCtx.setCBufferContextEntity(cBuffer.getRow(1));
+
+      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      interpreter.run();
+    } else {
+      cBuffer.fireEvent(event);
+    }
   }
 
   public static void materialize() {

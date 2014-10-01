@@ -205,15 +205,19 @@ public class Component {
     return null;
   }
 
-  public String getSearchRecordName() {
-    return this.searchRecordToUse;
+  public ComponentPeopleCodeProg getProgramForEvent(final PCEvent event) {
+    for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
+      if (prog.RECNAME == null
+          && prog.FLDNAME == null
+          && prog.event.equals(event.getName())) {
+        return prog;
+      }
+    }
+    return null;
   }
 
-  /**
-   * Runs the PreBuild (Component PC) program if it exists.
-   */
-  public void runPreBuild() {
-    throw new OPSVMachRuntimeException("TODO: Fire PreBuild from ComponentBuffer.");
+  public String getSearchRecordName() {
+    return this.searchRecordToUse;
   }
 
   /**

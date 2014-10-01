@@ -198,14 +198,16 @@ public class GlobalFnLibrary {
    * component buffer available to caller.
    */
   public static void PT_GetLevel0() {
-    throw new OPSVMachRuntimeException("TODO: Reimplement GetLevel0 system fn.");
-
-/*    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
 
-    Environment.pushToCallStack(ComponentBuffer.ptGetLevel0());*/
+    // The level 0 rowset is the sole child rowset of the sole child row
+    // of the root Component buffer rowset (null is used b/c it has no
+    // primary record defn).
+    Environment.pushToCallStack(ComponentBuffer
+        .getCBufferRowset().getRow(1).getRowset(null));
   }
 
   public static void PT_CreateArrayRept() {

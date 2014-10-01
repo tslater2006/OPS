@@ -87,11 +87,10 @@ public final class Main {
       ComponentBuffer.materialize();
 
       ComponentBuffer.firstPassFill();
-
-/*      c.runPreBuild();
+      ComponentBuffer.fireEvent(PCEvent.PRE_BUILD);
 
       // TEMPORARY
-      ComponentBuffer.printContents();*/
+//      ComponentBuffer.printContents();
 //      c.runDefaultProcessing();
 
       TraceFileVerifier.logVerificationSummary(false);

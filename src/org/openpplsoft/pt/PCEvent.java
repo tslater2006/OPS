@@ -8,7 +8,8 @@
 package org.openpplsoft.pt;
 
 public enum PCEvent {
-  SEARCH_INIT("SearchInit");
+  SEARCH_INIT("SearchInit"),
+  PRE_BUILD("PreBuild");
 
   private String name;
 

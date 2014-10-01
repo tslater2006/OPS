@@ -451,7 +451,9 @@ public final class StmtLibrary {
     int i = 0;
     for (RecordField rf : rfList) {
       if (rf.isKey()) {
-        final String keyValue = (String) recFldBuf.getParentRecordBuffer()
+        throw new OPSVMachRuntimeException("TODO: Add logic back to get key value, "
+            + "this time with newly implemented buffer context methods.");
+/*        final String keyValue = (String) recFldBuf.getParentRecordBuffer()
             .getParentScrollBuffer().getKeyValueFromHierarchy(rf.FIELDNAME).read();
 
         if (keyValue == null) {
@@ -464,7 +466,7 @@ public final class StmtLibrary {
           query.append(rf.FIELDNAME).append("=?");
           bindVals.add(keyValue);
           i++;
-        }
+        }*/
       }
     }
 
@@ -586,7 +588,7 @@ public final class StmtLibrary {
           if (rf.isRequired()) {
             throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
                 + recDefn.RECNAME + "; value does not exist for search key: "
-                + rf.FIELDNAME);
+                + rf.FIELDNAME, opscbkle);
           } else {
             // If a non-required key field does not have a matching value,
             // we need to issue a query for all of the fields on the record.

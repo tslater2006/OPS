@@ -39,11 +39,15 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
   private static Map<String, Method> ptMethodTable;
 
   private PTRow parentRow;
-  private List<PTRow> rows;
+  private List<PTRow> rows = new ArrayList<PTRow>();
   private Record primaryRecDefn;
 
-  private Set<Record> registeredRecordDefns;
-  private Map<String, ScrollBuffer> registeredChildScrollDefns;
+  // If this is null, this rowset is a standalone rowset.
+  private ScrollBuffer cBufferScrollDefn;
+
+  private Set<Record> registeredRecordDefns = new HashSet<Record>();
+  private Map<String, ScrollBuffer> registeredChildScrollDefns =
+      new LinkedHashMap<String, ScrollBuffer>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -59,32 +63,39 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
   }
 
   /**
-   * Create a new Rowset object that's attached to a specific
-   * record definition; can only be called by internal methods.
-   * @param r the specific record defn to attach to the rowset
+   * Remember: the provided primary record defn could be null if
+   * this rowset represents the level 0 scroll of the component buffer.
    */
-  public PTRowset(final PTRowsetTypeConstraint origTc, final PTRow pRow, final Record r) {
+  public PTRowset(final PTRowsetTypeConstraint origTc, final PTRow pRow,
+      final Record primRecDefn) {
     super(origTc);
     this.parentRow = pRow;
+    this.primaryRecDefn = primRecDefn;
+    this.initRowset();
+  }
 
-    this.primaryRecDefn = r;
-    this.rows = new ArrayList<PTRow>();
-    this.registeredRecordDefns = new HashSet<Record>();
-    this.registeredChildScrollDefns = new LinkedHashMap<String, ScrollBuffer>();
+  public PTRowset(final PTRowsetTypeConstraint origTc, final PTRow pRow,
+      final ScrollBuffer scrollDefn) {
+    super(origTc);
+    this.parentRow = pRow;
+    this.cBufferScrollDefn = scrollDefn;
+    this.primaryRecDefn = scrollDefn.getPrimaryRecDefn();
+    this.initRowset();
+  }
 
-    /*
-     * One row is always present in the rowset, even when flushed.
-     * Note that the given record defn could be null if this rowset contains
-     * the level 0 records for a level 0 scroll buffer in a component.
-     */
-    if (this.primaryRecDefn != null) {
-      this.registeredRecordDefns.add(r);
-    }
+  private void initRowset() {
+    // One row is always present in the rowset, even when flushed.
     this.rows.add(new PTRowTypeConstraint().alloc(
         this, this.registeredRecordDefns, this.registeredChildScrollDefns));
+    this.registerRecordDefn(this.primaryRecDefn);
   }
 
   public void registerRecordDefn(final Record recDefn) {
+
+    if (recDefn == null) {
+      return;
+    }
+
     this.registeredRecordDefns.add(recDefn);
 
     // Each row must also have this record registered.
@@ -122,9 +133,26 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public ScrollBuffer getCBufferScrollDefn() {
+    return this.cBufferScrollDefn;
+  }
+
+  /**
+   * If a key lookup request reaches a Rowset, the request should
+   * always be passed to the parent row in order to look at the child
+   * records within that row.
+   */
   public PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException {
-    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTRowset.");
+    if (this.parentRow != null) {
+      return this.parentRow.findValueForKeyInCBufferContext(fieldName);
+    }
+    throw new OPSCBufferKeyLookupException("Rowset has no parent, unable to "
+        + "continue key lookup.");
+  }
+
+  public PTRow getParentRow() {
+    return this.parentRow;
   }
 
   public int getActiveRowCount() {

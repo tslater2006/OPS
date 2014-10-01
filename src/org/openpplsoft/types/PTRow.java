@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
@@ -27,6 +30,8 @@ import org.openpplsoft.runtime.*;
 public final class PTRow extends PTObjectType implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
+
+  private static final Logger log = LogManager.getLogger(PTRow.class.getName());
 
   private PTRowset parentRowset;
 
@@ -117,7 +122,49 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
 
   public PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException {
-    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTRow.");
+    log.debug("{}, {}", this.parentRowset, this.parentRowset.getCBufferScrollDefn());
+
+    if (this.parentRowset == null) {
+      throw new OPSCBufferKeyLookupException("Row's parent is null; "
+          + "unable to continue search for key value without a parent rowset.");
+    }
+
+    // If the parent rowset does not have a scroll defn, it may be the root
+    // PTRowset representing the ComponentBuffer as a whole. If this is the case,
+    // the entire search record (primary record for that rowset) should be searched.
+    if (this.parentRowset.getCBufferScrollDefn() == null) {
+      if (this.parentRowset == ComponentBuffer.getCBufferRowset()) {
+        throw new OPSCBufferKeyLookupException("TODO: Lookup field in search record.");
+      } else {
+        throw new OPSCBufferKeyLookupException("Row's parent rowset does not "
+            + "have a scroll defn, and it is not the ComponentBuffer rowset; "
+            + "these are unexpected conditions that prevent further key lookup.");
+      }
+    }
+
+
+    /*
+     * We must access the buffer definitions, not the raw records themselves,
+     * as not all record fields may be in the component buffer for any given record.
+     */
+    for (final RecordBuffer recBuf
+        : this.parentRowset.getCBufferScrollDefn().getOrderedRecBuffers()) {
+      final RecordFieldBuffer rfBuf = recBuf.getRecordFieldBufferFromTable(fieldName);
+
+      if (rfBuf != null && rfBuf.getRecFldDefn().isKey()) {
+        return this.recordMap.get(rfBuf.getRecDefn().RECNAME)
+            .getFieldRef(rfBuf.getRecFldDefn().FIELDNAME).deref().getValue();
+      }
+    }
+
+    // If the field does not exist, and/or is not a key, in/on any of the
+    // records in this row, pass the field name to the parent rowset
+    // to continue the search in the next parent row.
+    return this.parentRowset.findValueForKeyInCBufferContext(fieldName);
+  }
+
+  public PTRowset getParentRowset() {
+    return this.parentRowset;
   }
 
   /**

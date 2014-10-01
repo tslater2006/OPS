@@ -27,19 +27,14 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
     throw new OPSDataTypeException("Call to alloc() PTRowset without args is illegal.");
   }
 
- /**
-  * Allocates a new rowset object with an attached record defn.
-  * Allocated rowsets must have an associated record defn in order
-  * to determine the type of records enclosed within them. However, this
-  * defn is not part of the type itself; a Rowset variable can be assigned
-  * any Rowset object, regardless of its underlying record defn (this is why
-  * the typeCheck and equals/hashCode methods are not overriden by this class,
-  * there's no need to do so).
-  * @param recDefn the record defn to attach
-  * @return the newly allocated rowset object
-  */
-  public PTRowset alloc(final PTRow parentRow, final Record recDefn) {
-    return new PTRowset(this, parentRow, recDefn);
+  // Use to allocate standalone (non-component buffer) rowsets.
+  public PTRowset alloc(final PTRow parentRow, final Record primaryRecDefn) {
+    return new PTRowset(this, parentRow, primaryRecDefn);
+  }
+
+  // Use to allocate component buffer rowsets.
+  public PTRowset alloc(final PTRow parentRow, final ScrollBuffer scrollDefn) {
+    return new PTRowset(this, parentRow, scrollDefn);
   }
 
   @Override

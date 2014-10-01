@@ -132,9 +132,27 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  /**
+   * Key lookups are always passed up when reaching a PTRecord;
+   * call does not go to the record's parent row, but to the record's parent row's
+   * parent row (since key lookup does not involve searching records in the same
+   * row as this record, but the ones that exist on the row above it). Thus, if
+   * this record
+   * is in scroll level 2, the records in both scroll level 1 and scroll level 0
+   * will be searched within the two rows that make up the buffer context hierarchy
+   * leading to the row that this record is in.
+   */
   public PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException {
-    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTRecord.");
+    if (this.parentRow != null
+        && this.parentRow.getParentRowset() != null
+        && this.parentRow.getParentRowset().getParentRow() != null) {
+      this.parentRow.getParentRowset().getParentRow()
+          .findValueForKeyInCBufferContext(fieldName);
+    }
+    throw new OPSCBufferKeyLookupException("PTRecord's parent row is either null or "
+        + "does not have a parent rowset and/or row itself; unable to continue "
+        + "key lookup.");
   }
 
   /**

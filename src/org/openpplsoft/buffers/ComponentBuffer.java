@@ -85,6 +85,10 @@ public final class ComponentBuffer {
     return currSB;
   }
 
+  public static PTRowset getCBufferRowset() {
+    return cBuffer;
+  }
+
   /**
    * If the search record contains at least one key, fill the
    * search record with data.

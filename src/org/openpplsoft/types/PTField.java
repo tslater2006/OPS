@@ -90,7 +90,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException {
-    throw new OPSCBufferKeyLookupException("TODO: Support key lookup in PTField.");
+    throw new OPSVMachRuntimeException("Did not expect key lookup call on PTField; "
+        + "if possible, this call should be made on the parent record, rather than "
+        + "implemented here, altho doing so would just pass the request up "
+        + "to the parent record.");
   }
 
   public void setDefault() {

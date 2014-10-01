@@ -52,19 +52,21 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
   }
 
-  public PTRowset allocRowset(final PTRow parentRow) {
-
-    // If this is the level zero scroll buffer, its primary record name will
-    // be null, since it has no primary record.
+  public Record getPrimaryRecDefn() {
     Record primaryRecDefn = null;
     if (this.primaryRecName != null) {
       primaryRecDefn = DefnCache.getRecord(this.primaryRecName);
     }
+    return primaryRecDefn;
+  }
 
-    // Create a rowset with no parent; the caller is responsible for setting
-    // the parent row.
+  public PTRowset allocRowset(final PTRow parentRow) {
+
+    // Create a rowset with the supplied parent; this scroll buffer object
+    // will be linked to the rowset, which will use the primary rec name
+    // defined in this object as the primary rec defn.
     final PTRowset rowset = new PTRowsetTypeConstraint()
-        .alloc(parentRow, primaryRecDefn);
+        .alloc(parentRow, this);
 
     // For each record buffer in this scroll, register the underlying record
     // defn in the rowset (and thus its newly created child row as well).
@@ -113,35 +115,6 @@ public class ScrollBuffer implements IStreamableBuffer {
    */
   public Map<String, RecordBuffer> getRecBufferTable() {
     return this.recBufferTable;
-  }
-
-  /**
-   * Searches up the scroll hierarchy for the appropriate value
-   * for the provided key field.
-   * @param fldName the key field name for which a value is needed
-   * @return the value for the key field
-   */
-  public PTPrimitiveType getKeyValueFromHierarchy(final String fldName) {
-    if (this.parent == null) {
-      /*
-       * Examine the search record of the component buffer
-       * if this is the level 0 scroll buffer.
-       */
-      if (ComponentBuffer.getSearchRecord().hasField(fldName)) {
-        return ComponentBuffer.getSearchRecord().getFieldRef(fldName)
-            .deref().getValue();
-      }
-    } else {
-      /*
-       * Examine the primary scroll record of the *parent* scroll
-       * buffer, not this scroll buffer. If key value exists,
-       * return it, otherwise call this method on the parent's parent
-       * scroll buffer.
-       */
-      throw new OPSVMachRuntimeException("Need to support getting "
-          + "key values from scroll 1 and/or 2 of comp buffer.");
-    }
-    return null;
   }
 
   /**

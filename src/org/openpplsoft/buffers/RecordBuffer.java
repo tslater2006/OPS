@@ -95,6 +95,10 @@ public class RecordBuffer implements IStreamableBuffer {
     return this.scrollLevel;
   }
 
+  public RecordFieldBuffer getRecordFieldBufferFromTable(final String fldname) {
+    return this.fieldBufferTable.get(fldname);
+  }
+
   /**
    * Get whether or not this record buffer is the primary
    * record for its parent ScrollBuffer.

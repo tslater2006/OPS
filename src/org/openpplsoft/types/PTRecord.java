@@ -144,15 +144,24 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
    */
   public PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException {
-    if (this.parentRow != null
-        && this.parentRow.getParentRowset() != null
-        && this.parentRow.getParentRowset().getParentRow() != null) {
-      this.parentRow.getParentRowset().getParentRow()
-          .findValueForKeyInCBufferContext(fieldName);
+
+    if (this.parentRow == null) {
+      throw new OPSCBufferKeyLookupException("PTRecord's parent row is null; "
+          + "cannot continue key lookup.");
     }
-    throw new OPSCBufferKeyLookupException("PTRecord's parent row is either null or "
-        + "does not have a parent rowset and/or row itself; unable to continue "
-        + "key lookup.");
+
+    if (this.parentRow.getParentRowset() == null) {
+      throw new OPSCBufferKeyLookupException("PTRecord's parent row's parent "
+          + "rowset is null; cannot continue key lookup.");
+    }
+
+    if (this.parentRow.getParentRowset().getParentRow() == null) {
+      throw new OPSCBufferKeyLookupException("PTRecord's parent row's parent "
+          + "rowset's parent row is null; cannot continue key lookup.");
+    }
+
+    return this.parentRow.getParentRowset().getParentRow()
+          .findValueForKeyInCBufferContext(fieldName);
   }
 
   /**

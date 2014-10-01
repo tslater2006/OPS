@@ -134,14 +134,24 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     // the entire search record (primary record for that rowset) should be searched.
     if (this.parentRowset.getCBufferScrollDefn() == null) {
       if (this.parentRowset == ComponentBuffer.getCBufferRowset()) {
-        throw new OPSCBufferKeyLookupException("TODO: Lookup field in search record.");
-      } else {
-        throw new OPSCBufferKeyLookupException("Row's parent rowset does not "
-            + "have a scroll defn, and it is not the ComponentBuffer rowset; "
-            + "these are unexpected conditions that prevent further key lookup.");
-      }
-    }
 
+        final PTRecord searchRecord = this.recordMap.get(
+            ComponentBuffer.getComponentDefn().getSearchRecordName());
+
+        if (searchRecord.hasField(fieldName)) {
+          final PTField fld = searchRecord.getFieldRef(fieldName).deref();
+          if (fld.getRecordFieldDefn().isKey()) {
+            return fld.getValue();
+          }
+        }
+
+        throw new OPSCBufferKeyLookupException("Key lookup extended all the way to "
+            + "component search record, value for key was not found anywhere.");
+      }
+      throw new OPSCBufferKeyLookupException("Row's parent rowset does not "
+          + "have a scroll defn, and it is not the ComponentBuffer rowset; "
+          + "these are unexpected conditions that prevent further key lookup.");
+    }
 
     /*
      * We must access the buffer definitions, not the raw records themselves,

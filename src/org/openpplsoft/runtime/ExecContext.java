@@ -19,7 +19,6 @@ public abstract class ExecContext {
   public PeopleCodeProg prog;
   public ParseTree startNode;
   public LinkedList<Scope> scopeStack;
-  public ICBufferEntity cBufferContextEntity;
 
   public ExecContext(PeopleCodeProg p) {
     this.prog = p;
@@ -31,17 +30,6 @@ public abstract class ExecContext {
     public OPSVMachIdentifierResolutionException(final String msg) {
       super(msg);
     }
-  }
-
-  public void setCBufferContextEntity(final ICBufferEntity contextEntity) {
-    this.cBufferContextEntity = contextEntity;
-  }
-
-  public PTType resolveContextualCBufferReference(final String id) {
-    if (this.cBufferContextEntity != null) {
-      return this.cBufferContextEntity.resolveContextualCBufferReference(id);
-    }
-    return null;
   }
 
   public void pushScope(Scope s) {

@@ -74,9 +74,8 @@ public final class ComponentBuffer {
       // IMPORTANT: Buffer context for Component-level events like PreBuild
       // and PostBuild have the first (and only) row of the level zero rowset
       // as their context.
-      eCtx.setCBufferContextEntity(getLevelZeroRowset().getRow(1));
-
-      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      final InterpretSupervisor interpreter =
+          new InterpretSupervisor(eCtx, getLevelZeroRowset().getRow(1));
       interpreter.run();
     } else {
       cBuffer.fireEvent(event);

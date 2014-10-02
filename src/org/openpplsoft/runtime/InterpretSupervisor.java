@@ -19,13 +19,26 @@ import org.openpplsoft.antlr4.*;
 
 public class InterpretSupervisor {
 
-  private LinkedList<ExecContext> execContextStack;
+  private LinkedList<ExecContext> execContextStack = new LinkedList<ExecContext>();
+  private ICBufferEntity cBufferContextEntity;
 
   private static Logger log = LogManager.getLogger(InterpretSupervisor.class.getName());
 
-  public InterpretSupervisor(ExecContext e) {
-    this.execContextStack = new LinkedList<ExecContext>();
+  public InterpretSupervisor(final ExecContext e) {
     this.execContextStack.push(e);
+  }
+
+  public InterpretSupervisor(final ExecContext e,
+      final ICBufferEntity contextEntity) {
+    this.execContextStack.push(e);
+    this.cBufferContextEntity = contextEntity;
+  }
+
+  public PTType resolveContextualCBufferReference(final String id) {
+    if (this.cBufferContextEntity != null) {
+      return this.cBufferContextEntity.resolveContextualCBufferReference(id);
+    }
+    return null;
   }
 
   public void run() {

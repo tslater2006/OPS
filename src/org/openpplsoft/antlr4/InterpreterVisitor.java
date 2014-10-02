@@ -1106,7 +1106,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * to highest scope for this reason.
        */
       final String id = ctx.GENERIC_ID().getText();
-      final PTType resolvedCBufferRef = this.eCtx.resolveContextualCBufferReference(id);
+      final PTType resolvedCBufferRef =
+          this.supervisor.resolveContextualCBufferReference(id);
       if (resolvedCBufferRef != null) {
 
         log.debug("Resolved GENERIC_ID: {} to the following buffer reference :{}",

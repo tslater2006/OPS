@@ -65,8 +65,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     final PeopleCodeProg recProg = this.recFieldDefn.getProgramForEvent(event);
     if (recProg != null) {
       final ExecContext eCtx = new ProgramExecContext(recProg);
-      eCtx.setCBufferContextEntity(this);
-      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      // Pass this field to the supervisor as the component buffer context.
+      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
     }
 
@@ -75,8 +75,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
         .getProgramForRecordFieldEvent(event, this.recFieldDefn);
     if (compProg != null) {
       final ExecContext eCtx = new ProgramExecContext(compProg);
-      eCtx.setCBufferContextEntity(this);
-      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      // Pass this field to the supervisor as the component buffer context.
+      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
     }
   }

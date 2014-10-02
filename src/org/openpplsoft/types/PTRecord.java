@@ -117,8 +117,8 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
         .getProgramForRecordEvent(event, this.recDefn);
     if (compProg != null) {
       final ExecContext eCtx = new ProgramExecContext(compProg);
-      eCtx.setCBufferContextEntity(this);
-      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
+      // Pass this record to the supervisor as the component buffer context.
+      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
     }
   }

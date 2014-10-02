@@ -72,8 +72,9 @@ public final class ComponentBuffer {
       final ExecContext eCtx = new ProgramExecContext(compProg);
 
       // IMPORTANT: Buffer context for Component-level events like PreBuild
-      // and PostBuild involve the (only) row in the level 0 scroll (rowset).
-      eCtx.setCBufferContextEntity(cBuffer.getRow(1));
+      // and PostBuild have the first (and only) row of the level zero rowset
+      // as their context.
+      eCtx.setCBufferContextEntity(getLevelZeroRowset().getRow(1));
 
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx);
       interpreter.run();
@@ -105,6 +106,12 @@ public final class ComponentBuffer {
 
   public static PTRowset getCBufferRowset() {
     return cBuffer;
+  }
+
+  public static PTRowset getLevelZeroRowset() {
+    // Remember, null is used here b/c the level 0 scroll does
+    // not have a primary record.
+    return cBuffer.getRow(1).getRowset(null);
   }
 
   /**

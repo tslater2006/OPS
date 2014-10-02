@@ -203,11 +203,7 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
 
-    // The level 0 rowset is the sole child rowset of the sole child row
-    // of the root Component buffer rowset (null is used b/c it has no
-    // primary record defn).
-    Environment.pushToCallStack(ComponentBuffer
-        .getCBufferRowset().getRow(1).getRowset(null));
+    Environment.pushToCallStack(ComponentBuffer.getLevelZeroRowset());
   }
 
   public static void PT_CreateArrayRept() {

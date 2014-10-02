@@ -1108,6 +1108,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final String id = ctx.GENERIC_ID().getText();
       final PTType resolvedCBufferRef = this.eCtx.resolveContextualCBufferReference(id);
       if (resolvedCBufferRef != null) {
+
+        log.debug("Resolved GENERIC_ID: {} to the following buffer reference :{}",
+            id, resolvedCBufferRef);
+
         this.setNodeData(ctx, resolvedCBufferRef);
 
       } else if (this.eCtx.prog.hasFunctionImplNamed(id)) {
@@ -1168,8 +1172,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       } else if (PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.containsKey(
         id.toUpperCase())) {
 
-        //log.debug("Resolved GENERIC_ID: {} to DEFN_LITERAL",
-        //    ctx.GENERIC_ID().getText());
+        log.debug("Resolved GENERIC_ID: {} to DEFN_LITERAL",
+            ctx.GENERIC_ID().getText());
 
         /*
          * Detect defn literal reserved words (i.e.,

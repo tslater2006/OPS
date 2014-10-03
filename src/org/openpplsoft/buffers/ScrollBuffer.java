@@ -117,6 +117,14 @@ public class ScrollBuffer implements IStreamableBuffer {
     return this.recBufferTable;
   }
 
+  public boolean hasRecordBuffer(final String recName) {
+    return this.recBufferTable.containsKey(recName);
+  }
+
+  public RecordBuffer getRecordBuffer(final String recName) {
+    return this.recBufferTable.get(recName);
+  }
+
   /**
    * Add a page field to this scroll buffer.
    * @param tok the page field token representing the page field

@@ -21,6 +21,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   private PTRecord parentRecord;
   private RecordField recFieldDefn;
+  private RecordFieldBuffer recFieldBuffer;
   private PTImmutableReference<PTPrimitiveType> valueRef;
   private PTImmutableReference<PTBoolean> visiblePropertyRef;
 
@@ -38,11 +39,24 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public PTField(final PTFieldTypeConstraint origTc, final PTRecord pRecord, final RecordField rfd) {
+  public PTField(final PTFieldTypeConstraint origTc, final PTRecord pRecord,
+      final RecordField rfd) {
     super(origTc);
     this.parentRecord = pRecord;
     this.recFieldDefn = rfd;
+    this.init();
+  }
 
+  public PTField(final PTFieldTypeConstraint origTc, final PTRecord pRecord,
+      final RecordFieldBuffer recFldBuffer) {
+    super(origTc);
+    this.parentRecord = pRecord;
+    this.recFieldDefn = recFldBuffer.getRecFldDefn();
+    this.recFieldBuffer = recFldBuffer;
+    this.init();
+  }
+
+  private void init() {
     final PTTypeConstraint valueTc
         = recFieldDefn.getTypeConstraintForUnderlyingValue();
     final PTTypeConstraint<PTBoolean> visibleTc
@@ -79,6 +93,12 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
     }
+  }
+
+  public boolean runFieldDefaultProcessing() {
+
+    throw new OPSVMachRuntimeException("TODO: Run def proc on field.");
+
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {

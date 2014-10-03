@@ -7,6 +7,7 @@
 
 package org.openpplsoft.types;
 
+import org.openpplsoft.buffers.RecordFieldBuffer;
 import org.openpplsoft.pt.RecordField;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,11 @@ public class PTFieldTypeConstraint extends PTTypeConstraint<PTField> {
 
   public PTField alloc(final PTRecord parentRecord, final RecordField rfDefn) {
     return new PTField(this, parentRecord, rfDefn);
+  }
+
+  public PTField alloc(final PTRecord parentRecord,
+      final RecordFieldBuffer recFldBuffer) {
+    return new PTField(this, parentRecord, recFldBuffer);
   }
 
   @Override

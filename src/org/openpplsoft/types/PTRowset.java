@@ -100,7 +100,17 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
     // Each row must also have this record registered.
     for (final PTRow row : this.rows) {
-      row.registerRecordDefn(recDefn);
+
+      // If this is a component buffer scroll and the record has an
+      // associated record buffer, pass that to the row; it will register
+      // the underlying record defn and save a reference to that buffer
+      if (this.cBufferScrollDefn != null
+          && this.cBufferScrollDefn.hasRecordBuffer(recDefn.RECNAME)) {
+        row.registerRecordDefn(
+            this.cBufferScrollDefn.getRecordBuffer(recDefn.RECNAME));
+      } else {
+        row.registerRecordDefn(recDefn);
+      }
     }
   }
 
@@ -131,6 +141,15 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
       return this.parentRow.resolveContextualCBufferReference(identifier);
     }
     return null;
+  }
+
+  public boolean runFieldDefaultProcessing() {
+    boolean wasFieldChangedAndBlankFieldSeen = false;
+    for (final PTRow row : this.rows) {
+      wasFieldChangedAndBlankFieldSeen =
+          row.runFieldDefaultProcessing() || wasFieldChangedAndBlankFieldSeen;
+    }
+    return wasFieldChangedAndBlankFieldSeen;
   }
 
   public ScrollBuffer getCBufferScrollDefn() {

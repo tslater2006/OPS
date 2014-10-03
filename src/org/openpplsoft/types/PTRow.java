@@ -75,12 +75,28 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  // Used to register record defns that don't have an associated
+  // buffer (i.e., standalone rows/rowsets)
   public void registerRecordDefn(final Record recDefn) {
-    // Only register the record defn it hasn't already been registered.
+    // Only register the record defn if it hasn't already been registered.
     if (!this.registeredRecordDefns.contains(recDefn)) {
       this.registeredRecordDefns.add(recDefn);
       this.recordMap.put(recDefn.RECNAME,
           new PTRecordTypeConstraint().alloc(this, recDefn));
+    }
+  }
+
+  // Used to register record defns that have an asscoiated buffer
+  // (i.e., for records in the component buffer).
+  public void registerRecordDefn(final RecordBuffer recBuffer) {
+
+    final Record recDefn = recBuffer.getRecDefn();
+
+    // Only register the record defn if it hasn't already been registered.
+    if (!this.registeredRecordDefns.contains(recDefn)) {
+      this.registeredRecordDefns.add(recDefn);
+      this.recordMap.put(recDefn.RECNAME,
+          new PTRecordTypeConstraint().alloc(this, recBuffer));
     }
   }
 
@@ -109,6 +125,27 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().fireEvent(event);
     }
+  }
+
+  public boolean runFieldDefaultProcessing() {
+
+    boolean wasFieldChangedAndBlankFieldSeen = false;
+
+    // Run field default processing on each record in this row.
+    for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
+      wasFieldChangedAndBlankFieldSeen =
+          entry.getValue().runFieldDefaultProcessing()
+              || wasFieldChangedAndBlankFieldSeen;
+    }
+
+    // Run field default processing on each rowset in this row.
+    for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
+      wasFieldChangedAndBlankFieldSeen =
+          entry.getValue().runFieldDefaultProcessing()
+              || wasFieldChangedAndBlankFieldSeen;
+    }
+
+    return wasFieldChangedAndBlankFieldSeen;
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {
@@ -159,7 +196,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
      */
     for (final RecordBuffer recBuf
         : this.parentRowset.getCBufferScrollDefn().getOrderedRecBuffers()) {
-      final RecordFieldBuffer rfBuf = recBuf.getRecordFieldBufferFromTable(fieldName);
+      final RecordFieldBuffer rfBuf = recBuf.getRecordFieldBuffer(fieldName);
 
       if (rfBuf != null && rfBuf.getRecFldDefn().isKey()) {
         return this.recordMap.get(rfBuf.getRecDefn().RECNAME)

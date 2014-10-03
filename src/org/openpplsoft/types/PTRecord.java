@@ -41,6 +41,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
   private PTRow parentRow;
   private Record recDefn;
+  private RecordBuffer recBuffer;
   private Map<String, PTImmutableReference<PTField>> fieldRefs;
   private Map<Integer, PTImmutableReference<PTField>> fieldRefIdxTable;
 
@@ -71,27 +72,47 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  /**
-   * Creates a new record object that is attached
-   * to a record defn; can only be called by local methods.
-   * @param r the record defn to attach
-   */
-  public PTRecord(PTRecordTypeConstraint origTc, final PTRow pRow, final Record r) {
+  public PTRecord(final PTRecordTypeConstraint origTc,
+      final PTRow pRow, final Record r) {
     super(origTc);
     this.parentRow = pRow;
     this.recDefn = r;
+    this.init();
+  }
 
+  public PTRecord(final PTRecordTypeConstraint origTc,
+      final PTRow pRow, final RecordBuffer recBuffer) {
+    super(origTc);
+    this.parentRow = pRow;
+    this.recDefn = recBuffer.getRecDefn();
+    this.recBuffer = recBuffer;
+    this.init();
+  }
+
+  private void init() {
     // this map is linked in order to preserve
     // the order in which fields are added.
     this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTField>>();
-    this.fieldRefIdxTable = new LinkedHashMap<Integer, PTImmutableReference<PTField>>();
+    this.fieldRefIdxTable =
+        new LinkedHashMap<Integer, PTImmutableReference<PTField>>();
     int i = 1;
-    for (RecordField rf : this.recDefn.getExpandedFieldList()) {
+    for (final RecordField rf : this.recDefn.getExpandedFieldList()) {
       PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();
 
       try {
-        final PTImmutableReference<PTField> newFldRef
+        PTImmutableReference<PTField> newFldRef = null;
+
+        // If this record field has a buffer associated with it, allocate the
+        // field with that to give the field a reference to that buffer.
+        if (this.recBuffer != null
+            && this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
+          newFldRef
+            = new PTImmutableReference<PTField>(fldTc,
+                fldTc.alloc(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
+        } else {
+          newFldRef
             = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(this, rf));
+        }
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);
       } catch (final OPSTypeCheckException opstce) {
@@ -121,6 +142,21 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
     }
+  }
+
+  public boolean runFieldDefaultProcessing() {
+
+    boolean wasFieldChangedAndBlankFieldSeen = false;
+
+    // Fire event on each field in this record.
+    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+        : this.fieldRefs.entrySet()) {
+      wasFieldChangedAndBlankFieldSeen =
+          entry.getValue().deref().runFieldDefaultProcessing()
+              || wasFieldChangedAndBlankFieldSeen;
+    }
+
+    return wasFieldChangedAndBlankFieldSeen;
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {

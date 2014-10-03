@@ -82,6 +82,22 @@ public final class ComponentBuffer {
     }
   }
 
+  /**
+   * Component-level default processing invokes field default processing
+   * on all fields (only those with a RecordField buffer will actually execute
+   * processing).
+   */
+  public static void runDefaultProcessing() {
+
+    // First, run field level default processing on all fields
+    // (call on level 0 rowset b/c search record does not get processed).
+    boolean wasFieldChangedAndBlankFieldSeen =
+        getLevelZeroRowset().runFieldDefaultProcessing();
+
+    throw new OPSVMachRuntimeException("TODO: Run FieldFormula.");
+
+  }
+
   public static void materialize() {
     cBuffer.registerChildScrollDefn(lvlZeroScrollBuffer);
   }

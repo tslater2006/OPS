@@ -88,10 +88,9 @@ public final class Main {
 
       ComponentBuffer.firstPassFill();
       ComponentBuffer.fireEvent(PCEvent.PRE_BUILD);
+      ComponentBuffer.runDefaultProcessing();
 
-      // TEMPORARY
-//      ComponentBuffer.printContents();
-//      c.runDefaultProcessing();
+      //ComponentBuffer.printContents();
 
       TraceFileVerifier.logVerificationSummary(false);
 

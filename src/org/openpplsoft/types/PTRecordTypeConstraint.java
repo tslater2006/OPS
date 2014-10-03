@@ -7,6 +7,7 @@
 
 package org.openpplsoft.types;
 
+import org.openpplsoft.buffers.RecordBuffer;
 import org.openpplsoft.pt.Record;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,19 +27,14 @@ public class PTRecordTypeConstraint extends PTTypeConstraint<PTRecord> {
     throw new OPSDataTypeException("Call to alloc() PTRecord without args is illegal.");
   }
 
- /**
-  * Allocates a new record object with an attached record defn.
-  * Allocated records must have an associated record defn in order
-  * to determine the type of the value enclosed within them. However, this
-  * defn is not part of the type itself; a Record variable can be assigned
-  * any Record object, regardless of its underlying record defn (this is why
-  * the typeCheck and equals/hashCode methods are not overriden by this class,
-  * there's no need to do so).
-  * @param recDefn the record defn to attach
-  * @return the newly allocated record object
-  */
+  // Used to allocate records without an associated buffer in the component.
   public PTRecord alloc(final PTRow parentRow, final Record recDefn) {
     return new PTRecord(this, parentRow, recDefn);
+  }
+
+  // Used to allocate records with an associated buffer in the component.
+  public PTRecord alloc(final PTRow parentRow, final RecordBuffer recBuffer) {
+    return new PTRecord(this, parentRow, recBuffer);
   }
 
   @Override

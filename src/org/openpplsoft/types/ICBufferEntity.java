@@ -14,4 +14,5 @@ public interface ICBufferEntity {
   PTType resolveContextualCBufferReference(final String identifier);
   PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException;
+  boolean runFieldDefaultProcessing();
 }

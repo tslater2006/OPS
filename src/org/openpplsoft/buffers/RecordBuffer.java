@@ -35,6 +35,7 @@ public class RecordBuffer implements IStreamableBuffer {
 
   private ScrollBuffer sbuf;
   private String recName;
+  private Record recDefn;
   private int scrollLevel;
   private boolean isPrimaryScrollRecordBuffer, hasBeenExpanded;
   private Map<String, RecordFieldBuffer> fieldBufferTable;
@@ -72,8 +73,8 @@ public class RecordBuffer implements IStreamableBuffer {
      * This may even need to be broader than EFFDT; i.e., if any level-0
      * record contains keys, add them now.
      */
-    final Record recDefn = DefnCache.getRecord(this.recName);
-    final RecordField EFFDT = recDefn.fieldTable.get("EFFDT");
+    this.recDefn = DefnCache.getRecord(this.recName);
+    final RecordField EFFDT = this.recDefn.fieldTable.get("EFFDT");
     if (EFFDT != null && EFFDT.isKey()) {
       this.addPageField(this.recName, "EFFDT");
     }
@@ -87,6 +88,10 @@ public class RecordBuffer implements IStreamableBuffer {
     return this.recName;
   }
 
+  public Record getRecDefn() {
+    return this.recDefn;
+  }
+
   /**
    * Get the scroll level at which this record buffer exists.
    * @return the scroll level at which this record buffer exists
@@ -95,9 +100,14 @@ public class RecordBuffer implements IStreamableBuffer {
     return this.scrollLevel;
   }
 
-  public RecordFieldBuffer getRecordFieldBufferFromTable(final String fldname) {
-    return this.fieldBufferTable.get(fldname);
+  public RecordFieldBuffer getRecordFieldBuffer(final String fieldname) {
+    return this.fieldBufferTable.get(fieldname);
   }
+
+  public boolean hasRecordFieldBuffer(final String fieldName) {
+    return this.fieldBufferTable.containsKey(fieldName);
+  }
+
 
   /**
    * Get whether or not this record buffer is the primary

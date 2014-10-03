@@ -124,6 +124,12 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
 
+    // FieldFormula event fires only on records and record fields with an
+    // associated buffer in the component.
+    if (event == PCEvent.FIELD_FORMULA && this.recBuffer == null) {
+      return;
+    }
+
     // Fire event on each field in this record.
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {

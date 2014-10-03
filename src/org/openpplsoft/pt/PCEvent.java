@@ -10,7 +10,8 @@ package org.openpplsoft.pt;
 public enum PCEvent {
   SEARCH_INIT("SearchInit"),
   PRE_BUILD("PreBuild"),
-  FIELD_DEFAULT("FieldDefault");
+  FIELD_DEFAULT("FieldDefault"),
+  FIELD_FORMULA("FieldFormula");
 
   private String name;
 

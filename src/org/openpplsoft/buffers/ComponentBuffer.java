@@ -91,13 +91,29 @@ public final class ComponentBuffer {
    */
   public static void runDefaultProcessing() {
 
+    FieldDefaultProcSummary fldDefProcSummary = null;
+
     // First, run field level default processing on all fields
     // (call on level 0 rowset b/c search record does not get processed).
-    final FieldDefaultProcSummary fldDefProcSummary = new FieldDefaultProcSummary();
-    getLevelZeroRowset().runFieldDefaultProcessing(fldDefProcSummary);
+    do {
+      fldDefProcSummary = new FieldDefaultProcSummary();
+      getLevelZeroRowset().runFieldDefaultProcessing(fldDefProcSummary);
+    } while (fldDefProcSummary.doContinueDefProc());
 
-    throw new OPSVMachRuntimeException("TODO: Run FieldFormula.");
+    // Next, run FieldFormula programs (should be few, if any, since Oracle
+    // has advised that no one use this event except to define external
+    // function libraries).
+    final FireEventSummary fieldFormulaSummary = new FireEventSummary();
+    fireEvent(PCEvent.FIELD_FORMULA, fieldFormulaSummary);
 
+    // Next, if any FieldFormula programs were just run, run
+    // another round of default processing.
+    if (fieldFormulaSummary.getNumEventProgsExecuted() > 0) {
+      do {
+        fldDefProcSummary = new FieldDefaultProcSummary();
+        getLevelZeroRowset().runFieldDefaultProcessing(fldDefProcSummary);
+      } while (fldDefProcSummary.doContinueDefProc());
+    }
   }
 
   public static void materialize() {

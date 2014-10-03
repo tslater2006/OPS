@@ -429,10 +429,11 @@ public final class StmtLibrary {
   /**
    * @param defaultRecDefn the record defn named in DEFRECNAME for the record
    * field with the default value
-   * @param recFldBuf the buffer for the record field being defaulted
+   * @param fieldBeingDefaulted the field being defaulted
    */
   public static OPSStmt generateNonConstantFieldDefaultQuery(
-        final Record defaultRecDefn, final RecordFieldBuffer recFldBuf) {
+        final Record defaultRecDefn, final PTField fieldBeingDefaulted)
+            throws OPSCBufferKeyLookupException {
 
     final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
         defaultRecDefn, "");
@@ -451,22 +452,16 @@ public final class StmtLibrary {
     int i = 0;
     for (RecordField rf : rfList) {
       if (rf.isKey()) {
-        throw new OPSVMachRuntimeException("TODO: Add logic back to get key value, "
-            + "this time with newly implemented buffer context methods.");
-/*        final String keyValue = (String) recFldBuf.getParentRecordBuffer()
-            .getParentScrollBuffer().getKeyValueFromHierarchy(rf.FIELDNAME).read();
 
-        if (keyValue == null) {
-          throw new OPSVMachRuntimeException("Failed to generate non constant "
-              + "field default query; a value for a key on the record could "
-              + "not be found in the component buffer.");
-        } else {
-          if (i == 0) { query.append(" WHERE "); }
-          if (i > 0) { query.append(" AND "); }
-          query.append(rf.FIELDNAME).append("=?");
-          bindVals.add(keyValue);
-          i++;
-        }*/
+        final String keyValue =
+              fieldBeingDefaulted.getParentRecord()
+                  .findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
+
+        if (i == 0) { query.append(" WHERE "); }
+        if (i > 0) { query.append(" AND "); }
+        query.append(rf.FIELDNAME).append("=?");
+        bindVals.add(keyValue);
+        i++;
       }
     }
 

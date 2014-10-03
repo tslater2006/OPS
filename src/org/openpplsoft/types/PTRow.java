@@ -153,7 +153,6 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
 
   public PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException {
-    log.debug("{}, {}", this.parentRowset, this.parentRowset.getCBufferScrollDefn());
 
     if (this.parentRowset == null) {
       throw new OPSCBufferKeyLookupException("Row's parent is null; "

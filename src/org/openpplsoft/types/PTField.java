@@ -106,6 +106,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  public PTRecord getParentRecord() {
+    return this.parentRecord;
+  }
+
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
 
@@ -145,9 +149,21 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       final String defRecName = this.recFieldDefn.DEFRECNAME;
       final String defFldName = this.recFieldDefn.DEFFIELDNAME;
       final Record defRecDefn = DefnCache.getRecord(defRecName);
-      final OPSStmt ostmt =
-          StmtLibrary.generateNonConstantFieldDefaultQuery(
-              defRecDefn, this.recFieldBuffer);
+
+      OPSStmt ostmt = null;
+      try {
+        ostmt =
+            StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, this);
+      } catch (final OPSCBufferKeyLookupException opscbkle) {
+        log.warn("Failed to generate non constant "
+            + "field default query for field: " + this.recFieldDefn.FIELDNAME
+            + "; a value for a key on the record could "
+            + "not be found in the component buffer. This is not an error, "
+            + "just a warning that the field can't be defaulted at this time, "
+            + "but may be defaulted on a future field def proc run if the key "
+            + "is available at that time.");
+        return;
+      }
 
       log.debug("Querying {}.{} for default value for field {}.{}",
           defRecName, defFldName,
@@ -247,10 +263,18 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public PTPrimitiveType findValueForKeyInCBufferContext(
       final String fieldName) throws OPSCBufferKeyLookupException {
-    throw new OPSVMachRuntimeException("Did not expect key lookup call on PTField; "
-        + "if possible, this call should be made on the parent record, rather than "
-        + "implemented here, altho doing so would just pass the request up "
-        + "to the parent record.");
+    throw new OPSVMachRuntimeException("Illegal call to find value for key "
+        + "on PTField; you must call the overloaded version of this method that "
+        + "lacks arguments.");
+  }
+
+  public PTPrimitiveType findValueForKeyInCBufferContext()
+      throws OPSCBufferKeyLookupException {
+    if (this.parentRecord != null) {
+      return this.parentRecord.findValueForKeyInCBufferContext(
+          this.recFieldDefn.FIELDNAME);
+    }
+    return null;
   }
 
   public void setDefault() {

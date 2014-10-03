@@ -453,6 +453,8 @@ public final class StmtLibrary {
     for (RecordField rf : rfList) {
       if (rf.isKey()) {
 
+        log.debug("Looking up key for {}.{}", defaultRecDefn.RECNAME,
+            rf.FIELDNAME);
         final String keyValue =
               fieldBeingDefaulted.getParentRecord()
                   .findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();

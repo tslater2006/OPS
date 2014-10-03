@@ -169,9 +169,10 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
             ComponentBuffer.getComponentDefn().getSearchRecordName());
 
         if (searchRecord.hasField(fieldName)) {
-          final PTField fld = searchRecord.getFieldRef(fieldName).deref();
-          if (fld.getRecordFieldDefn().isKey()) {
-            return fld.getValue();
+          final PTPrimitiveType fldValue =
+              searchRecord.getFieldRef(fieldName).deref().getValue();
+          if (fldValue.isMarkedAsUpdated()) {
+            return fldValue;
           }
         }
 
@@ -191,9 +192,15 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
         : this.parentRowset.getCBufferScrollDefn().getOrderedRecBuffers()) {
       final RecordFieldBuffer rfBuf = recBuf.getRecordFieldBuffer(fieldName);
 
-      if (rfBuf != null && rfBuf.getRecFldDefn().isKey()) {
-        return this.recordMap.get(rfBuf.getRecDefn().RECNAME)
-            .getFieldRef(rfBuf.getRecFldDefn().FIELDNAME).deref().getValue();
+      if (rfBuf != null) {
+        final PTField fld = this.recordMap.get(
+            rfBuf.getRecDefn().RECNAME).getFieldRef(rfBuf.getRecFldDefn()
+                .FIELDNAME).deref();
+        final PTPrimitiveType fldValue = fld.getValue();
+        log.debug("Found potential key match: {}", fld);
+        if (fldValue.isMarkedAsUpdated()) {
+          return fldValue;
+        }
       }
     }
 

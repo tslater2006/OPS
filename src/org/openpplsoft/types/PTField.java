@@ -122,8 +122,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     // If this field is not in the component buffer (meaning it is not a field listed
     // in the component buffer structure), do not run field default proc on it.
     if (this.recFieldBuffer == null) {
-      log.debug("Skipping FldDefProc: {}.{}",
-          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+//      log.debug("Skipping FldDefProc: {}.{}",
+//          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
       return;
     }
 
@@ -150,6 +150,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
         this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+    boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
 
     if (this.recFieldDefn.hasDefaultNonConstantValue()) {
       final String defRecName = this.recFieldDefn.DEFRECNAME;
@@ -163,7 +164,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       } catch (final OPSCBufferKeyLookupException opscbkle) {
         log.warn("Failed to generate non constant "
             + "field default query for field: " + this.recFieldDefn.FIELDNAME
-            + "; a value for a key on the record could "
+            + "; a value for a key on the default record (" + defRecName + ") could "
             + "not be found in the component buffer. This is not an error, "
             + "just a warning that the field can't be defaulted at this time, "
             + "but may be defaulted on a future field def proc run if the key "
@@ -251,10 +252,9 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
      * it may not have actually changed the field's value. If it did, an emission
      * must be made indicating as much.
      */
-    if (this.getValue().isMarkedAsUpdated()) {
+    if (!preFldDefProcIsMarkedAsUpdated && this.getValue().isMarkedAsUpdated()) {
       fldDefProcSummary.fieldWasChanged();
       TraceFileVerifier.submitEnforcedEmission(fdEmission);
-      this.getValue().clearUpdatedFlag();
     } else if (this.getValue().isBlank()) {
       fldDefProcSummary.blankFieldWasSeen();
     }

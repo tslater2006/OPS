@@ -121,12 +121,13 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public void fireEvent(final PCEvent event) {
+  public void fireEvent(final PCEvent event,
+      final FireEventSummary fireEventSummary) {
 
     // Fire event on each field in this record.
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
-      entry.getValue().deref().fireEvent(event);
+      entry.getValue().deref().fireEvent(event, fireEventSummary);
     }
 
     /*
@@ -141,22 +142,18 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
       // Pass this record to the supervisor as the component buffer context.
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
+      fireEventSummary.incrementNumEventProgsExecuted();
     }
   }
 
-  public boolean runFieldDefaultProcessing() {
-
-    boolean wasFieldChangedAndBlankFieldSeen = false;
+  public void runFieldDefaultProcessing(
+      final FieldDefaultProcSummary fldDefProcSummary) {
 
     // Fire event on each field in this record.
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
-      wasFieldChangedAndBlankFieldSeen =
-          entry.getValue().deref().runFieldDefaultProcessing()
-              || wasFieldChangedAndBlankFieldSeen;
+      entry.getValue().deref().runFieldDefaultProcessing(fldDefProcSummary);
     }
-
-    return wasFieldChangedAndBlankFieldSeen;
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {

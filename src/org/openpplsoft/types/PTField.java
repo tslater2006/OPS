@@ -8,14 +8,22 @@
 package org.openpplsoft.types;
 
 import java.lang.reflect.Method;
+import java.util.*;
+import java.sql.*;
 
+import org.openpplsoft.runtime.*;
 import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
+import org.openpplsoft.sql.*;
+import org.openpplsoft.trace.*;
 import org.openpplsoft.pt.peoplecode.*;
-import java.util.*;
-import org.openpplsoft.runtime.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class PTField extends PTObjectType implements ICBufferEntity {
+
+  private static Logger log = LogManager.getLogger(PTField.class.getName());
 
   private static Map<String, Method> ptMethodTable;
 
@@ -73,7 +81,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public void fireEvent(final PCEvent event) {
+  public void fireEvent(final PCEvent event,
+      final FireEventSummary fireEventSummary) {
 
     // If a Record PeopleCode program has been written for this event, run it now.
     final PeopleCodeProg recProg = this.recFieldDefn.getProgramForEvent(event);
@@ -82,6 +91,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       // Pass this field to the supervisor as the component buffer context.
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
+      fireEventSummary.incrementNumEventProgsExecuted();
     }
 
     // If a Component PeopleCode program has been written for this event, run it now.
@@ -92,13 +102,140 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       // Pass this field to the supervisor as the component buffer context.
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
+      fireEventSummary.incrementNumEventProgsExecuted();
     }
   }
 
-  public boolean runFieldDefaultProcessing() {
+  public void runFieldDefaultProcessing(
+      final FieldDefaultProcSummary fldDefProcSummary) {
 
-    throw new OPSVMachRuntimeException("TODO: Run def proc on field.");
+    // If this field is not in the component buffer (meaning it is not a field listed
+    // in the component buffer structure), do not run field default proc on it.
+    if (this.recFieldBuffer == null) {
+      log.debug("Skipping FldDefProc: {}.{}",
+          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      return;
+    }
 
+    log.debug("Running FldDefProc: {}.{}",
+          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+
+    // If field is not blank, no need to run field default proc on it.
+    if (!this.getValue().isBlank()) {
+      log.debug("Ignorning non-blank field during FldDefProc: {}.{}",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      return;
+    }
+
+    // If field is a key, its value will be based on the keys defined on
+    // fields in higher scroll levels, so don't perform field default processing.
+    // NOTE: I am making an exception here for EFFDT, I don't know at this time
+    // whether this is accurate and/or complete.
+    // TODO(mquinn): Keep this in mind.
+    if(this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
+      log.debug("Ignoring key field during FldDefProc: {}.{}",
+          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      return;
+    }
+
+    final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
+        this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+
+    if (this.recFieldDefn.hasDefaultNonConstantValue()) {
+      final String defRecName = this.recFieldDefn.DEFRECNAME;
+      final String defFldName = this.recFieldDefn.DEFFIELDNAME;
+      final Record defRecDefn = DefnCache.getRecord(defRecName);
+      final OPSStmt ostmt =
+          StmtLibrary.generateNonConstantFieldDefaultQuery(
+              defRecDefn, this.recFieldBuffer);
+
+      log.debug("Querying {}.{} for default value for field {}.{}",
+          defRecName, defFldName,
+              this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+
+      ResultSet rs = null;
+      try {
+        rs = ostmt.executeQuery();
+        /*
+         * Keep in mind that zero records may legitimately be returned here,
+         * in which case the field will remain blank.
+         */
+        if (rs.next()) {
+          log.debug("Will default to: {}", rs.getString(defFldName));
+          throw new OPSVMachRuntimeException("TODO: This code has not been "
+              + "run yet for a field that actually generates a record from "
+              + "which to default (queries so far have returned 0 records; "
+              + "need to read *defFldName* from resultset and write that to "
+              + "the field. ALSO REMEMBER TO UNCOMMENT THE CODE BELOW.");
+  /*           if (rs.next()) {
+                throw new OPSVMachRuntimeException(
+                  "Result set for default non constant field default query "
+                    + "returned multiple records; only expected one.");
+                  }*/
+        }
+      } catch (final java.sql.SQLException sqle) {
+        throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+      } finally {
+        try {
+          if (rs != null) { rs.close(); }
+          if (ostmt != null) { ostmt.close(); }
+        } catch (final java.sql.SQLException sqle) {
+          log.warn("Unable to close rs and/or ostmt in finally block.");
+        }
+      }
+    } else if (this.recFieldDefn.hasDefaultConstantValue()) {
+      final String defValue = this.recFieldDefn.DEFFIELDNAME;
+      final PTPrimitiveType fldValue = this.getValue();
+
+      // First check if the value is actually a meta value (i.e., "%date")
+      if (defValue.startsWith("%")) {
+        if (defValue.equals("%date") && fldValue instanceof PTDateTime) {
+          ((PTDateTime) fldValue).writeSYSDATE();
+          fdEmission.setMetaValue(defValue);
+        } else if (defValue.equals("%date") && fldValue instanceof PTDate) {
+          ((PTDate) fldValue).writeSYSDATE();
+          fdEmission.setMetaValue(defValue);
+        } else {
+          throw new OPSVMachRuntimeException("Unexpected defValue (" + defValue + ") "
+              + "and field (" + fldValue + ") combination.");
+        }
+      // If not a meta value, interpret the value as a raw constant (i.e., "Y" or "9999").
+      } else {
+        if (fldValue instanceof PTString) {
+          ((PTString) fldValue).write(defValue);
+        } else if (fldValue instanceof PTChar && defValue.length() == 1) {
+          ((PTChar) fldValue).write(defValue.charAt(0));
+        } else {
+          throw new OPSVMachRuntimeException("Expected PTString or PTChar for "
+            + "field value while attempting to write field default: " + defValue);
+        }
+      }
+
+      fdEmission.setDefaultedValue(fldValue.readAsString());
+      fdEmission.setConstantFlag();
+    } else {
+      // fireEvent() returns true if prog was run, false otherwise.
+      final FireEventSummary summary = new FireEventSummary();
+      this.fireEvent(PCEvent.FIELD_DEFAULT, summary);
+      if(summary.getNumEventProgsExecuted() > 0) {
+        fdEmission.setDefaultedValue("from peoplecode");
+      } else {
+        return;
+      }
+    }
+
+    /*
+     * At this point, some form of field default processing was executed, but
+     * it may not have actually changed the field's value. If it did, an emission
+     * must be made indicating as much.
+     */
+    if (this.getValue().isMarkedAsUpdated()) {
+      fldDefProcSummary.fieldWasChanged();
+      TraceFileVerifier.submitEnforcedEmission(fdEmission);
+      this.getValue().clearUpdatedFlag();
+    } else if (this.getValue().isBlank()) {
+      fldDefProcSummary.blankFieldWasSeen();
+    }
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {

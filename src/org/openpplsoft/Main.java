@@ -78,7 +78,7 @@ public final class Main {
           (String) Environment.getSystemVar("%Menu").read());
 
       ComponentBuffer.init(c);
-      ComponentBuffer.fireEvent(PCEvent.SEARCH_INIT);
+      ComponentBuffer.fireEvent(PCEvent.SEARCH_INIT, new FireEventSummary());
       ComponentBuffer.fillSearchRecord();
 
       ComponentBuffer.assembleStructure();
@@ -87,7 +87,7 @@ public final class Main {
       ComponentBuffer.materialize();
 
       ComponentBuffer.firstPassFill();
-      ComponentBuffer.fireEvent(PCEvent.PRE_BUILD);
+      ComponentBuffer.fireEvent(PCEvent.PRE_BUILD, new FireEventSummary());
       ComponentBuffer.runDefaultProcessing();
 
       //ComponentBuffer.printContents();

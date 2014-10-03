@@ -5,20 +5,20 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package org.openpplsoft.pt;
+package org.openpplsoft.runtime;
 
-public enum PCEvent {
-  SEARCH_INIT("SearchInit"),
-  PRE_BUILD("PreBuild"),
-  FIELD_DEFAULT("FieldDefault");
+public class FireEventSummary {
 
-  private String name;
+  private int numEventProgsExecuted = 0;
 
-  private PCEvent(final String n) {
-    this.name = n;
+  public FireEventSummary() {}
+
+  public void incrementNumEventProgsExecuted() {
+    this.numEventProgsExecuted++;
   }
 
-  public String getName() {
-    return this.name;
+  public int getNumEventProgsExecuted() {
+    return this.numEventProgsExecuted;
   }
 }
+

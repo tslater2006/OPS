@@ -114,38 +114,32 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public void fireEvent(final PCEvent event) {
+  public void fireEvent(final PCEvent event,
+      final FireEventSummary fireEventSummary) {
 
     // Fire event on each record in this row.
     for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
-      entry.getValue().fireEvent(event);
+      entry.getValue().fireEvent(event, fireEventSummary);
     }
 
     // Fire event on each rowset in this row.
     for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
-      entry.getValue().fireEvent(event);
+      entry.getValue().fireEvent(event, fireEventSummary);
     }
   }
 
-  public boolean runFieldDefaultProcessing() {
-
-    boolean wasFieldChangedAndBlankFieldSeen = false;
+  public void runFieldDefaultProcessing(
+      final FieldDefaultProcSummary fldDefProcSummary) {
 
     // Run field default processing on each record in this row.
     for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
-      wasFieldChangedAndBlankFieldSeen =
-          entry.getValue().runFieldDefaultProcessing()
-              || wasFieldChangedAndBlankFieldSeen;
+      entry.getValue().runFieldDefaultProcessing(fldDefProcSummary);
     }
 
     // Run field default processing on each rowset in this row.
     for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
-      wasFieldChangedAndBlankFieldSeen =
-          entry.getValue().runFieldDefaultProcessing()
-              || wasFieldChangedAndBlankFieldSeen;
+      entry.getValue().runFieldDefaultProcessing(fldDefProcSummary);
     }
-
-    return wasFieldChangedAndBlankFieldSeen;
   }
 
   public PTType resolveContextualCBufferReference(final String identifier) {

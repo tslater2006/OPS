@@ -130,9 +130,10 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public void fireEvent(final PCEvent event) {
+  public void fireEvent(final PCEvent event,
+      final FireEventSummary fireEventSummary) {
     for (final PTRow row : this.rows) {
-      row.fireEvent(event);
+      row.fireEvent(event, fireEventSummary);
     }
   }
 
@@ -143,13 +144,11 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
-  public boolean runFieldDefaultProcessing() {
-    boolean wasFieldChangedAndBlankFieldSeen = false;
+  public void runFieldDefaultProcessing(
+      final FieldDefaultProcSummary fldDefProcSummary) {
     for (final PTRow row : this.rows) {
-      wasFieldChangedAndBlankFieldSeen =
-          row.runFieldDefaultProcessing() || wasFieldChangedAndBlankFieldSeen;
+      row.runFieldDefaultProcessing(fldDefProcSummary);
     }
-    return wasFieldChangedAndBlankFieldSeen;
   }
 
   public ScrollBuffer getCBufferScrollDefn() {

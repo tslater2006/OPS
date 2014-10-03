@@ -61,7 +61,8 @@ public final class ComponentBuffer {
     compDefn.getListOfComponentPC();
   }
 
-  public static void fireEvent(final PCEvent event) {
+  public static void fireEvent(final PCEvent event,
+      final FireEventSummary fireEventSummary) {
 
     /*
      * If a Component PeopleCode program has been written for this component,
@@ -77,8 +78,9 @@ public final class ComponentBuffer {
       final InterpretSupervisor interpreter =
           new InterpretSupervisor(eCtx, getLevelZeroRowset().getRow(1));
       interpreter.run();
+      fireEventSummary.incrementNumEventProgsExecuted();
     } else {
-      cBuffer.fireEvent(event);
+      cBuffer.fireEvent(event,fireEventSummary);
     }
   }
 
@@ -91,8 +93,8 @@ public final class ComponentBuffer {
 
     // First, run field level default processing on all fields
     // (call on level 0 rowset b/c search record does not get processed).
-    boolean wasFieldChangedAndBlankFieldSeen =
-        getLevelZeroRowset().runFieldDefaultProcessing();
+    final FieldDefaultProcSummary fldDefProcSummary = new FieldDefaultProcSummary();
+    getLevelZeroRowset().runFieldDefaultProcessing(fldDefProcSummary);
 
     throw new OPSVMachRuntimeException("TODO: Run FieldFormula.");
 

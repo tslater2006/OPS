@@ -283,8 +283,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
-  public void setDefault() {
-    valueRef.deref().setDefault();
+  public void setBlank() {
+    valueRef.deref().setBlank();
   }
 
   public PTPrimitiveType getValue() {
@@ -313,14 +313,22 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   /**
-   * Implements the .SetDefault PeopleCode method for field objects.
+   * From PeopleBooks
+   * (http://docs.oracle.com/cd/E38689_01/pt853pbr0/eng/pt/tpcl/langref_PeopleCodeBuilt-inFunctionsandLanguageConstructs-073e6a.html#SetDefault-073c69)
+   * :
+   * "Use the SetDefault function to set a field to a null value,
+   * so that the next time default processing occurs, it is set
+   * to its default value"
+   * TODO(mquinn): THERE ARE CASES WHERE CALLING THIS METHOD WILL ABORT
+   * CONTINUED EXECUTION OF THE CALLING FUNCTION / PROGRAM; you must
+   * implement these cases in the future.
    */
   public void PT_SetDefault() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected no args.");
     }
-    this.setDefault();
+    this.setBlank();
   }
 
   /**

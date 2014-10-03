@@ -38,7 +38,7 @@ public final class PTTime extends PTPrimitiveType<String> {
   }
 
   @Override
-  public void setDefault() {
+  public void setBlank() {
     // default value is current time.
     this.value = new SimpleDateFormat("HH:mm:ss")
         .format(Calendar.getInstance().getTime());

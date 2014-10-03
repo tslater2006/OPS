@@ -24,6 +24,12 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
 
   public PTNumber(final BigDecimal initialVal) {
     super(numTc);
+
+    if (initialVal == null) {
+      throw new OPSVMachRuntimeException("Failed to initialize new PTNumber; "
+          + "initial value is null.");
+    }
+
     this.value = initialVal;
   }
 
@@ -46,7 +52,7 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     return this.value.intValueExact();
   }
 
-  public void setDefault() {
+  public void setBlank() {
     this.value = BigDecimal.ZERO;
   }
 

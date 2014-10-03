@@ -25,6 +25,12 @@ public final class PTInteger extends PTNumberType<Integer> {
 
   public PTInteger(final Integer initialVal) {
     super(intTc);
+
+    if (initialVal == null) {
+      throw new OPSVMachRuntimeException("Failed to initialize new PTInteger; "
+          + "initial value is null.");
+    }
+
     this.value = initialVal;
   }
 
@@ -36,7 +42,7 @@ public final class PTInteger extends PTNumberType<Integer> {
     return intTc;
   }
 
-  public void setDefault() {
+  public void setBlank() {
     this.value = 0;
   }
 

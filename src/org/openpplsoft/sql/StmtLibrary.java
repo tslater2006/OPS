@@ -436,7 +436,7 @@ public final class StmtLibrary {
             throws OPSCBufferKeyLookupException {
 
     final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
-        defaultRecDefn, "");
+        defaultRecDefn, "", true);
     final List<RecordField> rfList = defaultRecDefn.getExpandedFieldList();
 
     final StringBuilder query = new StringBuilder("SELECT ");
@@ -452,6 +452,11 @@ public final class StmtLibrary {
     int i = 0;
     for (RecordField rf : rfList) {
       if (rf.isKey()) {
+
+        // Don't include EFFSEQ in non constant queries.
+        if (rf.FIELDNAME.equals("EFFSEQ")) {
+          continue;
+        }
 
         if (i == 0) { query.append(" WHERE "); }
         if (i > 0) { query.append(" AND "); }
@@ -477,14 +482,21 @@ public final class StmtLibrary {
           try {
             keyValue = fieldBeingDefaulted.getParentRecord()
                 .findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
+            log.debug("Resolved field {} to {}.", rf.FIELDNAME, keyValue);
           } catch (final OPSCBufferKeyLookupException opscbkle) {
             if (rf.FIELDNAME.equals("EFFDT")) {
               keyValue = Environment.getSystemVar("%Date").readAsString();
+            } else {
+              throw opscbkle;
             }
           }
         }
 
-        query.append(rf.FIELDNAME).append("=?");
+        if (rf.FIELDNAME.equals("EFFDT")) {
+          query.append(rf.FIELDNAME).append("<=TO_DATE(?,'YYYY-MM-DD')");
+        } else {
+          query.append(rf.FIELDNAME).append("=?");
+        }
         bindVals.add(keyValue);
         i++;
       }
@@ -524,7 +536,7 @@ public final class StmtLibrary {
     final StringBuilder selectClause = new StringBuilder("SELECT ");
 
     final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
-        recDefn, dottedAlias);
+        recDefn, dottedAlias, false);
     for (int i = 0; i < aliasedFields.length; i++) {
       if (i > 0) { selectClause.append(","); }
       selectClause.append(aliasedFields[i]);
@@ -537,10 +549,10 @@ public final class StmtLibrary {
   }
 
   private static String[] getOptionallyAliasedFieldsToSelect(final Record recDefn,
-      final String dottedAlias) {
+      final String dottedAlias, final boolean includeRawAndToCharEffdt) {
 
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
-    final String[] aliasedFields = new String[rfList.size()];
+    final List<String> aliasedFields = new ArrayList<String>();
 
     for (int i = 0; i < rfList.size(); i++) {
       final String fieldname = rfList.get(i).FIELDNAME;
@@ -551,20 +563,26 @@ public final class StmtLibrary {
        */
       if (rfList.get(i).getTypeConstraintForUnderlyingValue()
           .isUnderlyingClassEqualTo(PTDate.class)) {
-        aliasedFields[i] = "TO_CHAR(" + dottedAlias
-            + fieldname + ",'YYYY-MM-DD')";
+
+        if (fieldname.equals("EFFDT") && includeRawAndToCharEffdt) {
+          aliasedFields.add(dottedAlias + fieldname);
+          aliasedFields.add("TO_CHAR(" + dottedAlias
+              + fieldname + ",'YYYY-MM-DD')");
+        } else {
+          aliasedFields.add("TO_CHAR(" + dottedAlias
+              + fieldname + ",'YYYY-MM-DD')");
+        }
 
       } else if (rfList.get(i).getTypeConstraintForUnderlyingValue()
           .isUnderlyingClassEqualTo(PTDateTime.class)) {
-        aliasedFields[i] = "TO_CHAR(CAST((" + dottedAlias + fieldname
-            + ") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')";
-
+        aliasedFields.add("TO_CHAR(CAST((" + dottedAlias + fieldname
+            + ") AS TIMESTAMP),'YYYY-MM-DD-HH24.MI.SS.FF')");
       } else {
-        aliasedFields[i] = dottedAlias + fieldname;
+        aliasedFields.add(dottedAlias + fieldname);
       }
     }
 
-    return aliasedFields;
+    return aliasedFields.toArray(new String[0]);
   }
 
   /**

@@ -34,16 +34,18 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
 
   public PTDateTime(final String initialValue) {
     super(dateTimeTc);
-    if (initialValue != null) {
-      try {
-        final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT1);
-        this.value = dtf.parseDateTime(initialValue);
-      } catch (final java.lang.IllegalArgumentException iae) {
-        final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT2);
-        this.value = dtf.parseDateTime(initialValue);
-      }
-    } else {
-      this.value = null;
+
+    if (initialValue == null) {
+      throw new OPSVMachRuntimeException("Failed to initialize new PTDateTime; "
+         + "initial value is null.");
+    }
+
+    try {
+      final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT1);
+      this.value = dtf.parseDateTime(initialValue);
+    } catch (final java.lang.IllegalArgumentException iae) {
+      final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT2);
+      this.value = dtf.parseDateTime(initialValue);
     }
   }
 
@@ -68,7 +70,7 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
     return dtf.print(this.value);
   }
 
-  public void setDefault() {
+  public void setBlank() {
     // In App Designer debugging, PT shows "<no value>" for newly created,
     // uninitialized date variables, so using a Java null to simulate.
     this.value = null;

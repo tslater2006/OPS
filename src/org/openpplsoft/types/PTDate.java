@@ -37,12 +37,18 @@ public final class PTDate extends PTPrimitiveType<Date> {
 
   public PTDate(final Date initialValue) {
     super(dateTc);
+
+    // Do not check for null before assigning; PTDate values use null for blank.
     this.value = initialValue;
   }
 
   public PTDate(final String initialValue) {
     super(dateTc);
-    if (initialValue != null) {
+
+    if (initialValue == null) {
+      // If the value provided is null, set the field value to null.
+      this.value = null;
+    } else {
       try {
         // A non-null string must match the PeopleSoft date format.
         final DateFormat df = new SimpleDateFormat(PS_DATE_FORMAT);
@@ -50,9 +56,6 @@ public final class PTDate extends PTPrimitiveType<Date> {
       } catch (final ParseException pe) {
         throw new OPSVMachRuntimeException(pe.getMessage(), pe);
       }
-    } else {
-      // Null is a legitimate value, as that represents a blank date.
-      this.value = null;
     }
   }
 
@@ -77,7 +80,7 @@ public final class PTDate extends PTPrimitiveType<Date> {
     this.write(((PTDate) src).read());
   }
 
-  public void setDefault() {
+  public void setBlank() {
     // In App Designer debugging, PT shows "<no value>" for newly created,
     // uninitialized date variables, so using a Java null to simulate.
     this.value = null;

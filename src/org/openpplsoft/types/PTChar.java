@@ -50,7 +50,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
   }
 
   @Override
-  public void setDefault() {
+  public void setBlank() {
     this.value = ' ';
   }
 

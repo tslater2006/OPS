@@ -22,6 +22,12 @@ public final class PTString extends PTPrimitiveType<String> {
 
   public PTString(final String initialVal) {
     super(stringTc);
+
+    if (initialVal == null) {
+      throw new OPSVMachRuntimeException("Failed to initialize new PTString; "
+          + "initial value is null.");
+    }
+
     this.value = initialVal;
   }
 
@@ -44,7 +50,7 @@ public final class PTString extends PTPrimitiveType<String> {
   }
 
   @Override
-  public void setDefault() {
+  public void setBlank() {
     this.value = " ";
   }
 

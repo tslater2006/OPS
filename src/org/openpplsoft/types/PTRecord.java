@@ -295,7 +295,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   public void setDefault() {
     for (Map.Entry<String, PTImmutableReference<PTField>> cursor
         : this.fieldRefs.entrySet()) {
-      cursor.getValue().deref().setDefault();
+      cursor.getValue().deref().setBlank();
     }
   }
 

@@ -19,6 +19,10 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
   public PTBoolean(final Boolean initialVal) {
     super(boolTc);
+    if (initialVal == null) {
+      throw new OPSVMachRuntimeException("Failed to initialize PTBoolean; "
+          + "initial value is null.");
+    }
     this.value = initialVal;
   }
 
@@ -30,7 +34,7 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     return boolTc;
   }
 
-  public void setDefault() {
+  public void setBlank() {
     this.value = false;
   }
 

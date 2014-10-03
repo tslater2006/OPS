@@ -136,7 +136,7 @@ public final class TraceFileVerifier {
    * @param opsEmission emission from OPS that should not be enforced
    */
   public static void submitUnenforcedEmission(final IEmission opsEmission) {
-    //log.debug(opsEmission);
+    log.debug(opsEmission);
     unenforcedEmissions.add(opsEmission);
   }
 
@@ -146,9 +146,9 @@ public final class TraceFileVerifier {
    * @param opsEmission emission from OPS that SHOULD be enforced
    */
   public static void submitEnforcedEmission(final IEmission opsEmission) {
-    if(!(opsEmission instanceof OPSStmt)) {
+//    if(!(opsEmission instanceof OPSStmt)) {
       log.debug(opsEmission);
-    }
+   // }
 
     IEmission traceEmission;
     if (coverageAreaStartLineNbr == 0) {

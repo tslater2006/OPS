@@ -189,28 +189,28 @@ public final class StmtLibrary {
 
         final PTPrimitiveType val = searchRec
             .getFieldRef(rf.FIELDNAME).deref().getValue();
-
-        /*
-         * If this is the OPRID field and it is blank
-         * in the search record, default it to the system var value.
-         * TODO(mquinn): If multiple fields require this kind of defaulting,
-         * abstract this into the underlying RecordField object.
-         */
-        if (val.isBlank() && rf.FIELDNAME.equals("OPRID")) {
-          // Write the value used into the OPRID field on the search record.
-          ((PTString) searchRec.getFieldRef(rf.FIELDNAME).deref()
-              .getValue()).systemWrite(
-                  (String) Environment.getSystemVar("%OperatorId").read());
-        }
-
         query.append(rf.FIELDNAME);
+
         if (rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
           query.append(" LIKE '").append((String) val.read()).append("%'");
         } else {
           query.append("=?");
-          bindVals.add((String) val.read());
-        }
 
+          /*
+           * If this is the OPRID field, PS automatically adds a WHERE clause
+           * to select only those records where OPRID equals %OperatorId if
+           * both of the following are true:
+           * 1) OPRID is a key on the record being queried
+           * 2) OPRID is NOT a list box item (meaning it doesn't appear in the
+           *    results shown to the user in the "list box" on the search page.
+           * If both of those are true, add the condition now.
+           */
+          if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
+            bindVals.add(Environment.getSystemVar("%OperatorId").readAsString());
+          } else {
+            bindVals.add((String) val.read());
+          }
+        }
         i++;
       }
     }
@@ -453,14 +453,37 @@ public final class StmtLibrary {
     for (RecordField rf : rfList) {
       if (rf.isKey()) {
 
-        log.debug("Looking up key for {}.{}", defaultRecDefn.RECNAME,
-            rf.FIELDNAME);
-        final String keyValue =
-              fieldBeingDefaulted.getParentRecord()
-                  .findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
-
         if (i == 0) { query.append(" WHERE "); }
         if (i > 0) { query.append(" AND "); }
+
+        log.debug("Looking up key for {}.{}", defaultRecDefn.RECNAME,
+            rf.FIELDNAME);
+
+        String keyValue = null;
+
+        /*
+         * If this is the OPRID field, PS automatically adds a WHERE clause
+         * to select only those records where OPRID equals %OperatorId if
+         * both of the following are true:
+         * 1) OPRID is a key on the record being queried
+         * 2) OPRID is NOT a list box item (meaning it doesn't appear in the
+         *    results shown to the user in the "list box" on the search page.
+         * If both of those are true, add the condition now.
+         */
+        if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
+          keyValue = Environment.getSystemVar("%OperatorId").readAsString();
+          log.debug("Using %OperatorId for OPRID field.");
+        } else {
+          try {
+            keyValue = fieldBeingDefaulted.getParentRecord()
+                .findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
+          } catch (final OPSCBufferKeyLookupException opscbkle) {
+            if (rf.FIELDNAME.equals("EFFDT")) {
+              keyValue = Environment.getSystemVar("%Date").readAsString();
+            }
+          }
+        }
+
         query.append(rf.FIELDNAME).append("=?");
         bindVals.add(keyValue);
         i++;
@@ -648,16 +671,29 @@ public final class StmtLibrary {
       if (rf.isKey()) {
 
         String val = null;
-        try {
-          val = record.findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
-        } catch (final OPSCBufferKeyLookupException opscbkle) {
-          // If key value cannot be resolved, do not include it (see logic above).
-          continue;
+
+        /*
+         * If this is the OPRID field, PS automatically adds a WHERE clause
+         * to select only those records where OPRID equals %OperatorId if
+         * both of the following are true:
+         * 1) OPRID is a key on the record being queried
+         * 2) OPRID is NOT a list box item (meaning it doesn't appear in the
+         *    results shown to the user in the "list box" on the search page.
+         * If both of those are true, add the condition now.
+         */
+        if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
+          val = Environment.getSystemVar("%OperatorId").readAsString();
+        } else {
+          try {
+            val = record.findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
+          } catch (final OPSCBufferKeyLookupException opscbkle) {
+            // If key value cannot be resolved, do not include it (see logic above).
+            continue;
+          }
         }
 
         if (i == 0) { query.append(" WHERE "); }
         if (i > 0) { query.append(" AND "); }
-
         query.append(rf.FIELDNAME).append("=?");
         bindVals.add(val);
         i++;

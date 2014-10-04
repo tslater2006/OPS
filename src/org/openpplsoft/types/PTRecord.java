@@ -229,27 +229,17 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
    * will be searched within the two rows that make up the buffer context hierarchy
    * leading to the row that this record is in.
    */
-  public PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName, final boolean mustValBeKey)
-          throws OPSCBufferKeyLookupException {
+  public void generateKeylist(
+      final String fieldName, final List<PTField> keylist) {
 
-    if (this.parentRow == null) {
-      throw new OPSCBufferKeyLookupException("PTRecord's parent row is null; "
-          + "cannot continue key lookup.");
+    if (this.parentRow == null
+        || this.parentRow.getParentRowset() == null
+        || this.parentRow.getParentRowset().getParentRow() == null) {
+      return;
     }
 
-    if (this.parentRow.getParentRowset() == null) {
-      throw new OPSCBufferKeyLookupException("PTRecord's parent row's parent "
-          + "rowset is null; cannot continue key lookup.");
-    }
-
-    if (this.parentRow.getParentRowset().getParentRow() == null) {
-      throw new OPSCBufferKeyLookupException("PTRecord's parent row's parent "
-          + "rowset's parent row is null; cannot continue key lookup.");
-    }
-
-    return this.parentRow.getParentRowset().getParentRow()
-          .findValueForKeyInCBufferContext(fieldName, mustValBeKey);
+    this.parentRow.getParentRowset().getParentRow()
+          .generateKeylist(fieldName, keylist);
   }
 
   /**

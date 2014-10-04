@@ -479,17 +479,16 @@ public final class StmtLibrary {
           keyValue = Environment.getSystemVar("%OperatorId").readAsString();
           log.debug("Using %OperatorId for OPRID field.");
         } else {
-          try {
-            keyValue = fieldBeingDefaulted.getParentRecord()
-                .findValueForKeyInCBufferContext(rf.FIELDNAME, false).readAsString();
-            log.debug("Resolved field {} to {}.", rf.FIELDNAME, keyValue);
-          } catch (final OPSCBufferKeyLookupException opscbkle) {
+          final List<PTField> keylist = new ArrayList<PTField>();
+          fieldBeingDefaulted.getParentRecord()
+              .generateKeylist(rf.FIELDNAME, keylist);
+          throw new OPSVMachRuntimeException("TODO: Evaluate keylist 3.");
+/*            log.debug("Resolved field {} to {}.", rf.FIELDNAME, keyValue);
             if (rf.FIELDNAME.equals("EFFDT")) {
               keyValue = Environment.getSystemVar("%Date").readAsString();
             } else {
               throw opscbkle;
-            }
-          }
+            }*/
         }
 
         if (rf.FIELDNAME.equals("EFFDT")) {
@@ -620,9 +619,10 @@ public final class StmtLibrary {
 
       if (rf.isKey()) {
 
-        try {
-          record.findValueForKeyInCBufferContext(rf.FIELDNAME, false);
-        } catch (final OPSCBufferKeyLookupException opscbkle) {
+        final List<PTField> keylist = new ArrayList<PTField>();
+        record.generateKeylist(rf.FIELDNAME, keylist);
+        throw new OPSVMachRuntimeException("TODO: Evaluate keylist 4.");
+/*        } catch (final OPSCBufferKeyLookupException opscbkle) {
           if (rf.isRequired()) {
             throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
                 + recDefn.RECNAME + "; value does not exist for search key: "
@@ -632,7 +632,7 @@ public final class StmtLibrary {
             // we need to issue a query for all of the fields on the record.
             limitSelectClauseToKeys = false;
           }
-        }
+        }*/
       }
     }
 
@@ -702,13 +702,13 @@ public final class StmtLibrary {
         if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
           val = Environment.getSystemVar("%OperatorId").readAsString();
         } else {
-          try {
-            val = record.findValueForKeyInCBufferContext(rf.FIELDNAME, false)
-                .readAsString();
-          } catch (final OPSCBufferKeyLookupException opscbkle) {
+          final List<PTField> keylist = new ArrayList<PTField>();
+          record.generateKeylist(rf.FIELDNAME, keylist);
+          throw new OPSVMachRuntimeException("TODO: Evaluate keylist 4.");
+          /*} catch (final OPSCBufferKeyLookupException opscbkle) {
             // If key value cannot be resolved, do not include it (see logic above).
             continue;
-          }
+          }*/
         }
 
         if (i == 0) { query.append(" WHERE "); }

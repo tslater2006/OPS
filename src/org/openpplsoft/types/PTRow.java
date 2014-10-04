@@ -151,13 +151,12 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
-  public PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName, final boolean mustValBeKey)
-          throws OPSCBufferKeyLookupException {
+  public void generateKeylist(
+      final String fieldName, final List<PTField> keylist) {
 
+    // Can't continue if no parent rowset (scroll) exists.
     if (this.parentRowset == null) {
-      throw new OPSCBufferKeyLookupException("Row's parent is null; "
-          + "unable to continue search for key value without a parent rowset.");
+      return;
     }
 
     // If the parent rowset does not have a scroll defn, it may be the root
@@ -171,24 +170,9 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
 
         if (searchRecord.hasField(fieldName)) {
           final PTField fld = searchRecord.getFieldRef(fieldName).deref();
-          final PTPrimitiveType fldValue = fld.getValue();
-
-          if (mustValBeKey && !fld.getRecordFieldDefn().isKey()) {
-            throw new OPSCBufferKeyLookupException("Caller requires value to be "
-                + "from a key, but field in search record is not a key.");
-          }
-
-          if (fldValue.isMarkedAsUpdated() || fldValue instanceof PTNumberType) {
-            return fldValue;
-          }
+          keylist.add(fld);
         }
-
-        throw new OPSCBufferKeyLookupException("Key lookup extended all the way to "
-            + "component search record, value for key was not found anywhere.");
       }
-      throw new OPSCBufferKeyLookupException("Row's parent rowset does not "
-          + "have a scroll defn, and it is not the ComponentBuffer rowset; "
-          + "these are unexpected conditions that prevent further key lookup.");
     }
 
     /*
@@ -203,24 +187,11 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
         final PTField fld = this.recordMap.get(
             rfBuf.getRecDefn().RECNAME).getFieldRef(rfBuf.getRecFldDefn()
                 .FIELDNAME).deref();
-        final PTPrimitiveType fldValue = fld.getValue();
-        log.debug("Found potential key match ({}.{}): {}",
-            rfBuf.getRecDefn().RECNAME, rfBuf.getRecFldDefn().FIELDNAME, fld);
-
-        if (mustValBeKey && !rfBuf.getRecFldDefn().isKey()) {
-          continue;
-        }
-
-        if (fldValue.isMarkedAsUpdated() || fldValue instanceof PTNumberType) {
-          return fldValue;
-        }
+        keylist.add(fld);
       }
     }
 
-    // If the field does not exist, and/or is not a key, in/on any of the
-    // records in this row, pass the field name to the parent rowset
-    // to continue the search in the next parent row.
-    return this.parentRowset.findValueForKeyInCBufferContext(fieldName, mustValBeKey);
+    this.parentRowset.generateKeylist(fieldName, keylist);
   }
 
   public PTRowset getParentRowset() {

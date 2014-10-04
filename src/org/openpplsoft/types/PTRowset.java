@@ -160,14 +160,11 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
    * always be passed to the parent row in order to look at the child
    * records within that row.
    */
-  public PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName, final boolean mustValBeKey)
-          throws OPSCBufferKeyLookupException {
+  public void generateKeylist(
+      final String fieldName, final List<PTField> keylist) {
     if (this.parentRow != null) {
-      return this.parentRow.findValueForKeyInCBufferContext(fieldName, mustValBeKey);
+      this.parentRow.generateKeylist(fieldName, keylist);
     }
-    throw new OPSCBufferKeyLookupException("Rowset has no parent, unable to "
-        + "continue key lookup.");
   }
 
   public PTRow getParentRow() {

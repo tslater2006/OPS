@@ -230,7 +230,8 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
    * leading to the row that this record is in.
    */
   public PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName) throws OPSCBufferKeyLookupException {
+      final String fieldName, final boolean mustValBeKey)
+          throws OPSCBufferKeyLookupException {
 
     if (this.parentRow == null) {
       throw new OPSCBufferKeyLookupException("PTRecord's parent row is null; "
@@ -248,7 +249,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     }
 
     return this.parentRow.getParentRowset().getParentRow()
-          .findValueForKeyInCBufferContext(fieldName);
+          .findValueForKeyInCBufferContext(fieldName, mustValBeKey);
   }
 
   /**

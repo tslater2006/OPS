@@ -144,18 +144,9 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return;
     }
 
-    /**if (((this.recFieldDefn.isKey()
-      && this.recFieldDefn.isSearchKey())
-      || this.recFieldDefn.isAlternateSearchKey())
-      && this.recFieldDefn.isListBoxItem()) {
-      log.debug("[EXPERIMENTAL] Ignorning non-blank field during FldDefProc: {}.{}",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
-        return;
-    }*/
-
     if (this.recFieldDefn.isKey()) {
       try {
-        final PTPrimitiveType keyValue = this.findValueForKeyInCBufferContext();
+        final PTPrimitiveType keyValue = this.findValueForKeyInCBufferContext(true);
         log.debug("Ignorning key field {}.{} during "
             + "non-constant FldDefProc; key value exists in buffer context "
             + "so no need to default it: {}",
@@ -260,7 +251,29 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return;
     }
 
-    if (this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
+    if (this.recFieldDefn.FIELDNAME.equals("EFFDT")
+        && this.recFieldDefn.isKey()
+        && (this.parentRecord.getRecDefn().isTable()
+            || this.parentRecord.getRecDefn().isView())) {
+
+      try {
+        final PTPrimitiveType keyValue = this.findValueForKeyInCBufferContext(true);
+        log.debug("Ignorning key field {}.{} during "
+            + "non-constant FldDefProc; key value exists in buffer context "
+            + "so no need to default it: {}",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keyValue);
+        /**
+        * TODO: Set value with key value before returning.
+       */
+        return;
+      } catch (final OPSCBufferKeyLookupException opscbkle) {
+        log.debug("No value found for key {}.{} during non-default fld proc, "
+            + "will continue processing.",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      }
+    }
+
+/*    if (this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
       try {
         final PTPrimitiveType keyValue = this.findValueForKeyInCBufferContext();
         log.debug("Ignorning key field {}.{} during "
@@ -273,7 +286,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
             + "will continue processing.",
             this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
       }
-    }
+    }*/
 
     boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
@@ -331,17 +344,18 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   public PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName) throws OPSCBufferKeyLookupException {
+      final String fieldName, final boolean mustValBeKey)
+          throws OPSCBufferKeyLookupException {
     throw new OPSVMachRuntimeException("Illegal call to find value for key "
         + "on PTField; you must call the overloaded version of this method that "
         + "lacks arguments.");
   }
 
-  public PTPrimitiveType findValueForKeyInCBufferContext()
+  public PTPrimitiveType findValueForKeyInCBufferContext(final boolean mustValBeKey)
       throws OPSCBufferKeyLookupException {
     if (this.parentRecord != null) {
       return this.parentRecord.findValueForKeyInCBufferContext(
-          this.recFieldDefn.FIELDNAME);
+          this.recFieldDefn.FIELDNAME, mustValBeKey);
     }
     return null;
   }

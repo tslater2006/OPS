@@ -161,9 +161,10 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
    * records within that row.
    */
   public PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName) throws OPSCBufferKeyLookupException {
+      final String fieldName, final boolean mustValBeKey)
+          throws OPSCBufferKeyLookupException {
     if (this.parentRow != null) {
-      return this.parentRow.findValueForKeyInCBufferContext(fieldName);
+      return this.parentRow.findValueForKeyInCBufferContext(fieldName, mustValBeKey);
     }
     throw new OPSCBufferKeyLookupException("Rowset has no parent, unable to "
         + "continue key lookup.");

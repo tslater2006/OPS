@@ -152,7 +152,8 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
   }
 
   public PTPrimitiveType findValueForKeyInCBufferContext(
-      final String fieldName) throws OPSCBufferKeyLookupException {
+      final String fieldName, final boolean mustValBeKey)
+          throws OPSCBufferKeyLookupException {
 
     if (this.parentRowset == null) {
       throw new OPSCBufferKeyLookupException("Row's parent is null; "
@@ -169,8 +170,14 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
             ComponentBuffer.getComponentDefn().getSearchRecordName());
 
         if (searchRecord.hasField(fieldName)) {
-          final PTPrimitiveType fldValue =
-              searchRecord.getFieldRef(fieldName).deref().getValue();
+          final PTField fld = searchRecord.getFieldRef(fieldName).deref();
+          final PTPrimitiveType fldValue = fld.getValue();
+
+          if (mustValBeKey && !fld.getRecordFieldDefn().isKey()) {
+            throw new OPSCBufferKeyLookupException("Caller requires value to be "
+                + "from a key, but field in search record is not a key.");
+          }
+
           if (fldValue.isMarkedAsUpdated() || fldValue instanceof PTNumberType) {
             return fldValue;
           }
@@ -199,6 +206,11 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
         final PTPrimitiveType fldValue = fld.getValue();
         log.debug("Found potential key match ({}.{}): {}",
             rfBuf.getRecDefn().RECNAME, rfBuf.getRecFldDefn().FIELDNAME, fld);
+
+        if (mustValBeKey && !rfBuf.getRecFldDefn().isKey()) {
+          continue;
+        }
+
         if (fldValue.isMarkedAsUpdated() || fldValue instanceof PTNumberType) {
           return fldValue;
         }
@@ -208,7 +220,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     // If the field does not exist, and/or is not a key, in/on any of the
     // records in this row, pass the field name to the parent rowset
     // to continue the search in the next parent row.
-    return this.parentRowset.findValueForKeyInCBufferContext(fieldName);
+    return this.parentRowset.findValueForKeyInCBufferContext(fieldName, mustValBeKey);
   }
 
   public PTRowset getParentRowset() {

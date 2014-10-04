@@ -481,7 +481,7 @@ public final class StmtLibrary {
         } else {
           try {
             keyValue = fieldBeingDefaulted.getParentRecord()
-                .findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
+                .findValueForKeyInCBufferContext(rf.FIELDNAME, false).readAsString();
             log.debug("Resolved field {} to {}.", rf.FIELDNAME, keyValue);
           } catch (final OPSCBufferKeyLookupException opscbkle) {
             if (rf.FIELDNAME.equals("EFFDT")) {
@@ -621,7 +621,7 @@ public final class StmtLibrary {
       if (rf.isKey()) {
 
         try {
-          record.findValueForKeyInCBufferContext(rf.FIELDNAME);
+          record.findValueForKeyInCBufferContext(rf.FIELDNAME, false);
         } catch (final OPSCBufferKeyLookupException opscbkle) {
           if (rf.isRequired()) {
             throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
@@ -703,7 +703,8 @@ public final class StmtLibrary {
           val = Environment.getSystemVar("%OperatorId").readAsString();
         } else {
           try {
-            val = record.findValueForKeyInCBufferContext(rf.FIELDNAME).readAsString();
+            val = record.findValueForKeyInCBufferContext(rf.FIELDNAME, false)
+                .readAsString();
           } catch (final OPSCBufferKeyLookupException opscbkle) {
             // If key value cannot be resolved, do not include it (see logic above).
             continue;

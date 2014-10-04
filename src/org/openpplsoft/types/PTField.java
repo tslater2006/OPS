@@ -142,7 +142,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     // NOTE: I am making an exception here for EFFDT, I don't know at this time
     // whether this is accurate and/or complete.
     // TODO(mquinn): Keep this in mind.
-    if(this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
+    if(this.recFieldDefn.isKey()
+      && this.recFieldDefn.hasDefaultNonConstantValue()) {
       log.debug("Ignoring key field during FldDefProc: {}.{}",
           this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
       return;
@@ -234,19 +235,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
       fdEmission.setDefaultedValue(fldValue.readAsString());
       fdEmission.setFromConstantFlag();
-    } else {
-      // fireEvent() returns true if prog was run, false otherwise.
-      final FireEventSummary summary = new FireEventSummary();
-      this.fireEvent(PCEvent.FIELD_DEFAULT, summary);
-      if(summary.getNumEventProgsExecuted() > 0) {
-        fdEmission.setDefaultedValue("from peoplecode");
-      } else {
-        return;
-      }
     }
 
     /*
-     * At this point, some form of field default processing was executed, but
+     * At this point, some form of field default processing may have been executed, but
      * it may not have actually changed the field's value. If it did, an emission
      * must be made indicating as much.
      */
@@ -339,6 +331,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     if(this.valueRef != null) {
       this.valueRef.setReadOnly();
     }
+  }
+
+  public RecordFieldBuffer getRecordFieldBuffer() {
+    return this.recFieldBuffer;
   }
 
   @Override

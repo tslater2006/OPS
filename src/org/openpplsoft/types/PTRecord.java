@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.trace.*;
 import org.openpplsoft.sql.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.buffers.*;
@@ -155,10 +156,48 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
 
-    // Fire event on each field in this record.
+    // Run field default processing on each field in this record.
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
+      // Note: callee will exit if field is not blank per fld def proc logic in PS.
       entry.getValue().deref().runFieldDefaultProcessing(fldDefProcSummary);
+    }
+
+    // For any fields that are still blank, fire the FieldDefault event.
+    // NOTE: This cannot be done in the PTField call to runFieldDefaultProcessing,
+    // because FieldDefault events only fire once every field has been assigned
+    // a constant/record default (if defined).
+    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+        : this.fieldRefs.entrySet()) {
+      final PTField fld = entry.getValue().deref();
+      final PTPrimitiveType fldValue = fld.getValue();
+      final RecordField recFieldDefn = fld.getRecordFieldDefn();
+
+      // Only fire event if field is blank and has a buffer in the component.
+      if (fldValue.isBlank() && fld.getRecordFieldBuffer() != null) {
+        boolean preFieldDefaultFireIsMarkedAsUpdated = fldValue.isMarkedAsUpdated();
+
+        final FireEventSummary summary = new FireEventSummary();
+        entry.getValue().deref().fireEvent(PCEvent.FIELD_DEFAULT, summary);
+
+        if (summary.getNumEventProgsExecuted() > 0) {
+          final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
+              recFieldDefn.RECNAME, recFieldDefn.FIELDNAME);
+          fdEmission.setDefaultedValue("from peoplecode");
+
+          /*
+           * At this point, some form of field default processing may have been
+           * executed, but it may not have actually changed the field's values. If
+           * If it did, an emission must be made indicating as much.
+           */
+          if (!preFieldDefaultFireIsMarkedAsUpdated && fldValue.isMarkedAsUpdated()) {
+            fldDefProcSummary.fieldWasChanged();
+            TraceFileVerifier.submitEnforcedEmission(fdEmission);
+          } else if (fldValue.isBlank()) {
+            fldDefProcSummary.blankFieldWasSeen();
+          }
+        }
+      }
     }
   }
 

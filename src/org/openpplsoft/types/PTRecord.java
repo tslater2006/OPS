@@ -156,11 +156,20 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
 
-    // Run field default processing on each field in this record.
+    // Run non-constant (from record) field default processing
+    // on each field in this record.
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
       // Note: callee will exit if field is not blank per fld def proc logic in PS.
-      entry.getValue().deref().runFieldDefaultProcessing(fldDefProcSummary);
+      entry.getValue().deref().runNonConstantFieldDefaultProcessing(fldDefProcSummary);
+      entry.getValue().deref().runConstantFieldDefaultProcessing(fldDefProcSummary);
+    }
+
+    // Run constant field default processing
+    // on each field in this record.
+    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+        : this.fieldRefs.entrySet()) {
+      // Note: callee will exit if field is not blank per fld def proc logic in PS.
     }
 
     // For any fields that are still blank, fire the FieldDefault event.
@@ -186,8 +195,8 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
           fdEmission.setDefaultedValue("from peoplecode");
 
           /*
-           * At this point, some form of field default processing may have been
-           * executed, but it may not have actually changed the field's values. If
+           * At this point, a FieldDefault program may have been run,
+           * but it may not have actually changed the field's values. If
            * If it did, an emission must be made indicating as much.
            */
           if (!preFieldDefaultFireIsMarkedAsUpdated && fldValue.isMarkedAsUpdated()) {

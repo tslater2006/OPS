@@ -118,6 +118,13 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
+    throw new OPSVMachRuntimeException("Illegal call to runFieldDefaultProcessing"
+        + " on PTField; you must call the method for the appropriate type ("
+        + "constant or non-constant) that you wish to run.");
+  }
+
+  public void runNonConstantFieldDefaultProcessing(
+      final FieldDefaultProcSummary fldDefProcSummary) {
 
     // If this field is not in the component buffer (meaning it is not a field listed
     // in the component buffer structure), do not run field default proc on it.
@@ -137,21 +144,33 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return;
     }
 
-    // If field is a key, its value will be based on the keys defined on
-    // fields in higher scroll levels, so don't perform field default processing.
-    // NOTE: I am making an exception here for EFFDT, I don't know at this time
-    // whether this is accurate and/or complete.
-    // TODO(mquinn): Keep this in mind.
-    if(this.recFieldDefn.isKey()
-      && this.recFieldDefn.hasDefaultNonConstantValue()) {
-      log.debug("Ignoring key field during FldDefProc: {}.{}",
-          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
-      return;
+    /**if (((this.recFieldDefn.isKey()
+      && this.recFieldDefn.isSearchKey())
+      || this.recFieldDefn.isAlternateSearchKey())
+      && this.recFieldDefn.isListBoxItem()) {
+      log.debug("[EXPERIMENTAL] Ignorning non-blank field during FldDefProc: {}.{}",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+        return;
+    }*/
+
+    if (this.recFieldDefn.isKey()) {
+      try {
+        final PTPrimitiveType keyValue = this.findValueForKeyInCBufferContext();
+        log.debug("Ignorning key field {}.{} during "
+            + "non-constant FldDefProc; key value exists in buffer context "
+            + "so no need to default it: {}",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keyValue);
+        return;
+      } catch (final OPSCBufferKeyLookupException opscbkle) {
+        log.debug("No value found for key {}.{} during non-default fld proc, "
+            + "will continue processing.",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      }
     }
 
+    boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
         this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
-    boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
 
     if (this.recFieldDefn.hasDefaultNonConstantValue()) {
       final String defRecName = this.recFieldDefn.DEFRECNAME;
@@ -192,6 +211,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
                 "Result set for default non constant field default query "
                 + "returned multiple records; only expected one.");
           }
+
           fdEmission.setDefaultedValue(this.getValue().readAsString());
           fdEmission.setFromRecordFlag();
         }
@@ -205,7 +225,61 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
           log.warn("Unable to close rs and/or ostmt in finally block.");
         }
       }
-    } else if (this.recFieldDefn.hasDefaultConstantValue()) {
+    }
+
+    /*
+     * Check if the field's value changed. If it did, an emission
+     * must be made indicating as much.
+     */
+    if (!preFldDefProcIsMarkedAsUpdated && this.getValue().isMarkedAsUpdated()) {
+      fldDefProcSummary.fieldWasChanged();
+      TraceFileVerifier.submitEnforcedEmission(fdEmission);
+    } else if (this.getValue().isBlank()) {
+      fldDefProcSummary.blankFieldWasSeen();
+    }
+  }
+
+  public void runConstantFieldDefaultProcessing(
+      final FieldDefaultProcSummary fldDefProcSummary) {
+
+    // If this field is not in the component buffer (meaning it is not a field listed
+    // in the component buffer structure), do not run field default proc on it.
+    if (this.recFieldBuffer == null) {
+//      log.debug("Skipping FldDefProc: {}.{}",
+//          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      return;
+    }
+
+    log.debug("Running FldDefProc: {}.{}",
+          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+
+    // If field is not blank, no need to run field default proc on it.
+    if (!this.getValue().isBlank()) {
+      log.debug("Ignorning non-blank field during FldDefProc: {}.{}",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      return;
+    }
+
+    if (this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
+      try {
+        final PTPrimitiveType keyValue = this.findValueForKeyInCBufferContext();
+        log.debug("Ignorning key field {}.{} during "
+            + "non-constant FldDefProc; key value exists in buffer context "
+            + "so no need to default it: {}",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keyValue);
+        return;
+      } catch (final OPSCBufferKeyLookupException opscbkle) {
+        log.debug("No value found for key {}.{} during non-default fld proc, "
+            + "will continue processing.",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      }
+    }
+
+    boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
+    final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
+        this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+
+    if (this.recFieldDefn.hasDefaultConstantValue()) {
       final String defValue = this.recFieldDefn.DEFFIELDNAME;
       final PTPrimitiveType fldValue = this.getValue();
 
@@ -238,8 +312,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     }
 
     /*
-     * At this point, some form of field default processing may have been executed, but
-     * it may not have actually changed the field's value. If it did, an emission
+     * Check if the field's value changed. If it did, an emission
      * must be made indicating as much.
      */
     if (!preFldDefProcIsMarkedAsUpdated && this.getValue().isMarkedAsUpdated()) {

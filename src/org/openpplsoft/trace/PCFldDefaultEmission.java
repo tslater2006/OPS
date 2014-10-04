@@ -32,7 +32,7 @@ public class PCFldDefaultEmission implements IEmission {
       LogManager.getLogger(PCFldDefaultEmission.class.getName());
 
   public String ptRECNAME, ptFLDNAME, defaultedValue;
-  public boolean constantFlag;
+  public boolean fromConstantFlag, fromRecordFlag;
   public String metaValue = null;
 
   public PCFldDefaultEmission(final String recName, final String fldName) {
@@ -51,8 +51,12 @@ public class PCFldDefaultEmission implements IEmission {
     this.defaultedValue = v;
   }
 
-  public void setConstantFlag() {
-    this.constantFlag = true;
+  public void setFromConstantFlag() {
+    this.fromConstantFlag = true;
+  }
+
+  public void setFromRecordFlag() {
+    this.fromRecordFlag = true;
   }
 
   /**
@@ -76,7 +80,8 @@ public class PCFldDefaultEmission implements IEmission {
     final PCFldDefaultEmission other = (PCFldDefaultEmission) obj;
     if (this.ptRECNAME.equals(other.ptRECNAME)
         && this.ptFLDNAME.equals(other.ptFLDNAME)
-        && this.constantFlag == other.constantFlag) {
+        && this.fromRecordFlag == other.fromRecordFlag
+        && this.fromConstantFlag == other.fromConstantFlag) {
 
       if ("%date".equals(this.metaValue)) {
         // If this emission has a "%date" meta-value, it was interpreted by the
@@ -110,12 +115,15 @@ public class PCFldDefaultEmission implements IEmission {
     return new HashCodeBuilder(HCB_INITIAL,
         HCB_MULTIPLIER).append(this.ptRECNAME)
         .append(this.ptFLDNAME).append(this.defaultedValue)
-        .append(this.constantFlag).toHashCode();
+        .append(this.fromConstantFlag).toHashCode();
   }
 
   @Override
   public String toString() {
     return "-: " + this.ptRECNAME + "." + this.ptFLDNAME
-        + (this.constantFlag ? " constant " : " ") + "default " + this.defaultedValue;
+        + (this.fromConstantFlag ? " constant " : " ")
+        + "default "
+        + (this.fromRecordFlag ? "from record " : "")
+        + this.defaultedValue;
   }
 }

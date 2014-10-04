@@ -650,7 +650,7 @@ public class GlobalFnLibrary {
   public static void readRecordFromResultSet(Record recDefn,
       PTRecord recObj, ResultSet rs) throws SQLException {
 
-    ResultSetMetaData rsMetadata = rs.getMetaData();
+    final ResultSetMetaData rsMetadata = rs.getMetaData();
     int numCols = rsMetadata.getColumnCount();
 
     for(int i = 1; i <= numCols; i++) {
@@ -660,6 +660,24 @@ public class GlobalFnLibrary {
       GlobalFnLibrary.readFieldFromResultSet(fldObj,
         colName, colTypeName, rs);
     }
+  }
+
+  public static void readFieldFromResultSet(final PTField fldObj,
+      final ResultSet rs, final String colName) throws SQLException {
+
+    final ResultSetMetaData rsMetadata = rs.getMetaData();
+    int numCols = rsMetadata.getColumnCount();
+
+    for(int i = 1; i <= numCols; i++) {
+      if (rsMetadata.getColumnName(i).equals(colName)) {
+        readFieldFromResultSet(fldObj, colName,
+            rsMetadata.getColumnTypeName(i), rs);
+        return;
+      }
+    }
+
+    throw new OPSVMachRuntimeException("The column with the name of "
+        + colName + "does not exist in the result set; unable to read field.");
   }
 
   public static void readFieldFromResultSet(PTField fldObj,

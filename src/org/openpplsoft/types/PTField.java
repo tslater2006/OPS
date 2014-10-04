@@ -184,17 +184,15 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
          * in which case the field will remain blank.
          */
         if (rs.next()) {
-          log.debug("Will default to: {}", rs.getString(defFldName));
-          throw new OPSVMachRuntimeException("TODO: This code has not been "
-              + "run yet for a field that actually generates a record from "
-              + "which to default (queries so far have returned 0 records; "
-              + "need to read *defFldName* from resultset and write that to "
-              + "the field. ALSO REMEMBER TO UNCOMMENT THE CODE BELOW.");
-  /*           if (rs.next()) {
-                throw new OPSVMachRuntimeException(
-                  "Result set for default non constant field default query "
-                    + "returned multiple records; only expected one.");
-                  }*/
+          log.debug("Defaulting to: {}", rs.getString(defFldName));
+          GlobalFnLibrary.readFieldFromResultSet(this, rs, defFldName);
+          if (rs.next()) {
+            throw new OPSVMachRuntimeException(
+                "Result set for default non constant field default query "
+                + "returned multiple records; only expected one.");
+          }
+          fdEmission.setDefaultedValue(this.getValue().readAsString());
+          fdEmission.setFromRecordFlag();
         }
       } catch (final java.sql.SQLException sqle) {
         throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
@@ -235,7 +233,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       }
 
       fdEmission.setDefaultedValue(fldValue.readAsString());
-      fdEmission.setConstantFlag();
+      fdEmission.setFromConstantFlag();
     } else {
       // fireEvent() returns true if prog was run, false otherwise.
       final FireEventSummary summary = new FireEventSummary();

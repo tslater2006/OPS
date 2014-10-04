@@ -54,6 +54,7 @@ public final class TraceFileVerifier {
   private static final int GROUP2 = 2;
   private static final int GROUP3 = 3;
   private static final int GROUP4 = 4;
+  private static final int GROUP5 = 5;
 
   private static Logger log = LogManager.getLogger(
       TraceFileVerifier.class.getName());
@@ -77,7 +78,7 @@ public final class TraceFileVerifier {
     pcRelDispProcEndPattern =
         Pattern.compile("Finished\\sRelated\\sDisplay\\sprocessing");
     pcFldDefaultPattern =
-        Pattern.compile("([A-Z_0-9]+)\\.([A-Z_0-9]+)\\s+(constant\\s+)?default\\s+(.+?)$");
+        Pattern.compile("([A-Z_0-9]+)\\.([A-Z_0-9]+)\\s+(constant\\s+)?default\\s+(from\\s+record\\s+)?(.+?)$");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -265,9 +266,12 @@ public final class TraceFileVerifier {
         currTraceLine = getNextTraceLine();
         final PCFldDefaultEmission fldDefEmission =
             new PCFldDefaultEmission(pcFldDefaultMatcher.group(GROUP1),
-            pcFldDefaultMatcher.group(GROUP2), pcFldDefaultMatcher.group(GROUP4));
+            pcFldDefaultMatcher.group(GROUP2), pcFldDefaultMatcher.group(GROUP5));
         if (pcFldDefaultMatcher.group(GROUP3) != null) {
-          fldDefEmission.setConstantFlag();
+          fldDefEmission.setFromConstantFlag();
+        }
+        if (pcFldDefaultMatcher.group(GROUP4) != null) {
+          fldDefEmission.setFromRecordFlag();
         }
         return fldDefEmission;
       }

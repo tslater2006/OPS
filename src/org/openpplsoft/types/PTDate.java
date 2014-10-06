@@ -69,6 +69,9 @@ public final class PTDate extends PTPrimitiveType<Date> {
 
   @Override
   public String readAsString() {
+    if (this.value == null) {
+      return null;
+    }
     final DateFormat df = new SimpleDateFormat(PS_DATE_FORMAT);
     return df.format(this.value);
   }

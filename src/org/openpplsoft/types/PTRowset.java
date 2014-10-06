@@ -161,7 +161,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
    * records within that row.
    */
   public void generateKeylist(
-      final String fieldName, final List<PTField> keylist) {
+      final String fieldName, final Keylist keylist) {
     if (this.parentRow != null) {
       this.parentRow.generateKeylist(fieldName, keylist);
     }

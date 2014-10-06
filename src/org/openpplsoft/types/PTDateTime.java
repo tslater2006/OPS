@@ -66,6 +66,9 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
 
   @Override
   public String readAsString() {
+    if (this.value == null) {
+      return null;
+    }
     final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT2);
     return dtf.print(this.value);
   }

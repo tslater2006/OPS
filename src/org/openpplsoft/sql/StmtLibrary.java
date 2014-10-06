@@ -458,9 +458,6 @@ public final class StmtLibrary {
           continue;
         }
 
-        if (i == 0) { query.append(" WHERE "); }
-        if (i > 0) { query.append(" AND "); }
-
         log.debug("Looking up key for {}.{}", defaultRecDefn.RECNAME,
             rf.FIELDNAME);
 
@@ -479,18 +476,34 @@ public final class StmtLibrary {
           keyValue = Environment.getSystemVar("%OperatorId").readAsString();
           log.debug("Using %OperatorId for OPRID field.");
         } else {
-          final List<PTField> keylist = new ArrayList<PTField>();
+          final Keylist keylist = new Keylist();
           fieldBeingDefaulted.getParentRecord()
               .generateKeylist(rf.FIELDNAME, keylist);
-          throw new OPSVMachRuntimeException("TODO: Evaluate keylist 3.");
-/*            log.debug("Resolved field {} to {}.", rf.FIELDNAME, keyValue);
+          log.debug("Keylist for {}.{} (def record for non-constant query): {}",
+              rf.RECNAME, rf.FIELDNAME, keylist);
+
+          if (keylist.hasNonBlankValue()) {
+            keyValue = keylist.getFirstNonBlankField().getValue().readAsString();
+            log.debug("Resolved field {} to {}.", rf.FIELDNAME, keyValue);
+          } else {
             if (rf.FIELDNAME.equals("EFFDT")) {
               keyValue = Environment.getSystemVar("%Date").readAsString();
+            } else if (!rf.isRequired()) {
+              // If no value was found, but the field isn't marked as required,
+              // use a blank value.
+              keyValue = ((PTPrimitiveType) rf.getTypeConstraintForUnderlyingValue()
+                  .alloc()).readAsString();
             } else {
-              throw opscbkle;
-            }*/
+              throw new OPSCBufferKeyLookupException("A non-blank value was not found for "
+                  + "the required key field: " + defaultRecDefn.RECNAME + "." + rf.FIELDNAME
+                  + "; cannot "
+                  + "generate non-constant default query on this record at this time.");
+            }
+          }
         }
 
+        if (i == 0) { query.append(" WHERE "); }
+        if (i > 0) { query.append(" AND "); }
         if (rf.FIELDNAME.equals("EFFDT")) {
           query.append(rf.FIELDNAME).append("<=TO_DATE(?,'YYYY-MM-DD')");
         } else {
@@ -619,20 +632,23 @@ public final class StmtLibrary {
 
       if (rf.isKey()) {
 
-        final List<PTField> keylist = new ArrayList<PTField>();
+        final Keylist keylist = new Keylist();
         record.generateKeylist(rf.FIELDNAME, keylist);
-        throw new OPSVMachRuntimeException("TODO: Evaluate keylist 4.");
-/*        } catch (final OPSCBufferKeyLookupException opscbkle) {
+        log.debug("Keylist for field {}.{}: {}", rf.RECNAME, rf.FIELDNAME, keylist);
+
+        if (keylist.size() == 0) {
           if (rf.isRequired()) {
             throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
-                + recDefn.RECNAME + "; value does not exist for search key: "
-                + rf.FIELDNAME, opscbkle);
+                + recDefn.RECNAME + "; keylist is empty for: " + rf.FIELDNAME);
           } else {
             // If a non-required key field does not have a matching value,
             // we need to issue a query for all of the fields on the record.
             limitSelectClauseToKeys = false;
           }
-        }*/
+        } else if (keylist.size() > 1) {
+          throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
+              + recDefn.RECNAME + "; multiple key values found for: " + rf.FIELDNAME);
+        }
       }
     }
 
@@ -702,13 +718,19 @@ public final class StmtLibrary {
         if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
           val = Environment.getSystemVar("%OperatorId").readAsString();
         } else {
-          final List<PTField> keylist = new ArrayList<PTField>();
+          final Keylist keylist = new Keylist();
           record.generateKeylist(rf.FIELDNAME, keylist);
-          throw new OPSVMachRuntimeException("TODO: Evaluate keylist 4.");
-          /*} catch (final OPSCBufferKeyLookupException opscbkle) {
+          log.debug("Keylist for field {}.{}: {}", rf.RECNAME, rf.FIELDNAME, keylist);
+
+          if (keylist.size() == 0) {
             // If key value cannot be resolved, do not include it (see logic above).
             continue;
-          }*/
+          } else if (keylist.size() == 1) {
+            val = keylist.get(0).getValue().readAsString();
+          } else {
+            throw new OPSVMachRuntimeException("Expected one value for key " + rf.FIELDNAME
+                + " on record " + rf.RECNAME + ", multiple found.");
+          }
         }
 
         if (i == 0) { query.append(" WHERE "); }

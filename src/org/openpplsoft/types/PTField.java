@@ -134,6 +134,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return;
     }
 
+    if (!this.recFieldDefn.hasDefaultNonConstantValue()) {
+      return;
+    }
+
     log.debug("Running FldDefProc: {}.{}",
           this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
 
@@ -146,21 +150,24 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
     if (this.recFieldDefn.isKey()) {
 
-      final List<PTField> keylist = new ArrayList<PTField>();
+      final Keylist keylist = new Keylist();
       this.generateKeylist(keylist);
-      throw new OPSVMachRuntimeException("TODO: Evaluate keylist.");
-/*        log.debug("Ignorning key field {}.{} during "
-            + "non-constant FldDefProc; key value exists in buffer context "
-            + "so no need to default it: {}",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keyValue);
-        return;*/
+      log.debug("{}.{} has the following keylist during non-constant field def proc:\n{}",
+          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keylist);
+
+      if (keylist.size() > 0 && keylist.isFirstValueNonBlank()) {
+        log.debug("Ignoring key field {}.{} during "
+            + "non-constant FldDefProc; key value exists in immediate context "
+            + "so no need to default it.",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+        return;
+      }
     }
 
     boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
         this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
 
-    if (this.recFieldDefn.hasDefaultNonConstantValue()) {
       final String defRecName = this.recFieldDefn.DEFRECNAME;
       final String defFldName = this.recFieldDefn.DEFFIELDNAME;
       final Record defRecDefn = DefnCache.getRecord(defRecName);
@@ -213,7 +220,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
           log.warn("Unable to close rs and/or ostmt in finally block.");
         }
       }
-    }
+
 
     /*
      * Check if the field's value changed. If it did, an emission
@@ -238,6 +245,11 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return;
     }
 
+    if (!this.recFieldDefn.hasDefaultConstantValue()) {
+      return;
+    }
+
+
     log.debug("Running FldDefProc: {}.{}",
           this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
 
@@ -253,36 +265,43 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
         && (this.parentRecord.getRecDefn().isTable()
             || this.parentRecord.getRecDefn().isView())) {
 
-      final List<PTField> keylist = new ArrayList<PTField>();
+      final Keylist keylist = new Keylist();
       this.generateKeylist(keylist);
-      throw new OPSVMachRuntimeException("TODO: Evaluate keylist 2");
-/*        log.debug("Ignorning key field {}.{} during "
-            + "non-constant FldDefProc; key value exists in buffer context "
-            + "so no need to default it: {}",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keyValue);
-        return;*/
-    }
+      log.debug("Keylist for {}.{} during constant def proc: {}",
+          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keylist.toString());
 
-/*    if (this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
-      try {
-        final PTPrimitiveType keyValue = this.generateKeylist();
+      if (keylist.hasNonBlankValue()) {
         log.debug("Ignorning key field {}.{} during "
             + "non-constant FldDefProc; key value exists in buffer context "
-            + "so no need to default it: {}",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keyValue);
+            + "so no need to default it.",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
         return;
-      } catch (final OPSCBufferKeyLookupException opscbkle) {
+      }
+    }
+
+    if (this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
+      final Keylist keylist = new Keylist();
+      this.generateKeylist(keylist);
+      log.debug("Keylist for {}.{} during constant def proc: {}",
+          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keylist.toString());
+
+      if (keylist.hasNonBlankValue()) {
+        log.debug("Ignorning key field {}.{} during "
+            + "non-constant FldDefProc; key value exists in buffer context "
+            + "so no need to default it.",
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+        return;
+      } else {
         log.debug("No value found for key {}.{} during non-default fld proc, "
             + "will continue processing.",
             this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
       }
-    }*/
+    }
 
     boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
         this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
 
-    if (this.recFieldDefn.hasDefaultConstantValue()) {
       final String defValue = this.recFieldDefn.DEFFIELDNAME;
       final PTPrimitiveType fldValue = this.getValue();
 
@@ -312,7 +331,6 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
       fdEmission.setDefaultedValue(fldValue.readAsString());
       fdEmission.setFromConstantFlag();
-    }
 
     /*
      * Check if the field's value changed. If it did, an emission
@@ -334,12 +352,12 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   public void generateKeylist(
-      final String fieldName, final List<PTField> keylist) {
+      final String fieldName, final Keylist keylist) {
     throw new OPSVMachRuntimeException("Illegal call to find value for key "
         + "on PTField; you must call the overloaded version of this method.");
   }
 
-  public void generateKeylist(final List<PTField> keylist) {
+  public void generateKeylist(final Keylist keylist) {
     if (this.parentRecord != null) {
       this.parentRecord.generateKeylist(
           this.recFieldDefn.FIELDNAME, keylist);

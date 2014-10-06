@@ -230,7 +230,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
    * leading to the row that this record is in.
    */
   public void generateKeylist(
-      final String fieldName, final List<PTField> keylist) {
+      final String fieldName, final Keylist keylist) {
 
     if (this.parentRow == null
         || this.parentRow.getParentRowset() == null

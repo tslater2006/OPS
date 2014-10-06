@@ -152,7 +152,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
   }
 
   public void generateKeylist(
-      final String fieldName, final List<PTField> keylist) {
+      final String fieldName, final Keylist keylist) {
 
     // Can't continue if no parent rowset (scroll) exists.
     if (this.parentRowset == null) {
@@ -172,7 +172,11 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
           final PTField fld = searchRecord.getFieldRef(fieldName).deref();
           keylist.add(fld);
         }
+      } else {
+        throw new OPSVMachRuntimeException("Parent rowset has null scroll defn, but it is not "
+            + "of the root PTRowset object representing the component buffer as expected.");
       }
+      return;
     }
 
     /*

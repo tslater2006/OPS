@@ -56,6 +56,14 @@ public final class PTTime extends PTPrimitiveType<String> {
   }
 
   @Override
+  public String readAsString() {
+    if (this.value == null) {
+      return null;
+    }
+    return this.value.toString();
+  }
+
+  @Override
   public PTBoolean isGreaterThan(final PTPrimitiveType op) {
     throw new OPSDataTypeException("isGreaterThan not implemented for "
         + "Date.");

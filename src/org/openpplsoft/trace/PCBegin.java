@@ -17,8 +17,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class PCBegin implements IEmission {
 
   private String progDescriptor;
-  private String level;
-  private String row;
+  private int level, row;
 
   /**
    * Creates a new PCBegin emission object.
@@ -28,11 +27,11 @@ public class PCBegin implements IEmission {
    *   ocurring.
    * @param r the row number for the emission
    */
-  public PCBegin(final String pd, final String l,
-      final String r) {
+  public PCBegin(final String pd, final int level,
+      final int row) {
     this.progDescriptor = pd;
-    this.level = l;
-    this.row = r;
+    this.level = level;
+    this.row = row;
   }
 
   @Override
@@ -47,7 +46,7 @@ public class PCBegin implements IEmission {
 
     final PCBegin other = (PCBegin) obj;
     if (this.progDescriptor.equals(other.progDescriptor)
-        && this.level.equals(other.level) && this.row.equals(other.row)) {
+        && this.level == other.level && this.row == other.row) {
       return true;
     }
     return false;

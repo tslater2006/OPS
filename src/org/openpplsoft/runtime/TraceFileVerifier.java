@@ -241,7 +241,8 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new PCBegin(pcBeginMatcher.group(GROUP1),
-            pcBeginMatcher.group(GROUP2), pcBeginMatcher.group(GROUP3));
+            Integer.parseInt(pcBeginMatcher.group(GROUP2)),
+            Integer.parseInt(pcBeginMatcher.group(GROUP3)));
       }
 
       final Matcher pcInstrMatcher = pcInstrPattern.matcher(currTraceLine);

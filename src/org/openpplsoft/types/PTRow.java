@@ -222,6 +222,10 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     return this.recordMap.containsKey(recName);
   }
 
+  public int getIndexOfThisRowInParentRowset() {
+    return 0;
+  }
+
   /**
    * Implementation of GetRecord method for the PeopleTools
    * row class.

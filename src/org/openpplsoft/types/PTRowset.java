@@ -233,6 +233,16 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     return this.rows.get(idx - 1);
   }
 
+  public int getIndexOfRow(final PTRow row) {
+    for (int i = 0; i < this.rows.size(); i++) {
+      if(row == this.rows.get(i)) {
+        return i;
+      }
+    }
+    throw new OPSVMachRuntimeException("Unable to get index for the provided row; "
+        + "row does not exist in this rowset.");
+  }
+
   /**
    * Sort the rows in the rowset; the exact order ("A" for ascending,
    * "D" for descending) must be passed on the OPS runtime stack.

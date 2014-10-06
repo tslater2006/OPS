@@ -93,7 +93,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     // If a Record PeopleCode program has been written for this event, run it now.
     final PeopleCodeProg recProg = this.recFieldDefn.getProgramForEvent(event);
     if (recProg != null) {
-      final ExecContext eCtx = new ProgramExecContext(recProg);
+      final ExecContext eCtx = new ProgramExecContext(recProg,
+          this.determineScrollLevel(), this.determineRowIndex());
       // Pass this field to the supervisor as the component buffer context.
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
@@ -104,7 +105,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     final PeopleCodeProg compProg = ComponentBuffer.getComponentDefn()
         .getProgramForRecordFieldEvent(event, this.recFieldDefn);
     if (compProg != null) {
-      final ExecContext eCtx = new ProgramExecContext(compProg);
+      final ExecContext eCtx = new ProgramExecContext(compProg,
+            this.determineScrollLevel(), this.determineRowIndex());
       // Pass this field to the supervisor as the component buffer context.
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
@@ -148,8 +150,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return;
     }
 
-    if (this.recFieldDefn.isKey()) {
-
+   if (this.recFieldDefn.isKey()) {
       final Keylist keylist = new Keylist();
       this.generateKeylist(keylist);
       log.debug("{}.{} has the following keylist during non-constant field def proc:\n{}",
@@ -383,6 +384,20 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return this.visiblePropertyRef;
     }
     return null;
+  }
+
+  public int determineRowIndex() {
+    if (this.parentRecord != null
+        && this.parentRecord.getParentRow() != null) {
+      return this.parentRecord.getParentRow().getIndexOfThisRowInParentRowset();
+    }
+
+    throw new OPSVMachRuntimeException("Failed to determine ancestral row "
+        + "index; path to parent record and/or row contains null somewhere.");
+  }
+
+  public int determineScrollLevel() {
+    return 0;
   }
 
   @Override

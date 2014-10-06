@@ -114,7 +114,8 @@ public class InterpretSupervisor {
           (execContextStack.size() == 1 ? "start" : "start-ext"),
               String.format("%02d", execContextStack.size() - 1),
                   methodOrFuncName, descriptor));
-      TraceFileVerifier.submitEnforcedEmission(new PCBegin(descriptor, "0", "0"));
+      TraceFileVerifier.submitEnforcedEmission(new PCBegin(descriptor,
+          context.getExecutionScrollLevel(), context.getExecutionRowIdx()));
     }
 
     InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
@@ -153,6 +154,16 @@ public class InterpretSupervisor {
   }
 
   public void runImmediately(ExecContext eCtx) {
+    // Full program exec contexts require the component scroll
+    // level and row idx of the context in which they're executing
+    // at instantiation. For all other contexts, use the context
+    // scroll and row from the previously running program.
+    if (!(eCtx instanceof ProgramExecContext)) {
+      eCtx.setExecutionScrollLevel(
+          execContextStack.peek().getExecutionScrollLevel());
+      eCtx.setExecutionRowIdx(
+          execContextStack.peek().getExecutionRowIdx());
+    }
     execContextStack.push(eCtx);
     this.runTopOfStack();
   }
@@ -170,3 +181,4 @@ public class InterpretSupervisor {
     }
   }
 }
+

@@ -70,7 +70,9 @@ public final class ComponentBuffer {
      */
     final PeopleCodeProg compProg = compDefn.getProgramForEvent(event);
     if (compProg != null) {
-      final ExecContext eCtx = new ProgramExecContext(compProg);
+      // Note: root component events like PreBuild and PostBuild always
+      // run at scroll level 0 and row 0.
+      final ExecContext eCtx = new ProgramExecContext(compProg, 0, 0);
 
       // IMPORTANT: Buffer context for Component-level events like PreBuild
       // and PostBuild have the first (and only) row of the level zero rowset

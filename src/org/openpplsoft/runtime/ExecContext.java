@@ -20,7 +20,17 @@ public abstract class ExecContext {
   public ParseTree startNode;
   public LinkedList<Scope> scopeStack;
 
-  public ExecContext(PeopleCodeProg p) {
+  /*
+   * The level (scroll) the program to be run resides on, along with
+   * the row of the of that level (scroll) the program is being run in.
+   * App class exec contexts do not have these values set at instantiation b/c
+   * they are not wedded to the component processor; the interpreter supervisor
+   * will set the values manually (using the values of the context immediately
+   * preceding it on the stack) before loading those contexts onto the stack.
+   */
+  private int execCBufferScrollLevel = -1, execCBufferRowIdx = -1;
+
+  public ExecContext(final PeopleCodeProg p) {
     this.prog = p;
     this.startNode = p.getParseTree();
     this.scopeStack = new LinkedList<Scope>();
@@ -30,6 +40,22 @@ public abstract class ExecContext {
     public OPSVMachIdentifierResolutionException(final String msg) {
       super(msg);
     }
+  }
+
+  public void setExecutionScrollLevel(final int lvl) {
+    this.execCBufferScrollLevel = lvl;
+  }
+
+  public int getExecutionScrollLevel() {
+    return this.execCBufferScrollLevel;
+  }
+
+  public void setExecutionRowIdx(final int idx) {
+    this.execCBufferRowIdx = idx;
+  }
+
+  public int getExecutionRowIdx() {
+    return this.execCBufferRowIdx;
   }
 
   public void pushScope(Scope s) {

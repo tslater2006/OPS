@@ -98,6 +98,9 @@ public class Environment {
       case "%UserId":
         a = systemVarTable.get("%OperatorId");
         break;
+      case "%PanelGroup":
+        a = systemVarTable.get("%Component");
+        break;
       default:
         a = systemVarTable.get(var);
     }

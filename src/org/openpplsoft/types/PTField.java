@@ -397,7 +397,12 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   public int determineScrollLevel() {
-    return 0;
+    if (this.parentRecord != null) {
+      return this.parentRecord.determineScrollLevel();
+    }
+
+    throw new OPSVMachRuntimeException("Failed to determine scroll level for "
+        + "this field; parent record is null.");
   }
 
   @Override

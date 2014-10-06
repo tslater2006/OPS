@@ -19,4 +19,5 @@ public interface ICBufferEntity {
       final String fieldName, final Keylist keylist);
   void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary);
+  int determineScrollLevel();
 }

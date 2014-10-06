@@ -243,6 +243,18 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
         + "row does not exist in this rowset.");
   }
 
+  public int determineScrollLevel() {
+    if (this == ComponentBuffer.getCBufferRowset()) {
+      return -1;
+    } else if (this.parentRow != null) {
+      return 1 + this.parentRow.determineScrollLevel();
+    } else {
+      throw new OPSVMachRuntimeException("Unable to determine scroll level "
+          + "for this rowset; this is not the root cbuffer rowset, but "
+          + "the parent row is null, so unable to continue traversal.");
+    }
+  }
+
   /**
    * Sort the rows in the rowset; the exact order ("A" for ascending,
    * "D" for descending) must be passed on the OPS runtime stack.

@@ -265,7 +265,12 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   }
 
   public int determineScrollLevel() {
-    return 0;
+    if (this.parentRow != null) {
+      return this.parentRow.determineScrollLevel();
+    }
+
+    throw new OPSVMachRuntimeException("Failed to determine scroll level of "
+        + "this record; parent row is null.");
   }
 
   /**

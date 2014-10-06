@@ -231,6 +231,15 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
         + "row in parent rowset; parent rowset is null.");
   }
 
+  public int determineScrollLevel() {
+    if (this.parentRowset != null) {
+      return this.parentRowset.determineScrollLevel();
+    }
+
+    throw new OPSVMachRuntimeException("Unable to determine scroll level "
+        + "for this row; parent rowset is null.");
+  }
+
   /**
    * Implementation of GetRecord method for the PeopleTools
    * row class.

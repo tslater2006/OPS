@@ -114,8 +114,13 @@ public class InterpretSupervisor {
           (execContextStack.size() == 1 ? "start" : "start-ext"),
               String.format("%02d", execContextStack.size() - 1),
                   methodOrFuncName, descriptor));
+
+      // Internally (in OPS) the search record has a scroll level of -1;
+      // for trace file purposes though, search records are on level 0.
+      int execScrollLevel = Math.max(0, context.getExecutionScrollLevel());
+
       TraceFileVerifier.submitEnforcedEmission(new PCBegin(descriptor,
-          context.getExecutionScrollLevel(), context.getExecutionRowIdx()));
+          execScrollLevel, context.getExecutionRowIdx()));
     }
 
     InterpreterVisitor interpreter = new InterpreterVisitor(context, this);

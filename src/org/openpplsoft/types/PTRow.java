@@ -222,6 +222,15 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     return this.recordMap.containsKey(recName);
   }
 
+  public int getIndexOfThisRowInParentRowset() {
+    if (this.parentRowset != null) {
+      return this.parentRowset.getIndexOfRow(this);
+    }
+
+    throw new OPSVMachRuntimeException("Unable to get index of this "
+        + "row in parent rowset; parent rowset is null.");
+  }
+
   /**
    * Implementation of GetRecord method for the PeopleTools
    * row class.

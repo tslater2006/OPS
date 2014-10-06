@@ -145,7 +145,8 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     final PeopleCodeProg compProg = ComponentBuffer.getComponentDefn()
         .getProgramForRecordEvent(event, this.recDefn);
     if (compProg != null) {
-      final ExecContext eCtx = new ProgramExecContext(compProg);
+      final ExecContext eCtx = new ProgramExecContext(compProg,
+          this.determineScrollLevel(), this.determineRowIndex());
       // Pass this record to the supervisor as the component buffer context.
       final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
       interpreter.run();
@@ -242,12 +243,29 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
           .generateKeylist(fieldName, keylist);
   }
 
+  public PTRow getParentRow() {
+    return this.parentRow;
+  }
+
   /**
    * Retrieves the underlying record defn.
    * @return the underlying record defn
    */
   public Record getRecDefn() {
     return this.recDefn;
+  }
+
+  public int determineRowIndex() {
+    if (this.parentRow != null) {
+      return this.parentRow.getIndexOfThisRowInParentRowset();
+    }
+
+    throw new OPSVMachRuntimeException("Failed to determine ancestral row "
+        + "index; parent row is null.");
+  }
+
+  public int determineScrollLevel() {
+    return 0;
   }
 
   /**

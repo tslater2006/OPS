@@ -17,7 +17,10 @@ public class ProgramExecContext extends ExecContext {
   public String funcName;
   public ParseTree funcStartNode;
 
-  public ProgramExecContext(PeopleCodeProg p) {
+  public ProgramExecContext(PeopleCodeProg p,
+      final int cBufferLevel, final int cBufferRow) {
     super(p);
+    this.setExecutionScrollLevel(cBufferLevel);
+    this.setExecutionRowIdx(cBufferRow);
   }
 }

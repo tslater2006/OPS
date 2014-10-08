@@ -1424,9 +1424,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitWhenBranch(
       final PeopleCodeParser.WhenBranchContext ctx) {
 
-    if (ctx.op != null) {
-      throw new OPSVMachRuntimeException("Encountered relational op in when "
-          + "branch, not yet supported.");
+    // The equality relation is assumed if ommitted.
+    if (ctx.op != null && !ctx.op.getText().equals("=")) {
+      throw new OPSVMachRuntimeException("Encountered unsupported relational "
+          + "op in when branch: " + ctx.op.getText());
     }
 
     final EvaluateConstruct evalConstruct = this.evalConstructStack.peek();

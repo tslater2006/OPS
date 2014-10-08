@@ -84,9 +84,9 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
 
-    // FieldFormula events are fired only on fields with an associated buffer
-    // in the component.
-    if (event == PCEvent.FIELD_FORMULA && this.recFieldBuffer == null) {
+    // PeopleCode events fire only on entities in the component buffer
+    // (make exception for SearchInit, as search record does not have a buffer).
+    if (this.recFieldBuffer == null && event != PCEvent.SEARCH_INIT) {
       return;
     }
 

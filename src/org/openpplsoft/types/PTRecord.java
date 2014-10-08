@@ -125,16 +125,17 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
 
-    // FieldFormula event fires only on records and record fields with an
-    // associated buffer in the component.
-    if (event == PCEvent.FIELD_FORMULA && this.recBuffer == null) {
-      return;
-    }
-
     // Fire event on each field in this record.
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
       entry.getValue().deref().fireEvent(event, fireEventSummary);
+    }
+
+    // PeopleCode events fire only on entities in the component buffer.
+    // (make an exception for SearchInit, as search records do not have a buffer
+    // in component  technically).
+    if (this.recBuffer == null && event != PCEvent.SEARCH_INIT) {
+      return;
     }
 
     /*

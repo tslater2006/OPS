@@ -90,6 +90,8 @@ public final class Main {
       ComponentBuffer.fireEvent(PCEvent.PRE_BUILD, new FireEventSummary());
       ComponentBuffer.runDefaultProcessing();
 
+      ComponentBuffer.fireEvent(PCEvent.ROW_INIT, new FireEventSummary());
+
       //ComponentBuffer.printContents();
 
       TraceFileVerifier.logVerificationSummary(false);

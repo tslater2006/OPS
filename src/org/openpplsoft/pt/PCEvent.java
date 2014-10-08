@@ -11,7 +11,8 @@ public enum PCEvent {
   SEARCH_INIT("SearchInit"),
   PRE_BUILD("PreBuild"),
   FIELD_DEFAULT("FieldDefault"),
-  FIELD_FORMULA("FieldFormula");
+  FIELD_FORMULA("FieldFormula"),
+  ROW_INIT("RowInit");
 
   private String name;
 

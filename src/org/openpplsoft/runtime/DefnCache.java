@@ -31,6 +31,7 @@ public final class DefnCache {
   private static Map<Integer, MsgSet> msgSets;
   private static Map<String, HTML> html;
   private static Map<String, SQL> sql;
+  private static Map<String, User> users;
 
   private static Logger log = LogManager.getLogger(DefnCache.class.getName());
 
@@ -44,6 +45,7 @@ public final class DefnCache {
     msgSets = new HashMap<Integer, MsgSet>();
     html = new HashMap<String, HTML>();
     sql = new HashMap<String, SQL>();
+    users = new HashMap<String, User>();
   }
 
   private DefnCache() {}
@@ -222,4 +224,15 @@ public final class DefnCache {
     }
     return s;
   }
+
+  public static User getUser(final String oprid) {
+    User u = users.get(oprid);
+    if (u == null) {
+      log.debug("Caching User defn for {}", oprid);
+      u = new User(oprid);
+      users.put(oprid, u);
+    }
+    return u;
+  }
+
 }

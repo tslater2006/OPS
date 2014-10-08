@@ -39,6 +39,7 @@
   <bean id="SSS_STUDENT_CENTER"
     class="org.openpplsoft.runtime.ComponentRuntimeProfile">
     <constructor-arg value="SSS_STUDENT_CENTER"/>
+    <constructor-arg value="KADAMS"/>
     <constructor-arg value="003_KADAMS_SSS_STUDENT_CENTER.tracesql"/>
     <constructor-arg value="2013-10-04"/>
   </bean>
@@ -46,6 +47,7 @@
   <bean id="CLASS_SEARCH"
     class="org.openpplsoft.runtime.ComponentRuntimeProfile">
     <constructor-arg value="CLASS_SEARCH"/>
+    <constructor-arg value="KADAMS"/>
     <constructor-arg value="004_KADAMS_CLASS_SEARCH.tracesql"/>
     <constructor-arg value="2013-11-06"/>
   </bean>
@@ -53,6 +55,7 @@
   <bean id="SSR_SSENRL_LIST"
     class="org.openpplsoft.runtime.ComponentRuntimeProfile">
     <constructor-arg value="SSR_SSENRL_LIST"/>
+    <constructor-arg value="KADAMS"/>
     <constructor-arg value="007_KADAMS_SSR_SSENRL_LIST.tracesql"/>
     <constructor-arg value="2014-01-15"/>
   </bean>
@@ -60,6 +63,7 @@
   <bean id="SSR_SSENRL_ADD"
     class="org.openpplsoft.runtime.ComponentRuntimeProfile">
     <constructor-arg value="SSR_SSENRL_ADD"/>
+    <constructor-arg value="KADAMS"/>
     <constructor-arg value="006_KADAMS_SSR_SSENRL_ADD.tracesql"/>
     <constructor-arg value="2013-11-16"/>
   </bean>

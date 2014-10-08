@@ -247,3 +247,9 @@ DBTYPE, EFFDT DESC , SEQNUM
 #[enforced]:  false
 select sysdate from dual
 
+=!========================================================================
+
+###[label]:   query.PSOPRDEFN
+#[enforced]:  false
+select * from PSOPRDEFN where OPRID = ?
+

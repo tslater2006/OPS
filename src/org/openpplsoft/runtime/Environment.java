@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.lang.reflect.Method;
 
+import org.openpplsoft.pt.*;
 import org.openpplsoft.types.*;
 import org.openpplsoft.runtime.*;
 import org.apache.logging.log4j.*;
@@ -22,6 +23,7 @@ public class Environment {
 
   // i.e., XENCSDEV, ENTCSDEV (appears in PS URLs)
   public static String psEnvironmentName;
+  private static User user;
 
   private static Map<String, PTPrimitiveType> systemVarTable;
   private static Map<String, Callable> systemFuncTable;
@@ -51,6 +53,14 @@ public class Environment {
           GlobalFnLibrary.class));
       }
     }
+  }
+
+  public static void init(final String psEnviName, final String oprid) {
+    psEnvironmentName = psEnviName;
+    user = DefnCache.getUser(oprid);
+    Environment.setSystemVar("%OperatorId", new PTString(user.getOprid()));
+    Environment.setSystemVar("%EmployeeId", new PTString(user.getEmplid()));
+    Environment.setSystemVar("%OperatorClass", new PTString(user.getOprClass()));
   }
 
   /**

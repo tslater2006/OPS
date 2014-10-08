@@ -19,18 +19,23 @@ import java.text.ParseException;
  */
 public class ComponentRuntimeProfile {
 
-  private String componentName, tracefileName;
+  private String componentName, tracefileName, oprid;
   private PTDate tracefileDate;
 
-  public ComponentRuntimeProfile(final String c, final String tfName,
-      final String tfDate) {
+  public ComponentRuntimeProfile(final String c, final String oprid,
+      final String tfName, final String tfDate) {
     this.componentName = c;
+    this.oprid = oprid;
     this.tracefileName = tfName;
     this.tracefileDate = new PTDate(tfDate);
   }
 
   public String getComponentName() {
     return this.componentName;
+  }
+
+  public String getOprid() {
+    return this.oprid;
   }
 
   public String getTraceFileName() {

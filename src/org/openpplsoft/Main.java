@@ -50,12 +50,11 @@ public final class Main {
     try {
       Runtime.getRuntime().addShutdownHook(new ENTShutdownHook());
       TraceFileVerifier.init(profileToRun);
-      Environment.psEnvironmentName = (String) ctx.getBean("psEnvironmentName");
+      Environment.init((String) ctx.getBean("psEnvironmentName"),
+          profileToRun.getOprid());
 
       Environment.setSystemVar("%Component", new PTString(profileToRun.getComponentName()));
       Environment.setSystemVar("%Menu", new PTString("SA_LEARNER_SERVICES"));
-      Environment.setSystemVar("%OperatorId", new PTString("KADAMS"));
-      Environment.setSystemVar("%EmployeeId", new PTString("AA0001"));
       Environment.setSystemVar("%Action_UpdateDisplay", new PTString("U"));
       Environment.setSystemVar("%Action_Add", new PTString("A"));
 

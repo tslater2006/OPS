@@ -464,17 +464,22 @@ public final class StmtLibrary {
         String keyValue = null;
 
         /*
-         * If this is the OPRID field, PS automatically adds a WHERE clause
-         * to select only those records where OPRID equals %OperatorId if
+         * (Row level security): :If this is the OPRID or OPRCLASS field, PS
+         * automatically adds a WHERE clause
+         * to select only those records where OPRID equals %OperatorId or OPRCLASS
+         * equals %OperatorClass if
          * both of the following are true:
-         * 1) OPRID is a key on the record being queried
-         * 2) OPRID is NOT a list box item (meaning it doesn't appear in the
+         * 1) OPRID/OPRCLASS is a key on the record being queried
+         * 2) OPRID/OPRCLASS is NOT a list box item (meaning it doesn't appear in the
          *    results shown to the user in the "list box" on the search page.
          * If both of those are true, add the condition now.
          */
         if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
           keyValue = Environment.getSystemVar("%OperatorId").readAsString();
           log.debug("Using %OperatorId for OPRID field.");
+        } else if (rf.FIELDNAME.equals("OPRCLASS") && rf.isKey() && !rf.isListBoxItem()) {
+          keyValue = Environment.getSystemVar("%OperatorClass").readAsString();
+          log.debug("Using %OperatorClass for OPRCLASS field.");
         } else {
           final Keylist keylist = new Keylist();
           fieldBeingDefaulted.getParentRecord()

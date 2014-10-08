@@ -142,6 +142,15 @@ public class InterpreterEmissionsFilter {
         continue;
       }
 
+      // Don't emit End-Evaluate statements directly after a When
+      // branch emission.
+      if (i.startsWith("End-Evaluate")
+          && prev.getInstruction().startsWith("When")) {
+        this.pendingInstrEmissions.removeFirst();
+        this.inspectedInstrEmissions.addLast(instr);
+        continue;
+      }
+
       // Don't emit this instruction emission if the previously
       // inspected emission (*regardless of whether it was actually
       // submitted to the trace file verifier or not*) lacked a

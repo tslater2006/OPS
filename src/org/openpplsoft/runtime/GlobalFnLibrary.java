@@ -40,7 +40,12 @@ public class GlobalFnLibrary {
     if(p instanceof PTField) {
       return doesContainValue(((PTField)p).getValue());
     } else if(p instanceof PTString) {
+      // IMPORTANT: PS uses " " for blanks, but "" is also indicative of
+      // an absent value, so must check this before checking PrimitiveType values
+      // in general (next conditional).
       return ((PTString) p).read().trim().length() > 0;
+    } else if(p instanceof PTPrimitiveType) {
+      return !((PTPrimitiveType) p).isBlank();
     } else if(p instanceof PTRecord) {
       /*
        * IMPORTANT: I am not sure if this is accurate. PT documentation

@@ -56,6 +56,9 @@ public final class TraceFileVerifier {
   private static final int GROUP4 = 4;
   private static final int GROUP5 = 5;
 
+  private static boolean isPausedAndWaitingToSyncUp;
+  private static IEmission emissionToSyncUpOn;
+
   private static Logger log = LogManager.getLogger(
       TraceFileVerifier.class.getName());
 
@@ -151,19 +154,24 @@ public final class TraceFileVerifier {
       log.debug(opsEmission);
    // }
 
+    if (isPausedAndWaitingToSyncUp) {
+      log.warn("[PAUSED] TRACE FILE VERIFIER IS PAUSED and waiting for interpreter "
+        + "to emit: {}", emissionToSyncUpOn);
+    }
+
     IEmission traceEmission;
     if (coverageAreaStartLineNbr == 0) {
-    /*
-     * If this is the first emission being matched, seek
-     * to the match in the trace file. It is assumed that the first
-     * OPS emission is a SQL statement due to the need to get component
-     * metadata; if this routine is used to check tracefiles that have been
-     * generated with a non-empty cache, this assumption may not be valid.
-     */
-    do {
-      traceEmission = getNextTraceEmission();
-    } while (traceEmission != null
-          && !opsEmission.equals(traceEmission));
+      /*
+       * If this is the first emission being matched, seek
+       * to the match in the trace file. It is assumed that the first
+       * OPS emission is a SQL statement due to the need to get component
+       * metadata; if this routine is used to check tracefiles that have been
+       * generated with a non-empty cache, this assumption may not be valid.
+       */
+      do {
+        traceEmission = getNextTraceEmission();
+      } while (traceEmission != null
+            && !opsEmission.equals(traceEmission));
 
       if (traceEmission != null) {
         coverageAreaStartLineNbr = currTraceLineNbr;
@@ -171,7 +179,11 @@ public final class TraceFileVerifier {
         return;
       }
     } else {
-      traceEmission = getNextTraceEmission();
+      if (isPausedAndWaitingToSyncUp) {
+        traceEmission = emissionToSyncUpOn;
+      } else {
+        traceEmission = getNextTraceEmission();
+      }
     }
 
     if (traceEmission == null) {
@@ -180,13 +192,47 @@ public final class TraceFileVerifier {
     }
 
     if (opsEmission.equals(traceEmission)) {
-
       // Increment emission-specific counter.
       if (opsEmission instanceof OPSStmt) {
         numEnforcedSQLEmissions++;
       } else {
         numPCEmissionMatches++;
       }
+
+      if (isPausedAndWaitingToSyncUp) {
+        log.warn("[RESUMED] Trace file verifier is now synced up with interpreter on matching "
+            + "emission: {}", opsEmission);
+        isPausedAndWaitingToSyncUp = false;
+        emissionToSyncUpOn = null;
+      }
+    } else if (isPausedAndWaitingToSyncUp) {
+      log.warn("[SKIPPED] Trace file verifier is paused and waiting to sync up; disregarding "
+          + "this OPS emission: {}", opsEmission);
+
+    /*
+     * Look at DERIVED_CS.SRVC_IND_NEG.RowInit. There is a Break statement without a trailing
+     * semicolon. Although this is legal (in PeopleCode, semicolons are optional for the last
+     * statement in any statement list), the PeopleTools bytecode interpreter does not appear
+     * to interpret this correctly in the context of When statement lists in Evaluate statements;
+     * it appears to skip When branches until it reaches the next statement with a semicolon.
+     * I do not want to have to add semicolons to all programs where this is the case, so I am going
+     * to temporarily pause trace file verification until the interpreter emits that next
+     * statement with a semicolon. In theory, this should only cause the verifier to be paused for
+     * a few emissions.
+     */
+    } else if (opsEmission instanceof PCInstruction
+        && traceEmission instanceof PCInstruction
+        && ((PCInstruction) traceEmission).getInstruction().equals("Break")) {
+
+      // If we don't have a match and the trace file emitted a Break w/o semicolon, pause
+      // and wait for interpreter to sync up.
+      isPausedAndWaitingToSyncUp = true;
+      emissionToSyncUpOn = getNextTraceEmission();
+
+      log.warn("[PAUSING] Trace file verification; trace file expects Break w/o semicolon; "
+          + "this is a known problem emission, so we will wait for interpreter to sync up "
+          + "on the trace emission immediately after it: {}", emissionToSyncUpOn);
+
     } else {
       log.fatal("=== Emission Mismatch! =======================");
       log.fatal("OPS emitted: {}", opsEmission);

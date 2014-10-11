@@ -1765,13 +1765,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private PTNumberType getOrDerefNumber(final PTType rawExpr) {
     if (rawExpr instanceof PTNumberType) {
       return (PTNumberType) rawExpr;
-    } else if (rawExpr instanceof PTReference
-        && ((PTReference) rawExpr).deref() instanceof PTNumberType) {
-      return (PTNumberType) ((PTReference) rawExpr).deref();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either a number or a reference "
-          + "to one (getOrDerefNumber).");
+    } else if (rawExpr instanceof PTReference) {
+      final PTReference ref = ((PTReference) rawExpr);
+      final PTType derefedVal = ref.deref();
+      if (derefedVal instanceof PTNumberType) {
+        return (PTNumberType) derefedVal;
+      } else if (ref instanceof PTAnyTypeReference) {
+        ((PTAnyTypeReference) ref).castTo(PTNumber.getTc());
+        return (PTNumberType) ((PTReference) ref).deref();
+      }
     }
+
+    throw new OPSVMachRuntimeException("Expected either a number or a reference "
+        + "to one (getOrDerefNumber).");
   }
 
   private PTBoolean getOrDerefBoolean(final PTType rawExpr) {

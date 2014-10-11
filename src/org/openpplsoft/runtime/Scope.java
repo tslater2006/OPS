@@ -95,7 +95,12 @@ public class Scope {
       }
     }
 
-    PTReference<PTType> newSymTableRef = new PTReference<PTType>(tc, initialValue);
+    PTReference<PTType> newSymTableRef = null;
+    if (tc instanceof PTAnyTypeConstraint) {
+      newSymTableRef = new PTAnyTypeReference(tc, initialValue);
+    } else {
+      newSymTableRef = new PTReference<PTType>(tc, initialValue);
+    }
     log.debug("Declared {} with ref = {}", id, newSymTableRef);
     this.symbolTable.put(id, newSymTableRef);
   }

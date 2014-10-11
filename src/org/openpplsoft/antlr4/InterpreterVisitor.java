@@ -1358,6 +1358,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         case "Field":
           typeConstraint = new PTFieldTypeConstraint();
           break;
+        case "Row":
+          typeConstraint = new PTRowTypeConstraint();
+          break;
         default:
           throw new OPSVMachRuntimeException("Unexpected data type: "
               + ctx.GENERIC_ID().getText());

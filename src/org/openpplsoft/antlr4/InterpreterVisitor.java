@@ -392,14 +392,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "in For construct; not yet supported.");
     }
 
-    PTNumberType counter = null;
-    try {
-      counter = this.getOrDerefNumber(
+    final PTNumberType counter = this.getOrDerefNumber(
           this.eCtx.resolveIdentifier(ctx.VAR_ID().getText()));
-    } catch(final ExecContext.OPSVMachIdentifierResolutionException ire) {
-      throw new OPSVMachRuntimeException("Unable to resolve var id in For "
-          + "stmt.", ire);
-    }
 
     visit(ctx.expr(0));
     final PTNumberType initialExpr =
@@ -1073,27 +1067,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     } else if (ctx.VAR_ID() != null) {
 
-      PTType a = null;
       final String varId = ctx.VAR_ID().getText();
-      try {
-        a = this.eCtx.resolveIdentifier(varId);
-      } catch(final ExecContext.OPSVMachIdentifierResolutionException ire1) {
+      final PTType a = this.eCtx.resolveIdentifier(varId);
 
-        /*
-         * If the var identifier cannot be resolved, it must be auto-declared,
-         * which is one of the saddest language features of PeopleCode.
-         * Auto-declared vars always have Local scope and are of type Any.
-         */
-        this.declareIdentifier("Local", varId, new PTAnyTypeConstraint());
-        log.debug("Auto-declared identifier {} (Local scope, of type Any).", varId);
-
-        try {
-          a = this.eCtx.resolveIdentifier(varId);
-        } catch(final ExecContext.OPSVMachIdentifierResolutionException ire2) {
-          throw new OPSVMachRuntimeException("Failed to resolve identifier "
-              + varId + " after auto-declaring it.", ire2);
-        }
-      }
       //log.debug("Resolved {} to {}.", ctx.VAR_ID().getText(), a);
       this.setNodeData(ctx, a);
 

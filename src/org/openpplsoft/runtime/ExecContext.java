@@ -14,7 +14,12 @@ import java.util.*;
 import org.openpplsoft.types.*;
 import org.openpplsoft.runtime.*;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 public abstract class ExecContext {
+
+  private static final Logger log = LogManager.getLogger(ExecContext.class.getName());
 
   public PeopleCodeProg prog;
   public ParseTree startNode;
@@ -34,12 +39,6 @@ public abstract class ExecContext {
     this.prog = p;
     this.startNode = p.getParseTree();
     this.scopeStack = new LinkedList<Scope>();
-  }
-
-  public class OPSVMachIdentifierResolutionException extends Exception {
-    public OPSVMachIdentifierResolutionException(final String msg) {
-      super(msg);
-    }
   }
 
   public void setExecutionScrollLevel(final int lvl) {
@@ -83,8 +82,7 @@ public abstract class ExecContext {
     }
   }
 
-  public PTType resolveIdentifier(String id)
-      throws OPSVMachIdentifierResolutionException {
+  public PTType resolveIdentifier(final String id) {
 
     /*
      * Search through the stack of scopes;
@@ -107,9 +105,14 @@ public abstract class ExecContext {
       return Environment.globalScope.resolveVar(id);
     }
 
-    throw new OPSVMachIdentifierResolutionException(
-        "Unable to resolve identifier ("
-        + id + ") to PTType after checking all scopes.");
+    /*
+     * If the var identifier cannot be resolved, it must be auto-declared,
+     * which is one of the saddest language features of PeopleCode.
+     * Auto-declared vars always have Local scope and are of type Any.
+     */
+    this.declareLocalVar(id, new PTAnyTypeConstraint());
+    log.warn("Auto-declared identifier {} (Local scope, of type Any).", id);
+    return this.resolveIdentifier(id);
   }
 }
 

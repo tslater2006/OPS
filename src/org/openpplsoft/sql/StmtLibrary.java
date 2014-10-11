@@ -180,7 +180,7 @@ public final class StmtLibrary {
       }
     }
 
-    query.append(" FROM PS_").append(recDefn.RECNAME).append(" WHERE ");
+    query.append(" FROM ").append(recDefn.getDbTableName()).append(" WHERE ");
 
     i = 0;
     for (RecordField rf : rfList) {
@@ -359,8 +359,8 @@ public final class StmtLibrary {
            * Insert subquery for EFFDT field.
            */
           query.append("(")
-             .append("SELECT MAX(EFFDT) FROM PS_")
-             .append(recDefn.RECNAME)
+             .append("SELECT MAX(EFFDT) FROM ")
+             .append(recDefn.getDbTableName())
              .append(" B WHERE ");
 
           boolean isFirstKeyOnSub = true;
@@ -447,7 +447,7 @@ public final class StmtLibrary {
       query.append(aliasedFields[i]);
     }
 
-    query.append(" FROM PS_").append(defaultRecDefn.RECNAME);
+    query.append(" FROM ").append(defaultRecDefn.getDbTableName());
 
     int i = 0;
     for (RecordField rf : rfList) {
@@ -560,7 +560,7 @@ public final class StmtLibrary {
     }
 
     selectClause.append(" FROM ").append(recDefn
-        .getFullDatabaseRecordName()).append(" ").append(tableAlias);
+        .getDbTableName()).append(" ").append(tableAlias);
 
     return selectClause.toString();
   }
@@ -703,7 +703,7 @@ public final class StmtLibrary {
       }
     }
 
-    query.append(" FROM PS_").append(recDefn.RECNAME);
+    query.append(" FROM ").append(recDefn.getDbTableName());
 
     int i = 0;
     for (RecordField rf : rfList) {

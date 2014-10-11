@@ -154,20 +154,6 @@ public class Record {
     }
   }
 
-  /**
-   * Gets the full name of the record, as it
-   * exists in the DBMS schema. For most tables (except PS system
-   * tables), this is the RECNAME prefixed with "PS_".
-   * @return the name of the DBMS table associated with this record
-   */
-  public String getFullDatabaseRecordName() {
-    if(this.RECNAME.equals("PSXLATITEM")) {
-      return this.RECNAME;
-    } else {
-      return "PS_" + this.RECNAME;
-    }
-  }
-
   public boolean isTable() {
     return this.RECTYPE == 0;
   }
@@ -284,6 +270,13 @@ public class Record {
 
   public List<PeopleCodeProg> getRecordProgsForField(String FLDNAME) {
     return this.recordProgsByFieldTable.get(FLDNAME);
+  }
+
+  public String getDbTableName() {
+    if (this.RECNAME.startsWith("PS")) {
+      return this.RECNAME;
+    }
+    return "PS_" + this.RECNAME;
   }
 
   @Override

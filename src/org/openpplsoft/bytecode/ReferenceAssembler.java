@@ -97,7 +97,7 @@ public class ReferenceAssembler extends ElementAssembler {
      * Before emitting the reference text, emit the reference index.
      * This is required during component loading.
      */
-    stream.appendAssembledText("#ENTREF{" + refIdx + "}");
+    stream.appendAssembledText("#OPSREF{" + refIdx + "}");
     stream.appendAssembledText(ref);
   }
 }

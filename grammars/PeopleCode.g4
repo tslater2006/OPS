@@ -145,4 +145,4 @@ COMMENT_3 : '/+' .*? '+/' ';'? -> skip;
 WS        : [ \t\r\n]+ -> channel(WHITESPACE_CHANNEL);
 
 // Reference indices are emitted on a separate channel.
-ENT_REF_IDX : '#ENTREF{' IntegerLiteral '}' -> channel(REFERENCES_CHANNEL) ;
+OPS_REF_IDX : '#OPSREF{' IntegerLiteral '}' -> channel(REFERENCES_CHANNEL) ;

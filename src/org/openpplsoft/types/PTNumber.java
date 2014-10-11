@@ -127,8 +127,19 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
 
   @Override
   public PTBoolean isGreaterThanOrEqual(PTPrimitiveType op) {
-    throw new OPSDataTypeException("isGreaterThanOrEqual not "
-        + "supported.");
+    if(op instanceof PTNumber) {
+      if(this.value.compareTo(((PTNumber) op).read()) >= 0) {
+        return new PTBoolean(true);
+      }
+    } else if (op instanceof PTInteger) {
+      if (this.value.compareTo(new BigDecimal(((PTInteger) op).read())) >= 0) {
+        return new PTBoolean(true);
+      }
+    } else {
+      throw new OPSDataTypeException("Expected op to be PTNumber or PTInteger.");
+    }
+
+    return new PTBoolean(false);
   }
 
   @Override

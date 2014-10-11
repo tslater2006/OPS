@@ -1110,8 +1110,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           this.supervisor.resolveContextualCBufferReference(id);
       if (resolvedCBufferRef != null) {
 
-        log.debug("Resolved GENERIC_ID: {} to the following buffer reference :{}",
-            id, resolvedCBufferRef);
+//        log.debug("Resolved GENERIC_ID: {} to the following buffer reference :{}",
+//             id, resolvedCBufferRef);
 
         this.setNodeData(ctx, resolvedCBufferRef);
 

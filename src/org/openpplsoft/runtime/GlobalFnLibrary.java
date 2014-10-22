@@ -648,6 +648,21 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(sqlObj);
   }
 
+  public static void PT_SQLExec() {
+
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if(args.size() == 0
+        || !(args.get(0) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected at least 1 arg, "
+          + "the first being of type PTString containing SQL text to "
+          + "execute; (NOTE: it is possible for a SQL object to be passed "
+          + "as the first arg instead of a string).");
+    }
+
+    throw new OPSVMachRuntimeException("TODO: Complete SQLExec implementation.");
+  }
+
   /*==================================*/
   /* Shared OPS functions             */
   /*==================================*/

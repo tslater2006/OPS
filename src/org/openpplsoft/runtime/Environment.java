@@ -167,4 +167,66 @@ public class Environment {
     Collections.reverse(args);
     return args;
   }
+
+  public static PTType getOrDeref(final PTType rawExpr) {
+    if (rawExpr instanceof PTReference) {
+      return ((PTReference) rawExpr).deref();
+    }
+    return rawExpr;
+  }
+
+  public static PTPrimitiveType getOrDerefPrimitive(final PTType rawExpr) {
+    if (rawExpr instanceof PTPrimitiveType) {
+      return (PTPrimitiveType) rawExpr;
+    } else if (rawExpr instanceof PTReference) {
+        return getOrDerefPrimitive(((PTReference) rawExpr).deref());
+    } else if (rawExpr instanceof PTField) {
+      return ((PTField) rawExpr).getValue();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a primitive, a reference "
+          + "to one, or a Field (getOrDerefPrimitive): " + rawExpr);
+    }
+  }
+
+  public static PTObjectType getOrDerefObject(final PTType rawExpr) {
+    if (rawExpr instanceof PTObjectType) {
+      return (PTObjectType) rawExpr;
+    } else if (rawExpr instanceof PTReference
+        && ((PTReference) rawExpr).deref() instanceof PTObjectType) {
+      return (PTObjectType) ((PTReference) rawExpr).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either an object or a reference "
+          + "to one (getOrDerefObject).");
+    }
+  }
+
+  public static PTNumberType getOrDerefNumber(final PTType rawExpr) {
+    if (rawExpr instanceof PTNumberType) {
+      return (PTNumberType) rawExpr;
+    } else if (rawExpr instanceof PTReference) {
+      final PTReference ref = ((PTReference) rawExpr);
+      final PTType derefedVal = ref.deref();
+      if (derefedVal instanceof PTNumberType) {
+        return (PTNumberType) derefedVal;
+      } else if (ref instanceof PTAnyTypeReference) {
+        ((PTAnyTypeReference) ref).castTo(PTNumber.getTc());
+        return (PTNumberType) ((PTReference) ref).deref();
+      }
+    }
+
+    throw new OPSVMachRuntimeException("Expected either a number or a reference "
+        + "to one (getOrDerefNumber).");
+  }
+
+  public static PTBoolean getOrDerefBoolean(final PTType rawExpr) {
+    if (rawExpr instanceof PTBoolean) {
+      return (PTBoolean) rawExpr;
+    } else if (rawExpr instanceof PTReference
+        && ((PTReference) rawExpr).deref() instanceof PTBoolean) {
+      return (PTBoolean) ((PTReference) rawExpr).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected either a boolean or a reference "
+          + "to one (getOrDerefBoolean).");
+    }
+  }
 }

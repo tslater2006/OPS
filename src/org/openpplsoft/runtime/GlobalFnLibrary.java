@@ -14,6 +14,8 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.text.ParseException;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -650,7 +652,9 @@ public class GlobalFnLibrary {
 
   public static void PT_SQLExec() {
 
-    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+    // Do not get all args in their dereferenced form; outvars will likely
+    // be references and we need to preserve that.
+    List<PTType> args = Environment.getArgsFromCallStack();
 
     if(args.size() == 0
         || !(args.get(0) instanceof PTString)) {
@@ -660,7 +664,62 @@ public class GlobalFnLibrary {
           + "as the first arg instead of a string).");
     }
 
-    throw new OPSVMachRuntimeException("TODO: Complete SQLExec implementation.");
+    String sqlCmd = ((PTString) args.get(0)).read();
+    int nextArgIdx = 1;
+
+    // If this is a SELECT statement, prefix it with an uppercase "SELECT"
+    // followed by a space (no clue why, but this is what PS does).
+    Pattern selectPattern = Pattern.compile("^[Ss][Ee][Ll][Ee][Cc][Tt]");
+    Matcher selectMatcher = selectPattern.matcher(sqlCmd);
+    sqlCmd = selectMatcher.replaceFirst("SELECT ");
+
+    // Note: this regex uses positve lookbehind and lookahead.
+    Pattern bindIdxPattern = Pattern.compile("(?<=\\s*)(:\\d+)(?=\\s?)");
+    Matcher bindIdxMatcher = bindIdxPattern.matcher(sqlCmd);
+    List<String> bindVals = new ArrayList<String>();
+    while (bindIdxMatcher.find()) {
+
+      if (nextArgIdx >= args.size()) {
+        throw new OPSVMachRuntimeException("Expected another bind expr "
+            + "but reached the end of the provided argument list.");
+      }
+
+      final PTPrimitiveType bindExpr = Environment.getOrDerefPrimitive(
+          args.get(nextArgIdx++));
+      bindVals.add(bindExpr.readAsString());
+    }
+
+    // Replace all numbered bind indices with question marks.
+    bindIdxMatcher.reset();
+    sqlCmd = bindIdxMatcher.replaceAll("?");
+
+    final OPSStmt ostmt = new OPSStmt(sqlCmd,
+        bindVals.toArray(new String[bindVals.size()]),
+        OPSStmt.EmissionType.ENFORCED);
+    ResultSet rs = null;
+
+    try {
+      rs = ostmt.executeQuery();
+      /*
+       * SQLExec only selects the first row of a result set; it discards
+       * any rows after that. Additionally, the result set may legitimately
+       * be empty.
+       */
+      if (rs.next()) {
+        throw new OPSVMachRuntimeException("TODO: Bind out vars.");
+      }
+    } catch (final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    } finally {
+      try {
+        if (rs != null) { rs.close(); }
+        if (ostmt != null) { ostmt.close(); }
+      } catch (final java.sql.SQLException sqle) {
+        log.warn("Unable to close rs and/or ostmt in finally block.");
+      }
+    }
+
+    throw new OPSVMachRuntimeException("TODO: Complete SQLExec.");
   }
 
   /*==================================*/

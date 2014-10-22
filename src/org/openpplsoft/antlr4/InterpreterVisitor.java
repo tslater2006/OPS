@@ -358,7 +358,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     // Get value of conditional expression.
     visit(ctx.expr());
     final boolean exprResult =
-        getOrDerefBoolean(this.getNodeData(ctx.expr())).read();
+        Environment.getOrDerefBoolean(this.getNodeData(ctx.expr())).read();
 
     // If expression evaluates to true, visit the conditional body;
     // otherwise, visit the Else body if it exists.
@@ -392,7 +392,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "in For construct; not yet supported.");
     }
 
-    final PTNumberType counter = this.getOrDerefNumber(
+    final PTNumberType counter = Environment.getOrDerefNumber(
           this.eCtx.resolveIdentifier(ctx.VAR_ID().getText()));
 
     visit(ctx.expr(0));
@@ -404,7 +404,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     visit(ctx.expr(1));
     final PTNumberType toExpr =
-        this.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
+        Environment.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
 
     this.eFilter.emit(ctx);
     while (counter.isLessThanOrEqual(toExpr).read()) {
@@ -705,10 +705,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     visit(ctx.expr(0));
     final PTNumberType lhs =
-        this.getOrDerefNumber(this.getNodeData(ctx.expr(0)));
+        Environment.getOrDerefNumber(this.getNodeData(ctx.expr(0)));
     visit(ctx.expr(1));
     final PTNumberType rhs =
-        this.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
+        Environment.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
 
     if (ctx.m != null) {
       this.setNodeData(ctx, lhs.mul(rhs));
@@ -732,11 +732,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.ExprAddSubContext ctx) {
 
     visit(ctx.expr(0));
-    final PTNumberType lhs = this.getOrDerefNumber(
+    final PTNumberType lhs = Environment.getOrDerefNumber(
         this.getNodeData(ctx.expr(0)));
 
     visit(ctx.expr(1));
-    final PTNumberType rhs = this.getOrDerefNumber(
+    final PTNumberType rhs = Environment.getOrDerefNumber(
         this.getNodeData(ctx.expr(1)));
 
     if (ctx.a != null) {
@@ -779,7 +779,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr());
     visit(ctx.id());
 
-    final PTObjectType obj = this.getOrDerefObject(this.getNodeData(ctx.expr()));
+    final PTObjectType obj = Environment.getOrDerefObject(this.getNodeData(ctx.expr()));
     final PTType prop = obj.dotProperty(ctx.id().getText());
     final Callable call = obj.dotMethod(ctx.id().getText());
 
@@ -825,11 +825,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     //log.debug("BEGIN visitExprArrayIndex; expr is {}", ctx.expr().getText());
 
     visit(ctx.expr());
-    PTType t = this.getOrDeref(this.getNodeData(ctx.expr()));
+    PTType t = Environment.getOrDeref(this.getNodeData(ctx.expr()));
 
     for (PeopleCodeParser.ExprContext argCtx : ctx.exprList().expr()) {
       visit(argCtx);
-      PTType indexExpr = getOrDeref(this.getNodeData(argCtx));
+      PTType indexExpr = Environment.getOrDeref(this.getNodeData(argCtx));
 //      log.debug("About to index into {} with index expr {}.",
 //        t, indexExpr);
 
@@ -862,11 +862,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.ExprComparisonContext ctx) {
 
     visit(ctx.expr(0));
-    final PTPrimitiveType lhs = this.getOrDerefPrimitive(
+    final PTPrimitiveType lhs = Environment.getOrDerefPrimitive(
         this.getNodeData(ctx.expr(0)));
 
     visit(ctx.expr(1));
-    final PTPrimitiveType rhs = this.getOrDerefPrimitive(
+    final PTPrimitiveType rhs = Environment.getOrDerefPrimitive(
         this.getNodeData(ctx.expr(1)));
 
     PTBoolean result;
@@ -901,11 +901,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.ExprEqualityContext ctx) {
 
     visit(ctx.expr(0));
-    final PTPrimitiveType lhs = this.getOrDerefPrimitive(
+    final PTPrimitiveType lhs = Environment.getOrDerefPrimitive(
         this.getNodeData(ctx.expr(0)));
 
     visit(ctx.expr(1));
-    final PTPrimitiveType rhs = this.getOrDerefPrimitive(
+    final PTPrimitiveType rhs = Environment.getOrDerefPrimitive(
         this.getNodeData(ctx.expr(1)));
 
     PTBoolean result;
@@ -942,7 +942,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     if (ctx.op.getText().equals("Or")) {
       visit(ctx.expr(0));
-      final PTBoolean lhs = this.getOrDerefBoolean(this.getNodeData(ctx.expr(0)));
+      final PTBoolean lhs = Environment.getOrDerefBoolean(this.getNodeData(ctx.expr(0)));
 
       /*
        * Short-circuit evaluation: if lhs is true, this expression is true,
@@ -956,9 +956,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
     } else if (ctx.op.getText().equals("And")) {
       visit(ctx.expr(0));
-      final PTBoolean lhs = this.getOrDerefBoolean(this.getNodeData(ctx.expr(0)));
+      final PTBoolean lhs = Environment.getOrDerefBoolean(this.getNodeData(ctx.expr(0)));
       visit(ctx.expr(1));
-      final PTBoolean rhs = this.getOrDerefBoolean(this.getNodeData(ctx.expr(1)));
+      final PTBoolean rhs = Environment.getOrDerefBoolean(this.getNodeData(ctx.expr(1)));
 
       if (lhs.read() && rhs.read()) {
         this.setNodeData(ctx, new PTBoolean(true));
@@ -985,10 +985,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     visit(ctx.expr(0));
     final PTString lhs =
-        (PTString) this.getOrDerefPrimitive(this.getNodeData(ctx.expr(0)));
+        (PTString) Environment.getOrDerefPrimitive(this.getNodeData(ctx.expr(0)));
     visit(ctx.expr(1));
     final PTString rhs =
-        (PTString) this.getOrDerefPrimitive(this.getNodeData(ctx.expr(1)));
+        (PTString) Environment.getOrDerefPrimitive(this.getNodeData(ctx.expr(1)));
 
     this.setNodeData(ctx, lhs.concat(rhs));
     return null;
@@ -1360,7 +1360,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.eFilter.emit(ctx);
 
     visit(ctx.expr());
-    final PTPrimitiveType baseExpr = this.getOrDerefPrimitive(
+    final PTPrimitiveType baseExpr = Environment.getOrDerefPrimitive(
         this.getNodeData(ctx.expr()));
     log.debug("Interpreting Evaluate stmt; conditional base value is {}", baseExpr);
 
@@ -1727,68 +1727,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             throw new OPSVMachRuntimeException(opstce1.getMessage(), opstce1);
         }
       }
-    }
-  }
-
-  private PTType getOrDeref(final PTType rawExpr) {
-    if (rawExpr instanceof PTReference) {
-      return ((PTReference) rawExpr).deref();
-    }
-    return rawExpr;
-  }
-
-  private PTPrimitiveType getOrDerefPrimitive(final PTType rawExpr) {
-    if (rawExpr instanceof PTPrimitiveType) {
-      return (PTPrimitiveType) rawExpr;
-    } else if (rawExpr instanceof PTReference) {
-        return this.getOrDerefPrimitive(((PTReference) rawExpr).deref());
-    } else if (rawExpr instanceof PTField) {
-      return ((PTField) rawExpr).getValue();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either a primitive, a reference "
-          + "to one, or a Field (getOrDerefPrimitive): " + rawExpr);
-    }
-  }
-
-  private PTObjectType getOrDerefObject(final PTType rawExpr) {
-    if (rawExpr instanceof PTObjectType) {
-      return (PTObjectType) rawExpr;
-    } else if (rawExpr instanceof PTReference
-        && ((PTReference) rawExpr).deref() instanceof PTObjectType) {
-      return (PTObjectType) ((PTReference) rawExpr).deref();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either an object or a reference "
-          + "to one (getOrDerefObject).");
-    }
-  }
-
-  private PTNumberType getOrDerefNumber(final PTType rawExpr) {
-    if (rawExpr instanceof PTNumberType) {
-      return (PTNumberType) rawExpr;
-    } else if (rawExpr instanceof PTReference) {
-      final PTReference ref = ((PTReference) rawExpr);
-      final PTType derefedVal = ref.deref();
-      if (derefedVal instanceof PTNumberType) {
-        return (PTNumberType) derefedVal;
-      } else if (ref instanceof PTAnyTypeReference) {
-        ((PTAnyTypeReference) ref).castTo(PTNumber.getTc());
-        return (PTNumberType) ((PTReference) ref).deref();
-      }
-    }
-
-    throw new OPSVMachRuntimeException("Expected either a number or a reference "
-        + "to one (getOrDerefNumber).");
-  }
-
-  private PTBoolean getOrDerefBoolean(final PTType rawExpr) {
-    if (rawExpr instanceof PTBoolean) {
-      return (PTBoolean) rawExpr;
-    } else if (rawExpr instanceof PTReference
-        && ((PTReference) rawExpr).deref() instanceof PTBoolean) {
-      return (PTBoolean) ((PTReference) rawExpr).deref();
-    } else {
-      throw new OPSVMachRuntimeException("Expected either a boolean or a reference "
-          + "to one (getOrDerefBoolean).");
     }
   }
 

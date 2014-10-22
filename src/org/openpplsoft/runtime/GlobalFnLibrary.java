@@ -706,7 +706,17 @@ public class GlobalFnLibrary {
        * be empty.
        */
       if (rs.next()) {
-        throw new OPSVMachRuntimeException("TODO: Bind out vars.");
+        ResultSetMetaData rsMetadata = rs.getMetaData();
+        for (int colIdx = 0; colIdx < rsMetadata.getColumnCount(); colIdx++) {
+
+          if (nextArgIdx >= args.size()) {
+            throw new OPSVMachRuntimeException("Expected an out var "
+                + "but reached the end of the provided argument list.");
+          }
+
+          assign(args.get(nextArgIdx++),
+              new PTString(rs.getString(colIdx)));
+        }
       }
     } catch (final java.sql.SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
@@ -719,7 +729,8 @@ public class GlobalFnLibrary {
       }
     }
 
-    throw new OPSVMachRuntimeException("TODO: Complete SQLExec.");
+    // SQLExec returns True if execution completed successfully.
+    Environment.pushToCallStack(new PTBoolean(true));
   }
 
   /*==================================*/

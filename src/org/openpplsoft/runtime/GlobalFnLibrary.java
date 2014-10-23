@@ -670,7 +670,6 @@ public class GlobalFnLibrary {
     }
 
     String sqlCmd = ((PTString) args.get(0)).read();
-    int nextArgIdx = 1;
 
     // If this is a SELECT statement, prefix it with an uppercase "SELECT"
     // followed by a space (no clue why, but this is what PS does).
@@ -679,19 +678,30 @@ public class GlobalFnLibrary {
     sqlCmd = selectMatcher.replaceFirst("SELECT ");
 
     // Note: this regex uses positve lookbehind and lookahead.
-    Pattern bindIdxPattern = Pattern.compile("(?<=\\s*)(:\\d+)(?=\\s?)");
+    Pattern bindIdxPattern = Pattern.compile("(?<=\\s*)(:(\\d+))(?=\\s?)");
     Matcher bindIdxMatcher = bindIdxPattern.matcher(sqlCmd);
     List<String> bindVals = new ArrayList<String>();
+
+    int maxArgIdx = -1;
+
     while (bindIdxMatcher.find()) {
 
-      if (nextArgIdx >= args.size()) {
+      final int argIdx = Integer.parseInt(bindIdxMatcher.group(2));
+
+      if (argIdx >= args.size()) {
         throw new OPSVMachRuntimeException("Expected another bind expr "
             + "but reached the end of the provided argument list.");
       }
 
+      // Bind exprs start with argument at index 1; bind indices also start
+      // at index 1, so we can use the value of argIdx directly here.
       final PTPrimitiveType bindExpr = Environment.getOrDerefPrimitive(
-          args.get(nextArgIdx++));
+          args.get(argIdx));
       bindVals.add(bindExpr.readAsString());
+
+      if (argIdx > maxArgIdx) {
+        maxArgIdx = argIdx;
+      }
     }
 
     // Replace all numbered bind indices with question marks.
@@ -703,6 +713,10 @@ public class GlobalFnLibrary {
         OPSStmt.EmissionType.ENFORCED);
     ResultSet rs = null;
 
+    // The index of the first argument to be used as an out var is
+    // 1 greater than the index of the last argument used as a bind expr.
+    int nextOutVarIdx = maxArgIdx + 1;
+
     try {
       rs = ostmt.executeQuery();
       /*
@@ -711,15 +725,17 @@ public class GlobalFnLibrary {
        * be empty.
        */
       if (rs.next()) {
-        ResultSetMetaData rsMetadata = rs.getMetaData();
-        for (int colIdx = 0; colIdx < rsMetadata.getColumnCount(); colIdx++) {
+        log.debug("Record returned by SQLExec; writing selected fields to out vars...");
 
-          if (nextArgIdx >= args.size()) {
+        ResultSetMetaData rsMetadata = rs.getMetaData();
+        for (int colIdx = 1; colIdx < rsMetadata.getColumnCount(); colIdx++) {
+
+          if (nextOutVarIdx >= args.size()) {
             throw new OPSVMachRuntimeException("Expected an out var "
                 + "but reached the end of the provided argument list.");
           }
 
-          assign(args.get(nextArgIdx++),
+          assign(args.get(nextOutVarIdx),
               new PTString(rs.getString(colIdx)));
         }
       }

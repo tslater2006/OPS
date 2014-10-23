@@ -38,9 +38,14 @@ public class GlobalFnLibrary {
    * IMPORTANT: Use this: http://it.toolbox.com/blogs/spread-knowledge/understanding-blanknull-field-values-for-using-with-all-and-none-peoplecode-functions-40672
    * as a reference for null/blank rules with PeopleSoft data types.
    */
-  private static boolean doesContainValue(PTType p) {
-    if(p instanceof PTField) {
-      return doesContainValue(((PTField)p).getValue());
+  private static boolean doesContainValue(final PTType val) {
+
+    final PTType p = Environment.getOrDeref(val);
+
+    if (p instanceof PTNull) {
+      return false;
+    } else if (p instanceof PTField) {
+      return doesContainValue(((PTField) p).getValue());
     } else if(p instanceof PTString) {
       // IMPORTANT: PS uses " " for blanks, but "" is also indicative of
       // an absent value, so must check this before checking PrimitiveType values

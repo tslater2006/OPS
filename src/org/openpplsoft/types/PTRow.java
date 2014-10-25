@@ -210,6 +210,15 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     return this.recordMap.get(recName);
   }
 
+  /**
+   * Retrieves the record at the given index (records are stored
+   * in a linked hash map and thus are ordered).
+   */
+  public PTRecord getRecord(final int index) {
+    // Remember: PS uses 1-based indices, not 0-based, must adjust here.
+    return (PTRecord) this.recordMap.values().toArray()[index - 1];
+  }
+
   public PTRowset getRowset(final String primaryRecName) {
     return this.rowsetMap.get(primaryRecName);
   }
@@ -245,7 +254,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
    * row class.
    */
   public void PT_GetRecord() {
-    final List<PTType> args = Environment.getArgsFromCallStack();
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() != 1) {
       throw new OPSVMachRuntimeException("Expected only one arg.");
     }
@@ -255,9 +264,11 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
       rec = this.getRecord(((PTRecordLiteral) args.get(0)).getRecName());
     } else if (args.get(0) instanceof PTString) {
       rec = this.getRecord(((PTString) args.get(0)).read());
+    } else if (args.get(0) instanceof PTInteger) {
+      rec = this.getRecord(((PTInteger) args.get(0)).read());
     } else {
       throw new OPSVMachRuntimeException("Expected arg to GetRecord() to "
-          + "be a PTRecordLiteral or PTString.");
+          + "be a PTRecordLiteral or PTString or PTInteger.");
     }
 
     Environment.pushToCallStack(rec);

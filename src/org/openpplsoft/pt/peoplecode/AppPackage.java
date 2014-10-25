@@ -64,35 +64,28 @@ public class AppPackage {
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
         new String[]{PSDefn.APP_PACKAGE, this.rootPkgName});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      /*
-       * NOTE: BE VERY CAREFUL HERE; not only is the result set not ordered by PROGSEQ, but
-       * there may be multiple entries per program if it is greater than 28,000 bytes.
-       * Keep those considerations in mind when using the records returned here.
-       */
-      while(rs.next()) {
-        // We have 6 pairs of OBJECTID/OBJECTVALUEs that we want to save;
-        // skip the first pair b/c it's just the name of this (root) app pkg.
-        String[][] pkgEntryParts = new String[6][2];
-        for(int i = 0; i < 6; i++) {
-          pkgEntryParts[i] = new String[]{rs.getString("OBJECTID"+(i+2)),
-            rs.getString("OBJECTVALUE"+(i+2))};
-        }
-        this.addToSubpkgTree(pkgEntryParts);
+    /*
+     * NOTE: BE VERY CAREFUL HERE; not only is the result set not ordered by PROGSEQ, but
+     * there may be multiple entries per program if it is greater than 28,000 bytes.
+     * Keep those considerations in mind when using the records returned here.
+     */
+    while(rs.next()) {
+      // We have 6 pairs of OBJECTID/OBJECTVALUEs that we want to save;
+      // skip the first pair b/c it's just the name of this (root) app pkg.
+      String[][] pkgEntryParts = new String[6][2];
+      for(int i = 0; i < 6; i++) {
+        pkgEntryParts[i] = new String[]{rs.getString("OBJECTID"+(i+2)),
+          rs.getString("OBJECTVALUE"+(i+2))};
       }
-
-      //log.debug("\n\n\nPackage tree: \n{}\n\n\n", this.rootPkgNode);
-    } catch(final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if(rs != null) { rs.close(); }
-        if(ostmt != null) { ostmt.close(); }
-      } catch(java.sql.SQLException sqle) {}
+      this.addToSubpkgTree(pkgEntryParts);
     }
+
+    rs.close();
+    ostmt.close();
+
+    //log.debug("\n\n\nPackage tree: \n{}\n\n\n", this.rootPkgNode);
   }
 
   private void addToSubpkgTree(String[][] pkgEntryParts) {

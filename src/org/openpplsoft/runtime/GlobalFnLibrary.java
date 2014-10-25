@@ -316,56 +316,46 @@ public class GlobalFnLibrary {
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
         "query.PSAUTHITEM_PSOPRCLS_IsMenuItemAuthorized",
         bindVals);
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
+    /*
+     * Iterate over each record in the resultset; we are looking for
+     * the first one that allows the user to access the requested menu item
+     * in the mode provided as an argument.
+     * NOTE: I am checking simple equality b/w the mode arg and
+     * AUTHORIZEDACTIONS for now. AUTHORIZEDACTIONS is actually a bit mask.
+     * See the following for more information:
+     * - http://www.erpassociates.com/peoplesoft-corner-weblog/security/secrets-of-psauthitem.html
+     * - http://peoplesoftwiki.blogspot.com/2009/12/finding-barname-itemname-and-all-about.html
+     * - http://peoplesoft.ittoolbox.com/groups/technical-functional/peopletools-l/how-to-interpret-authorizedactons-with-components-under-barname-3522093
+     */
+    while (rs.next()) {
+      final String permList = rs.getString("PERMISSION_LIST_NAME");
+      final int authorizedActions = rs.getInt("AUTHORIZEDACTIONS");
+
+      log.debug("IsMenuItemAuthorized: Checking: "
+          + "Permission List: {}; AUTHORIZEDACTIONS: {}",
+          rs.getString("PERMISSION_LIST_NAME"),
+          rs.getInt("AUTHORIZEDACTIONS"));
 
       /*
-       * Iterate over each record in the resultset; we are looking for
-       * the first one that allows the user to access the requested menu item
-       * in the mode provided as an argument.
-       * NOTE: I am checking simple equality b/w the mode arg and
-       * AUTHORIZEDACTIONS for now. AUTHORIZEDACTIONS is actually a bit mask.
-       * See the following for more information:
-       * - http://www.erpassociates.com/peoplesoft-corner-weblog/security/secrets-of-psauthitem.html
-       * - http://peoplesoftwiki.blogspot.com/2009/12/finding-barname-itemname-and-all-about.html
-       * - http://peoplesoft.ittoolbox.com/groups/technical-functional/peopletools-l/how-to-interpret-authorizedactons-with-components-under-barname-3522093
+       * TODO(mquinn): This mapping is done adhoc right now, but once
+       * more action modes are added, an enum should be use; see the links
+       * listed above for exact mappings.
        */
-      while (rs.next()) {
-        final String permList = rs.getString("PERMISSION_LIST_NAME");
-        final int authorizedActions = rs.getInt("AUTHORIZEDACTIONS");
-
-        log.debug("IsMenuItemAuthorized: Checking: "
-            + "Permission List: {}; AUTHORIZEDACTIONS: {}",
-            rs.getString("PERMISSION_LIST_NAME"),
-            rs.getInt("AUTHORIZEDACTIONS"));
-
-        /*
-         * TODO(mquinn): This mapping is done adhoc right now, but once
-         * more action modes are added, an enum should be use; see the links
-         * listed above for exact mappings.
-         */
-        final int ADD_MASK = 1;
-        final int UPDATE_DISPLAY_MASK = 2;
-        if (   ((authorizedActions & ADD_MASK) > 0) && actionMode.equals("A")
-            || ((authorizedActions & UPDATE_DISPLAY_MASK) > 0)
-                   && actionMode.equals("U")) {
-          log.debug("IsMenuItemAuthorized: found permissible record, returning True.");
-          Environment.pushToCallStack(new PTBoolean(true));
-          return;
-        }
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
+      final int ADD_MASK = 1;
+      final int UPDATE_DISPLAY_MASK = 2;
+      if (   ((authorizedActions & ADD_MASK) > 0) && actionMode.equals("A")
+          || ((authorizedActions & UPDATE_DISPLAY_MASK) > 0)
+                 && actionMode.equals("U")) {
+        log.debug("IsMenuItemAuthorized: found permissible record, returning True.");
+        Environment.pushToCallStack(new PTBoolean(true));
+        return;
       }
     }
+
+    rs.close();
+    ostmt.close();
 
     // If no record permitted access for the given actionMode,
     // access to the menu item is not authorized.
@@ -718,44 +708,36 @@ public class GlobalFnLibrary {
     final OPSStmt ostmt = new OPSStmt(sqlCmd,
         bindVals.toArray(new String[bindVals.size()]),
         OPSStmt.EmissionType.ENFORCED);
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
     // The index of the first argument to be used as an out var is
     // 1 greater than the index of the last argument used as a bind expr.
     int nextOutVarIdx = maxArgIdx + 1;
 
-    try {
-      rs = ostmt.executeQuery();
-      /*
-       * SQLExec only selects the first row of a result set; it discards
-       * any rows after that. Additionally, the result set may legitimately
-       * be empty.
-       */
-      if (rs.next()) {
-        log.debug("Record returned by SQLExec; writing selected fields to out vars...");
+    /*
+     * SQLExec only selects the first row of a result set; it discards
+     * any rows after that. Additionally, the result set may legitimately
+     * be empty.
+     */
+    if (rs.next()) {
+      log.debug("Record returned by SQLExec; writing selected fields to out vars...");
 
-        ResultSetMetaData rsMetadata = rs.getMetaData();
-        for (int colIdx = 1; colIdx <= rsMetadata.getColumnCount(); colIdx++) {
+      for (int colIdx = 1; colIdx <= rs.getColumnCount(); colIdx++) {
 
-          if (nextOutVarIdx >= args.size()) {
-            throw new OPSVMachRuntimeException("Expected an out var "
-                + "but reached the end of the provided argument list.");
-          }
-
-          assign(args.get(nextOutVarIdx++),
-              new PTString(rs.getString(colIdx)));
+        if (nextOutVarIdx >= args.size()) {
+          throw new OPSVMachRuntimeException("Expected an out var "
+              + "but reached the end of the provided argument list.");
         }
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
+
+//        assign(args.get(nextOutVarIdx++),
+  //          new PTString(rs.getString(colIdx)));
+        throw new OPSVMachRuntimeException("TODO: Replace code above with call to "
+            + "new method on OPSStmt.");
       }
     }
+
+    rs.close();
+    ostmt.close();
 
     // SQLExec returns True if execution completed successfully.
     Environment.pushToCallStack(new PTBoolean(true));

@@ -42,116 +42,101 @@ public class Record {
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSRECDEFN",
         new String[]{this.RECNAME});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
+    int fieldcount = 0;
+    if(rs.next()) {
+      fieldcount = rs.getInt("FIELDCOUNT");
+      this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
+      this.RECTYPE = rs.getInt("RECTYPE");
+    } else {
+      throw new OPSVMachRuntimeException("Expected record to be returned from PSRECDEFN query: " + this.RECNAME);
+    }
+    rs.close();
+    ostmt.close();
+
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSDBFIELD_PSRECFIELD_JOIN",
+        new String[]{this.RECNAME});
+    rs = ostmt.executeQuery();
+
+    this.fieldTable = new HashMap<String, RecordField>();
+    this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
+
+    int i = 0;
+    while(rs.next()) {
+      RecordField f = new RecordField(this.RECNAME,
+          rs.getString("FIELDNAME").trim(), rs.getInt("FIELDTYPE"));
+      f.USEEDIT = rs.getInt("USEEDIT");
+      f.FIELDNUM = rs.getInt("FIELDNUM");
+      f.LENGTH = rs.getInt("LENGTH");
+      f.DEFRECNAME = rs.getString("DEFRECNAME");
+      f.DEFFIELDNAME = rs.getString("DEFFIELDNAME");
+      this.fieldTable.put(f.FIELDNAME, f);
+      this.fldAndSubrecordTable.put(f.FIELDNUM, f);
+        i++;
+    }
+    rs.close();
+    ostmt.close();
+
+    this.subRecordNames = new ArrayList<String>();
+
+    /*
+     * If the number of fields retrieved differs from the FIELDCOUNT for the record
+     * definition, we need to query for subrecords.
+     */
+    if(fieldcount != i) {
+      ostmt = StmtLibrary.getStaticSQLStmt(
+          "query.PSDBFIELD_PSRECFIELD_JOIN_ForSubrecords", new String[]{this.RECNAME});
       rs = ostmt.executeQuery();
 
-      int fieldcount = 0;
-      if(rs.next()) {
-        fieldcount = rs.getInt("FIELDCOUNT");
-        this.RELLANGRECNAME = rs.getString("RELLANGRECNAME").trim();
-        this.RECTYPE = rs.getInt("RECTYPE");
-      } else {
-        throw new OPSVMachRuntimeException("Expected record to be returned from PSRECDEFN query: " + this.RECNAME);
+      while(rs.next()) {
+        this.fldAndSubrecordTable.put(rs.getInt("FIELDNUM"), rs.getString("FIELDNAME"));
+        subRecordNames.add(rs.getString("FIELDNAME"));
+        i++;
       }
       rs.close();
       ostmt.close();
 
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSDBFIELD_PSRECFIELD_JOIN",
-          new String[]{this.RECNAME});
-      rs = ostmt.executeQuery();
-
-      this.fieldTable = new HashMap<String, RecordField>();
-      this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
-
-      int i = 0;
-      while(rs.next()) {
-        RecordField f = new RecordField(this.RECNAME,
-            rs.getString("FIELDNAME").trim(), rs.getInt("FIELDTYPE"));
-        f.USEEDIT = rs.getInt("USEEDIT");
-        f.FIELDNUM = rs.getInt("FIELDNUM");
-        f.LENGTH = rs.getInt("LENGTH");
-        f.DEFRECNAME = rs.getString("DEFRECNAME");
-        f.DEFFIELDNAME = rs.getString("DEFFIELDNAME");
-        this.fieldTable.put(f.FIELDNAME, f);
-        this.fldAndSubrecordTable.put(f.FIELDNUM, f);
-          i++;
-        }
-        rs.close();
-        ostmt.close();
-
-        this.subRecordNames = new ArrayList<String>();
-
-        /*
-         * If the number of fields retrieved differs from the FIELDCOUNT for the record
-         * definition, we need to query for subrecords.
-         */
-        if(fieldcount != i) {
-          ostmt = StmtLibrary.getStaticSQLStmt(
-              "query.PSDBFIELD_PSRECFIELD_JOIN_ForSubrecords", new String[]{this.RECNAME});
-          rs = ostmt.executeQuery();
-
-          while(rs.next()) {
-            this.fldAndSubrecordTable.put(rs.getInt("FIELDNUM"), rs.getString("FIELDNAME"));
-            subRecordNames.add(rs.getString("FIELDNAME"));
-            i++;
-          }
-
-          if(fieldcount != i) {
-            throw new OPSVMachRuntimeException("Even after querying for subrecords, field count " +
-              "does not match that on PSRECDEFN.");
-          }
-        }
-
-        ostmt = StmtLibrary.getStaticSQLStmt("query.PSDBFLDLBL",
-            new String[]{this.RECNAME});
-        rs = ostmt.executeQuery();
-        rs.next();        // Do nothing with records for now.
-      } catch(final java.sql.SQLException sqle) {
-        throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-      } finally {
-        try {
-          if(rs != null) { rs.close(); }
-          if(ostmt != null) { ostmt.close(); }
-        } catch(java.sql.SQLException sqle) {}
+      if(fieldcount != i) {
+        throw new OPSVMachRuntimeException("Even after querying for subrecords, field count " +
+            "does not match that on PSRECDEFN.");
       }
     }
 
-    public void discoverRecordPC() {
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSDBFLDLBL",
+       new String[]{this.RECNAME});
+    rs = ostmt.executeQuery();
+    rs.next();        // Do nothing with records for now.
+    rs.close();
+    ostmt.close();
+  }
 
-      if(this.hasRecordPCBeenDiscovered) { return; }
-      this.hasRecordPCBeenDiscovered = true;
+  public void discoverRecordPC() {
 
-      OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
-          new String[]{PSDefn.RECORD, this.RECNAME});
-      ResultSet rs = null;
+    if(this.hasRecordPCBeenDiscovered) { return; }
+    this.hasRecordPCBeenDiscovered = true;
 
-      try {
-        rs = ostmt.executeQuery();
+    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
+        new String[]{PSDefn.RECORD, this.RECNAME});
+    OPSResultSet rs = ostmt.executeQuery();
 
-        while(rs.next()) {
-          PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
-              rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
-          prog = DefnCache.getProgram(prog);
+    while (rs.next()) {
+      PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
+          rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
+      prog = DefnCache.getProgram(prog);
 
-          List<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
-              .get(rs.getString("OBJECTVALUE2"));
-          if(fieldProgList == null) {
-            fieldProgList = new ArrayList<PeopleCodeProg>();
-          }
+      List<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
+          .get(rs.getString("OBJECTVALUE2"));
+      if(fieldProgList == null) {
+        fieldProgList = new ArrayList<PeopleCodeProg>();
+      }
 
-          fieldProgList.add(prog);
-          this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
-        }
-      } catch(final java.sql.SQLException sqle) {
-        throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-      } finally {
-        try {
-          if(rs != null) { rs.close(); }
-          if(ostmt != null) { ostmt.close(); }
-      } catch(java.sql.SQLException sqle) {}
+      fieldProgList.add(prog);
+      this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   public boolean isTable() {

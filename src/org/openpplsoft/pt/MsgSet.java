@@ -41,34 +41,25 @@ public class MsgSet {
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSMSGSETDEFN",
         new String[]{""+this.ptMESSAGE_SET_NBR});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      //Do nothing with record for now.
-      rs.next();
-      rs.close();
-      ostmt.close();
+    //Do nothing with record for now.
+    rs.next();
+    rs.close();
+    ostmt.close();
 
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSMSGCATDEFN",
-          new String[]{""+this.ptMESSAGE_SET_NBR});
-      rs = ostmt.executeQuery();
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSMSGCATDEFN",
+        new String[]{""+this.ptMESSAGE_SET_NBR});
+    rs = ostmt.executeQuery();
 
-      this.messages = new HashMap<Integer, String>();
-      while(rs.next())  {
-        this.messages.put(rs.getInt("MESSAGE_NBR"),
-            rs.getString("MESSAGE_TEXT"));
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
+    this.messages = new HashMap<Integer, String>();
+    while(rs.next())  {
+      this.messages.put(rs.getInt("MESSAGE_NBR"),
+          rs.getString("MESSAGE_TEXT"));
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   /**

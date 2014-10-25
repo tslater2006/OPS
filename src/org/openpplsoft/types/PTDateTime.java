@@ -121,21 +121,13 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
 
   public void writeSYSDATE() {
     final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.SYSDATE", new String[]{});
-    ResultSet rs = null;
-    try {
-      rs = ostmt.executeQuery();
-      rs.next();
-      this.write(new DateTime(rs.getTimestamp("sysdate")));
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close ostmt and/or rs in finally block.");
-      }
-    }
+    final OPSResultSet rs = ostmt.executeQuery();
+
+    rs.next();
+    this.write(new DateTime(rs.getTimestamp("sysdate")));
+
+    rs.close();
+    ostmt.close();
   }
 
   public boolean equals(Object obj) {

@@ -169,59 +169,51 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
         this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
 
-      final String defRecName = this.recFieldDefn.DEFRECNAME;
-      final String defFldName = this.recFieldDefn.DEFFIELDNAME;
-      final Record defRecDefn = DefnCache.getRecord(defRecName);
+    final String defRecName = this.recFieldDefn.DEFRECNAME;
+    final String defFldName = this.recFieldDefn.DEFFIELDNAME;
+    final Record defRecDefn = DefnCache.getRecord(defRecName);
 
-      OPSStmt ostmt = null;
-      try {
-        ostmt =
-            StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, this);
-      } catch (final OPSCBufferKeyLookupException opscbkle) {
-        log.warn("Failed to generate non constant "
-            + "field default query for field: " + this.recFieldDefn.FIELDNAME
-            + "; a value for a key on the default record (" + defRecName + ") could "
-            + "not be found in the component buffer. This is not an error, "
-            + "just a warning that the field can't be defaulted at this time, "
-            + "but may be defaulted on a future field def proc run if the key "
-            + "is available at that time.");
-        return;
+    OPSStmt ostmt = null;
+    try {
+      ostmt =
+          StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, this);
+    } catch (final OPSCBufferKeyLookupException opscbkle) {
+      log.warn("Failed to generate non constant "
+          + "field default query for field: " + this.recFieldDefn.FIELDNAME
+          + "; a value for a key on the default record (" + defRecName + ") could "
+          + "not be found in the component buffer. This is not an error, "
+          + "just a warning that the field can't be defaulted at this time, "
+          + "but may be defaulted on a future field def proc run if the key "
+          + "is available at that time.");
+      return;
+    }
+
+    log.debug("Querying {}.{} for default value for field {}.{}",
+        defRecName, defFldName,
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+
+    /*
+     * Keep in mind that zero records may legitimately be returned here,
+     * in which case the field will remain blank.
+     */
+    final OPSResultSet rs = ostmt.executeQuery();
+    if (rs.next()) {
+      log.debug("Defaulting to: {}", rs.getString(defFldName));
+
+      //GlobalFnLibrary.readFieldFromResultSet(this, rs, defFldName);
+      throw new OPSVMachRuntimeException("TODO: Replace call above with "
+        + "call to new method on OPSResultSet, AND UNCOMMENT CODE BELOW.");
+/*      if (rs.next()) {
+        throw new OPSVMachRuntimeException(
+            "Result set for default non constant field default query "
+            + "returned multiple records; only expected one.");
       }
 
-      log.debug("Querying {}.{} for default value for field {}.{}",
-          defRecName, defFldName,
-              this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
-
-      ResultSet rs = null;
-      try {
-        rs = ostmt.executeQuery();
-        /*
-         * Keep in mind that zero records may legitimately be returned here,
-         * in which case the field will remain blank.
-         */
-        if (rs.next()) {
-          log.debug("Defaulting to: {}", rs.getString(defFldName));
-          GlobalFnLibrary.readFieldFromResultSet(this, rs, defFldName);
-          if (rs.next()) {
-            throw new OPSVMachRuntimeException(
-                "Result set for default non constant field default query "
-                + "returned multiple records; only expected one.");
-          }
-
-          fdEmission.setDefaultedValue(this.getValue().readAsString());
-          fdEmission.setFromRecordFlag();
-        }
-      } catch (final java.sql.SQLException sqle) {
-        throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-      } finally {
-        try {
-          if (rs != null) { rs.close(); }
-          if (ostmt != null) { ostmt.close(); }
-        } catch (final java.sql.SQLException sqle) {
-          log.warn("Unable to close rs and/or ostmt in finally block.");
-        }
-      }
-
+      fdEmission.setDefaultedValue(this.getValue().readAsString());
+      fdEmission.setFromRecordFlag();*/
+    }
+    rs.close();
+    ostmt.close();
 
     /*
      * Check if the field's value changed. If it did, an emission

@@ -160,38 +160,26 @@ public final class ComponentBuffer {
     }
 
     OPSStmt ostmt = StmtLibrary.getSearchRecordFillQuery();
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
+    final int numCols = rs.getColumnCount();
 
-      final ResultSetMetaData rsMetadata = rs.getMetaData();
-      final int numCols = rsMetadata.getColumnCount();
-
-      // search record may legitimately be empty, check before continuing.
-      if (rs.next()) {
-        final PTRecord searchRecord = ComponentBuffer.getSearchRecord();
-        for (int i = 1; i <= numCols; i++) {
-          final String colName = rsMetadata.getColumnName(i);
-          final String colTypeName = rsMetadata.getColumnTypeName(i);
-          final PTField fldObj = searchRecord.getFieldRef(colName).deref();
-          GlobalFnLibrary.readFieldFromResultSet(fldObj,
-              colName, colTypeName, rs);
-        }
-        if (rs.next()) {
-          throw new OPSVMachRuntimeException(
-              "Result set for search record fill has more than "
-              + "one record.");
-        }
+    // search record may legitimately be empty, check before continuing.
+    if (rs.next()) {
+      final PTRecord searchRecord = ComponentBuffer.getSearchRecord();
+      for (int i = 1; i <= numCols; i++) {
+        final String colName = rs.getColumnName(i);
+        final String colTypeName = rs.getColumnTypeName(i);
+        final PTField fldObj = searchRecord.getFieldRef(colName).deref();
+        //GlobalFnLibrary.readFieldFromResultSet(fldObj,
+        //    colName, colTypeName, rs);
+        throw new OPSVMachRuntimeException("TODO: Replace the code above with "
+            + "call to new method on OPSResultSet.");
       }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
+      if (rs.next()) {
+        throw new OPSVMachRuntimeException(
+            "Result set for search record fill has more than "
+            + "one record.");
       }
     }
   }

@@ -43,55 +43,30 @@ public class HTML {
 
     final String[] bindVals = new String[]{this.ptCONTNAME, this.ptCONTTYPE};
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSCONTDEFN", bindVals);
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      //Do nothing with record for now.
-      rs.next();
-      rs.close();
-      ostmt.close();
+    //Do nothing with record for now.
+    rs.next();
+    rs.close();
+    ostmt.close();
 
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSCONTENT", bindVals);
-      rs = ostmt.executeQuery();
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSCONTENT", bindVals);
+    rs = ostmt.executeQuery();
 
-      if(rs.next())  {
-        final Blob blob = rs.getBlob("CONTDATA");
+    if(rs.next())  {
 
-        if (blob.length() > (long) Integer.MAX_VALUE) {
-          throw new OPSVMachRuntimeException("Length of Blob for CONTDATA in GetHTML "
-              + "is greater than Integer.MAX_VALUE, which means multiple calls to "
-              + "getBytes must be made.");
-        }
+      this.ptCONTDATA = rs.getBlobAsString("CONTDATA");
 
-        StringBuilder builder = new StringBuilder();
-        byte[] arr = blob.getBytes(1, (int) blob.length());
-        for (byte b : arr) {
-          if (b > 0) {
-            builder.append(Character.toString((char) b));
-          }
-        }
-
-        blob.free();
-        this.ptCONTDATA = builder.toString();
-
-        if (rs.next()) {
-          throw new OPSVMachRuntimeException("Multiple records found for HTML defn; "
-              + "expected only one.");
-        }
-      } else {
-        throw new OPSVMachRuntimeException("No records found; unable to get HTML defn.");
+      if (rs.next()) {
+        throw new OPSVMachRuntimeException("Multiple records found for HTML defn; "
+            + "expected only one.");
       }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
+    } else {
+      throw new OPSVMachRuntimeException("No records found; unable to get HTML defn.");
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   public String getHTMLText() {

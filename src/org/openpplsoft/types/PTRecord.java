@@ -392,45 +392,37 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
     final OPSStmt ostmt = StmtLibrary.prepareSelectByKeyEffDtStmt(
         this.recDefn, this, (PTDate) args.get(0));
-    ResultSet rs = null;
+    final OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-      rs = ostmt.executeQuery();
-
-      final int numCols = rs.getMetaData().getColumnCount();
-      if (numCols != rfList.size()) {
-        throw new OPSVMachRuntimeException("The number of columns returned "
-            + "by the select by key query (" + numCols
-            + ") differs from the number "
-            + "of fields (" + rfList.size()
-            + ") in the record defn field list.");
-      }
-
-      /*
-       * Although multiple rows may exist in the ResultSet,
-       * only one row is read by SelectByKeyEffDt.
-       */
-      PTBoolean returnVal = new PTBoolean(false);
-      if (rs.next()) {
-        GlobalFnLibrary.readRecordFromResultSet(
-          this.recDefn, this, rs);
-        returnVal = new PTBoolean(true);
-      }
-
-      // Return true if record was read, false otherwise.
-      Environment.pushToCallStack(returnVal);
-
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
+    final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
+    final int numCols = rs.getColumnCount();
+    if (numCols != rfList.size()) {
+      throw new OPSVMachRuntimeException("The number of columns returned "
+          + "by the select by key query (" + numCols
+          + ") differs from the number "
+          + "of fields (" + rfList.size()
+          + ") in the record defn field list.");
     }
+
+    /*
+     * Although multiple rows may exist in the ResultSet,
+     * only one row is read by SelectByKeyEffDt.
+     */
+    PTBoolean returnVal = new PTBoolean(false);
+    if (rs.next()) {
+
+      //GlobalFnLibrary.readRecordFromResultSet(
+      //  this.recDefn, this, rs);
+      throw new OPSVMachRuntimeException("TODO: Replace code above with call to "
+          + "new method on OPSResultSet, AND UNCOMMENT CODE BELOW.");
+      //returnVal = new PTBoolean(true);
+    }
+
+    rs.close();
+    ostmt.close();
+
+    // Return true if record was read, false otherwise.
+    Environment.pushToCallStack(returnVal);
   }
 
   /**
@@ -444,54 +436,46 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     }
 
     final OPSStmt ostmt = StmtLibrary.prepareSelectByKey(this.recDefn, this);
-    ResultSet rs = null;
+    final OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-      rs = ostmt.executeQuery();
+    final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
+    final int numCols = rs.getColumnCount();
 
-      final int numCols = rs.getMetaData().getColumnCount();
-      if (numCols != rfList.size()) {
-        throw new OPSVMachRuntimeException("The number of columns returned "
-            + "by the select by key query (" + numCols + ") differs "
-            + "from the number "
-            + "of fields (" + rfList.size()
-            + ") in the record defn field list.");
-      }
+    if (numCols != rfList.size()) {
+      throw new OPSVMachRuntimeException("The number of columns returned "
+          + "by the select by key query (" + numCols + ") differs "
+          + "from the number "
+          + "of fields (" + rfList.size()
+          + ") in the record defn field list.");
+    }
 
-      /*
-       * VERY IMPORTANT!
-       * The PT documentation is somewhat vague and leaves room open to
-       * interpretation for some things (i.e., if multiple records are returned,
-       * is that an error?). Using the PS debugger, I found the answer to that
-       * question to be no; PT seems to stop reading after the first record, and
-       * the return value for SelectByKey is True. Just keep in mind that before
-       * modifying this code and the rest of this function, compare the official
-       * documentation with an actual debugging session first.
-       */
-      PTBoolean returnVal = new PTBoolean(false);
-      while (rs.next()) {
-        // is this the first row in rs?
-        if (rs.isFirst()) {
-          GlobalFnLibrary.readRecordFromResultSet(
-              this.recDefn, this, rs);
-          returnVal = new PTBoolean(true);
-          break;
-        }
-      }
-
-      Environment.pushToCallStack(returnVal);
-
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
+    /*
+     * VERY IMPORTANT!
+     * The PT documentation is somewhat vague and leaves room open to
+     * interpretation for some things (i.e., if multiple records are returned,
+     * is that an error?). Using the PS debugger, I found the answer to that
+     * question to be no; PT seems to stop reading after the first record, and
+     * the return value for SelectByKey is True. Just keep in mind that before
+     * modifying this code and the rest of this function, compare the official
+     * documentation with an actual debugging session first.
+     */
+    PTBoolean returnVal = new PTBoolean(false);
+    while (rs.next()) {
+      // is this the first row in rs?
+      if (rs.isFirst()) {
+        //GlobalFnLibrary.readRecordFromResultSet(
+        //    this.recDefn, this, rs);
+        throw new OPSVMachRuntimeException("TODO: Replace code above with call "
+            + "to new method on OPSResultSet, and UNCOMMENT CODE BELOW.");
+        //returnVal = new PTBoolean(true);
+        //break;
       }
     }
+
+    rs.close();
+    ostmt.close();
+
+    Environment.pushToCallStack(returnVal);
   }
 
   /**
@@ -511,43 +495,32 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
       return;
     }
 
-    ResultSet rs = null;
+    /*
+     * If null comes back, one or more key values is not
+     * available, and thus the fill cannot be run.
+     */
+    if (ostmt == null) { return; }
 
-    try {
+    final OPSResultSet rs = ostmt.executeQuery();
+    final int numCols = rs.getColumnCount();
 
-      /*
-       * If null comes back, one or more key values is not
-       * available, and thus the fill cannot be run.
-       */
-      if (ostmt == null) { return; }
-
-      rs = ostmt.executeQuery();
-
-      final ResultSetMetaData rsMetadata = rs.getMetaData();
-      final int numCols = rsMetadata.getColumnCount();
-
-      // NOTE: record may legitimately be empty.
-      if (rs.next()) {
-        for (int i = 1; i <= numCols; i++) {
-          final String colName = rsMetadata.getColumnName(i);
-          final String colTypeName = rsMetadata.getColumnTypeName(i);
-          final PTField fldObj = this.getFieldRef(colName).deref();
-          log.debug("Before: {} = {}", colName, fldObj);
-          GlobalFnLibrary.readFieldFromResultSet(fldObj,
-              colName, colTypeName, rs);
-          log.debug("After: {} = {}", colName, fldObj);
-        }
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
+    // NOTE: record may legitimately be empty.
+    if (rs.next()) {
+      for (int i = 1; i <= numCols; i++) {
+        final String colName = rs.getColumnName(i);
+        final String colTypeName = rs.getColumnTypeName(i);
+        final PTField fldObj = this.getFieldRef(colName).deref();
+        log.debug("Before: {} = {}", colName, fldObj);
+        //GlobalFnLibrary.readFieldFromResultSet(fldObj,
+        //    colName, colTypeName, rs);
+        throw new OPSVMachRuntimeException("TODO: Replace code above with call "
+            + "to new method on OPSResultSet, and UNCOMMENT CODE BELOW.");
+        //log.debug("After: {} = {}", colName, fldObj);
       }
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   /**

@@ -65,60 +65,52 @@ public class Component {
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLGRPDEFN",
         new String[]{this.ptPNLGRPNAME, this.ptMARKET});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      rs.next();
-      this.ptADDSRCHRECNAME = rs.getString("ADDSRCHRECNAME");
-      this.ptSEARCHRECNAME = rs.getString("SEARCHRECNAME");
-      this.ptACTIONS = rs.getInt("ACTIONS");
-      this.ptPRIMARYACTION = rs.getInt("PRIMARYACTION");
-      this.ptDFLTACTION = rs.getInt("DFLTACTION");
-      rs.close();
-      ostmt.close();
+    rs.next();
+    this.ptADDSRCHRECNAME = rs.getString("ADDSRCHRECNAME");
+    this.ptSEARCHRECNAME = rs.getString("SEARCHRECNAME");
+    this.ptACTIONS = rs.getInt("ACTIONS");
+    this.ptPRIMARYACTION = rs.getInt("PRIMARYACTION");
+    this.ptDFLTACTION = rs.getInt("DFLTACTION");
 
-      /*
-       * Select the search record to use based on the mode
-       * the component should open in.
-       */
-      if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_NEW) {
-        this.searchRecordToUse = this.ptADDSRCHRECNAME;
-      } else if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_SEARCH) {
-        this.searchRecordToUse = this.ptSEARCHRECNAME;
-      } else {
-        throw new OPSVMachRuntimeException("Unable to select search record "
-            + "due to unknown Primary Action value.");
-      }
+    rs.close();
+    ostmt.close();
 
-      this.pages = new ArrayList<Page>();
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLGROUP",
-          new String[]{this.ptPNLGRPNAME, this.ptMARKET});
-      rs = ostmt.executeQuery();
-
-      while (rs.next()) {
-        // All pages at the root of the component start at scroll level 0.
-        final Page p = new Page(rs.getString("PNLNAME"));
-        log.debug("Component contains Page.{}", p.getPNLNAME());
-
-        if (this.pages.size() == 0) {
-          log.debug("Using name of first page as value for %Page: {}",
-              p.getPNLNAME());
-          Environment.setSystemVar("%Page", new PTString(p.getPNLNAME()));
-        }
-
-        this.pages.add(p);
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
+    /*
+     * Select the search record to use based on the mode
+     * the component should open in.
+     */
+    if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_NEW) {
+      this.searchRecordToUse = this.ptADDSRCHRECNAME;
+    } else if (this.ptPRIMARYACTION == PSDefn.PRIMARYACTION_SEARCH) {
+      this.searchRecordToUse = this.ptSEARCHRECNAME;
+    } else {
+      throw new OPSVMachRuntimeException("Unable to select search record "
+          + "due to unknown Primary Action value.");
     }
+
+    this.pages = new ArrayList<Page>();
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLGROUP",
+        new String[]{this.ptPNLGRPNAME, this.ptMARKET});
+    rs = ostmt.executeQuery();
+
+    while (rs.next()) {
+      // All pages at the root of the component start at scroll level 0.
+      final Page p = new Page(rs.getString("PNLNAME"));
+      log.debug("Component contains Page.{}", p.getPNLNAME());
+
+      if (this.pages.size() == 0) {
+        log.debug("Using name of first page as value for %Page: {}",
+            p.getPNLNAME());
+        Environment.setSystemVar("%Page", new PTString(p.getPNLNAME()));
+      }
+
+      this.pages.add(p);
+    }
+
+    rs.close();
+    ostmt.close();
   }
 
   /**
@@ -133,59 +125,50 @@ public class Component {
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_CompPCList",
         new String[]{PSDefn.COMPONENT, this.ptPNLGRPNAME, PSDefn.MARKET,
         this.ptMARKET});
-    ResultSet rs = null;
+    final OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
-      rs = ostmt.executeQuery();
+    this.orderedComponentProgs = new ArrayList<ComponentPeopleCodeProg>();
 
-      while (rs.next()) {
-        final String objectid3 = rs.getString("OBJECTID3").trim();
-        final String objectval3 = rs.getString("OBJECTVALUE3").trim();
-        final String objectid4 = rs.getString("OBJECTID4").trim();
-        final String objectval4 = rs.getString("OBJECTVALUE4").trim();
-        final String objectid5 = rs.getString("OBJECTID5").trim();
-        final String objectval5 = rs.getString("OBJECTVALUE5").trim();
+    while (rs.next()) {
+      final String objectid3 = rs.getString("OBJECTID3").trim();
+      final String objectval3 = rs.getString("OBJECTVALUE3").trim();
+      final String objectid4 = rs.getString("OBJECTID4").trim();
+      final String objectval4 = rs.getString("OBJECTVALUE4").trim();
+      final String objectid5 = rs.getString("OBJECTID5").trim();
+      final String objectval5 = rs.getString("OBJECTVALUE5").trim();
 
-        PeopleCodeProg prog = null;
+      PeopleCodeProg prog = null;
 
-        // Example: SSS_STUDENT_CENTER.GBL.PreBuild
-        if (objectid3.equals(PSDefn.EVENT)) {
-          prog = new ComponentPeopleCodeProg(this.ptPNLGRPNAME, this.ptMARKET,
-            objectval3);
+      // Example: SSS_STUDENT_CENTER.GBL.PreBuild
+      if (objectid3.equals(PSDefn.EVENT)) {
+        prog = new ComponentPeopleCodeProg(this.ptPNLGRPNAME, this.ptMARKET,
+          objectval3);
 
-        // Example: SSS_STUDENT_CENTER.LS_SS_PERS_SRCH.SearchInit
-        } else if (objectid3.equals(PSDefn.RECORD)
-              && objectid4.equals(PSDefn.EVENT)) {
-          prog = new ComponentPeopleCodeProg(this.ptPNLGRPNAME, this.ptMARKET,
-            objectval3, objectval4);
+      // Example: SSS_STUDENT_CENTER.LS_SS_PERS_SRCH.SearchInit
+      } else if (objectid3.equals(PSDefn.RECORD)
+            && objectid4.equals(PSDefn.EVENT)) {
+        prog = new ComponentPeopleCodeProg(this.ptPNLGRPNAME, this.ptMARKET,
+          objectval3, objectval4);
 
-        // Example: SSS_STUDENT_CENTER.LS_DERIVED_SSS_SCL
-        //            .SS_CLS_SCHED_LINK.FieldChange
-        } else if (objectid3.equals(PSDefn.RECORD)
-              && objectid4.equals(PSDefn.FIELD)
-              && objectid5.equals(PSDefn.EVENT)) {
-          prog = new ComponentPeopleCodeProg(this.ptPNLGRPNAME, this.ptMARKET,
-            objectval3, objectval4, objectval5);
+      // Example: SSS_STUDENT_CENTER.LS_DERIVED_SSS_SCL
+      //            .SS_CLS_SCHED_LINK.FieldChange
+      } else if (objectid3.equals(PSDefn.RECORD)
+            && objectid4.equals(PSDefn.FIELD)
+            && objectid5.equals(PSDefn.EVENT)) {
+        prog = new ComponentPeopleCodeProg(this.ptPNLGRPNAME, this.ptMARKET,
+          objectval3, objectval4, objectval5);
 
-        } else {
-          throw new OPSVMachRuntimeException("Unexpected type of "
-              + "Component PC encountered.");
-        }
-
-        prog = DefnCache.getProgram(prog);
-        this.orderedComponentProgs.add((ComponentPeopleCodeProg) prog);
+      } else {
+        throw new OPSVMachRuntimeException("Unexpected type of "
+            + "Component PC encountered.");
       }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
+
+      prog = DefnCache.getProgram(prog);
+      this.orderedComponentProgs.add((ComponentPeopleCodeProg) prog);
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   public ComponentPeopleCodeProg getProgramForRecordFieldEvent(

@@ -73,110 +73,101 @@ public class Page {
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLDEFN",
         new String[]{this.ptPNLNAME});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      // Do nothing with record for now.
-      rs.next();
-      rs.close();
-      ostmt.close();
+    // Do nothing with record for now.
+    rs.next();
+    rs.close();
+    ostmt.close();
 
-      this.subpages = new ArrayList<PgToken>();
-      this.secpages = new ArrayList<PgToken>();
-      this.tokens = new ArrayList<PgToken>();
-      this.referencedMsgSets = new LinkedHashSet<Integer>();
+    this.subpages = new ArrayList<PgToken>();
+    this.secpages = new ArrayList<PgToken>();
+    this.tokens = new ArrayList<PgToken>();
+    this.referencedMsgSets = new LinkedHashSet<Integer>();
 
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLFIELD",
-          new String[]{this.ptPNLNAME});
-      rs = ostmt.executeQuery();
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSPNLFIELD",
+        new String[]{this.ptPNLNAME});
+    rs = ostmt.executeQuery();
+
+    /*
+     * TODO(mquinn): Throw exception if no records were read
+     * (need to use counter, no method on rs available).
+     */
+    while (rs.next()) {
+
+      final PgToken pf = new PgToken();
+      pf.RECNAME = rs.getString("RECNAME").trim();
+      pf.FIELDNAME = rs.getString("FIELDNAME").trim();
+      pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
+      pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
+      pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
 
       /*
-       * TODO(mquinn): Throw exception if no records were read
-       * (need to use counter, no method on rs available).
+       * IMPORTANT NOTE: If you are having issues related to extraneous/missing
+       * emissions of PSMSGSETDEFN/PSMSGCATDEFN, add/move/del calls to get msg
+       * set from cache using this nbr; I do not know the exact enumeration of
+       * FIELDTYPE values for which the msg set should be retrieved, but the
+       * cases under which such calls do appear have been verified as being
+       * required during tracefile verification.
        */
-      while (rs.next()) {
+      int msgSetNbr = rs.getInt("GRDLBLMSGSET");
 
-        final PgToken pf = new PgToken();
-        pf.RECNAME = rs.getString("RECNAME").trim();
-        pf.FIELDNAME = rs.getString("FIELDNAME").trim();
-        pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
-        pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
-        pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
-
-        /*
-         * IMPORTANT NOTE: If you are having issues related to extraneous/missing
-         * emissions of PSMSGSETDEFN/PSMSGCATDEFN, add/move/del calls to get msg
-         * set from cache using this nbr; I do not know the exact enumeration of
-         * FIELDTYPE values for which the msg set should be retrieved, but the
-         * cases under which such calls do appear have been verified as being
-         * required during tracefile verification.
-         */
-        int msgSetNbr = rs.getInt("GRDLBLMSGSET");
-
-        switch (rs.getInt("FIELDTYPE")) {
-          case PSDefn.PageFieldType.STATIC_TEXT:
-          case PSDefn.PageFieldType.FRAME:
-          case PSDefn.PageFieldType.STATIC_IMAGE:
-          case PSDefn.PageFieldType.HORIZONTAL_RULE:
-            break;
-          case PSDefn.PageFieldType.GROUPBOX:
-            pf.flags.add(PFlag.GROUPBOX);
-            this.tokens.add(pf);
-            break;
-          case PSDefn.PageFieldType.SUBPAGE:
-            pf.flags.add(PFlag.PAGE);
-            pf.flags.add(PFlag.SUBPAGE);
-            this.subpages.add(pf);
-            this.tokens.add(pf);
-            break;
-          case PSDefn.PageFieldType.PUSHBTN_LINK_PEOPLECODE:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_SCROLL_ACTION:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_TOOLBAR_ACTION:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_EXTERNAL:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_INTERNAL:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_PROCESS:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_SECPAGE:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_PROMPT_ACTION:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_PAGE_ANCHOR:
-          case PSDefn.PageFieldType.PUSHBTN_LINK_INST_MSG_ACTION:
-            pf.flags.add(PFlag.PUSHBTN_LINK);
-            this.tokens.add(pf);
-            if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
-            break;
-          case PSDefn.PageFieldType.SECPAGE:
-            pf.flags.add(PFlag.PAGE);
-            pf.flags.add(PFlag.SECPAGE);
-            this.secpages.add(pf);
-            this.tokens.add(pf);
-            break;
-          case PSDefn.PageFieldType.SCROLL_BAR:
-          case PSDefn.PageFieldType.GRID:
-          case PSDefn.PageFieldType.SCROLL_AREA:
-            pf.flags.add(PFlag.SCROLL_START);
-            this.tokens.add(pf);
-            break;
-          default:
-            pf.flags.add(PFlag.GENERIC);
-            this.tokens.add(pf);
-            if (pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
-              throw new OPSVMachRuntimeException("A generic field with "
-                  + "either a blank RECNAME "
-                  + "or FIELDNAME was encountered.");
-            }
-            if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
+      switch (rs.getInt("FIELDTYPE")) {
+        case PSDefn.PageFieldType.STATIC_TEXT:
+        case PSDefn.PageFieldType.FRAME:
+        case PSDefn.PageFieldType.STATIC_IMAGE:
+        case PSDefn.PageFieldType.HORIZONTAL_RULE:
+          break;
+        case PSDefn.PageFieldType.GROUPBOX:
+          pf.flags.add(PFlag.GROUPBOX);
+          this.tokens.add(pf);
+          break;
+        case PSDefn.PageFieldType.SUBPAGE:
+          pf.flags.add(PFlag.PAGE);
+          pf.flags.add(PFlag.SUBPAGE);
+          this.subpages.add(pf);
+          this.tokens.add(pf);
+          break;
+        case PSDefn.PageFieldType.PUSHBTN_LINK_PEOPLECODE:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_SCROLL_ACTION:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_TOOLBAR_ACTION:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_EXTERNAL:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_INTERNAL:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_PROCESS:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_SECPAGE:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_PROMPT_ACTION:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_PAGE_ANCHOR:
+        case PSDefn.PageFieldType.PUSHBTN_LINK_INST_MSG_ACTION:
+          pf.flags.add(PFlag.PUSHBTN_LINK);
+          this.tokens.add(pf);
+          if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
+          break;
+        case PSDefn.PageFieldType.SECPAGE:
+          pf.flags.add(PFlag.PAGE);
+          pf.flags.add(PFlag.SECPAGE);
+          this.secpages.add(pf);
+          this.tokens.add(pf);
+          break;
+        case PSDefn.PageFieldType.SCROLL_BAR:
+        case PSDefn.PageFieldType.GRID:
+        case PSDefn.PageFieldType.SCROLL_AREA:
+          pf.flags.add(PFlag.SCROLL_START);
+          this.tokens.add(pf);
+          break;
+        default:
+          pf.flags.add(PFlag.GENERIC);
+          this.tokens.add(pf);
+          if (pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
+            throw new OPSVMachRuntimeException("A generic field with "
+                + "either a blank RECNAME "
+                + "or FIELDNAME was encountered.");
           }
-        }
-      } catch (final java.sql.SQLException sqle) {
-        throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-      } finally {
-        try {
-          if (rs != null) { rs.close(); }
-          if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
+          if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
       }
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   /**
@@ -271,24 +262,15 @@ public class Page {
     final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
         "query.PSPCMPROG_RecordPCList",
         new String[]{PSDefn.PAGE, this.ptPNLNAME});
-    ResultSet rs = null;
+    final OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      while (rs.next()) {
-        final PeopleCodeProg prog = new PagePeopleCodeProg(this.ptPNLNAME);
-        this.pageActivateProg = DefnCache.getProgram(prog);
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
+    while (rs.next()) {
+      final PeopleCodeProg prog = new PagePeopleCodeProg(this.ptPNLNAME);
+      this.pageActivateProg = DefnCache.getProgram(prog);
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   /**

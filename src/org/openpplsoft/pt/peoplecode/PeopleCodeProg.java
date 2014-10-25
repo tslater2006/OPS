@@ -90,51 +90,42 @@ public abstract class PeopleCodeProg {
         this.bindVals[3], this.bindVals[4], this.bindVals[5], this.bindVals[6],
         this.bindVals[7], this.bindVals[8], this.bindVals[9], this.bindVals[10],
         this.bindVals[11], this.bindVals[12], this.bindVals[13]});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-
-      /*
-       * Append the program bytecode; there could be multiple records
-       * for this program if the length exceeds 28,000 bytes. Note that
-       * the above query must be ordered by PROSEQ, otherwise these records
-       * will need to be pre-sorted before appending the BLOBs together.
-       */
-      int PROGLEN = -1;
-      while(rs.next()) {
-        PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
-        this.appendProgBytes(rs.getBlob("PROGTXT"));
-      }
-      rs.close();
-      ostmt.close();
-
-      if(this.progBytes.length != PROGLEN) {
-        throw new OPSVMachRuntimeException("Number of bytes in " + this.getDescriptor() + " ("
-            + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
-      }
-
-      this.progRefsTable = new TreeMap<Integer, Reference>();
-
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_GetRefs",
-          new String[]{this.bindVals[0], this.bindVals[1], this.bindVals[2],
-          this.bindVals[3], this.bindVals[4], this.bindVals[5],
-          this.bindVals[6], this.bindVals[7], this.bindVals[8],
-          this.bindVals[9], this.bindVals[10], this.bindVals[11],
-          this.bindVals[12], this.bindVals[13]});
-      rs = ostmt.executeQuery();
-      while(rs.next()) {
-        this.progRefsTable.put(rs.getInt("NAMENUM"),
-            new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
-      }
-    } catch(final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if(rs != null) { rs.close(); }
-        if(ostmt != null) { ostmt.close(); }
-      } catch(java.sql.SQLException sqle) {}
+    /*
+     * Append the program bytecode; there could be multiple records
+     * for this program if the length exceeds 28,000 bytes. Note that
+     * the above query must be ordered by PROSEQ, otherwise these records
+     * will need to be pre-sorted before appending the BLOBs together.
+     */
+    int PROGLEN = -1;
+    while(rs.next()) {
+      PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
+      this.appendProgBytes(rs.getBlob("PROGTXT"));
     }
+    rs.close();
+    ostmt.close();
+
+    if(this.progBytes.length != PROGLEN) {
+      throw new OPSVMachRuntimeException("Number of bytes in " + this.getDescriptor() + " ("
+          + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
+    }
+
+    this.progRefsTable = new TreeMap<Integer, Reference>();
+
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_GetRefs",
+        new String[]{this.bindVals[0], this.bindVals[1], this.bindVals[2],
+        this.bindVals[3], this.bindVals[4], this.bindVals[5],
+        this.bindVals[6], this.bindVals[7], this.bindVals[8],
+        this.bindVals[9], this.bindVals[10], this.bindVals[11],
+        this.bindVals[12], this.bindVals[13]});
+    rs = ostmt.executeQuery();
+    while(rs.next()) {
+      this.progRefsTable.put(rs.getInt("NAMENUM"),
+          new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
+    }
+    rs.close();
+    ostmt.close();
 
     /*
      * Assemble the text of the program from its constituent bytecode.
@@ -145,7 +136,7 @@ public abstract class PeopleCodeProg {
     this.programText = byteStream.getAssembledText();
   }
 
-  public void appendProgBytes(Blob blob) {
+  public void appendProgBytes(final Blob blob) {
 
     int b;
     InputStream stream = null;

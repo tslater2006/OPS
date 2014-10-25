@@ -40,39 +40,30 @@ public class Menu {
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSMENUDEFN",
         new String[]{this.ptMENUNAME});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      //Do nothing with record for now.
-      rs.next();
-      rs.close();
-      ostmt.close();
+    //Do nothing with record for now.
+    rs.next();
+    rs.close();
+    ostmt.close();
 
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSMENUITEM",
-          new String[]{this.ptMENUNAME});
-      rs = ostmt.executeQuery();
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSMENUITEM",
+        new String[]{this.ptMENUNAME});
+    rs = ostmt.executeQuery();
 
-      while(rs.next())  {
-        if (rs.getInt("ITEMTYPE") == 5) {
-          MenuItem item = new MenuItem();
-          item.BARNAME = rs.getString("BARNAME");
-          item.ITEMNAME = rs.getString("ITEMNAME");
-          item.PNLGRPNAME = rs.getString("PNLGRPNAME");
-          item.MARKET = rs.getString("MARKET");
-          this.menuItems.add(item);
-        }
-      }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
+    while(rs.next())  {
+      if (rs.getInt("ITEMTYPE") == 5) {
+        MenuItem item = new MenuItem();
+        item.BARNAME = rs.getString("BARNAME");
+        item.ITEMNAME = rs.getString("ITEMNAME");
+        item.PNLGRPNAME = rs.getString("PNLGRPNAME");
+        item.MARKET = rs.getString("MARKET");
+        this.menuItems.add(item);
       }
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   public void loadReferencedComponents() {

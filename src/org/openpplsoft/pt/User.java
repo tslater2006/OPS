@@ -33,26 +33,15 @@ public class User {
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSOPRDEFN",
         new String[]{this.oprid});
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      rs.next();
-      this.oprid = rs.getString("OPRID");
-      this.emplid = rs.getString("EMPLID");
-      this.oprclass = rs.getString("OPRCLASS");
-      rs.close();
-      ostmt.close();
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
-    }
+    rs.next();
+    this.oprid = rs.getString("OPRID");
+    this.emplid = rs.getString("EMPLID");
+    this.oprclass = rs.getString("OPRCLASS");
+
+    rs.close();
+    ostmt.close();
   }
 
   public String getOprid() {

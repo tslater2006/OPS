@@ -442,52 +442,44 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
     final OPSStmt ostmt = StmtLibrary.prepareFillStmt(this.primaryRecDefn,
         ((PTString) args.get(0)).read(), bindVals);
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      final List<RecordField> rfList = this.primaryRecDefn.getExpandedFieldList();
-      rs = ostmt.executeQuery();
+    final List<RecordField> rfList = this.primaryRecDefn.getExpandedFieldList();
+    final int numCols = rs.getColumnCount();
 
-      final int numCols = rs.getMetaData().getColumnCount();
-      if (numCols != rfList.size()) {
-        throw new OPSVMachRuntimeException("The number of columns returned "
-            + "by the fill query (" + numCols + ") differs from the number "
-            + "of fields (" + rfList.size()
-            + ") in the record defn field list.");
-      }
-
-      int rowsRead = 0;
-      while (rs.next()) {
-
-        //If at least one row exists, remove the empty row.
-        if (rowsRead == 0) {
-          this.rows.clear();
-        }
-
-        final PTRow newRow = new PTRowTypeConstraint().alloc(
-            this, this.registeredRecordDefns, this.registeredChildScrollDefns);
-        GlobalFnLibrary
-            .readRecordFromResultSet(
-            this.primaryRecDefn,
-            newRow.getRecord(this.primaryRecDefn.RECNAME),
-            rs);
-        this.rows.add(newRow);
-        rowsRead++;
-      }
-
-      // Return the number of rows read from the fill operation.
-      Environment.pushToCallStack(new PTInteger(rowsRead));
-
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close ostmt and/or rs in finally block.");
-      }
+    if (numCols != rfList.size()) {
+      throw new OPSVMachRuntimeException("The number of columns returned "
+          + "by the fill query (" + numCols + ") differs from the number "
+          + "of fields (" + rfList.size()
+          + ") in the record defn field list.");
     }
+
+    int rowsRead = 0;
+    while (rs.next()) {
+
+      //If at least one row exists, remove the empty row.
+      if (rowsRead == 0) {
+        this.rows.clear();
+      }
+
+      final PTRow newRow = new PTRowTypeConstraint().alloc(
+          this, this.registeredRecordDefns, this.registeredChildScrollDefns);
+/*      GlobalFnLibrary
+          .readRecordFromResultSet(
+          this.primaryRecDefn,
+          newRow.getRecord(this.primaryRecDefn.RECNAME),
+          rs);*/
+      throw new OPSVMachRuntimeException("TODO: Replace the code above with a call "
+          + "to new method on OPSResultSet, and UNCOMMENT CODE BELOW.");
+      /*this.rows.add(newRow);
+      rowsRead++;*/
+    }
+
+    rs.close();
+    ostmt.close();
+
+    // Return the number of rows read from the fill operation.
+    Environment.pushToCallStack(new PTInteger(rowsRead));
   }
 
   @Override

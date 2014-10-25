@@ -54,65 +54,37 @@ public class SQL {
 
     final String[] bindVals = new String[]{this.ptSQLID, this.ptSQLTYPE};
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSSQLDEFN", bindVals);
-    ResultSet rs = null;
+    OPSResultSet rs = ostmt.executeQuery();
 
-    try {
-      rs = ostmt.executeQuery();
-      //Do nothing with record for now.
-      rs.next();
-      rs.close();
-      ostmt.close();
+    //Do nothing with record for now.
+    rs.next();
+    rs.close();
+    ostmt.close();
 
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSSQLDESCR", bindVals);
-      rs = ostmt.executeQuery();
-      //Do nothing with record for now.
-      rs.next();
-      rs.close();
-      ostmt.close();
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSSQLDESCR", bindVals);
+    rs = ostmt.executeQuery();
 
-      ostmt = StmtLibrary.getStaticSQLStmt("query.PSSQLTEXTDEFN", bindVals);
-      rs = ostmt.executeQuery();
-      if(rs.next())  {
-        final Clob clob = rs.getClob("SQLTEXT");
+    //Do nothing with record for now.
+    rs.next();
+    rs.close();
+    ostmt.close();
 
-        if (clob.length() > (long) Integer.MAX_VALUE) {
-          throw new OPSVMachRuntimeException("Clob is longer than maximum possible "
-              + "length of String; unable to store SQLTEXT in String.");
-        }
+    ostmt = StmtLibrary.getStaticSQLStmt("query.PSSQLTEXTDEFN", bindVals);
+    rs = ostmt.executeQuery();
+    if(rs.next())  {
 
-        final StringBuilder sqlTextBuilder = new StringBuilder();
-        final BufferedReader clobReader = new BufferedReader(
-            clob.getCharacterStream());
+      this.ptSQLTEXT = rs.getClobAsString("SQLTEXT");
 
-        String line;
-        while(null != (line = clobReader.readLine())) {
-            sqlTextBuilder.append(line);
-            log.debug("SQL line {}", line);
-        }
-        clobReader.close();
-
-        clob.free();
-        this.ptSQLTEXT = sqlTextBuilder.toString();
-
-        if (rs.next()) {
-          throw new OPSVMachRuntimeException("Multiple records found for SQL defn; "
-              + "expected only one.");
-        }
-      } else {
-        throw new OPSVMachRuntimeException("No records found; unable to get SQL defn.");
+      if (rs.next()) {
+        throw new OPSVMachRuntimeException("Multiple records found for SQL defn; "
+            + "expected only one.");
       }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
-    } catch (final java.io.IOException ioe) {
-      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
-    } finally {
-      try {
-        if (rs != null) { rs.close(); }
-        if (ostmt != null) { ostmt.close(); }
-      } catch (final java.sql.SQLException sqle) {
-        log.warn("Unable to close rs and/or ostmt in finally block.");
-      }
+    } else {
+      throw new OPSVMachRuntimeException("No records found; unable to get SQL defn.");
     }
+
+    rs.close();
+    ostmt.close();
   }
 
   public String getSQLText() {

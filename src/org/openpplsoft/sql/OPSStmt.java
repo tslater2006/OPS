@@ -36,6 +36,7 @@ public class OPSStmt extends SQLStmt {
   private String[] bindValList;
   private EmissionType emissionType;
   private PreparedStatement pstmt;
+  private OPSResultSet rs;
 
   /**
    * An OPS SQL emission can either be enforced against the trace
@@ -73,11 +74,11 @@ public class OPSStmt extends SQLStmt {
 
   /**
    * Executes the query represented by this OPSStmt.
-   * @return the JDBC ResultSet containing the query results
+   * @return the OPSResultSet containing the query results
    * @throws java.sql.SQLException if execution of underlying PreparedStatement
    *    results in an error.
    */
-  public ResultSet executeQuery() throws java.sql.SQLException {
+  public OPSResultSet executeQuery() {
 
     if (this.emissionType == EmissionType.ENFORCED) {
       TraceFileVerifier.submitEnforcedEmission(this);
@@ -85,7 +86,17 @@ public class OPSStmt extends SQLStmt {
       TraceFileVerifier.submitUnenforcedEmission(this);
     }
 
-    return this.pstmt.executeQuery();
+    if (this.rs != null) {
+      throw new OPSVMachRuntimeException("An OPSResultSet has already been associated "
+          + "with this OPSStmt, expected null.");
+    }
+
+    try {
+      this.rs = new OPSResultSet(this.pstmt.executeQuery());
+    } catch (final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+    return this.rs;
   }
 
   /**
@@ -93,8 +104,15 @@ public class OPSStmt extends SQLStmt {
    * @throws java.sql.SQLException if closing of underlying PreparedStatement
    *    results in an error.
    */
-  public void close() throws java.sql.SQLException {
-    this.pstmt.close();
+  public void close() {
+    try {
+      this.pstmt.close();
+      if (this.rs != null) {
+        rs.close();
+      }
+    } catch (final java.sql.SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
   }
 }
 

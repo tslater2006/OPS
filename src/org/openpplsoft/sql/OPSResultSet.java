@@ -9,12 +9,14 @@ package org.openpplsoft.sql;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.types.*;
 
 /**
  * Wrapper for all ResultSets opened by
@@ -120,6 +122,14 @@ public class OPSResultSet {
     }
   }
 
+  public BigDecimal getBigDecimal(final String colName) {
+    try {
+      return rs.getBigDecimal(colName);
+    } catch (final SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+  }
+
   public boolean next() {
     try {
       return rs.next();
@@ -158,6 +168,49 @@ public class OPSResultSet {
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
+  }
+
+  /**
+   * Retrieves a value from the given column name that is type
+   * compatible with the provided type constraint.
+   */
+  public PTPrimitiveType getTypeCompatibleValue(final int colIdx,
+      PTTypeConstraint tc) {
+
+    final String colName = this.getColumnName(colIdx);
+    final String colTypeName = this.getColumnTypeName(colIdx);
+
+    log.debug("Getting type compatible value from column named {}; tc = {}",
+        colName, tc);
+
+    if(tc.isUnderlyingClassEqualTo(PTChar.class)) {
+      if (colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
+        return new PTChar(this.getString(colName));
+      }
+    } else if (tc.isUnderlyingClassEqualTo(PTString.class)) {
+      if (colTypeName.equals("CLOB")) {
+        return new PTString(this.getClobAsString(colName));
+      } else if (colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
+        return new PTString(this.getString(colName));
+      }
+    } else if (tc.isUnderlyingClassEqualTo(PTNumber.class)) {
+      if(colTypeName.equals("NUMBER")) {
+        return new PTNumber(this.getBigDecimal(colName));
+      }
+    } else if (tc.isUnderlyingClassEqualTo(PTDate.class)) {
+      if (colTypeName.equals("VARCHAR2")) {
+        return new PTDate(this.getString(colName));
+      }
+    } else if (tc.isUnderlyingClassEqualTo(PTDateTime.class)) {
+      if(colTypeName.equals("VARCHAR2") || colTypeName.equals("TIMESTAMP")) {
+        return new PTDateTime(this.getString(colName));
+      }
+    }
+
+    throw new OPSVMachRuntimeException("Unable to get type compatible value from "
+        + "OPSResultSet; no valid combination exists for the database column type ("
+        + colTypeName + ") of the provided field and the provided type constraint: "
+        + tc);
   }
 
   /**

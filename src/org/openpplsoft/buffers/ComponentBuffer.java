@@ -168,13 +168,13 @@ public final class ComponentBuffer {
     if (rs.next()) {
       final PTRecord searchRecord = ComponentBuffer.getSearchRecord();
       for (int i = 1; i <= numCols; i++) {
+
         final String colName = rs.getColumnName(i);
-        final String colTypeName = rs.getColumnTypeName(i);
-        final PTField fldObj = searchRecord.getFieldRef(colName).deref();
-        //GlobalFnLibrary.readFieldFromResultSet(fldObj,
-        //    colName, colTypeName, rs);
-        throw new OPSVMachRuntimeException("TODO: Replace the code above with "
-            + "call to new method on OPSResultSet.");
+        final PTReference<PTField> fldRef = searchRecord.getFieldRef(colName);
+        final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(i,
+            fldRef.deref().getValue().getOriginatingTypeConstraint());
+
+        GlobalFnLibrary.assign(fldRef, dbVal);
       }
       if (rs.next()) {
         throw new OPSVMachRuntimeException(

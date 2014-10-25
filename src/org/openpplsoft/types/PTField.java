@@ -242,7 +242,6 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return;
     }
 
-
     log.debug("Running FldDefProc: {}.{}",
           this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
 

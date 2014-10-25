@@ -27,6 +27,22 @@ public final class PTChar extends PTPrimitiveType<Character> {
     charTc = new PTTypeConstraint<PTChar>(PTChar.class);
   }
 
+  public PTChar(final char initialVal) {
+    super(charTc);
+    this.value = initialVal;
+  }
+
+  public PTChar(final String initialVal) {
+    super(charTc);
+
+    if (initialVal == null) {
+      throw new OPSVMachRuntimeException("Initial value is null, "
+          + "non-null initial value is required");
+    }
+
+    this.write(initialVal);
+  }
+
   public PTChar(final PTTypeConstraint origTc) {
     super(origTc);
   }
@@ -36,8 +52,16 @@ public final class PTChar extends PTPrimitiveType<Character> {
   }
 
   public void write(final String newValue) {
+
     this.checkIsWriteable();
+
     log.debug("Writing to PTChar; raw string is: {}", newValue);
+
+    if (newValue == null) {
+      throw new OPSVMachRuntimeException("Initial attempt to write "
+          + "null value to PTChar.");
+    }
+
     if(newValue.length() > 1) {
       throw new OPSVMachRuntimeException("Illegal attempt to write string ("
           + newValue + ") to PTChar.");

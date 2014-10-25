@@ -41,11 +41,25 @@ public class OPSResultSet {
     }
   }
 
+  public String getClobAsString(final int colIdx) {
+    try {
+      return this.clobToString(rs.getClob(colIdx));
+    } catch (final SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+  }
+
   public String getClobAsString(final String colName) {
     try {
+      return this.clobToString(rs.getClob(colName));
+    } catch (final SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+  }
 
-      final Clob clob = rs.getClob("SQLTEXT");
+  private String clobToString(final Clob clob) {
 
+    try {
       if (clob.length() > (long) Integer.MAX_VALUE) {
         throw new OPSVMachRuntimeException("Clob is longer than maximum possible "
             + "length of String; unable to store entire value in String unless "
@@ -122,9 +136,25 @@ public class OPSResultSet {
     }
   }
 
+  public String getString(final int colIdx) {
+    try {
+      return rs.getString(colIdx);
+    } catch (final SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+  }
+
   public BigDecimal getBigDecimal(final String colName) {
     try {
       return rs.getBigDecimal(colName);
+    } catch (final SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+  }
+
+  public BigDecimal getBigDecimal(final int colIdx) {
+    try {
+      return rs.getBigDecimal(colIdx);
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -170,40 +200,52 @@ public class OPSResultSet {
     }
   }
 
+  public void readIntoRecord(final PTRecord recObj) {
+
+    for (int i = 1; i <= this.getColumnCount(); i++) {
+
+      final String colName = this.getColumnName(i);
+      final PTReference<PTField> fldRef = recObj.getFieldRef(colName);
+      final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
+          fldRef.deref().getValue().getOriginatingTypeConstraint());
+
+      GlobalFnLibrary.assign(fldRef, dbVal);
+    }
+  }
+
   /**
    * Retrieves a value from the given column name that is type
    * compatible with the provided type constraint.
    */
-  public PTPrimitiveType getTypeCompatibleValue(final int colIdx,
+  private PTPrimitiveType getTypeCompatibleValue(final int colIdx,
       PTTypeConstraint tc) {
 
-    final String colName = this.getColumnName(colIdx);
     final String colTypeName = this.getColumnTypeName(colIdx);
 
     log.debug("Getting type compatible value from column named {}; tc = {}",
-        colName, tc);
+        this.getColumnTypeName(colIdx), tc);
 
     if(tc.isUnderlyingClassEqualTo(PTChar.class)) {
       if (colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
-        return new PTChar(this.getString(colName));
+        return new PTChar(this.getString(colIdx));
       }
     } else if (tc.isUnderlyingClassEqualTo(PTString.class)) {
       if (colTypeName.equals("CLOB")) {
-        return new PTString(this.getClobAsString(colName));
+        return new PTString(this.getClobAsString(colIdx));
       } else if (colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
-        return new PTString(this.getString(colName));
+        return new PTString(this.getString(colIdx));
       }
     } else if (tc.isUnderlyingClassEqualTo(PTNumber.class)) {
       if(colTypeName.equals("NUMBER")) {
-        return new PTNumber(this.getBigDecimal(colName));
+        return new PTNumber(this.getBigDecimal(colIdx));
       }
     } else if (tc.isUnderlyingClassEqualTo(PTDate.class)) {
       if (colTypeName.equals("VARCHAR2")) {
-        return new PTDate(this.getString(colName));
+        return new PTDate(this.getString(colIdx));
       }
     } else if (tc.isUnderlyingClassEqualTo(PTDateTime.class)) {
       if(colTypeName.equals("VARCHAR2") || colTypeName.equals("TIMESTAMP")) {
-        return new PTDateTime(this.getString(colName));
+        return new PTDateTime(this.getString(colIdx));
       }
     }
 

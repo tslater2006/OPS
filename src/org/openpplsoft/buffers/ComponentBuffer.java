@@ -166,16 +166,7 @@ public final class ComponentBuffer {
 
     // search record may legitimately be empty, check before continuing.
     if (rs.next()) {
-      final PTRecord searchRecord = ComponentBuffer.getSearchRecord();
-      for (int i = 1; i <= numCols; i++) {
-
-        final String colName = rs.getColumnName(i);
-        final PTReference<PTField> fldRef = searchRecord.getFieldRef(colName);
-        final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(i,
-            fldRef.deref().getValue().getOriginatingTypeConstraint());
-
-        GlobalFnLibrary.assign(fldRef, dbVal);
-      }
+      rs.readIntoRecord(ComponentBuffer.getSearchRecord());
       if (rs.next()) {
         throw new OPSVMachRuntimeException(
             "Result set for search record fill has more than "

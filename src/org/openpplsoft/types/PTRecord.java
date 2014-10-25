@@ -410,12 +410,8 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
      */
     PTBoolean returnVal = new PTBoolean(false);
     if (rs.next()) {
-
-      //GlobalFnLibrary.readRecordFromResultSet(
-      //  this.recDefn, this, rs);
-      throw new OPSVMachRuntimeException("TODO: Replace code above with call to "
-          + "new method on OPSResultSet, AND UNCOMMENT CODE BELOW.");
-      //returnVal = new PTBoolean(true);
+      rs.readIntoRecord(this);
+      returnVal = new PTBoolean(true);
     }
 
     rs.close();
@@ -506,17 +502,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
     // NOTE: record may legitimately be empty.
     if (rs.next()) {
-      for (int i = 1; i <= numCols; i++) {
-        final String colName = rs.getColumnName(i);
-        final String colTypeName = rs.getColumnTypeName(i);
-        final PTField fldObj = this.getFieldRef(colName).deref();
-        log.debug("Before: {} = {}", colName, fldObj);
-        //GlobalFnLibrary.readFieldFromResultSet(fldObj,
-        //    colName, colTypeName, rs);
-        throw new OPSVMachRuntimeException("TODO: Replace code above with call "
-            + "to new method on OPSResultSet, and UNCOMMENT CODE BELOW.");
-        //log.debug("After: {} = {}", colName, fldObj);
-      }
+      rs.readIntoRecord(this);
     }
 
     rs.close();

@@ -678,11 +678,11 @@ public class GlobalFnLibrary {
 
     String sqlCmd = ((PTString) args.get(0)).read();
 
-    // If this is a SELECT statement, prefix it with an uppercase "SELECT"
-    // followed by a space (no clue why, but this is what PS does).
-    Pattern selectPattern = Pattern.compile("^[Ss][Ee][Ll][Ee][Cc][Tt]");
-    Matcher selectMatcher = selectPattern.matcher(sqlCmd);
-    sqlCmd = selectMatcher.replaceFirst("SELECT ");
+    // If this statement begins with "Select", lowercase the keyword and add
+    // a space (no clue why, but this is what PS does).
+    if (sqlCmd.startsWith("Select")) {
+      sqlCmd = sqlCmd.replaceFirst("Select", "SELECT ");
+    }
 
     // Note: this regex uses positve lookbehind and lookahead.
     Pattern bindIdxPattern = Pattern.compile("(?<=\\s*)(:(\\d+))(?=\\s?)");

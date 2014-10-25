@@ -26,14 +26,18 @@ public class InterpreterEmissionsFilter {
   private static Logger log = LogManager.getLogger(
       InterpreterEmissionsFilter.class.getName());
 
-  private CommonTokenStream tokens;
+  private InterpretSupervisor parentSupervisor;
   private LinkedList<PCInstruction> inspectedInstrEmissions;
   private LinkedList<PCInstruction> pendingInstrEmissions;
 
-  public InterpreterEmissionsFilter(final CommonTokenStream ts) {
-    this.tokens = ts;
+  public InterpreterEmissionsFilter(final InterpretSupervisor s) {
     this.inspectedInstrEmissions = new LinkedList<PCInstruction>();
     this.pendingInstrEmissions = new LinkedList<PCInstruction>();
+    this.parentSupervisor = s;
+  }
+
+  public CommonTokenStream getTokens() {
+    return this.parentSupervisor.getCurrentlyExecutingTokenStream();
   }
 
   public void emit(final Token tok) {
@@ -53,7 +57,7 @@ public class InterpreterEmissionsFilter {
     int i = interval.a;
     boolean newlineSeen = false;
     while (i <= interval.b) {
-      final Token t = this.tokens.get(i);
+      final Token t = this.getTokens().get(i);
       if (t.getChannel() == PeopleCodeLexer.REFERENCES_CHANNEL) {
         i++;
         continue;
@@ -74,20 +78,6 @@ public class InterpreterEmissionsFilter {
     final PCInstruction instr = new PCInstruction(line.toString());
     instr.sourceContext = ctx;
     this.pendingInstrEmissions.addLast(instr);
-    this.flushPendingInstrEmissions();
-  }
-
-  public void repeatLastEmission() {
-    if (this.pendingInstrEmissions.size() > 0) {
-      this.pendingInstrEmissions.addLast(
-          this.pendingInstrEmissions.getLast());
-    } else if (this.inspectedInstrEmissions.size() == 0) {
-      throw new OPSVMachRuntimeException("Unable to repeat last instruction "
-          + "emission, no emissions have been submitted yet.");
-    } else {
-      this.pendingInstrEmissions.addLast(
-          this.inspectedInstrEmissions.getLast());
-    }
     this.flushPendingInstrEmissions();
   }
 
@@ -125,17 +115,26 @@ public class InterpreterEmissionsFilter {
         continue;
       }
 
+      // Don't emit an Else after emitting an End-If.
+      if(i.startsWith("Else")
+          && prev.getInstruction().startsWith("End-If")) {
+        this.pendingInstrEmissions.removeFirst();
+        this.inspectedInstrEmissions.addLast(instr);
+        continue;
+      }
+
       /*
        * The tracefile frequently excludes end-of-control-construct
        * instructions that appear in quick succession; usually only the first
        * and last such statments are listed in the tracefile. The conditional
        * below implements that logic.
        */
-      if((i.startsWith("End-If") || i.startsWith("End-Evaluate"))
-          && (prev.getInstruction().startsWith("For")
+      if ((i.startsWith("End-If") || i.startsWith("End-Evaluate"))
+            && (prev.getInstruction().startsWith("For")
               || prev.getInstruction().startsWith("End-If")
               || prev.getInstruction().startsWith("Else")
               || prev.getInstruction().startsWith("If")
+              || prev.getInstruction().startsWith("End-Function")
               || prev.getInstruction().startsWith("End-Evaluate"))) {
         this.pendingInstrEmissions.removeFirst();
         this.inspectedInstrEmissions.addLast(instr);
@@ -175,8 +174,8 @@ public class InterpreterEmissionsFilter {
   private String getSemicolonsAfterTokenIdx(final int tokIdx) {
     int i = tokIdx;
     final StringBuilder b = new StringBuilder();
-    //log.debug("Looking at {}", this.tokens.get(i).getText());
-    while (this.tokens.get(i).getText().equals(";")) {
+    //log.debug("Looking at {}", this.getTokens().get(i).getText());
+    while (this.getTokens().get(i).getText().equals(";")) {
       b.append(";");
       i++;
     }

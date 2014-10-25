@@ -42,7 +42,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       LogManager.getLogger(InterpreterVisitor.class.getName());
 
   private ExecContext eCtx;
-  private CommonTokenStream tokens;
   private InterpretSupervisor supervisor;
   private ParseTreeProperty<PTType> nodeData;
   private ParseTreeProperty<Callable> nodeCallables;
@@ -50,8 +49,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private Stack<EvaluateConstruct> evalConstructStack;
   private AccessLevel blockAccessLvl;
   private PeopleCodeParser.StmtBreakContext lastSeenBreakContext;
-  private InterpreterEmissionsFilter eFilter;
   private boolean hasVarDeclBeenEmitted;
+  private LinkedList<Object> submittedEmissions;
 
   /**
    * Creates a new interpreter instance that is aware
@@ -63,13 +62,31 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public InterpreterVisitor(final ExecContext e,
       final InterpretSupervisor s) {
     this.eCtx = e;
-    this.tokens = e.prog.tokenStream;
     this.supervisor = s;
     this.nodeData = new ParseTreeProperty<PTType>();
     this.nodeCallables = new ParseTreeProperty<Callable>();
     this.nodeTypeConstraints = new ParseTreeProperty<PTTypeConstraint>();
     this.evalConstructStack = new Stack<EvaluateConstruct>();
-    this.eFilter = new InterpreterEmissionsFilter(this.tokens);
+    this.submittedEmissions = new LinkedList<Object>();
+  }
+
+  public void emit(final Token tok) {
+    this.submittedEmissions.addLast(tok);
+    this.supervisor.getEmissionsFilter().emit(tok);
+  }
+
+  public void emit(final ParserRuleContext ctx) {
+    this.submittedEmissions.addLast(ctx);
+    this.supervisor.getEmissionsFilter().emit(ctx);
+  }
+
+  public void resubmitLastEmission() {
+    Object e = this.submittedEmissions.getLast();
+    if (e instanceof Token) {
+      this.supervisor.getEmissionsFilter().emit((Token) e);
+    } else {
+      this.supervisor.getEmissionsFilter().emit((ParserRuleContext) e);
+    }
   }
 
   /**
@@ -353,7 +370,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @return null
    */
   public Void visitIfStmt(final PeopleCodeParser.IfStmtContext ctx) {
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
 
     // Get value of conditional expression.
     visit(ctx.expr());
@@ -365,14 +382,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     if (exprResult) {
       visit(ctx.stmtList(0));
       if (ctx.stmtList(1) != null) {
-        this.eFilter.emit(ctx.elsetok);
+        this.emit(ctx.elsetok);
       } else {
-        this.eFilter.emit(ctx.endif);
+        this.emit(ctx.endif);
       }
     } else {
       if (ctx.stmtList(1) != null) {
         visit(ctx.stmtList(1));
-        this.eFilter.emit(ctx.endif);
+        this.emit(ctx.endif);
       }
     }
 
@@ -406,21 +423,21 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final PTNumberType toExpr =
         Environment.getOrDerefNumber(this.getNodeData(ctx.expr(1)));
 
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
     while (counter.isLessThanOrEqual(toExpr).read()) {
 
       try {
         visit(ctx.stmtList());
       } catch (OPSBreakSignalException opsbse) {
-        this.eFilter.emit(this.lastSeenBreakContext);
+        this.emit(this.lastSeenBreakContext);
         break;
       }
 
       // Increment and set new value of incrementing expression.
       counter.copyValueFrom(counter.add(new PTInteger(1)));
 
-      this.eFilter.emit(ctx.endfor);
-      this.eFilter.emit(ctx);
+      this.emit(ctx.endfor);
+      this.emit(ctx);
     }
 
     return null;
@@ -449,7 +466,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitStmtAssign(
       final PeopleCodeParser.StmtAssignContext ctx) {
 
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
     visit(ctx.expr(1));
     final PTType src = this.getNodeData(ctx.expr(1));
 
@@ -467,7 +484,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @return null
    */
   public Void visitStmtExpr(final PeopleCodeParser.StmtExprContext ctx) {
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
     visit(ctx.expr());
     return null;
   }
@@ -479,7 +496,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    * @return null
    */
   public Void visitStmtReturn(final PeopleCodeParser.StmtReturnContext ctx) {
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
 
     // If the Return expression is non-null, it must be type-checked against
     // the type declared in the method or function signature.
@@ -655,7 +672,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else {
       this.supervisor.runImmediately(call.eCtx);
       if(!(call.eCtx instanceof FunctionExecContext)) {
-        this.eFilter.repeatLastEmission();
+        this.resubmitLastEmission();
       }
     }
 
@@ -680,7 +697,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        */
       if (call != null && call.eCtx != null
             && call.eCtx instanceof FunctionExecContext) {
-        this.eFilter.repeatLastEmission();
+        this.resubmitLastEmission();
       }
     }
 
@@ -807,7 +824,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             + "one value.");
       }
       this.setNodeData(ctx, args.get(0));
-      this.eFilter.repeatLastEmission();
+      this.resubmitLastEmission();
     }
 
     return null;
@@ -815,7 +832,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
   /**
    * Called by ANTLR when an array indexing operation within
-   * an expression in a stement is being visited in the parse tree.
+   * an expression in a statement is being visited in the parse tree.
    * @param ctx the associated ParseTree node
    * @return null
    */
@@ -1006,7 +1023,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitMethodImpl(
       final PeopleCodeParser.MethodImplContext ctx) {
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
 
     final Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
     final List<FormalParam> formalParams =
@@ -1021,7 +1038,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.stmtList());
     this.eCtx.popScope();
 
-    this.eFilter.emit(ctx.endmethod);
+    this.emit(ctx.endmethod);
     return null;
   }
 
@@ -1033,7 +1050,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitGetImpl(
       final PeopleCodeParser.GetImplContext ctx) {
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
 
     final Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
     this.eCtx.pushScope(localScope);
@@ -1264,12 +1281,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
               && varsToDeclare.size() == 1
               && !didInitializeAnIdentifier)
           || didInitializeAnIdentifier) {
-        this.eFilter.emit(ctx);
+        this.emit(ctx);
         this.hasVarDeclBeenEmitted = true;
       }
     } else if((this.eCtx instanceof FunctionExecContext) &&
         this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
-      this.eFilter.emit(ctx);
+      this.emit(ctx);
     }
     return null;
   }
@@ -1357,7 +1374,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitEvaluateStmt(
       final PeopleCodeParser.EvaluateStmtContext ctx) {
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
 
     visit(ctx.expr());
     final PTPrimitiveType baseExpr = Environment.getOrDerefPrimitive(
@@ -1380,7 +1397,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         // If this is the last When branch, the Break is self-evident
         // and should not be emitted.
         if(i < (branches.size() - 1)) {
-          this.eFilter.emit(this.lastSeenBreakContext);
+          this.emit(this.lastSeenBreakContext);
         }
 
         evalConstruct.breakSeen = true;
@@ -1419,7 +1436,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     // Always emit the first When branch of an Evaluate statement
     if (!evalConstruct.hasBranchBeenEmitted) {
-      this.eFilter.emit(ctx);
+      this.emit(ctx);
       evalConstruct.hasBranchBeenEmitted = true;
 
     // If this isn't the first When branch, emit it only if a true
@@ -1427,7 +1444,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     // seen did not have an empty statement list.
     } else if(!evalConstruct.trueBranchExprSeen &&
         !evalConstruct.wasLastWhenBranchStmtListEmpty) {
-      this.eFilter.emit(ctx);
+      this.emit(ctx);
     }
 
     evalConstruct.wasLastWhenBranchStmtListEmpty =
@@ -1458,7 +1475,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       final PeopleCodeParser.WhenOtherBranchContext ctx) {
 
     final EvaluateConstruct evalConstruct = this.evalConstructStack.peek();
-    this.eFilter.emit(ctx);
+    this.emit(ctx);
 
     /*
      * Execution cannot fall through to When-Other; if no break was seen
@@ -1469,12 +1486,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       try {
         visit(ctx.stmtList());
       } catch (final OPSBreakSignalException opsbse) {
-        this.eFilter.emit(this.lastSeenBreakContext);
+        this.emit(this.lastSeenBreakContext);
         evalConstruct.breakSeen = true;
       }
 
       // Only emit End-Evaluate if no true branch has yet been seen.
-      this.eFilter.emit(evalConstruct.endEvaluateToken);
+      this.emit(evalConstruct.endEvaluateToken);
     }
 
     return null;
@@ -1561,7 +1578,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
             + "expected call frame boundary, but found data instead.");
       }
 
-      this.eFilter.repeatLastEmission();
+      this.resubmitLastEmission();
     }
 
     return null;
@@ -1586,7 +1603,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         if (((FunctionExecContext) this.eCtx).funcName.equals(
             ctx.funcSignature().GENERIC_ID().getText())) {
 
-          this.eFilter.emit(ctx.funcSignature());
+          this.emit(ctx.funcSignature());
           visit(ctx.funcSignature());
 
           final Scope localScope = new Scope(Scope.Lvl.FUNCTION_LOCAL);
@@ -1602,7 +1619,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           visit(ctx.stmtList());
           this.eCtx.popScope();
 
-          this.eFilter.emit(ctx.endfunction);
+          this.emit(ctx.endfunction);
 
         } else {
           throw new OPSFuncImplSignalException(ctx.

@@ -16,22 +16,26 @@ import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.types.*;
 import org.apache.logging.log4j.*;
 import org.openpplsoft.antlr4.*;
+import org.antlr.v4.runtime.*;
 
 public class InterpretSupervisor {
 
   private LinkedList<ExecContext> execContextStack = new LinkedList<ExecContext>();
   private ICBufferEntity cBufferContextEntity;
+  private InterpreterEmissionsFilter eFilter;
 
   private static Logger log = LogManager.getLogger(InterpretSupervisor.class.getName());
 
   public InterpretSupervisor(final ExecContext e) {
     this.execContextStack.push(e);
+    this.eFilter = new InterpreterEmissionsFilter(this);
   }
 
   public InterpretSupervisor(final ExecContext e,
       final ICBufferEntity contextEntity) {
     this.execContextStack.push(e);
     this.cBufferContextEntity = contextEntity;
+    this.eFilter = new InterpreterEmissionsFilter(this);
   }
 
   public PTType resolveContextualCBufferReference(final String id) {
@@ -175,6 +179,14 @@ public class InterpretSupervisor {
 
   public ExecContext getThisExecContext() {
     return this.execContextStack.peek();
+  }
+
+  public InterpreterEmissionsFilter getEmissionsFilter() {
+    return this.eFilter;
+  }
+
+  public CommonTokenStream getCurrentlyExecutingTokenStream() {
+    return this.execContextStack.peek().prog.tokenStream;
   }
 
   private void fatallyLogContextStack() {

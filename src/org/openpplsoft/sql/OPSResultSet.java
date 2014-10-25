@@ -203,7 +203,6 @@ public class OPSResultSet {
   public void readIntoRecord(final PTRecord recObj) {
 
     for (int i = 1; i <= this.getColumnCount(); i++) {
-
       final String colName = this.getColumnName(i);
       final PTReference<PTField> fldRef = recObj.getFieldRef(colName);
       final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
@@ -213,9 +212,30 @@ public class OPSResultSet {
     }
   }
 
+  public void readNamedColumnIntoField(final PTField fldObj, final String colName) {
+
+    for (int i = 1; i <= this.getColumnCount(); i++) {
+      if (this.getColumnName(i).equals(colName)) {
+        final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
+            fldObj.getValue().getOriginatingTypeConstraint());
+
+        // We cannot use GlobalFnLibrary.assign() b/c that method requires that
+        // the destination be a reference. Since we know fields contain only
+        // primitives, and that db values are always primitives, we do the
+        // assignment manually here.
+        fldObj.getValue().copyValueFrom(dbVal);
+      }
+    }
+  }
+
   /**
    * Retrieves a value from the given column name that is type
    * compatible with the provided type constraint.
+   * IMPORTANT NOTE: This method calls the variants of the get____()
+   * methods on ResultSet that accept integer column indices as arguments, rather
+   * than String column names. This should be done whenever possible, because
+   * sometimes result set column names can differ from those that are expected
+   * on PT defintions (i.e., due to aliases in queries).
    */
   private PTPrimitiveType getTypeCompatibleValue(final int colIdx,
       PTTypeConstraint tc) {

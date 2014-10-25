@@ -200,17 +200,18 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     if (rs.next()) {
       log.debug("Defaulting to: {}", rs.getString(defFldName));
 
-      //GlobalFnLibrary.readFieldFromResultSet(this, rs, defFldName);
-      throw new OPSVMachRuntimeException("TODO: Replace call above with "
-        + "call to new method on OPSResultSet, AND UNCOMMENT CODE BELOW.");
-/*      if (rs.next()) {
+      // REMEMBER: defFldName is the name of a field on a *different* record;
+      // we are reading that value into this field.
+      rs.readNamedColumnIntoField(this, defFldName);
+
+      if (rs.next()) {
         throw new OPSVMachRuntimeException(
             "Result set for default non constant field default query "
             + "returned multiple records; only expected one.");
       }
 
       fdEmission.setDefaultedValue(this.getValue().readAsString());
-      fdEmission.setFromRecordFlag();*/
+      fdEmission.setFromRecordFlag();
     }
     rs.close();
     ostmt.close();

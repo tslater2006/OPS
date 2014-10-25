@@ -728,14 +728,14 @@ public class GlobalFnLibrary {
         log.debug("Record returned by SQLExec; writing selected fields to out vars...");
 
         ResultSetMetaData rsMetadata = rs.getMetaData();
-        for (int colIdx = 1; colIdx < rsMetadata.getColumnCount(); colIdx++) {
+        for (int colIdx = 1; colIdx <= rsMetadata.getColumnCount(); colIdx++) {
 
           if (nextOutVarIdx >= args.size()) {
             throw new OPSVMachRuntimeException("Expected an out var "
                 + "but reached the end of the provided argument list.");
           }
 
-          assign(args.get(nextOutVarIdx),
+          assign(args.get(nextOutVarIdx++),
               new PTString(rs.getString(colIdx)));
         }
       }
@@ -862,6 +862,8 @@ public class GlobalFnLibrary {
 
   @SuppressWarnings("unchecked")
   public static void assign(final PTType dst, final PTType src) {
+
+    log.debug("Assigning from {} to {}", src, dst);
 
     if (!(dst instanceof PTReference)) {
       throw new OPSVMachRuntimeException("Illegal assignment; not a valid l-value: "

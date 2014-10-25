@@ -71,6 +71,7 @@ public class Scope {
    * @param id the identifier to declare
    * @param type the type to declare
    */
+  @SuppressWarnings("unchecked")
   public void declareAndInitVar(final String id, final PTTypeConstraint tc,
       final PTType initialValue) throws OPSTypeCheckException {
 
@@ -96,11 +97,21 @@ public class Scope {
     }
 
     PTReference<PTType> newSymTableRef = null;
-    if (tc instanceof PTAnyTypeConstraint) {
+
+    /*
+     * If the value provided is a reference, use that reference in the
+     * symbol table. This allows references created by calling entities to be
+     * modified by the callee and be seen upon return to the caller.
+     */
+    if (initialValue instanceof PTReference) {
+      tc.typeCheck(((PTReference) initialValue).deref());
+      newSymTableRef = (PTReference) initialValue;
+    } else if (tc instanceof PTAnyTypeConstraint) {
       newSymTableRef = new PTAnyTypeReference(tc, initialValue);
     } else {
       newSymTableRef = new PTReference<PTType>(tc, initialValue);
     }
+
     log.debug("Declared {} with ref = {}", id, newSymTableRef);
     this.symbolTable.put(id, newSymTableRef);
   }

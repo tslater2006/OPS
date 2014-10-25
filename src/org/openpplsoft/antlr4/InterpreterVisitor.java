@@ -1657,6 +1657,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
   }
 
+  /**
+   * NOTE: DO NOT unwrap arguments that are references; this will
+   * prevent the caller from seeing any changes to object/Any references
+   * that may be made by the callee.
+   */
   private void bindArgsToFormalParams(final Scope localScope,
       final List<FormalParam> formalParams) {
 
@@ -1670,16 +1675,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     for (int i = 0; i < formalParams.size() && i < args.size(); i++) {
       PTType arg = args.get(i);
       FormalParam fp = formalParams.get(i);
-
-      /*
-       * For all execution contexts, any args that are references must
-       * be unwrapped to their raw types, otherwise the formal parameter
-       * identifier references created at the call site will refer to
-       * the references themselves.
-       */
-      if (arg instanceof PTReference) {
-        arg = ((PTReference) arg).deref();
-      }
 
       if (this.eCtx instanceof AppClassObjExecContext) {
         /*
@@ -1710,10 +1705,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         localScope.declareAndInitVar(fp.id, fp.typeConstraint, arg);
       } catch (final OPSTypeCheckException opstce1) {
         /*
-         * It's possible that the argument is a field object that
-         * needs to have its "default method" (getValue()) called prior
+         * It's possible that the argument is a field object (or reference to one)
+         * that needs to have its "default method" (getValue()) called prior
          * to binding it to the formal param identifier.
          */
+        if (arg instanceof PTReference) {
+          arg = ((PTReference) arg).deref();
+        }
+
         if (arg instanceof PTField) {
           try {
             localScope.declareAndInitVar(fp.id, fp.typeConstraint,

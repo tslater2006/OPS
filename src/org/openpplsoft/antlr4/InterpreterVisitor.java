@@ -1287,6 +1287,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else if((this.eCtx instanceof FunctionExecContext) &&
         this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
       this.emit(ctx);
+    } else if((this.eCtx instanceof ProgramExecContext)
+        && evalConstructStack.size() > 0
+        && (varTc.isUnderlyingClassEqualTo(PTRowset.class)
+            || varTc.isUnderlyingClassEqualTo(PTInteger.class))) {
+      this.emit(ctx);
     }
     return null;
   }

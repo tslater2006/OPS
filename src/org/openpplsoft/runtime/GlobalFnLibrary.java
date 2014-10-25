@@ -108,6 +108,13 @@ public class GlobalFnLibrary {
   /**
    * TODO(mquinn): Implement this function.
    */
+  public static void PT_UnHide() {
+    Environment.getDereferencedArgsFromCallStack();
+  }
+
+  /**
+   * TODO(mquinn): Implement this function.
+   */
   public static void PT_SetSearchDialogBehavior() {
     Environment.getDereferencedArgsFromCallStack();
   }

@@ -285,7 +285,12 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
   @Override
   public PTType dotProperty(final String s) {
-    return this.fieldRefs.get(s);
+    if (this.fieldRefs.containsKey(s)) {
+      return this.fieldRefs.get(s);
+    } else if (s.equals("Name")) {
+      return new PTString(this.recDefn.RECNAME);
+    }
+    return null;
   }
 
   @Override

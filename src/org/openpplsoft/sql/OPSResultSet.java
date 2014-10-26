@@ -216,7 +216,7 @@ public class OPSResultSet {
       final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
           fldRef.deref().getValue().getOriginatingTypeConstraint());
 
-      GlobalFnLibrary.assign(fldRef, dbVal);
+      Environment.assign(fldRef, dbVal);
     }
   }
 
@@ -227,7 +227,7 @@ public class OPSResultSet {
         final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
             fldObj.getValue().getOriginatingTypeConstraint());
 
-        // We cannot use GlobalFnLibrary.assign() b/c that method requires that
+        // We cannot use Environment.assign() b/c that method requires that
         // the destination be a reference. Since we know fields contain only
         // primitives, and that db values are always primitives, we do the
         // assignment manually here.

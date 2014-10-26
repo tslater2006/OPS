@@ -743,7 +743,7 @@ public class GlobalFnLibrary {
         final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(colIdx,
             outVal.getOriginatingTypeConstraint());
 
-        GlobalFnLibrary.assign(outVar, dbVal);
+        Environment.assign(outVar, dbVal);
       }
     }
 
@@ -752,77 +752,5 @@ public class GlobalFnLibrary {
 
     // SQLExec returns True if execution completed successfully.
     Environment.pushToCallStack(new PTBoolean(true));
-  }
-
-  @SuppressWarnings("unchecked")
-  public static void assign(final PTType dst, final PTType src) {
-
-    log.debug("Assigning from {} to {}", src, dst);
-
-    if (!(dst instanceof PTReference)) {
-      throw new OPSVMachRuntimeException("Illegal assignment; not a valid l-value: "
-          + dst);
-    }
-
-    final PTReference lRef = (PTReference) dst;
-    PTType rawSrc = src;
-
-    if (src instanceof PTReference) {
-      rawSrc = ((PTReference) src).deref();
-    }
-
-    if (rawSrc instanceof PTPrimitiveType) {
-      if (lRef.deref() instanceof PTPrimitiveType) {
-        ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) rawSrc);
-      } else if (lRef.deref() instanceof PTField) {
-        ((PTField) lRef.deref()).getValue().copyValueFrom((PTPrimitiveType) rawSrc);
-
-      // NOTE: You must look at the type constraint of the *reference* in the
-      // conditional directly below this comment, not the
-      // value it points to, b/c the value could be null and as of this writing,
-      // PTNull is a singleton and thus per-null originating type constraints
-      // are not associated with it.
-      } else if (lRef.getOriginatingTypeConstraint()
-          instanceof PTAnyTypeConstraint) {
-        /*
-         * Variables of type Any can point to objects or primitives. If an object
-         * (or Null) is asigned to the identifier, a new primitive must be alloc'ed
-         * containing a copy of the value in source operand.
-         */
-        PTPrimitiveType primCopy = (PTPrimitiveType)
-            ((PTPrimitiveType) rawSrc).getOriginatingTypeConstraint().alloc();
-        primCopy.copyValueFrom((PTPrimitiveType) rawSrc);
-        try {
-          lRef.pointTo(primCopy);
-        } catch (final OPSImmutableRefAttemptedChangeException opsirace) {
-          throw new OPSVMachRuntimeException(opsirace.getMessage(), opsirace);
-        } catch (final OPSTypeCheckException opstce) {
-          throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
-        }
-      } else {
-        throw new OPSVMachRuntimeException("Assignment failed; rawSrc is primitive "
-            + "but lRef dereferences to neither a primitive nor a PTField: " + lRef.deref());
-      }
-    } else if(rawSrc instanceof PTObjectType) {
-      try {
-        lRef.pointTo(rawSrc);
-      } catch (final OPSImmutableRefAttemptedChangeException opsirace) {
-        if (rawSrc instanceof PTField && lRef.deref() instanceof PTPrimitiveType) {
-          // If lRef refers to a primitive and rawSrc is a Field, re-attempt the
-          // assignment, this time copying the value from
-          // the Field's underlying value to the referred primitive.
-          ((PTPrimitiveType) lRef.deref()).copyValueFrom(((PTField) rawSrc).getValue());
-        } else {
-          throw new OPSVMachRuntimeException("Assignment failed, even after "
-              + "checking if rawSrc is a PTField that needs to be unwrapped "
-              + "to its enclosed value.", opsirace);
-        }
-      } catch (final OPSTypeCheckException opstce) {
-        throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
-      }
-    } else {
-      throw new OPSVMachRuntimeException("Assignment failed; unexpected "
-          + "rawSrc: " + src + "; lRef is " + lRef);
-    }
   }
 }

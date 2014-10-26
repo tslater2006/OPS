@@ -473,7 +473,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr(0));
     final PTType dst = this.getNodeData(ctx.expr(0));
 
-    GlobalFnLibrary.assign(dst, src);
+    Environment.assign(dst, src);
     return null;
   }
 

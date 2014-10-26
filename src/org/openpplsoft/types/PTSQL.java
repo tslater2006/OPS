@@ -142,10 +142,10 @@ public final class PTSQL extends PTObjectType {
         final String colTypeName = this.rs.getColumnTypeName(i+1);
         switch(colTypeName) {
           case "VARCHAR":
-            GlobalFnLibrary.assign(arg, new PTString(rs.getString(colName)));
+            Environment.assign(arg, new PTString(rs.getString(colName)));
             break;
           case "VARCHAR2":
-            GlobalFnLibrary.assign(arg, new PTString(rs.getString(colName)));
+            Environment.assign(arg, new PTString(rs.getString(colName)));
             break;
           default:
             throw new OPSVMachRuntimeException("Unexpected colTypeName in Fetch: "

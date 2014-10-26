@@ -23,12 +23,12 @@ public final class PTRecordLiteral extends PTObjectType {
   public PTRecordLiteral(final String rStr) {
     super(new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
 
-    if(!rStr.startsWith("Record.")) {
+    if(!rStr.toLowerCase().startsWith("record.")) {
       throw new OPSVMachRuntimeException("Expected rStr to start "
-          + "with 'Record.' while creating PTRecordLiteral; rStr = "
+          + "with 'Record.' (case-insensitive) while creating PTRecordLiteral; rStr = "
           + rStr);
     }
-    Record r = DefnCache.getRecord(rStr.replaceFirst("Record.", ""));
+    Record r = DefnCache.getRecord(rStr.substring(rStr.indexOf(".") + 1));
     this.ptRECNAME = r.RECNAME;
     this.recDefn = r;
   }

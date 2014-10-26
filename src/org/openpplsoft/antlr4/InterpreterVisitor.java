@@ -587,20 +587,23 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           + "support this particular input type.");
     }
 
-    String input = ((PTString) this.getNodeData(ctx.expr())).read();
+    final String input = ((PTString) this.getNodeData(ctx.expr())).read();
+    final String lcInput = input.toLowerCase();
     PTType output;
-    if (input.startsWith("Record.")) {
+    if (lcInput.startsWith("record.")) {
       output = new PTRecordLiteral(input);
-    } else if (input.startsWith("MenuName.")) {
+    } else if (lcInput.startsWith("menuname.")) {
       output = new PTMenuLiteral(input);
-    } else if (input.startsWith("BarName.")) {
+    } else if (lcInput.startsWith("barname.")) {
       output = new PTMenuBarLiteral(input);
-    } else if (input.startsWith("ItemName.")) {
+    } else if (lcInput.startsWith("itemname.")) {
       output = new PTMenuItemLiteral(input);
-    } else if (input.startsWith("Page.")) {
+    } else if (lcInput.startsWith("page.")) {
       output = new PTPageLiteral(input);
-    } else if (input.startsWith("Component.")) {
+    } else if (lcInput.startsWith("component.")) {
       output = new PTComponentLiteral(input);
+    } else if (lcInput.startsWith("field.")) {
+      output = new PTFieldLiteral(input);
     } else {
       throw new OPSVMachRuntimeException("Unsupported dynamic reference "
           + "attempt: " + input);

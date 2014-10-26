@@ -28,12 +28,13 @@ public final class PTMenuLiteral extends PTObjectType {
 
   public PTMenuLiteral(final String mStr) {
     super(new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
-    if(!mStr.startsWith("MenuName.")) {
+
+    if(!mStr.toLowerCase().startsWith("menuname.")) {
       throw new OPSVMachRuntimeException("Expected mStr to start "
-          + "with 'Menu.' while creating PTMenuLiteral; mStr = "
+          + "with 'Menu.' (case-insensitive) while creating PTMenuLiteral; mStr = "
           + mStr);
     }
-    Menu m = DefnCache.getMenu(mStr.replaceFirst("MenuName.", ""));
+    Menu m = DefnCache.getMenu(mStr.substring(mStr.indexOf(".") + 1));
     this.ptMENUNAME = m.getMenuName();
     this.menuDefn = m;
   }

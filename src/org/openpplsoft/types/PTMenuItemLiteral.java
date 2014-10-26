@@ -21,12 +21,13 @@ public final class PTMenuItemLiteral extends PTObjectType {
 
   public PTMenuItemLiteral(final String iStr) {
     super(new PTTypeConstraint<PTMenuItemLiteral>(PTMenuItemLiteral.class));
-    if(!iStr.startsWith("ItemName.")) {
+
+    if(!iStr.toLowerCase().startsWith("itemname.")) {
       throw new OPSVMachRuntimeException("Expected iStr to start "
-          + "with 'ItemName.' while alloc'ing PTMenuItemLiteral; iStr = "
-          + iStr);
+          + "with 'ItemName.' (case-insensitive) while alloc'ing "
+          + "PTMenuItemLiteral; iStr = " + iStr);
     }
-    this.ptITEMNAME = iStr.replaceFirst("ItemName.", "");
+    this.ptITEMNAME = iStr.substring(iStr.indexOf(".") + 1);
   }
 
   /**

@@ -21,12 +21,14 @@ public final class PTComponentLiteral extends PTObjectType {
 
   public PTComponentLiteral(final String cStr) {
     super(new PTTypeConstraint<PTComponentLiteral>(PTComponentLiteral.class));
-    if(!cStr.startsWith("Component.")) {
+
+    if(!cStr.toLowerCase().startsWith("component.")) {
       throw new OPSVMachRuntimeException("Expected cStr to start "
-          + "with 'Component.' while creating PTComponentLiteral; cStr = "
+          + "with 'Component.' (case-insensitive) while creating "
+          + "PTComponentLiteral; cStr = "
           + cStr);
     }
-    this.ptPNLGRPNAME = cStr.replaceFirst("Component.", "");
+    this.ptPNLGRPNAME = cStr.substring(cStr.indexOf(".") + 1);
   }
 
   /**

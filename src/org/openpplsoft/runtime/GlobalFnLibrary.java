@@ -10,7 +10,6 @@ package org.openpplsoft.runtime;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.text.ParseException;
@@ -754,43 +753,6 @@ public class GlobalFnLibrary {
     // SQLExec returns True if execution completed successfully.
     Environment.pushToCallStack(new PTBoolean(true));
   }
-
-  /*==================================*/
-  /* Shared OPS functions             */
-  /*==================================*/
-
-/*  public static void readRecordFromResultSet(Record recDefn,
-      PTRecord recObj, ResultSet rs) throws SQLException {
-
-    final ResultSetMetaData rsMetadata = rs.getMetaData();
-    int numCols = rsMetadata.getColumnCount();
-
-    for(int i = 1; i <= numCols; i++) {
-      final String colName = rsMetadata.getColumnName(i);
-      final String colTypeName = rsMetadata.getColumnTypeName(i);
-      final PTField fldObj = recObj.getFieldRef(colName).deref();
-      GlobalFnLibrary.readFieldFromResultSet(fldObj,
-        colName, colTypeName, rs);
-    }
-  }
-
-  public static void readFieldFromResultSet(final PTField fldObj,
-      final ResultSet rs, final String colName) throws SQLException {
-
-    final ResultSetMetaData rsMetadata = rs.getMetaData();
-    int numCols = rsMetadata.getColumnCount();
-
-    for(int i = 1; i <= numCols; i++) {
-      if (rsMetadata.getColumnName(i).equals(colName)) {
-        readFieldFromResultSet(fldObj, colName,
-            rsMetadata.getColumnTypeName(i), rs);
-        return;
-      }
-    }
-
-    throw new OPSVMachRuntimeException("The column with the name of "
-        + colName + "does not exist in the result set; unable to read field.");
-  }*/
 
   @SuppressWarnings("unchecked")
   public static void assign(final PTType dst, final PTType src) {

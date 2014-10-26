@@ -459,12 +459,9 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     while (rs.next()) {
       // is this the first row in rs?
       if (rs.isFirst()) {
-        //GlobalFnLibrary.readRecordFromResultSet(
-        //    this.recDefn, this, rs);
-        throw new OPSVMachRuntimeException("TODO: Replace code above with call "
-            + "to new method on OPSResultSet, and UNCOMMENT CODE BELOW.");
-        //returnVal = new PTBoolean(true);
-        //break;
+        rs.readIntoRecord(this);
+        returnVal = new PTBoolean(true);
+        break;
       }
     }
 

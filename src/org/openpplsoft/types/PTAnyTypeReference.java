@@ -19,7 +19,7 @@ public final class PTAnyTypeReference extends PTReference<PTType> {
   }
 
   public void castTo(final PTTypeConstraint castTc) {
-    if (this.referencedValue == PTNull.getSingleton()) {
+    if (this.referencedValue instanceof PTNull) {
       try {
         this.pointTo(castTc.alloc());
         return;

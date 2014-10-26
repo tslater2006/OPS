@@ -13,18 +13,9 @@ import org.openpplsoft.runtime.*;
 
 public final class PTNull extends PTObjectType {
 
-  private static PTNull singleton;
-
-  private PTNull() {
-    super(new PTTypeConstraint<PTNull>(PTNull.class));
-  }
-
-  public static PTNull getSingleton() {
-    if (singleton == null) {
-      singleton = new PTNull();
-      singleton.setReadOnly();
-    }
-    return singleton;
+  public PTNull(final PTTypeConstraint origTc) {
+    super(origTc);
+    this.setReadOnly();
   }
 
   public PTType dotProperty(String s) {

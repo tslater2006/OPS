@@ -237,7 +237,7 @@ public class OPSResultSet {
    * sometimes result set column names can differ from those that are expected
    * on PT defintions (i.e., due to aliases in queries).
    */
-  private PTPrimitiveType getTypeCompatibleValue(final int colIdx,
+  public PTPrimitiveType getTypeCompatibleValue(final int colIdx,
       PTTypeConstraint tc) {
 
     final String colTypeName = this.getColumnTypeName(colIdx);
@@ -245,7 +245,9 @@ public class OPSResultSet {
     log.debug("Getting type compatible value from column named {}; tc = {}",
         this.getColumnTypeName(colIdx), tc);
 
-    if(tc.isUnderlyingClassEqualTo(PTChar.class)) {
+    if (tc instanceof PTAnyTypeConstraint) {
+      throw new OPSVMachRuntimeException("TODO: Handle Any tc in getTypeCompatibleValue.");
+    } else if (tc.isUnderlyingClassEqualTo(PTChar.class)) {
       if (colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
         return new PTChar(this.getString(colIdx));
       }

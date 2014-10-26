@@ -729,10 +729,22 @@ public class GlobalFnLibrary {
               + "but reached the end of the provided argument list.");
         }
 
-//        assign(args.get(nextOutVarIdx++),
-  //          new PTString(rs.getString(colIdx)));
-        throw new OPSVMachRuntimeException("TODO: Replace code above with call to "
-            + "new method on OPSStmt.");
+        final PTType outVar = args.get(nextOutVarIdx++);
+
+        // Even though we don't write directly to the dbVal here (assignment
+        // is handled by assign()), we need the raw value that eventually
+        // will be written to b/c its type constraint dictates what type to read
+        // from the database. This could be a primitive or it could be of type Any;
+        // here, we need to deref if it's a ref, and if it's a field, unwrap as well.
+        PTType outVal = Environment.getOrDeref(outVar);
+        if (outVal instanceof PTField) {
+          outVal = ((PTField) outVal).getValue();
+        }
+
+        final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(colIdx,
+            outVal.getOriginatingTypeConstraint());
+
+        GlobalFnLibrary.assign(outVar, dbVal);
       }
     }
 

@@ -464,15 +464,10 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
       final PTRow newRow = new PTRowTypeConstraint().alloc(
           this, this.registeredRecordDefns, this.registeredChildScrollDefns);
-/*      GlobalFnLibrary
-          .readRecordFromResultSet(
-          this.primaryRecDefn,
-          newRow.getRecord(this.primaryRecDefn.RECNAME),
-          rs);*/
-      throw new OPSVMachRuntimeException("TODO: Replace the code above with a call "
-          + "to new method on OPSResultSet, and UNCOMMENT CODE BELOW.");
-      /*this.rows.add(newRow);
-      rowsRead++;*/
+
+      rs.readIntoRecord(newRow.getRecord(this.primaryRecDefn.RECNAME));
+      this.rows.add(newRow);
+      rowsRead++;
     }
 
     rs.close();

@@ -44,7 +44,7 @@ public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
   @Override
   public void typeCheck(PTType a) throws OPSTypeCheckException {
     boolean result =
-        (a == PTNull.getSingleton()
+        ((a instanceof PTNull)
          || (a instanceof PTArray
               && (this.reqdDimension == ((PTArray) a).dimensions)
               && this.reqdNestedTypeConstraint.equals(((PTArray) a)

@@ -23,7 +23,7 @@ public class PTAnyTypeConstraint extends PTTypeConstraint<PTType> {
 
   @Override
   public PTType alloc() {
-    return PTNull.getSingleton();
+    return new PTNull(this);
   }
 
   /**
@@ -39,6 +39,6 @@ public class PTAnyTypeConstraint extends PTTypeConstraint<PTType> {
 
   @Override
   public String toString() {
-    return super.toString();
+    return "(PTAnyTypeConstraint)" + super.toString();
   }
 }

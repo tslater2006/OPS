@@ -63,7 +63,7 @@ public class PTTypeConstraint<T extends PTType> {
 
   public void typeCheck(final PTType a) throws OPSTypeCheckException {
     boolean result = (this.underlyingClass == a.getClass()
-        || (this.isUnderlyingClassObject() && a == PTNull.getSingleton())
+        || (this.isUnderlyingClassObject() && (a instanceof PTNull))
         || (this.underlyingClass == PTNumber.class && a instanceof PTInteger)
     );
     log.debug("~TYPECHECK: {} <----- {} ? {}",

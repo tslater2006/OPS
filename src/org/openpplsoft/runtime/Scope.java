@@ -56,7 +56,7 @@ public class Scope {
         // Primitive references must be initialized (can't be null).
         this.declareAndInitVar(id, tc, tc.alloc());
       } else {
-        this.declareAndInitVar(id, tc, PTNull.getSingleton());
+        this.declareAndInitVar(id, tc, new PTNull(tc));
       }
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);

@@ -128,6 +128,14 @@ public class OPSResultSet {
     }
   }
 
+  public int getInt(final int colIdx) {
+    try {
+      return rs.getInt(colIdx);
+    } catch (final SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+  }
+
   public String getString(final String colName) {
     try {
       return rs.getString(colName);
@@ -246,7 +254,9 @@ public class OPSResultSet {
         this.getColumnTypeName(colIdx), tc);
 
     if (tc instanceof PTAnyTypeConstraint) {
-      throw new OPSVMachRuntimeException("TODO: Handle Any tc in getTypeCompatibleValue.");
+      if (colTypeName.equals("CHAR")) {
+        return new PTChar(this.getString(colIdx));
+      }
     } else if (tc.isUnderlyingClassEqualTo(PTChar.class)) {
       if (colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {
         return new PTChar(this.getString(colIdx));
@@ -260,6 +270,10 @@ public class OPSResultSet {
     } else if (tc.isUnderlyingClassEqualTo(PTNumber.class)) {
       if(colTypeName.equals("NUMBER")) {
         return new PTNumber(this.getBigDecimal(colIdx));
+      }
+    } else if (tc.isUnderlyingClassEqualTo(PTInteger.class)) {
+      if(colTypeName.equals("NUMBER")) {
+        return new PTInteger(this.getInt(colIdx));
       }
     } else if (tc.isUnderlyingClassEqualTo(PTDate.class)) {
       if (colTypeName.equals("VARCHAR2")) {

@@ -256,6 +256,8 @@ public class OPSResultSet {
     if (tc instanceof PTAnyTypeConstraint) {
       if (colTypeName.equals("CHAR")) {
         return new PTChar(this.getString(colIdx));
+      } else if (colTypeName.equals("VARCHAR2")) {
+        return new PTString(this.getString(colIdx));
       }
     } else if (tc.isUnderlyingClassEqualTo(PTChar.class)) {
       if (colTypeName.equals("CHAR") || colTypeName.equals("VARCHAR2")) {

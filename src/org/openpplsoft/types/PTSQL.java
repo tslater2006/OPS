@@ -124,33 +124,25 @@ public final class PTSQL extends PTObjectType {
             + "underlying SQL statement.");
       }
 
-      for (int i = 0; i < args.size() && i < this.rs.getColumnCount(); i++) {
-        final PTType arg = args.get(i);
-        if (!(arg instanceof PTReference)) {
+      for (int colIdx = 1;
+          colIdx <= args.size() && colIdx <= this.rs.getColumnCount(); colIdx++) {
+
+        final PTType outVar = args.get(colIdx - 1);
+
+        if (!(outVar instanceof PTReference)) {
           throw new OPSVMachRuntimeException("Fetch failed; expected a reference "
-              + "(variable) as one of the arguments but found: " + arg);
+              + "(variable) as one of the out vars but found: " + outVar);
         }
 
-        /**
-         * TODO(mquinn): Because we cannot rely on the arg's type (can be Any)
-         * to determine how to read the underlying field from the database,
-         * I will likely need to access Field metadata to determine exactly
-         * which raw PTType should be created. Until then, I am passing only
-         * strings. This works for now but will need to change.
-         */
-        final String colName = this.rs.getColumnName(i+1);
-        final String colTypeName = this.rs.getColumnTypeName(i+1);
-        switch(colTypeName) {
-          case "VARCHAR":
-            Environment.assign(arg, new PTString(rs.getString(colName)));
-            break;
-          case "VARCHAR2":
-            Environment.assign(arg, new PTString(rs.getString(colName)));
-            break;
-          default:
-            throw new OPSVMachRuntimeException("Unexpected colTypeName in Fetch: "
-                + colTypeName);
+        PTType outVal = Environment.getOrDeref(outVar);
+        if (outVal instanceof PTField) {
+          outVal = ((PTField) outVal).getValue();
         }
+
+        final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(colIdx,
+            outVal.getOriginatingTypeConstraint());
+
+        Environment.assign(outVar, dbVal);
       }
 
       Environment.pushToCallStack(new PTBoolean(true));

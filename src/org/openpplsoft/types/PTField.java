@@ -32,6 +32,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   private RecordFieldBuffer recFieldBuffer;
   private PTImmutableReference<PTPrimitiveType> valueRef;
   private PTImmutableReference<PTBoolean> visiblePropertyRef;
+  private PTImmutableReference<PTString> fldNamePropertyRef;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -67,15 +68,17 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   private void init() {
     final PTTypeConstraint valueTc
         = recFieldDefn.getTypeConstraintForUnderlyingValue();
-    final PTTypeConstraint<PTBoolean> visibleTc
-        = new PTTypeConstraint<PTBoolean>(PTBoolean.class);
 
     try {
       this.valueRef
           = new PTImmutableReference<PTPrimitiveType>(valueTc,
               (PTPrimitiveType) valueTc.alloc());
       this.visiblePropertyRef
-          = new PTImmutableReference<PTBoolean>(visibleTc, visibleTc.alloc());
+          = new PTImmutableReference<PTBoolean>(
+              PTBoolean.getTc(), PTBoolean.getTc().alloc());
+      this.fldNamePropertyRef
+          = new PTImmutableReference<PTString>(
+              PTString.getTc(), new PTString(this.recFieldDefn.FIELDNAME));
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
@@ -374,6 +377,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return this.valueRef;
     } else if(s.equals("Visible")) {
       return this.visiblePropertyRef;
+    } else if(s.equals("Name")) {
+      return this.fldNamePropertyRef;
     }
     return null;
   }

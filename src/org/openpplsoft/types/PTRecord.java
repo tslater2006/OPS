@@ -289,6 +289,8 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
       return this.fieldRefs.get(s);
     } else if (s.equals("Name")) {
       return new PTString(this.recDefn.RECNAME);
+    } else if (s.equals("FieldCount")) {
+      return new PTInteger(this.fieldRefs.size());
     }
     return null;
   }

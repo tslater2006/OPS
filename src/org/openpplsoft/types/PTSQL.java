@@ -128,19 +128,8 @@ public final class PTSQL extends PTObjectType {
           colIdx <= args.size() && colIdx <= this.rs.getColumnCount(); colIdx++) {
 
         final PTType outVar = args.get(colIdx - 1);
-
-        if (!(outVar instanceof PTReference)) {
-          throw new OPSVMachRuntimeException("Fetch failed; expected a reference "
-              + "(variable) as one of the out vars but found: " + outVar);
-        }
-
-        PTType outVal = Environment.getOrDeref(outVar);
-        if (outVal instanceof PTField) {
-          outVal = ((PTField) outVal).getValue();
-        }
-
         final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(colIdx,
-            outVal.getOriginatingTypeConstraint());
+            outVar.getOriginatingTypeConstraint());
 
         Environment.assign(outVar, dbVal);
       }

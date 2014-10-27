@@ -95,7 +95,7 @@ public class Assembler {
       new SimpleElementAssembler((byte) 26, "End-If", AFlag.ENDIF_STYLE),
       new SimpleElementAssembler((byte) 27, "Error"),
       new SimpleElementAssembler((byte) 28, "If", AFlag.IF_STYLE),
-      new SimpleElementAssembler((byte) 29, "Not"),
+      new SimpleElementAssembler((byte) 29, "Not", AFlag.SPACE_BEFORE_AND_AFTER2),
       new SimpleElementAssembler((byte) 30, "Or", AFlag.AND_STYLE),
       new SimpleElementAssembler((byte) 31, "Then", AFlag.THEN_STYLE),
       new SimpleElementAssembler((byte) 32, "Warning"),

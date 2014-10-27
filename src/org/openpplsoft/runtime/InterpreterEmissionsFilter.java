@@ -119,7 +119,6 @@ public class InterpreterEmissionsFilter {
 
       // Guaranteed to be non-null given immediately preceding check.
       final PCInstruction prev = this.inspectedInstrEmissions.getLast();
-      log.fatal("Previous instr: {}", prev);
 
       /*====================================================*/
       /* BEGIN checks involving previous emission           */

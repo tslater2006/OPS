@@ -73,6 +73,9 @@ public final class Main {
 
       final Component c = DefnCache.getComponent(
           (String) Environment.getSystemVar("%Component").read(), "GBL");
+      log.fatal("Value of %Page: {}", new PTString(c.getPages().get(0).getPNLNAME()));
+      Environment.setSystemVar("%Page", new PTString(c.getPages().get(0).getPNLNAME()));
+
       final Menu m = DefnCache.getMenu(
           (String) Environment.getSystemVar("%Menu").read());
 

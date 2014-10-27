@@ -99,13 +99,6 @@ public class Component {
       // All pages at the root of the component start at scroll level 0.
       final Page p = new Page(rs.getString("PNLNAME"));
       log.debug("Component contains Page.{}", p.getPNLNAME());
-
-      if (this.pages.size() == 0) {
-        log.debug("Using name of first page as value for %Page: {}",
-            p.getPNLNAME());
-        Environment.setSystemVar("%Page", new PTString(p.getPNLNAME()));
-      }
-
       this.pages.add(p);
     }
 

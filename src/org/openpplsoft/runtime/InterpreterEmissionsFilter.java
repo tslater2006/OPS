@@ -50,6 +50,23 @@ public class InterpreterEmissionsFilter {
     this.flushPendingInstrEmissions();
   }
 
+  /**
+   * Shadow emissions are never actually emitted; they are simply
+   * appended to the list of inspected emissions so that the logic
+   * implemented in flushPendingInstrEmissions sees the correct
+   * previous emission, even though it was never actually emitted (see
+   * handling of End-For emission in interpreter for example).
+   */
+  public void shadowEmit(final Token tok) {
+    final StringBuilder b = new StringBuilder(tok.getText());
+    b.append(this.getSemicolonsAfterTokenIdx(tok.getTokenIndex()+1));
+
+    final PCInstruction instr = new PCInstruction(b.toString());
+    instr.sourceToken = tok;
+
+    this.inspectedInstrEmissions.addLast(instr);
+  }
+
   public void emit(final ParserRuleContext ctx) {
     final StringBuffer line = new StringBuffer();
     final Interval interval = ctx.getSourceInterval();
@@ -102,6 +119,7 @@ public class InterpreterEmissionsFilter {
 
       // Guaranteed to be non-null given immediately preceding check.
       final PCInstruction prev = this.inspectedInstrEmissions.getLast();
+      log.fatal("Previous instr: {}", prev);
 
       /*====================================================*/
       /* BEGIN checks involving previous emission           */
@@ -131,6 +149,7 @@ public class InterpreterEmissionsFilter {
        */
       if ((i.startsWith("End-If") || i.startsWith("End-Evaluate"))
             && (prev.getInstruction().startsWith("For")
+              || prev.getInstruction().startsWith("End-For")
               || prev.getInstruction().startsWith("End-If")
               || prev.getInstruction().startsWith("Else")
               || prev.getInstruction().startsWith("If")

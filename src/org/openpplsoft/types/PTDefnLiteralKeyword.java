@@ -20,7 +20,8 @@ public enum PTDefnLiteralKeyword {
   COMPONENT("component"),
   FIELD("field"),
   SQL("sql"),
-  PANELGROUP("panelgroup", "component");
+  PANELGROUP("panelgroup", "component"),
+  HTML("html");
 
   private String lcKeyword, aliasOfKeyword;
 
@@ -82,6 +83,8 @@ public enum PTDefnLiteralKeyword {
       return new PTMenuBarLiteral(fullLiteral);
     } else if (this == PTDefnLiteralKeyword.ITEMNAME) {
       return new PTMenuItemLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.HTML) {
+      return new PTHTMLLiteral(fullLiteral);
     } else {
       throw new OPSDataTypeException("TODO: This enumerated value "
           + "needs a mapping to a literal object class.");

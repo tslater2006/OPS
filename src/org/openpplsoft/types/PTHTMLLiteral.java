@@ -13,24 +13,24 @@ import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 
 /**
- * Represents a PeopleTools SQL literal.
+ * Represents a PeopleTools HTML literal.
  */
-public final class PTSQLLiteral extends PTString {
+public final class PTHTMLLiteral extends PTString {
 
-  public PTSQLLiteral(final PTTypeConstraint origTc) {
+  public PTHTMLLiteral(final PTTypeConstraint origTc) {
     super(origTc);
   }
 
-  public PTSQLLiteral(final String sStr) {
+  public PTHTMLLiteral(final String hStr) {
     super(PTString.getTc());
 
-    if(!sStr.toLowerCase().startsWith("sql.")) {
-      throw new OPSVMachRuntimeException("Expected sStr to start "
-          + "with 'SQL.' (case-insensitive) while creating "
-          + "PTSQLLiteral; sStr = "
-          + sStr);
+    if(!hStr.toLowerCase().startsWith("html.")) {
+      throw new OPSVMachRuntimeException("Expected hStr to start "
+          + "with 'HTML.' (case-insensitive) while creating "
+          + "PTHTMLLiteral; hStr = "
+          + hStr);
     }
-    this.write(sStr.substring(sStr.indexOf(".") + 1));
+    this.write(hStr.substring(hStr.indexOf(".") + 1));
     this.setReadOnly();
   }
 

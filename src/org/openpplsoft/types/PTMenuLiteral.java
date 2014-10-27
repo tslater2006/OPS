@@ -15,15 +15,10 @@ import org.openpplsoft.runtime.*;
 /**
  * Represents a PeopleTools menu literal.
  */
-public final class PTMenuLiteral extends PTObjectType {
+public final class PTMenuLiteral extends PTString {
 
-  private String ptMENUNAME;
-  private Menu menuDefn;
-
-  public PTMenuLiteral(final Menu m) {
-    super(new PTTypeConstraint<PTMenuLiteral>(PTMenuLiteral.class));
-    this.ptMENUNAME = m.getMenuName();
-    this.menuDefn = m;
+  public PTMenuLiteral(final PTTypeConstraint origTc) {
+    super(origTc);
   }
 
   public PTMenuLiteral(final String mStr) {
@@ -34,9 +29,8 @@ public final class PTMenuLiteral extends PTObjectType {
           + "with 'Menu.' (case-insensitive) while creating PTMenuLiteral; mStr = "
           + mStr);
     }
-    Menu m = DefnCache.getMenu(mStr.substring(mStr.indexOf(".") + 1));
-    this.ptMENUNAME = m.getMenuName();
-    this.menuDefn = m;
+    this.write(mStr.substring(mStr.indexOf(".") + 1));
+    this.setReadOnly();
   }
 
   /**
@@ -44,23 +38,13 @@ public final class PTMenuLiteral extends PTObjectType {
    * @return the name of the menu
    */
   public String getMenuName() {
-    return this.ptMENUNAME;
-  }
-
-  @Override
-  public PTType dotProperty(final String s) {
-    throw new OPSDataTypeException("dotProperty() has not been implemented.");
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    return null;
+    return this.read();
   }
 
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",ptMENUNAME=").append(this.ptMENUNAME);
+    b.append(",literal=").append(this.read());
     return b.toString();
   }
 }

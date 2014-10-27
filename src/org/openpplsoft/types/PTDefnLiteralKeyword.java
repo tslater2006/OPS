@@ -18,12 +18,19 @@ public enum PTDefnLiteralKeyword {
   ITEMNAME("itemname"),
   PAGE("page"),
   COMPONENT("component"),
-  FIELD("field");
+  FIELD("field"),
+  SQL("sql"),
+  PANELGROUP("panelgroup", "component");
 
-  private String lcKeyword;
+  private String lcKeyword, aliasOfKeyword;
 
   private PTDefnLiteralKeyword(final String lcKeyword) {
     this.lcKeyword = lcKeyword;
+  }
+
+  private PTDefnLiteralKeyword(final String lcKeyword, final String aliasOfKeyword) {
+    this.lcKeyword = lcKeyword;
+    this.aliasOfKeyword = aliasOfKeyword;
   }
 
   public String getLowerCaseKeyword() {
@@ -50,12 +57,31 @@ public enum PTDefnLiteralKeyword {
 
   public PTType allocLiteralObj(final String literalSuffix) {
 
-    final String fullLiteral = this.lcKeyword + "." + literalSuffix;
+    String fullLiteral;
+    if (this.aliasOfKeyword == null) {
+      fullLiteral = this.lcKeyword;
+    } else {
+      fullLiteral = this.aliasOfKeyword;
+    }
+    fullLiteral += "." + literalSuffix;
 
     if (this == PTDefnLiteralKeyword.RECORD) {
       return new PTRecordLiteral(fullLiteral);
     } else if (this == PTDefnLiteralKeyword.MENUNAME) {
       return new PTMenuLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.COMPONENT
+                || this == PTDefnLiteralKeyword.PANELGROUP) {
+      return new PTComponentLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.SQL) {
+      return new PTSQLLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.PAGE) {
+      return new PTPageLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.FIELD) {
+      return new PTFieldLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.BARNAME) {
+      return new PTMenuBarLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.ITEMNAME) {
+      return new PTMenuItemLiteral(fullLiteral);
     } else {
       throw new OPSDataTypeException("TODO: This enumerated value "
           + "needs a mapping to a literal object class.");

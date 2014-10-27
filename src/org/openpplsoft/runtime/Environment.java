@@ -226,7 +226,7 @@ public class Environment {
       return (PTBoolean) ((PTReference) rawExpr).deref();
     } else {
       throw new OPSVMachRuntimeException("Expected either a boolean or a reference "
-          + "to one (getOrDerefBoolean).");
+          + "to one (getOrDerefBoolean); instead encountered: " + rawExpr);
     }
   }
 

@@ -15,32 +15,19 @@ import org.openpplsoft.runtime.*;
 /**
  * Represents a PeopleTools component literal.
  */
-public final class PTComponentLiteral extends PTString {
+public final class PTSQLLiteral extends PTString {
 
-  public PTComponentLiteral(final PTTypeConstraint origTc) {
-    super(origTc);
-  }
+  public PTSQLLiteral(final String sStr) {
+    super(PTString.getTc());
 
-  public PTComponentLiteral(final String cStr) {
-    super(new PTTypeConstraint<PTComponentLiteral>(PTComponentLiteral.class));
-
-    if(!cStr.toLowerCase().startsWith("component.")) {
-      throw new OPSVMachRuntimeException("Expected cStr to start "
-          + "with 'Component.' (case-insensitive) while creating "
-          + "PTComponentLiteral; cStr = "
-          + cStr);
+    if(!sStr.toLowerCase().startsWith("sql.")) {
+      throw new OPSVMachRuntimeException("Expected sStr to start "
+          + "with 'SQL.' (case-insensitive) while creating "
+          + "PTSQLLiteral; sStr = "
+          + sStr);
     }
-
-    this.write(cStr.substring(cStr.indexOf(".") + 1));
+    this.write(sStr.substring(sStr.indexOf(".") + 1));
     this.setReadOnly();
-  }
-
-  /**
-   * Returns the name of the component represented by this literal.
-   * @return the name of the component
-   */
-  public String getComponentName() {
-    return this.read();
   }
 
   @Override

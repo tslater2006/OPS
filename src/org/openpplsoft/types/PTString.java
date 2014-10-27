@@ -12,7 +12,7 @@ import org.openpplsoft.runtime.*;
 /**
  * Implementation of the PeopleTools string data type.
  */
-public final class PTString extends PTPrimitiveType<String> {
+public class PTString extends PTPrimitiveType<String> {
 
   private static PTTypeConstraint<PTString> stringTc;
 

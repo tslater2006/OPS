@@ -388,7 +388,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
       fld = this.fieldRefs.get(fldName).deref();
     } else {
       throw new OPSVMachRuntimeException("Expected arg to GetField to be either "
-          + "an integer or a field literal.");
+          + "an integer or a field literal, is actually: " + arg.getClass().getName());
     }
 
     Environment.pushToCallStack(fld);

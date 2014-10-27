@@ -170,11 +170,12 @@ public class GlobalFnLibrary {
   public static void PT_CreateRecord() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-    if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
-      throw new OPSVMachRuntimeException("Expected single string arg.");
+    if(args.size() != 1 || (!(args.get(0) instanceof PTRecordLiteral))) {
+      throw new OPSVMachRuntimeException("Expected single RecordLiteral arg.");
     }
 
-    final Record recDefn = DefnCache.getRecord(((PTString) args.get(0)).read());
+    final Record recDefn = DefnCache.getRecord(
+        ((PTRecordLiteral) args.get(0)).getRecName());
 
     // Create a new standalone record, which by definition has no (null) parent.
     final PTRecord rec = new PTRecordTypeConstraint().alloc(null, recDefn);
@@ -186,11 +187,12 @@ public class GlobalFnLibrary {
   public static void PT_CreateRowset() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-    if(args.size() != 1 || (!(args.get(0) instanceof PTString))) {
-      throw new OPSVMachRuntimeException("Expected single string arg.");
+    if(args.size() != 1 || (!(args.get(0) instanceof PTRecordLiteral))) {
+      throw new OPSVMachRuntimeException("Expected single RecordLiteral arg.");
     }
 
-    final Record recDefn = DefnCache.getRecord(((PTString) args.get(0)).read());
+    final Record recDefn = DefnCache.getRecord(
+        ((PTRecordLiteral) args.get(0)).getRecName());
 
     // Create a new standalone rowset, which by definition has no (null) parent.
    final PTRowset newRowset = new PTRowsetTypeConstraint().alloc(null, recDefn);

@@ -596,8 +596,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final String input = ((PTString) this.getNodeData(ctx.expr())).read();
     final PTType output = PTDefnLiteralKeyword.allocLiteralObjFromDefnString(input);
 
-    log.debug("Translated dynamic reference input {} to {}",
-        input, output);
+    log.debug("Translated dynamic reference input {} to {}", input, output);
     this.setNodeData(ctx, output);
     return null;
   }

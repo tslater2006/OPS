@@ -1171,11 +1171,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       } else if (DefnCache.hasRecord(id)) {
         /*
          * Detect references to record field literals, which look like
-         * references to component buffer records but are not actually
-         * in the component buffer.
+         * references to component buffer records but may or may not actually
+         * be in the component buffer.
          * (i.e., record field literals passed to Sort() on Rowsets).
          */
-        this.setNodeData(ctx, new PTRecordLiteral(DefnCache.getRecord(id)));
+        this.setNodeData(ctx, new PTRecordSpecifier(DefnCache.getRecord(id)));
       }
     }
     return null;

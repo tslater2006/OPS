@@ -261,14 +261,12 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
 
     PTRecord rec = null;
     if(args.get(0) instanceof PTRecordLiteral) {
-      rec = this.getRecord(((PTRecordLiteral) args.get(0)).getRecName());
-    } else if (args.get(0) instanceof PTString) {
-      rec = this.getRecord(((PTString) args.get(0)).read());
+      rec = this.getRecord(((PTRecordLiteral) args.get(0)).read());
     } else if (args.get(0) instanceof PTInteger) {
       rec = this.getRecord(((PTInteger) args.get(0)).read());
     } else {
       throw new OPSVMachRuntimeException("Expected arg to GetRecord() to "
-          + "be a PTRecordLiteral or PTString or PTInteger.");
+          + "be a PTRecordLiteral or PTInteger.");
     }
 
     Environment.pushToCallStack(rec);

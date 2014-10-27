@@ -277,20 +277,20 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
           + "string: " + orderStr.read());
       }
 
-      final PTFieldLiteral fld =
-          (PTFieldLiteral) Environment.popFromCallStack();
-      if (fld != null && !fld.getRecordName().equals(this.primaryRecDefn.RECNAME)) {
+      final PTRecordFieldSpecifier fldSpec =
+          (PTRecordFieldSpecifier) Environment.popFromCallStack();
+      if (!fldSpec.getRecName().equals(this.primaryRecDefn.RECNAME)) {
         throw new OPSVMachRuntimeException("Encountered a sort "
             + "field for a record other than the one underlying this "
             + "rowset; this is legal but not yet supported.");
       }
 
-      if (!this.primaryRecDefn.fieldTable.containsKey(fld.getFieldName())) {
+      if (!this.primaryRecDefn.fieldTable.containsKey(fldSpec.getFieldName())) {
         throw new OPSVMachRuntimeException("The field "
-            + fld.getFieldName() + " does not exist on the underlying "
+            + fldSpec.getFieldName() + " does not exist on the underlying "
             + "record.");
       }
-      fields.push(fld.getFieldName());
+      fields.push(fldSpec.getFieldName());
 
     } while (!(Environment.peekAtCallStack() instanceof PTCallFrameBoundary));
 

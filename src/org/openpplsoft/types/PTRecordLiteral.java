@@ -15,10 +15,11 @@ import org.openpplsoft.runtime.*;
 /**
  * Represents a PeopleTools record literal.
  */
-public final class PTRecordLiteral extends PTObjectType {
+public final class PTRecordLiteral extends PTString {
 
-  private String ptRECNAME;
-  private Record recDefn;
+  public PTRecordLiteral(final PTTypeConstraint origTc) {
+    super(origTc);
+  }
 
   public PTRecordLiteral(final String rStr) {
     super(new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
@@ -28,56 +29,14 @@ public final class PTRecordLiteral extends PTObjectType {
           + "with 'Record.' (case-insensitive) while creating PTRecordLiteral; rStr = "
           + rStr);
     }
-    Record r = DefnCache.getRecord(rStr.substring(rStr.indexOf(".") + 1));
-    this.ptRECNAME = r.RECNAME;
-    this.recDefn = r;
-  }
-
-  public PTRecordLiteral(final Record r) {
-    super(new PTTypeConstraint<PTRecordLiteral>(PTRecordLiteral.class));
-    this.ptRECNAME = r.RECNAME;
-    this.recDefn = r;
-  }
-
-  /**
-   * Returns the name of the record represented by this literal.
-   * @return the name of the record
-   */
-  public String getRecName() {
-    return this.ptRECNAME;
-  }
-
-  /**
-   * Dot accesses on record field literals must
-   * always return the appropriate FieldLiteral,
-   * assuming the value for s is a valid field on
-   * the underlying record.
-   * @param s the name of the property
-   * @return the FieldLiteral corresponding to {@code s}
-   */
-  @Override
-  public PTType dotProperty(final String s) {
-    final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
-    for (RecordField rf : rfList) {
-      if (rf.FIELDNAME.equals(s)) {
-        return new PTFieldLiteral(this.ptRECNAME, s);
-      }
-    }
-
-    throw new OPSVMachRuntimeException("Unable to resolve s="
-        + s + " to a field on the PTRecordLiteral for record "
-        + this.ptRECNAME);
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    return null;
+    this.write(rStr.substring(rStr.indexOf(".") + 1));
+    this.setReadOnly();
   }
 
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",ptRECNAME=").append(this.ptRECNAME);
+    b.append(",literal=").append(this.read());
     return b.toString();
   }
 }

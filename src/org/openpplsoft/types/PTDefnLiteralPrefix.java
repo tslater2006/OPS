@@ -11,32 +11,26 @@ import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public final class PTDefnLiteral extends PTObjectType {
+public final class PTDefnLiteralPrefix extends PTObjectType {
 
-  private static PTDefnLiteral singleton;
+  private PTDefnLiteralKeyword prefixKeyword;
 
-  private PTDefnLiteral() {
-    super(new PTTypeConstraint<PTDefnLiteral>(PTDefnLiteral.class));
-  }
-
-  public static PTDefnLiteral getSingleton() {
-    if (singleton == null) {
-      singleton = new PTDefnLiteral();
-      singleton.setReadOnly();
-    }
-    return singleton;
+  public PTDefnLiteralPrefix(final PTDefnLiteralKeyword k) {
+    super(new PTTypeConstraint<PTDefnLiteralPrefix>(PTDefnLiteralPrefix.class));
+    this.prefixKeyword = k;
   }
 
   /*
-   * Accesses on a defn literal reserved word always
-   * resolve to the string itself; i.e., Menu.SA_LEARNER_SERVICES
-   * resolves to "SA_LEARNER_SERVICES".
+   * Accesses on a defn literal prefix always
+   * resolve to the approprtiate type literal object; i.e., a "Menu." prefix
+   * object resolves to a MenuLiteral object of "SA_LEARNER_SERVICES" when
+   * passed "SA_LEARNER_SERVICES" as the argument below.
    */
-  public PTType dotProperty(String s) {
-    return new PTString(s);
+  public PTType dotProperty(final String s) {
+    return this.prefixKeyword.allocLiteralObj(s);
   }
 
-  public Callable dotMethod(String s) {
+  public Callable dotMethod(final String s) {
     return null;
   }
 

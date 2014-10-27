@@ -594,26 +594,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     final String input = ((PTString) this.getNodeData(ctx.expr())).read();
-    final String lcInput = input.toLowerCase();
-    PTType output;
-    if (lcInput.startsWith("record.")) {
-      output = new PTRecordLiteral(input);
-    } else if (lcInput.startsWith("menuname.")) {
-      output = new PTMenuLiteral(input);
-    } else if (lcInput.startsWith("barname.")) {
-      output = new PTMenuBarLiteral(input);
-    } else if (lcInput.startsWith("itemname.")) {
-      output = new PTMenuItemLiteral(input);
-    } else if (lcInput.startsWith("page.")) {
-      output = new PTPageLiteral(input);
-    } else if (lcInput.startsWith("component.")) {
-      output = new PTComponentLiteral(input);
-    } else if (lcInput.startsWith("field.")) {
-      output = new PTFieldLiteral(input);
-    } else {
-      throw new OPSVMachRuntimeException("Unsupported dynamic reference "
-          + "attempt: " + input);
-    }
+    final PTType output = PTDefnLiteralKeyword.allocLiteralObjFromDefnString(input);
 
     log.debug("Translated dynamic reference input {} to {}",
         input, output);
@@ -1172,17 +1153,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.setNodeCallable(ctx, new Callable(new FunctionExecContext(
             extProg, id)));
 
-      } else if (PSDefn.DEFN_LITERAL_RESERVED_WORDS_TABLE.containsKey(
-        id.toUpperCase())) {
+      } else if (PTDefnLiteralKeyword.isKeyword(id)) {
 
-        log.debug("Resolved GENERIC_ID: {} to DEFN_LITERAL",
-            ctx.GENERIC_ID().getText());
+        log.debug("Resolved GENERIC_ID: {} to defn literal prefix.", id);
 
         /*
          * Detect defn literal reserved words (i.e.,
          * "Menu" in "Menu.SA_LEARNER_SERVICES").
          */
-        this.setNodeData(ctx, PTDefnLiteral.getSingleton());
+        this.setNodeData(ctx, PTDefnLiteralKeyword.allocLiteralPrefixObj(id));
 
       } else if (Environment.getSystemFuncPtr(id) != null) {
         /*

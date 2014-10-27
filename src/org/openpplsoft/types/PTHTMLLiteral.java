@@ -22,7 +22,7 @@ public final class PTHTMLLiteral extends PTString {
   }
 
   public PTHTMLLiteral(final String hStr) {
-    super(PTString.getTc());
+    super(new PTTypeConstraint<PTHTMLLiteral>(PTHTMLLiteral.class));
 
     if(!hStr.toLowerCase().startsWith("html.")) {
       throw new OPSVMachRuntimeException("Expected hStr to start "

@@ -520,12 +520,12 @@ public class GlobalFnLibrary {
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() == 0
-        || !(args.get(0) instanceof PTString)) {
+        || !(args.get(0) instanceof PTHTMLLiteral)) {
       throw new OPSVMachRuntimeException("Expected at least 1 arg, "
-          + "the first being of type PTString to GetHTMLText.");
+          + "the first being of type PTHTMLLiteral to GetHTMLText.");
     }
 
-    final HTML html = DefnCache.getHTML(((PTString) args.get(0)).read());
+    final HTML html = DefnCache.getHTML(((PTHTMLLiteral) args.get(0)).read());
 
     // If no additional args were provided, there is no need to look for
     // bind placeholders in the html text.
@@ -621,12 +621,12 @@ public class GlobalFnLibrary {
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() == 0
-        || !(args.get(0) instanceof PTString)) {
+        || !(args.get(0) instanceof PTSQLLiteral)) {
       throw new OPSVMachRuntimeException("Expected at least 1 arg, "
-          + "the first being of type PTString to GetHTMLText.");
+          + "the first being of type PTSQLLiteral to GetSQL.");
     }
 
-    final SQL sql = DefnCache.getSQL(((PTString) args.get(0)).read());
+    final SQL sql = DefnCache.getSQL(((PTSQLLiteral) args.get(0)).read());
     final PTPrimitiveType[] bindVals = new PTPrimitiveType[args.size() - 1];
 
     for (int i = 1; i < args.size(); i++) {

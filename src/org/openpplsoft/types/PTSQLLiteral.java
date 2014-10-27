@@ -22,7 +22,7 @@ public final class PTSQLLiteral extends PTString {
   }
 
   public PTSQLLiteral(final String sStr) {
-    super(PTString.getTc());
+    super(new PTTypeConstraint<PTSQLLiteral>(PTSQLLiteral.class));
 
     if(!sStr.toLowerCase().startsWith("sql.")) {
       throw new OPSVMachRuntimeException("Expected sStr to start "

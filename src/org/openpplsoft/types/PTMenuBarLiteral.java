@@ -15,9 +15,11 @@ import org.openpplsoft.runtime.*;
 /**
  * Represents a PeopleTools menu bar literal.
  */
-public final class PTMenuBarLiteral extends PTObjectType {
+public final class PTMenuBarLiteral extends PTString {
 
-  private String ptBARNAME;
+  public PTMenuBarLiteral(final PTTypeConstraint origTc) {
+    super(origTc);
+  }
 
   public PTMenuBarLiteral(final String bStr) {
     super(new PTTypeConstraint<PTMenuBarLiteral>(PTMenuBarLiteral.class));
@@ -27,7 +29,7 @@ public final class PTMenuBarLiteral extends PTObjectType {
           + "with 'BarName.' (case-insensitive) while alloc'ing "
           + "PTMenuBarLiteral; bStr = " + bStr);
     }
-    this.ptBARNAME = bStr.substring(bStr.indexOf(".") + 1);
+    this.write(bStr.substring(bStr.indexOf(".") + 1));
   }
 
   /**
@@ -35,23 +37,13 @@ public final class PTMenuBarLiteral extends PTObjectType {
    * @return the name of the menu bar
    */
   public String getMenuBarName() {
-    return this.ptBARNAME;
-  }
-
-  @Override
-  public PTType dotProperty(final String s) {
-    throw new OPSDataTypeException("dotProperty() has not been implemented.");
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    return null;
+    return this.read();
   }
 
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",ptBARNAME=").append(this.ptBARNAME);
+    b.append(",literal=").append(this.read());
     return b.toString();
   }
 }

@@ -11,12 +11,13 @@ import org.openpplsoft.pt.*;
 import java.util.*;
 import org.openpplsoft.runtime.*;
 
-public final class PTFieldLiteral extends PTObjectType {
+public final class PTFieldLiteral extends PTString {
 
-  public String RECNAME;
-  public String FIELDNAME;
+  public PTFieldLiteral(final PTTypeConstraint origTc) {
+    super(origTc);
+  }
 
-  public PTFieldLiteral(String fStr) {
+  public PTFieldLiteral(final String fStr) {
     super(new PTTypeConstraint<PTFieldLiteral>(PTFieldLiteral.class));
 
     if(!fStr.toLowerCase().startsWith("field.")) {
@@ -25,28 +26,36 @@ public final class PTFieldLiteral extends PTObjectType {
           + fStr);
     }
 
-    this.FIELDNAME = fStr.substring(fStr.indexOf(".") + 1);
+    this.write(fStr.substring(fStr.indexOf(".") + 1));
+    this.setReadOnly();
   }
 
-  public PTFieldLiteral(String r, String f) {
+  public String getRecordName() {
+    if (this.read().indexOf(".") != -1) {
+      return this.read().substring(0, this.read().indexOf("."));
+    }
+
+    return null;
+  }
+
+  public String getFieldName() {
+    if (this.read().indexOf(".") != -1) {
+      return this.read().substring(this.read().indexOf(".") + 1);
+    }
+    return this.read();
+  }
+
+  public PTFieldLiteral(final String r, final String f) {
     super(new PTTypeConstraint<PTFieldLiteral>(PTFieldLiteral.class));
-    this.RECNAME = r;
-    this.FIELDNAME = f;
-  }
 
-  public PTType dotProperty(String s) {
-    throw new OPSVMachRuntimeException("dotProperty not supported.");
-  }
-
-  public Callable dotMethod(String s) {
-    throw new OPSVMachRuntimeException("dotMethod not supported.");
+    this.write(r + "." + f);
+    this.setReadOnly();
   }
 
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder(super.toString());
-    b.append(",RECNAME=").append(this.RECNAME);
-    b.append(",FIELDNAME=").append(this.FIELDNAME);
+    b.append(",literal=").append(this.read());
     return b.toString();
   }
 }

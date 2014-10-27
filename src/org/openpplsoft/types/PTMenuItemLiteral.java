@@ -15,9 +15,11 @@ import org.openpplsoft.runtime.*;
 /**
  * Represents a PeopleTools menu item literal.
  */
-public final class PTMenuItemLiteral extends PTObjectType {
+public final class PTMenuItemLiteral extends PTString {
 
-  private String ptITEMNAME;
+  public PTMenuItemLiteral(final PTTypeConstraint origTc) {
+    super(origTc);
+  }
 
   public PTMenuItemLiteral(final String iStr) {
     super(new PTTypeConstraint<PTMenuItemLiteral>(PTMenuItemLiteral.class));
@@ -27,7 +29,8 @@ public final class PTMenuItemLiteral extends PTObjectType {
           + "with 'ItemName.' (case-insensitive) while alloc'ing "
           + "PTMenuItemLiteral; iStr = " + iStr);
     }
-    this.ptITEMNAME = iStr.substring(iStr.indexOf(".") + 1);
+
+    this.write(iStr.substring(iStr.indexOf(".") + 1));
   }
 
   /**
@@ -35,23 +38,13 @@ public final class PTMenuItemLiteral extends PTObjectType {
    * @return the name of the menu item
    */
   public String getMenuItemName() {
-    return this.ptITEMNAME;
-  }
-
-  @Override
-  public PTType dotProperty(final String s) {
-    throw new OPSDataTypeException("dotProperty() has not been implemented.");
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    return null;
+    return this.read();
   }
 
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",ptITEMNAME=").append(this.ptITEMNAME);
+    b.append(",literal=").append(this.read());
     return b.toString();
   }
 }

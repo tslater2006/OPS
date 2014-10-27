@@ -17,6 +17,10 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTSQLLiteral extends PTString {
 
+  public PTSQLLiteral(final PTTypeConstraint origTc) {
+    super(origTc);
+  }
+
   public PTSQLLiteral(final String sStr) {
     super(PTString.getTc());
 

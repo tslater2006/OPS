@@ -372,16 +372,26 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   public void PT_GetField() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-    if (args.size() != 1
-        || !(args.get(0) instanceof PTInteger)) {
-      throw new OPSVMachRuntimeException("Expected a single PTInteger arg to GetField.");
+    if (args.size() != 1) {
+      throw new OPSVMachRuntimeException("Expected a single arg to GetField.");
     }
 
-    final int fldIdx = ((PTInteger) args.get(0)).read();
+    final PTType arg = args.get(0);
+    final PTField fld;
+    if (arg instanceof PTInteger) {
+      // We do not need to adjust the provided index; fieldRefIdxTable maps
+      // fields to their PT indices (meaning 1-based instead of 0-based).
+      final int fldIdx = ((PTInteger) arg).read();
+      fld = this.fieldRefIdxTable.get(fldIdx).deref();
+    } else if (arg instanceof PTFieldLiteral) {
+      final String fldName = ((PTFieldLiteral) arg).FIELDNAME;
+      fld = this.fieldRefs.get(fldName).deref();
+    } else {
+      throw new OPSVMachRuntimeException("Expected arg to GetField to be either "
+          + "an integer or a field literal.");
+    }
 
-    // We do not need to adjust the provided index; fieldRefIdxTable maps
-    // fields to their PT indices (meaning 1-based instead of 0-based).
-    Environment.pushToCallStack(this.fieldRefIdxTable.get(fldIdx));
+    Environment.pushToCallStack(fld);
   }
 
   /**

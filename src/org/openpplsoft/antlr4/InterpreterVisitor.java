@@ -897,6 +897,23 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   }
 
   /**
+   * Called by ANTLR when a Not expression
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitExprNot(
+      final PeopleCodeParser.ExprNotContext ctx) {
+
+    visit(ctx.expr());
+    final PTBoolean boolExpr = Environment.getOrDerefBoolean(
+        this.getNodeData(ctx.expr()));
+
+    this.setNodeData(ctx, boolExpr.negationOf());
+    return null;
+  }
+
+  /**
    * Called by ANTLR when a logical equality operation
    * within an expression in a statement
    * is being visited in the parse tree.
@@ -914,25 +931,21 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final PTPrimitiveType rhs = Environment.getOrDerefPrimitive(
         this.getNodeData(ctx.expr(1)));
 
-    PTBoolean result;
+    final PTBoolean equalityResult = lhs.isEqual(rhs);
     if (ctx.e != null) {
-      result = lhs.isEqual(rhs);
-      log.debug("isEqual: {}? {}", ctx.getText(), result);
+      log.debug("isEqual: {}? {}", ctx.getText(), equalityResult);
+      this.setNodeData(ctx, equalityResult);
 
     } else if (ctx.i != null) {
-      result = lhs.isEqual(rhs);
-      if (result.read()) {
-        result = new PTBoolean(false);
-      } else {
-        result = new PTBoolean(true);
-      }
-      log.debug("isNotEqual: {}? {}", ctx.getText(), result);
+      final PTBoolean inEqualityResult = equalityResult.negationOf();
+      log.debug("isNotEqual: {}? {}", ctx.getText(), inEqualityResult);
+      this.setNodeData(ctx, inEqualityResult);
 
     } else {
       throw new OPSVMachRuntimeException("Unknown equality "
           + "operation encountered.");
     }
-    this.setNodeData(ctx, result);
+
     return null;
   }
 

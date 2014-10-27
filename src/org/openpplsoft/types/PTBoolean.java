@@ -26,6 +26,10 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
     this.value = initialVal;
   }
 
+  public PTBoolean negationOf() {
+    return new PTBoolean(!this.value);
+  }
+
   public PTBoolean(final PTTypeConstraint origTc) {
     super(origTc);
   }

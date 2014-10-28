@@ -26,7 +26,6 @@ public class Environment {
   private static User user;
 
   private static Map<String, PTPrimitiveType> systemVarTable;
-  private static Map<String, Callable> systemFuncTable;
 
   private static Stack<PTType> callStack;
 
@@ -42,17 +41,6 @@ public class Environment {
 
     // Initialize the call stack.
     callStack = new Stack<PTType>();
-
-    // Cache references to global PT functions to
-    // avoid repeated reflection lookups at runtime.
-    Method[] methods = GlobalFnLibrary.class.getMethods();
-    systemFuncTable = new HashMap<String, Callable>();
-    for(Method m : methods) {
-      if(m.getName().indexOf("PT_") == 0) {
-        systemFuncTable.put(m.getName().substring(3), new Callable(m,
-          GlobalFnLibrary.class));
-      }
-    }
   }
 
   public static void init(final String psEnviName, final String oprid) {
@@ -131,10 +119,6 @@ public class Environment {
         (PTPrimitiveType) a.getOriginatingTypeConstraint().alloc();
     copy.copyValueFrom(a);
     return copy;
-  }
-
-  public static Callable getSystemFuncPtr(String func) {
-    return systemFuncTable.get(func);
   }
 
   public static List<PTType> getDereferencedArgsFromCallStack() {

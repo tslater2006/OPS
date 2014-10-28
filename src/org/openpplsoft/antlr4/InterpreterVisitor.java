@@ -51,6 +51,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private PeopleCodeParser.StmtBreakContext lastSeenBreakContext;
   private boolean hasVarDeclBeenEmitted;
   private PCInstruction lastSubmittedEmission;
+  private GlobalFnLibrary globalFnLib;
 
   /**
    * Creates a new interpreter instance that is aware
@@ -67,6 +68,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.nodeCallables = new ParseTreeProperty<Callable>();
     this.nodeTypeConstraints = new ParseTreeProperty<PTTypeConstraint>();
     this.evalConstructStack = new Stack<EvaluateConstruct>();
+    this.globalFnLib = new GlobalFnLibrary(this.supervisor);
   }
 
   public void emit(final Token tok) {
@@ -1205,11 +1207,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          */
         this.setNodeData(ctx, PTDefnLiteralKeyword.allocLiteralPrefixObj(id));
 
-      } else if (Environment.getSystemFuncPtr(id) != null) {
+      } else if (GlobalFnLibrary.hasFuncNamed(id)) {
         /*
-         * Detect system function references.
+         * Detect global function references.
          */
-        this.setNodeCallable(ctx, Environment.getSystemFuncPtr(id));
+        this.setNodeCallable(ctx, this.globalFnLib.getFuncCallable(id));
 
       } else if (DefnCache.hasRecord(id)) {
         /*

@@ -20,24 +20,17 @@ public class Callable {
   public ExecContext eCtx;
   public Method ptMethod;
   public Class ptMethodClass;
-  public PTObjectType obj;
+  public Object obj;
 
   public Callable(ExecContext e) {
     this.eCtx = e;
   }
 
   /*
-   * For system functions (i.e., CreateRecord).
+   * For method calls on PT objects (i.e., PTRowset.Flush())
+   * or system func calls (i.e., GlobalFnLibrary's Lower()).
    */
-  public Callable(Method m, Class c) {
-    this.ptMethod = m;
-    this.ptMethodClass = c;
-  }
-
-  /*
-   * For method calls on PT objects (i.e., PTRowset.Flush()).
-   */
-  public Callable(Method m, PTObjectType o) {
+  public Callable(Method m, Object o) {
     this.ptMethod = m;
     this.obj = o;
   }

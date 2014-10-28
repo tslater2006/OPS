@@ -279,10 +279,10 @@ public class GlobalFnLibrary {
     }
 
     String[] bindVals = {
-      ((PTMenuLiteral) args.get(0)).getMenuName(),
-      ((PTMenuBarLiteral) args.get(1)).getMenuBarName(),
-      ((PTMenuItemLiteral) args.get(2)).getMenuItemName(),
-      ((PTPageLiteral) args.get(3)).getPageName(),
+      ((PTMenuLiteral) args.get(0)).read(),
+      ((PTMenuBarLiteral) args.get(1)).read(),
+      ((PTMenuItemLiteral) args.get(2)).read(),
+      ((PTPageLiteral) args.get(3)).read(),
       ((PTString) Environment.getSystemVar("%OperatorId")).read()
     };
 
@@ -448,12 +448,12 @@ public class GlobalFnLibrary {
     url.append("/c/");
 
     // append <menu>.<component>.<market>
-    url.append(((PTMenuLiteral) args.get(2)).getMenuName())
-       .append(".").append(((PTComponentLiteral) args.get(4)).getComponentName())
+    url.append(((PTMenuLiteral) args.get(2)).read())
+       .append(".").append(((PTComponentLiteral) args.get(4)).read())
        .append(".").append(((PTString) args.get(3)).read());
 
     // append "?Page=<page>"
-    url.append("?Page=").append(((PTPageLiteral) args.get(5)).getPageName());
+    url.append("?Page=").append(((PTPageLiteral) args.get(5)).read());
 
     // append "&Action=<action>"
     url.append("&Action=").append(((PTString) args.get(6)).read());

@@ -34,19 +34,4 @@ public final class PTComponentLiteral extends PTString {
     this.write(cStr.substring(cStr.indexOf(".") + 1));
     this.setReadOnly();
   }
-
-  /**
-   * Returns the name of the component represented by this literal.
-   * @return the name of the component
-   */
-  public String getComponentName() {
-    return this.read();
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",literal=").append(this.read());
-    return b.toString();
-  }
 }

@@ -32,11 +32,4 @@ public final class PTRecordLiteral extends PTString {
     this.write(rStr.substring(rStr.indexOf(".") + 1));
     this.setReadOnly();
   }
-
-  @Override
-  public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",literal=").append(this.read());
-    return b.toString();
-  }
 }

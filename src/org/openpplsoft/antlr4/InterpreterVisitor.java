@@ -1491,6 +1491,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * branch expr earlier b/c control may be falling through When branches
      * (occurs until a Break is seen or the Evaluate statement ends).
      */
+    log.debug("p1: {}; p2: {}", p1, p2);
     PTBoolean eq = ((PTPrimitiveType) p1).isEqual((PTPrimitiveType) p2);
     if (eq.read() || evalConstruct.trueBranchExprSeen) {
       evalConstruct.trueBranchExprSeen = true;

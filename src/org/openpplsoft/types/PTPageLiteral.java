@@ -32,19 +32,4 @@ public final class PTPageLiteral extends PTString {
 
     this.write(pStr.substring(pStr.indexOf(".") + 1));
   }
-
-  /**
-   * Returns the name of the page represented by this literal.
-   * @return the name of the page
-   */
-  public String getPageName() {
-    return this.read();
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",literal=").append(this.read());
-    return b.toString();
-  }
 }

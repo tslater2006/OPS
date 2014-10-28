@@ -30,6 +30,13 @@ public final class PTFieldLiteral extends PTString {
     this.setReadOnly();
   }
 
+  public PTFieldLiteral(final String r, final String f) {
+    super(new PTTypeConstraint<PTFieldLiteral>(PTFieldLiteral.class));
+
+    this.write(r + "." + f);
+    this.setReadOnly();
+  }
+
   public String getRecordName() {
     if (this.read().indexOf(".") != -1) {
       return this.read().substring(0, this.read().indexOf("."));
@@ -43,19 +50,5 @@ public final class PTFieldLiteral extends PTString {
       return this.read().substring(this.read().indexOf(".") + 1);
     }
     return this.read();
-  }
-
-  public PTFieldLiteral(final String r, final String f) {
-    super(new PTTypeConstraint<PTFieldLiteral>(PTFieldLiteral.class));
-
-    this.write(r + "." + f);
-    this.setReadOnly();
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder b = new StringBuilder(super.toString());
-    b.append(",literal=").append(this.read());
-    return b.toString();
   }
 }

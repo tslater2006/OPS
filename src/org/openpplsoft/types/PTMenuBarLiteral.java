@@ -31,19 +31,4 @@ public final class PTMenuBarLiteral extends PTString {
     }
     this.write(bStr.substring(bStr.indexOf(".") + 1));
   }
-
-  /**
-   * Returns the name of the menu bar represented by this literal.
-   * @return the name of the menu bar
-   */
-  public String getMenuBarName() {
-    return this.read();
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",literal=").append(this.read());
-    return b.toString();
-  }
 }

@@ -32,19 +32,4 @@ public final class PTMenuLiteral extends PTString {
     this.write(mStr.substring(mStr.indexOf(".") + 1));
     this.setReadOnly();
   }
-
-  /**
-   * Returns the name of the menu represented by this literal.
-   * @return the name of the menu
-   */
-  public String getMenuName() {
-    return this.read();
-  }
-
-  @Override
-  public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(",literal=").append(this.read());
-    return b.toString();
-  }
 }

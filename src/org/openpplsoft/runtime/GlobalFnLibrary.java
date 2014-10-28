@@ -779,4 +779,24 @@ public class GlobalFnLibrary {
     // SQLExec returns True if execution completed successfully.
     Environment.pushToCallStack(new PTBoolean(true));
   }
+
+  public void PT_GetField() {
+
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTField)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg, "
+          + "of type PTField to GetField.");
+    }
+
+    /*
+     * If a Field is provided to this method, simply return it. This is not
+     * strictly how GetField works in PeopleSoft, but right now, the interpreter
+     * is already resolving "<RECNAME>.<FIELDNAME>" strings to their appropriate
+     * contextual buffer references, so by the time it gets here, it's a field, not
+     * a PTRecordFieldSpecifier.
+     */
+    Environment.pushToCallStack(args.get(0));
+  }
 }

@@ -404,10 +404,9 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
-    if(args.size() != 3) {
-      throw new OPSVMachRuntimeException("Expected exactly 3 args to "
-          + "MsgGetText; altho var args to this fn are legal (see PT "
-          + "reference for defn) they are not supported at this time.");
+    if(args.size() < 3) {
+      throw new OPSVMachRuntimeException("Expected 3 or more args to "
+          + "MsgGetText (this fn supports var args).");
     }
 
     if(!(args.get(0) instanceof PTNumber || args.get(0) instanceof PTInteger)
@@ -431,7 +430,52 @@ public class GlobalFnLibrary {
     } else {
       msgNbr = ((PTInteger) args.get(1)).read();
     }
-    final String msg = msgSet.getMessage(msgNbr);
+    String msg = msgSet.getMessage(msgNbr);
+
+    /*
+     * Detect presence of bind values passed to us by the caller.
+     */
+    if (args.size() > 3) {
+
+      // This pattern must exclude escaped percent signs (i.e., "%%1" is NOT
+      // a bind index) and must match an index at the very beginning of the string.
+      final Pattern strBindIdxPattern = Pattern.compile("^[%]\\d+|[^%]%\\d+");
+      final Matcher strBindIdxMatcher = strBindIdxPattern.matcher(msg);
+
+      final StringBuffer msgSb = new StringBuffer();
+      while (strBindIdxMatcher.find()) {
+
+        // The last non-bind arg is at index 2; the first possible bind index is
+        // at index 1. Therefore, add 2 to get the appropriate bind arg.
+        final int bindIdx = Integer.parseInt(strBindIdxMatcher.group().substring(1)) + 2;
+
+        if (bindIdx >= args.size()) {
+          throw new OPSVMachRuntimeException("Expected a bind value "
+              + "but reached the end of the provided argument list to MsgGetText.");
+        }
+
+        final PTPrimitiveType bindExpr = Environment.getOrDerefPrimitive(
+            args.get(bindIdx));
+
+        // Replace the bind index with the corresponding bind value passed by caller.
+        strBindIdxMatcher.appendReplacement(msgSb, bindExpr.readAsString());
+      }
+      strBindIdxMatcher.appendTail(msgSb);
+      msg = msgSb.toString();
+    }
+
+    // Escaped '%' chars must be translated into a single '%'.
+    final Pattern escPctPattern = Pattern.compile("^[%]\\d+|[^%]%\\d+");
+    final Matcher escPctMatcher = escPctPattern.matcher(msg);
+    msg = escPctMatcher.replaceAll("%");
+
+    // Detect presence of escaped line breaks; these must be handled somehow.
+    final Pattern escLbPattern = Pattern.compile("%\\\\");
+    final Matcher escLbMatcher = escLbPattern.matcher(msg);
+    if (escLbMatcher.find()) {
+      throw new OPSVMachRuntimeException("TODO: Handle escaped line breaks in the "
+          + "text of messages (see PT documentation for MsgGetText).");
+    }
 
     if (msg == null) {
       log.debug("MsgGetText found no msg with setnbr={} and msgnbr={}; "

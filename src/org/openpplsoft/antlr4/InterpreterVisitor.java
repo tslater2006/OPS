@@ -80,11 +80,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.supervisor.getEmissionsFilter().emit(ctx);
   }
 
-  public void shadowEmit(final Token tok) {
-    this.submittedEmissions.addLast(tok);
-    this.supervisor.getEmissionsFilter().shadowEmit(tok);
-  }
-
   public void resubmitLastEmission() {
     Object e = this.submittedEmissions.getLast();
     if (e instanceof Token) {
@@ -435,7 +430,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         visit(ctx.stmtList());
       } catch (OPSBreakSignalException opsbse) {
         this.emit(this.lastSeenBreakContext);
-        this.shadowEmit(ctx.endfor);
+        this.emit(ctx.endfor);
         break;
       }
 

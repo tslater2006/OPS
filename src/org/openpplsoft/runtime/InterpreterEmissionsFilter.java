@@ -50,23 +50,6 @@ public class InterpreterEmissionsFilter {
     this.flushPendingInstrEmissions();
   }
 
-  /**
-   * Shadow emissions are never actually emitted; they are simply
-   * appended to the list of inspected emissions so that the logic
-   * implemented in flushPendingInstrEmissions sees the correct
-   * previous emission, even though it was never actually emitted (see
-   * handling of End-For emission in interpreter for example).
-   */
-  public void shadowEmit(final Token tok) {
-    final StringBuilder b = new StringBuilder(tok.getText());
-    b.append(this.getSemicolonsAfterTokenIdx(tok.getTokenIndex()+1));
-
-    final PCInstruction instr = new PCInstruction(b.toString());
-    instr.sourceToken = tok;
-
-    this.inspectedInstrEmissions.addLast(instr);
-  }
-
   public void emit(final ParserRuleContext ctx) {
     final StringBuffer line = new StringBuffer();
     final Interval interval = ctx.getSourceInterval();
@@ -123,61 +106,6 @@ public class InterpreterEmissionsFilter {
       /*====================================================*/
       /* BEGIN checks involving previous emission           */
       /*====================================================*/
-
-      // Don't emit an End-If after emitting a Break.
-      if(i.startsWith("End-If")
-          && prev.getInstruction().startsWith("Break")) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      // Don't emit an Else after emitting an End-If.
-      if(i.startsWith("Else")
-          && prev.getInstruction().startsWith("End-If")) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      /*
-       * The tracefile frequently excludes end-of-control-construct
-       * instructions that appear in quick succession; usually only the first
-       * and last such statments are listed in the tracefile. The conditional
-       * below implements that logic.
-       */
-      if ((i.startsWith("End-If") || i.startsWith("End-Evaluate"))
-            && (prev.getInstruction().startsWith("For")
-              || prev.getInstruction().startsWith("End-For")
-              || prev.getInstruction().startsWith("End-If")
-              || prev.getInstruction().startsWith("Else")
-              || prev.getInstruction().startsWith("If")
-              || prev.getInstruction().startsWith("End-Function")
-              || prev.getInstruction().startsWith("End-Evaluate"))) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      // Don't emit End-Evaluate statements directly after a When
-      // branch emission.
-      if (i.startsWith("End-Evaluate")
-          && prev.getInstruction().startsWith("When")) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
-
-      // Don't emit this instruction emission if the previously
-      // inspected emission (*regardless of whether it was actually
-      // submitted to the trace file verifier or not*) lacked a
-      // trailing semicolon and was an assignment stmt.
-      if ((prev.sourceContext instanceof PeopleCodeParser.StmtAssignContext)
-          && !prev.getInstruction().endsWith(";")) {
-        this.pendingInstrEmissions.removeFirst();
-        this.inspectedInstrEmissions.addLast(instr);
-        continue;
-      }
 
       /*
        * At this point, the pending instruction emission is cleared

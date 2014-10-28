@@ -65,6 +65,14 @@ public class PCInstruction implements IEmission {
     return this.instruction;
   }
 
+  public boolean isOptional() {
+    return this.instruction.startsWith("End-If")
+        || this.instruction.startsWith("Else")
+        || this.instruction.startsWith("Break")
+        || this.instruction.startsWith("End-Evaluate")
+        || this.instruction.startsWith("End-For");
+  }
+
   @Override
   public boolean equals(final Object obj) {
     if (obj == this) {

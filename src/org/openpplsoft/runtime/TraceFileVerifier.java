@@ -232,6 +232,16 @@ public final class TraceFileVerifier {
       log.warn("[PAUSING] Trace file verification; trace file expects Break w/o semicolon; "
           + "this is a known problem emission, so we will wait for interpreter to sync up "
           + "on the trace emission immediately after it: {}", emissionToSyncUpOn);
+    } else if (opsEmission instanceof PCInstruction
+        && ((PCInstruction) opsEmission).isOptional()) {
+
+      // Unlike above, we do NOT skip to the next trace emission; OPS must match against
+      // this one.
+      isPausedAndWaitingToSyncUp = true;
+      emissionToSyncUpOn = traceEmission;
+
+      log.warn("[PAUSING] Trace file verification; OPS emitted optional instruction. Disregarding "
+          + "and waiting for OPS to emit: {}", emissionToSyncUpOn);
 
     } else {
       log.fatal("=== Emission Mismatch! =======================");

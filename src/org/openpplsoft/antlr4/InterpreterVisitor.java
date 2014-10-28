@@ -50,7 +50,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private AccessLevel blockAccessLvl;
   private PeopleCodeParser.StmtBreakContext lastSeenBreakContext;
   private boolean hasVarDeclBeenEmitted;
-  private LinkedList<Object> submittedEmissions;
+  private PCInstruction lastSubmittedEmission;
 
   /**
    * Creates a new interpreter instance that is aware
@@ -67,26 +67,61 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     this.nodeCallables = new ParseTreeProperty<Callable>();
     this.nodeTypeConstraints = new ParseTreeProperty<PTTypeConstraint>();
     this.evalConstructStack = new Stack<EvaluateConstruct>();
-    this.submittedEmissions = new LinkedList<Object>();
   }
 
   public void emit(final Token tok) {
-    this.submittedEmissions.addLast(tok);
-    this.supervisor.getEmissionsFilter().emit(tok);
+    final StringBuilder b = new StringBuilder(tok.getText());
+    b.append(this.getSemicolonsAfterTokenIdx(tok.getTokenIndex()+1));
+
+    final PCInstruction instr = new PCInstruction(b.toString());
+    instr.sourceToken = tok;
+    TraceFileVerifier.submitEnforcedEmission(instr);
+    this.lastSubmittedEmission = instr;
   }
 
   public void emit(final ParserRuleContext ctx) {
-    this.submittedEmissions.addLast(ctx);
-    this.supervisor.getEmissionsFilter().emit(ctx);
+    final StringBuffer line = new StringBuffer();
+    final Interval interval = ctx.getSourceInterval();
+
+    int i = interval.a;
+    boolean newlineSeen = false;
+    while (i <= interval.b) {
+      final Token t = this.eCtx.prog.tokenStream.get(i);
+      if (t.getChannel() == PeopleCodeLexer.REFERENCES_CHANNEL) {
+        i++;
+        continue;
+      }
+      if (t.getText().contains("\n")) {
+        newlineSeen = true;
+        break;
+      }
+      line.append(t.getText());
+      i++;
+    }
+
+    // Only look for semicolons if a newline wasn't seen.
+    if (!newlineSeen) {
+      line.append(this.getSemicolonsAfterTokenIdx(i));
+    }
+
+    final PCInstruction instr = new PCInstruction(line.toString());
+    instr.sourceContext = ctx;
+    TraceFileVerifier.submitEnforcedEmission(instr);
+    this.lastSubmittedEmission = instr;
+  }
+
+  private String getSemicolonsAfterTokenIdx(final int tokIdx) {
+    int i = tokIdx;
+    final StringBuilder b = new StringBuilder();
+    while (this.eCtx.prog.tokenStream.get(i).getText().equals(";")) {
+      b.append(";");
+      i++;
+    }
+    return b.toString();
   }
 
   public void resubmitLastEmission() {
-    Object e = this.submittedEmissions.getLast();
-    if (e instanceof Token) {
-      this.supervisor.getEmissionsFilter().emit((Token) e);
-    } else {
-      this.supervisor.getEmissionsFilter().emit((ParserRuleContext) e);
-    }
+    TraceFileVerifier.submitEnforcedEmission(this.lastSubmittedEmission);
   }
 
   /**

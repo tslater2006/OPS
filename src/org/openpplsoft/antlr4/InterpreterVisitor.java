@@ -1474,30 +1474,30 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       this.emit(ctx);
       evalConstruct.hasBranchBeenEmitted = true;
 
-    // If this isn't the first When branch, emit it only if a true
-    // When branch has not yet been seen *AND* if the last When branch
-    // seen did not have an empty statement list.
-    } else if(!evalConstruct.trueBranchExprSeen &&
-        !evalConstruct.wasLastWhenBranchStmtListEmpty) {
+    // If this isn't the first When branch, emit it only if we're not falling
+    // through branches AND a true branch expr has not yet been seen.
+    } else if(!evalConstruct.inFallingThroughState
+        && !evalConstruct.trueBranchExprSeen
+        && !evalConstruct.wasLastWhenBranchStmtListEmpty) {
       this.emit(ctx);
     }
 
-    evalConstruct.wasLastWhenBranchStmtListEmpty =
-        (ctx.stmtList().getChildCount() == 0);
-
-    /*
-     * If p1 equals p2, we have reached a When branch that evaluates
-     * to true; if they aren't equal, we must still check if we saw a true
-     * branch expr earlier b/c control may be falling through When branches
-     * (occurs until a Break is seen or the Evaluate statement ends).
-     */
     log.debug("p1: {}; p2: {}", p1, p2);
-    PTBoolean eq = ((PTPrimitiveType) p1).isEqual((PTPrimitiveType) p2);
-    if (eq.read() || evalConstruct.trueBranchExprSeen) {
+    final PTBoolean eq = ((PTPrimitiveType) p1).isEqual((PTPrimitiveType) p2);
+
+    if (eq.read()) {
       evalConstruct.trueBranchExprSeen = true;
-      visit(ctx.stmtList());
     }
 
+    boolean isThisWhenBranchStmtListEmpty = (ctx.stmtList().getChildCount() == 0);
+    if (eq.read() || evalConstruct.inFallingThroughState) {
+      visit(ctx.stmtList());
+
+      // Fall-through stops when a non-empty statement list is encountered during the fall.
+      evalConstruct.inFallingThroughState = isThisWhenBranchStmtListEmpty;
+    }
+
+    evalConstruct.wasLastWhenBranchStmtListEmpty = isThisWhenBranchStmtListEmpty;
     return null;
   }
 
@@ -1785,8 +1785,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private final class EvaluateConstruct {
     private PTType baseExpr;
     private Token endEvaluateToken;
-    private boolean hasBranchBeenEmitted, trueBranchExprSeen, breakSeen,
-      wasLastWhenBranchStmtListEmpty;
+    private boolean hasBranchBeenEmitted, inFallingThroughState, breakSeen,
+      wasLastWhenBranchStmtListEmpty, trueBranchExprSeen;
     private EvaluateConstruct(final PTType p) {
       this.baseExpr = p;
     }

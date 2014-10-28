@@ -51,6 +51,11 @@ public class InterpretSupervisor {
       throw opsvmre;
     }
 
+    if (TraceFileVerifier.isVerifierPaused()) {
+      throw new OPSVMachRuntimeException("Expected TraceFileVerifier to be synced up, "
+          + "but it is in the paused state.");
+    }
+
     if(this.execContextStack.size() != 0) {
       throw new OPSVMachRuntimeException("Expected exec context stack to be empty.");
     }

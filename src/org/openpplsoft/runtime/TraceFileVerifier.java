@@ -48,6 +48,7 @@ public final class TraceFileVerifier {
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
   private static int numTraceSQLStmts, numTraceSQLStmtsIgnored;
+  private static int numOPSOptionalPCInstrsEmitted;
 
   // Define regex group indices here rather than as magic nbrs.
   private static final int GROUP1 = 1;
@@ -106,6 +107,10 @@ public final class TraceFileVerifier {
     }
 
     ignoreStmtsInFile("ignoredSql_ORACLE.dat");
+  }
+
+  public static boolean isVerifierPaused() {
+    return isPausedAndWaitingToSyncUp;
   }
 
   /**
@@ -242,6 +247,8 @@ public final class TraceFileVerifier {
 
       log.warn("[PAUSING] Trace file verification; OPS emitted optional instruction. Disregarding "
           + "and waiting for OPS to emit: {}", emissionToSyncUpOn);
+
+      numOPSOptionalPCInstrsEmitted++;
 
     } else {
       log.fatal("=== Emission Mismatch! =======================");
@@ -399,9 +406,10 @@ public final class TraceFileVerifier {
     log.info("Adhoc SQL Emissions:\t\t\t{}", unenforcedEmissions.size());
     log.info("Enforced SQL Emissions:\t\t\t{}", numEnforcedSQLEmissions);
     log.info("Enforced PC Emissions:\t\t\t{}", numPCEmissionMatches);
+    log.info("Optional PC Emissions:\t\t\t{}", numOPSOptionalPCInstrsEmitted);
     log.info("Total Emissions:\t\t\t\t{}",
         numEnforcedSQLEmissions + unenforcedEmissions.size()
-        + numPCEmissionMatches);
+        + numPCEmissionMatches + numOPSOptionalPCInstrsEmitted);
     log.info("Component Structure Valid?\t\t\t\t{}",
         ComponentStructureVerifier.hasBeenVerified ? "YES" : "!!NO!!");
     log.info("Coverage Area Bounded?\t\t\t\t{}",

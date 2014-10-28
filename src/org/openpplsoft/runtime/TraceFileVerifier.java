@@ -160,8 +160,7 @@ public final class TraceFileVerifier {
     }
 
     if (isPausedAndWaitingToSyncUp) {
-      log.warn("[PAUSED] TRACE FILE VERIFIER IS PAUSED and waiting for interpreter "
-        + "to emit: {}", emissionToSyncUpOn);
+      log.warn("[VERIFIER:PAUSED] Waiting for interpreter to emit: {}", emissionToSyncUpOn);
     }
 
     IEmission traceEmission;
@@ -205,14 +204,14 @@ public final class TraceFileVerifier {
       }
 
       if (isPausedAndWaitingToSyncUp) {
-        log.warn("[RESUMED] Trace file verifier is now synced up with interpreter on matching "
+        log.warn("[VERIFIER:RESUMED] Interpreter has just synced up on matching "
             + "emission: {}", opsEmission);
         isPausedAndWaitingToSyncUp = false;
         emissionToSyncUpOn = null;
       }
     } else if (isPausedAndWaitingToSyncUp) {
-      log.warn("[SKIPPED] Trace file verifier is paused and waiting to sync up; disregarding "
-          + "this OPS emission: {}", opsEmission);
+      log.warn("[VERIFIER:DISCARDING] OPS emission ({}) does not match emission to sync "
+          + "up on: {}", opsEmission, emissionToSyncUpOn);
 
     /*
      * Look at DERIVED_CS.SRVC_IND_NEG.RowInit. There is a Break statement without a trailing
@@ -234,7 +233,7 @@ public final class TraceFileVerifier {
       isPausedAndWaitingToSyncUp = true;
       emissionToSyncUpOn = getNextTraceEmission();
 
-      log.warn("[PAUSING] Trace file verification; trace file expects Break w/o semicolon; "
+      log.warn("[VERIFIER:PAUSING] Encountered Break w/o semicolon in tracefile; "
           + "this is a known problem emission, so we will wait for interpreter to sync up "
           + "on the trace emission immediately after it: {}", emissionToSyncUpOn);
     } else if (opsEmission instanceof PCInstruction
@@ -245,7 +244,7 @@ public final class TraceFileVerifier {
       isPausedAndWaitingToSyncUp = true;
       emissionToSyncUpOn = traceEmission;
 
-      log.warn("[PAUSING] Trace file verification; OPS emitted optional instruction. Disregarding "
+      log.warn("[VERIFIER:PAUSING] Ignoring optional OPS instruction (" + opsEmission + ") "
           + "and waiting for OPS to emit: {}", emissionToSyncUpOn);
 
       numOPSOptionalPCInstrsEmitted++;

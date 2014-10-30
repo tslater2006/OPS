@@ -33,7 +33,15 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   private PTImmutableReference<PTPrimitiveType> valueRef;
   private PTImmutableReference<PTBoolean> visiblePropertyRef;
   private PTImmutableReference<PTString> fldNamePropertyRef;
-  private List<String> dropDownList;
+  private List<DropDownItem> dropDownList;
+
+  private class DropDownItem {
+    private String code, desc;
+    public DropDownItem(final String c, final String d) {
+      this.code = c;
+      this.desc = d;
+    }
+  }
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -67,7 +75,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   private void init() {
-    this.dropDownList = new ArrayList<String>();
+    this.dropDownList = new ArrayList<DropDownItem>();
     final PTTypeConstraint valueTc
         = recFieldDefn.getTypeConstraintForUnderlyingValue();
 
@@ -433,6 +441,21 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public void PT_ClearDropDownList() {
     this.dropDownList.clear();
+  }
+
+  public void PT_AddDropDownItem() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+    if (args.size() != 2
+        || !(args.get(0) instanceof PTString)
+        || !(args.get(1) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected two PTString args "
+          + "to AddDropDownItem.");
+    }
+
+    this.dropDownList.add(new DropDownItem(
+        ((PTString) args.get(0)).readAsString(),
+        ((PTString) args.get(1)).readAsString()));
   }
 
   /**

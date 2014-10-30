@@ -274,14 +274,19 @@ public final class StmtLibrary {
 
       final String effDtCheckRecord = effDtCheckMatcher.group(1);
       // Do not use group 2 (contains whitespace preceding the optional subquery alias)
-      final String effDtSubqueryAlias = effDtCheckMatcher.group(3);
+      String effDtSubqueryAlias = effDtCheckMatcher.group(3);
       final String effDtRootAlias = effDtCheckMatcher.group(4);
-      final String effDtBound = effDtCheckMatcher.group(5);
+      String effDtBound = effDtCheckMatcher.group(5);
 
       if(!rootAlias.equals(effDtRootAlias)) {
         throw new OPSVMachRuntimeException("While preparing fill query, "
           + "found %EffDtCheck that has a root alias (" + effDtRootAlias
           + ") different than expected (" + rootAlias + ").");
+      }
+
+      // If subquery alias is not specified, use name of record being checked.
+      if (effDtSubqueryAlias == null) {
+        effDtSubqueryAlias = effDtCheckRecord;
       }
 
       StringBuilder effDtSubqueryBuilder = new StringBuilder(
@@ -298,6 +303,12 @@ public final class StmtLibrary {
             .append(effDtRootAlias).append(".").append(rf.FIELDNAME)
             .append(" AND");
         }
+      }
+
+      // If the effDtBound is not a meta-sql construct, it will not
+      // be wrapped with TO_DATE later in this function, so wrap it now.
+      if (!effDtBound.startsWith("%")) {
+        effDtBound = "TO_DATE(" + effDtBound + ",'YYYY-MM-DD')";
       }
 
       effDtSubqueryBuilder.append(" ").append(effDtSubqueryAlias)

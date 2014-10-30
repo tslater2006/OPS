@@ -33,6 +33,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   private PTImmutableReference<PTPrimitiveType> valueRef;
   private PTImmutableReference<PTBoolean> visiblePropertyRef;
   private PTImmutableReference<PTString> fldNamePropertyRef;
+  private List<String> dropDownList;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -66,6 +67,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   private void init() {
+    this.dropDownList = new ArrayList<String>();
     final PTTypeConstraint valueTc
         = recFieldDefn.getTypeConstraintForUnderlyingValue();
 
@@ -427,6 +429,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       throw new OPSVMachRuntimeException("Expected no args.");
     }
     this.setBlank();
+  }
+
+  public void PT_ClearDropDownList() {
+    this.dropDownList.clear();
   }
 
   /**

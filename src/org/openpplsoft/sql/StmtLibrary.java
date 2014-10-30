@@ -122,8 +122,7 @@ public final class StmtLibrary {
     bindIdxPattern = Pattern.compile(":\\d+");
     dateInPattern = Pattern.compile("%(DATEIN|DateIn)\\((.+?)\\)");
     effDtCheckPattern = Pattern.compile(
-      "%EffDtCheck\\(([A-Za-z_]+)\\s+([A-Za-z0-9_]+),"
-        + "\\s+([A-Za-z]+),\\s+(%[A-Za-z]+\\(\\?\\))\\)");
+      "%EffDtCheck\\(([A-Za-z_]+)(\\s+([A-Za-z0-9_]+))?,\\s+([A-Za-z]+),\\s+(.*)\\)");
   }
 
   private StmtLibrary() {}
@@ -274,9 +273,10 @@ public final class StmtLibrary {
     while (effDtCheckMatcher.find()) {
 
       final String effDtCheckRecord = effDtCheckMatcher.group(1);
-      final String effDtSubqueryAlias = effDtCheckMatcher.group(2);
-      final String effDtRootAlias = effDtCheckMatcher.group(3);
-      final String effDtBound = effDtCheckMatcher.group(4);
+      // Do not use group 2 (contains whitespace preceding the optional subquery alias)
+      final String effDtSubqueryAlias = effDtCheckMatcher.group(3);
+      final String effDtRootAlias = effDtCheckMatcher.group(4);
+      final String effDtBound = effDtCheckMatcher.group(5);
 
       if(!rootAlias.equals(effDtRootAlias)) {
         throw new OPSVMachRuntimeException("While preparing fill query, "

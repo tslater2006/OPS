@@ -1446,6 +1446,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       visit(ctx.whenOtherBranch());
     }
 
+    this.emit(evalConstruct.endEvaluateToken);
     this.evalConstructStack.pop();
 
     return null;
@@ -1527,9 +1528,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.emit(this.lastSeenBreakContext);
         evalConstruct.breakSeen = true;
       }
-
-      // Only emit End-Evaluate if no true branch has yet been seen.
-      this.emit(evalConstruct.endEvaluateToken);
     }
 
     return null;

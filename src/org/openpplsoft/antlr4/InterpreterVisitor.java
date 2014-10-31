@@ -1008,13 +1008,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else if (ctx.op.getText().equals("And")) {
       visit(ctx.expr(0));
       final PTBoolean lhs = Environment.getOrDerefBoolean(this.getNodeData(ctx.expr(0)));
-      visit(ctx.expr(1));
-      final PTBoolean rhs = Environment.getOrDerefBoolean(this.getNodeData(ctx.expr(1)));
 
-      if (lhs.read() && rhs.read()) {
-        this.setNodeData(ctx, new PTBoolean(true));
-      } else {
+      /*
+       * Short-circuit evaluation: if lhs is false, this expression is false,
+       * otherwise evaluate rhs and bubble up its value.
+       */
+      if (!lhs.read()) {
         this.setNodeData(ctx, new PTBoolean(false));
+      } else {
+        visit(ctx.expr(1));
+        this.setNodeData(ctx, this.getNodeData(ctx.expr(1)));
       }
     } else {
       throw new OPSInterpretException("Unsupported boolean comparison "

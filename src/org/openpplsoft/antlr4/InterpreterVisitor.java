@@ -1424,6 +1424,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   }
 
   /**
+   * Called by ANTLR when a try/catch statement
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitTryCatchStmt(
+      final PeopleCodeParser.TryCatchStmtContext ctx) {
+    throw new OPSVMachRuntimeException("TODO: Support try/catch.");
+//    return null;
+  }
+
+  /**
    * Called by ANTLR when an Evaluate statement
    * is being visited in the parse tree.
    * @param ctx the associated ParseTree node

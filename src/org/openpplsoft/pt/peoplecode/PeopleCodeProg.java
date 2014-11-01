@@ -39,7 +39,6 @@ public abstract class PeopleCodeProg {
   private Map<String, FuncImpl> funcImplNodes;
   private Map<String, Function> funcTable;
   private Map<Integer, Reference> bytecodeRefTable;
-  public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
   private Map<String, List<AppPackagePath>> importedAppClasses;
   public List<AppPackagePath> importedAppPackagePaths;
 
@@ -189,7 +188,6 @@ public abstract class PeopleCodeProg {
     this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
     this.funcImplNodes = new HashMap<String, FuncImpl>();
     this.funcTable = new HashMap<String, Function>();
-    this.confirmedRecordProgCalls = new HashMap<RecordPeopleCodeProg, Boolean>();
     this.importedAppClasses = new HashMap<String, List<AppPackagePath>>();
     this.importedAppPackagePaths = new ArrayList<AppPackagePath>();
 

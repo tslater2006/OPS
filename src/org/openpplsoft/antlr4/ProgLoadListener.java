@@ -352,28 +352,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
           + "expression type preceding a function call or rowset "
           + "index call: " + ctx.expr().getText());
     }
-
-    /*
-     * Only GENERIC_IDs are considered to be identifiers representative of
-     * a function name; if the identifier is a variable, it is
-     * part of a rowset call (i.e, "&rs(1)") and should not be checked.
-     */
-    if (id.GENERIC_ID() != null) {
-
-      final RecordPeopleCodeProg referencedProg = this.srcProg.recordProgFnCalls
-          .get(id.GENERIC_ID().getText());
-
-      /*
-       * If the referencedProg is null, the referenced function has a scope
-       * beyond the program (is a system function). Otherwise, the function
-       * is in program scope, and is thus defined in the referencedProg;
-       * we must note that a reference to that program exists to ensure that
-       * we load that program later.
-       */
-      if (referencedProg != null) {
-        this.srcProg.confirmedRecordProgCalls.put(referencedProg, true);
-      }
-    }
   }
 
   /**

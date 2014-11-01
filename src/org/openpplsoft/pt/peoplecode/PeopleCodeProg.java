@@ -38,7 +38,7 @@ public abstract class PeopleCodeProg {
   public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
   private Map<String, FuncImpl> funcImplNodes;
   private Map<String, Function> funcTable;
-  public Map<Integer, Reference> progRefsTable;
+  private Map<Integer, Reference> bytecodeRefTable;
   public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
   private Map<String, List<AppPackagePath>> importedAppClasses;
   public List<AppPackagePath> importedAppPackagePaths;
@@ -109,7 +109,7 @@ public abstract class PeopleCodeProg {
           + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
     }
 
-    this.progRefsTable = new TreeMap<Integer, Reference>();
+    this.bytecodeRefTable = new TreeMap<Integer, Reference>();
 
     ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_GetRefs",
         new String[]{this.bindVals[0], this.bindVals[1], this.bindVals[2],
@@ -119,7 +119,7 @@ public abstract class PeopleCodeProg {
         this.bindVals[12], this.bindVals[13]});
     rs = ostmt.executeQuery();
     while(rs.next()) {
-      this.progRefsTable.put(rs.getInt("NAMENUM"),
+      this.bytecodeRefTable.put(rs.getInt("NAMENUM"),
           new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
     }
     rs.close();
@@ -198,8 +198,8 @@ public abstract class PeopleCodeProg {
     walker.walk(new ProgLoadListener(this), this.parseTree);
   }
 
-  public Reference getReference(int refNbr) {
-    return this.progRefsTable.get(refNbr);
+  public Reference getBytecodeReference(int refNbr) {
+    return this.bytecodeRefTable.get(refNbr);
   }
 
   public String toString() {

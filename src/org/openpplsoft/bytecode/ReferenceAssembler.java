@@ -59,7 +59,7 @@ public class ReferenceAssembler extends ElementAssembler {
     final int b2 = (int) (stream.readNextByte() & WIDE_AND);
 
     final int refIdx = b2 * MULTIPLIER_SHIFT + b1 + 1;
-    final Reference refObj = stream.getMappedReference(refIdx);
+    final Reference refObj = stream.getBytecodeReference(refIdx);
 
     if (refObj == null) {
       throw new OPSAssembleException("No reference is mapped to index "

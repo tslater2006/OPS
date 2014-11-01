@@ -51,8 +51,8 @@ public class PeopleCodeByteStream {
     return prog.progBytes[this.cursorPos];
   }
 
-  public Reference getMappedReference(int idx) {
-    return this.prog.progRefsTable.get(idx);
+  public Reference getBytecodeReference(int idx) {
+    return this.prog.getBytecodeReference(idx);
   }
 
   public void appendAssembledText(char c) {

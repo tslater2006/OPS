@@ -29,7 +29,7 @@ public abstract class PeopleCodeProg {
   protected String[] bindVals;
   protected String event;
   private String programText;
-  private byte[] progBytes;
+  private byte[] bytecode;
   private CommonTokenStream tokenStream;
   private ParseTree parseTree;
   private boolean hasAtLeastOneStatementFlag;
@@ -94,7 +94,7 @@ public abstract class PeopleCodeProg {
   }
 
   public byte[] getBytecode() {
-    return this.progBytes;
+    return this.bytecode;
   }
 
   public void init() {
@@ -118,14 +118,14 @@ public abstract class PeopleCodeProg {
     int PROGLEN = -1;
     while(rs.next()) {
       PROGLEN = rs.getInt("PROGLEN");     // PROGLEN is the same for all records returned here.
-      this.appendProgBytes(rs.getBlob("PROGTXT"));
+      this.appendBytecode(rs.getBlob("PROGTXT"));
     }
     rs.close();
     ostmt.close();
 
-    if(this.progBytes.length != PROGLEN) {
+    if(this.bytecode.length != PROGLEN) {
       throw new OPSVMachRuntimeException("Number of bytes in " + this.getDescriptor() + " ("
-          + this.progBytes.length + ") not equal to PROGLEN (" + PROGLEN + ").");
+          + this.bytecode.length + ") not equal to PROGLEN (" + PROGLEN + ").");
     }
 
     this.bytecodeRefTable = new TreeMap<Integer, Reference>();
@@ -153,7 +153,7 @@ public abstract class PeopleCodeProg {
     this.programText = byteStream.getAssembledText();
   }
 
-  public void appendProgBytes(final Blob blob) {
+  public void appendBytecode(final Blob blob) {
 
     int b;
     InputStream stream = null;
@@ -177,16 +177,16 @@ public abstract class PeopleCodeProg {
     int startIdx;
     byte[] allBytes;
 
-    if(this.progBytes == null) {
+    if(this.bytecode == null) {
       allBytes = new byte[bytes.size()];
       startIdx = 0;
     } else {
-      allBytes = new byte[this.progBytes.length + bytes.size()];
-      startIdx = this.progBytes.length;
+      allBytes = new byte[this.bytecode.length + bytes.size()];
+      startIdx = this.bytecode.length;
 
       // Copy previous bytes to new array.
       for(int i = 0; i < startIdx; i++) {
-        allBytes[i] = this.progBytes[i];
+        allBytes[i] = this.bytecode[i];
       }
     }
 
@@ -195,7 +195,7 @@ public abstract class PeopleCodeProg {
       allBytes[i] = iter.next().byteValue();
     }
 
-    this.progBytes = allBytes;
+    this.bytecode = allBytes;
   }
 
   public void loadDefnsAndPrograms() {

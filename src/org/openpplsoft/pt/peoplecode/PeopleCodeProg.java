@@ -27,10 +27,10 @@ public abstract class PeopleCodeProg {
   private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
 
   protected String[] bindVals;
-  public String event;
-  public String programText;
-  public byte[] progBytes;
-  public CommonTokenStream tokenStream;
+  protected String event;
+  private String programText;
+  private byte[] progBytes;
+  private CommonTokenStream tokenStream;
   private ParseTree parseTree;
   private boolean hasAtLeastOneStatementFlag;
 
@@ -83,6 +83,18 @@ public abstract class PeopleCodeProg {
       this.lexAndParse();
     }
     return this.parseTree;
+  }
+
+  public CommonTokenStream getTokenStream() {
+    return this.tokenStream;
+  }
+
+  public String getEvent() {
+    return this.event;
+  }
+
+  public byte[] getBytecode() {
+    return this.progBytes;
   }
 
   public void init() {

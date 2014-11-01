@@ -104,7 +104,7 @@ public class RecordField {
     final List<PeopleCodeProg> recFldProgs = recDefn.getRecordProgsForField(this.FIELDNAME);
     if (recFldProgs != null) {
       for (PeopleCodeProg prog : recFldProgs) {
-        if (prog.event.equals(event.getName())) {
+        if (prog.getEvent().equals(event.getName())) {
           return prog;
         }
       }

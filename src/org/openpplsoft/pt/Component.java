@@ -169,7 +169,7 @@ public class Component {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
       if (prog.RECNAME != null && prog.RECNAME.equals(recFldDefn.RECNAME)
           && prog.FLDNAME != null && prog.FLDNAME.equals(recFldDefn.FIELDNAME)
-          && prog.event.equals(event.getName())) {
+          && prog.getEvent().equals(event.getName())) {
         return prog;
       }
     }
@@ -181,7 +181,7 @@ public class Component {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
       if (prog.RECNAME != null && prog.RECNAME.equals(recDefn.RECNAME)
           && prog.FLDNAME == null
-          && prog.event.equals(event.getName())) {
+          && prog.getEvent().equals(event.getName())) {
         return prog;
       }
     }
@@ -192,7 +192,7 @@ public class Component {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
       if (prog.RECNAME == null
           && prog.FLDNAME == null
-          && prog.event.equals(event.getName())) {
+          && prog.getEvent().equals(event.getName())) {
         return prog;
       }
     }

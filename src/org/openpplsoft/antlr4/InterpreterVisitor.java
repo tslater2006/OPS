@@ -88,7 +88,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     int i = interval.a;
     boolean newlineSeen = false;
     while (i <= interval.b) {
-      final Token t = this.eCtx.prog.tokenStream.get(i);
+      final Token t = this.eCtx.prog.getTokenStream().get(i);
       if (t.getChannel() == PeopleCodeLexer.REFERENCES_CHANNEL) {
         i++;
         continue;
@@ -115,7 +115,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private String getSemicolonsAfterTokenIdx(final int tokIdx) {
     int i = tokIdx;
     final StringBuilder b = new StringBuilder();
-    while (this.eCtx.prog.tokenStream.get(i).getText().equals(";")) {
+    while (this.eCtx.prog.getTokenStream().get(i).getText().equals(";")) {
       b.append(";");
       i++;
     }

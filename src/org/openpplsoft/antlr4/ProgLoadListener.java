@@ -53,7 +53,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
    */
   public ProgLoadListener(final PeopleCodeProg p) {
     this.srcProg = p;
-    this.tokens = p.tokenStream;
+    this.tokens = p.getTokenStream();
     this.refIndicesSeen = new HashMap<Integer, Void>();
   }
 

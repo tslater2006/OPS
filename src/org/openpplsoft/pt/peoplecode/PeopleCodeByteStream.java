@@ -37,18 +37,18 @@ public class PeopleCodeByteStream {
   }
 
   public int getProgLenInBytes() {
-    return this.prog.progBytes.length;
+    return this.prog.getBytecode().length;
   }
 
   public byte readNextByte() {
-    return prog.progBytes[this.cursorPos++];
+    return prog.getBytecode()[this.cursorPos++];
   }
 
   public byte readAhead() {
-    if(this.cursorPos >= this.prog.progBytes.length - 1) {
+    if(this.cursorPos >= this.prog.getBytecode().length - 1) {
       return -1;
     }
-    return prog.progBytes[this.cursorPos];
+    return prog.getBytecode()[this.cursorPos];
   }
 
   public Reference getBytecodeReference(int idx) {

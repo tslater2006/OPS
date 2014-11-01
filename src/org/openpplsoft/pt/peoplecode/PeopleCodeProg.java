@@ -41,7 +41,7 @@ public abstract class PeopleCodeProg {
   public Map<String, Boolean> importedRootAppPackages;
   public Map<Integer, Reference> progRefsTable;
   public Map<RecordPeopleCodeProg, Boolean> confirmedRecordProgCalls;
-  public Map<String, List<AppPackagePath>> importedAppClasses;
+  private Map<String, List<AppPackagePath>> importedAppClasses;
   public List<AppPackagePath> importedAppPackagePaths;
 
   private boolean hasInitialized, haveLoadedDefnsAndPrograms, haveLexedAndParsed;
@@ -300,5 +300,17 @@ public abstract class PeopleCodeProg {
     // ensure that that has happened before returning the flag.
     this.loadDefnsAndPrograms();
     return this.hasAtLeastOneStatementFlag;
+  }
+
+  public void addPathToImportedClass(final String appClassName,
+      final AppPackagePath appPkgPath) {
+    if (!this.importedAppClasses.containsKey(appClassName)) {
+      this.importedAppClasses.put(appClassName, new ArrayList<AppPackagePath>());
+    }
+    this.importedAppClasses.get(appClassName).add(appPkgPath);
+  }
+
+  public List<AppPackagePath> getPathsToImportedClass(final String appClassName) {
+    return this.importedAppClasses.get(appClassName);
   }
 }

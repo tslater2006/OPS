@@ -347,7 +347,7 @@ public abstract class PeopleCodeProg {
    * We first search for the class name in the table of app class imports.
    * If no entry exists there, we scan the package imports for a match.
    */
-  public List<String> resolveAppClassToFullPath(final String appClassName) {
+  public AppClassPeopleCodeProg resolveAppClassToProg(final String appClassName) {
     AppPackagePath authoritativePath = null;
     final List<AppPackagePath> pkgList =
         this.importedAppClasses.get(appClassName);
@@ -391,6 +391,11 @@ public abstract class PeopleCodeProg {
         + "path to class name (" + appClassName + ").");
     }
 
-    return appClassParts;
+    return new AppClassPeopleCodeProg(
+        appClassParts.toArray(new String[appClassParts.size()]));
+  }
+
+  public boolean doesImportClass(final String appClassName) {
+    return this.importedAppClasses.containsKey(appClassName);
   }
 }

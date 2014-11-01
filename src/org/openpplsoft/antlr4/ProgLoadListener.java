@@ -166,15 +166,12 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   @Override
   public void exitVarType(final PeopleCodeParser.VarTypeContext ctx) {
 
-    List<String> appClassParts = null;
-    PeopleCodeProg prog;
-
     if (ctx.appClassPath() != null) {
-      appClassParts = new ArrayList<String>();
+      List<String> appClassParts = new ArrayList<String>();
       for (TerminalNode id : ctx.appClassPath().GENERIC_ID()) {
         appClassParts.add(id.getText());
       }
-      prog = new AppClassPeopleCodeProg(appClassParts.toArray(
+      PeopleCodeProg prog = new AppClassPeopleCodeProg(appClassParts.toArray(
           new String[appClassParts.size()]));
       this.setVarTypeProg(ctx, prog);
       //log.debug("(0) Path found: {} in {}", appClassParts, ctx.getText());
@@ -186,10 +183,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
        * etc. are allowable app class names, keep this in mind if issues arise).
        */
       if (!PSDefn.VAR_TYPES_TABLE.containsKey(ctx.GENERIC_ID().getText())) {
-        appClassParts = this.srcProg.resolveAppClassToFullPath(
-              ctx.GENERIC_ID().getText());
-            prog = new AppClassPeopleCodeProg(appClassParts.toArray(
-                new String[appClassParts.size()]));
+        PeopleCodeProg prog = this.srcProg.resolveAppClassToProg(
+            ctx.GENERIC_ID().getText());
         this.setVarTypeProg(ctx, prog);
         //log.debug("(1) Class name resolved: {} in {}",
         //  appClassParts, ctx.getText());
@@ -197,7 +192,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     } else if (ctx.varType() != null) {
       // if the nested variable type has a program attached to it,
       // bubble it up before exiting.
-      prog = this.getVarTypeProg(ctx.varType());
+      PeopleCodeProg prog = this.getVarTypeProg(ctx.varType());
       if (prog != null) {
         this.setVarTypeProg(ctx, prog);
       }
@@ -265,28 +260,29 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     if (this.srcProg instanceof AppClassPeopleCodeProg) {
       return;
     }
-    List<String> appClassParts = null;
 
+    PeopleCodeProg prog = null;
     if (ctx.appClassPath() != null) {
       /*
        * This invocation of 'create' includes the full path to the
        * app class object being instantiated.
        */
-      appClassParts = new ArrayList<String>();
+      final List<String> appClassParts = new ArrayList<String>();
       for (TerminalNode id : ctx.appClassPath().GENERIC_ID()) {
         appClassParts.add(id.getText());
       }
+      prog = new AppClassPeopleCodeProg(
+          appClassParts.toArray(new String[appClassParts.size()]));
+
     } else {
       /*
        * This invocation of 'create' is creating an instance of
        * an app class but we only have the app class name.
        */
-      appClassParts = this.srcProg.resolveAppClassToFullPath(
+      prog = this.srcProg.resolveAppClassToProg(
           ctx.GENERIC_ID().getText());
     }
 
-    PeopleCodeProg prog = new AppClassPeopleCodeProg(
-        appClassParts.toArray(new String[appClassParts.size()]));
     prog = DefnCache.getProgram(prog);
     this.srcProg.addReferencedProg(prog);
   }

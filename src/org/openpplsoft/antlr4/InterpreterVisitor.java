@@ -1357,7 +1357,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
 
       PTTypeConstraint typeConstraint;
-      switch (ctx.GENERIC_ID().getText()) {
+      final String id = ctx.GENERIC_ID().getText();
+      switch (id) {
         case "array":
           if (nestedTc instanceof PTArrayTypeConstraint) {
             typeConstraint = new PTArrayTypeConstraint(
@@ -1398,8 +1399,24 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           typeConstraint = new PTSQLTypeConstraint();
           break;
         default:
-          throw new OPSVMachRuntimeException("Unexpected data type: "
-              + ctx.GENERIC_ID().getText());
+          /**
+           * In the underlying bytecode, variables of an app class type appear with either
+           * 1) the full package path in front of the class name, or 2) no app package path
+           * in front of the class name. Case #1 is handled above by bubbling up the type
+           * constraint attached to the app class parse tree node. Case #2 has no such node, and
+           * thus must 1) check if an app class has been imported by the program with the same
+           * name as the type encountered here, and 2) if so, resolve the app class name to
+           * the appropriate program so the associated type constraint can be instantiated.
+           */
+          if (this.eCtx.prog.doesImportClass(id)) {
+            final AppClassPeopleCodeProg appClassProg = this.eCtx.prog.resolveAppClassToProg(id);
+            typeConstraint = new PTAppClassObjTypeConstraint(appClassProg);
+            log.debug("Resolved GENERIC_ID var type w/o app pkg path "
+                + "to app class: {}", appClassProg);
+          } else {
+            throw new OPSVMachRuntimeException("Unexpected data type: "
+                + ctx.GENERIC_ID().getText());
+          }
       }
       this.setNodeTypeConstraint(ctx, typeConstraint);
     }

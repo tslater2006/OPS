@@ -343,7 +343,54 @@ public abstract class PeopleCodeProg {
     this.importedAppClasses.get(appClassName).add(appPkgPath);
   }
 
-  public List<AppPackagePath> getPathsToImportedClass(final String appClassName) {
-    return this.importedAppClasses.get(appClassName);
+  /*
+   * We first search for the class name in the table of app class imports.
+   * If no entry exists there, we scan the package imports for a match.
+   */
+  public List<String> resolveAppClassToFullPath(final String appClassName) {
+    AppPackagePath authoritativePath = null;
+    final List<AppPackagePath> pkgList =
+        this.importedAppClasses.get(appClassName);
+    List<String> appClassParts = null;
+
+    if (pkgList != null) {
+      if (pkgList.size() > 1) {
+        throw new OPSVMachRuntimeException("Found multiple discrete "
+          + "app class imports for an app class; unable to resolve "
+          + "authoritative package path.");
+      } else {
+        authoritativePath = pkgList.get(0);
+      }
+    } else {
+      for (AppPackagePath importedPkgPath
+          : this.importedAppPackagePaths) {
+        final AppPackage pkg = DefnCache.getAppPackage(
+            importedPkgPath.getRootPkgName());
+        final Map<String, Void> appClassesInPath =
+            pkg.getClassesInPath(importedPkgPath);
+        if (appClassesInPath.containsKey(appClassName)) {
+          if (authoritativePath == null) {
+            authoritativePath = importedPkgPath;
+          } else {
+            throw new OPSVMachRuntimeException("Found multiple discrete "
+              + "app pkg imports for an app class; unable to resolve "
+              + "authoritative package path.");
+          }
+        }
+      }
+    }
+
+    if (authoritativePath != null) {
+      appClassParts = new ArrayList<String>();
+      for (String part : authoritativePath.parts) {
+        appClassParts.add(part);
+      }
+      appClassParts.add(appClassName);
+    } else {
+      throw new OPSVMachRuntimeException("Unable to resolve authoritative "
+        + "path to class name (" + appClassName + ").");
+    }
+
+    return appClassParts;
   }
 }

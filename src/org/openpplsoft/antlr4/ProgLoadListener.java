@@ -186,7 +186,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
        * etc. are allowable app class names, keep this in mind if issues arise).
        */
       if (!PSDefn.VAR_TYPES_TABLE.containsKey(ctx.GENERIC_ID().getText())) {
-        appClassParts = this.resolveAppClassToFullPath(
+        appClassParts = this.srcProg.resolveAppClassToFullPath(
               ctx.GENERIC_ID().getText());
             prog = new AppClassPeopleCodeProg(appClassParts.toArray(
                 new String[appClassParts.size()]));
@@ -281,7 +281,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
        * This invocation of 'create' is creating an instance of
        * an app class but we only have the app class name.
        */
-      appClassParts = this.resolveAppClassToFullPath(
+      appClassParts = this.srcProg.resolveAppClassToFullPath(
           ctx.GENERIC_ID().getText());
     }
 
@@ -391,57 +391,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   /*======================================================================*/
   /* shared functions                                                     */
   /*======================================================================*/
-
-  /*
-   * We first search for the class name in the table of app class imports.
-   * If no entry exists there, we scan the package imports for a match.
-   */
-  private List<String> resolveAppClassToFullPath(final String appClassName) {
-    AppPackagePath authoritativePath = null;
-    final List<AppPackagePath> pkgList =
-        this.srcProg.getPathsToImportedClass(appClassName);
-    List<String> appClassParts = null;
-
-    if (pkgList != null) {
-      if (pkgList.size() > 1) {
-        throw new OPSVMachRuntimeException("Found multiple discrete "
-          + "app class imports for an app class; unable to resolve "
-          + "authoritative package path.");
-      } else {
-        authoritativePath = pkgList.get(0);
-      }
-    } else {
-      for (AppPackagePath importedPkgPath
-          : this.srcProg.getImportedAppPackagePaths()) {
-        final AppPackage pkg = DefnCache.getAppPackage(
-            importedPkgPath.getRootPkgName());
-        final Map<String, Void> appClassesInPath =
-            pkg.getClassesInPath(importedPkgPath);
-        if (appClassesInPath.containsKey(appClassName)) {
-          if (authoritativePath == null) {
-            authoritativePath = importedPkgPath;
-          } else {
-            throw new OPSVMachRuntimeException("Found multiple discrete "
-              + "app pkg imports for an app class; unable to resolve "
-              + "authoritative package path.");
-          }
-        }
-      }
-    }
-
-    if (authoritativePath != null) {
-      appClassParts = new ArrayList<String>();
-      for (String part : authoritativePath.parts) {
-        appClassParts.add(part);
-      }
-      appClassParts.add(appClassName);
-    } else {
-      throw new OPSVMachRuntimeException("Unable to resolve authoritative "
-        + "path to class name (" + appClassName + ").");
-    }
-
-    return appClassParts;
-  }
 
   /**
    * This method should be called to immediately load programs

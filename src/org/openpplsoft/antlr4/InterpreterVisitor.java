@@ -1649,41 +1649,45 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitFuncImpl(
       final PeopleCodeParser.FuncImplContext ctx) {
 
-    if(this.eCtx instanceof FunctionExecContext) {
-        /**
-         * If this function is the function named in the execution
-         * context, continue interpretation; otherwise, signal to
-         * to the supervisor that it needs to switch to the correct
-         * ParseTree node.
-         */
-        if (((FunctionExecContext) this.eCtx).funcName.equals(
-            ctx.funcSignature().GENERIC_ID().getText())) {
+    /*
+     * NOTE: We only execute a function when the
+     * execution context is a FunctionExecContext. For all other contexts,
+     * we do nothing more than execute the signature of the function.
+     */
+    if (this.eCtx instanceof FunctionExecContext) {
+      /**
+       * If this function is the function named in the execution
+       * context, continue interpretation; otherwise, signal to
+       * to the supervisor that it needs to switch to the correct
+       * ParseTree node.
+       */
+      if (((FunctionExecContext) this.eCtx).funcName.equals(
+          ctx.funcSignature().GENERIC_ID().getText())) {
 
-          this.emit(ctx.funcSignature());
-          visit(ctx.funcSignature());
+        this.emit(ctx.funcSignature());
+        visit(ctx.funcSignature());
 
-          final Scope localScope = new Scope(Scope.Lvl.FUNCTION_LOCAL);
-          final List<FormalParam> formalParams =
-              this.eCtx.prog.getFunction(
-                ctx.funcSignature().GENERIC_ID().getText()).formalParams;
+        final Scope localScope = new Scope(Scope.Lvl.FUNCTION_LOCAL);
+        final List<FormalParam> formalParams =
+            this.eCtx.prog.getFunction(
+              ctx.funcSignature().GENERIC_ID().getText()).formalParams;
 
-          // This logic is externalized from this method b/c visitMethodImpl
-          // shares the same logic.
-          this.bindArgsToFormalParams(localScope, formalParams);
+        // This logic is externalized from this method b/c visitMethodImpl
+        // shares the same logic.
+        this.bindArgsToFormalParams(localScope, formalParams);
 
-          this.eCtx.pushScope(localScope);
-          visit(ctx.stmtList());
-          this.eCtx.popScope();
+        this.eCtx.pushScope(localScope);
+        visit(ctx.stmtList());
+        this.eCtx.popScope();
 
-          this.emit(ctx.endfunction);
+        this.emit(ctx.endfunction);
 
-        } else {
-          throw new OPSFuncImplSignalException(ctx.
-              funcSignature().GENERIC_ID().getText());
-        }
+      } else {
+        throw new OPSFuncImplSignalException(ctx.
+            funcSignature().GENERIC_ID().getText());
+      }
     } else {
-      throw new OPSVMachRuntimeException("Attempt to execute function body "
-          + "outside of FunctionExecContext is not yet supported.");
+      this.emit(ctx.funcSignature());
     }
 
     return null;

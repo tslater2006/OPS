@@ -100,7 +100,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     if (ctx.appPkgPath() != null) {
       final String rootPkgName = ctx.appPkgPath().GENERIC_ID(0).getText();
       DefnCache.getAppPackage(rootPkgName);
-      this.srcProg.importedAppPackagePaths.add(
+      this.srcProg.addImportedAppPackagePath(
           new AppPackagePath(ctx.appPkgPath().getText()));
     } else {
       final String rootPkgName = ctx.appClassPath().GENERIC_ID(0).getText();
@@ -412,7 +412,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
       }
     } else {
       for (AppPackagePath importedPkgPath
-          : this.srcProg.importedAppPackagePaths) {
+          : this.srcProg.getImportedAppPackagePaths()) {
         final AppPackage pkg = DefnCache.getAppPackage(
             importedPkgPath.getRootPkgName());
         final Map<String, Void> appClassesInPath =

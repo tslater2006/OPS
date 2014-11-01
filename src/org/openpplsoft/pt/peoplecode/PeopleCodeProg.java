@@ -40,7 +40,7 @@ public abstract class PeopleCodeProg {
   private Map<String, Function> funcTable;
   private Map<Integer, Reference> bytecodeRefTable;
   private Map<String, List<AppPackagePath>> importedAppClasses;
-  public List<AppPackagePath> importedAppPackagePaths;
+  private List<AppPackagePath> importedAppPackagePaths;
 
   private boolean hasInitialized, haveLoadedDefnsAndPrograms, haveLexedAndParsed;
 
@@ -69,6 +69,14 @@ public abstract class PeopleCodeProg {
   protected abstract void initBindVals();
 
   public abstract String getDescriptor();
+
+  public void addImportedAppPackagePath(final AppPackagePath path) {
+    this.importedAppPackagePaths.add(path);
+  }
+
+  public List<AppPackagePath> getImportedAppPackagePaths() {
+    return this.importedAppPackagePaths;
+  }
 
   public ParseTree getParseTree() {
     if(parseTree == null) {

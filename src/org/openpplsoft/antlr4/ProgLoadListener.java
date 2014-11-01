@@ -66,6 +66,18 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     return this.varTypeProgs.get(node);
   }
 
+  @Override
+  public void exitProgram(final PeopleCodeParser.ProgramContext ctx) {
+    /*
+     * This program may not have any executable statements (i.e., it may
+     * have a comment but that's it). When firing PC events,
+     * programs that don't have at least one stmt in the stmtList of
+     * the root program node in the parse tree will not be submitted to
+     * the interpret supervisor.
+     */
+    this.srcProg.setHasAtLeastOneStatement(ctx.stmtList().stmt(0) != null);
+  }
+
   /**
    * Save the class declaration start node for use in selectively parsing
    * identifiers and methods during app class object instantiation.

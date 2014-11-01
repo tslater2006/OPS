@@ -32,6 +32,7 @@ public abstract class PeopleCodeProg {
   public byte[] progBytes;
   public CommonTokenStream tokenStream;
   private ParseTree parseTree;
+  private boolean hasAtLeastOneStatementFlag;
 
   public List<PeopleCodeProg> referencedProgs;
   public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
@@ -43,9 +44,7 @@ public abstract class PeopleCodeProg {
   public Map<String, List<AppPackagePath>> importedAppClasses;
   public List<AppPackagePath> importedAppPackagePaths;
 
-  private boolean hasInitialized = false;
-  private boolean haveLoadedDefnsAndPrograms = false;
-  private boolean haveLexedAndParsed = false;
+  private boolean hasInitialized, haveLoadedDefnsAndPrograms, haveLexedAndParsed;
 
   public class FuncImpl {
     public String funcName;
@@ -290,5 +289,16 @@ public abstract class PeopleCodeProg {
     // Remember: keys in table are lower-cased b/c PS does not distinguish
     // b/w function names of differing cases.
     return this.funcImplNodes.containsKey(funcName.toLowerCase());
+  }
+
+  public void setHasAtLeastOneStatement(final boolean b) {
+    this.hasAtLeastOneStatementFlag = b;
+  }
+
+  public boolean hasAtLeastOneStatement() {
+    // Since this flag is set only when the parse tree is walked,
+    // ensure that that has happened before returning the flag.
+    this.loadDefnsAndPrograms();
+    return this.hasAtLeastOneStatementFlag;
   }
 }

@@ -151,7 +151,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     if (this.getVarTypeProg(ctx.varType()) != null) {
       PeopleCodeProg prog = this.getVarTypeProg(ctx.varType());
       prog = DefnCache.getProgram(prog);
-      this.srcProg.referencedProgs.add(prog);
+      this.srcProg.addReferencedProg(prog);
     }
   }
 
@@ -228,8 +228,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
         ctx.event().getText());
     prog = DefnCache.getProgram(prog);
 
-    this.srcProg.referencedProgs.add(prog);
-    this.srcProg.recordProgFnCalls.put(fnName, (RecordPeopleCodeProg) prog);
+    this.srcProg.addReferencedProg(prog);
+    this.srcProg.addRecordProgFnCall(fnName, (RecordPeopleCodeProg) prog);
 
     // Load the prog's initial metadata if it hasn't already been cached.
     prog.init();
@@ -288,7 +288,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     PeopleCodeProg prog = new AppClassPeopleCodeProg(
         appClassParts.toArray(new String[appClassParts.size()]));
     prog = DefnCache.getProgram(prog);
-    this.srcProg.referencedProgs.add(prog);
+    this.srcProg.addReferencedProg(prog);
   }
 
   /**
@@ -452,6 +452,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
    */
   private void handlePropOrInstanceAppClassRef(final PeopleCodeProg prog) {
     final PeopleCodeProg p = DefnCache.getProgram(prog);
-    this.srcProg.referencedProgs.add(p);
+    this.srcProg.addReferencedProg(p);
   }
 }

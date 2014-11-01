@@ -1181,7 +1181,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         this.setNodeCallable(ctx, new Callable(fec));
 
-      } else if (this.eCtx.prog.recordProgFnCalls.containsKey(id)) {
+      } else if (this.eCtx.prog.hasRecordProgFnCall(id)) {
 
         log.debug("Resolved GENERIC_ID: {} to an external function "
             + "referenced by this program.", id);
@@ -1192,7 +1192,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         // Ensure external program has been init'ed and parsed.
         final PeopleCodeProg extProg = DefnCache.getProgram(this.eCtx.prog
-            .recordProgFnCalls.get(id));
+            .getRecordProgFnCall(id));
         extProg.loadDefnsAndPrograms();
 
         // Create an execution context pointing to the external program

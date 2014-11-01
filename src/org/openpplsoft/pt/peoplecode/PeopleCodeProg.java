@@ -34,8 +34,8 @@ public abstract class PeopleCodeProg {
   private ParseTree parseTree;
   private boolean hasAtLeastOneStatementFlag;
 
-  public List<PeopleCodeProg> referencedProgs;
-  public Map<String, RecordPeopleCodeProg> recordProgFnCalls;
+  private List<PeopleCodeProg> referencedProgs;
+  private Map<String, RecordPeopleCodeProg> recordProgFnCalls;
   private Map<String, FuncImpl> funcImplNodes;
   private Map<String, Function> funcTable;
   private Map<Integer, Reference> bytecodeRefTable;
@@ -202,6 +202,23 @@ public abstract class PeopleCodeProg {
     this.lexAndParse();
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(new ProgLoadListener(this), this.parseTree);
+  }
+
+  public void addRecordProgFnCall(final String fnName,
+      final RecordPeopleCodeProg prog) {
+    this.recordProgFnCalls.put(fnName, prog);
+  }
+
+  public void addReferencedProg(final PeopleCodeProg prog) {
+    this.referencedProgs.add(prog);
+  }
+
+  public boolean hasRecordProgFnCall(final String fnName) {
+    return this.recordProgFnCalls.containsKey(fnName);
+  }
+
+  public RecordPeopleCodeProg getRecordProgFnCall(final String fnName) {
+    return this.recordProgFnCalls.get(fnName);
   }
 
   public Reference getBytecodeReference(int refNbr) {

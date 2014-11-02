@@ -843,4 +843,24 @@ public class GlobalFnLibrary {
      */
     Environment.pushToCallStack(args.get(0));
   }
+
+  public void PT_GetRecord() {
+
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTRecordLiteral)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg, "
+          + "of type PTRecord to GetRecord.");
+    }
+
+    final PTType resEntity = this.interpretSupervisor
+        .resolveContextualCBufferReference(((PTRecordLiteral) args.get(0)).read());
+    if (resEntity == null || !(resEntity instanceof PTRecord)) {
+      throw new OPSVMachRuntimeException("Failure in GetRecord: expected provided identifier ("
+          + args.get(0) + ") to resolve to record but instead resolved to: " + resEntity);
+    }
+
+    Environment.pushToCallStack(resEntity);
+  }
 }

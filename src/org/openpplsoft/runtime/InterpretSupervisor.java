@@ -42,6 +42,18 @@ public class InterpretSupervisor {
     return null;
   }
 
+  public PTRecord getNearestCBufferRecordInContext() {
+    if (this.cBufferContextEntity instanceof PTRecord) {
+      return (PTRecord) this.cBufferContextEntity;
+    } else if (this.cBufferContextEntity instanceof PTField) {
+      return ((PTField) this.cBufferContextEntity).getParentRecord();
+    } else {
+      throw new OPSVMachRuntimeException("Can't find nearest record in component "
+          + "buffer context; expected context entity to be Record or Field but "
+          + "is actually: " + this.cBufferContextEntity);
+    }
+  }
+
   public void run() {
 
     try {

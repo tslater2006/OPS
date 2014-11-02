@@ -848,19 +848,23 @@ public class GlobalFnLibrary {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
-    if(args.size() != 1
-        || !(args.get(0) instanceof PTRecordLiteral)) {
-      throw new OPSVMachRuntimeException("Expected exactly 1 arg, "
+    if (args.size() == 0) {
+      Environment.pushToCallStack(this.interpretSupervisor
+          .getNearestCBufferRecordInContext());
+    } else if(args.size() == 1
+        && args.get(0) instanceof PTRecordLiteral) {
+
+      final PTType resEntity = this.interpretSupervisor
+          .resolveContextualCBufferReference(((PTRecordLiteral) args.get(0)).read());
+      if (resEntity == null || !(resEntity instanceof PTRecord)) {
+        throw new OPSVMachRuntimeException("Failure in GetRecord: expected provided identifier ("
+            + args.get(0) + ") to resolve to record but instead resolved to: " + resEntity);
+      }
+
+      Environment.pushToCallStack(resEntity);
+    } else {
+      throw new OPSVMachRuntimeException("Expected exactly 0 args or 1 arg "
           + "of type PTRecord to GetRecord.");
     }
-
-    final PTType resEntity = this.interpretSupervisor
-        .resolveContextualCBufferReference(((PTRecordLiteral) args.get(0)).read());
-    if (resEntity == null || !(resEntity instanceof PTRecord)) {
-      throw new OPSVMachRuntimeException("Failure in GetRecord: expected provided identifier ("
-          + args.get(0) + ") to resolve to record but instead resolved to: " + resEntity);
-    }
-
-    Environment.pushToCallStack(resEntity);
   }
 }

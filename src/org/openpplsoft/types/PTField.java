@@ -35,6 +35,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       displayOnlyPropertyRef;
   private PTImmutableReference<PTString> fldNamePropertyRef;
   private List<DropDownItem> dropDownList;
+  private boolean isGrayedOut;
 
   private class DropDownItem {
     private String code, desc;
@@ -490,6 +491,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public RecordFieldBuffer getRecordFieldBuffer() {
     return this.recFieldBuffer;
+  }
+
+  public void grayOut() {
+    this.isGrayedOut = true;
   }
 
   @Override

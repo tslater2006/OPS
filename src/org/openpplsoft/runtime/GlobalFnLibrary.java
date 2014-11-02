@@ -830,7 +830,7 @@ public class GlobalFnLibrary {
 
     if(args.size() != 1
         || !(args.get(0) instanceof PTField)) {
-      throw new OPSVMachRuntimeException("Expected exactly 1 arg, "
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg "
           + "of type PTField to GetField.");
     }
 
@@ -866,5 +866,18 @@ public class GlobalFnLibrary {
       throw new OPSVMachRuntimeException("Expected exactly 0 args or 1 arg "
           + "of type PTRecord to GetRecord.");
     }
+  }
+
+  public void PT_Gray() {
+
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTField)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg "
+          + "of type PTField to Gray.");
+    }
+
+    ((PTField) args.get(0)).grayOut();
   }
 }

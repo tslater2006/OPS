@@ -55,6 +55,8 @@ public final class Main {
 
       Environment.setSystemVar("%Component", new PTString(profileToRun.getComponentName()));
       Environment.setSystemVar("%Menu", new PTString("SA_LEARNER_SERVICES"));
+      Environment.setSystemVar("%Mode", new PTString(profileToRun.getMode()));
+
       Environment.setSystemVar("%Action_UpdateDisplay", new PTString("U"));
       Environment.setSystemVar("%Action_Add", new PTString("A"));
 

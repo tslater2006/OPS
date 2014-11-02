@@ -113,7 +113,7 @@ evaluateStmt    : 'Evaluate' expr whenBranch+ whenOtherBranch? endevaluate='End-
 whenBranch      : 'When' (op='='|op='>')? expr stmtList ;
 whenOtherBranch : 'When-Other' stmtList ;
 
-tryCatchStmt    : trytok='try' stmtList catchSignature stmtList 'end-try' ;
+tryCatchStmt    : trytok='try' stmtList catchSignature stmtList endtry='end-try' ;
 catchSignature  : 'catch' 'Exception' VAR_ID ;
 
 createInvocation : 'create' (appClassPath|GENERIC_ID) '(' exprList? ')' ;

@@ -1539,6 +1539,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       throw new OPSVMachRuntimeException("TODO: Support handling of PeopleCode exception.");
     }
 
+    this.emit(ctx.endtry);
     return null;
   }
 

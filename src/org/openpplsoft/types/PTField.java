@@ -31,7 +31,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   private RecordField recFieldDefn;
   private RecordFieldBuffer recFieldBuffer;
   private PTImmutableReference<PTPrimitiveType> valueRef;
-  private PTImmutableReference<PTBoolean> visiblePropertyRef;
+  private PTImmutableReference<PTBoolean> visiblePropertyRef,
+      displayOnlyPropertyRef;
   private PTImmutableReference<PTString> fldNamePropertyRef;
   private List<DropDownItem> dropDownList;
 
@@ -80,15 +81,32 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
         = recFieldDefn.getTypeConstraintForUnderlyingValue();
 
     try {
+      /*
+       * Initialize read/write properties.
+       */
       this.valueRef
           = new PTImmutableReference<PTPrimitiveType>(valueTc,
               (PTPrimitiveType) valueTc.alloc());
       this.visiblePropertyRef
           = new PTImmutableReference<PTBoolean>(
               PTBoolean.getTc(), PTBoolean.getTc().alloc());
+      // NOTE: Technically this is supposed to be defaulted to the value
+      // specified in App Designer. Checking if the first bit of FIELDUSE in
+      // PgToken is set to 1 will tell you if the field is display only. However,
+      // at this time, I am not linking pages to fields. If you have issues with
+      // logic related to DisplayOnly, you may need to associate fields with pages.
+      this.displayOnlyPropertyRef
+          = new PTImmutableReference<PTBoolean>(
+              PTBoolean.getTc(), PTBoolean.getTc().alloc());
+
+      /*
+       * Initialize read-only properties.
+       */
       this.fldNamePropertyRef
           = new PTImmutableReference<PTString>(
               PTString.getTc(), new PTString(this.recFieldDefn.FIELDNAME));
+      this.fldNamePropertyRef.deref().setReadOnly();
+
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
@@ -391,6 +409,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
       return this.visiblePropertyRef;
     } else if(s.toLowerCase().equals("name")) {
       return this.fldNamePropertyRef;
+    } else if(s.toLowerCase().equals("displayonly")) {
+      return this.displayOnlyPropertyRef;
     }
     return null;
   }

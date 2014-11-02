@@ -561,7 +561,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         Environment.pushToCallStack(PTCallFrameBoundary.getSingleton());
         Environment.pushToCallStack(this.getNodeData(ctx.expr(1)));
         this.supervisor.runImmediately(gsCallable.getSetterExecContext());
-        // No need to check return type; setters never return anything.
+
+        if (!(Environment.popFromCallStack() instanceof PTCallFrameBoundary)) {
+          throw new OPSVMachRuntimeException("A return value "
+              + "was found on the call stack after calling setter; none was expected.");
+        }
       }
     } else {
       final PTType dst = this.getNodeData(ctx.expr(0));

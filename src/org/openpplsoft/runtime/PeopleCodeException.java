@@ -23,7 +23,7 @@ public class PeopleCodeException extends OPSVMachRuntimeException {
       final String[] msgBindVals) {
     final MsgSet msgSet = DefnCache.getMsgSet(msgSetNbr);
     return new PeopleCodeException(responsibleExecContext,
-        msgSet.getMessage(msgNbr), msgSetNbr, msgNbr);
+        msgSet.getMessage(msgNbr, msgBindVals), msgSetNbr, msgNbr);
   }
 
   private PeopleCodeException(final ExecContext responsibleExecContext,
@@ -43,6 +43,8 @@ public class PeopleCodeException extends OPSVMachRuntimeException {
   }
 
   public String getResponsibleProgAndEvent() {
+    // The regex removes the first part of the descriptor (i.e., we don't
+    // want "AppClassPC" in "AppClassPC.EO.CA...")
     return this.responsibleExecContext.prog.getDescriptor().replaceFirst(".*?\\.", "");
   }
 

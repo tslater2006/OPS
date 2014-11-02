@@ -33,14 +33,6 @@ public class PTString extends PTPrimitiveType<String> {
 
   public PTString(final PTTypeConstraint origTc) {
     super(origTc);
-
-    /*
-     * VERY IMPORTANT: Strings are not initialized to blank in PeopleSoft.
-     * Fields whose underlying type is string DO initialize their values to blank,
-     * but strings in general are initialized to the empty string. DO NOT call set
-     * blank in any String constructors.
-     */
-    this.value = "";
   }
 
   public static PTTypeConstraint<PTString> getTc() {
@@ -59,12 +51,12 @@ public class PTString extends PTPrimitiveType<String> {
 
   @Override
   public void setBlank() {
-    this.value = " ";
+    this.value = "";
   }
 
   @Override
   public boolean isBlank() {
-    return this.value.equals(" ");
+    return this.value.trim().length() == 0;
   }
 
   @Override

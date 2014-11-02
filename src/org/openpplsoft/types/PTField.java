@@ -110,8 +110,6 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
-
-    this.setBlank();
   }
 
   public void fireEvent(final PCEvent event,
@@ -178,8 +176,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
     // If field is not blank, no need to run field default proc on it.
     if (!this.getValue().isBlank()) {
-      log.debug("Ignorning non-blank field during FldDefProc: {}.{}",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      log.debug("Ignorning non-blank field during FldDefProc: {}", this);
       return;
     }
 
@@ -281,8 +278,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
     // If field is not blank, no need to run field default proc on it.
     if (!this.getValue().isBlank()) {
-      log.debug("Ignorning non-blank field during FldDefProc: {}.{}",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      log.debug("Ignorning non-blank field during FldDefProc: {}|", this);
       return;
     }
 

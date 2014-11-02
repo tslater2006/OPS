@@ -62,20 +62,19 @@ public class SQLStmt implements IEmission {
       return false;
     }
 
-    //log.debug("SQL stmt is: {}", this.sql);
+    log.debug("SQL stmt is: {}", this.sql);
 
     // Ensure bind value indices and values match
     // those in the other statement.
     for (Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
 
-      //log.debug("Checking key {} with value {}.", cursor.getKey(),
-      //    cursor.getValue());
+      log.debug("Checking key {} with value {}.", cursor.getKey(),
+          cursor.getValue());
 
       if (!cursor.getValue().equals(
           otherStmt.bindVals.get(cursor.getKey()))) {
-        //log.debug("Other stmt for key {} has value {}.",
-        //    cursor.getKey(), otherStmt.bindVals.get(cursor.getKey()));
-        //throw new OPSVMachRuntimeException("Bindings differ.");
+        log.debug("Other stmt for key {} has value {}.",
+            cursor.getKey(), otherStmt.bindVals.get(cursor.getKey()));
         return false;
       }
     }

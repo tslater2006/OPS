@@ -35,7 +35,6 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
 
   public PTNumber(final PTTypeConstraint origTc) {
     super(origTc);
-    this.value = BigDecimal.ZERO;
   }
 
   public static PTTypeConstraint<PTNumber> getTc() {

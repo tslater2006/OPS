@@ -32,7 +32,6 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
 
   public PTBoolean(final PTTypeConstraint origTc) {
     super(origTc);
-    this.value = false;
   }
 
   public static PTTypeConstraint<PTBoolean> getTc() {

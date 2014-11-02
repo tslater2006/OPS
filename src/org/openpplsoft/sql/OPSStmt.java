@@ -59,7 +59,22 @@ public class OPSStmt extends SQLStmt {
     this.emissionType = eType;
 
     for (int i = 0; i < bVals.length; i++) {
-      this.bindVals.put(i + 1, bVals[i]);
+      /*
+       * IMPORTANT NOTE: For all empty string bind values, I am
+       * replacing them with a single character blank string, as that
+       * is how PS represents NULL in the database. You may run into
+       * issues in the event that a query explicitly wants to query
+       * using an empty string. In that case, for every record being queried/filled/etc.,
+       * I believe you will need to match each bind value to the appropriate field and determine
+       * if the field is required according to PS; if it is, those should be converted to
+       * from the empty string, and all other fields should be left alone.
+       * TODO(mquinn): keep this in mind.
+       */
+      if (bVals[i].equals("")) {
+        this.bindVals.put(i + 1, " ");
+      } else {
+        this.bindVals.put(i + 1, bVals[i]);
+      }
     }
 
     try {

@@ -391,8 +391,9 @@ public abstract class PeopleCodeProg {
         + "path to class name (" + appClassName + ").");
     }
 
-    return new AppClassPeopleCodeProg(
-        appClassParts.toArray(new String[appClassParts.size()]));
+    return (AppClassPeopleCodeProg) DefnCache.getProgram(
+        new AppClassPeopleCodeProg(appClassParts.toArray(
+            new String[appClassParts.size()])));
   }
 
   public boolean doesImportClass(final String appClassName) {

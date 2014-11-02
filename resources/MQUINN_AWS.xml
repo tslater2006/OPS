@@ -57,7 +57,7 @@
   <bean id="SSR_SSENRL_LIST"
     class="org.openpplsoft.runtime.ComponentRuntimeProfile">
     <constructor-arg value="SSR_SSENRL_LIST"/>
-    <constructor-arg value="U"/>
+    <constructor-arg value="A"/>
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="005_KADAMS_SSR_SSENRL_LIST.tracesql"/>
     <constructor-arg value="2013-11-16"/>

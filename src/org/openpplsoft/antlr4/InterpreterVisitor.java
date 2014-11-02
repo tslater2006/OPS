@@ -1542,7 +1542,17 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       visit(ctx.stmtList(0));
       this.emit(ctx.catchSignature());
     } catch (final PeopleCodeException pce) {
-      throw new OPSVMachRuntimeException("TODO: Support handling of PeopleCode exception.");
+      if (ctx.catchSignature().exClass.getText().equals("Exception")) {
+        final PCExceptionCaught exEmission = new PCExceptionCaught(
+            pce.getMessage(), pce.getMsgSetNbr(), pce.getMsgNbr(),
+            "HERE", "HERE");
+        TraceFileVerifier.submitEnforcedEmission(exEmission);
+        this.emit(ctx.catchSignature());
+        visit(ctx.stmtList(1));
+      } else {
+        throw new OPSVMachRuntimeException("TODO: Support catching exceptions that aren't "
+            + "of the generic Exception superclass.");
+      }
     }
 
     this.emit(ctx.endtry);

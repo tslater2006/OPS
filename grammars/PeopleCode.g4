@@ -114,7 +114,7 @@ whenBranch      : 'When' (op='='|op='>')? expr stmtList ;
 whenOtherBranch : 'When-Other' stmtList ;
 
 tryCatchStmt    : trytok='try' stmtList catchSignature stmtList endtry='end-try' ;
-catchSignature  : 'catch' 'Exception' VAR_ID ;
+catchSignature  : 'catch' exClass='Exception' VAR_ID ;
 
 createInvocation : 'create' (appClassPath|GENERIC_ID) '(' exprList? ')' ;
 

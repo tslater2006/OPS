@@ -43,7 +43,7 @@ public final class TraceFileVerifier {
   private static BufferedReader traceFileReader;
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
-      pcRelDispProcEndPattern, pcFldDefaultPattern;
+      pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -83,6 +83,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Finished\\sRelated\\sDisplay\\sprocessing");
     pcFldDefaultPattern =
         Pattern.compile("([A-Z_0-9]+)\\.([A-Z_0-9]+)\\s+(constant\\s+)?default\\s+(from\\s+record\\s+)?(.+?)$");
+    pcExceptionCaughtPattern =
+        Pattern.compile("Caught\\sException:(\\s.*?)\\((\\d+),(\\d+)\\)\\s+(.*?)\\s+Name:(.*?)\\s");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -351,6 +353,21 @@ public final class TraceFileVerifier {
             break;
           }
         }
+      }
+
+      final Matcher pcExCaughtMatcher =
+          pcExceptionCaughtPattern.matcher(currTraceLine);
+      if (pcExCaughtMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        final PCExceptionCaught exEmission =
+            new PCExceptionCaught(
+                pcExCaughtMatcher.group(GROUP1),
+                Integer.parseInt(pcExCaughtMatcher.group(GROUP2)),
+                Integer.parseInt(pcExCaughtMatcher.group(GROUP3)),
+                pcExCaughtMatcher.group(GROUP4),
+                pcExCaughtMatcher.group(GROUP5));
+        return exEmission;
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

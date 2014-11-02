@@ -14,7 +14,7 @@ import org.openpplsoft.runtime.*;
 
 public class ProgramExecContext extends ExecContext {
 
-  public String funcName;
+  public String funcName = "";
   public ParseTree funcStartNode;
 
   public ProgramExecContext(PeopleCodeProg p,
@@ -22,5 +22,10 @@ public class ProgramExecContext extends ExecContext {
     super(p);
     this.setExecutionScrollLevel(cBufferLevel);
     this.setExecutionRowIdx(cBufferRow);
+  }
+
+  @Override
+  public String getMethodOrFuncName() {
+    return this.funcName;
   }
 }

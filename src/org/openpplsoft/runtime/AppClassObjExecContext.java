@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.tree.*;
 
 public abstract class AppClassObjExecContext extends ExecContext {
 
-  public String methodOrGetterName;
+  public String methodOrGetterName = "";
   public PTAppClassObj appClassObj;
   public PTTypeConstraint expectedReturnTypeConstraint;
 
@@ -27,5 +27,10 @@ public abstract class AppClassObjExecContext extends ExecContext {
     this.expectedReturnTypeConstraint = rTc;
     this.pushScope(obj.propertyScope);
     this.pushScope(obj.instanceScope);
+  }
+
+  @Override
+  public String getMethodOrFuncName() {
+    return this.methodOrGetterName;
   }
 }

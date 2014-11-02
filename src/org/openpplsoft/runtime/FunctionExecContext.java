@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.tree.*;
  */
 public class FunctionExecContext extends ExecContext {
 
-  public String funcName;
+  public String funcName = "";
   public ParseTree funcNodeToRun;
 
   public FunctionExecContext(final PeopleCodeProg prog, final String fnName) {
@@ -33,5 +33,10 @@ public class FunctionExecContext extends ExecContext {
     PeopleCodeProg.FuncImpl fImpl = prog.getFunctionImpl(fnName);
     this.funcName = fImpl.funcName;
     this.funcNodeToRun = fImpl.parseTreeNode;
+  }
+
+  @Override
+  public String getMethodOrFuncName() {
+    return this.funcName;
   }
 }

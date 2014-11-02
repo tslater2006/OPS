@@ -41,6 +41,8 @@ public abstract class ExecContext {
     this.scopeStack = new LinkedList<Scope>();
   }
 
+  public abstract String getMethodOrFuncName();
+
   public void setExecutionScrollLevel(final int lvl) {
     this.execCBufferScrollLevel = lvl;
   }

@@ -99,19 +99,7 @@ public class InterpretSupervisor {
       return;
     }
 
-    String methodOrFuncName = "";
-    if(context instanceof ProgramExecContext &&
-      ((ProgramExecContext)context).funcName != null) {
-      methodOrFuncName = ((ProgramExecContext)context).funcName;
-    }
-    if(context instanceof AppClassObjExecContext &&
-      ((AppClassObjExecContext)context).methodOrGetterName != null) {
-      methodOrFuncName = ((AppClassObjExecContext)context).methodOrGetterName;
-    }
-    if(context instanceof FunctionExecContext) {
-      methodOrFuncName = ((FunctionExecContext) context).funcName;
-    }
-
+    final String methodOrFuncName = context.getMethodOrFuncName();
     String descriptor = context.prog.getDescriptor();
     descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
@@ -187,7 +175,12 @@ public class InterpretSupervisor {
     String indent = "";
     for (int i = this.execContextStack.size() - 1; i >= 0; i--) {
       ExecContext e = this.execContextStack.get(i);
-      log.fatal("!!! PC Call Stack !!! {} |-> {}", indent, e.prog);
+      if (e.getMethodOrFuncName().length() > 0) {
+        log.fatal("!!! PC Call Stack !!! {} |-> {} [Method/Func: {}]", indent, e.prog,
+            e.getMethodOrFuncName());
+      } else {
+        log.fatal("!!! PC Call Stack !!! {} |-> {}", indent, e.prog);
+      }
       indent = indent.concat("    ");
     }
   }

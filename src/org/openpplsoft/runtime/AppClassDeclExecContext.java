@@ -23,4 +23,9 @@ public class AppClassDeclExecContext extends ExecContext {
     super(tc.getReqdProgDefn());
     this.startNode = tc.getReqdProgDefn().getClassDeclNode();
   }
+
+  @Override
+  public String getMethodOrFuncName() {
+    return "";
+  }
 }

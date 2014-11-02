@@ -39,10 +39,20 @@ public class Callable {
   public void invokePtMethod() {
     try {
       this.ptMethod.invoke(this.obj);
-    } catch(final java.lang.IllegalAccessException iae) {
+    } catch (final java.lang.IllegalAccessException iae) {
       throw new OPSVMachRuntimeException(iae.getMessage(), iae);
-    } catch(final java.lang.reflect.InvocationTargetException ite) {
-      throw new OPSVMachRuntimeException(ite.getMessage(), ite);
+    } catch (final java.lang.reflect.InvocationTargetException ite) {
+      /*
+       * If the cause of the ITE is due to an OPS RTE, throw the underlying
+       * cause; otherwise, certain OPS RTEs that are checked by the interpreter
+       * (i.e., OPSIllegalNonCBufferFieldAccessAttempt) will see the ITE rather
+       * than the underlying OPS RTE, and therefore will not catch it.
+       */
+      if (ite.getCause() instanceof OPSVMachRuntimeException) {
+        throw (OPSVMachRuntimeException) ite.getCause();
+      } else {
+        throw new OPSVMachRuntimeException(ite.getMessage(), ite);
+      }
     }
   }
 }

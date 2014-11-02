@@ -5,20 +5,23 @@
 |*                         See LICENSE.md for details.                       *|
 \*===---------------------------------------------------------------------===*/
 
-package org.openpplsoft.antlr4;
+package org.openpplsoft.runtime;
+
+import org.openpplsoft.pt.MsgSet;
 
 /**
  * This exception is thrown by the interpreter when a PeopleCode
  * exception is thrown.
  */
-public class PeopleCodeException extends RuntimeException {
+public class PeopleCodeException extends OPSVMachRuntimeException {
 
-  /**
-   * Creates an instance of the exception.
-   * @param instructionText the text of the return stmt in the
-   *    PeopleCode program.
-   */
-  public PeopleCodeException() {
-    super();
+  public static PeopleCodeException create(final int msgSetNbr, final int msgNbr,
+      final String[] msgBindVals) {
+    final MsgSet msgSet = DefnCache.getMsgSet(msgSetNbr);
+    return new PeopleCodeException(msgSet.getMessage(msgNbr));
+  }
+
+  private PeopleCodeException(final String msg) {
+    super(msg);
   }
 }

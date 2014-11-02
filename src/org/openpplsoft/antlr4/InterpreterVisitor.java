@@ -547,7 +547,13 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final PTType src = this.getNodeData(ctx.expr(1));
 
     this.inLhsOfAssignmentFlag = true;
-    visit(ctx.expr(0));
+    try {
+      visit(ctx.expr(0));
+    } catch (final OPSIllegalNonCBufferFieldAccessAttempt opsincfaa) {
+      throw PeopleCodeException.create(2, 119, new String[]{
+          "HERE", "HERE", "HERE"
+      });
+    }
     this.inLhsOfAssignmentFlag = false;
 
     if (this.getNodeCallable(ctx.expr(0)) instanceof GetterSetterCallable) {

@@ -21,6 +21,8 @@ public class Callable {
   public Method ptMethod;
   public Object obj;
 
+  public Callable() {}
+
   public Callable(ExecContext e) {
     this.eCtx = e;
   }

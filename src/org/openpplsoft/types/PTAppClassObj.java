@@ -48,10 +48,9 @@ public final class PTAppClassObj extends PTObjectType {
      * return the value associated with them in this object's property scope.
      * Note that properties are always public, so no need to check access level.
      */
-    if (this.progDefn.hasPropertyGetter(s)) {
-      if (!this.progDefn.propertyTable.get(s).hasGetter) {
-        return this.propertyScope.resolveVar(s);
-      }
+    if (this.progDefn.hasPropertyGetterImpl(s)
+        && !this.progDefn.propertyTable.get(s).hasGetter) {
+      return this.propertyScope.resolveVar(s);
     } else if (this.progDefn.hasIdentifier("&" + s)) {
       // Instance identifiers are stored in the prog defn table and in the scope
       // with ampersand prefixes; & are not allowed after ".", so we always need
@@ -65,17 +64,33 @@ public final class PTAppClassObj extends PTObjectType {
 
   public Callable dotMethod(final String s) {
 
+    final GetterSetterCallable gsCallable = new GetterSetterCallable();
+
     /*
      * Properties with a getter are to be considered methods on the app class
      * object; return a callable accordingly. Note that properties are always
      * public, so no need to check access level.
      */
-    if(this.progDefn.hasPropertyGetter(s)) {
-      if(this.progDefn.propertyTable.get(s).hasGetter) {
-        return new Callable(new AppClassObjGetterExecContext(this, s,
+    if (this.progDefn.hasPropertyGetterImpl(s)
+        && this.progDefn.propertyTable.get(s).hasGetter) {
+      gsCallable.setGetterExecContext(new AppClassObjMethodExecContext(this, s,
           this.progDefn.getPropGetterImplStartNode(s),
           this.progDefn.propertyTable.get(s).typeConstraint));
-      }
+    }
+
+    /*
+     * Properties with a setter are to be considered methods on the app class
+     * object; return a callable accordingly. Note that properties are always
+     * public, so no need to check access level.
+     */
+    if (this.progDefn.hasPropertySetterImpl(s)
+        && this.progDefn.propertyTable.get(s).hasSetter) {
+      gsCallable.setSetterExecContext(new AppClassObjMethodExecContext(this, s,
+          this.progDefn.getPropSetterImplStartNode(s), null));
+    }
+
+    if (gsCallable.hasSetterExecContext() || gsCallable.hasGetterExecContext()) {
+      return gsCallable;
     }
 
    /*

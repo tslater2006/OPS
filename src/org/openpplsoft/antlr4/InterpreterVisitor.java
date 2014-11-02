@@ -49,7 +49,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private Stack<EvaluateConstruct> evalConstructStack;
   private AccessLevel blockAccessLvl;
   private PeopleCodeParser.StmtBreakContext lastSeenBreakContext;
-  private boolean hasVarDeclBeenEmitted;
+  private boolean hasVarDeclBeenEmitted, inLhsOfAssignmentFlag;
   private PCInstruction lastSubmittedEmission;
   private GlobalFnLibrary globalFnLib;
 
@@ -546,10 +546,19 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.expr(1));
     final PTType src = this.getNodeData(ctx.expr(1));
 
+    this.inLhsOfAssignmentFlag = true;
     visit(ctx.expr(0));
-    final PTType dst = this.getNodeData(ctx.expr(0));
+    this.inLhsOfAssignmentFlag = false;
 
-    Environment.assign(dst, src);
+    if (this.getNodeCallable(ctx.expr(0)) instanceof GetterSetterCallable) {
+      final GetterSetterCallable gsCallable =
+          (GetterSetterCallable) this.getNodeCallable(ctx.expr(0));
+      throw new OPSVMachRuntimeException("TODO: Call setter in assignment.");
+    } else {
+      final PTType dst = this.getNodeData(ctx.expr(0));
+      Environment.assign(dst, src);
+    }
+
     return null;
   }
 
@@ -873,17 +882,25 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * the getter should be run immediately in order to set the node data
      * for this context object.
      */
-    if (call != null && call.eCtx != null
-        && call.eCtx instanceof AppClassObjGetterExecContext) {
-      this.supervisor.runImmediately(call.eCtx);
+    if (call != null && call instanceof GetterSetterCallable) {
+      /**
+       * If the a getter exists AND we are not in the LHS of an assignment
+       * (which means we need to run the setter not the getter), then call
+       * the getter.
+       */
+      if (!this.inLhsOfAssignmentFlag
+          && ((GetterSetterCallable) call).hasGetterExecContext()) {
+        this.supervisor.runImmediately(
+            ((GetterSetterCallable) call).getGetterExecContext());
 
-      final List<PTType> args = Environment.getArgsFromCallStack();
-      if (args.size() != 1) {
-        throw new OPSVMachRuntimeException("Getter should return exactly "
-            + "one value.");
+        final List<PTType> args = Environment.getArgsFromCallStack();
+        if (args.size() != 1) {
+          throw new OPSVMachRuntimeException("Getter should return exactly "
+              + "one value.");
+        }
+        this.setNodeData(ctx, args.get(0));
+        this.resubmitLastEmission();
       }
-      this.setNodeData(ctx, args.get(0));
-      this.resubmitLastEmission();
     }
 
     return null;

@@ -29,6 +29,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
   public Map<String, Method> methodTable;
   private Map<String, ParseTree> methodImplStartNodes;
   private Map<String, ParseTree> propGetterImplStartNodes;
+  private Map<String, ParseTree> propSetterImplStartNodes;
   public boolean hasClassDefnBeenLoaded = false;
 
   public class Instance {
@@ -76,6 +77,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     this.methodTable = new HashMap<String, Method>();
     this.methodImplStartNodes = new HashMap<String, ParseTree>();
     this.propGetterImplStartNodes = new HashMap<String, ParseTree>();
+    this.propSetterImplStartNodes = new HashMap<String, ParseTree>();
   }
 
   protected void initBindVals() {
@@ -154,11 +156,29 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     return this.propGetterImplStartNodes.get(propertyName);
   }
 
-  public boolean hasPropertyGetter(String propertyName) {
+  public boolean hasPropertyGetterImpl(String propertyName) {
     if(!this.propGetterImplStartNodes.containsKey(propertyName)) {
       this.lexAndParse();
     }
     return this.propGetterImplStartNodes.containsKey(propertyName);
+  }
+
+  public boolean hasPropertySetterImpl(final String propertyName) {
+    if(!this.propSetterImplStartNodes.containsKey(propertyName)) {
+      this.lexAndParse();
+    }
+    return this.propSetterImplStartNodes.containsKey(propertyName);
+  }
+
+  public void savePropSetterImplStartNode(String propertyName, ParseTree node) {
+    this.propSetterImplStartNodes.put(propertyName, node);
+  }
+
+  public ParseTree getPropSetterImplStartNode(String propertyName) {
+    if(!this.propSetterImplStartNodes.containsKey(propertyName)) {
+      this.lexAndParse();
+    }
+    return this.propSetterImplStartNodes.get(propertyName);
   }
 
   public boolean hasIdentifier(final String identifierName) {

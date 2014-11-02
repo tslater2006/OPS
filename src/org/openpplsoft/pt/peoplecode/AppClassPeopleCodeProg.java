@@ -43,11 +43,12 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
   public class Property {
     public String id;
     public PTTypeConstraint typeConstraint;
-    public boolean hasGetter;
-    public Property(String i, PTTypeConstraint t, boolean g) {
+    public boolean hasGetter, hasSetter;
+    public Property(String i, PTTypeConstraint t, boolean g, boolean s) {
       this.id = i;
       this.typeConstraint = t;
       this.hasGetter = g;
+      this.hasSetter = s;
     }
   }
 
@@ -166,10 +167,10 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
   }
 
   public void addPropertyIdentifier(String id, PTTypeConstraint typeConstraint,
-      boolean hasGetter) {
-    log.debug("Adding property id to table: {}, {}, getter?{}",
-        id, typeConstraint, hasGetter);
-    this.propertyTable.put(id, new Property(id, typeConstraint, hasGetter));
+      boolean hasGetter, boolean hasSetter) {
+    log.debug("Adding property id to table: {}, {}, getter?{}, setter?{}",
+        id, typeConstraint, hasGetter, hasSetter);
+    this.propertyTable.put(id, new Property(id, typeConstraint, hasGetter, hasSetter));
   }
 
   public void addMethod(AccessLevel aLvl, String name,

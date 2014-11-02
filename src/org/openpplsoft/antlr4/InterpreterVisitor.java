@@ -348,14 +348,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final boolean hasSetter = (ctx.s != null);
     final boolean isReadOnly = (ctx.r != null);
 
-    if (hasSetter || isReadOnly) {
-      throw new OPSVMachRuntimeException("Need to support property "
-          + "setters and/or readonly properties: " + ctx.getText());
+    if (isReadOnly) {
+      throw new OPSVMachRuntimeException("Need to support read-only properties: "
+          + ctx.getText());
     }
 
     final PTTypeConstraint tc = this.getNodeTypeConstraint(ctx.varType());
     ((AppClassPeopleCodeProg) this.eCtx.prog).addPropertyIdentifier(
-      id, tc, hasGetter);
+      id, tc, hasGetter, hasSetter);
     return null;
   }
 

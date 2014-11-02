@@ -965,12 +965,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final PTBoolean equalityResult = lhs.isEqual(rhs);
     if (ctx.e != null) {
-      log.debug("isEqual: {}? {}", ctx.getText(), equalityResult);
+      log.debug("[=] lhs: {}; rhs: {}, result: ", lhs, rhs, equalityResult);
       this.setNodeData(ctx, equalityResult);
 
     } else if (ctx.i != null) {
       final PTBoolean inEqualityResult = equalityResult.negationOf();
-      log.debug("isNotEqual: {}? {}", ctx.getText(), inEqualityResult);
+      log.debug("[<>] lhs: {}; rhs: {}, result: ", lhs, rhs, inEqualityResult);
       this.setNodeData(ctx, inEqualityResult);
 
     } else {

@@ -1431,8 +1431,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitTryCatchStmt(
       final PeopleCodeParser.TryCatchStmtContext ctx) {
-    throw new OPSVMachRuntimeException("TODO: Support try/catch.");
-//    return null;
+
+    this.emit(ctx.trytok);
+
+    try {
+      visit(ctx.stmtList(0));
+    } catch (final PeopleCodeException pce) {
+      throw new OPSVMachRuntimeException("TODO: Support handling of PeopleCode exception.");
+    }
+
+    return null;
   }
 
   /**

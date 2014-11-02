@@ -61,6 +61,7 @@ public final class PTDate extends PTPrimitiveType<Date> {
 
   public PTDate(final PTTypeConstraint origTc) {
     super(origTc);
+    this.value = null;
   }
 
   public static PTTypeConstraint<PTDate> getTc() {

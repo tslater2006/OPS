@@ -26,6 +26,7 @@ public final class PTTime extends PTPrimitiveType<String> {
 
   public PTTime(PTTypeConstraint origTc) {
     super(origTc);
+    this.value = null;
   }
 
   public static PTTypeConstraint<PTTime> getTc() {

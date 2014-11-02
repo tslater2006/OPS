@@ -92,6 +92,8 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
+
+    this.setBlank();
   }
 
   public void fireEvent(final PCEvent event,

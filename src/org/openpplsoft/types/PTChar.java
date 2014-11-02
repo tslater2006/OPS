@@ -45,6 +45,7 @@ public final class PTChar extends PTPrimitiveType<Character> {
 
   public PTChar(final PTTypeConstraint origTc) {
     super(origTc);
+    this.value = '\0';
   }
 
   public static PTTypeConstraint<PTChar> getTc() {

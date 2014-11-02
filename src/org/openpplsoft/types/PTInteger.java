@@ -36,6 +36,7 @@ public final class PTInteger extends PTNumberType<Integer> {
 
   public PTInteger(final PTTypeConstraint origTc) {
     super(origTc);
+    this.value = 0;
   }
 
   public static PTTypeConstraint<PTInteger> getTc() {

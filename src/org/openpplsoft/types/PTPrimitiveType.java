@@ -15,7 +15,14 @@ public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType
 
   protected PTPrimitiveType(final PTTypeConstraint origTc) {
     super(origTc);
-    this.setBlank();
+
+    /*
+     * IMPORTANT REMINDER: Do NOT call setBlank here in an attempt
+     * to centralize initialization of primitives. In PeopleSoft, the notions of
+     * "initialized" and "blank" are separate (i.e., strings are initialized to "" but
+     * their blank value is considered to be " "). Initialize values in
+     * subclass constructors only.
+     */
   }
 
   public abstract boolean equals(Object obj);

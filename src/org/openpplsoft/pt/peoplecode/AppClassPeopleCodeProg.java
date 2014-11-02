@@ -161,6 +161,10 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     return this.propGetterImplStartNodes.containsKey(propertyName);
   }
 
+  public boolean hasIdentifier(final String identifierName) {
+    return this.instanceTable.containsKey(identifierName);
+  }
+
   public void addInstanceIdentifier(String id, PTTypeConstraint tc) {
     log.debug("Adding instance id to table: {}, {}", id, tc);
     this.instanceTable.put(id, new Instance(id, tc));

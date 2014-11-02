@@ -41,23 +41,29 @@ public final class PTAppClassObj extends PTObjectType {
     }
   }
 
-  public PTType dotProperty(String s) {
+  public PTType dotProperty(final String s) {
 
     /*
      * Properties *without* a getter are to be considered simple data entries;
      * return the value associated with them in this object's property scope.
      * Note that properties are always public, so no need to check access level.
      */
-    if(this.progDefn.hasPropertyGetter(s)) {
-      if(!this.progDefn.propertyTable.get(s).hasGetter) {
+    if (this.progDefn.hasPropertyGetter(s)) {
+      if (!this.progDefn.propertyTable.get(s).hasGetter) {
         return this.propertyScope.resolveVar(s);
       }
+    } else if (this.progDefn.hasIdentifier("&" + s)) {
+      // Instance identifiers are stored in the prog defn table and in the scope
+      // with ampersand prefixes; & are not allowed after ".", so we always need
+      // to prefix with an ampersand when checking if the provided String is an
+      // instance identifier.
+      return this.instanceScope.resolveVar("&" + s);
     }
 
     return null;
   }
 
-  public Callable dotMethod(String s) {
+  public Callable dotMethod(final String s) {
 
     /*
      * Properties with a getter are to be considered methods on the app class

@@ -189,4 +189,15 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     }
     return this.classDeclNode;
   }
+
+  public String getFullyQualifiedName() {
+    final StringBuilder b = new StringBuilder();
+    for (int i = 0; i < this.pathParts.length; i++) {
+      if (i > 0) {
+        b.append(":");
+      }
+      b.append(this.pathParts[i]);
+    }
+    return b.toString();
+  }
 }

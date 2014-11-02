@@ -82,6 +82,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   }
 
   public void emit(final ParserRuleContext ctx) {
+    this.emit(ctx, null, null);
+  }
+
+  /**
+   * This overload of emit allows a token to be replaced with
+   * a string of the caller's choosing. This is/should be done rarely
+   * (one example is the need to replace unqualified app class names in
+   * create statements with their fully qualified path names; see visitStmtAssign).
+   */
+  public void emit(final ParserRuleContext ctx,
+      final Token tokToReplace, final String replacementStr) {
+
     final StringBuffer line = new StringBuffer();
     final Interval interval = ctx.getSourceInterval();
 
@@ -97,7 +109,12 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         newlineSeen = true;
         break;
       }
-      line.append(t.getText());
+
+      if (t == tokToReplace) {
+        line.append(replacementStr);
+      } else {
+        line.append(t.getText());
+      }
       i++;
     }
 
@@ -504,7 +521,28 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   public Void visitStmtAssign(
       final PeopleCodeParser.StmtAssignContext ctx) {
 
-    this.emit(ctx);
+    /*
+     * The emission of assignment statements containing a create
+     * invocation that does not have a fully qualified app class name will
+     * cause tracefile verification to fail. We must replace the GENERIC_ID containing
+     * the app class name with the fully qualified path/class name at emit-time.
+     */
+    if (ctx.expr(1) instanceof PeopleCodeParser.ExprCreateContext
+        && ((PeopleCodeParser.ExprCreateContext) ctx.expr(1))
+            .createInvocation().appClassPath() == null) {
+
+      final Token appClassTok = ((PeopleCodeParser.ExprCreateContext) ctx.expr(1))
+          .createInvocation().GENERIC_ID().getSymbol();
+      final String appClassName = appClassTok.getText();
+      final AppClassPeopleCodeProg appClassProg =
+          this.eCtx.prog.resolveAppClassToProg(appClassName);
+      final String fqn = appClassProg.getFullyQualifiedName();
+
+      this.emit(ctx, appClassTok, fqn);
+    } else {
+      this.emit(ctx);
+    }
+
     visit(ctx.expr(1));
     final PTType src = this.getNodeData(ctx.expr(1));
 

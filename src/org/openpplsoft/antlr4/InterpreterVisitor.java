@@ -1641,9 +1641,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       objTc = (PTAppClassObjTypeConstraint)
           this.getNodeTypeConstraint(ctx.appClassPath());
     } else {
-      throw new OPSVMachRuntimeException("Encountered create invocation "
-          + "without app class prefix; need to support this by resolving "
-          + "path to class.");
+      final AppClassPeopleCodeProg appClassProg =
+          this.eCtx.prog.resolveAppClassToProg(ctx.GENERIC_ID().getText());
+      objTc = new PTAppClassObjTypeConstraint(appClassProg);
     }
 
     /*

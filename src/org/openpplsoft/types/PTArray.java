@@ -60,7 +60,7 @@ public final class PTArray extends PTObjectType {
   }
 
   public PTType dotProperty(String s) {
-    if(s.equals("Len")) {
+    if(s.toLowerCase().equals("len")) {
       return new PTInteger(values.size());
     }
     return null;

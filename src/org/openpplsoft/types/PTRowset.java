@@ -177,7 +177,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
   @Override
   public PTType dotProperty(final String s) {
-    if (s.equals("ActiveRowCount")) {
+    if (s.toLowerCase().equals("activerowcount")) {
       return new PTInteger(this.getActiveRowCount());
     }
     return null;

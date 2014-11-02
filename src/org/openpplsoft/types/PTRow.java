@@ -276,7 +276,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
   public PTType dotProperty(final String s) {
     if (this.recordMap.containsKey(s)) {
       return this.recordMap.get(s);
-    } else if (s.equals("RecordCount")) {
+    } else if (s.toLowerCase().equals("recordcount")) {
       return new PTInteger(this.registeredRecordDefns.size());
     }
     return null;

@@ -385,11 +385,11 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   }
 
   public PTImmutableReference dotProperty(String s) {
-    if(s.equals("Value")) {
+    if(s.toLowerCase().equals("value")) {
       return this.valueRef;
-    } else if(s.equals("Visible")) {
+    } else if(s.toLowerCase().equals("visible")) {
       return this.visiblePropertyRef;
-    } else if(s.equals("Name")) {
+    } else if(s.toLowerCase().equals("name")) {
       return this.fldNamePropertyRef;
     }
     return null;

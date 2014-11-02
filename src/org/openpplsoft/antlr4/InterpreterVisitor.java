@@ -1538,6 +1538,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     try {
       visit(ctx.stmtList(0));
+      this.emit(ctx.catchSignature());
     } catch (final PeopleCodeException pce) {
       throw new OPSVMachRuntimeException("TODO: Support handling of PeopleCode exception.");
     }

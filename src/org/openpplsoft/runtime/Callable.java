@@ -19,7 +19,6 @@ public class Callable {
 
   public ExecContext eCtx;
   public Method ptMethod;
-  public Class ptMethodClass;
   public Object obj;
 
   public Callable(ExecContext e) {
@@ -37,11 +36,7 @@ public class Callable {
 
   public void invokePtMethod() {
     try {
-      if(this.obj != null) {
-        this.ptMethod.invoke(this.obj);
-      } else {
-        this.ptMethod.invoke(this.ptMethodClass);
-      }
+      this.ptMethod.invoke(this.obj);
     } catch(final java.lang.IllegalAccessException iae) {
       throw new OPSVMachRuntimeException(iae.getMessage(), iae);
     } catch(final java.lang.reflect.InvocationTargetException ite) {

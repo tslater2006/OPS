@@ -49,7 +49,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private Stack<EvaluateConstruct> evalConstructStack;
   private AccessLevel blockAccessLvl;
   private PeopleCodeParser.StmtBreakContext lastSeenBreakContext;
-  private boolean hasVarDeclBeenEmitted, inLhsOfAssignmentFlag;
+  private boolean inLhsOfAssignmentFlag;
   private PCInstruction lastSubmittedEmission;
   private GlobalFnLibrary globalFnLib;
 
@@ -1416,17 +1416,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     if (this.eCtx.prog instanceof AppClassPeopleCodeProg) {
-      if (!this.hasVarDeclBeenEmitted
-          || varTc.isUnderlyingClassEqualTo(PTRowset.class)
-          || varTc.isUnderlyingClassEqualTo(PTAppClassObj.class)
-          || varTc.isUnderlyingClassEqualTo(PTRecord.class)
-          || (varTc.isUnderlyingClassEqualTo(PTNumber.class)
-              && varsToDeclare.size() == 1
-              && !didInitializeAnIdentifier)
-          || didInitializeAnIdentifier) {
-        this.emit(ctx);
-        this.hasVarDeclBeenEmitted = true;
-      }
+      this.emit(ctx);
     } else if((this.eCtx instanceof FunctionExecContext) &&
         this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
       this.emit(ctx);

@@ -278,6 +278,8 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
       return this.recordMap.get(s);
     } else if (s.toLowerCase().equals("recordcount")) {
       return new PTInteger(this.registeredRecordDefns.size());
+    } else if (s.toLowerCase().equals("parentrowset")) {
+      return this.parentRowset;
     }
     return null;
   }

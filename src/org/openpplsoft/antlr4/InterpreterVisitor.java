@@ -1033,12 +1033,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final PTBoolean equalityResult = lhs.isEqual(rhs);
     if (ctx.e != null) {
-      log.debug("[=] lhs: {}; rhs: {}, result: ", lhs, rhs, equalityResult);
+      log.debug("[=] lhs: {}; rhs: {}, result: {}",
+          lhs, rhs, equalityResult.readAsString());
       this.setNodeData(ctx, equalityResult);
 
     } else if (ctx.i != null) {
       final PTBoolean inEqualityResult = equalityResult.negationOf();
-      log.debug("[<>] lhs: {}; rhs: {}, result: ", lhs, rhs, inEqualityResult);
+      log.debug("[<>] lhs: {}; rhs: {}, result: {}",
+          lhs, rhs, inEqualityResult.readAsString());
       this.setNodeData(ctx, inEqualityResult);
 
     } else {

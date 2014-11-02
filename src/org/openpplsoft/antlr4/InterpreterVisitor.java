@@ -550,7 +550,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     try {
       visit(ctx.expr(0));
     } catch (final OPSIllegalNonCBufferFieldAccessAttempt opsincfaa) {
-      throw PeopleCodeException.create(2, 119, new String[]{
+      throw PeopleCodeException.create(this.eCtx, 2, 119, new String[]{
           "HERE", "HERE", "HERE"
       });
     }
@@ -1545,7 +1545,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       if (ctx.catchSignature().exClass.getText().equals("Exception")) {
         final PCExceptionCaught exEmission = new PCExceptionCaught(
             pce.getMessage(), pce.getMsgSetNbr(), pce.getMsgNbr(),
-            "HERE", "HERE");
+            pce.getResponsibleProgAndEvent(), pce.getResponsibleMethodOrFuncName());
         TraceFileVerifier.submitEnforcedEmission(exEmission);
         this.emit(ctx.catchSignature());
         visit(ctx.stmtList(1));

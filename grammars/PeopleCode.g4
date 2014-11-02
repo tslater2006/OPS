@@ -94,8 +94,8 @@ property          : 'property' varType GENERIC_ID g='get'? s='set'? r='readonly'
 instance          : 'instance' varType VAR_ID (',' VAR_ID)* ;
 
 methodImpl  : 'method' GENERIC_ID stmtList endmethod='end-method' ;
-getImpl     : 'get' GENERIC_ID stmtList 'end-get' ;
-setImpl     : 'set' GENERIC_ID stmtList 'end-set' ;
+getImpl     : 'get' GENERIC_ID stmtList endget='end-get' ;
+setImpl     : 'set' GENERIC_ID stmtList endset='end-set' ;
 
 funcImpl        : funcSignature stmtList endfunction='End-Function' ;
 funcSignature   : 'Function' GENERIC_ID formalParamList? returnType? ';'? ;

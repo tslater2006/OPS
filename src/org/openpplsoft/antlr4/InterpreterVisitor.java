@@ -553,7 +553,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     if (this.getNodeCallable(ctx.expr(0)) instanceof GetterSetterCallable) {
       final GetterSetterCallable gsCallable =
           (GetterSetterCallable) this.getNodeCallable(ctx.expr(0));
-      throw new OPSVMachRuntimeException("TODO: Call setter in assignment.");
+
+      if (!gsCallable.hasSetterExecContext()) {
+        throw new OPSVMachRuntimeException("Expected setter exec context but none "
+            + "exists on the provided callable.");
+      } else {
+        Environment.pushToCallStack(PTCallFrameBoundary.getSingleton());
+        Environment.pushToCallStack(this.getNodeData(ctx.expr(1)));
+        this.supervisor.runImmediately(gsCallable.getSetterExecContext());
+        // No need to check return type; setters never return anything.
+      }
     } else {
       final PTType dst = this.getNodeData(ctx.expr(0));
       Environment.assign(dst, src);
@@ -1122,7 +1131,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         ((AppClassPeopleCodeProg) this.eCtx.prog).methodTable.
             get(ctx.GENERIC_ID().getText()).formalParams;
 
-    // This logic is externalized from this method b/c visitMethodImpl
+    // This logic is externalized from this method b/c visitFuncImpl
     // shares the same logic.
     this.bindArgsToFormalParams(localScope, formalParams);
 
@@ -1149,6 +1158,44 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     visit(ctx.stmtList());
     this.eCtx.popScope();
 
+
+    this.emit(ctx.endget);
+    return null;
+  }
+
+  /**
+   * Called by ANTLR when an app class setter (mutator) method
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitSetImpl(
+      final PeopleCodeParser.SetImplContext ctx) {
+    this.emit(ctx);
+
+    final Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
+
+    /*
+     * Setters always have a single implied formal parameter named
+     * "&NewValue" that has the same type as the underlying value.
+     */
+    final List<FormalParam> formalParams = new ArrayList<FormalParam>();
+    final FormalParam formalParam =
+        new FormalParam("&NewValue",
+            ((AppClassPeopleCodeProg) this.eCtx.prog).propertyTable.
+                get(ctx.GENERIC_ID().getText()).typeConstraint);
+    formalParams.add(formalParam);
+
+    // This logic is externalized from this method b/c visitFuncImpl
+    // shares the same logic.
+    this.bindArgsToFormalParams(localScope, formalParams);
+
+
+    this.eCtx.pushScope(localScope);
+    visit(ctx.stmtList());
+    this.eCtx.popScope();
+
+    this.emit(ctx.endset);
     return null;
   }
 

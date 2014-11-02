@@ -33,6 +33,10 @@ public class GetterSetterCallable extends Callable {
     return this.getterExecContext;
   }
 
+  public AppClassObjMethodExecContext getSetterExecContext() {
+    return this.setterExecContext;
+  }
+
   public boolean hasSetterExecContext() {
     return this.setterExecContext != null;
   }

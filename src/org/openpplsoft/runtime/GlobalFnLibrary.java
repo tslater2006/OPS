@@ -475,7 +475,8 @@ public class GlobalFnLibrary {
 
     if(args.size() != 8) {
       throw new OPSVMachRuntimeException("Expected exactly 8 args to "
-          + "MsgGetText; altho var args to this fn are legal (see PT "
+          + "GenerateComponentContentRelURL; "
+          + "altho var args to this fn are legal (see PT "
           + "reference for defn) they are not supported at this time.");
     }
 
@@ -887,5 +888,61 @@ public class GlobalFnLibrary {
     }
 
     ((PTField) args.get(0)).grayOut();
+  }
+
+  /**
+   * IMPORTANT NOTE: As I've implemented it here, this function generates
+   * an absolute rather than relative URL. There are very likely issues
+   * with the final URL reproduced, due to lack of info at this time.
+   * TODO(mquinn): Keep this in mind in the event of issues.
+   */
+  public void PT_GenerateScriptRelativeURL() {
+
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if(args.size() != 6) {
+      throw new OPSVMachRuntimeException("Expected exactly 6 args to "
+          + "GenerateScriptRelativeURL; altho var args to this fn are legal (see PT "
+          + "reference for defn) they are not supported at this time.");
+    }
+
+    if(!(args.get(0) instanceof PTString)
+        || !(args.get(1) instanceof PTString)
+        || !(args.get(2) instanceof PTRecordLiteral)
+        || !(args.get(3) instanceof PTFieldLiteral)
+        || !(args.get(4) instanceof PTString)
+        || !(args.get(5) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("The arguments provided to "
+          + "GenerateScriptRelativeURL do not match the expected types.");
+    }
+
+    final StringBuilder url = new StringBuilder("/psp/");
+
+    // append PS environment name (i.e., XENCSDEV, ENTCSDEV, etc.)
+    url.append(Environment.psEnvironmentName);
+
+    // append portal name (i.e., EMPLOYEE)
+    url.append("/").append(((PTString) args.get(0)).read());
+
+    // append node name (i.e., HRMS)
+    url.append("/").append(((PTString) args.get(1)).read());
+
+    // append "s" (for script)
+    url.append("/s/");
+
+    // append <recname>.<fldname>
+    url.append(((PTRecordLiteral) args.get(2)).read())
+       .append(".").append(((PTFieldLiteral) args.get(3)).read());
+
+    // append ".<event>"
+    url.append(".").append(((PTString) args.get(4)).read());
+
+    // append ".<funcname>"
+    url.append(".").append(((PTString) args.get(5)).read());
+
+    log.debug("GenerateScriptRelativeURL: From args, generated url: {}",
+      url.toString());
+
+    Environment.pushToCallStack(new PTString(url.toString()));
   }
 }

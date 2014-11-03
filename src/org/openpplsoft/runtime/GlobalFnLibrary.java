@@ -796,6 +796,33 @@ public class GlobalFnLibrary {
 
         Environment.assign(outVar, dbVal);
       }
+    } else {
+      /*
+       * If no row was returned, SQLExec blanks/NULLs any outvars passed
+       * as arguments. The exception to this involves *NON-WORK* Component
+       * Processor fields, these are *not* blanked/nullified.
+       */
+      for (int i = nextOutVarIdx; i < args.size(); i++) {
+        final PTType outVar = args.get(i);
+        final PTType outVarDerefed = Environment.getOrDeref(outVar);
+        log.debug("In SQLExec, about to blank/nullify field due to absence "
+            + "of record returned by SQLExec: {}", outVar);
+        if (outVarDerefed instanceof PTPrimitiveType) {
+          ((PTPrimitiveType) outVarDerefed).setBlank();
+        } else {
+          if (outVarDerefed instanceof PTField) {
+            throw new OPSVMachRuntimeException("TODO: Need to blank a field; "
+                + "YOU MUST FIRST DETERMINE "
+                + "if it's a non-work component processor field, these do not get "
+                + "blanked; see PT documentation for SQLExec: "
+                + "http://docs.oracle.com/cd/E13292_01/pt849pbr0/eng/psbooks/tpcl/chapter.htm?File=tpcl/htm/tpcl02.htm");
+          } else {
+            // Do not pass derefed outvar as l-value, assgmt will fail.
+            Environment.assign(outVar, new PTNull(
+                outVar.getOriginatingTypeConstraint()));
+          }
+        }
+      }
     }
 
     rs.close();

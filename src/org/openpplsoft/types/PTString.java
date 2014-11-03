@@ -61,10 +61,13 @@ public class PTString extends PTPrimitiveType<String> {
 
   @Override
   public void copyValueFrom(final PTPrimitiveType src) {
-    if (!(src instanceof PTString)) {
-      throw new OPSDataTypeException("Expected src to be PTString.");
+    if (src instanceof PTString) {
+      this.write(((PTString) src).read());
+    } else if (src instanceof PTChar) {
+      this.write(String.valueOf(((PTChar) src).read()));
+    } else {
+      throw new OPSDataTypeException("Expected src to be PTString or PTChar.");
     }
-    this.write(((PTString) src).read());
   }
 
   @Override

@@ -90,7 +90,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
               (PTPrimitiveType) valueTc.alloc());
       this.visiblePropertyRef
           = new PTImmutableReference<PTBoolean>(
-              PTBoolean.getTc(), PTBoolean.getTc().alloc());
+              PTBoolean.getTc(), new PTBoolean(true));
       // NOTE: Technically this is supposed to be defaulted to the value
       // specified in App Designer. Checking if the first bit of FIELDUSE in
       // PgToken is set to 1 will tell you if the field is display only. However,
@@ -511,6 +511,14 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public void grayOut() {
     this.isGrayedOut = true;
+  }
+
+  public void hide() {
+    this.visiblePropertyRef.deref().write(false);
+  }
+
+  public void unhide() {
+    this.visiblePropertyRef.deref().write(true);
   }
 
   @Override

@@ -115,6 +115,7 @@ public class GlobalFnLibrary {
         return;
       }
     }
+
     Environment.pushToCallStack(new PTBoolean(true));
   }
 
@@ -132,18 +133,24 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(true));
   }
 
-  /**
-   * TODO(mquinn): Implement this function.
-   */
   public void PT_Hide() {
-    Environment.getDereferencedArgsFromCallStack();
+
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+    if(args.size() != 1 && !(args.get(0) instanceof PTField)) {
+      throw new OPSVMachRuntimeException("Expected single Field arg to Hide.");
+    }
+
+    ((PTField) args.get(0)).hide();
   }
 
-  /**
-   * TODO(mquinn): Implement this function.
-   */
   public void PT_UnHide() {
-    Environment.getDereferencedArgsFromCallStack();
+
+    List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+    if(args.size() != 1 && !(args.get(0) instanceof PTField)) {
+      throw new OPSVMachRuntimeException("Expected single Field arg to UnHide.");
+    }
+
+    ((PTField) args.get(0)).unhide();
   }
 
   /**

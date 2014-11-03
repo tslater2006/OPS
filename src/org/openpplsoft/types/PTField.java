@@ -401,6 +401,22 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public PTImmutableReference dotProperty(String s) {
     if(s.toLowerCase().equals("value")) {
+
+      /*
+       * Why is this check here and not in Record's PT_GetField, you may ask?
+       * Furthermore, why are we only throwing an exception when attempting to
+       * write to the Value of a field that is not in the component buffer (and not
+       * Visible, DisplayOnly, etc.)?
+       * Because apparently that's what PS does according to the tracefile.
+       * This exception will be converted to a PCE in visitStmtAssign of the
+       * interpreter.
+       */
+      if (this.parentRecord != null
+          && this.parentRecord.getRecBuffer() != null
+          && this.recFieldBuffer == null) {
+        throw new OPSIllegalNonCBufferFieldAccessAttempt(
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+      }
       return this.valueRef;
     } else if(s.toLowerCase().equals("visible")) {
       return this.visiblePropertyRef;

@@ -256,6 +256,10 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     return this.recDefn;
   }
 
+  public RecordBuffer getRecBuffer() {
+    return this.recBuffer;
+  }
+
   public int determineRowIndex() {
     if (this.parentRow != null) {
       return this.parentRow.getIndexOfThisRowInParentRowset();
@@ -391,17 +395,6 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     } else {
       throw new OPSVMachRuntimeException("Expected arg to GetField to be either "
           + "an integer or a field literal, is actually: " + arg.getClass().getName());
-    }
-
-    /*
-     * Before continuing, we must ensure that if this Record is in the component
-     * buffer, that this field also in the component buffer is well. If not, throw
-     * a PeopleCode exception.
-     */
-    final RecordField rfDefn = fld.getRecordFieldDefn();
-    if (this.recBuffer != null && !this.recBuffer.hasRecordFieldBuffer(
-        rfDefn.FIELDNAME)) {
-      throw new OPSIllegalNonCBufferFieldAccessAttempt(rfDefn.RECNAME, rfDefn.FIELDNAME);
     }
 
     Environment.pushToCallStack(fld);

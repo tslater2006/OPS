@@ -428,23 +428,27 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
    */
   public void PT_Fill() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-    if (args.size() < 1) {
-      throw new OPSVMachRuntimeException(
-          "Expected at least one string arg.");
-    }
 
-    // Gather bind values following the WHERE string on the stack.
-    final String[] bindVals = new String[args.size() - 1];
-    for (int i = 1; i < args.size(); i++) {
-      bindVals[i - 1] = ((PTPrimitiveType) args.get(i)).readAsString();
-      //log.debug("Fill query bind value {}: {}", i-1, bindVals[i-1]);
+    // If no args are provided to Fill, use a single blank as the where
+    // clause.
+    String whereClause = " ";
+    String[] bindVals = new String[0];
+    if (args.size() > 0) {
+      whereClause = ((PTString) args.get(0)).read();
+
+      // Gather bind values following the WHERE string on the stack.
+      bindVals = new String[args.size() - 1];
+      for (int i = 1; i < args.size(); i++) {
+        bindVals[i - 1] = ((PTPrimitiveType) args.get(i)).readAsString();
+        //log.debug("Fill query bind value {}: {}", i-1, bindVals[i-1]);
+      }
     }
 
     // The rowset must be flushed before continuing.
     this.internalFlush();
 
-    final OPSStmt ostmt = StmtLibrary.prepareFillStmt(this.primaryRecDefn,
-        ((PTString) args.get(0)).read(), bindVals);
+    final OPSStmt ostmt = StmtLibrary.prepareFillStmt(
+        this.primaryRecDefn, whereClause, bindVals);
     OPSResultSet rs = ostmt.executeQuery();
 
     final List<RecordField> rfList = this.primaryRecDefn.getExpandedFieldList();

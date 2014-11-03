@@ -9,11 +9,18 @@ package org.openpplsoft.trace;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
+
 /**
  * Represents lines in tracefile indicating
  * that a PeopleCode exception was caught.
  */
 public class PCExceptionCaught implements IEmission {
+
+  private static Logger log =
+      LogManager.getLogger(PCExceptionCaught.class.getName());
 
   public int msgSetNbr, msgNbr;
   public String exMsg, responsibleProgAndEvent, responsibleMethodOrFuncName;
@@ -41,7 +48,8 @@ public class PCExceptionCaught implements IEmission {
     }
 
     final PCExceptionCaught other = (PCExceptionCaught) obj;
-    return (this.exMsg.equals(other.exMsg)
+
+    return (this.exMsg.trim().equals(other.exMsg.trim())
         && this.msgSetNbr == other.msgSetNbr
         && this.msgNbr == other.msgNbr
         && this.responsibleProgAndEvent.equals(other.responsibleProgAndEvent)

@@ -550,9 +550,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     try {
       visit(ctx.expr(0));
     } catch (final OPSIllegalNonCBufferFieldAccessAttempt opsincfaa) {
+      final PTPrimitiveType primSrc = Environment.getOrDerefPrimitive(src);
       throw PeopleCodeException.create(this.eCtx, 2, 119, new String[]{
-          "HERE", "HERE", "HERE"
-      });
+          opsincfaa.getRecName(), opsincfaa.getFieldName(),
+              primSrc.readAsString()});
     }
     this.inLhsOfAssignmentFlag = false;
 

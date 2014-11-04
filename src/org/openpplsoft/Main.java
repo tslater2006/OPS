@@ -96,6 +96,7 @@ public final class Main {
       ComponentBuffer.runDefaultProcessing();
 
       ComponentBuffer.fireEvent(PCEvent.ROW_INIT, new FireEventSummary());
+      ComponentBuffer.fireEvent(PCEvent.POST_BUILD, new FireEventSummary());
 
       //ComponentBuffer.printContents();
 

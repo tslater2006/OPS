@@ -12,7 +12,8 @@ public enum PCEvent {
   PRE_BUILD("PreBuild"),
   FIELD_DEFAULT("FieldDefault"),
   FIELD_FORMULA("FieldFormula"),
-  ROW_INIT("RowInit");
+  ROW_INIT("RowInit"),
+  POST_BUILD("PostBuild");
 
   private String name;
 

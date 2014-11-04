@@ -394,12 +394,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitFuncSignature(final PeopleCodeParser.FuncSignatureContext ctx) {
 
-    visit(ctx.formalParamList());
     final List<FormalParam> formalParams = new ArrayList<FormalParam>();
-    for (PeopleCodeParser.ParamContext pCtx
-        : ctx.formalParamList().param()) {
-      formalParams.add(new FormalParam(pCtx.VAR_ID().getText(),
-        this.getNodeTypeConstraint(pCtx.varType())));
+
+    if (ctx.formalParamList() != null) {
+      visit(ctx.formalParamList());
+      for (PeopleCodeParser.ParamContext pCtx
+          : ctx.formalParamList().param()) {
+        formalParams.add(new FormalParam(pCtx.VAR_ID().getText(),
+          this.getNodeTypeConstraint(pCtx.varType())));
+      }
     }
 
     PTTypeConstraint rTypeConstraint = null;

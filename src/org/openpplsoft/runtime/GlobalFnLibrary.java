@@ -17,11 +17,13 @@ import java.sql.ResultSetMetaData;
 import java.text.ParseException;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Date;
+
 import java.util.regex.*;
 
 import org.openpplsoft.sql.*;
@@ -988,5 +990,23 @@ public class GlobalFnLibrary {
     }
 
     Environment.pushToCallStack(resRowset);
+  }
+
+  public void PT_Weekday() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if(args.size() != 1
+        || !(args.get(0) instanceof PTDate)) {
+      throw new OPSVMachRuntimeException("Expected exactly 1 arg "
+          + "of type PTDate to Weekday.");
+    }
+
+    final Calendar dtCal = Calendar.getInstance();
+    dtCal.setTime(((PTDate) args.get(0)).read());
+
+    // PS maps Sunday to 1 and Saturday to 7.
+    final int psDayOfWeek = dtCal.get(Calendar.DAY_OF_WEEK);
+    Environment.pushToCallStack(new PTInteger(psDayOfWeek));
   }
 }

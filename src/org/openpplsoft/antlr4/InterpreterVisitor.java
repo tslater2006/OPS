@@ -1509,6 +1509,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         case "any":
           typeConstraint = new PTAnyTypeConstraint();
           break;
+        case "GridColumn":
+          typeConstraint = new PTGridColumnTypeConstraint();
+          break;
         default:
           /**
            * In the underlying bytecode, variables of an app class type appear with either

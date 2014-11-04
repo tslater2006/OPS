@@ -73,7 +73,7 @@ public class Record {
       f.DEFFIELDNAME = rs.getString("DEFFIELDNAME");
       this.fieldTable.put(f.FIELDNAME, f);
       this.fldAndSubrecordTable.put(f.FIELDNUM, f);
-        i++;
+      i++;
     }
     rs.close();
     ostmt.close();

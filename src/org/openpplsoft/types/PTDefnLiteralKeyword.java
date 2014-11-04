@@ -21,7 +21,8 @@ public enum PTDefnLiteralKeyword {
   FIELD("field"),
   SQL("sql"),
   PANELGROUP("panelgroup", "component"),
-  HTML("html");
+  HTML("html"),
+  SCROLL("scroll");
 
   private String lcKeyword, aliasOfKeyword;
 
@@ -85,6 +86,8 @@ public enum PTDefnLiteralKeyword {
       return new PTMenuItemLiteral(fullLiteral);
     } else if (this == PTDefnLiteralKeyword.HTML) {
       return new PTHTMLLiteral(fullLiteral);
+    } else if (this == PTDefnLiteralKeyword.SCROLL) {
+      return new PTScrollLiteral(fullLiteral);
     } else {
       throw new OPSDataTypeException("TODO: This enumerated value "
           + "needs a mapping to a literal object class.");

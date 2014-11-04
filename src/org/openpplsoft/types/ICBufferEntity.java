@@ -15,6 +15,7 @@ import org.openpplsoft.runtime.FireEventSummary;
 public interface ICBufferEntity {
   void fireEvent(final PCEvent event, final FireEventSummary fireEventSummary);
   PTType resolveContextualCBufferReference(final String identifier);
+  PTRowset resolveContextualCBufferScrollReference(final PTScrollLiteral scrollName);
   void generateKeylist(
       final String fieldName, final Keylist keylist);
   void runFieldDefaultProcessing(

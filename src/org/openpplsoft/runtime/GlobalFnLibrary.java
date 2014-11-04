@@ -961,4 +961,32 @@ public class GlobalFnLibrary {
         ((PTPageLiteral) args.get(0)), ((PTString) args.get(1)));
     Environment.pushToCallStack(grid);
   }
+
+  /**
+   * IMPORTANT: According to the PT documentation, passing a scroll
+   * name to GetRowset returns the *child* rowset of the rowset in
+   * current context with a primary record name == to the scroll name.
+   * It does not reach up the rowset hierarchy indefinitely, unlike
+   * GetRecord().
+   */
+  public void PT_GetRowset() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if (args.size() != 1
+        || !(args.get(0) instanceof PTScrollLiteral)) {
+      throw new OPSVMachRuntimeException("Expected a single ScrollLiteral "
+          + "arg to GetRowset.");
+    }
+
+    final PTScrollLiteral scrollName = ((PTScrollLiteral) args.get(0));
+    final PTRowset resRowset = this.interpretSupervisor
+        .resolveContextualCBufferScrollReference(scrollName);
+    if (resRowset == null) {
+      throw new OPSVMachRuntimeException("Failure in GetRowset; no rowset "
+          + "found for scroll name: " + scrollName);
+    }
+
+    Environment.pushToCallStack(resRowset);
+  }
 }

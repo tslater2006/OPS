@@ -221,6 +221,14 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public PTRowset resolveContextualCBufferScrollReference(
+      final PTScrollLiteral scrollName) {
+    if (this.parentRow != null) {
+      return this.parentRow.resolveContextualCBufferScrollReference(scrollName);
+    }
+    return null;
+  }
+
   /**
    * Key lookups are always passed up when reaching a PTRecord;
    * call does not go to the record's parent row, but to the record's parent row's

@@ -144,6 +144,14 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public PTRowset resolveContextualCBufferScrollReference(
+      final PTScrollLiteral scrollName) {
+    if (this.parentRow != null) {
+      return this.parentRow.resolveContextualCBufferScrollReference(scrollName);
+    }
+    return null;
+  }
+
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
     for (final PTRow row : this.rows) {

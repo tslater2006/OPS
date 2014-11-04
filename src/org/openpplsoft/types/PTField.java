@@ -374,6 +374,14 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public PTRowset resolveContextualCBufferScrollReference(
+      final PTScrollLiteral scrollName) {
+    if (this.parentRecord != null) {
+      return this.parentRecord.resolveContextualCBufferScrollReference(scrollName);
+    }
+    return null;
+  }
+
   public void generateKeylist(
       final String fieldName, final Keylist keylist) {
     throw new OPSVMachRuntimeException("Illegal call to find value for key "

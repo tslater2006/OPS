@@ -151,6 +151,16 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public PTRowset resolveContextualCBufferScrollReference(
+      final PTScrollLiteral scrollName) {
+    if (this.rowsetMap.containsKey(scrollName.read())) {
+      return this.rowsetMap.get(scrollName.read());
+    } else if (this.parentRowset != null) {
+      return this.parentRowset.resolveContextualCBufferScrollReference(scrollName);
+    }
+    return null;
+  }
+
   public void generateKeylist(
       final String fieldName, final Keylist keylist) {
 

@@ -42,6 +42,15 @@ public class InterpretSupervisor {
     return null;
   }
 
+  public PTRowset resolveContextualCBufferScrollReference(
+      final PTScrollLiteral scrollName) {
+    if (this.cBufferContextEntity != null) {
+      return this.cBufferContextEntity
+          .resolveContextualCBufferScrollReference(scrollName);
+    }
+    return null;
+  }
+
   public PTRecord getNearestCBufferRecordInContext() {
     if (this.cBufferContextEntity instanceof PTRecord) {
       return (PTRecord) this.cBufferContextEntity;

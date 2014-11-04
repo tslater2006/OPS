@@ -99,6 +99,9 @@ public class Environment {
       case "%PanelGroup":
         a = systemVarTable.get("%Component");
         break;
+      case "%AsOfDate":
+        a = systemVarTable.get("%Date");
+        break;
       default:
         a = systemVarTable.get(var);
     }

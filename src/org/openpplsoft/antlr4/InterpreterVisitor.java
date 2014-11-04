@@ -1503,6 +1503,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         case "SQL":
           typeConstraint = new PTSQLTypeConstraint();
           break;
+        case "Grid":
+          typeConstraint = new PTGridTypeConstraint();
+          break;
         default:
           /**
            * In the underlying bytecode, variables of an app class type appear with either

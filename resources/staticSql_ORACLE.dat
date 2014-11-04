@@ -188,13 +188,13 @@ where a.MENUNAME = ?
 =!========================================================================
 
 ###[label]:   query.PSMSGSETDEFN
-#[enforced]:  true
+#[enforced]:  false
 SELECT VERSION, DESCR FROM PSMSGSETDEFN WHERE MESSAGE_SET_NBR = ?
 
 =!========================================================================
 
 ###[label]:   query.PSMSGCATDEFN
-#[enforced]:  true
+#[enforced]:  false
 SELECT MESSAGE_NBR, MESSAGE_TEXT, 
 MSG_SEVERITY,    DESCRLONG, 
 TO_CHAR(CAST((LAST_UPDATE_DTTM) AS TIMESTAMP),

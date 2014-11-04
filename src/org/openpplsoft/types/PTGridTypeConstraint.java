@@ -21,7 +21,13 @@ public class PTGridTypeConstraint extends PTTypeConstraint<PTGrid> {
 
   @Override
   public PTGrid alloc() {
-    return new PTGrid(this);
+    throw new OPSDataTypeException("Illegal attempt to alloc Grid "
+        + "object without providing page and grid names; must call other "
+        + "(overloaded) alloc method and provide these values.");
+  }
+
+  public PTGrid alloc(final PTPageLiteral pageName, final PTString gridName) {
+    return new PTGrid(this, pageName, gridName);
   }
 
   @Override

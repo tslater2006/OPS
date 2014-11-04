@@ -945,4 +945,20 @@ public class GlobalFnLibrary {
 
     Environment.pushToCallStack(new PTString(url.toString()));
   }
+
+  public void PT_GetGrid() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if (args.size() != 2
+        || !(args.get(0) instanceof PTPageLiteral)
+        || !(args.get(1) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected a PageLiteral and "
+          + "String as args to GetGrid.");
+    }
+
+    final PTGrid grid = (new PTGridTypeConstraint()).alloc(
+        ((PTPageLiteral) args.get(0)), ((PTString) args.get(1)));
+    Environment.pushToCallStack(grid);
+  }
 }

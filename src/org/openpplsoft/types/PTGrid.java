@@ -28,6 +28,8 @@ public final class PTGrid extends PTObjectType {
 
   private static Map<String, Method> ptMethodTable;
 
+  private String pageName, gridName;
+
   static {
     final String PT_METHOD_PREFIX = "PT_";
 
@@ -42,8 +44,11 @@ public final class PTGrid extends PTObjectType {
     }
   }
 
-  public PTGrid(final PTGridTypeConstraint origTc) {
+  public PTGrid(final PTGridTypeConstraint origTc,
+      final PTPageLiteral pageName, final PTString gridName) {
     super(origTc);
+    this.pageName = pageName.read();
+    this.gridName = gridName.read();
   }
 
   @Override
@@ -62,6 +67,8 @@ public final class PTGrid extends PTObjectType {
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
+    b.append(",pageName=").append(this.pageName);
+    b.append(",gridName=").append(this.gridName);
     return b.toString();
   }
 }

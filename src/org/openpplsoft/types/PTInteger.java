@@ -61,6 +61,11 @@ public final class PTInteger extends PTNumberType<Integer> {
   }
 
   @Override
+  public PTNumberType negate() {
+    return new PTInteger(this.read() * -1);
+  }
+
+  @Override
   public PTNumberType add(PTNumberType op) {
     if(!(op instanceof PTInteger)) {
       throw new OPSDataTypeException("Expected op to be PTInteger.");

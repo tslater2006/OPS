@@ -71,6 +71,11 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
   }
 
   @Override
+  public PTNumberType negate() {
+    throw new OPSVMachRuntimeException("negate() not supported.");
+  }
+
+  @Override
   public PTNumberType add(PTNumberType op) {
     if(op instanceof PTInteger) {
          return new PTNumber(

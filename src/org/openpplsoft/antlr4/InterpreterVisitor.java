@@ -1007,6 +1007,23 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   }
 
   /**
+   * Called by ANTLR when a negation expression
+   * is being visited in the parse tree.
+   * @param ctx the associated ParseTree node
+   * @return null
+   */
+  public Void visitExprNegate(
+      final PeopleCodeParser.ExprNegateContext ctx) {
+
+    visit(ctx.expr());
+    final PTNumberType numExpr = Environment.getOrDerefNumber(
+        this.getNodeData(ctx.expr()));
+
+    this.setNodeData(ctx, numExpr.negate());
+    return null;
+  }
+
+  /**
    * Called by ANTLR when a Not expression
    * is being visited in the parse tree.
    * @param ctx the associated ParseTree node

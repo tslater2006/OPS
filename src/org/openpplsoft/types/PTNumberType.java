@@ -17,4 +17,5 @@ public abstract class PTNumberType<T extends java.lang.Number> extends PTPrimiti
   public abstract PTNumberType sub(PTNumberType op);
   public abstract PTNumberType mul(PTNumberType op);
   public abstract PTNumberType div(PTNumberType op);
+  public abstract PTNumberType negate();
 }

@@ -18,6 +18,7 @@ import java.text.ParseException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1008,5 +1009,40 @@ public class GlobalFnLibrary {
     // PS maps Sunday to 1 and Saturday to 7.
     final int psDayOfWeek = dtCal.get(Calendar.DAY_OF_WEEK);
     Environment.pushToCallStack(new PTInteger(psDayOfWeek));
+  }
+
+  /**
+   * Note; negative delta values are allowed here (both in
+   * technical sense and in the PT defn/implementation.
+   */
+  public void PT_AddToDate() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if(args.size() != 4
+        || !(args.get(0) instanceof PTDate)
+        || !(args.get(1) instanceof PTInteger)
+        || !(args.get(2) instanceof PTInteger)
+        || !(args.get(3) instanceof PTInteger)) {
+      throw new OPSVMachRuntimeException("Expected exactly 4 args "
+          + "(1 PTDate, the rest PTInteger) to AddToDate.");
+    }
+
+    final Calendar dtCal = Calendar.getInstance();
+    dtCal.setTime(((PTDate) args.get(0)).read());
+
+    final int yearDelta = ((PTInteger) args.get(1)).read();
+    final int monthDelta = ((PTInteger) args.get(2)).read();
+    final int dayDelta = ((PTInteger) args.get(3)).read();
+
+    // Order matters here; see PT documentation; when adding months
+    // to the date, "if the date provided
+    // is the last day of the month, and the next month is shorter, the
+    // returned result is the last day of the next month."
+    dtCal.add(Calendar.DATE, dayDelta);
+    dtCal.add(Calendar.MONTH, monthDelta);
+    dtCal.add(Calendar.YEAR, yearDelta);
+
+    Environment.pushToCallStack(new PTDate(dtCal.getTime()));
   }
 }

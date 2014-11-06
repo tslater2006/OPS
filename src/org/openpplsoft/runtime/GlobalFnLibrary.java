@@ -744,7 +744,7 @@ public class GlobalFnLibrary {
     Matcher bindIdxMatcher = bindIdxPattern.matcher(sqlCmd);
     List<String> bindVals = new ArrayList<String>();
 
-    int maxArgIdx = -1;
+    int maxArgIdx = 0;
 
     while (bindIdxMatcher.find()) {
 

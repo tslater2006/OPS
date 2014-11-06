@@ -1441,17 +1441,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
     }
 
-    if (this.eCtx.prog instanceof AppClassPeopleCodeProg) {
-      this.emit(ctx);
-    } else if((this.eCtx instanceof FunctionExecContext) &&
-        this.eCtx.scopeStack.getFirst().getLevel() == Scope.Lvl.FUNCTION_LOCAL) {
-      this.emit(ctx);
-    } else if((this.eCtx instanceof ProgramExecContext)
-        && evalConstructStack.size() > 0
-        && (varTc.isUnderlyingClassEqualTo(PTRowset.class)
-            || varTc.isUnderlyingClassEqualTo(PTInteger.class))) {
-      this.emit(ctx);
-    }
+    // Variable declarations are optional emissions for tracefile
+    // verification, so we can always emit them.
+    this.emit(ctx);
     return null;
   }
 

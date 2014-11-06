@@ -74,6 +74,8 @@ public class PCInstruction implements IEmission {
         || this.instruction.startsWith("try")
         || this.instruction.startsWith("end-try")
         || this.instruction.startsWith("Local ")
+        || this.instruction.startsWith("Global ")
+        || this.instruction.startsWith("Component ")
         || this.instruction.startsWith("End-Function");
   }
 

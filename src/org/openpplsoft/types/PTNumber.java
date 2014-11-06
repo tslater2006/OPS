@@ -123,8 +123,12 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
       if(this.value.compareTo(((PTNumber) op).read()) > 0) {
         return new PTBoolean(true);
       }
+    } else if(op instanceof PTInteger) {
+      if(this.value.compareTo(new BigDecimal(((PTInteger) op).read())) > 0) {
+        return new PTBoolean(true);
+      }
     } else {
-      throw new OPSDataTypeException("Expected op to be PTNumber.");
+      throw new OPSDataTypeException("Expected op to be PTNumber or PTInteger.");
     }
 
     return new PTBoolean(false);

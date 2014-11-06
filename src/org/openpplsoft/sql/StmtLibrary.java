@@ -119,7 +119,7 @@ public final class StmtLibrary {
     }
 
     // compile meta-SQL detection regex patterns.
-    bindIdxPattern = Pattern.compile(":\\d+");
+    bindIdxPattern = Pattern.compile(":(\\d+)");
     dateInPattern = Pattern.compile("%(DATEIN|DateIn)\\((.+?)\\)");
     effDtCheckPattern = Pattern.compile(
       "%EffDtCheck\\(([A-Za-z_]+)(\\s+([A-Za-z0-9_]+))?,\\s+([A-Za-z]+),\\s+(.*)\\)");
@@ -239,16 +239,37 @@ public final class StmtLibrary {
         new String[bindVals.size()]), OPSStmt.EmissionType.ENFORCED);
   }
 
+  public static OPSStmt convertForJDBCAndGetOPSStmt(
+      final String query, final String[] bindVals,
+          final OPSStmt.EmissionType eType) {
+
+    final List<String> expandedBindVals = new ArrayList<String>();
+    final Matcher bindIdxMatcher = bindIdxPattern.matcher(query);
+    while (bindIdxMatcher.find()) {
+      final int bindIdx = Integer.parseInt(bindIdxMatcher.group(1));
+
+      // PS bind indices are 1-based, must subtract 1 here.
+      expandedBindVals.add(bindVals[bindIdx - 1]);
+    }
+
+    bindIdxMatcher.reset();
+    final String newSql = bindIdxMatcher.replaceAll("?");
+
+    return new OPSStmt(newSql, expandedBindVals.toArray(
+        new String[expandedBindVals.size()]), eType);
+  }
+
   public static OPSStmt prepareSqlFromSQLDefn(final SQL sqlDefn,
     final String[] bindVals) {
 
-    // Replace numeric bind sockets (":1") with "?".
-    final Matcher bindIdxMatcher = bindIdxPattern.matcher(sqlDefn.getSQLText());
-    final String newSql = bindIdxMatcher.replaceAll("?");
-
-    return new OPSStmt(newSql, bindVals, OPSStmt.EmissionType.ENFORCED);
+    // We can't directly get an OPSStmt with this query b/c it
+    // 1) has numeric bind indices (not "?") and 2)
+    // converting these numeric indices to "?" may require that the list
+    // of bind values be expanded (if a bind index appears multiple
+    // times in the list).
+    return convertForJDBCAndGetOPSStmt(sqlDefn.getSQLText(), bindVals,
+        OPSStmt.EmissionType.ENFORCED);
   }
-
 
   /**
    * Generates an OPSStmt that will fill the given record.
@@ -264,9 +285,7 @@ public final class StmtLibrary {
     final StringBuilder query = new StringBuilder(
         generateSelectClause(recDefn, rootAlias));
 
-    // Replace numeric bind sockets (":1") with "?".
-    final Matcher bindIdxMatcher = bindIdxPattern.matcher(whereStr);
-    String newWhereStr = bindIdxMatcher.replaceAll("?");
+    String newWhereStr = whereStr;
 
     // Expand any %EffDtCheck meta-SQL
     final Matcher effDtCheckMatcher = effDtCheckPattern.matcher(newWhereStr);
@@ -328,7 +347,12 @@ public final class StmtLibrary {
     query.append("  ").append(newWhereStr);
     //log.debug("Fill query string: {}", query.toString());
 
-    return new OPSStmt(query.toString(), bindVals,
+    // We can't directly get an OPSStmt with this query b/c it
+    // 1) has numeric bind indices (not "?") and 2)
+    // converting these numeric indices to "?" may require that the list
+    // of bind values be expanded (if a bind index appears multiple
+    // times in the list).
+    return convertForJDBCAndGetOPSStmt(query.toString(), bindVals,
         OPSStmt.EmissionType.ENFORCED);
   }
 

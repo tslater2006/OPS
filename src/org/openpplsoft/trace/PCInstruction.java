@@ -94,11 +94,11 @@ public class PCInstruction implements IEmission {
 
     /*
      * Long emissions in the trace file (i.e., calls to Fill rowsets)
-     * are typically cut off around 300 characters, but I've seen variation
+     * are typically cut off around 280 characters, but I've seen variation
      * in this limit. Therefore, if one long instruction starts with the text
      * of the other or vice versa, consider the instructions to be equal.
      */
-    final int PC_INSTR_CUTOFF_CHAR_LIMIT = 300;
+    final int PC_INSTR_CUTOFF_CHAR_LIMIT = 280;
     if (this.instruction.length() > PC_INSTR_CUTOFF_CHAR_LIMIT
         || other.instruction.length() > PC_INSTR_CUTOFF_CHAR_LIMIT) {
       return (this.instruction.startsWith(other.instruction)

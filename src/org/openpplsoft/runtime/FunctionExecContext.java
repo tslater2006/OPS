@@ -21,6 +21,7 @@ public class FunctionExecContext extends ExecContext {
 
   public String funcName = "";
   public ParseTree funcNodeToRun;
+  public boolean hasTargetFuncBeenExecuted;
 
   public FunctionExecContext(final PeopleCodeProg prog, final String fnName) {
     super(prog);
@@ -38,5 +39,13 @@ public class FunctionExecContext extends ExecContext {
   @Override
   public String getMethodOrFuncName() {
     return this.funcName;
+  }
+
+  public void markTargetFuncAsExecuted() {
+    this.hasTargetFuncBeenExecuted = true;
+  }
+
+  public boolean hasTargetFuncBeenExecuted() {
+    return this.hasTargetFuncBeenExecuted;
   }
 }

@@ -142,11 +142,20 @@ public class InterpretSupervisor {
     boolean normalExit = true;
     try {
       interpreter.visit(context.startNode);
-    } catch (OPSReturnException opsre) {
+    } catch (final OPSReturnException opsre) {
       normalExit = false;
-    } catch (OPSFuncImplSignalException opsise) {
-      log.debug("Caught OPSFuncImplSignalException; switching to target function now.");
-      interpreter.visit(((FunctionExecContext) context).funcNodeToRun);
+    } catch (final OPSFuncImplSignalException opsise) {
+      /*
+       * Only execute the target func if it hasn't already. If the first
+       * function in a program is the target func, it will already have
+       * been executed w/o having thrown an exception, so must check
+       * to prevent executing it again.
+       */
+      if (!((FunctionExecContext) context).hasTargetFuncBeenExecuted()) {
+        log.debug("Caught OPSFuncImplSignalException and target func has "
+            + "yet been executed; switching to target function now.");
+        interpreter.visit(((FunctionExecContext) context).funcNodeToRun);
+      }
     }
 
     if(normalExit) {

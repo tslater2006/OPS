@@ -1223,7 +1223,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     // shares the same logic.
     this.bindArgsToFormalParams(localScope, formalParams);
 
-
     this.eCtx.pushScope(localScope);
     visit(ctx.stmtList());
     this.eCtx.popScope();
@@ -1848,6 +1847,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         this.emit(ctx.endfunction);
 
+        // Indicate that the target func has been executed to prevent
+        // InterpretSupervisor from executing it again in the event
+        // another function impl is present (when the OPSFuncImplSignalException
+        // is thrown).
+        ((FunctionExecContext) this.eCtx).markTargetFuncAsExecuted();
       } else {
         throw new OPSFuncImplSignalException(ctx.
             funcSignature().GENERIC_ID().getText());

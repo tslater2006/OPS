@@ -34,6 +34,7 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
   private static final Logger log = LogManager.getLogger(PTRow.class.getName());
 
   private PTRowset parentRowset;
+  private PTImmutableReference<PTBoolean> selectedPropertyRef;
 
   // Maps record names to child record objects
   private Map<String, PTRecord> recordMap = new LinkedHashMap<String, PTRecord>();
@@ -72,6 +73,17 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     for(Map.Entry<String, ScrollBuffer> entry
         : childScrollDefnsToRegister.entrySet()) {
       this.registerChildScrollDefn(entry.getValue());
+    }
+
+    try {
+      /*
+       * Initialize read/write properties.
+       */
+      this.selectedPropertyRef
+          = new PTImmutableReference<PTBoolean>(
+              PTBoolean.getTc(), new PTBoolean(false));
+    } catch (final OPSTypeCheckException opstce) {
+      throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
   }
 
@@ -290,6 +302,8 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
       return new PTInteger(this.registeredRecordDefns.size());
     } else if (s.toLowerCase().equals("parentrowset")) {
       return this.parentRowset;
+    } else if (s.toLowerCase().equals("selected")) {
+      return this.selectedPropertyRef;
     }
     return null;
   }

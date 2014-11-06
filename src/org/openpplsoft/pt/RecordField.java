@@ -8,6 +8,8 @@
 package org.openpplsoft.pt;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.logging.log4j.*;
 import org.openpplsoft.runtime.*;
@@ -24,7 +26,10 @@ public class RecordField {
   public int LENGTH;
   public String DEFRECNAME;
   public String DEFFIELDNAME;
+  public String LABEL_ID;
   private int typeFlag;
+  private FieldLabel defaultLabel;
+  private Map<String, FieldLabel> labels;
 
   private final int KEY_FLAG = 1;
   private final int ALTERNATE_SEARCH_KEY_FLAG = 16;
@@ -39,6 +44,14 @@ public class RecordField {
     this.RECNAME = r;
     this.FIELDNAME = f;
     this.typeFlag = t;
+    this.labels = new HashMap<String, FieldLabel>();
+  }
+
+  public void addLabel(final FieldLabel label) {
+    this.labels.put(label.getLabelId(), label);
+    if (label.isDefault()) {
+      this.defaultLabel = label;
+    }
   }
 
   public PTTypeConstraint getTypeConstraintForUnderlyingValue() {
@@ -124,6 +137,10 @@ public class RecordField {
         this.RECNAME, this.FIELDNAME, this.DEFRECNAME, this.DEFFIELDNAME);
     return this.DEFRECNAME.trim().length() > 0
         && this.DEFFIELDNAME.trim().length() > 0;
+  }
+
+  public FieldLabel getLabelById(final String labelId) {
+    return this.labels.get(labelId);
   }
 }
 

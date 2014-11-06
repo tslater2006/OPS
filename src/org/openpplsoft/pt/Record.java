@@ -71,6 +71,7 @@ public class Record {
       f.LENGTH = rs.getInt("LENGTH");
       f.DEFRECNAME = rs.getString("DEFRECNAME");
       f.DEFFIELDNAME = rs.getString("DEFFIELDNAME");
+      f.LABEL_ID = rs.getString("LABEL_ID");
       this.fieldTable.put(f.FIELDNAME, f);
       this.fldAndSubrecordTable.put(f.FIELDNUM, f);
       i++;
@@ -106,7 +107,14 @@ public class Record {
     ostmt = StmtLibrary.getStaticSQLStmt("query.PSDBFLDLBL",
        new String[]{this.RECNAME});
     rs = ostmt.executeQuery();
-    rs.next();        // Do nothing with records for now.
+    while (rs.next()) {
+      final FieldLabel label = new FieldLabel(rs.getString("LABEL_ID"),
+          rs.getString("LONGNAME"), rs.getString("SHORTNAME"));
+      if (rs.getInt("DEFAULT_LABEL") == 1) {
+        label.setAsDefault();
+      }
+      this.fieldTable.get(rs.getString("FIELDNAME")).addLabel(label);
+    }
     rs.close();
     ostmt.close();
   }

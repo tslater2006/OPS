@@ -477,12 +477,35 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
   public void PT_SetDefault() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
-      throw new OPSVMachRuntimeException("Expected no args.");
+      throw new OPSVMachRuntimeException("Expected no args to SetDefault.");
     }
     this.setBlank();
   }
 
+  public void PT_GetLongLabel() {
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    if (args.size() != 1
+        || !(args.get(0) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected single string arg to GetLongLabel.");
+    }
+
+    final String labelId = ((PTString) args.get(0)).read();
+    final FieldLabel label = this.recFieldDefn.getLabelById(labelId);
+
+    // If label does not exist, PT documentation indicates that a "Null"
+    // (blank) string should be returned.
+    if (label == null) {
+      Environment.pushToCallStack(new PTString(""));
+    } else {
+      Environment.pushToCallStack(new PTString(label.getLongName()));
+    }
+  }
+
   public void PT_ClearDropDownList() {
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    if (args.size() != 0) {
+      throw new OPSVMachRuntimeException("Expected no args to ClearDropDownList");
+    }
     this.dropDownList.clear();
   }
 

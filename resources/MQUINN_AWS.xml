@@ -50,8 +50,8 @@
     <constructor-arg value="CLASS_SEARCH"/>
     <constructor-arg value="U"/>
     <constructor-arg value="KADAMS"/>
-    <constructor-arg value="004_KADAMS_CLASS_SEARCH.trace"/>
-    <constructor-arg value="2013-11-06"/>
+    <constructor-arg value="009_AWS_KADAMS_CLASS_SEARCH.trace"/>
+    <constructor-arg value="2014-11-12"/>
   </bean>
 
   <bean id="SSR_SSENRL_LIST"

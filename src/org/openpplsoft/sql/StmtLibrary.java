@@ -48,7 +48,7 @@ public final class StmtLibrary {
 
   private static Map<String, StaticSqlDefn> staticSqlDefns;
   private static Pattern bindIdxPattern;
-  private static Pattern dateInPattern;
+  private static Pattern dateInPattern, currDateInPattern;
   private static Pattern effDtCheckPattern;
 
   static {
@@ -121,6 +121,7 @@ public final class StmtLibrary {
     // compile meta-SQL detection regex patterns.
     bindIdxPattern = Pattern.compile(":(\\d+)");
     dateInPattern = Pattern.compile("%(DATEIN|DateIn)\\((.+?)\\)");
+    currDateInPattern = Pattern.compile("%CurrentDateIn");
     effDtCheckPattern = Pattern.compile(
       "%EffDtCheck\\(([A-Za-z_]+)(\\s+([A-Za-z0-9_]+))?,\\s+([A-Za-z]+),\\s+(.*)\\)");
   }
@@ -342,6 +343,13 @@ public final class StmtLibrary {
     while (dateInMatcher.find()) {
       newWhereStr = dateInMatcher.replaceAll("TO_DATE("
           + dateInMatcher.group(2) + ",'YYYY-MM-DD')");
+    }
+
+    // Replace occurrences of %CurrentDateIn
+    final Matcher currDateInMatcher = currDateInPattern.matcher(newWhereStr);
+    while (currDateInMatcher.find()) {
+      newWhereStr = currDateInMatcher.replaceAll(
+          "TO_DATE(TO_CHAR(SYSDATE,'YYYY-MM-DD'),'YYYY-MM-DD')");
     }
 
     query.append("  ").append(newWhereStr);

@@ -1045,4 +1045,11 @@ public class GlobalFnLibrary {
 
     Environment.pushToCallStack(new PTDate(dtCal.getTime()));
   }
+
+  /*
+   * Not implementing for now.
+   */
+  public void PT_SetCursorPos() {
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+  }
 }

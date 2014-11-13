@@ -126,6 +126,16 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  public void logContents(final String indent) {
+    for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
+      entry.getValue().logContents(indent + "  ");
+    }
+
+    for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
+      entry.getValue().logContents(indent + "  ");
+    }
+  }
+
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
 

@@ -152,6 +152,19 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
+  public void logContents(final String indent) {
+    if (this.primaryRecDefn == null) {
+      log.debug("{}Scroll: {}", indent, null);
+    } else {
+      log.debug("{}Scroll: {}", indent, this.primaryRecDefn.RECNAME);
+    }
+
+    for (int i = 0; i < this.rows.size(); i++) {
+      log.debug("{}Row {}", indent, i);
+      this.rows.get(i).logContents(indent);
+    }
+  }
+
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
     for (final PTRow row : this.rows) {

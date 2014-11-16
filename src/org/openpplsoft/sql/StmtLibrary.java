@@ -307,8 +307,22 @@ public final class StmtLibrary {
         generateSelectClause(recDefn, rootAlias, true));
 
     final String newWhereStr = processAndExpandWhereStr(rootAlias, whereStr);
-    query.append(" ").append(newWhereStr);
+    query.append(newWhereStr);
     log.fatal("Select query: {}", query);
+
+    int i = 0;
+    final List<RecordField> rfList = recDefn.getExpandedFieldList();
+    for (RecordField rf : rfList) {
+      if (rf.isKey()) {
+        if (i == 0) { query.append(" ORDER BY "); }
+        if (i > 0) { query.append(", "); }
+        query.append(rf.FIELDNAME);
+        if (rf.isDescendingKey()) {
+          query.append(" DESC");
+        }
+        i++;
+      }
+    }
 
     // We can't directly get an OPSStmt with this query b/c it
     // 1) has numeric bind indices (not "?") and 2)

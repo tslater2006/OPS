@@ -284,11 +284,31 @@ public final class StmtLibrary {
 
     final String rootAlias = "FILL";
     final StringBuilder query = new StringBuilder(
-        generateSelectClause(recDefn, rootAlias));
+        generateSelectClause(recDefn, rootAlias, false));
 
     final String newWhereStr = processAndExpandWhereStr(rootAlias, whereStr);
     query.append("  ").append(newWhereStr);
     //log.debug("Fill query string: {}", query.toString());
+
+    // We can't directly get an OPSStmt with this query b/c it
+    // 1) has numeric bind indices (not "?") and 2)
+    // converting these numeric indices to "?" may require that the list
+    // of bind values be expanded (if a bind index appears multiple
+    // times in the list).
+    return convertForJDBCAndGetOPSStmt(query.toString(), bindVals,
+        OPSStmt.EmissionType.ENFORCED);
+  }
+
+  public static OPSStmt prepareSelectStmt(final Record recDefn,
+      final String whereStr, final String[] bindVals) {
+
+    final String rootAlias = "";
+    final StringBuilder query = new StringBuilder(
+        generateSelectClause(recDefn, rootAlias, true));
+
+    final String newWhereStr = processAndExpandWhereStr(rootAlias, whereStr);
+    query.append(" ").append(newWhereStr);
+    log.fatal("Select query: {}", query);
 
     // We can't directly get an OPSStmt with this query b/c it
     // 1) has numeric bind indices (not "?") and 2)
@@ -356,17 +376,18 @@ public final class StmtLibrary {
 
     // Replace occurrences of %DATEIN/DateIn with TO_DATE(*,'YYYY-MM-DD')
     final Matcher dateInMatcher = dateInPattern.matcher(newWhereStr);
+    final StringBuffer dateInSb = new StringBuffer();
     while (dateInMatcher.find()) {
-      newWhereStr = dateInMatcher.replaceAll("TO_DATE("
+      dateInMatcher.appendReplacement(dateInSb, "TO_DATE("
           + dateInMatcher.group(2) + ",'YYYY-MM-DD')");
     }
+    dateInMatcher.appendTail(dateInSb);
+    newWhereStr = dateInSb.toString();
 
     // Replace occurrences of %CurrentDateIn
     final Matcher currDateInMatcher = currDateInPattern.matcher(newWhereStr);
-    while (currDateInMatcher.find()) {
-      newWhereStr = currDateInMatcher.replaceAll(
-          "TO_DATE(TO_CHAR(SYSDATE,'YYYY-MM-DD'),'YYYY-MM-DD')");
-    }
+    newWhereStr = currDateInMatcher.replaceAll(
+        "TO_DATE(TO_CHAR(SYSDATE,'YYYY-MM-DD'),'YYYY-MM-DD')");
 
     return newWhereStr;
   }
@@ -384,7 +405,7 @@ public final class StmtLibrary {
 
     final String tableAlias = "A";
     final StringBuilder query = new StringBuilder(
-        generateSelectClause(recDefn, tableAlias));
+        generateSelectClause(recDefn, tableAlias, false));
 
     query.append(" WHERE ");
 
@@ -450,7 +471,7 @@ public final class StmtLibrary {
 
     final String tableAlias = "";
     final StringBuilder query = new StringBuilder(
-        generateSelectClause(recDefn, tableAlias));
+        generateSelectClause(recDefn, tableAlias, false));
 
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
     final List<String> bindVals = new ArrayList<String>();
@@ -593,7 +614,7 @@ public final class StmtLibrary {
    * @return the SELECT clause in string form
    */
   private static String generateSelectClause(final Record recDefn,
-      final String tableAlias) {
+      final String tableAlias, final boolean delimitFieldsWithSpace) {
 
     String dottedAlias = tableAlias;
     if (dottedAlias.length() > 0) {
@@ -605,7 +626,12 @@ public final class StmtLibrary {
     final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
         recDefn, dottedAlias, false);
     for (int i = 0; i < aliasedFields.length; i++) {
-      if (i > 0) { selectClause.append(","); }
+      if (i > 0) {
+        selectClause.append(",");
+        if (delimitFieldsWithSpace) {
+          selectClause.append(" ");
+        }
+      }
       selectClause.append(aliasedFields[i]);
     }
 

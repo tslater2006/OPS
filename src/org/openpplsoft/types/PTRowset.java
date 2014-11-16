@@ -536,7 +536,8 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
           + "be passed before the required RecordLiteral, so may need to support "
           + "this now.");
     }
-    final PTRecordLiteral recToSelectFrom = (PTRecordLiteral) args.get(0);
+    final Record recToSelectFrom =
+        DefnCache.getRecord(((PTRecordLiteral) args.get(0)).read());
     int nextBindVarIdx = 1;
 
     /*
@@ -551,14 +552,16 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     /*
      * If any bind vars have been passed in, accumulate them now.
      */
-    final List<PTType> bindVals = new ArrayList<PTType>();
+    final List<String> bindVals = new ArrayList<String>();
     while (nextBindVarIdx < args.size()) {
-      bindVals.add(args.get(nextBindVarIdx++));
+      final PTPrimitiveType primArg =
+          Environment.getOrDerefPrimitive(args.get(nextBindVarIdx++));
+      bindVals.add(primArg.readAsString());
     }
 
-/*    final OPSStmt ostmt = StmtLibrary.prepareSelectStmt(
+    final OPSStmt ostmt = StmtLibrary.prepareSelectStmt(
         recToSelectFrom, whereStr, bindVals.toArray(new String[bindVals.size()]));
-    OPSResultSet rs = ostmt.executeQuery();*/
+    OPSResultSet rs = ostmt.executeQuery();
 
     throw new OPSVMachRuntimeException("TODO: Support Select on Rowset.");
   }

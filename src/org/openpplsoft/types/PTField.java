@@ -113,6 +113,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  public boolean isInComponentBuffer() {
+    return this.recFieldBuffer != null;
+  }
+
   public void logContents(final String indent) {
 
     // Do not log contents of a field that is not in the component buffer.

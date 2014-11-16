@@ -122,6 +122,10 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  public boolean isInComponentBuffer() {
+    return this.recBuffer != null;
+  }
+
   public void logContents(final String indent) {
 
     // Do not log contents of a record that is not in the component buffer.

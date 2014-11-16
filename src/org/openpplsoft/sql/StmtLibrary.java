@@ -286,6 +286,22 @@ public final class StmtLibrary {
     final StringBuilder query = new StringBuilder(
         generateSelectClause(recDefn, rootAlias));
 
+    final String newWhereStr = processAndExpandWhereStr(rootAlias, whereStr);
+    query.append("  ").append(newWhereStr);
+    //log.debug("Fill query string: {}", query.toString());
+
+    // We can't directly get an OPSStmt with this query b/c it
+    // 1) has numeric bind indices (not "?") and 2)
+    // converting these numeric indices to "?" may require that the list
+    // of bind values be expanded (if a bind index appears multiple
+    // times in the list).
+    return convertForJDBCAndGetOPSStmt(query.toString(), bindVals,
+        OPSStmt.EmissionType.ENFORCED);
+  }
+
+  private static String processAndExpandWhereStr(
+      final String rootAlias, final String whereStr) {
+
     String newWhereStr = whereStr;
 
     // Expand any %EffDtCheck meta-SQL
@@ -352,16 +368,7 @@ public final class StmtLibrary {
           "TO_DATE(TO_CHAR(SYSDATE,'YYYY-MM-DD'),'YYYY-MM-DD')");
     }
 
-    query.append("  ").append(newWhereStr);
-    //log.debug("Fill query string: {}", query.toString());
-
-    // We can't directly get an OPSStmt with this query b/c it
-    // 1) has numeric bind indices (not "?") and 2)
-    // converting these numeric indices to "?" may require that the list
-    // of bind values be expanded (if a bind index appears multiple
-    // times in the list).
-    return convertForJDBCAndGetOPSStmt(query.toString(), bindVals,
-        OPSStmt.EmissionType.ENFORCED);
+    return newWhereStr;
   }
 
   /**

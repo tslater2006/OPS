@@ -525,12 +525,18 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     }
 
     if (!(args.get(0) instanceof PTRecordLiteral)) {
+      /*
+       * IMPORTANT: When supporting ScrollLiterals here, remember that:
+       * "The first scrollname must be a child rowset of the rowset
+       *  object executing the method, the second scrollname must be a
+       *  child of the first child, and so on."
+       */
       throw new OPSVMachRuntimeException("Expected RecordLiteral as first arg "
           + "to Select; note that Select allows multiple (optional) ScrollLiterals to "
           + "be passed before the required RecordLiteral, so may need to support "
           + "this now.");
     }
-    final PTRecordLiteral selectRecLiteral = (PTRecordLiteral) args.get(0);
+    final PTRecordLiteral recToSelectFrom = (PTRecordLiteral) args.get(0);
     int nextBindVarIdx = 1;
 
     /*
@@ -545,10 +551,14 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     /*
      * If any bind vars have been passed in, accumulate them now.
      */
-    final List<PTType> bindVars = new ArrayList<PTType>();
+    final List<PTType> bindVals = new ArrayList<PTType>();
     while (nextBindVarIdx < args.size()) {
-      bindVars.add(args.get(nextBindVarIdx++));
+      bindVals.add(args.get(nextBindVarIdx++));
     }
+
+/*    final OPSStmt ostmt = StmtLibrary.prepareSelectStmt(
+        recToSelectFrom, whereStr, bindVals.toArray(new String[bindVals.size()]));
+    OPSResultSet rs = ostmt.executeQuery();*/
 
     throw new OPSVMachRuntimeException("TODO: Support Select on Rowset.");
   }

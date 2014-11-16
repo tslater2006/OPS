@@ -507,6 +507,43 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     Environment.pushToCallStack(new PTInteger(rowsRead));
   }
 
+  public void PT_Select() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if (args.size() == 0) {
+      throw new OPSVMachRuntimeException("Select requires at least one arg.");
+    }
+
+    if (!(args.get(0) instanceof PTRecordLiteral)) {
+      throw new OPSVMachRuntimeException("Expected RecordLiteral as first arg "
+          + "to Select; note that Select allows multiple (optional) ScrollLiterals to "
+          + "be passed before the required RecordLiteral, so may need to support "
+          + "this now.");
+    }
+    final PTRecordLiteral selectRecLiteral = (PTRecordLiteral) args.get(0);
+    int nextBindVarIdx = 1;
+
+    /*
+     * Note that Select does not require a WHERE string to be passed in.
+     */
+    String whereStr = null;
+    if (args.get(1) instanceof PTString) {
+      whereStr = ((PTString) args.get(1)).read();
+      nextBindVarIdx++;
+    }
+
+    /*
+     * If any bind vars have been passed in, accumulate them now.
+     */
+    final List<PTType> bindVars = new ArrayList<PTType>();
+    while (nextBindVarIdx < args.size()) {
+      bindVars.add(args.get(nextBindVarIdx++));
+    }
+
+    throw new OPSVMachRuntimeException("TODO: Support Select on Rowset.");
+  }
+
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());

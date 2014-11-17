@@ -44,7 +44,7 @@ public final class TraceFileVerifier {
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
-      beginScrollsPattern;
+      beginScrollsPattern, endScrollsPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -88,6 +88,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Caught\\sException:(\\s.*?)\\((\\d+),(\\d+)\\)\\s+(.*?)\\s+Name:(.*?)\\s");
     beginScrollsPattern =
         Pattern.compile("Begin\\s+Scrolls\\s+(.*)");
+    endScrollsPattern =
+        Pattern.compile("End\\s+Scrolls");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -379,6 +381,14 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new BeginScrolls(beginScrollsMatcher.group(GROUP1));
+      }
+
+      final Matcher endScrollsMatcher =
+          endScrollsPattern.matcher(currTraceLine);
+      if (endScrollsMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new EndScrolls();
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

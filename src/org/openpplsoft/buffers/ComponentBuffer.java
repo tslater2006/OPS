@@ -147,6 +147,7 @@ public final class ComponentBuffer {
   public static void emitScrolls(final String phase) {
     TraceFileVerifier.submitEnforcedEmission(new BeginScrolls(phase));
     cBuffer.emitScrolls("");
+    TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
   }
 
   public static PTRowset getLevelZeroRowset() {

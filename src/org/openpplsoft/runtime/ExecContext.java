@@ -113,7 +113,7 @@ public abstract class ExecContext {
      * Auto-declared vars always have Local scope and are of type Any.
      */
     this.declareLocalVar(id, new PTAnyTypeConstraint());
-    log.warn("Auto-declared identifier {} (Local scope, of type Any).", id);
+    log.info("Auto-declared identifier {} (Local scope, of type Any).", id);
     return this.resolveIdentifier(id);
   }
 }

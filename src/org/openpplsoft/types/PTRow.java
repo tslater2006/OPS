@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.trace.*;
 
 /**
  * Represents a PeopleTools row definition; contains
@@ -131,6 +132,16 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
   }
 
   public void emitScrolls(final String indent) {
+
+    int scrollLevel = Math.max(0, this.determineScrollLevel());
+    TraceFileVerifier.submitEnforcedEmission(new BeginLevel(
+        scrollLevel, this.getIndexOfThisRowInParentRowset(), 1, 1, 0,
+        this.registeredChildScrollDefns.size(),
+        // All non-level 0 rows seem to have these flags enabled.
+        (scrollLevel != 0), (scrollLevel != 0),
+        this.registeredRecordDefns.size()
+            + this.registeredChildScrollDefns.size()));
+
     for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().emitScrolls(indent + "  ");
     }

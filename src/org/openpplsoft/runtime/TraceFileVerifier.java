@@ -44,7 +44,7 @@ public final class TraceFileVerifier {
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
-      beginScrollsPattern, endScrollsPattern;
+      beginScrollsPattern, endScrollsPattern, beginLevelPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -57,6 +57,10 @@ public final class TraceFileVerifier {
   private static final int GROUP3 = 3;
   private static final int GROUP4 = 4;
   private static final int GROUP5 = 5;
+  private static final int GROUP6 = 6;
+  private static final int GROUP7 = 7;
+  private static final int GROUP8 = 8;
+  private static final int GROUP9 = 9;
 
   private static boolean isPausedAndWaitingToSyncUp;
   private static IEmission emissionToSyncUpOn;
@@ -90,6 +94,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Begin\\s+Scrolls\\s+(.*)");
     endScrollsPattern =
         Pattern.compile("End\\s+Scrolls");
+    beginLevelPattern =
+        Pattern.compile("Begin\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]\\s+occcnt=(\\d+)\\s+activecnt=(\\d+)\\s+hiddencnt=(\\d+)\\s+scrlcnt=(\\d+)\\s+flags=[\\d\\w]+\\s+(noautoselect\\s+)?(noautoupdate\\s+)?nrec=(\\d+)");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -167,7 +173,7 @@ public final class TraceFileVerifier {
     }
 
     if (isPausedAndWaitingToSyncUp) {
-      log.warn("[VERIFIER:PAUSED] Waiting for interpreter to emit: {}", emissionToSyncUpOn);
+      log.debug("[VERIFIER:PAUSED] Waiting for interpreter to emit: {}", emissionToSyncUpOn);
     }
 
     IEmission traceEmission;
@@ -211,13 +217,13 @@ public final class TraceFileVerifier {
       }
 
       if (isPausedAndWaitingToSyncUp) {
-        log.warn("[VERIFIER:RESUMED] Interpreter has just synced up on matching "
+        log.debug("[VERIFIER:RESUMED] Interpreter has just synced up on matching "
             + "emission: {}", opsEmission);
         isPausedAndWaitingToSyncUp = false;
         emissionToSyncUpOn = null;
       }
     } else if (isPausedAndWaitingToSyncUp) {
-      log.warn("[VERIFIER:DISCARDING] OPS emission ({}) does not match emission to sync "
+      log.debug("[VERIFIER:DISCARDING] OPS emission ({}) does not match emission to sync "
           + "up on: {}", opsEmission, emissionToSyncUpOn);
 
     /*
@@ -240,7 +246,7 @@ public final class TraceFileVerifier {
       isPausedAndWaitingToSyncUp = true;
       emissionToSyncUpOn = getNextTraceEmission();
 
-      log.warn("[VERIFIER:PAUSING] Encountered Break w/o semicolon in tracefile; "
+      log.debug("[VERIFIER:PAUSING] Encountered Break w/o semicolon in tracefile; "
           + "this is a known problem emission, so we will wait for interpreter to sync up "
           + "on the trace emission immediately after it: {}", emissionToSyncUpOn);
     } else if (opsEmission instanceof PCInstruction
@@ -251,7 +257,7 @@ public final class TraceFileVerifier {
       isPausedAndWaitingToSyncUp = true;
       emissionToSyncUpOn = traceEmission;
 
-      log.warn("[VERIFIER:PAUSING] Ignoring optional OPS instruction (" + opsEmission + ") "
+      log.debug("[VERIFIER:PAUSING] Ignoring optional OPS instruction (" + opsEmission + ") "
           + "and waiting for OPS to emit: {}", emissionToSyncUpOn);
 
       numOPSOptionalPCInstrsEmitted++;
@@ -389,6 +395,23 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new EndScrolls();
+      }
+
+      final Matcher beginLevelMatcher =
+          beginLevelPattern.matcher(currTraceLine);
+      if (beginLevelMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new BeginLevel(
+            Integer.parseInt(beginLevelMatcher.group(GROUP1)),
+            Integer.parseInt(beginLevelMatcher.group(GROUP2)),
+            Integer.parseInt(beginLevelMatcher.group(GROUP3)),
+            Integer.parseInt(beginLevelMatcher.group(GROUP4)),
+            Integer.parseInt(beginLevelMatcher.group(GROUP5)),
+            Integer.parseInt(beginLevelMatcher.group(GROUP6)),
+            beginLevelMatcher.group(GROUP7) != null,
+            beginLevelMatcher.group(GROUP8) != null,
+            Integer.parseInt(beginLevelMatcher.group(GROUP9)));
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

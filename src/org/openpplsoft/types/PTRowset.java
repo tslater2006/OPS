@@ -27,6 +27,7 @@ import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
+import org.openpplsoft.trace.*;
 
 /**
  * Represents a PeopleTools rowset object.
@@ -157,14 +158,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
   }
 
   public void emitScrolls(final String indent) {
-    if (this.primaryRecDefn == null) {
-      log.debug("{}Scroll: {}", indent, null);
-    } else {
-      log.debug("{}Scroll: {}", indent, this.primaryRecDefn.RECNAME);
-    }
-
     for (int i = 0; i < this.rows.size(); i++) {
-      log.debug("{}Row {}", indent, i);
       this.rows.get(i).emitScrolls(indent);
     }
   }
@@ -578,7 +572,9 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     // Return the number of rows read from the fill operation.
     Environment.pushToCallStack(new PTInteger(rowsRead));
 
-    ComponentBuffer.emitScrolls("After ScrollSelect");
+    TraceFileVerifier.submitEnforcedEmission(new BeginScrolls("After ScrollSelect"));
+    ComponentBuffer.getLevelZeroRowset().emitScrolls("");
+    TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
   }
 
   @Override

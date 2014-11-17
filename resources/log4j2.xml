@@ -22,12 +22,11 @@
       <AppenderRef ref="Console-Less"/>
     </Root>
 
-    <Logger name="org.openpplsoft.sql" level="WARN"/>
+<!--    <Logger name="org.openpplsoft.sql" level="WARN"/>
     <Logger name="org.openpplsoft.runtime" level="INFO"/>
     <Logger name="org.openpplsoft.runtime.Scope" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime.DefnCache" level="WARN"/>
     <Logger name="org.openpplsoft.runtime.Environment" level="DEBUG"/>
-    <Logger name="org.openpplsoft.runtime.TraceFileVerifier" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime.InterpretSupervisor" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime.ComponentStructureVerifier" level="WARN"/>
     <Logger name="org.openpplsoft.runtime.GlobalFnLibrary" level="DEBUG"/>
@@ -43,7 +42,8 @@
     <Logger name="org.openpplsoft.antlr4" level="DEBUG"/>
     <Logger name="org.openpplsoft.pt.pages" level="DEBUG"/>
     <Logger name="org.openpplsoft.buffers" level="WARN"/>
-    <Logger name="org.openpplsoft.buffers.ComponentBuffer" level="DEBUG"/>
-    <Logger name="org.openpplsoft.buffers.RecordBuffer" level="DEBUG"/>
+-->
+    <Logger name="org.openpplsoft.buffers.ComponentBuffer" level="INFO"/>
+    <Logger name="org.openpplsoft.runtime.TraceFileVerifier" level="DEBUG"/>
   </Loggers>
 </Configuration>

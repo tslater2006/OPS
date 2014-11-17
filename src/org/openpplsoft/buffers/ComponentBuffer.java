@@ -144,12 +144,6 @@ public final class ComponentBuffer {
     return cBuffer;
   }
 
-  public static void emitScrolls(final String phase) {
-    TraceFileVerifier.submitEnforcedEmission(new BeginScrolls(phase));
-    cBuffer.emitScrolls("");
-    TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
-  }
-
   public static PTRowset getLevelZeroRowset() {
     // Remember, null is used here b/c the level 0 scroll does
     // not have a primary record.
@@ -179,7 +173,9 @@ public final class ComponentBuffer {
             "Result set for search record fill has more than "
             + "one record.");
       }
-      ComponentBuffer.emitScrolls("Search Results");
+      TraceFileVerifier.submitEnforcedEmission(new BeginScrolls("Search Results"));
+      cBuffer.emitScrolls("");
+      TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
     }
   }
 
@@ -364,8 +360,8 @@ public final class ComponentBuffer {
         for (int i = 0; i < indent; i++) {
           b.append(" ");
         }
-        log.info(b.toString());
-        log.info("=======================================================");
+        log.debug(b.toString());
+        log.debug("=======================================================");
       } else if (buf instanceof RecordBuffer) {
         final RecordBuffer rbuf = (RecordBuffer) buf;
         final StringBuilder b = new StringBuilder();
@@ -373,7 +369,7 @@ public final class ComponentBuffer {
           b.append(" ");
         }
         b.append(" + ").append(rbuf.getRecName());
-        log.info(b.toString());
+        log.debug(b.toString());
       } else {
 
         final RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
@@ -382,7 +378,7 @@ public final class ComponentBuffer {
           b.append(" ");
         }
         b.append("   - ").append(fbuf.getFldName());
-        log.info(b.toString());
+        log.debug(b.toString());
       }
     }
   }

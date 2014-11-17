@@ -44,7 +44,7 @@ public final class TraceFileVerifier {
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
-      beginScrollsPattern, endScrollsPattern, beginLevelPattern;
+      beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -95,7 +95,9 @@ public final class TraceFileVerifier {
     endScrollsPattern =
         Pattern.compile("End\\s+Scrolls");
     beginLevelPattern =
-        Pattern.compile("Begin\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]\\s+occcnt=(\\d+)\\s+activecnt=(\\d+)\\s+hiddencnt=(\\d+)\\s+scrlcnt=(\\d+)\\s+flags=[\\d\\w]+\\s+(noautoselect\\s+)?(noautoupdate\\s+)?nrec=(\\d+)");
+        Pattern.compile("Begin\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]\\s+occcnt=(\\d+)\\s+activecnt=(\\d+)\\s+hiddencnt=(\\d+)\\s+scrlcnt=(\\d+)\\s+flags=\\S+\\s+(noautoselect\\s+)?(noautoupdate\\s+)?nrec=(\\d+)");
+    recPattern =
+        Pattern.compile("Rec\\s+([0-9A-Z_]+)\\s+\\(recdefn\\s+\\S+\\)\\s+keyrec=(-?\\d+)\\s+keyfield=(-?\\d+)");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -412,6 +414,17 @@ public final class TraceFileVerifier {
             beginLevelMatcher.group(GROUP7) != null,
             beginLevelMatcher.group(GROUP8) != null,
             Integer.parseInt(beginLevelMatcher.group(GROUP9)));
+      }
+
+      final Matcher recMatcher =
+          recPattern.matcher(currTraceLine);
+      if (recMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new RecInScroll(
+            recMatcher.group(GROUP1),
+            Integer.parseInt(recMatcher.group(GROUP2)),
+            Integer.parseInt(recMatcher.group(GROUP3)));
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

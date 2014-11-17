@@ -536,6 +536,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
           + "be passed before the required RecordLiteral, so may need to support "
           + "this now.");
     }
+
     final Record recToSelectFrom =
         DefnCache.getRecord(((PTRecordLiteral) args.get(0)).read());
     int nextBindVarIdx = 1;
@@ -563,7 +564,19 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
         recToSelectFrom, whereStr, bindVals.toArray(new String[bindVals.size()]));
     OPSResultSet rs = ostmt.executeQuery();
 
-    throw new OPSVMachRuntimeException("TODO: Support Select on Rowset.");
+    int rowsRead = 0;
+    while (rs.next()) {
+      rowsRead++;
+      throw new OPSVMachRuntimeException("TODO: Support reading records from ResultSet "
+          + "into EXISTING rows in this rowset (unlike Fill, which flushes before "
+          + "doing so.");
+    }
+
+    rs.close();
+    ostmt.close();
+
+    // Return the number of rows read from the fill operation.
+    Environment.pushToCallStack(new PTInteger(rowsRead));
   }
 
   @Override

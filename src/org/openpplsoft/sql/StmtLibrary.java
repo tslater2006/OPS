@@ -308,7 +308,6 @@ public final class StmtLibrary {
 
     final String newWhereStr = processAndExpandWhereStr(rootAlias, whereStr);
     query.append(newWhereStr);
-    log.fatal("Select query: {}", query);
 
     int i = 0;
     final List<RecordField> rfList = recDefn.getExpandedFieldList();

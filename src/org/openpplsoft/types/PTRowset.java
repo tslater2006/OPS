@@ -156,7 +156,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     return null;
   }
 
-  public void logContents(final String indent) {
+  public void emitScrolls(final String indent) {
     if (this.primaryRecDefn == null) {
       log.debug("{}Scroll: {}", indent, null);
     } else {
@@ -165,7 +165,7 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
     for (int i = 0; i < this.rows.size(); i++) {
       log.debug("{}Row {}", indent, i);
-      this.rows.get(i).logContents(indent);
+      this.rows.get(i).emitScrolls(indent);
     }
   }
 
@@ -577,6 +577,8 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
 
     // Return the number of rows read from the fill operation.
     Environment.pushToCallStack(new PTInteger(rowsRead));
+
+    ComponentBuffer.emitScrolls("After ScrollSelect");
   }
 
   @Override

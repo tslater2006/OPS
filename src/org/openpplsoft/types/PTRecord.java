@@ -126,7 +126,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     return this.recBuffer != null;
   }
 
-  public void logContents(final String indent) {
+  public void emitScrolls(final String indent) {
 
     // Do not log contents of a record that is not in the component buffer.
     if (this.recBuffer == null) {
@@ -136,7 +136,7 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     log.debug("{}CRecBuf {}", indent, this.recDefn.RECNAME);
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
-      entry.getValue().deref().logContents(indent + "  ");
+      entry.getValue().deref().emitScrolls(indent + "  ");
     }
   }
 

@@ -22,6 +22,7 @@ import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
+import org.openpplsoft.trace.*;
 import org.openpplsoft.types.*;
 
 /**
@@ -143,8 +144,9 @@ public final class ComponentBuffer {
     return cBuffer;
   }
 
-  public static void logContents() {
-    cBuffer.logContents("");
+  public static void emitScrolls(final String phase) {
+    TraceFileVerifier.submitEnforcedEmission(new BeginScrolls(phase));
+    cBuffer.emitScrolls("");
   }
 
   public static PTRowset getLevelZeroRowset() {
@@ -176,6 +178,7 @@ public final class ComponentBuffer {
             "Result set for search record fill has more than "
             + "one record.");
       }
+      ComponentBuffer.emitScrolls("Search Results");
     }
   }
 

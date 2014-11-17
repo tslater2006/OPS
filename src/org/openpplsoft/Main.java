@@ -98,8 +98,6 @@ public final class Main {
       ComponentBuffer.fireEvent(PCEvent.ROW_INIT, new FireEventSummary());
       ComponentBuffer.fireEvent(PCEvent.POST_BUILD, new FireEventSummary());
 
-      ComponentBuffer.logContents();
-
       TraceFileVerifier.logVerificationSummary(false);
 
     } catch (final OPSVMachRuntimeException opsvmre) {

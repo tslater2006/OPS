@@ -117,7 +117,7 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     return this.recFieldBuffer != null;
   }
 
-  public void logContents(final String indent) {
+  public void emitScrolls(final String indent) {
 
     // Do not log contents of a field that is not in the component buffer.
     if (this.recFieldBuffer == null) {

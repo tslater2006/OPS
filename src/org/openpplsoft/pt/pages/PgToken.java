@@ -79,12 +79,30 @@ public class PgToken {
   public String toString() {
 
     StringBuilder b = new StringBuilder();
-    b.append("PgToken: ").append(this.flags);
 
-    if(this.RECNAME != null && this.RECNAME.length() > 0) { b.append(", ").append("RECNAME=").append(this.RECNAME); }
-    if(this.FIELDNAME != null && this.FIELDNAME.length() > 0) { b.append(", ").append("FIELDNAME=").append(this.FIELDNAME); }
-    if(this.SUBPNLNAME != null && this.SUBPNLNAME.length() > 0) { b.append(", ").append("SUBPNLNAME=").append(this.SUBPNLNAME); }
-    if(this.primaryRecName != null && this.primaryRecName.length() > 0) { b.append(", ").append("primaryRecName=").append(this.primaryRecName); }
+    if (this.flags.contains(PFlag.PAGE)) {
+      b.append(this.SUBPNLNAME);
+
+      if(this.RECNAME != null && this.RECNAME.length() > 0) {
+        b.append(", ").append("RECNAME=").append(this.RECNAME);
+      }
+
+      if(this.FIELDNAME != null && this.FIELDNAME.length() > 0) {
+        b.append(", ").append("FIELDNAME=").append(this.FIELDNAME);
+      }
+    } else if (!this.flags.contains(PFlag.END_OF_PAGE)) {
+      b.append(this.RECNAME).append(".").append(this.FIELDNAME);
+
+      if(this.SUBPNLNAME != null && this.SUBPNLNAME.length() > 0) {
+        b.append("SUBPNLNAME=").append(this.SUBPNLNAME);
+      }
+    }
+
+    if(this.primaryRecName != null && this.primaryRecName.length() > 0) {
+      b.append(", ").append("primaryRecName=").append(this.primaryRecName);
+    }
+
+    b.append(this.flags);
 
     return b.toString();
   }

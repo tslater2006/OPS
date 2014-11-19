@@ -263,6 +263,37 @@ public final class ComponentBuffer {
     }
   }
 
+  public static void logPageHierarchyVisual() {
+
+    PgToken tok;
+    PgTokenStream pfs;
+
+    for (Page p : compDefn.getPages()) {
+
+      log.info("Root page: {}", p.getPNLNAME());
+
+      String indent = "   ";
+      pfs = new PgTokenStream(p.getPNLNAME());
+
+      while ((tok = pfs.next()) != null) {
+
+        if (tok.flags.contains(PFlag.PAGE)) {
+          log.info("{}Page:{}", indent, tok);
+          indent = indent.concat("   ");
+          continue;
+        }
+
+        if (tok.flags.contains(PFlag.END_OF_PAGE)) {
+          indent = indent.substring(3);
+          log.info("{}{}", indent, tok);
+          continue;
+        }
+
+        log.info("{}{}", indent, tok);
+      }
+    }
+  }
+
   /**
    * Add a page field to the appropriate ScrollBuffer
    * in the ComponentBuffer.

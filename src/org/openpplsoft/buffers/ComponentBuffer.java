@@ -197,8 +197,6 @@ public final class ComponentBuffer {
     PgToken tok;
     PgTokenStream pfs;
 
-    final byte REL_DISP_FLAG = (byte) 16;
-
     for (Page p : compDefn.getPages()) {
       pfs = new PgTokenStream(p.getPNLNAME());
 

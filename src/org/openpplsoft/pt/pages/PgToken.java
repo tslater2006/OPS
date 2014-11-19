@@ -52,11 +52,6 @@ public class PgToken {
       return false;
     }
 
-    // Related display fields should not be added.
-    if(isRelatedDisplay()) {
-      return false;
-    }
-
     /*
      * TODO: Keep an eye on these two checks involving subrecords.
      * It may be necessary to resolve subrecord fields to their parent/gp/etc.,

@@ -138,7 +138,7 @@ public class ScrollBuffer implements IStreamableBuffer {
       this.recBufferTable.put(r.getRecName(), r);
       this.orderedRecBuffers.add(r);
     }
-    r.addPageField(tok.RECNAME, tok.FIELDNAME);
+    r.addPageField(tok.RECNAME, tok.FIELDNAME, tok.isRelatedDisplay());
   }
 
   /**

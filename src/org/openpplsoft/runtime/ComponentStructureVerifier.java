@@ -71,7 +71,14 @@ public class ComponentStructureVerifier {
               "during component structure validation.");
         }
       } else if(buf instanceof RecordBuffer) {
+
         RecordBuffer rbuf = (RecordBuffer) buf;
+
+        log.fatal("Solely? {}", rbuf.isComposedSolelyOfRelatedDisplayFields());
+        if (rbuf.isComposedSolelyOfRelatedDisplayFields()) {
+          continue;
+        }
+
         StringBuilder b = new StringBuilder();
         for(int i=0; i<indent; i++){b.append(" ");}
         b.append(" + ").append(rbuf.getRecName());
@@ -107,3 +114,4 @@ public class ComponentStructureVerifier {
     hasBeenVerified = true;
   }
 }
+

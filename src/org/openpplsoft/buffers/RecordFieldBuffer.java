@@ -20,6 +20,7 @@ public class RecordFieldBuffer implements IStreamableBuffer,
   private Record recDefn;
   private RecordField fldDefn;
   private RecordBuffer parentRecordBuffer;
+  private boolean isRelatedDisplayField;
 
   // Used for reading.
   private boolean hasEmittedSelf;
@@ -31,11 +32,12 @@ public class RecordFieldBuffer implements IStreamableBuffer,
    * @param parent the field's parent RecordBuffer
    */
   public RecordFieldBuffer(final String r, final String f,
-      final RecordBuffer parent) {
+      final RecordBuffer parent, final boolean isRelatedDisplayField) {
     this.fldName = f;
     this.recDefn = DefnCache.getRecord(r);
     this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
     this.parentRecordBuffer = parent;
+    this.isRelatedDisplayField = isRelatedDisplayField;
 
     if (this.fldDefn == null) {
       throw new OPSVMachRuntimeException("Field not found on the record "
@@ -62,6 +64,10 @@ public class RecordFieldBuffer implements IStreamableBuffer,
 
   public RecordField getRecFldDefn() {
     return this.fldDefn;
+  }
+
+  public boolean isRelatedDisplayField() {
+    return this.isRelatedDisplayField;
   }
 
   /**

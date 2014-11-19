@@ -76,7 +76,7 @@ public class RecordBuffer implements IStreamableBuffer {
     this.recDefn = DefnCache.getRecord(this.recName);
     final RecordField EFFDT = this.recDefn.fieldTable.get("EFFDT");
     if (EFFDT != null && EFFDT.isKey()) {
-      this.addPageField(this.recName, "EFFDT");
+      this.addPageField(this.recName, "EFFDT", false);
     }
   }
 
@@ -108,7 +108,6 @@ public class RecordBuffer implements IStreamableBuffer {
     return this.fieldBufferTable.containsKey(fieldName);
   }
 
-
   /**
    * Get whether or not this record buffer is the primary
    * record for its parent ScrollBuffer.
@@ -133,10 +132,10 @@ public class RecordBuffer implements IStreamableBuffer {
    * @param ptFIELDNAME the FIELDNAME of the page field to add
    */
   public void addPageField(final String ptRECNAME,
-      final String ptFIELDNAME) {
+      final String ptFIELDNAME, boolean isRelatedDisplayField) {
     RecordFieldBuffer f = this.fieldBufferTable.get(ptFIELDNAME);
     if (f == null) {
-      f = new RecordFieldBuffer(ptRECNAME, ptFIELDNAME, this);
+      f = new RecordFieldBuffer(ptRECNAME, ptFIELDNAME, this, isRelatedDisplayField);
       this.fieldBufferTable.put(f.getFldName(), f);
       this.fieldBuffers.add(f);
 
@@ -167,13 +166,25 @@ public class RecordBuffer implements IStreamableBuffer {
         // if the field is in a subrecord, the RECNAME in the
         // FieldBuffer will be that of the subrecord itself.
         final RecordFieldBuffer fldBuffer =
-            new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this);
+            new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this, false);
         this.fieldBufferTable.put(fldBuffer.getFldName(), fldBuffer);
         this.fieldBuffers.add(fldBuffer);
       }
 
       this.hasBeenExpanded = true;
     }
+  }
+
+  public boolean isComposedSolelyOfRelatedDisplayFields() {
+    for (final RecordFieldBuffer buf : this.fieldBuffers) {
+      log.fatal("Record field: {}", buf.getFldName());
+    }
+    for (final RecordFieldBuffer buf : this.fieldBuffers) {
+      if (!buf.isRelatedDisplayField()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

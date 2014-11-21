@@ -366,6 +366,26 @@ public final class ComponentBuffer {
     lvlZeroScrollBuffer.resetCursors();
   }
 
+  public static void expandRecordBuffersWhereNecessary() {
+    IStreamableBuffer buf;
+    ComponentBuffer.resetCursors();
+    while ((buf = ComponentBuffer.next()) != null) {
+      if (buf instanceof RecordFieldBuffer) {
+        ((RecordFieldBuffer) buf).expandParentRecordBufferIfNecessary();
+      }
+    }
+  }
+
+  public static void addEffDtKeyWhereNecessary() {
+    IStreamableBuffer buf;
+    ComponentBuffer.resetCursors();
+    while ((buf = ComponentBuffer.next()) != null) {
+      if (buf instanceof RecordBuffer) {
+        ((RecordBuffer) buf).addEffDtKeyIfNecessary();
+      }
+    }
+  }
+
   /**
    * Prints the structure of this ComponentBuffer; includes scroll levels,
    * primary record names, and all included child records. Indentation is

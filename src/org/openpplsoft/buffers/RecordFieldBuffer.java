@@ -8,6 +8,7 @@
 package org.openpplsoft.buffers;
 
 import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
 
 /**
@@ -20,7 +21,7 @@ public class RecordFieldBuffer implements IStreamableBuffer,
   private Record recDefn;
   private RecordField fldDefn;
   private RecordBuffer parentRecordBuffer;
-  private boolean isRelatedDisplayField;
+  private PgToken srcPgTok;
 
   // Used for reading.
   private boolean hasEmittedSelf;
@@ -32,12 +33,12 @@ public class RecordFieldBuffer implements IStreamableBuffer,
    * @param parent the field's parent RecordBuffer
    */
   public RecordFieldBuffer(final String r, final String f,
-      final RecordBuffer parent, final boolean isRelatedDisplayField) {
+      final RecordBuffer parent, final PgToken srcTok) {
     this.fldName = f;
     this.recDefn = DefnCache.getRecord(r);
     this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
     this.parentRecordBuffer = parent;
-    this.isRelatedDisplayField = isRelatedDisplayField;
+    this.srcPgTok = srcTok;
 
     if (this.fldDefn == null) {
       throw new OPSVMachRuntimeException("Field not found on the record "
@@ -48,6 +49,10 @@ public class RecordFieldBuffer implements IStreamableBuffer,
 
   public RecordBuffer getParentRecordBuffer() {
     return this.parentRecordBuffer;
+  }
+
+  public PgToken getSrcPageToken() {
+    return this.srcPgTok;
   }
 
   /**
@@ -67,20 +72,22 @@ public class RecordFieldBuffer implements IStreamableBuffer,
   }
 
   public boolean isRelatedDisplayField() {
-    return this.isRelatedDisplayField;
+    return this.srcPgTok != null && this.srcPgTok.isRelatedDisplay();
   }
 
-  /**
-   * Expands the entire parent record into the parent
-   * record buffer based on PeopleTools logic.
-   */
-  public void checkFieldBufferRules() {
+  public boolean isInvisibleField() {
+    return this.srcPgTok != null && this.srcPgTok.isInvisible();
+  }
+
+  public void expandParentRecordBufferIfNecessary() {
     /*
      * If a level 0, non-derived record contains at least one field
-     * that is neither a search key nor an alternate key, all of the
+     * that is neither a search key nor an alternate key, and if the
+     * record has at least one structural field, all of the
      * record's fields should be present in the component buffer.
      */
     if (this.parentRecordBuffer.getScrollLevel() == 0
+        && this.parentRecordBuffer.doesContainStructuralFields()
         && !this.recDefn.isDerivedWorkRecord()
         && !this.fldDefn.isAlternateSearchKey()) {
       this.parentRecordBuffer.expandEntireRecordIntoBuffer();

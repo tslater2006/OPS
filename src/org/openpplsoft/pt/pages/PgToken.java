@@ -20,6 +20,7 @@ public class PgToken {
   public int OCCURSLEVEL;
   public byte FIELDUSE;
 
+  private final byte INVISIBLE_FLAG = (byte) 2;
   private final byte DISP_CNTRL_FLAG = (byte) 8;
   private final byte REL_DISP_FLAG = (byte) 16;
 
@@ -35,6 +36,10 @@ public class PgToken {
 
   public PgToken(EnumSet<PFlag> flagSet) {
     this.flags = EnumSet.copyOf(flagSet);
+  }
+
+  public boolean isInvisible() {
+    return ((this.FIELDUSE & this.INVISIBLE_FLAG) > 0);
   }
 
   public boolean isDisplayControl() {
@@ -103,6 +108,8 @@ public class PgToken {
     }
 
     b.append(this.flags);
+    b.append(", reldisp?").append(this.isRelatedDisplay());
+    b.append(", invis?").append(this.isInvisible());
 
     return b.toString();
   }

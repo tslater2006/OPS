@@ -38,14 +38,17 @@ public class ComponentStructureVerifier {
 
     String line = null;
     String lineParts[];
+    boolean skipUpcomingRecordFields = false;
 
     ComponentBuffer.resetCursors();
     while((buf = ComponentBuffer.next()) != null) {
 
-      try {
-        line = reader.readLine().trim();
-      } catch(final java.io.IOException ioe) {
-        throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
+      if (!skipUpcomingRecordFields) {
+        try {
+          line = reader.readLine().trim();
+        } catch(final java.io.IOException ioe) {
+          throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
+        }
       }
 
       lineParts = line.split(";");
@@ -53,6 +56,7 @@ public class ComponentStructureVerifier {
       if(buf instanceof ScrollBuffer) {
 
         ScrollBuffer sbuf = (ScrollBuffer) buf;
+        skipUpcomingRecordFields = false;
         indent = sbuf.getScrollLevel() * 3;
 
         StringBuilder b = new StringBuilder();
@@ -73,9 +77,11 @@ public class ComponentStructureVerifier {
       } else if(buf instanceof RecordBuffer) {
 
         RecordBuffer rbuf = (RecordBuffer) buf;
+        skipUpcomingRecordFields = false;
 
-        log.fatal("Solely? {}", rbuf.isComposedSolelyOfRelatedDisplayFields());
-        if (rbuf.isComposedSolelyOfRelatedDisplayFields()) {
+        if (!rbuf.doesContainStructuralFields()
+            || PSDefn.isSystemRecord(rbuf.getRecName())) {
+          skipUpcomingRecordFields = true;
           continue;
         }
 
@@ -87,14 +93,20 @@ public class ComponentStructureVerifier {
         if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
             !lineParts[1].replaceAll("-", "_").equals(rbuf.getRecName())) {
           throw new OPSVMachRuntimeException("Incorrect/absent record token encountered " +
-              "during component structure validation.");
+              "during component structure validation; expected: " + line + "; received: "
+              + rbuf.getRecName());
         }
       } else {
+
+        if (skipUpcomingRecordFields) {
+          continue;
+        }
+
         RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
         StringBuilder b = new StringBuilder();
         for(int i=0; i<indent; i++){b.append(" ");}
         b.append("   - ").append(fbuf.getFldName());
-        log.info(b.toString());
+        log.info("{} | {}", b.toString(), fbuf.getSrcPageToken());
 
         if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
             !lineParts[1].replaceAll("-", "_").equals(fbuf.getFldName())) {
@@ -104,13 +116,18 @@ public class ComponentStructureVerifier {
       }
     }
 
-    try {
-      if(!reader.readLine().trim().equals("END-COMPONENT-STRUCTURE")) {
-        throw new OPSVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
+    if (!skipUpcomingRecordFields) {
+      try {
+        line = reader.readLine();
+      } catch(final java.io.IOException ioe) {
+        throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
       }
-    } catch(final java.io.IOException ioe) {
-      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     }
+
+    if(!line.trim().equals("END-COMPONENT-STRUCTURE")) {
+      throw new OPSVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
+    }
+
     hasBeenVerified = true;
   }
 }

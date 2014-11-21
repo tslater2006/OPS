@@ -8,7 +8,9 @@
 package org.openpplsoft.pt;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Defines PeopleTools/PeopleSoft constants and utility methods
@@ -59,7 +61,7 @@ public final class PSDefn {
   public static final int DFLTACTION_UPDATE_DISPLAY_ALL = 2;
   public static final int DFLTACTION_CORRECTION = 3;
 
-  private static final Map<String, Boolean> SYSTEM_RECORDS;
+  private static final Set<String> SYSTEM_RECORDS;
 
   private static final String[] DEFN_LITERAL_RESERVED_WORDS = new String[]{
     "BarName",
@@ -108,8 +110,8 @@ public final class PSDefn {
   };
 
   static {
-    SYSTEM_RECORDS = new HashMap<String, Boolean>();
-    SYSTEM_RECORDS.put("PSXLATITEM", true);
+    SYSTEM_RECORDS = new HashSet<String>();
+    SYSTEM_RECORDS.add("PSXLATITEM");
 
     // Index defn literal reserved words for O(1) lookup.
     DEFN_LITERAL_RESERVED_WORDS_TABLE = new HashMap<String, String>();
@@ -133,7 +135,7 @@ public final class PSDefn {
    * @return true if record is a system record, false otherwise
    */
   public static boolean isSystemRecord(final String recName) {
-    return SYSTEM_RECORDS.get(recName) != null;
+    return SYSTEM_RECORDS.contains(recName);
   }
 
   /**

@@ -131,6 +131,7 @@ public class ScrollBuffer implements IStreamableBuffer {
    *    to be added.
    */
   public void addPageField(final PgToken tok) {
+
     RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
     if (r == null) {
       r = new RecordBuffer(this, tok.RECNAME, this.scrollLevel,
@@ -138,7 +139,7 @@ public class ScrollBuffer implements IStreamableBuffer {
       this.recBufferTable.put(r.getRecName(), r);
       this.orderedRecBuffers.add(r);
     }
-    r.addPageField(tok.RECNAME, tok.FIELDNAME, tok.isRelatedDisplay());
+    r.addPageField(tok.RECNAME, tok.FIELDNAME, tok);
   }
 
   /**

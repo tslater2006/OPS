@@ -87,6 +87,8 @@ public final class Main {
       ComponentBuffer.fillSearchRecord();
 
       ComponentBuffer.assembleStructure();
+      ComponentBuffer.expandRecordBuffersWhereNecessary();
+      ComponentBuffer.addEffDtKeyWhereNecessary();
       ComponentBuffer.logPageHierarchyVisual();
       ComponentBuffer.printStructure();
       ComponentStructureVerifier.verify(profileToRun);

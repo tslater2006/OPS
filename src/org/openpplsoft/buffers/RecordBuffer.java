@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.*;
 import org.openpplsoft.types.*;
@@ -65,19 +66,7 @@ public class RecordBuffer implements IStreamableBuffer {
 
     this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
     this.fieldBuffers = new ArrayList<RecordFieldBuffer>();
-
-    /*
-     * TODO(mquinn): This may not be the correct approach.
-     * Not sure if EFFDT should always be in the component buffer, or if
-     * it should only be there if based on the presence of specific keys.
-     * This may even need to be broader than EFFDT; i.e., if any level-0
-     * record contains keys, add them now.
-     */
     this.recDefn = DefnCache.getRecord(this.recName);
-    final RecordField EFFDT = this.recDefn.fieldTable.get("EFFDT");
-    if (EFFDT != null && EFFDT.isKey()) {
-      this.addPageField(this.recName, "EFFDT", false);
-    }
   }
 
   /**
@@ -108,6 +97,13 @@ public class RecordBuffer implements IStreamableBuffer {
     return this.fieldBufferTable.containsKey(fieldName);
   }
 
+  public void addEffDtKeyIfNecessary() {
+    final RecordField EFFDT = this.recDefn.fieldTable.get("EFFDT");
+    if (this.recDefn.isDerivedWorkRecord() && EFFDT != null && EFFDT.isKey()) {
+      this.addPageField(this.recName, "EFFDT", null);
+    }
+  }
+
   /**
    * Get whether or not this record buffer is the primary
    * record for its parent ScrollBuffer.
@@ -132,16 +128,20 @@ public class RecordBuffer implements IStreamableBuffer {
    * @param ptFIELDNAME the FIELDNAME of the page field to add
    */
   public void addPageField(final String ptRECNAME,
-      final String ptFIELDNAME, boolean isRelatedDisplayField) {
+      final String ptFIELDNAME, final PgToken srcTok) {
+
+    if (!ptRECNAME.equals(this.recName)) {
+      throw new OPSVMachRuntimeException("Illegal attempt to add page "
+        + "field " + ptRECNAME + "." + ptFIELDNAME + " ("
+        + srcTok + ") to record with different name"
+        + this.recName);
+    }
+
     RecordFieldBuffer f = this.fieldBufferTable.get(ptFIELDNAME);
     if (f == null) {
-      f = new RecordFieldBuffer(ptRECNAME, ptFIELDNAME, this, isRelatedDisplayField);
+      f = new RecordFieldBuffer(ptRECNAME, ptFIELDNAME, this, srcTok);
       this.fieldBufferTable.put(f.getFldName(), f);
       this.fieldBuffers.add(f);
-
-      // Ensure this is done after adding to the table,
-      // could cause infinte loop otherwise.
-      f.checkFieldBufferRules();
     }
   }
 
@@ -155,8 +155,12 @@ public class RecordBuffer implements IStreamableBuffer {
    */
   public void expandEntireRecordIntoBuffer() {
     if (!this.hasBeenExpanded) {
-      this.fieldBufferTable.clear();
-      this.fieldBuffers.clear();
+
+      final Map<String, RecordFieldBuffer> newTable =
+          new HashMap<String, RecordFieldBuffer>();
+      final List<RecordFieldBuffer> newList =
+          new ArrayList<RecordFieldBuffer>();
+
       final Record recDefn = DefnCache.getRecord(this.recName);
       final List<RecordField> expandedFieldList =
           recDefn.getExpandedFieldList();
@@ -165,26 +169,38 @@ public class RecordBuffer implements IStreamableBuffer {
         // Note: the true RECNAME is preserved in the FieldBuffer;
         // if the field is in a subrecord, the RECNAME in the
         // FieldBuffer will be that of the subrecord itself.
+
+        PgToken srcPageToken = null;
+        if (this.fieldBufferTable.containsKey(fld.FIELDNAME)) {
+          srcPageToken = this.fieldBufferTable.get(fld.FIELDNAME).getSrcPageToken();
+        }
+
         final RecordFieldBuffer fldBuffer =
-            new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this, false);
-        this.fieldBufferTable.put(fldBuffer.getFldName(), fldBuffer);
-        this.fieldBuffers.add(fldBuffer);
+            new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this, srcPageToken);
+        newTable.put(fldBuffer.getFldName(), fldBuffer);
+        newList.add(fldBuffer);
       }
 
+      this.fieldBufferTable = newTable;
+      this.fieldBuffers = newList;
       this.hasBeenExpanded = true;
     }
   }
 
-  public boolean isComposedSolelyOfRelatedDisplayFields() {
+  public boolean doesContainStructuralFields() {
+
+/*    log.debug("Begin fields for record: {}", this.recName);
     for (final RecordFieldBuffer buf : this.fieldBuffers) {
-      log.fatal("Record field: {}", buf.getFldName());
+      log.debug("{} | {}", buf.getFldName(), buf.getSrcPageToken());
     }
+    log.debug("End fields for record: {}", this.recName);*/
+
     for (final RecordFieldBuffer buf : this.fieldBuffers) {
       if (!buf.isRelatedDisplayField()) {
-        return false;
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   /**

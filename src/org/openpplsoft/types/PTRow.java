@@ -88,6 +88,12 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  /**
+   * CAUTION: Do not rely on this as a way to get the
+   * index for a record in all cases; this code does things
+   * (i.e., excluding system records from index increment) that
+   * may not apply to your needs.
+   */
   public int getIndexPositionOfRecord(final PTRecord rec) {
     int idxPos = 0;
     for (Map.Entry<String, PTRecord> entry
@@ -95,7 +101,12 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
       if (entry.getValue() == rec) {
         return idxPos;
       }
-      idxPos++;
+
+      // System records are not given a numeric position
+      // and thus should not cause the index counter to be incremented.
+      if (!PSDefn.isSystemRecord(entry.getValue().getRecDefn().RECNAME)) {
+        idxPos++;
+      }
     }
 
     throw new OPSVMachRuntimeException("The provided record does "

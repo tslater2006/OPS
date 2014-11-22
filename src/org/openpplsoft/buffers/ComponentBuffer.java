@@ -457,7 +457,8 @@ public final class ComponentBuffer {
       * be aborted if record conditions are not met (see
       * method implementation for details).
       */
-      if (recDefn.isTable() || recDefn.isView()) {
+      if (record.getRecBuffer().doesContainStructuralFields()
+          && (recDefn.isTable() || recDefn.isView())) {
         record.firstPassFill();
       }
     }

@@ -143,6 +143,14 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
 
+    // Only fire events on records in the component structure. Make
+    // exception for SearchInit event.
+    if (event != PCEvent.SEARCH_INIT
+        && (this.recBuffer == null
+            || !this.recBuffer.doesContainStructuralFields())) {
+      return;
+    }
+
     // Fire event on each field in this record.
     for (Map.Entry<String, PTImmutableReference<PTField>> entry
         : this.fieldRefs.entrySet()) {
@@ -175,6 +183,10 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
 
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
+
+    if (this.recBuffer == null || !this.recBuffer.doesContainStructuralFields()) {
+      return;
+    }
 
     // Run non-constant (from record) field default processing
     // on each field in this record.

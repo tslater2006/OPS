@@ -1070,4 +1070,18 @@ public class GlobalFnLibrary {
 
     Environment.pushToCallStack(new PTString(trimmedStr));
   }
+
+  public void PT_Char() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if (args.size() != 1
+        || !(args.get(0) instanceof PTInteger)) {
+      throw new OPSVMachRuntimeException("Expected a single Integer "
+          + "arg to Char.");
+    }
+
+    final int n = ((PTInteger) args.get(0)).read();
+    Environment.pushToCallStack(new PTString(Character.toString((char) n)));
+  }
 }

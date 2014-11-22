@@ -139,12 +139,10 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
         this.registeredChildScrollDefns.size(),
         // All non-level 0 rows seem to have these flags enabled.
         (scrollLevel != 0), (scrollLevel != 0),
-        this.registeredRecordDefns.size()
-            + this.registeredChildScrollDefns.size()));
+        this.registeredRecordDefns.size()));
 
     for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
-      TraceFileVerifier.submitEnforcedEmission(new RecInScroll(
-          entry.getValue().getRecDefn().RECNAME, -1, -1));
+      entry.getValue().emitRecInScroll();
     }
 
     for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {

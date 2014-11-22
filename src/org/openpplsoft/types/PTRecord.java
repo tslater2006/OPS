@@ -126,6 +126,17 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     return this.recBuffer != null;
   }
 
+  public void emitRecInScroll() {
+    int keyrec = -1, keyfield = -1;
+    if (this.recBuffer != null
+        && this.recBuffer.isRelatedDisplayRecBuffer()) {
+      throw new OPSVMachRuntimeException("TODO: Encountered rel disp rec "
+          + "buffer; emit appropriate RecInScroll.");
+    }
+    TraceFileVerifier.submitEnforcedEmission(new RecInScroll(
+        this.recDefn.RECNAME, -1, -1));
+  }
+
   public void emitScrolls(final String indent) {
 
     // Do not log contents of a record that is not in the component buffer.

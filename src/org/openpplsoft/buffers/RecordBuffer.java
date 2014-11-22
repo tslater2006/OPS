@@ -191,12 +191,16 @@ public class RecordBuffer implements IStreamableBuffer {
    * There is no concept of a "related display record"
    * in PeopleSoft; this is the name I'm giving to
    * records in the component buffer that contain only
-   * a single related field buffer.
+   * a related field buffers.
    */
   public boolean isRelatedDisplayRecBuffer() {
-    return this.fieldBuffers.size() == 1
-        && this.fieldBuffers.get(0).getSrcPageToken() != null
-        && this.fieldBuffers.get(0).getSrcPageToken().isRelatedDisplay();
+    for (final RecordFieldBuffer fbuf : this.fieldBuffers) {
+      if (fbuf.getSrcPageToken() == null ||
+          !fbuf.getSrcPageToken().isRelatedDisplay()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public boolean doesContainStructuralFields() {

@@ -102,16 +102,6 @@ public class Page {
       pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
       pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
 
-      /*
-       * IMPORTANT NOTE: If you are having issues related to extraneous/missing
-       * emissions of PSMSGSETDEFN/PSMSGCATDEFN, add/move/del calls to get msg
-       * set from cache using this nbr; I do not know the exact enumeration of
-       * FIELDTYPE values for which the msg set should be retrieved, but the
-       * cases under which such calls do appear have been verified as being
-       * required during tracefile verification.
-       */
-      int msgSetNbr = rs.getInt("GRDLBLMSGSET");
-
       switch (rs.getInt("FIELDTYPE")) {
         case PSDefn.PageFieldType.STATIC_TEXT:
         case PSDefn.PageFieldType.FRAME:
@@ -140,7 +130,6 @@ public class Page {
         case PSDefn.PageFieldType.PUSHBTN_LINK_INST_MSG_ACTION:
           pf.flags.add(PFlag.PUSHBTN_LINK);
           this.tokens.add(pf);
-          if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
           break;
         case PSDefn.PageFieldType.SECPAGE:
           pf.flags.add(PFlag.PAGE);
@@ -162,7 +151,6 @@ public class Page {
                 + "either a blank RECNAME "
                 + "or FIELDNAME was encountered.");
           }
-          if(msgSetNbr != 0) { DefnCache.getMsgSet(msgSetNbr); }
       }
     }
 

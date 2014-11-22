@@ -497,6 +497,14 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     this.setBlank();
   }
 
+  public void PT_GetRelated() {
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+    if (args.size() != 1) {
+      throw new OPSVMachRuntimeException("Expected single arg to GetRelated.");
+    }
+    throw new OPSVMachRuntimeException("TODO: Support GetRelated on Field.");
+  }
+
   public void PT_GetLongLabel() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 1

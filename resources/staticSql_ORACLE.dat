@@ -253,3 +253,11 @@ select sysdate from dual
 #[enforced]:  false
 select * from PSOPRDEFN where OPRID = ?
 
+=!========================================================================
+
+###[label]:   query.GetUserOption
+#[enforced]:  false
+select USER_OPTION_VALUE from PSUSEROPTNDEFN 
+where OPTN_CATEGORY_LVL = ? and USEROPTN = ?
+
+

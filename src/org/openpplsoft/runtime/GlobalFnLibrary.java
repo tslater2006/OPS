@@ -18,7 +18,6 @@ import java.text.ParseException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1083,5 +1082,42 @@ public class GlobalFnLibrary {
 
     final int n = ((PTInteger) args.get(0)).read();
     Environment.pushToCallStack(new PTString(Character.toString((char) n)));
+  }
+
+  public void PT_GetUserOption() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if (args.size() != 2
+        || !(args.get(0) instanceof PTString)
+        || !(args.get(1) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected 2 String "
+          + "args to GetUserOption.");
+    }
+
+    final String[] bindVals = {
+      ((PTString) args.get(0)).read(),
+      ((PTString) args.get(1)).read()
+    };
+
+    final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
+        "query.GetUserOption", bindVals);
+    final OPSResultSet rs = ostmt.executeQuery();
+
+    if (rs.next()) {
+      Environment.pushToCallStack(
+          new PTString(rs.getString("USER_OPTION_VALUE")));
+    } else {
+      throw new OPSVMachRuntimeException("Expected a single record in GetUserOption "
+          + "result set, none returned.");
+    }
+
+    if (rs.next()) {
+      throw new OPSVMachRuntimeException("Expected a single record in GetUserOption "
+          + "result set, multiple returned.");
+    }
+
+    rs.close();
+    ostmt.close();
   }
 }

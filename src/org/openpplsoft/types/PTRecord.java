@@ -149,6 +149,11 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   }
 
   public void emitRecInScroll() {
+
+    if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
+      return;
+    }
+
     int keyrec = -1, keyfield = -1;
     if (this.recBuffer != null
         && this.recBuffer.isRelatedDisplayRecBuffer()) {
@@ -167,6 +172,10 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
   }
 
   public void emitScrolls(final String indent) {
+
+    if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
+      return;
+    }
 
     // Do not log contents of a record that is not in the component buffer.
     if (this.recBuffer == null) {

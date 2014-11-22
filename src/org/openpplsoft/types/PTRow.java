@@ -88,6 +88,20 @@ public final class PTRow extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  public int getIndexPositionOfRecord(final PTRecord rec) {
+    int idxPos = 0;
+    for (Map.Entry<String, PTRecord> entry
+        : this.recordMap.entrySet()) {
+      if (entry.getValue() == rec) {
+        return idxPos;
+      }
+      idxPos++;
+    }
+
+    throw new OPSVMachRuntimeException("The provided record does "
+        + "not exist in this row; unable to determine index position.");
+  }
+
   // Used to register record defns that don't have an associated
   // buffer (i.e., standalone rows/rowsets)
   public void registerRecordDefn(final Record recDefn) {

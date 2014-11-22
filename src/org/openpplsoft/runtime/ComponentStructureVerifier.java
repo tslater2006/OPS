@@ -106,7 +106,7 @@ public class ComponentStructureVerifier {
         StringBuilder b = new StringBuilder();
         for(int i=0; i<indent; i++){b.append(" ");}
         b.append("   - ").append(fbuf.getFldName());
-        log.info("{} | {}", b.toString(), fbuf.getSrcPageToken());
+        log.info(b.toString());
 
         if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
             !lineParts[1].replaceAll("-", "_").equals(fbuf.getFldName())) {

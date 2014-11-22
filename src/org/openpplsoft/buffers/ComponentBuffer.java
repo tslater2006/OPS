@@ -427,6 +427,7 @@ public final class ComponentBuffer {
           b.append(" ");
         }
         b.append("   - ").append(fbuf.getFldName());
+        b.append(" | ").append(fbuf.getSrcPageToken());
         log.debug(b.toString());
       }
     }

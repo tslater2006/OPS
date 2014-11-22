@@ -114,6 +114,10 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
     }
   }
 
+  public int getIndexPositionOfThisFieldInParentRecord() {
+    return this.parentRecord.getIndexPositionOfField(this);
+  }
+
   public boolean isInComponentBuffer() {
     return this.recFieldBuffer != null;
   }

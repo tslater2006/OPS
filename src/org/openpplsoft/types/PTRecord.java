@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.trace.*;
 import org.openpplsoft.sql.*;
@@ -126,15 +127,43 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     return this.recBuffer != null;
   }
 
+  public int getIndexPositionOfThisRecordInParentRow() {
+    return this.parentRow.getIndexPositionOfRecord(this);
+  }
+
+  public int getIndexPositionOfField(final PTField fld) {
+    int idxPos = 0;
+    for (Map.Entry<Integer, PTImmutableReference<PTField>> entry
+        : fieldRefIdxTable.entrySet()) {
+      if (entry.getValue().deref() == fld) {
+        // We use this counter, rather than the hashmap key, because
+        // the hashmap key is 1-based and this method should return the
+        // 0-based index.
+        return idxPos;
+      }
+      idxPos++;
+    }
+
+    throw new OPSVMachRuntimeException("The field provided does not exist "
+        + "on this record; unable to get index position.");
+  }
+
   public void emitRecInScroll() {
     int keyrec = -1, keyfield = -1;
     if (this.recBuffer != null
         && this.recBuffer.isRelatedDisplayRecBuffer()) {
-      throw new OPSVMachRuntimeException("TODO: Encountered rel disp rec "
-          + "buffer; emit appropriate RecInScroll.");
+      final RecordFieldBuffer relDispFldBuf = this.recBuffer.getFieldBuffers().get(0);
+      final PgToken relDispFldTok = relDispFldBuf.getSrcPageToken();
+      final PgToken dispCtrlFldTok = relDispFldTok.dispControlFieldTok;
+      final PTField dispCtrlFld =
+          this.resolveContextualCBufferRecordFieldReference(
+              dispCtrlFldTok.RECNAME, dispCtrlFldTok.FIELDNAME).deref();
+      keyrec = dispCtrlFld.getParentRecord()
+          .getIndexPositionOfThisRecordInParentRow();
+      keyfield = dispCtrlFld.getIndexPositionOfThisFieldInParentRecord();
     }
     TraceFileVerifier.submitEnforcedEmission(new RecInScroll(
-        this.recDefn.RECNAME, -1, -1));
+        this.recDefn.RECNAME, keyrec, keyfield));
   }
 
   public void emitScrolls(final String indent) {

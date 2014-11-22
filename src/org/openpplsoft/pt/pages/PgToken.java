@@ -17,8 +17,13 @@ public class PgToken {
   public String RECNAME;
   public String FIELDNAME;
   public String SUBPNLNAME;
-  public int OCCURSLEVEL;
+  public int OCCURSLEVEL, FIELDNUM, ASSOCFIELDNUM;
   public byte FIELDUSE;
+
+  // If this token represents a related display field,
+  // dispControlFieldTok refers to the associated display
+  // control field.
+  public PgToken dispControlFieldTok;
 
   private final byte INVISIBLE_FLAG = (byte) 2;
   private final byte DISP_CNTRL_FLAG = (byte) 8;

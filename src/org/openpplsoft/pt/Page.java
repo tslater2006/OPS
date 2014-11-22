@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +34,7 @@ public class Page {
   private String ptPNLNAME;
   private List<PgToken> subpages;
   private List<PgToken> secpages;
+  private Map<Integer, PgToken> tokenTable;
   private List<PgToken> tokens;
   private PeopleCodeProg pageActivateProg;
   private Set<Integer> referencedMsgSets;
@@ -82,6 +85,7 @@ public class Page {
 
     this.subpages = new ArrayList<PgToken>();
     this.secpages = new ArrayList<PgToken>();
+    this.tokenTable = new HashMap<Integer, PgToken>();
     this.tokens = new ArrayList<PgToken>();
     this.referencedMsgSets = new LinkedHashSet<Integer>();
 
@@ -93,6 +97,7 @@ public class Page {
      * TODO(mquinn): Throw exception if no records were read
      * (need to use counter, no method on rs available).
      */
+    int nextFieldNum = 1;
     while (rs.next()) {
 
       final PgToken pf = new PgToken();
@@ -101,6 +106,15 @@ public class Page {
       pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
       pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
       pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
+      pf.ASSOCFIELDNUM = rs.getInt("ASSOCFIELDNUM");
+
+      /*
+       * Even though PSPNLFIELD has a FIELDNUM field, it is
+       * not selected in the query (although it is in the ORDER
+       * BY clause). I do not want to make PSPNLFIELD unenforced,
+       * so for now I am using an incremented var.
+       */
+      pf.FIELDNUM = nextFieldNum++;
 
       switch (rs.getInt("FIELDTYPE")) {
         case PSDefn.PageFieldType.STATIC_TEXT:
@@ -110,12 +124,14 @@ public class Page {
           break;
         case PSDefn.PageFieldType.GROUPBOX:
           pf.flags.add(PFlag.GROUPBOX);
+          this.tokenTable.put(pf.FIELDNUM, pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.SUBPAGE:
           pf.flags.add(PFlag.PAGE);
           pf.flags.add(PFlag.SUBPAGE);
           this.subpages.add(pf);
+          this.tokenTable.put(pf.FIELDNUM, pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.PUSHBTN_LINK_PEOPLECODE:
@@ -129,22 +145,26 @@ public class Page {
         case PSDefn.PageFieldType.PUSHBTN_LINK_PAGE_ANCHOR:
         case PSDefn.PageFieldType.PUSHBTN_LINK_INST_MSG_ACTION:
           pf.flags.add(PFlag.PUSHBTN_LINK);
+          this.tokenTable.put(pf.FIELDNUM, pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.SECPAGE:
           pf.flags.add(PFlag.PAGE);
           pf.flags.add(PFlag.SECPAGE);
           this.secpages.add(pf);
+          this.tokenTable.put(pf.FIELDNUM, pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.SCROLL_BAR:
         case PSDefn.PageFieldType.GRID:
         case PSDefn.PageFieldType.SCROLL_AREA:
           pf.flags.add(PFlag.SCROLL_START);
+          this.tokenTable.put(pf.FIELDNUM, pf);
           this.tokens.add(pf);
           break;
         default:
           pf.flags.add(PFlag.GENERIC);
+          this.tokenTable.put(pf.FIELDNUM, pf);
           this.tokens.add(pf);
           if (pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
             throw new OPSVMachRuntimeException("A generic field with "
@@ -156,6 +176,25 @@ public class Page {
 
     rs.close();
     ostmt.close();
+
+    /*
+     * Now that we have collected this page's tokens, we need
+     * to connect each related display field tokens to the display
+     * control field token associated with it. This cannot be done
+     * while iterating over the result set b/c some referenced tokens
+     * will not be available.
+     */
+    for (PgToken tok : this.tokens) {
+      if (tok.isRelatedDisplay()) {
+        final PgToken assocTok = this.tokenTable.get(tok.ASSOCFIELDNUM + 1);
+        if (assocTok == null || !assocTok.isDisplayControl()) {
+          throw new OPSVMachRuntimeException("On page " + this.ptPNLNAME + ", "
+              + "encountered rel disp page token (" + tok + ") but assoc tok "
+              + "is either null or not display control: " + assocTok);
+        }
+        tok.dispControlFieldTok = assocTok;
+      }
+    }
   }
 
   /**

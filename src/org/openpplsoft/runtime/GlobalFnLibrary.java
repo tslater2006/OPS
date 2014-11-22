@@ -1047,10 +1047,27 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTDate(dtCal.getTime()));
   }
 
-  /*
-   * Not implementing for now.
-   */
+  // Not implementing for now.
   public void PT_SetCursorPos() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+  }
+
+  public void PT_RTrim() {
+
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    if (args.size() != 1
+        || !(args.get(0) instanceof PTString)) {
+      throw new OPSVMachRuntimeException("Expected a single String "
+          + "arg to RTrim.");
+    }
+
+    String trimmedStr = ((PTString) args.get(0)).read();
+    while (trimmedStr.length() > 0
+        && trimmedStr.charAt(trimmedStr.length() - 1) == ' ') {
+      trimmedStr = trimmedStr.substring(0, trimmedStr.length() - 1);
+    }
+
+    Environment.pushToCallStack(new PTString(trimmedStr));
   }
 }

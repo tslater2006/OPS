@@ -180,7 +180,8 @@ public class Page {
     /*
      * Now that we have collected this page's tokens, we need
      * to connect each related display field tokens to the display
-     * control field token associated with it. This cannot be done
+     * control field token associated with it, and vice versa.
+     * This cannot be done
      * while iterating over the result set b/c some referenced tokens
      * will not be available.
      */
@@ -193,6 +194,7 @@ public class Page {
               + "is either null or not display control: " + assocTok);
         }
         tok.dispControlFieldTok = assocTok;
+        assocTok.relDispFieldToks.add(tok);
       }
     }
   }

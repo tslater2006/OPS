@@ -7,7 +7,10 @@
 
 package org.openpplsoft.pt.pages;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 
@@ -24,6 +27,12 @@ public class PgToken {
   // dispControlFieldTok refers to the associated display
   // control field.
   public PgToken dispControlFieldTok;
+
+  // If this token represents a display control field,
+  // this list contains references to all of the related
+  // display field tokens that use this field for display control.
+  public List<PgToken> relDispFieldToks =
+      new ArrayList<PgToken>();
 
   private final byte INVISIBLE_FLAG = (byte) 2;
   private final byte DISP_CNTRL_FLAG = (byte) 8;

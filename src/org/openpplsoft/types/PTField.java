@@ -14,6 +14,7 @@ import java.sql.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.sql.*;
 import org.openpplsoft.trace.*;
 import org.openpplsoft.pt.peoplecode.*;
@@ -508,10 +509,59 @@ public final class PTField extends PTObjectType implements ICBufferEntity {
 
   public void PT_GetRelated() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-    if (args.size() != 1) {
-      throw new OPSVMachRuntimeException("Expected single arg to GetRelated.");
+    if (args.size() != 1 || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
+      throw new OPSVMachRuntimeException("Expected single PTRecordFieldSpecifier "
+          + "arg to GetRelated.");
     }
-    throw new OPSVMachRuntimeException("TODO: Support GetRelated on Field.");
+
+    final PTRecordFieldSpecifier recFldSpecifier =
+        ((PTRecordFieldSpecifier) args.get(0));
+
+    if (this.recFieldBuffer == null) {
+      throw new OPSVMachRuntimeException("Illegal call to GetRelated; this field "
+          + "(" + this + ") has no record field buffer.");
+    }
+
+    if (this.recFieldBuffer.getSrcPageToken() == null) {
+      throw new OPSVMachRuntimeException("Illegal call to GetRelated; this field "
+          + "(" + this + ") has no underlying page token.");
+    }
+
+    final PgToken srcToken = this.recFieldBuffer.getSrcPageToken();
+    if (!srcToken.isDisplayControl()) {
+      throw new OPSVMachRuntimeException("Illegal call to GetRelated; this field's "
+          + "underlying page token is not a display control field: " + srcToken);
+    }
+
+    PgToken desiredRelDispFieldTok = null;
+    for (final PgToken relDispFieldTok : srcToken.relDispFieldToks) {
+      if (relDispFieldTok.RECNAME.equals(recFldSpecifier.getRecName())
+          && relDispFieldTok.FIELDNAME.equals(recFldSpecifier.getFieldName())) {
+        desiredRelDispFieldTok = relDispFieldTok;
+        break;
+      }
+    }
+
+    if (desiredRelDispFieldTok == null) {
+      throw new OPSVMachRuntimeException("In GetRelated, unable to find "
+          + "a related display token that matches the record field specifier "
+          + "provided: " + recFldSpecifier);
+    }
+
+    final PTField relDispField = recFldSpecifier.resolveInCBufferContext().deref();
+
+    /*
+     * This check makes absolutely sure that the resolved field's underlying
+     * page token is a reference to the desired token we saved a reference to
+     * earlier. If they are equal, we have the related field.
+     */
+    if (relDispField.getRecordFieldBuffer().getSrcPageToken() !=
+        desiredRelDispFieldTok) {
+      throw new OPSVMachRuntimeException("In GetRelated, the resolved field's "
+          + "underlying page token does not match the desired one.");
+    }
+
+    Environment.pushToCallStack(relDispField);
   }
 
   public void PT_GetLongLabel() {

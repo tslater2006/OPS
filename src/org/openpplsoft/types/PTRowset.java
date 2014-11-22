@@ -142,9 +142,18 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public PTType resolveContextualCBufferReference(final String identifier) {
+  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
     if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferReference(identifier);
+      return this.parentRow.resolveContextualCBufferRecordReference(recName);
+    }
+    return null;
+  }
+
+  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+      final String recName, final String fieldName) {
+    if (this.parentRow != null) {
+      return this.parentRow.resolveContextualCBufferRecordFieldReference(
+          recName, fieldName);
     }
     return null;
   }

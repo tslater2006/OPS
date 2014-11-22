@@ -22,11 +22,14 @@ public final class PTRecordFieldSpecifier extends PTObjectType {
 
   private Record recDefn;
   private String fieldName;
+  private InterpretSupervisor interpretSupervisor;
 
-  public PTRecordFieldSpecifier(final Record r, final String fieldName) {
+  public PTRecordFieldSpecifier(final Record r, final String fieldName,
+      final InterpretSupervisor interpretSupervisor) {
     super(new PTTypeConstraint<PTRecordFieldSpecifier>(PTRecordFieldSpecifier.class));
     this.recDefn = r;
     this.fieldName = fieldName;
+    this.interpretSupervisor = interpretSupervisor;
   }
 
   public String getRecName() {
@@ -37,21 +40,34 @@ public final class PTRecordFieldSpecifier extends PTObjectType {
     return this.fieldName;
   }
 
-  @Override
-  public PTType dotProperty(final String s) {
-    return null;
+  public PTReference<PTField> resolveInCBufferContext() {
+    return this.interpretSupervisor.resolveContextualCBufferRecordFieldReference(
+        this.recDefn.RECNAME, this.fieldName);
   }
 
+  /**
+   * dotProperty calls on record field specifiers should be passed through
+   * to the underlying component buffer field in context.
+   */
+  @Override
+  public PTType dotProperty(final String s) {
+    return this.resolveInCBufferContext().deref().dotProperty(s);
+  }
+
+  /**
+   * dotMethod calls on record field specifiers should be passed through
+   * to the underlying component buffer field in context.
+   */
   @Override
   public Callable dotMethod(final String s) {
-    return null;
+    return this.resolveInCBufferContext().deref().dotMethod(s);
   }
 
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
     b.append("recName=").append(this.recDefn.RECNAME);
-    b.append("fieldName=").append(this.fieldName);
+    b.append(",fieldName=").append(this.fieldName);
     return b.toString();
   }
 }

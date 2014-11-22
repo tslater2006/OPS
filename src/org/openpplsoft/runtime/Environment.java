@@ -169,6 +169,9 @@ public class Environment {
         return getOrDerefPrimitive(((PTReference) rawExpr).deref());
     } else if (rawExpr instanceof PTField) {
       return ((PTField) rawExpr).getValue();
+    } else if (rawExpr instanceof PTRecordFieldSpecifier) {
+      return ((PTRecordFieldSpecifier) rawExpr).resolveInCBufferContext()
+          .deref().getValue();
     } else {
       throw new OPSVMachRuntimeException("Expected either a primitive, a reference "
           + "to one, or a Field (getOrDerefPrimitive): " + rawExpr);
@@ -220,19 +223,33 @@ public class Environment {
   @SuppressWarnings("unchecked")
   public static void assign(final PTType dst, final PTType src) {
 
-    log.debug("Assigning from {} to {}", src, dst);
+    PTType resolvedDst = dst;
 
-    if (!(dst instanceof PTReference)) {
-      throw new OPSVMachRuntimeException("Illegal assignment; not a valid l-value: "
-          + dst);
+    // A RecordFieldSpecifier provided as an l-value is a reference to
+    // a record field buffer in the component buffers and must be resolved.
+    if (dst instanceof PTRecordFieldSpecifier) {
+      resolvedDst = ((PTRecordFieldSpecifier) dst).resolveInCBufferContext();
     }
 
-    final PTReference lRef = (PTReference) dst;
+    if (!(resolvedDst instanceof PTReference)) {
+      throw new OPSVMachRuntimeException("Illegal assignment; not a valid l-value: "
+          + resolvedDst);
+    }
+
+    final PTReference lRef = (PTReference) resolvedDst;
     PTType rawSrc = src;
 
-    if (src instanceof PTReference) {
-      rawSrc = ((PTReference) src).deref();
+    // A RecordFieldSpecifier provided as an r-value is a reference to a
+    // record field buffer in the component buffers and must be resolved.
+    if (rawSrc instanceof PTRecordFieldSpecifier) {
+      rawSrc = ((PTRecordFieldSpecifier) rawSrc).resolveInCBufferContext();
     }
+
+    if (rawSrc instanceof PTReference) {
+      rawSrc = ((PTReference) rawSrc).deref();
+    }
+
+    log.debug("Assigning from {} to {}", rawSrc, resolvedDst);
 
     if (rawSrc instanceof PTPrimitiveType) {
       if (lRef.deref() instanceof PTPrimitiveType) {

@@ -35,9 +35,19 @@ public class InterpretSupervisor {
     this.cBufferContextEntity = contextEntity;
   }
 
-  public PTType resolveContextualCBufferReference(final String id) {
+  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
     if (this.cBufferContextEntity != null) {
-      return this.cBufferContextEntity.resolveContextualCBufferReference(id);
+      return this.cBufferContextEntity
+          .resolveContextualCBufferRecordReference(recName);
+    }
+    return null;
+  }
+
+  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+      final String recName, final String fieldName) {
+    if (this.cBufferContextEntity != null) {
+      return this.cBufferContextEntity
+          .resolveContextualCBufferRecordFieldReference(recName, fieldName);
     }
     return null;
   }

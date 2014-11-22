@@ -1264,22 +1264,9 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else if (ctx.GENERIC_ID() != null) {
       //log.debug("Resolving GENERIC_ID: {}", ctx.GENERIC_ID().getText());
 
-      /*
-       * IMPORTANT NOTE: I believe it is possible to override system functions.
-       * The checks on GENERIC_ID below should be run in order of lowest scope
-       * to highest scope for this reason.
-       */
       final String id = ctx.GENERIC_ID().getText();
-      final PTType resolvedCBufferRef =
-          this.supervisor.resolveContextualCBufferReference(id);
-      if (resolvedCBufferRef != null) {
 
-//        log.debug("Resolved GENERIC_ID: {} to the following buffer reference :{}",
-//             id, resolvedCBufferRef);
-
-        this.setNodeData(ctx, resolvedCBufferRef);
-
-      } else if (this.eCtx.prog.hasFunctionImplNamed(id)) {
+      if (this.eCtx.prog.hasFunctionImplNamed(id)) {
 
         log.debug("Resolved GENERIC_ID: {} to an internal function "
             + "within this program.", id);
@@ -1352,12 +1339,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
       } else if (DefnCache.hasRecord(id)) {
         /*
-         * Detect references to record field literals, which look like
+         * Detect references to record field literals, which look
          * references to component buffer records but may or may not actually
          * be in the component buffer.
-         * (i.e., record field literals passed to Sort() on Rowsets).
+         * (i.e., record field literals passed to Sort() on Rowsets,
+         * GetRelated() on Fields, etc.).
          */
-        this.setNodeData(ctx, new PTRecordSpecifier(DefnCache.getRecord(id)));
+        this.setNodeData(ctx, new PTRecordSpecifier(
+            DefnCache.getRecord(id), this.supervisor));
       }
     }
     return null;
@@ -1944,10 +1933,15 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         localScope.declareAndInitVar(fp.id, fp.typeConstraint, arg);
       } catch (final OPSTypeCheckException opstce1) {
         /*
-         * It's possible that the argument is a field object (or reference to one)
+         * It's possible that the argument is a field object (or reference to one,
+         * or record field specifier for one)
          * that needs to have its "default method" (getValue()) called prior
          * to binding it to the formal param identifier.
          */
+        if (arg instanceof PTRecordFieldSpecifier) {
+          arg = ((PTRecordFieldSpecifier) arg).resolveInCBufferContext();
+        }
+
         if (arg instanceof PTReference) {
           arg = ((PTReference) arg).deref();
         }

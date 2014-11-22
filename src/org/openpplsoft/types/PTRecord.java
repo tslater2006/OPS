@@ -242,11 +242,23 @@ public final class PTRecord extends PTObjectType implements ICBufferEntity {
     }
   }
 
-  public PTType resolveContextualCBufferReference(final String identifier) {
-    if (identifier.equals(this.recDefn.RECNAME)) {
+  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
+    if (recName.equals(this.recDefn.RECNAME)) {
       return this;
     } else if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferReference(identifier);
+      return this.parentRow.resolveContextualCBufferRecordReference(recName);
+    }
+    return null;
+  }
+
+  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+      final String recName, final String fieldName) {
+    if (recName.equals(this.recDefn.RECNAME)
+        && this.hasField(fieldName)) {
+      return this.getFieldRef(fieldName);
+    } else if (this.parentRow != null) {
+      return this.parentRow.resolveContextualCBufferRecordFieldReference(
+          recName, fieldName);
     }
     return null;
   }

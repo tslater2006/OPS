@@ -21,10 +21,13 @@ import org.openpplsoft.runtime.*;
 public final class PTRecordSpecifier extends PTObjectType {
 
   private Record recDefn;
+  private InterpretSupervisor interpretSupervisor;
 
-  public PTRecordSpecifier(final Record r) {
+  public PTRecordSpecifier(final Record r,
+      final InterpretSupervisor interpretSupervisor) {
     super(new PTTypeConstraint<PTRecordSpecifier>(PTRecordSpecifier.class));
     this.recDefn = r;
+    this.interpretSupervisor = interpretSupervisor;
   }
 
   /**
@@ -48,7 +51,7 @@ public final class PTRecordSpecifier extends PTObjectType {
     final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
     for (RecordField rf : rfList) {
       if (rf.FIELDNAME.equals(s)) {
-        return new PTRecordFieldSpecifier(this.recDefn, s);
+        return new PTRecordFieldSpecifier(this.recDefn, s, this.interpretSupervisor);
       }
     }
 

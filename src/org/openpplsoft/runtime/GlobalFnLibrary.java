@@ -97,9 +97,12 @@ public class GlobalFnLibrary {
        * be blank/empty.
        */
       return (((PTRecord) p).getRecDefn() != null);
+    } else if (p instanceof PTRecordFieldSpecifier) {
+      return doesContainValue(
+          ((PTRecordFieldSpecifier) p).resolveInCBufferContext().deref());
     } else {
       throw new OPSVMachRuntimeException("Unexpected data type passed " +
-        "to doesContainValue(ptdt).");
+        "to doesContainValue(ptdt): " + p);
     }
   }
 
@@ -139,21 +142,23 @@ public class GlobalFnLibrary {
   public void PT_Hide() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-    if(args.size() != 1 && !(args.get(0) instanceof PTField)) {
-      throw new OPSVMachRuntimeException("Expected single Field arg to Hide.");
+    if(args.size() != 1 || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
+      throw new OPSVMachRuntimeException("Expected single PTRecordFieldSpecifier "
+          + " arg to Hide.");
     }
 
-    ((PTField) args.get(0)).hide();
+    ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext().deref().hide();
   }
 
   public void PT_UnHide() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-    if(args.size() != 1 && !(args.get(0) instanceof PTField)) {
-      throw new OPSVMachRuntimeException("Expected single Field arg to UnHide.");
+    if(args.size() != 1 || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
+      throw new OPSVMachRuntimeException("Expected single PTRecordFieldSpecifier "
+          + "arg to UnHide.");
     }
 
-    ((PTField) args.get(0)).unhide();
+    ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext().deref().unhide();
   }
 
   /**
@@ -697,11 +702,11 @@ public class GlobalFnLibrary {
       PTType bVal = args.get(i);
       if (bVal instanceof PTPrimitiveType) {
         bindVals[i - 1] = (PTPrimitiveType) bVal;
-      } else if (bVal instanceof PTField
-          && ((PTField) bVal).getValue() instanceof PTPrimitiveType) {
-        // If a Field object is passed as a bind value, it must be unboxed
-        // and its unboxed value must be primitive.
-        bindVals[i - 1] = (PTPrimitiveType) ((PTField) bVal).getValue();
+      } else if (bVal instanceof PTField) {
+        bindVals[i - 1] = ((PTField) bVal).getValue();
+      } else if (bVal instanceof PTRecordFieldSpecifier) {
+        bindVals[i - 1] = ((PTRecordFieldSpecifier) bVal)
+            .resolveInCBufferContext().deref().getValue();
       } else {
         throw new OPSVMachRuntimeException("Illegal bind value supplied to GetSQL; "
             + "expected primitive but got: " + args.get(i));
@@ -841,19 +846,13 @@ public class GlobalFnLibrary {
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 1
-        || !(args.get(0) instanceof PTField)) {
+        || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
       throw new OPSVMachRuntimeException("Expected exactly 1 arg "
-          + "of type PTField to GetField.");
+          + "of type PTRecordFieldSpecifier to GetField.");
     }
 
-    /*
-     * If a Field is provided to this method, simply return it. This is not
-     * strictly how GetField works in PeopleSoft, but right now, the interpreter
-     * is already resolving "<RECNAME>.<FIELDNAME>" strings to their appropriate
-     * contextual buffer references, so by the time it gets here, it's a field, not
-     * a PTRecordFieldSpecifier.
-     */
-    Environment.pushToCallStack(args.get(0));
+    Environment.pushToCallStack(
+        ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext().deref());
   }
 
   public void PT_GetRecord() {
@@ -867,7 +866,8 @@ public class GlobalFnLibrary {
         && args.get(0) instanceof PTRecordLiteral) {
 
       final PTType resEntity = this.interpretSupervisor
-          .resolveContextualCBufferReference(((PTRecordLiteral) args.get(0)).read());
+          .resolveContextualCBufferRecordReference(
+              ((PTRecordLiteral) args.get(0)).read());
       if (resEntity == null || !(resEntity instanceof PTRecord)) {
         throw new OPSVMachRuntimeException("Failure in GetRecord: expected provided identifier ("
             + args.get(0) + ") to resolve to record but instead resolved to: " + resEntity);
@@ -885,12 +885,13 @@ public class GlobalFnLibrary {
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     if(args.size() != 1
-        || !(args.get(0) instanceof PTField)) {
+        || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
       throw new OPSVMachRuntimeException("Expected exactly 1 arg "
-          + "of type PTField to Gray.");
+          + "of type PTRecordFieldSpecifier to Gray.");
     }
 
-    ((PTField) args.get(0)).grayOut();
+    ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext()
+        .deref().grayOut();
   }
 
   /**

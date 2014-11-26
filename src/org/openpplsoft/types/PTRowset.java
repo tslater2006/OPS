@@ -563,16 +563,29 @@ public final class PTRowset extends PTObjectType implements ICBufferEntity {
       bindVals.add(primArg.readAsString());
     }
 
+    log.debug("Selecting into rowset: {}", this);
     final OPSStmt ostmt = StmtLibrary.prepareSelectStmt(
         recToSelectFrom, whereStr, bindVals.toArray(new String[bindVals.size()]));
     OPSResultSet rs = ostmt.executeQuery();
 
-    int rowsRead = 0;
+    int rowsRead = 0, rowIdxToWriteTo = 1;
     while (rs.next()) {
+      final PTRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
+      final PTRecord recToWriteTo = rowToWriteTo.getRecord(this.primaryRecDefn.RECNAME);
+
+      /**
+       * It is possible to select from a different record than the
+       * record used as the rowset's primary record. If this is the case,
+       * we need to read/write only those fields that are shared by both.
+       * Otherwise, read into the record as usual.
+       */
+      if (!this.primaryRecDefn.RECNAME.equals(recToSelectFrom.RECNAME)) {
+        rs.readIntoRecordDefinedFieldsOnly(recToWriteTo);
+      } else {
+        rs.readIntoRecord(recToWriteTo);
+      }
+
       rowsRead++;
-      throw new OPSVMachRuntimeException("TODO: Support reading records from ResultSet "
-          + "into EXISTING rows in this rowset (unlike Fill, which flushes before "
-          + "doing so.");
     }
 
     rs.close();

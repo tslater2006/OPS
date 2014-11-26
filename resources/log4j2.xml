@@ -50,6 +50,7 @@
     <Logger name="org.openpplsoft.runtime.Environment" level="DEBUG"/>
     <Logger name="org.openpplsoft.types.PTField" level="DEBUG"/>
     <Logger name="org.openpplsoft.types.PTRecord" level="DEBUG"/>
+    <Logger name="org.openpplsoft.types.PTRowset" level="DEBUG"/>
 
   </Loggers>
 </Configuration>

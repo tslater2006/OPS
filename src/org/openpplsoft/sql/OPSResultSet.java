@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.runtime.*;
+import org.openpplsoft.pt.*;
 import org.openpplsoft.types.*;
 
 /**
@@ -209,14 +210,33 @@ public class OPSResultSet {
   }
 
   public void readIntoRecord(final PTRecord recObj) {
-
     for (int i = 1; i <= this.getColumnCount(); i++) {
       final String colName = this.getColumnName(i);
       final PTReference<PTField> fldRef = recObj.getFieldRef(colName);
       final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
           fldRef.deref().getValue().getOriginatingTypeConstraint());
-
       Environment.assign(fldRef, dbVal);
+    }
+  }
+
+  /**
+   * There are times when the result set may contain fields that do not
+   * exist on the record you want to read into (i.e., using Select method on Rowset
+   * class with a record that differs from the primary record defn of the Rowset).
+   * If you use the normal "readIntoRecord", an exception will be thrown
+   * when such fields are the subject of an attempted write. If you use this method,
+   * those fields will simply be skipped.
+   */
+  public void readIntoRecordDefinedFieldsOnly(final PTRecord recObj) {
+    final Record recDefn = recObj.getRecDefn();
+    for (int i = 1; i <= this.getColumnCount(); i++) {
+      final String colName = this.getColumnName(i);
+      if (recDefn.hasField(colName)) {
+        final PTReference<PTField> fldRef = recObj.getFieldRef(colName);
+        final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
+            fldRef.deref().getValue().getOriginatingTypeConstraint());
+        Environment.assign(fldRef, dbVal);
+      }
     }
   }
 

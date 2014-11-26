@@ -272,6 +272,10 @@ public class Record {
     return "PS_" + this.RECNAME;
   }
 
+  public boolean hasField(final String fldName) {
+    return this.fieldTable.containsKey(fldName);
+  }
+
   @Override
   public String toString() {
     return this.RECNAME;

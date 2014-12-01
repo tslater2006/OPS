@@ -39,8 +39,8 @@ public final class PTStandaloneRowset extends PTRowset {
 
   private static Map<String, Method> ptMethodTable;
 
-  private PTRow parentRow;
-  private List<PTRow> rows = new ArrayList<PTRow>();
+  private PTStandaloneRow parentRow;
+  private List<PTStandaloneRow> rows = new ArrayList<PTStandaloneRow>();
   private Record primaryRecDefn;
 
   // If this is null, this rowset is a standalone rowset.
@@ -67,7 +67,7 @@ public final class PTStandaloneRowset extends PTRowset {
    * Remember: the provided primary record defn could be null if
    * this rowset represents the level 0 scroll of the component buffer.
    */
-  public PTStandaloneRowset(final PTRowsetTypeConstraint origTc, final PTRow pRow,
+  public PTStandaloneRowset(final PTRowsetTypeConstraint origTc, final PTStandaloneRow pRow,
       final Record primRecDefn) {
     super(origTc);
     this.parentRow = pRow;
@@ -75,7 +75,7 @@ public final class PTStandaloneRowset extends PTRowset {
     this.initRowset();
   }
 
-  public PTStandaloneRowset(final PTRowsetTypeConstraint origTc, final PTRow pRow,
+  public PTStandaloneRowset(final PTRowsetTypeConstraint origTc, final PTStandaloneRow pRow,
       final ScrollBuffer scrollDefn) {
     super(origTc);
     this.parentRow = pRow;
@@ -100,7 +100,7 @@ public final class PTStandaloneRowset extends PTRowset {
     this.registeredRecordDefns.add(recDefn);
 
     // Each row must also have this record registered.
-    for (final PTRow row : this.rows) {
+    for (final PTStandaloneRow row : this.rows) {
 
       // If this is a component buffer scroll and the record has an
       // associated record buffer, pass that to the row; it will register
@@ -126,14 +126,14 @@ public final class PTStandaloneRowset extends PTRowset {
           childScrollDefn.getPrimaryRecName(), childScrollDefn);
     }
 
-    for (final PTRow row : this.rows) {
+    for (final PTStandaloneRow row : this.rows) {
       row.registerChildScrollDefn(childScrollDefn);
     }
   }
 
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
-    for (final PTRow row : this.rows) {
+    for (final PTStandaloneRow row : this.rows) {
       row.fireEvent(event, fireEventSummary);
     }
   }
@@ -170,7 +170,7 @@ public final class PTStandaloneRowset extends PTRowset {
 
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
-    for (final PTRow row : this.rows) {
+    for (final PTStandaloneRow row : this.rows) {
       row.runFieldDefaultProcessing(fldDefProcSummary);
     }
   }
@@ -191,7 +191,7 @@ public final class PTStandaloneRowset extends PTRowset {
     }
   }
 
-  public PTRow getParentRow() {
+  public PTStandaloneRow getParentRow() {
     return this.parentRow;
   }
 
@@ -255,7 +255,7 @@ public final class PTStandaloneRowset extends PTRowset {
    * @param idx the index of the row to retrieve
    * @return the row corresponding to idx
    */
-  public PTRow getRow(int idx) {
+  public PTStandaloneRow getRow(int idx) {
     // Must subtract 1 from idx; rowset indices start at 1.
     return this.rows.get(idx - 1);
   }
@@ -334,7 +334,7 @@ public final class PTStandaloneRowset extends PTRowset {
     log.debug("======== End Sorted Rowset =========");*/
   }
 
-  private List<PTRow> mergeSortRows(final List<PTRow> rowsToSort,
+  private List<PTStandaloneRow> mergeSortRows(final List<PTStandaloneRow> rowsToSort,
     final List<String> sortFields, final List<String> sortOrders) {
 
     if (rowsToSort.size() < 2) {
@@ -342,23 +342,23 @@ public final class PTStandaloneRowset extends PTRowset {
     }
 
     final int mid = rowsToSort.size() / 2;
-    final List<PTRow> left = this.mergeSortRows(
+    final List<PTStandaloneRow> left = this.mergeSortRows(
         rowsToSort.subList(0, mid), sortFields, sortOrders);
-    final List<PTRow> right = this.mergeSortRows(
+    final List<PTStandaloneRow> right = this.mergeSortRows(
         rowsToSort.subList(mid,
           rowsToSort.size()), sortFields, sortOrders);
     return this.merge(left, right, sortFields, sortOrders);
   }
 
-  private List<PTRow> merge(final List<PTRow> left,
-      final List<PTRow> right, final List<String> sortFields,
+  private List<PTStandaloneRow> merge(final List<PTStandaloneRow> left,
+      final List<PTStandaloneRow> right, final List<String> sortFields,
       final List<String> sortOrders) {
 
-    final List<PTRow> merged = new ArrayList<PTRow>();
+    final List<PTStandaloneRow> merged = new ArrayList<PTStandaloneRow>();
     int l = 0, r = 0;
     while (l < left.size() && r < right.size()) {
-      final PTRow lRow = left.get(l);
-      final PTRow rRow = right.get(r);
+      final PTStandaloneRow lRow = left.get(l);
+      final PTStandaloneRow rRow = right.get(r);
 
       /*
        * Order the rows based on the precedence
@@ -495,7 +495,7 @@ public final class PTStandaloneRowset extends PTRowset {
         this.rows.clear();
       }
 
-      final PTRow newRow = new PTRowTypeConstraint().allocStandaloneRow(
+      final PTStandaloneRow newRow = new PTRowTypeConstraint().allocStandaloneRow(
           this, this.registeredRecordDefns, this.registeredChildScrollDefns);
 
       rs.readIntoRecord(newRow.getRecord(this.primaryRecDefn.RECNAME));

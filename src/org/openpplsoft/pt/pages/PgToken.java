@@ -124,7 +124,6 @@ public class PgToken {
     b.append(this.flags);
     b.append(", reldisp?").append(this.isRelatedDisplay());
     b.append(", invis?").append(this.isInvisible());
-    b.append(", occursLvl=").append(this.OCCURSLEVEL);
 
     return b.toString();
   }

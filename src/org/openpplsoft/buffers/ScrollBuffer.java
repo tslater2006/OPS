@@ -25,13 +25,10 @@ public class ScrollBuffer implements IStreamableBuffer {
   private int scrollLevel;
   private String primaryRecName;
   private ScrollBuffer parent;
+  private Map<String, RecordBuffer> recBufferTable;
   private Map<String, ScrollBuffer> scrollBufferTable;
-  private List<ScrollBuffer> orderedScrollBuffers;
-
-  // We can't (shouldn't, since the complexity isn't worth it)
-  // have an accompanying hash table here, because
-  // multiple buffers for a record are allowed (reldisp records).
   private List<RecordBuffer> orderedRecBuffers;
+  private List<ScrollBuffer> orderedScrollBuffers;
 
   // Used for reading.
   private boolean hasEmittedSelf;
@@ -49,6 +46,7 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.primaryRecName = r;
     this.parent = p;
 
+    this.recBufferTable = new HashMap<String, RecordBuffer>();
     this.orderedRecBuffers = new ArrayList<RecordBuffer>();
     this.scrollBufferTable = new HashMap<String, ScrollBuffer>();
     this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
@@ -111,26 +109,34 @@ public class ScrollBuffer implements IStreamableBuffer {
   }
 
   /**
+   * Get the table that maps this scroll buffer's constituent
+   * records to the records' corresponding record buffers.
+   * @return a table mapping record names to record buffers
+   */
+  public Map<String, RecordBuffer> getRecBufferTable() {
+    return this.recBufferTable;
+  }
+
+  public boolean hasRecordBuffer(final String recName) {
+    return this.recBufferTable.containsKey(recName);
+  }
+
+  public RecordBuffer getRecordBuffer(final String recName) {
+    return this.recBufferTable.get(recName);
+  }
+
+  /**
    * Add a page field to this scroll buffer.
    * @param tok the page field token representing the page field
    *    to be added.
    */
   public void addPageField(final PgToken tok) {
 
-    RecordBuffer r = null;
-
-    // Search for the first (may need to look for most recently used)
-    // record buffer w/ the same record name as the token.
-    for (final RecordBuffer rbuf : this.orderedRecBuffers) {
-      if (rbuf.getRecName().equals(tok.RECNAME)) {
-        r = rbuf;
-        break;
-      }
-    }
-
+    RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
     if (r == null) {
       r = new RecordBuffer(this, tok.RECNAME, this.scrollLevel,
           this.primaryRecName);
+      this.recBufferTable.put(r.getRecName(), r);
       this.orderedRecBuffers.add(r);
     }
     r.addPageField(tok.RECNAME, tok.FIELDNAME, tok);

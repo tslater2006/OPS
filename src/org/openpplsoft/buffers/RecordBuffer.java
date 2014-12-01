@@ -142,26 +142,6 @@ public class RecordBuffer implements IStreamableBuffer {
       f = new RecordFieldBuffer(ptRECNAME, ptFIELDNAME, this, srcTok);
       this.fieldBufferTable.put(f.getFldName(), f);
       this.fieldBuffers.add(f);
-    /**
-     * TODO: Must handle PSXLATITEM (system records) despite the fact that
-     * these are not emitted during scroll emissions.
-     */
-    } else if (!srcTok.RECNAME.equals("PSXLATITEM") && srcTok.isRelatedDisplay()
-          && f.getSrcPageToken().isRelatedDisplay()) {
-
-      final PgToken existingDispCtrlTok = f.getSrcPageToken().dispControlFieldTok;
-      final PgToken newDispCtrlTok = srcTok.dispControlFieldTok;
-
-      if (!existingDispCtrlTok.RECNAME.equals(newDispCtrlTok.RECNAME)
-          || !existingDispCtrlTok.FIELDNAME.equals(newDispCtrlTok.FIELDNAME)) {
-        log.debug(">>>>>>> DUP REF <<<<<<<<<<<<<<");
-        log.debug("Existing disp control token: {}", existingDispCtrlTok);
-        log.debug("Duplicate's disp control token: {}", newDispCtrlTok);
-        log.debug("lhs: {}", f.getSrcPageToken());
-        log.debug("rhs: {}", srcTok);
-        log.debug("==? {}", existingDispCtrlTok == newDispCtrlTok);
-        throw new OPSVMachRuntimeException("Token does not share buffer.");
-      }
     }
   }
 

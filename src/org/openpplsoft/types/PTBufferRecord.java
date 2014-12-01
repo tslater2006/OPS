@@ -110,10 +110,10 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
             && this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
           newFldRef
             = new PTImmutableReference<PTField>(fldTc,
-                fldTc.alloc(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
+                fldTc.allocBufferField(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
         } else {
           newFldRef
-            = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(this, rf));
+            = new PTImmutableReference<PTField>(fldTc, fldTc.allocBufferField(this, rf));
         }
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);

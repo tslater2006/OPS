@@ -108,12 +108,13 @@ public final class PTStandaloneRecord extends PTRecord implements ICBufferEntity
         // field with that to give the field a reference to that buffer.
         if (this.recBuffer != null
             && this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
-          newFldRef
+          throw new OPSVMachRuntimeException("MQUINN 11-30-2014 : Disabling for split.");
+/*          newFldRef
             = new PTImmutableReference<PTField>(fldTc,
-                fldTc.alloc(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
+                fldTc.allocBufferField(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));*/
         } else {
           newFldRef
-            = new PTImmutableReference<PTField>(fldTc, fldTc.alloc(this, rf));
+            = new PTImmutableReference<PTField>(fldTc, fldTc.allocStandaloneField(this, rf));
         }
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);

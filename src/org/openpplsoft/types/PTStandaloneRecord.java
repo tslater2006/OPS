@@ -124,10 +124,6 @@ public final class PTStandaloneRecord extends PTRecord implements ICBufferEntity
     }
   }
 
-  public boolean isInComponentBuffer() {
-    return this.recBuffer != null;
-  }
-
   public int getIndexPositionOfThisRecordInParentRow() {
     return this.parentRow.getIndexPositionOfRecord(this);
   }

@@ -23,5 +23,4 @@ public interface ICBufferEntity {
   void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary);
   int determineScrollLevel();
-  boolean isInComponentBuffer();
 }

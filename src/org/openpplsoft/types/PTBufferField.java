@@ -118,10 +118,6 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
     return this.parentRecord.getIndexPositionOfField(this);
   }
 
-  public boolean isInComponentBuffer() {
-    return this.recFieldBuffer != null;
-  }
-
   public void emitScrolls(final String indent) {
 
     // Do not log contents of a field that is not in the component buffer.

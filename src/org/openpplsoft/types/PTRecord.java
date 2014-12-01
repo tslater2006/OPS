@@ -59,7 +59,6 @@ public abstract class PTRecord extends PTObjectType {
   }
 
   public abstract void generateKeylist(String fieldName, Keylist keylist);
-  public abstract boolean isInComponentBuffer();
   public abstract void emitScrolls(String indent);
   public abstract void fireEvent(PCEvent event, FireEventSummary fireEventSummary);
   public abstract void runFieldDefaultProcessing(FieldDefaultProcSummary fldDefProcSummary);

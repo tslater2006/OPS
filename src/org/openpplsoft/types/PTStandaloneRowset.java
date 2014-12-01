@@ -91,10 +91,6 @@ public final class PTStandaloneRowset extends PTRowset {
     this.registerRecordDefn(this.primaryRecDefn);
   }
 
-  public boolean isInComponentBuffer() {
-    return this.cBufferScrollDefn != null;
-  }
-
   public void registerRecordDefn(final Record recDefn) {
 
     if (recDefn == null) {
@@ -512,91 +508,6 @@ public final class PTStandaloneRowset extends PTRowset {
 
     // Return the number of rows read from the fill operation.
     Environment.pushToCallStack(new PTInteger(rowsRead));
-  }
-
-  public void PT_Select() {
-
-    if (!this.isInComponentBuffer()) {
-      throw new OPSVMachRuntimeException("Illegal call to Select on Rowset "
-          + "that isn't in the component buffer.");
-    }
-
-    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
-
-    if (args.size() == 0) {
-      throw new OPSVMachRuntimeException("Select requires at least one arg.");
-    }
-
-    if (!(args.get(0) instanceof PTRecordLiteral)) {
-      /*
-       * IMPORTANT: When supporting ScrollLiterals here, remember that:
-       * "The first scrollname must be a child rowset of the rowset
-       *  object executing the method, the second scrollname must be a
-       *  child of the first child, and so on."
-       */
-      throw new OPSVMachRuntimeException("Expected RecordLiteral as first arg "
-          + "to Select; note that Select allows multiple (optional) ScrollLiterals to "
-          + "be passed before the required RecordLiteral, so may need to support "
-          + "this now.");
-    }
-
-    final Record recToSelectFrom =
-        DefnCache.getRecord(((PTRecordLiteral) args.get(0)).read());
-    int nextBindVarIdx = 1;
-
-    /*
-     * Note that Select does not require a WHERE string to be passed in.
-     */
-    String whereStr = null;
-    if (args.get(1) instanceof PTString) {
-      whereStr = ((PTString) args.get(1)).read();
-      nextBindVarIdx++;
-    }
-
-    /*
-     * If any bind vars have been passed in, accumulate them now.
-     */
-    final List<String> bindVals = new ArrayList<String>();
-    while (nextBindVarIdx < args.size()) {
-      final PTPrimitiveType primArg =
-          Environment.getOrDerefPrimitive(args.get(nextBindVarIdx++));
-      bindVals.add(primArg.readAsString());
-    }
-
-    log.debug("Selecting into rowset: {}", this);
-    final OPSStmt ostmt = StmtLibrary.prepareSelectStmt(
-        recToSelectFrom, whereStr, bindVals.toArray(new String[bindVals.size()]));
-    OPSResultSet rs = ostmt.executeQuery();
-
-    int rowsRead = 0, rowIdxToWriteTo = 1;
-    while (rs.next()) {
-      final PTRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
-      final PTRecord recToWriteTo = rowToWriteTo.getRecord(this.primaryRecDefn.RECNAME);
-
-      /**
-       * It is possible to select from a different record than the
-       * record used as the rowset's primary record. If this is the case,
-       * we need to read/write only those fields that are shared by both.
-       * Otherwise, read into the record as usual.
-       */
-      if (!this.primaryRecDefn.RECNAME.equals(recToSelectFrom.RECNAME)) {
-        rs.readIntoRecordDefinedFieldsOnly(recToWriteTo);
-      } else {
-        rs.readIntoRecord(recToWriteTo);
-      }
-
-      rowsRead++;
-    }
-
-    rs.close();
-    ostmt.close();
-
-    // Return the number of rows read from the fill operation.
-    Environment.pushToCallStack(new PTInteger(rowsRead));
-
-    TraceFileVerifier.submitEnforcedEmission(new BeginScrolls("After ScrollSelect"));
-    ComponentBuffer.getLevelZeroRowset().emitScrolls("");
-    TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
   }
 
   @Override

@@ -91,10 +91,6 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     this.registerRecordDefn(this.primaryRecDefn);
   }
 
-  public boolean isInComponentBuffer() {
-    return this.cBufferScrollDefn != null;
-  }
-
   public void registerRecordDefn(final Record recDefn) {
 
     if (recDefn == null) {
@@ -515,11 +511,6 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
   }
 
   public void PT_Select() {
-
-    if (!this.isInComponentBuffer()) {
-      throw new OPSVMachRuntimeException("Illegal call to Select on Rowset "
-          + "that isn't in the component buffer.");
-    }
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 

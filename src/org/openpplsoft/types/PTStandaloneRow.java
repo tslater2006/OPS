@@ -124,10 +124,6 @@ public final class PTStandaloneRow extends PTRow {
     }
   }
 
-  public boolean isInComponentBuffer() {
-    return this.parentRowset.isInComponentBuffer();
-  }
-
   // Used to register record defns that have an asscoiated buffer
   // (i.e., for records in the component buffer).
   public void registerRecordDefn(final RecordBuffer recBuffer) {

@@ -243,8 +243,8 @@ public class GlobalFnLibrary {
     final Record recDefn = DefnCache.getRecord(
         ((PTRecordLiteral) args.get(0)).read());
 
-    // Create a new standalone rowset, which by definition has no (null) parent.
-   final PTRowset newRowset = new PTRowsetTypeConstraint().alloc(null, recDefn);
+   final PTStandaloneRowset newRowset =
+       new PTRowsetTypeConstraint().allocStandaloneRowset(null, recDefn);
 
     Environment.pushToCallStack(newRowset);
   }

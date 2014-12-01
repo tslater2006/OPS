@@ -27,14 +27,24 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
     throw new OPSDataTypeException("Call to alloc() PTRowset without args is illegal.");
   }
 
-  // Use to allocate standalone (non-component buffer) rowsets.
-  public PTRowset alloc(final PTRow parentRow, final Record primaryRecDefn) {
-    return new PTRowset(this, parentRow, primaryRecDefn);
+  public PTStandaloneRowset allocStandaloneRowset(final PTRow parentRow, final Record primaryRecDefn) {
+    return new PTStandaloneRowset(this, parentRow, primaryRecDefn);
   }
 
-  // Use to allocate component buffer rowsets.
-  public PTRowset alloc(final PTRow parentRow, final ScrollBuffer scrollDefn) {
-    return new PTRowset(this, parentRow, scrollDefn);
+  public PTBufferRowset allocBufferRowset(final PTRow parentRow, final ScrollBuffer scrollDefn) {
+    return new PTBufferRowset(this, parentRow, scrollDefn);
+  }
+
+  @Override
+  public void typeCheck(final PTType a) throws OPSTypeCheckException {
+    boolean result = (a instanceof PTNull)
+        || (a instanceof PTStandaloneRowset)
+        || (a instanceof PTBufferRowset);
+
+    if (!result) {
+      throw new OPSTypeCheckException("This type constraint (" + this + ") and "
+          + "a (" + a + ") are not type-compatible.");
+    }
   }
 
   @Override

@@ -65,8 +65,8 @@ public class ScrollBuffer implements IStreamableBuffer {
     // Create a rowset with the supplied parent; this scroll buffer object
     // will be linked to the rowset, which will use the primary rec name
     // defined in this object as the primary rec defn.
-    final PTRowset rowset = new PTRowsetTypeConstraint()
-        .alloc(parentRow, this);
+    final PTBufferRowset rowset = new PTRowsetTypeConstraint()
+        .allocBufferRowset(parentRow, this);
 
     // For each record buffer in this scroll, register the underlying record
     // defn in the rowset (and thus its newly created child row as well).

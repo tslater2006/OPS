@@ -30,16 +30,26 @@ public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
     throw new OPSDataTypeException("Call to alloc() PTRow without args is illegal.");
   }
 
-  /**
-   * DO NOT FORGET that allocating a row is always done within the context of a
-   * rowset, and that the row must have the same registered record and child scroll
-   * definitions as its parent rowset. Do not make additional versions of alloc()
-   * here without considering what could go wrong if certain args are ommitted or
-   * defaulted incorrectly.
-   */
-  public PTRow alloc(final PTRowset parentRowset, final Set<Record> recordDefns,
+  public PTStandaloneRow allocStandaloneRow(final PTStandaloneRowset parentRowset, final Set<Record> recordDefns,
       final Map<String, ScrollBuffer> childScrollDefns) {
-    return new PTRow(this, parentRowset, recordDefns, childScrollDefns);
+    return new PTStandaloneRow(this, parentRowset, recordDefns, childScrollDefns);
+  }
+
+  public PTBufferRow allocBufferRow(final PTBufferRowset parentRowset, final Set<Record> recordDefns,
+      final Map<String, ScrollBuffer> childScrollDefns) {
+    return new PTBufferRow(this, parentRowset, recordDefns, childScrollDefns);
+  }
+
+  @Override
+  public void typeCheck(final PTType a) throws OPSTypeCheckException {
+    boolean result = (a instanceof PTNull)
+        || (a instanceof PTStandaloneRow)
+        || (a instanceof PTBufferRow);
+
+    if (!result) {
+      throw new OPSTypeCheckException("This type constraint (" + this + ") and "
+          + "a (" + a + ") are not type-compatible.");
+    }
   }
 
   @Override

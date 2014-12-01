@@ -40,7 +40,7 @@ public final class ComponentBuffer {
   private static ScrollBuffer currSB;
   private static ScrollBuffer lvlZeroScrollBuffer;
 
-  private static PTRowset cBuffer;
+  private static PTBufferRowset cBuffer;
 
   private ComponentBuffer() {}
 
@@ -57,7 +57,7 @@ public final class ComponentBuffer {
 
     // Allocate a new row (with null parent) for use as the component buffer.
     searchRecDefn = DefnCache.getRecord(compDefn.getSearchRecordName());
-    cBuffer = new PTRowsetTypeConstraint().allocStandaloneRowset(null, searchRecDefn);
+    cBuffer = new PTRowsetTypeConstraint().allocBufferRowset(null, searchRecDefn);
 
     compDefn.getListOfComponentPC();
   }
@@ -79,7 +79,7 @@ public final class ComponentBuffer {
       // and PostBuild have the first (and only) row of the level zero rowset
       // as their context.
       final InterpretSupervisor interpreter =
-          new InterpretSupervisor(eCtx, getLevelZeroRowset().getRow(1));
+          new InterpretSupervisor(eCtx, (PTBufferRow) getLevelZeroRowset().getRow(1));
       interpreter.run();
       fireEventSummary.incrementNumEventProgsExecuted();
     } else {

@@ -27,12 +27,20 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
     throw new OPSDataTypeException("Call to alloc() PTRowset without args is illegal.");
   }
 
-  public PTStandaloneRowset allocStandaloneRowset(final PTRow parentRow, final Record primaryRecDefn) {
+  public PTStandaloneRowset allocStandaloneRowset(final PTStandaloneRow parentRow, final Record primaryRecDefn) {
     return new PTStandaloneRowset(this, parentRow, primaryRecDefn);
   }
 
-  public PTBufferRowset allocBufferRowset(final PTRow parentRow, final ScrollBuffer scrollDefn) {
+  public PTBufferRowset allocBufferRowset(final PTBufferRow parentRow, final ScrollBuffer scrollDefn) {
     return new PTBufferRowset(this, parentRow, scrollDefn);
+  }
+
+  /**
+   * MQUINN 11-30-2014 : THIS IS TEMPORARY; YOU MUST REMOVE THIS
+   * after splitting of buffer/standalone objects is done.
+   */
+  public PTBufferRowset allocBufferRowset(final PTBufferRow parentRow, final Record primaryRecDefn) {
+    return new PTBufferRowset(this, parentRow, primaryRecDefn);
   }
 
   @Override

@@ -86,7 +86,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
 
   private void initRowset() {
     // One row is always present in the rowset, even when flushed.
-    this.rows.add(new PTRowTypeConstraint().alloc(
+    this.rows.add(new PTRowTypeConstraint().allocBufferRow(
         this, this.registeredRecordDefns, this.registeredChildScrollDefns));
     this.registerRecordDefn(this.primaryRecDefn);
   }
@@ -446,7 +446,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
   private void internalFlush() {
     // One row is always present in the rowset, even when flushed.
     this.rows.clear();
-    this.rows.add(new PTRowTypeConstraint().alloc(
+    this.rows.add(new PTRowTypeConstraint().allocBufferRow(
         this, this.registeredRecordDefns, this.registeredChildScrollDefns));
   }
 
@@ -499,7 +499,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
         this.rows.clear();
       }
 
-      final PTRow newRow = new PTRowTypeConstraint().alloc(
+      final PTRow newRow = new PTRowTypeConstraint().allocBufferRow(
           this, this.registeredRecordDefns, this.registeredChildScrollDefns);
 
       rs.readIntoRecord(newRow.getRecord(this.primaryRecDefn.RECNAME));

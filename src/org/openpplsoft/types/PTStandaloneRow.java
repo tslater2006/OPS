@@ -120,7 +120,7 @@ public final class PTStandaloneRow extends PTRow {
     if (!this.registeredRecordDefns.contains(recDefn)) {
       this.registeredRecordDefns.add(recDefn);
       this.recordMap.put(recDefn.RECNAME,
-          new PTRecordTypeConstraint().alloc(this, recDefn));
+          new PTRecordTypeConstraint().allocStandaloneRecord(this, recDefn));
     }
   }
 
@@ -131,18 +131,20 @@ public final class PTStandaloneRow extends PTRow {
   // Used to register record defns that have an asscoiated buffer
   // (i.e., for records in the component buffer).
   public void registerRecordDefn(final RecordBuffer recBuffer) {
-
+    throw new OPSVMachRuntimeException("MQUINN 11-30-2014 : Disabling for split.");
+/*
     final Record recDefn = recBuffer.getRecDefn();
 
     // Only register the record defn if it hasn't already been registered.
     if (!this.registeredRecordDefns.contains(recDefn)) {
       this.registeredRecordDefns.add(recDefn);
       this.recordMap.put(recDefn.RECNAME,
-          new PTRecordTypeConstraint().alloc(this, recBuffer));
-    }
+          new PTRecordTypeConstraint().allocBufferRecord(this, recBuffer));
+    }*/
   }
 
   public void registerChildScrollDefn(final ScrollBuffer childScrollDefn) {
+    throw new OPSVMachRuntimeException("MQUINN 11-30-2014 : Disabling for split.");
   /*  if (this.registeredChildScrollDefns.containsKey(
         childScrollDefn.getPrimaryRecName())) {
       throw new OPSVMachRuntimeException("Halting on call to register child "

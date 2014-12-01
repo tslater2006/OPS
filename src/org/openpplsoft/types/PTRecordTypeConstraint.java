@@ -27,14 +27,31 @@ public class PTRecordTypeConstraint extends PTTypeConstraint<PTRecord> {
     throw new OPSDataTypeException("Call to alloc() PTRecord without args is illegal.");
   }
 
-  // Used to allocate records without an associated buffer in the component.
-  public PTRecord alloc(final PTRow parentRow, final Record recDefn) {
-    return new PTRecord(this, parentRow, recDefn);
+  public PTStandaloneRecord allocStandaloneRecord(final PTStandaloneRow parentRow, final Record recDefn) {
+    return new PTStandaloneRecord(this, parentRow, recDefn);
   }
 
-  // Used to allocate records with an associated buffer in the component.
-  public PTRecord alloc(final PTRow parentRow, final RecordBuffer recBuffer) {
-    return new PTRecord(this, parentRow, recBuffer);
+  public PTBufferRecord allocBufferRecord(final PTBufferRow parentRow, final RecordBuffer recBuffer) {
+    return new PTBufferRecord(this, parentRow, recBuffer);
+  }
+
+  /**
+   * MQUINN 11-30-2014 : Adding temporarily for split purposes; REMOVE THIS EVENTUALLY.
+   */
+  public PTBufferRecord allocBufferRecord(final PTBufferRow parentRow, final Record recDefn) {
+    return new PTBufferRecord(this, parentRow, recDefn);
+  }
+
+  @Override
+  public void typeCheck(final PTType a) throws OPSTypeCheckException {
+    boolean result = (a instanceof PTNull)
+        || (a instanceof PTStandaloneRecord)
+        || (a instanceof PTBufferRecord);
+
+    if (!result) {
+      throw new OPSTypeCheckException("This type constraint (" + this + ") and "
+          + "a (" + a + ") are not type-compatible.");
+    }
   }
 
   @Override

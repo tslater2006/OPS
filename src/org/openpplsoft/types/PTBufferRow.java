@@ -120,7 +120,7 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
     if (!this.registeredRecordDefns.contains(recDefn)) {
       this.registeredRecordDefns.add(recDefn);
       this.recordMap.put(recDefn.RECNAME,
-          new PTRecordTypeConstraint().alloc(this, recDefn));
+          new PTRecordTypeConstraint().allocBufferRecord(this, recDefn));
     }
   }
 
@@ -138,7 +138,7 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
     if (!this.registeredRecordDefns.contains(recDefn)) {
       this.registeredRecordDefns.add(recDefn);
       this.recordMap.put(recDefn.RECNAME,
-          new PTRecordTypeConstraint().alloc(this, recBuffer));
+          new PTRecordTypeConstraint().allocBufferRecord(this, recBuffer));
     }
   }
 

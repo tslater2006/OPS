@@ -226,8 +226,7 @@ public class GlobalFnLibrary {
     final Record recDefn = DefnCache.getRecord(
         ((PTRecordLiteral) args.get(0)).read());
 
-    // Create a new standalone record, which by definition has no (null) parent.
-    final PTRecord rec = new PTRecordTypeConstraint().alloc(null, recDefn);
+    final PTStandaloneRecord rec = new PTRecordTypeConstraint().allocStandaloneRecord(null, recDefn);
 
     rec.setDefault();
     Environment.pushToCallStack(rec);

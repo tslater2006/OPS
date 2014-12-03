@@ -39,8 +39,25 @@ public abstract class PTRecord extends PTObjectType {
   private static Logger log = LogManager.getLogger(PTRecord.class.getName());
 
   private static Map<String, Method> ptMethodTable;
+  private static Pattern dtPattern, datePattern, dotPattern;
+
+  protected Map<String, PTImmutableReference<PTField>> fieldRefs;
+  protected Map<Integer, PTImmutableReference<PTField>> fieldRefIdxTable;
 
   static {
+    /*
+     * "ASTIMESTAMP" is not a typo; no spaces exist in the name as
+     * returned in the ResultSet.
+     */
+    dtPattern = Pattern.compile(
+        "TO_CHAR\\(CAST\\(\\(([^\\)]*)\\)ASTIMESTAMP\\),"
+        + "'YYYY-MM-DD-HH24\\.MI\\.SS\\.FF'\\)");
+
+    datePattern = Pattern.compile(
+        "TO_CHAR\\(([^,]*),'YYYY-MM-DD'\\)");
+
+    dotPattern = Pattern.compile("([^\\.]*)\\.(.*)");
+
     final String PT_METHOD_PREFIX = "PT_";
 
     // cache pointers to PeopleTools Record methods.
@@ -68,13 +85,60 @@ public abstract class PTRecord extends PTObjectType {
   public abstract int determineScrollLevel();
   public abstract Record getRecDefn();
   public abstract void setDefault();
-  public abstract Map<String, PTImmutableReference<PTField>> getFieldRefs();
   public abstract int getIndexPositionOfField(PTField field);
   public abstract RecordBuffer getRecBuffer();
   public abstract PTRow getParentRow();
   public abstract void emitRecInScroll();
   public abstract boolean hasField(String fieldName);
-  public abstract PTImmutableReference<PTField> getFieldRef(String fieldName);
   public abstract void firstPassFill();
   public abstract int getIndexPositionOfThisRecordInParentRow();
+
+  public Map<String, PTImmutableReference<PTField>> getFieldRefs() {
+    return this.fieldRefs;
+  }
+
+  /**
+   * Retrieves the field object corresponding to the
+   * provided field name.
+   * @param fldName the name of the field to retrieve
+   * @return the field object corresponding to the provided name
+   */
+  public PTImmutableReference<PTField> getFieldRef(final String fldName) {
+
+    String unwrappedFldName = fldName;
+
+    /*
+     * Unwrap datetime fields.
+     */
+    final Matcher dtMatcher = dtPattern.matcher(unwrappedFldName);
+    if (dtMatcher.find()) {
+      unwrappedFldName = dtMatcher.group(1);
+    }
+
+    /*
+     * Unwrap date fields.
+     */
+    final Matcher dateMatcher = datePattern.matcher(unwrappedFldName);
+    if (dateMatcher.find()) {
+      unwrappedFldName = dateMatcher.group(1);
+    }
+
+    /*
+     * Remove any record or "FILL" prefix from the field name.
+     */
+    if (unwrappedFldName.contains(".")) {
+      final Matcher dotMatcher = dotPattern.matcher(unwrappedFldName);
+      if (dotMatcher.find()) {
+        unwrappedFldName = dotMatcher.group(2);
+      }
+    }
+
+    if (!this.fieldRefs.containsKey(unwrappedFldName)) {
+      throw new OPSVMachRuntimeException("Call to getFieldRef with "
+          + "unwrappedFldName=" + unwrappedFldName
+          + " did not match any field on this record: "
+          + this.toString());
+    }
+    return this.fieldRefs.get(unwrappedFldName);
+  }
 }

@@ -39,28 +39,12 @@ public final class PTStandaloneRecord extends PTRecord implements ICBufferEntity
   private static Logger log = LogManager.getLogger(PTStandaloneRecord.class.getName());
 
   private static Map<String, Method> ptMethodTable;
-  private static Pattern dtPattern, datePattern, dotPattern;
 
   private PTRow parentRow;
   private Record recDefn;
   private RecordBuffer recBuffer;
-  private Map<String, PTImmutableReference<PTField>> fieldRefs;
-  private Map<Integer, PTImmutableReference<PTField>> fieldRefIdxTable;
 
   static {
-    /*
-     * "ASTIMESTAMP" is not a typo; no spaces exist in the name as
-     * returned in the ResultSet.
-     */
-    dtPattern = Pattern.compile(
-        "TO_CHAR\\(CAST\\(\\(([^\\)]*)\\)ASTIMESTAMP\\),"
-        + "'YYYY-MM-DD-HH24\\.MI\\.SS\\.FF'\\)");
-
-    datePattern = Pattern.compile(
-        "TO_CHAR\\(([^,]*),'YYYY-MM-DD'\\)");
-
-    dotPattern = Pattern.compile("([^\\.]*)\\.(.*)");
-
     final String PT_METHOD_PREFIX = "PT_";
 
     // cache pointers to PeopleTools Record methods.
@@ -374,15 +358,6 @@ public final class PTStandaloneRecord extends PTRecord implements ICBufferEntity
         + "this record; parent row is null.");
   }
 
-  /**
-   * Retrieves the field references within this record.
-   * @return a map of the field names to the immutable references
-   *    to those fields.
-   */
-  public Map<String, PTImmutableReference<PTField>> getFieldRefs() {
-    return this.fieldRefs;
-  }
-
   @Override
   public PTType dotProperty(final String s) {
     if (this.fieldRefs.containsKey(s)) {
@@ -413,51 +388,6 @@ public final class PTStandaloneRecord extends PTRecord implements ICBufferEntity
    */
   public boolean hasField(final String fldName) {
     return this.fieldRefs.containsKey(fldName);
-  }
-
-  /**
-   * Retrieves the field object corresponding to the
-   * provided field name.
-   * @param fldName the name of the field to retrieve
-   * @return the field object corresponding to the provided name
-   */
-  public PTImmutableReference<PTField> getFieldRef(final String fldName) {
-
-    String unwrappedFldName = fldName;
-
-    /*
-     * Unwrap datetime fields.
-     */
-    final Matcher dtMatcher = dtPattern.matcher(unwrappedFldName);
-    if (dtMatcher.find()) {
-      unwrappedFldName = dtMatcher.group(1);
-    }
-
-    /*
-     * Unwrap date fields.
-     */
-    final Matcher dateMatcher = datePattern.matcher(unwrappedFldName);
-    if (dateMatcher.find()) {
-      unwrappedFldName = dateMatcher.group(1);
-    }
-
-    /*
-     * Remove any record or "FILL" prefix from the field name.
-     */
-    if (unwrappedFldName.contains(".")) {
-      final Matcher dotMatcher = dotPattern.matcher(unwrappedFldName);
-      if (dotMatcher.find()) {
-        unwrappedFldName = dotMatcher.group(2);
-      }
-    }
-
-    if (!this.fieldRefs.containsKey(unwrappedFldName)) {
-      throw new OPSVMachRuntimeException("Call to getFieldRef with "
-          + "unwrappedFldName=" + unwrappedFldName
-          + " did not match any field on this record: "
-          + this.toString());
-    }
-    return this.fieldRefs.get(unwrappedFldName);
   }
 
   /**

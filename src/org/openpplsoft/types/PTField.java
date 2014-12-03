@@ -59,10 +59,10 @@ public abstract class PTField extends PTObjectType {
   public abstract RecordFieldBuffer getRecordFieldBuffer();
   public abstract PTPrimitiveType getValue();
   public abstract PTRecord getParentRecord();
+  public abstract RecordField getRecordFieldDefn();
   public abstract void hide();
   public abstract void unhide();
   public abstract void grayOut();
-  public abstract RecordField getRecordFieldDefn();
   public abstract int getIndexPositionOfThisFieldInParentRecord();
   public abstract void setBlank();
 }

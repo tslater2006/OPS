@@ -88,31 +88,6 @@ public final class PTStandaloneRow extends PTRow {
     }
   }
 
-  /**
-   * CAUTION: Do not rely on this as a way to get the
-   * index for a record in all cases; this code does things
-   * (i.e., excluding system records from index increment) that
-   * may not apply to your needs.
-   */
-  public int getIndexPositionOfRecord(final PTRecord rec) {
-    int idxPos = 0;
-    for (Map.Entry<String, PTRecord> entry
-        : this.recordMap.entrySet()) {
-      if (entry.getValue() == rec) {
-        return idxPos;
-      }
-
-      // System records are not given a numeric position
-      // and thus should not cause the index counter to be incremented.
-      if (!PSDefn.isSystemRecord(entry.getValue().getRecDefn().RECNAME)) {
-        idxPos++;
-      }
-    }
-
-    throw new OPSVMachRuntimeException("The provided record does "
-        + "not exist in this row; unable to determine index position.");
-  }
-
   // Used to register record defns that don't have an associated
   // buffer (i.e., standalone rows/rowsets)
   public void registerRecordDefn(final Record recDefn) {
@@ -153,6 +128,15 @@ public final class PTStandaloneRow extends PTRow {
   public void generateKeylist(
       final String fieldName, final Keylist keylist) {
   }
+  public int getIndexPositionOfRecord(final PTRecord rec) {
+    return -5;
+  }
+  public int getIndexOfThisRowInParentRowset() {
+    return -5;
+  }
+  public int determineScrollLevel() {
+    return -5;
+  }
 
   public PTRowset getParentRowset() {
     return this.parentRowset;
@@ -185,24 +169,6 @@ public final class PTStandaloneRow extends PTRow {
    */
   public boolean hasRecord(final String recName) {
     return this.recordMap.containsKey(recName);
-  }
-
-  public int getIndexOfThisRowInParentRowset() {
-    if (this.parentRowset != null) {
-      return this.parentRowset.getIndexOfRow(this);
-    }
-
-    throw new OPSVMachRuntimeException("Unable to get index of this "
-        + "row in parent rowset; parent rowset is null.");
-  }
-
-  public int determineScrollLevel() {
-    if (this.parentRowset != null) {
-      return this.parentRowset.determineScrollLevel();
-    }
-
-    throw new OPSVMachRuntimeException("Unable to determine scroll level "
-        + "for this row; parent rowset is null.");
   }
 
   /**

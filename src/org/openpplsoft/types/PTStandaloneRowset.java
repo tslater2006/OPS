@@ -131,71 +131,35 @@ public final class PTStandaloneRowset extends PTRowset {
     }
   }
 
+  /**
+   * MQUINN 12-03-2014 : Remove after split.
+   */
   public void fireEvent(final PCEvent event,
-      final FireEventSummary fireEventSummary) {
-    for (final PTStandaloneRow row : this.rows) {
-      row.fireEvent(event, fireEventSummary);
-    }
-  }
-
+      final FireEventSummary fireEventSummary) {}
   public PTRecord resolveContextualCBufferRecordReference(final String recName) {
-    if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferRecordReference(recName);
-    }
     return null;
   }
-
   public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
-    if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferRecordFieldReference(
-          recName, fieldName);
-    }
     return null;
   }
-
   public PTRowset resolveContextualCBufferScrollReference(
       final PTScrollLiteral scrollName) {
-    if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferScrollReference(scrollName);
-    }
+    return null;
+  }
+  public void emitScrolls(final String indent) {}
+  public void runFieldDefaultProcessing(
+      final FieldDefaultProcSummary fldDefProcSummary) {}
+  public ScrollBuffer getCBufferScrollDefn() {
+    return null;
+  }
+  public void generateKeylist(
+      final String fieldName, final Keylist keylist) {}
+  public PTStandaloneRow getParentRow() {
     return null;
   }
 
-  public void emitScrolls(final String indent) {
-    for (int i = 0; i < this.rows.size(); i++) {
-      this.rows.get(i).emitScrolls(indent);
-    }
-  }
-
-  public void runFieldDefaultProcessing(
-      final FieldDefaultProcSummary fldDefProcSummary) {
-    for (final PTStandaloneRow row : this.rows) {
-      row.runFieldDefaultProcessing(fldDefProcSummary);
-    }
-  }
-
-  public ScrollBuffer getCBufferScrollDefn() {
-    return this.cBufferScrollDefn;
-  }
-
-  /**
-   * If a key lookup request reaches a Rowset, the request should
-   * always be passed to the parent row in order to look at the child
-   * records within that row.
-   */
-  public void generateKeylist(
-      final String fieldName, final Keylist keylist) {
-    if (this.parentRow != null) {
-      this.parentRow.generateKeylist(fieldName, keylist);
-    }
-  }
-
-  public PTStandaloneRow getParentRow() {
-    return this.parentRow;
-  }
-
-  public int getActiveRowCount() {
+ public int getActiveRowCount() {
     return this.rows.size();
   }
 

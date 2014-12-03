@@ -108,230 +108,44 @@ public final class PTStandaloneRecord extends PTRecord implements ICBufferEntity
     }
   }
 
+  /**
+   * MQUINN 12-03-2014 : Remove after split.
+   */
   public int getIndexPositionOfThisRecordInParentRow() {
-    return this.parentRow.getIndexPositionOfRecord(this);
+    return -5;
   }
-
   public int getIndexPositionOfField(final PTField fld) {
-    int idxPos = 0;
-    for (Map.Entry<Integer, PTImmutableReference<PTField>> entry
-        : fieldRefIdxTable.entrySet()) {
-      if (entry.getValue().deref() == fld) {
-        // We use this counter, rather than the hashmap key, because
-        // the hashmap key is 1-based and this method should return the
-        // 0-based index.
-        return idxPos;
-      }
-      idxPos++;
-    }
-
-    throw new OPSVMachRuntimeException("The field provided does not exist "
-        + "on this record; unable to get index position.");
+    return -5;
   }
-
   public void emitRecInScroll() {
-
-    if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
-      return;
-    }
-
-    int keyrec = -1, keyfield = -1;
-    if (this.recBuffer != null
-        && this.recBuffer.isRelatedDisplayRecBuffer()) {
-      final RecordFieldBuffer relDispFldBuf = this.recBuffer.getFieldBuffers().get(0);
-      final PgToken relDispFldTok = relDispFldBuf.getSrcPageToken();
-      final PgToken dispCtrlFldTok = relDispFldTok.dispControlFieldTok;
-      final PTField dispCtrlFld =
-          this.resolveContextualCBufferRecordFieldReference(
-              dispCtrlFldTok.RECNAME, dispCtrlFldTok.FIELDNAME).deref();
-      keyrec = dispCtrlFld.getParentRecord()
-          .getIndexPositionOfThisRecordInParentRow();
-      keyfield = dispCtrlFld.getIndexPositionOfThisFieldInParentRecord();
-    }
-    TraceFileVerifier.submitEnforcedEmission(new RecInScroll(
-        this.recDefn.RECNAME, keyrec, keyfield));
   }
-
   public void emitScrolls(final String indent) {
-
-    if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
-      return;
-    }
-
-    // Do not log contents of a record that is not in the component buffer.
-    if (this.recBuffer == null) {
-      return;
-    }
-
-    log.debug("{}CRecBuf {}", indent, this.recDefn.RECNAME);
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
-        : this.fieldRefs.entrySet()) {
-      entry.getValue().deref().emitScrolls(indent + "  ");
-    }
   }
-
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
-
-    // Only fire events on records in the component structure. Make
-    // exception for SearchInit event.
-    if (event != PCEvent.SEARCH_INIT
-        && (this.recBuffer == null
-            || !this.recBuffer.doesContainStructuralFields())) {
-      return;
-    }
-
-    // Fire event on each field in this record.
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
-        : this.fieldRefs.entrySet()) {
-      entry.getValue().deref().fireEvent(event, fireEventSummary);
-    }
-
-    // PeopleCode events fire only on entities in the component buffer.
-    // (make an exception for SearchInit, as search records do not have a buffer
-    // in component  technically).
-    if (this.recBuffer == null && event != PCEvent.SEARCH_INIT) {
-      return;
-    }
-
-    /*
-     * If a Component PeopleCode program has been written for this event, run it now.
-     * Note that there is no way to define a Record PeopleCode program on a record
-     * (must be attached to a Record Field) so we only check for Component PeopleCode here.
-     */
-    final PeopleCodeProg compProg = ComponentBuffer.getComponentDefn()
-        .getProgramForRecordEvent(event, this.recDefn);
-    if (compProg != null && compProg.hasAtLeastOneStatement()) {
-      final ExecContext eCtx = new ProgramExecContext(compProg,
-          this.determineScrollLevel(), this.determineRowIndex());
-      // Pass this record to the supervisor as the component buffer context.
-      final InterpretSupervisor interpreter = new InterpretSupervisor(eCtx, this);
-      interpreter.run();
-      fireEventSummary.incrementNumEventProgsExecuted();
-    }
   }
-
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
-
-    if (this.recBuffer == null || !this.recBuffer.doesContainStructuralFields()) {
-      return;
-    }
-
-    // Run non-constant (from record) field default processing
-    // on each field in this record.
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
-        : this.fieldRefs.entrySet()) {
-      // Note: callee will exit if field is not blank per fld def proc logic in PS.
-      entry.getValue().deref().runNonConstantFieldDefaultProcessing(fldDefProcSummary);
-      entry.getValue().deref().runConstantFieldDefaultProcessing(fldDefProcSummary);
-    }
-
-    // Run constant field default processing
-    // on each field in this record.
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
-        : this.fieldRefs.entrySet()) {
-      // Note: callee will exit if field is not blank per fld def proc logic in PS.
-    }
-
-    // For any fields that are still blank, fire the FieldDefault event.
-    // NOTE: This cannot be done in the PTField call to runFieldDefaultProcessing,
-    // because FieldDefault events only fire once every field has been assigned
-    // a constant/record default (if defined).
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
-        : this.fieldRefs.entrySet()) {
-      final PTField fld = entry.getValue().deref();
-      final PTPrimitiveType fldValue = fld.getValue();
-      final RecordField recFieldDefn = fld.getRecordFieldDefn();
-
-      // Only fire event if field is blank and has a buffer in the component.
-      if (fldValue.isBlank() && fld.getRecordFieldBuffer() != null) {
-        boolean preFieldDefaultFireIsMarkedAsUpdated = fldValue.isMarkedAsUpdated();
-
-        final FireEventSummary summary = new FireEventSummary();
-        entry.getValue().deref().fireEvent(PCEvent.FIELD_DEFAULT, summary);
-
-        if (summary.getNumEventProgsExecuted() > 0) {
-          final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
-              recFieldDefn.RECNAME, recFieldDefn.FIELDNAME);
-          fdEmission.setDefaultedValue("from peoplecode");
-
-          /*
-           * At this point, a FieldDefault program may have been run,
-           * but it may not have actually changed the field's values. If
-           * If it did, an emission must be made indicating as much.
-           */
-          if (!preFieldDefaultFireIsMarkedAsUpdated && fldValue.isMarkedAsUpdated()) {
-            fldDefProcSummary.fieldWasChanged();
-            TraceFileVerifier.submitEnforcedEmission(fdEmission);
-          } else if (fldValue.isBlank()) {
-            fldDefProcSummary.blankFieldWasSeen();
-          }
-        }
-      }
-    }
   }
-
   public PTRecord resolveContextualCBufferRecordReference(final String recName) {
-    if (recName.equals(this.recDefn.RECNAME)) {
-      return this;
-    } else if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferRecordReference(recName);
-    }
     return null;
   }
-
   public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
-    if (recName.equals(this.recDefn.RECNAME)
-        && this.hasField(fieldName)) {
-      return this.getFieldRef(fieldName);
-    } else if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferRecordFieldReference(
-          recName, fieldName);
-    }
     return null;
   }
-
   public PTRowset resolveContextualCBufferScrollReference(
       final PTScrollLiteral scrollName) {
-    if (this.parentRow != null) {
-      return this.parentRow.resolveContextualCBufferScrollReference(scrollName);
-    }
     return null;
   }
-
-  /**
-   * Key lookups are always passed up when reaching a PTRecord;
-   * call does not go to the record's parent row, but to the record's parent row's
-   * parent row (since key lookup does not involve searching records in the same
-   * row as this record, but the ones that exist on the row above it). Thus, if
-   * this record
-   * is in scroll level 2, the records in both scroll level 1 and scroll level 0
-   * will be searched within the two rows that make up the buffer context hierarchy
-   * leading to the row that this record is in.
-   */
   public void generateKeylist(
       final String fieldName, final Keylist keylist) {
-
-    if (this.parentRow == null
-        || this.parentRow.getParentRowset() == null
-        || this.parentRow.getParentRowset().getParentRow() == null) {
-      return;
-    }
-
-    this.parentRow.getParentRowset().getParentRow()
-          .generateKeylist(fieldName, keylist);
   }
 
   public PTRow getParentRow() {
     return this.parentRow;
   }
 
-  /**
-   * Retrieves the underlying record defn.
-   * @return the underlying record defn
-   */
   public Record getRecDefn() {
     return this.recDefn;
   }

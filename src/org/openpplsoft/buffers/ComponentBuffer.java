@@ -460,7 +460,7 @@ public final class ComponentBuffer {
       */
       if (record.getRecBuffer().doesContainStructuralFields()
           && (recDefn.isTable() || recDefn.isView())) {
-        record.firstPassFill();
+        ((PTBufferRecord) record).firstPassFill();
       }
     }
   }

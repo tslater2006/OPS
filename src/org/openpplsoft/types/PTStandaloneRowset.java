@@ -53,6 +53,9 @@ public final class PTStandaloneRowset extends PTRowset {
             PT_METHOD_PREFIX.length()), m);
       }
     }
+
+    // Add the universal methods defined in the superclass as well.
+    ptMethodTable.putAll(PTRowset.getUniversalRowsetMethodTable());
   }
 
   /**
@@ -85,6 +88,14 @@ public final class PTStandaloneRowset extends PTRowset {
   protected PTRow allocateNewRow() {
     return new PTRowTypeConstraint().allocStandaloneRow(
         this, this.registeredRecordDefns, this.registeredChildScrollDefns);
+  }
+
+  @Override
+  public Callable dotMethod(final String s) {
+    if (ptMethodTable.containsKey(s)) {
+      return new Callable(ptMethodTable.get(s), this);
+    }
+    return null;
   }
 
   public void registerRecordDefn(final Record recDefn) {
@@ -156,6 +167,68 @@ public final class PTStandaloneRowset extends PTRowset {
   }
   public int determineScrollLevel() {
     return -5;
+  }
+
+  /**
+   * Fill the rowset; the WHERE clause to use must be passed on the
+   * OPS runtime stack.
+   */
+  public void PT_Fill() {
+    final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
+
+    // If no args are provided to Fill, use a single blank as the where
+    // clause.
+    String whereClause = " ";
+    String[] bindVals = new String[0];
+    if (args.size() > 0) {
+      whereClause = ((PTString) args.get(0)).read();
+
+      // Gather bind values following the WHERE string on the stack.
+      bindVals = new String[args.size() - 1];
+      for (int i = 1; i < args.size(); i++) {
+        final PTPrimitiveType bindExpr =
+            Environment.getOrDerefPrimitive(args.get(i));
+        bindVals[i - 1] = bindExpr.readAsString();
+        //log.debug("Fill query bind value {}: {}", i-1, bindVals[i-1]);
+      }
+    }
+
+    // The rowset must be flushed before continuing.
+    this.internalFlush();
+
+    final OPSStmt ostmt = StmtLibrary.prepareFillStmt(
+        this.primaryRecDefn, whereClause, bindVals);
+    OPSResultSet rs = ostmt.executeQuery();
+
+    final List<RecordField> rfList = this.primaryRecDefn.getExpandedFieldList();
+    final int numCols = rs.getColumnCount();
+
+    if (numCols != rfList.size()) {
+      throw new OPSVMachRuntimeException("The number of columns returned "
+          + "by the fill query (" + numCols + ") differs from the number "
+          + "of fields (" + rfList.size()
+          + ") in the record defn field list.");
+    }
+
+    int rowsRead = 0;
+    while (rs.next()) {
+
+      //If at least one row exists, remove the empty row.
+      if (rowsRead == 0) {
+        this.rows.clear();
+      }
+
+      final PTRow newRow = this.allocateNewRow();
+      rs.readIntoRecord(newRow.getRecord(this.primaryRecDefn.RECNAME));
+      this.rows.add(newRow);
+      rowsRead++;
+    }
+
+    rs.close();
+    ostmt.close();
+
+    // Return the number of rows read from the fill operation.
+    Environment.pushToCallStack(new PTInteger(rowsRead));
   }
 
   @Override

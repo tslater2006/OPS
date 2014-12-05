@@ -34,7 +34,7 @@ import org.openpplsoft.buffers.*;
 /**
  * Represents a PeopleTools standalone record (not in the component buffer).
  */
-public final class PTStandaloneRecord extends PTRecord implements ICBufferEntity {
+public final class PTStandaloneRecord extends PTRecord {
 
   private static Logger log = LogManager.getLogger(PTStandaloneRecord.class.getName());
 

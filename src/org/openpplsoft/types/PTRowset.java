@@ -39,6 +39,10 @@ public abstract class PTRowset extends PTObjectType {
 
   private static Map<String, Method> ptMethodTable;
 
+  protected PTRow parentRow;
+  protected List<PTRow> rows = new ArrayList<PTRow>();
+  protected Record primaryRecDefn;
+
   static {
     final String PT_METHOD_PREFIX = "PT_";
     // cache pointers to PeopleTools Rowset methods.

@@ -22,7 +22,7 @@ import org.openpplsoft.pt.peoplecode.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PTStandaloneField extends PTField implements ICBufferEntity {
+public final class PTStandaloneField extends PTField {
 
   private static Logger log = LogManager.getLogger(PTStandaloneField.class.getName());
 

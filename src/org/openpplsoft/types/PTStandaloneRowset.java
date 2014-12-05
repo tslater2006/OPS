@@ -39,10 +39,6 @@ public final class PTStandaloneRowset extends PTRowset {
 
   private static Map<String, Method> ptMethodTable;
 
-  private PTStandaloneRow parentRow;
-  private List<PTStandaloneRow> rows = new ArrayList<PTStandaloneRow>();
-  private Record primaryRecDefn;
-
   // If this is null, this rowset is a standalone rowset.
   private ScrollBuffer cBufferScrollDefn;
 
@@ -100,7 +96,7 @@ public final class PTStandaloneRowset extends PTRowset {
     this.registeredRecordDefns.add(recDefn);
 
     // Each row must also have this record registered.
-    for (final PTStandaloneRow row : this.rows) {
+    for (final PTRow row : this.rows) {
 
       // If this is a component buffer scroll and the record has an
       // associated record buffer, pass that to the row; it will register
@@ -126,7 +122,7 @@ public final class PTStandaloneRowset extends PTRowset {
           childScrollDefn.getPrimaryRecName(), childScrollDefn);
     }
 
-    for (final PTStandaloneRow row : this.rows) {
+    for (final PTRow row : this.rows) {
       row.registerChildScrollDefn(childScrollDefn);
     }
   }
@@ -158,8 +154,14 @@ public final class PTStandaloneRowset extends PTRowset {
   public PTStandaloneRow getParentRow() {
     return null;
   }
+  public int getIndexOfRow(final PTRow row) {
+    return -5;
+  }
+  public int determineScrollLevel() {
+    return -5;
+  }
 
- public int getActiveRowCount() {
+  public int getActiveRowCount() {
     return this.rows.size();
   }
 
@@ -219,31 +221,9 @@ public final class PTStandaloneRowset extends PTRowset {
    * @param idx the index of the row to retrieve
    * @return the row corresponding to idx
    */
-  public PTStandaloneRow getRow(int idx) {
+  public PTRow getRow(int idx) {
     // Must subtract 1 from idx; rowset indices start at 1.
     return this.rows.get(idx - 1);
-  }
-
-  public int getIndexOfRow(final PTRow row) {
-    for (int i = 0; i < this.rows.size(); i++) {
-      if(row == this.rows.get(i)) {
-        return i;
-      }
-    }
-    throw new OPSVMachRuntimeException("Unable to get index for the provided row; "
-        + "row does not exist in this rowset.");
-  }
-
-  public int determineScrollLevel() {
-    if (this == ComponentBuffer.getCBufferRowset()) {
-      return -1;
-    } else if (this.parentRow != null) {
-      return 1 + this.parentRow.determineScrollLevel();
-    } else {
-      throw new OPSVMachRuntimeException("Unable to determine scroll level "
-          + "for this rowset; this is not the root cbuffer rowset, but "
-          + "the parent row is null, so unable to continue traversal.");
-    }
   }
 
   /**
@@ -298,7 +278,7 @@ public final class PTStandaloneRowset extends PTRowset {
     log.debug("======== End Sorted Rowset =========");*/
   }
 
-  private List<PTStandaloneRow> mergeSortRows(final List<PTStandaloneRow> rowsToSort,
+  private List<PTRow> mergeSortRows(final List<PTRow> rowsToSort,
     final List<String> sortFields, final List<String> sortOrders) {
 
     if (rowsToSort.size() < 2) {
@@ -306,23 +286,23 @@ public final class PTStandaloneRowset extends PTRowset {
     }
 
     final int mid = rowsToSort.size() / 2;
-    final List<PTStandaloneRow> left = this.mergeSortRows(
+    final List<PTRow> left = this.mergeSortRows(
         rowsToSort.subList(0, mid), sortFields, sortOrders);
-    final List<PTStandaloneRow> right = this.mergeSortRows(
+    final List<PTRow> right = this.mergeSortRows(
         rowsToSort.subList(mid,
           rowsToSort.size()), sortFields, sortOrders);
     return this.merge(left, right, sortFields, sortOrders);
   }
 
-  private List<PTStandaloneRow> merge(final List<PTStandaloneRow> left,
-      final List<PTStandaloneRow> right, final List<String> sortFields,
+  private List<PTRow> merge(final List<PTRow> left,
+      final List<PTRow> right, final List<String> sortFields,
       final List<String> sortOrders) {
 
-    final List<PTStandaloneRow> merged = new ArrayList<PTStandaloneRow>();
+    final List<PTRow> merged = new ArrayList<PTRow>();
     int l = 0, r = 0;
     while (l < left.size() && r < right.size()) {
-      final PTStandaloneRow lRow = left.get(l);
-      final PTStandaloneRow rRow = right.get(r);
+      final PTRow lRow = left.get(l);
+      final PTRow rRow = right.get(r);
 
       /*
        * Order the rows based on the precedence

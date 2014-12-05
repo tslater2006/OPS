@@ -39,10 +39,6 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
 
-  private PTBufferRow parentRow;
-  private List<PTBufferRow> rows = new ArrayList<PTBufferRow>();
-  private Record primaryRecDefn;
-
   // If this is null, this rowset is a standalone rowset.
   private ScrollBuffer cBufferScrollDefn;
 
@@ -100,7 +96,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     this.registeredRecordDefns.add(recDefn);
 
     // Each row must also have this record registered.
-    for (final PTBufferRow row : this.rows) {
+    for (final PTRow row : this.rows) {
 
       // If this is a component buffer scroll and the record has an
       // associated record buffer, pass that to the row; it will register
@@ -126,14 +122,14 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
           childScrollDefn.getPrimaryRecName(), childScrollDefn);
     }
 
-    for (final PTBufferRow row : this.rows) {
+    for (final PTRow row : this.rows) {
       row.registerChildScrollDefn(childScrollDefn);
     }
   }
 
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
-    for (final PTBufferRow row : this.rows) {
+    for (final PTRow row : this.rows) {
       row.fireEvent(event, fireEventSummary);
     }
   }
@@ -170,7 +166,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
 
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
-    for (final PTBufferRow row : this.rows) {
+    for (final PTRow row : this.rows) {
       row.runFieldDefaultProcessing(fldDefProcSummary);
     }
   }
@@ -191,7 +187,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     }
   }
 
-  public PTBufferRow getParentRow() {
+  public PTRow getParentRow() {
     return this.parentRow;
   }
 
@@ -255,7 +251,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
    * @param idx the index of the row to retrieve
    * @return the row corresponding to idx
    */
-  public PTBufferRow getRow(int idx) {
+  public PTRow getRow(int idx) {
     // Must subtract 1 from idx; rowset indices start at 1.
     return this.rows.get(idx - 1);
   }
@@ -334,7 +330,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     log.debug("======== End Sorted Rowset =========");*/
   }
 
-  private List<PTBufferRow> mergeSortRows(final List<PTBufferRow> rowsToSort,
+  private List<PTRow> mergeSortRows(final List<PTRow> rowsToSort,
     final List<String> sortFields, final List<String> sortOrders) {
 
     if (rowsToSort.size() < 2) {
@@ -342,23 +338,23 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     }
 
     final int mid = rowsToSort.size() / 2;
-    final List<PTBufferRow> left = this.mergeSortRows(
+    final List<PTRow> left = this.mergeSortRows(
         rowsToSort.subList(0, mid), sortFields, sortOrders);
-    final List<PTBufferRow> right = this.mergeSortRows(
+    final List<PTRow> right = this.mergeSortRows(
         rowsToSort.subList(mid,
           rowsToSort.size()), sortFields, sortOrders);
     return this.merge(left, right, sortFields, sortOrders);
   }
 
-  private List<PTBufferRow> merge(final List<PTBufferRow> left,
-      final List<PTBufferRow> right, final List<String> sortFields,
+  private List<PTRow> merge(final List<PTRow> left,
+      final List<PTRow> right, final List<String> sortFields,
       final List<String> sortOrders) {
 
-    final List<PTBufferRow> merged = new ArrayList<PTBufferRow>();
+    final List<PTRow> merged = new ArrayList<PTRow>();
     int l = 0, r = 0;
     while (l < left.size() && r < right.size()) {
-      final PTBufferRow lRow = left.get(l);
-      final PTBufferRow rRow = right.get(r);
+      final PTRow lRow = left.get(l);
+      final PTRow rRow = right.get(r);
 
       /*
        * Order the rows based on the precedence
@@ -561,7 +557,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
 
     int rowsRead = 0, rowIdxToWriteTo = 1;
     while (rs.next()) {
-      final PTBufferRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
+      final PTRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
       final PTRecord recToWriteTo = rowToWriteTo.getRecord(this.primaryRecDefn.RECNAME);
 
       /**

@@ -28,7 +28,8 @@ import org.openpplsoft.trace.*;
  * Represents a PeopleTools row definition; contains
  * 1 to n child records and 0 to m child rowsets.
  */
-public final class PTBufferRow extends PTRow implements ICBufferEntity {
+public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
+    implements ICBufferEntity {
 
   private static Map<String, Method> ptMethodTable;
 
@@ -47,7 +48,7 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
     }
   }
 
-  public PTBufferRow(final PTRowTypeConstraint origTc, final PTRowset pRowset,
+  public PTBufferRow(final PTRowTypeConstraint origTc, final PTBufferRowset pRowset,
       final Set<Record> recDefnsToRegister,
       final Map<String, ScrollBuffer> childScrollDefnsToRegister) {
     super(origTc);
@@ -82,9 +83,9 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
    * (i.e., excluding system records from index increment) that
    * may not apply to your needs.
    */
-  public int getIndexPositionOfRecord(final PTRecord rec) {
+  public int getIndexPositionOfRecord(final PTBufferRecord rec) {
     int idxPos = 0;
-    for (Map.Entry<String, PTRecord> entry
+    for (Map.Entry<String, PTBufferRecord> entry
         : this.recordMap.entrySet()) {
       if (entry.getValue() == rec) {
         return idxPos;
@@ -150,15 +151,15 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
         (scrollLevel != 0), (scrollLevel != 0),
         this.registeredRecordDefns.size()));
 
-    for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
+    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().emitRecInScroll();
     }
 
-    for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
+    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().emitScrolls(indent + "  ");
     }
 
-    for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
+    for (Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().emitScrolls(indent + "  ");
     }
   }
@@ -167,12 +168,12 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
       final FireEventSummary fireEventSummary) {
 
     // Fire event on each record in this row.
-    for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
+    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().fireEvent(event, fireEventSummary);
     }
 
     // Fire event on each rowset in this row.
-    for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
+    for (Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().fireEvent(event, fireEventSummary);
     }
   }
@@ -181,17 +182,17 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
       final FieldDefaultProcSummary fldDefProcSummary) {
 
     // Run field default processing on each record in this row.
-    for (Map.Entry<String, PTRecord> entry : this.recordMap.entrySet()) {
+    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().runFieldDefaultProcessing(fldDefProcSummary);
     }
 
     // Run field default processing on each rowset in this row.
-    for (Map.Entry<String, PTRowset> entry : this.rowsetMap.entrySet()) {
+    for (Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().runFieldDefaultProcessing(fldDefProcSummary);
     }
   }
 
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
+  public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {
     if (this.recordMap.containsKey(recName)) {
       return this.recordMap.get(recName);
     } else if (this.parentRowset != null) {
@@ -200,7 +201,7 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
     return null;
   }
 
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+  public PTReference<PTBufferField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
     if (this.recordMap.containsKey(recName)
         && this.recordMap.get(recName).hasField(fieldName)) {
@@ -212,7 +213,7 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
     return null;
   }
 
-  public PTRowset resolveContextualCBufferScrollReference(
+  public PTBufferRowset resolveContextualCBufferScrollReference(
       final PTScrollLiteral scrollName) {
     if (this.rowsetMap.containsKey(scrollName.read())) {
       return this.rowsetMap.get(scrollName.read());
@@ -236,7 +237,7 @@ public final class PTBufferRow extends PTRow implements ICBufferEntity {
     if (this.parentRowset.getCBufferScrollDefn() == null) {
       if (this.parentRowset == ComponentBuffer.getCBufferRowset()) {
 
-        final PTRecord searchRecord = this.recordMap.get(
+        final PTBufferRecord searchRecord = this.recordMap.get(
             ComponentBuffer.getComponentDefn().getSearchRecordName());
 
         if (searchRecord.hasField(fieldName)) {

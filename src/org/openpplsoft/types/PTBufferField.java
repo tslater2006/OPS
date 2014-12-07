@@ -22,21 +22,14 @@ import org.openpplsoft.pt.peoplecode.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PTBufferField extends PTField implements ICBufferEntity {
+public final class PTBufferField extends PTField<PTBufferRecord>
+    implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(PTBufferField.class.getName());
 
   private static Map<String, Method> ptMethodTable;
 
-  private PTRecord parentRecord;
-  private RecordField recFieldDefn;
-  private RecordFieldBuffer recFieldBuffer;
-  private PTImmutableReference<PTPrimitiveType> valueRef;
-  private PTImmutableReference<PTBoolean> visiblePropertyRef,
-      displayOnlyPropertyRef;
-  private PTImmutableReference<PTString> fldNamePropertyRef;
   private List<DropDownItem> dropDownList;
-  private boolean isGrayedOut;
 
   private class DropDownItem {
     private String code, desc;
@@ -60,7 +53,7 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
     }
   }
 
-  public PTBufferField(final PTFieldTypeConstraint origTc, final PTRecord pRecord,
+  public PTBufferField(final PTFieldTypeConstraint origTc, final PTBufferRecord pRecord,
       final RecordField rfd) {
     super(origTc);
     this.parentRecord = pRecord;
@@ -68,7 +61,7 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
     this.init();
   }
 
-  public PTBufferField(final PTFieldTypeConstraint origTc, final PTRecord pRecord,
+  public PTBufferField(final PTFieldTypeConstraint origTc, final PTBufferRecord pRecord,
       final RecordFieldBuffer recFldBuffer) {
     super(origTc);
     this.parentRecord = pRecord;
@@ -160,10 +153,6 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
       interpreter.run();
       fireEventSummary.incrementNumEventProgsExecuted();
     }
-  }
-
-  public PTRecord getParentRecord() {
-    return this.parentRecord;
   }
 
   public void runFieldDefaultProcessing(
@@ -383,14 +372,14 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
     }
   }
 
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
+  public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {
     if (this.parentRecord != null) {
       return this.parentRecord.resolveContextualCBufferRecordReference(recName);
     }
     return null;
   }
 
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+  public PTReference<PTBufferField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
     if (this.parentRecord != null) {
       return this.parentRecord.resolveContextualCBufferRecordFieldReference(
@@ -399,7 +388,7 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
     return null;
   }
 
-  public PTRowset resolveContextualCBufferScrollReference(
+  public PTBufferRowset resolveContextualCBufferScrollReference(
       final PTScrollLiteral scrollName) {
     if (this.parentRecord != null) {
       return this.parentRecord.resolveContextualCBufferScrollReference(scrollName);
@@ -418,18 +407,6 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
       this.parentRecord.generateKeylist(
           this.recFieldDefn.FIELDNAME, keylist);
     }
-  }
-
-  public void setBlank() {
-    valueRef.deref().setBlank();
-  }
-
-  public PTPrimitiveType getValue() {
-    return this.valueRef.deref();
-  }
-
-  public RecordField getRecordFieldDefn() {
-    return this.recFieldDefn;
   }
 
   public PTImmutableReference dotProperty(String s) {
@@ -548,7 +525,7 @@ public final class PTBufferField extends PTField implements ICBufferEntity {
           + "provided: " + recFldSpecifier);
     }
 
-    final PTField relDispField = recFldSpecifier.resolveInCBufferContext().deref();
+    final PTBufferField relDispField = recFldSpecifier.resolveInCBufferContext().deref();
 
     /*
      * This check makes absolutely sure that the resolved field's underlying

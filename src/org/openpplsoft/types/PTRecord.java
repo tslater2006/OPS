@@ -34,7 +34,8 @@ import org.openpplsoft.buffers.*;
 /**
  * Represents a PeopleTools record object.
  */
-public abstract class PTRecord extends PTObjectType {
+public abstract class PTRecord<R extends PTRow, F extends PTField>
+    extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTRecord.class.getName());
 
@@ -42,9 +43,9 @@ public abstract class PTRecord extends PTObjectType {
   private static Pattern dtPattern, datePattern, dotPattern;
 
   protected Record recDefn;
-  protected PTRow parentRow;
-  protected Map<String, PTImmutableReference<PTField>> fieldRefs;
-  protected Map<Integer, PTImmutableReference<PTField>> fieldRefIdxTable;
+  protected R parentRow;
+  protected Map<String, PTImmutableReference<F>> fieldRefs;
+  protected Map<Integer, PTImmutableReference<F>> fieldRefIdxTable;
 
   static {
     /*
@@ -77,22 +78,15 @@ public abstract class PTRecord extends PTObjectType {
     super(origTc);
   }
 
-  public abstract void generateKeylist(String fieldName, Keylist keylist);
-  public abstract void emitScrolls(String indent);
-  public abstract void fireEvent(PCEvent event, FireEventSummary fireEventSummary);
-  public abstract void runFieldDefaultProcessing(FieldDefaultProcSummary fldDefProcSummary);
-  public abstract PTRowset resolveContextualCBufferScrollReference(PTScrollLiteral scrollName);
-  public abstract PTRecord resolveContextualCBufferRecordReference(String recName);
-  public abstract PTReference<PTField> resolveContextualCBufferRecordFieldReference(String recName, String fldName);
-  public abstract int determineScrollLevel();
-  public abstract Record getRecDefn();
-  public abstract int getIndexPositionOfField(PTField field);
-  public abstract RecordBuffer getRecBuffer();
-  public abstract PTRow getParentRow();
-  public abstract void emitRecInScroll();
-  public abstract int getIndexPositionOfThisRecordInParentRow();
+  public R getParentRow() {
+    return this.parentRow;
+  }
 
-  public Map<String, PTImmutableReference<PTField>> getFieldRefs() {
+  public Record getRecDefn() {
+    return this.recDefn;
+  }
+
+  public Map<String, PTImmutableReference<F>> getFieldRefs() {
     return this.fieldRefs;
   }
 
@@ -102,7 +96,7 @@ public abstract class PTRecord extends PTObjectType {
    * @param fldName the name of the field to retrieve
    * @return the field object corresponding to the provided name
    */
-  public PTImmutableReference<PTField> getFieldRef(final String fldName) {
+  public PTImmutableReference<F> getFieldRef(final String fldName) {
 
     String unwrappedFldName = fldName;
 
@@ -178,7 +172,7 @@ public abstract class PTRecord extends PTObjectType {
    * this record object.
    */
   public void setDefault() {
-    for (Map.Entry<String, PTImmutableReference<PTField>> cursor
+    for (Map.Entry<String, PTImmutableReference<F>> cursor
         : this.fieldRefs.entrySet()) {
       cursor.getValue().deref().setBlank();
     }
@@ -192,7 +186,7 @@ public abstract class PTRecord extends PTObjectType {
     }
 
     final PTType arg = args.get(0);
-    final PTField fld;
+    final F fld;
     if (arg instanceof PTInteger) {
       // We do not need to adjust the provided index; fieldRefIdxTable maps
       // fields to their PT indices (meaning 1-based instead of 0-based).
@@ -321,7 +315,7 @@ public abstract class PTRecord extends PTObjectType {
   public void setReadOnly() {
     super.setReadOnly();
     if (this.fieldRefs != null) {
-      for (Map.Entry<String, PTImmutableReference<PTField>> cursor
+      for (Map.Entry<String, PTImmutableReference<F>> cursor
           : this.fieldRefs.entrySet()) {
         cursor.getValue().deref().setReadOnly();
       }

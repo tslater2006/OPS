@@ -528,9 +528,9 @@ public class GlobalFnLibrary {
     /*
      * The keylist must be in alphabetical order by key.
      */
-    Map<String, PTImmutableReference<PTField>> fieldsUnsorted
-        = ((PTRecord) args.get(7)).getFieldRefs();
-    Map<String, PTImmutableReference<PTField>> fieldsKeyAscMap =
+/*    Map<String, PTImmutableReference<?> fieldsUnsorted
+        = ((PTRecord<?, ?>) args.get(7)).getFieldRefs();
+    Map<String, PTImmutableReference<?>> fieldsKeyAscMap =
         new TreeMap<String, PTImmutableReference<PTField>>(fieldsUnsorted);
     for(Map.Entry<String, PTImmutableReference<PTField>> cursor
         : fieldsKeyAscMap.entrySet()) {
@@ -538,12 +538,15 @@ public class GlobalFnLibrary {
       // in PS and should be reduced to the empty string.
       url.append("&").append(cursor.getKey()).append("=")
           .append(cursor.getValue().deref().getValue().readAsString().trim());
-    }
+    }*/
+    throw new OPSVMachRuntimeException("TODO: In GenerateComponentContentRelUrl, "
+        + "replace the code above with one that doesn't require extensive generics "
+        + "AND RE-ENABLE THE CODE BELOW.");
 
-    log.debug("GenerateComponentContentURL: From args, generated url: {}",
+/*    log.debug("GenerateComponentContentURL: From args, generated url: {}",
       url.toString());
 
-    Environment.pushToCallStack(new PTString(url.toString()));
+    Environment.pushToCallStack(new PTString(url.toString()));*/
   }
 
   public void PT_Truncate() {

@@ -34,7 +34,8 @@ import org.openpplsoft.buffers.*;
 /**
  * Represents a PeopleTools record in the component buffer.
  */
-public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
+public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
+    implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(PTBufferRecord.class.getName());
 
@@ -57,7 +58,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
   }
 
   public PTBufferRecord(final PTRecordTypeConstraint origTc,
-      final PTRow pRow, final Record r) {
+      final PTBufferRow pRow, final Record r) {
     super(origTc);
     this.parentRow = pRow;
     this.recDefn = r;
@@ -65,7 +66,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
   }
 
   public PTBufferRecord(final PTRecordTypeConstraint origTc,
-      final PTRow pRow, final RecordBuffer recBuffer) {
+      final PTBufferRow pRow, final RecordBuffer recBuffer) {
     super(origTc);
     this.parentRow = pRow;
     this.recDefn = recBuffer.getRecDefn();
@@ -76,26 +77,26 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
   private void init() {
     // this map is linked in order to preserve
     // the order in which fields are added.
-    this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTField>>();
+    this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTBufferField>>();
     this.fieldRefIdxTable =
-        new LinkedHashMap<Integer, PTImmutableReference<PTField>>();
+        new LinkedHashMap<Integer, PTImmutableReference<PTBufferField>>();
     int i = 1;
     for (final RecordField rf : this.recDefn.getExpandedFieldList()) {
       PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();
 
       try {
-        PTImmutableReference<PTField> newFldRef = null;
+        PTImmutableReference<PTBufferField> newFldRef = null;
 
         // If this record field has a buffer associated with it, allocate the
         // field with that to give the field a reference to that buffer.
         if (this.recBuffer != null
             && this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
           newFldRef
-            = new PTImmutableReference<PTField>(fldTc,
+            = new PTImmutableReference<PTBufferField>(fldTc,
                 fldTc.allocBufferField(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
         } else {
           newFldRef
-            = new PTImmutableReference<PTField>(fldTc, fldTc.allocBufferField(this, rf));
+            = new PTImmutableReference<PTBufferField>(fldTc, fldTc.allocBufferField(this, rf));
         }
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);
@@ -109,9 +110,9 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
     return this.parentRow.getIndexPositionOfRecord(this);
   }
 
-  public int getIndexPositionOfField(final PTField fld) {
+  public int getIndexPositionOfField(final PTBufferField fld) {
     int idxPos = 0;
-    for (Map.Entry<Integer, PTImmutableReference<PTField>> entry
+    for (Map.Entry<Integer, PTImmutableReference<PTBufferField>> entry
         : fieldRefIdxTable.entrySet()) {
       if (entry.getValue().deref() == fld) {
         // We use this counter, rather than the hashmap key, because
@@ -138,7 +139,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
       final RecordFieldBuffer relDispFldBuf = this.recBuffer.getFieldBuffers().get(0);
       final PgToken relDispFldTok = relDispFldBuf.getSrcPageToken();
       final PgToken dispCtrlFldTok = relDispFldTok.dispControlFieldTok;
-      final PTField dispCtrlFld =
+      final PTBufferField dispCtrlFld =
           this.resolveContextualCBufferRecordFieldReference(
               dispCtrlFldTok.RECNAME, dispCtrlFldTok.FIELDNAME).deref();
       keyrec = dispCtrlFld.getParentRecord()
@@ -161,7 +162,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
     }
 
     log.debug("{}CRecBuf {}", indent, this.recDefn.RECNAME);
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+    for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
       entry.getValue().deref().emitScrolls(indent + "  ");
     }
@@ -179,7 +180,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
     }
 
     // Fire event on each field in this record.
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+    for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
       entry.getValue().deref().fireEvent(event, fireEventSummary);
     }
@@ -217,7 +218,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
 
     // Run non-constant (from record) field default processing
     // on each field in this record.
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+    for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
       // Note: callee will exit if field is not blank per fld def proc logic in PS.
       entry.getValue().deref().runNonConstantFieldDefaultProcessing(fldDefProcSummary);
@@ -226,18 +227,18 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
 
     // Run constant field default processing
     // on each field in this record.
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+    for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
       // Note: callee will exit if field is not blank per fld def proc logic in PS.
     }
 
     // For any fields that are still blank, fire the FieldDefault event.
-    // NOTE: This cannot be done in the PTField call to runFieldDefaultProcessing,
+    // NOTE: This cannot be done in the PTBufferField call to runFieldDefaultProcessing,
     // because FieldDefault events only fire once every field has been assigned
     // a constant/record default (if defined).
-    for (Map.Entry<String, PTImmutableReference<PTField>> entry
+    for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
-      final PTField fld = entry.getValue().deref();
+      final PTBufferField fld = entry.getValue().deref();
       final PTPrimitiveType fldValue = fld.getValue();
       final RecordField recFieldDefn = fld.getRecordFieldDefn();
 
@@ -269,7 +270,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
     }
   }
 
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
+  public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {
     if (recName.equals(this.recDefn.RECNAME)) {
       return this;
     } else if (this.parentRow != null) {
@@ -278,7 +279,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
     return null;
   }
 
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+  public PTReference<PTBufferField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
     if (recName.equals(this.recDefn.RECNAME)
         && this.hasField(fieldName)) {
@@ -290,7 +291,7 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
     return null;
   }
 
-  public PTRowset resolveContextualCBufferScrollReference(
+  public PTBufferRowset resolveContextualCBufferScrollReference(
       final PTScrollLiteral scrollName) {
     if (this.parentRow != null) {
       return this.parentRow.resolveContextualCBufferScrollReference(scrollName);
@@ -319,10 +320,6 @@ public final class PTBufferRecord extends PTRecord implements ICBufferEntity {
 
     this.parentRow.getParentRowset().getParentRow()
           .generateKeylist(fieldName, keylist);
-  }
-
-  public PTRow getParentRow() {
-    return this.parentRow;
   }
 
   /**

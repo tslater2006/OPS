@@ -22,11 +22,20 @@ import org.openpplsoft.pt.peoplecode.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class PTField extends PTObjectType {
+public abstract class PTField<R extends PTRecord> extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTField.class.getName());
 
   private static Map<String, Method> ptMethodTable;
+
+  protected R parentRecord;
+  protected RecordField recFieldDefn;
+  protected RecordFieldBuffer recFieldBuffer;
+  protected PTImmutableReference<PTPrimitiveType> valueRef;
+  protected PTImmutableReference<PTBoolean> visiblePropertyRef,
+      displayOnlyPropertyRef;
+  protected PTImmutableReference<PTString> fldNamePropertyRef;
+  protected boolean isGrayedOut;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -46,23 +55,19 @@ public abstract class PTField extends PTObjectType {
     super(origTc);
   }
 
-  public abstract void generateKeylist(String fieldName, Keylist keylist);
-  public abstract void emitScrolls(String indent);
-  public abstract void fireEvent(PCEvent event, FireEventSummary fireEventSummary);
-  public abstract void runFieldDefaultProcessing(FieldDefaultProcSummary fldDefProcSummary);
-  public abstract void runConstantFieldDefaultProcessing(FieldDefaultProcSummary summary);
-  public abstract void runNonConstantFieldDefaultProcessing(FieldDefaultProcSummary summary);
-  public abstract PTRowset resolveContextualCBufferScrollReference(PTScrollLiteral scrollName);
-  public abstract PTRecord resolveContextualCBufferRecordReference(String recName);
-  public abstract PTReference<PTField> resolveContextualCBufferRecordFieldReference(String recName, String fldName);
-  public abstract int determineScrollLevel();
-  public abstract RecordFieldBuffer getRecordFieldBuffer();
-  public abstract PTPrimitiveType getValue();
-  public abstract PTRecord getParentRecord();
-  public abstract RecordField getRecordFieldDefn();
-  public abstract void hide();
-  public abstract void unhide();
-  public abstract void grayOut();
-  public abstract int getIndexPositionOfThisFieldInParentRecord();
-  public abstract void setBlank();
+  public R getParentRecord() {
+    return this.parentRecord;
+  }
+
+  public PTPrimitiveType getValue() {
+    return this.valueRef.deref();
+  }
+
+  public RecordField getRecordFieldDefn() {
+    return this.recFieldDefn;
+  }
+
+  public void setBlank() {
+    valueRef.deref().setBlank();
+  }
 }

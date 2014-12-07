@@ -34,7 +34,8 @@ import org.openpplsoft.buffers.*;
 /**
  * Represents a PeopleTools standalone record (not in the component buffer).
  */
-public final class PTStandaloneRecord extends PTRecord {
+public final class PTStandaloneRecord extends PTRecord<PTStandaloneRow,
+    PTStandaloneField> {
 
   private static Logger log = LogManager.getLogger(PTStandaloneRecord.class.getName());
 
@@ -60,7 +61,7 @@ public final class PTStandaloneRecord extends PTRecord {
   }
 
   public PTStandaloneRecord(final PTRecordTypeConstraint origTc,
-      final PTRow pRow, final Record r) {
+      final PTStandaloneRow pRow, final Record r) {
     super(origTc);
     this.parentRow = pRow;
     this.recDefn = r;
@@ -68,7 +69,7 @@ public final class PTStandaloneRecord extends PTRecord {
   }
 
   public PTStandaloneRecord(final PTRecordTypeConstraint origTc,
-      final PTRow pRow, final RecordBuffer recBuffer) {
+      final PTStandaloneRow pRow, final RecordBuffer recBuffer) {
     super(origTc);
     this.parentRow = pRow;
     this.recDefn = recBuffer.getRecDefn();
@@ -79,15 +80,15 @@ public final class PTStandaloneRecord extends PTRecord {
   private void init() {
     // this map is linked in order to preserve
     // the order in which fields are added.
-    this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTField>>();
+    this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTStandaloneField>>();
     this.fieldRefIdxTable =
-        new LinkedHashMap<Integer, PTImmutableReference<PTField>>();
+        new LinkedHashMap<Integer, PTImmutableReference<PTStandaloneField>>();
     int i = 1;
     for (final RecordField rf : this.recDefn.getExpandedFieldList()) {
       PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();
 
       try {
-        PTImmutableReference<PTField> newFldRef = null;
+        PTImmutableReference<PTStandaloneField> newFldRef = null;
 
         // If this record field has a buffer associated with it, allocate the
         // field with that to give the field a reference to that buffer.
@@ -99,7 +100,7 @@ public final class PTStandaloneRecord extends PTRecord {
                 fldTc.allocBufferField(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));*/
         } else {
           newFldRef
-            = new PTImmutableReference<PTField>(fldTc, fldTc.allocStandaloneField(this, rf));
+            = new PTImmutableReference<PTStandaloneField>(fldTc, fldTc.allocStandaloneField(this, rf));
         }
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);
@@ -115,7 +116,7 @@ public final class PTStandaloneRecord extends PTRecord {
   public int getIndexPositionOfThisRecordInParentRow() {
     return -5;
   }
-  public int getIndexPositionOfField(final PTField fld) {
+  public int getIndexPositionOfField(final PTStandaloneField fld) {
     return -5;
   }
   public void emitRecInScroll() {
@@ -131,7 +132,7 @@ public final class PTStandaloneRecord extends PTRecord {
   public PTRecord resolveContextualCBufferRecordReference(final String recName) {
     return null;
   }
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+  public PTReference<PTStandaloneField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
     return null;
   }
@@ -141,10 +142,6 @@ public final class PTStandaloneRecord extends PTRecord {
   }
   public void generateKeylist(
       final String fieldName, final Keylist keylist) {
-  }
-
-  public PTRow getParentRow() {
-    return this.parentRow;
   }
 
   public Record getRecDefn() {

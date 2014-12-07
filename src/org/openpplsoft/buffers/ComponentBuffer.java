@@ -123,7 +123,7 @@ public final class ComponentBuffer {
     cBuffer.registerChildScrollDefn(lvlZeroScrollBuffer);
   }
 
-  public static PTRecord getSearchRecord() {
+  public static PTBufferRecord getSearchRecord() {
     return cBuffer.getRow(1).getRecord(compDefn.getSearchRecordName());
   }
 
@@ -140,11 +140,11 @@ public final class ComponentBuffer {
     return currSB;
   }
 
-  public static PTRowset getCBufferRowset() {
+  public static PTBufferRowset getCBufferRowset() {
     return cBuffer;
   }
 
-  public static PTRowset getLevelZeroRowset() {
+  public static PTBufferRowset getLevelZeroRowset() {
     // Remember, null is used here b/c the level 0 scroll does
     // not have a primary record.
     return cBuffer.getRow(1).getRowset(null);
@@ -446,11 +446,11 @@ public final class ComponentBuffer {
 
     // Remember: null is used to get the rowset b/c the rowset
     // at scroll level zero has no (null) primary record name.
-    final PTRow levelZeroRow = cBuffer.getRow(1).getRowset(null).getRow(1);
+    final PTBufferRow levelZeroRow = cBuffer.getRow(1).getRowset(null).getRow(1);
 
-    for (Map.Entry<String, PTRecord> entry
+    for (Map.Entry<String, PTBufferRecord> entry
         : levelZeroRow.getRecordMap().entrySet()) {
-      final PTRecord record = entry.getValue();
+      final PTBufferRecord record = entry.getValue();
       final Record recDefn = record.getRecDefn();
      /*
       * For the first pass, only fill table and view
@@ -460,7 +460,7 @@ public final class ComponentBuffer {
       */
       if (record.getRecBuffer().doesContainStructuralFields()
           && (recDefn.isTable() || recDefn.isView())) {
-        ((PTBufferRecord) record).firstPassFill();
+        record.firstPassFill();
       }
     }
   }

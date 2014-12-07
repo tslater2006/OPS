@@ -14,10 +14,10 @@ import org.openpplsoft.runtime.FireEventSummary;
 
 public interface ICBufferEntity {
   void fireEvent(final PCEvent event, final FireEventSummary fireEventSummary);
-  PTRecord resolveContextualCBufferRecordReference(final String recName);
-  PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+  PTBufferRecord resolveContextualCBufferRecordReference(final String recName);
+  PTReference<PTBufferField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fldName);
-  PTRowset resolveContextualCBufferScrollReference(final PTScrollLiteral scrollName);
+  PTBufferRowset resolveContextualCBufferScrollReference(final PTScrollLiteral scrollName);
   void generateKeylist(
       final String fieldName, final Keylist keylist);
   void runFieldDefaultProcessing(

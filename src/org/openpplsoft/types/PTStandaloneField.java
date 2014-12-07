@@ -22,20 +22,11 @@ import org.openpplsoft.pt.peoplecode.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class PTStandaloneField extends PTField {
+public final class PTStandaloneField extends PTField<PTStandaloneRecord> {
 
   private static Logger log = LogManager.getLogger(PTStandaloneField.class.getName());
 
   private static Map<String, Method> ptMethodTable;
-
-  private PTRecord parentRecord;
-  private RecordField recFieldDefn;
-  private RecordFieldBuffer recFieldBuffer;
-  private PTImmutableReference<PTPrimitiveType> valueRef;
-  private PTImmutableReference<PTBoolean> visiblePropertyRef,
-      displayOnlyPropertyRef;
-  private PTImmutableReference<PTString> fldNamePropertyRef;
-  private boolean isGrayedOut;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -51,16 +42,16 @@ public final class PTStandaloneField extends PTField {
     }
   }
 
-  public PTStandaloneField(final PTFieldTypeConstraint origTc, final PTRecord pRecord,
-      final RecordField rfd) {
+  public PTStandaloneField(final PTFieldTypeConstraint origTc,
+      final PTStandaloneRecord pRecord, final RecordField rfd) {
     super(origTc);
     this.parentRecord = pRecord;
     this.recFieldDefn = rfd;
     this.init();
   }
 
-  public PTStandaloneField(final PTFieldTypeConstraint origTc, final PTRecord pRecord,
-      final RecordFieldBuffer recFldBuffer) {
+  public PTStandaloneField(final PTFieldTypeConstraint origTc,
+      final PTStandaloneRecord pRecord, final RecordFieldBuffer recFldBuffer) {
     super(origTc);
     this.parentRecord = pRecord;
     this.recFieldDefn = recFldBuffer.getRecFldDefn();
@@ -130,19 +121,8 @@ public final class PTStandaloneField extends PTField {
   public void emitScrolls(final String indent) {}
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {}
-  public PTRecord getParentRecord() {
-    return this.parentRecord;
-  }
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {}
-
-  public PTPrimitiveType getValue() {
-    return this.valueRef.deref();
-  }
-
-  public RecordField getRecordFieldDefn() {
-    return this.recFieldDefn;
-  }
 
   public PTImmutableReference dotProperty(String s) {
     if(s.toLowerCase().equals("value")) {
@@ -181,10 +161,6 @@ public final class PTStandaloneField extends PTField {
 
     throw new OPSVMachRuntimeException("Failed to determine ancestral row "
         + "index; path to parent record and/or row contains null somewhere.");
-  }
-
-  public void setBlank() {
-    valueRef.deref().setBlank();
   }
 
   public int determineScrollLevel() {

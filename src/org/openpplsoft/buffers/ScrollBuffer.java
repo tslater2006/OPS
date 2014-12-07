@@ -60,7 +60,7 @@ public class ScrollBuffer implements IStreamableBuffer {
     return primaryRecDefn;
   }
 
-  public PTRowset allocRowset(final PTBufferRow parentRow) {
+  public PTBufferRowset allocRowset(final PTBufferRow parentRow) {
 
     // Create a rowset with the supplied parent; this scroll buffer object
     // will be linked to the rowset, which will use the primary rec name

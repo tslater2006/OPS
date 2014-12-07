@@ -28,7 +28,7 @@ import org.openpplsoft.trace.*;
  * Represents a PeopleTools row definition; contains
  * 1 to n child records and 0 to m child rowsets.
  */
-public final class PTStandaloneRow extends PTRow {
+public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandaloneRecord> {
 
   private static Map<String, Method> ptMethodTable;
 
@@ -47,7 +47,8 @@ public final class PTStandaloneRow extends PTRow {
     }
   }
 
-  public PTStandaloneRow(final PTRowTypeConstraint origTc, final PTRowset pRowset,
+  public PTStandaloneRow(final PTRowTypeConstraint origTc,
+      final PTStandaloneRowset pRowset,
       final Set<Record> recDefnsToRegister,
       final Map<String, ScrollBuffer> childScrollDefnsToRegister) {
     super(origTc);
@@ -124,10 +125,6 @@ public final class PTStandaloneRow extends PTRow {
   }
   public int determineScrollLevel() {
     return -5;
-  }
-
-  public PTRowset getParentRowset() {
-    return this.parentRowset;
   }
 
   @Override

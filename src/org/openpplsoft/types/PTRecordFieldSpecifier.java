@@ -40,7 +40,7 @@ public final class PTRecordFieldSpecifier extends PTObjectType {
     return this.fieldName;
   }
 
-  public PTReference<PTField> resolveInCBufferContext() {
+  public PTReference<PTBufferField> resolveInCBufferContext() {
     return this.interpretSupervisor.resolveContextualCBufferRecordFieldReference(
         this.recDefn.RECNAME, this.fieldName);
   }

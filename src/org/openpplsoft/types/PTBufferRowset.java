@@ -32,7 +32,8 @@ import org.openpplsoft.trace.*;
 /**
  * Represents a PeopleTools rowset in the component buffer.
  */
-public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
+public final class PTBufferRowset extends PTRowset<PTBufferRow>
+    implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(
       PTBufferRowset.class.getName());
@@ -88,7 +89,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     this.registerRecordDefn(this.primaryRecDefn);
   }
 
-  protected PTRow allocateNewRow() {
+  protected PTBufferRow allocateNewRow() {
     return new PTRowTypeConstraint().allocBufferRow(
         this, this.registeredRecordDefns, this.registeredChildScrollDefns);
   }
@@ -102,7 +103,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     this.registeredRecordDefns.add(recDefn);
 
     // Each row must also have this record registered.
-    for (final PTRow row : this.rows) {
+    for (final PTBufferRow row : this.rows) {
 
       // If this is a component buffer scroll and the record has an
       // associated record buffer, pass that to the row; it will register
@@ -128,14 +129,14 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
           childScrollDefn.getPrimaryRecName(), childScrollDefn);
     }
 
-    for (final PTRow row : this.rows) {
+    for (final PTBufferRow row : this.rows) {
       row.registerChildScrollDefn(childScrollDefn);
     }
   }
 
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
-    for (final PTRow row : this.rows) {
+    for (final PTBufferRow row : this.rows) {
       row.fireEvent(event, fireEventSummary);
     }
   }
@@ -148,14 +149,14 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     return null;
   }
 
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
+  public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {
     if (this.parentRow != null) {
       return this.parentRow.resolveContextualCBufferRecordReference(recName);
     }
     return null;
   }
 
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+  public PTReference<PTBufferField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
     if (this.parentRow != null) {
       return this.parentRow.resolveContextualCBufferRecordFieldReference(
@@ -164,7 +165,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     return null;
   }
 
-  public PTRowset resolveContextualCBufferScrollReference(
+  public PTBufferRowset resolveContextualCBufferScrollReference(
       final PTScrollLiteral scrollName) {
     if (this.parentRow != null) {
       return this.parentRow.resolveContextualCBufferScrollReference(scrollName);
@@ -180,7 +181,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
 
   public void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary) {
-    for (final PTRow row : this.rows) {
+    for (final PTBufferRow row : this.rows) {
       row.runFieldDefaultProcessing(fldDefProcSummary);
     }
   }
@@ -201,7 +202,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
     }
   }
 
-  public int getIndexOfRow(final PTRow row) {
+  public int getIndexOfRow(final PTBufferRow row) {
     for (int i = 0; i < this.rows.size(); i++) {
       if(row == this.rows.get(i)) {
         return i;
@@ -274,7 +275,7 @@ public final class PTBufferRowset extends PTRowset implements ICBufferEntity {
 
     int rowsRead = 0, rowIdxToWriteTo = 1;
     while (rs.next()) {
-      final PTRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
+      final PTBufferRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
       final PTRecord recToWriteTo = rowToWriteTo.getRecord(this.primaryRecDefn.RECNAME);
 
       /**

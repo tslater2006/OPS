@@ -32,15 +32,15 @@ import org.openpplsoft.trace.*;
 /**
  * Represents a PeopleTools rowset object.
  */
-public abstract class PTRowset extends PTObjectType {
+public abstract class PTRowset<R extends PTRow> extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(
       PTRowset.class.getName());
 
   private static Map<String, Method> ptMethodTable;
 
-  protected PTRow parentRow;
-  protected List<PTRow> rows = new ArrayList<PTRow>();
+  protected R parentRow;
+  protected List<R> rows = new ArrayList<R>();
   protected Record primaryRecDefn;
 
   protected Set<Record> registeredRecordDefns = new HashSet<Record>();
@@ -70,21 +70,9 @@ public abstract class PTRowset extends PTObjectType {
     super(origTc);
   }
 
-  protected abstract PTRow allocateNewRow();
-  public abstract void generateKeylist(String fieldName, Keylist keylist);
-  public abstract void emitScrolls(String indent);
-  public abstract void fireEvent(PCEvent event, FireEventSummary fireEventSummary);
-  public abstract void runFieldDefaultProcessing(FieldDefaultProcSummary fldDefProcSummary);
-  public abstract PTRowset resolveContextualCBufferScrollReference(PTScrollLiteral scrollName);
-  public abstract PTRecord resolveContextualCBufferRecordReference(String recName);
-  public abstract PTReference<PTField> resolveContextualCBufferRecordFieldReference(String recName, String fldName);
-  public abstract ScrollBuffer getCBufferScrollDefn();
-  public abstract int getIndexOfRow(PTRow row);
-  public abstract int determineScrollLevel();
-  public abstract void registerRecordDefn(Record rec);
-  public abstract void registerChildScrollDefn(ScrollBuffer scrollBuf);
+  protected abstract R allocateNewRow();
 
-  public PTRow getParentRow() {
+  public R getParentRow() {
     return this.parentRow;
   }
 
@@ -101,6 +89,24 @@ public abstract class PTRowset extends PTObjectType {
     }
 
     return null;
+  }
+
+  /**
+   * Flush the rowset (only a default empty row will be present
+   * after the flush).
+   */
+  public void PT_Flush() {
+    final List<PTType> args = Environment.getArgsFromCallStack();
+    if (args.size() != 0) {
+      throw new OPSVMachRuntimeException("Expected zero arguments.");
+    }
+    this.internalFlush();
+  }
+
+  protected void internalFlush() {
+    // One row is always present in the rowset, even when flushed.
+    this.rows.clear();
+    this.rows.add(this.allocateNewRow());
   }
 
   /**
@@ -140,7 +146,7 @@ public abstract class PTRowset extends PTObjectType {
    * @param idx the index of the row to retrieve
    * @return the row corresponding to idx
    */
-  public PTRow getRow(int idx) {
+  public R getRow(int idx) {
     // Must subtract 1 from idx; rowset indices start at 1.
     return this.rows.get(idx - 1);
   }
@@ -197,7 +203,7 @@ public abstract class PTRowset extends PTObjectType {
     log.debug("======== End Sorted Rowset =========");*/
   }
 
-  private List<PTRow> mergeSortRows(final List<PTRow> rowsToSort,
+  private List<R> mergeSortRows(final List<R> rowsToSort,
     final List<String> sortFields, final List<String> sortOrders) {
 
     if (rowsToSort.size() < 2) {
@@ -205,23 +211,23 @@ public abstract class PTRowset extends PTObjectType {
     }
 
     final int mid = rowsToSort.size() / 2;
-    final List<PTRow> left = this.mergeSortRows(
+    final List<R> left = this.mergeSortRows(
         rowsToSort.subList(0, mid), sortFields, sortOrders);
-    final List<PTRow> right = this.mergeSortRows(
+    final List<R> right = this.mergeSortRows(
         rowsToSort.subList(mid,
           rowsToSort.size()), sortFields, sortOrders);
     return this.merge(left, right, sortFields, sortOrders);
   }
 
-  private List<PTRow> merge(final List<PTRow> left,
-      final List<PTRow> right, final List<String> sortFields,
+  private List<R> merge(final List<R> left,
+      final List<R> right, final List<String> sortFields,
       final List<String> sortOrders) {
 
-    final List<PTRow> merged = new ArrayList<PTRow>();
+    final List<R> merged = new ArrayList<R>();
     int l = 0, r = 0;
     while (l < left.size() && r < right.size()) {
-      final PTRow lRow = left.get(l);
-      final PTRow rRow = right.get(r);
+      final R lRow = left.get(l);
+      final R rRow = right.get(r);
 
       /*
        * Order the rows based on the precedence
@@ -231,10 +237,15 @@ public abstract class PTRowset extends PTObjectType {
       for (int i = 0; i < sortFields.size(); i++) {
         final String order = sortOrders.get(i);
 
-        final PTPrimitiveType lVal = lRow.getRecord(this.primaryRecDefn.RECNAME)
-            .getFieldRef(sortFields.get(i)).deref().getValue();
-        final PTPrimitiveType rVal = rRow.getRecord(this.primaryRecDefn.RECNAME)
-            .getFieldRef(sortFields.get(i)).deref().getValue();
+        final PTRecord<?,?> lRecord = lRow.getRecord(this.primaryRecDefn.RECNAME);
+        final PTReference<? extends PTField> lRef = lRecord
+            .getFieldRef(sortFields.get(i));
+        final PTPrimitiveType lVal = lRef.deref().getValue();
+
+        final PTRecord<?,?> rRecord = rRow.getRecord(this.primaryRecDefn.RECNAME);
+        final PTReference<? extends PTField> rRef = rRecord
+            .getFieldRef(sortFields.get(i));
+        final PTPrimitiveType rVal = rRef.deref().getValue();
 
         if (lVal.isLessThan(rVal).read()) {
           if (order.equals("A")) {
@@ -288,23 +299,5 @@ public abstract class PTRowset extends PTObjectType {
     }
 
     return merged;
-  }
-
-  /**
-   * Flush the rowset (only a default empty row will be present
-   * after the flush).
-   */
-  public void PT_Flush() {
-    final List<PTType> args = Environment.getArgsFromCallStack();
-    if (args.size() != 0) {
-      throw new OPSVMachRuntimeException("Expected zero arguments.");
-    }
-    this.internalFlush();
-  }
-
-  protected void internalFlush() {
-    // One row is always present in the rowset, even when flushed.
-    this.rows.clear();
-    this.rows.add(this.allocateNewRow());
   }
 }

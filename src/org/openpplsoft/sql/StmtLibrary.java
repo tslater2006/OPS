@@ -157,7 +157,7 @@ public final class StmtLibrary {
    */
   public static OPSStmt getSearchRecordFillQuery() {
 
-    final PTRecord searchRec = ComponentBuffer.getSearchRecord();
+    final PTBufferRecord searchRec = ComponentBuffer.getSearchRecord();
     final Record recDefn = searchRec.getRecDefn();
     final List<RecordField> rfList = recDefn.getExpandedFieldList();
     final List<String> bindVals = new ArrayList<String>();
@@ -414,7 +414,7 @@ public final class StmtLibrary {
    * @return the OPSStmt to be executed
    */
   public static OPSStmt prepareSelectByKeyEffDtStmt(
-      final Record recDefn, final PTRecord recObj, final PTDate effDt) {
+      final Record recDefn, final PTRecord<?,?> recObj, final PTDate effDt) {
 
     final String tableAlias = "A";
     final StringBuilder query = new StringBuilder(
@@ -480,7 +480,7 @@ public final class StmtLibrary {
    * @return the OPSStmt to be executed
    */
   public static OPSStmt prepareSelectByKey(
-      final Record recDefn, final PTRecord recObj) {
+      final Record recDefn, final PTRecord<?,?> recObj) {
 
     final String tableAlias = "";
     final StringBuilder query = new StringBuilder(
@@ -513,10 +513,10 @@ public final class StmtLibrary {
   /**
    * @param defaultRecDefn the record defn named in DEFRECNAME for the record
    * field with the default value
-   * @param fieldBeingDefaulted the field being defaulted
+   * @param fieldBeingDefaulted the buffer field being defaulted
    */
   public static OPSStmt generateNonConstantFieldDefaultQuery(
-        final Record defaultRecDefn, final PTField fieldBeingDefaulted)
+        final Record defaultRecDefn, final PTBufferField fieldBeingDefaulted)
             throws OPSCBufferKeyLookupException {
 
     final String[] aliasedFields = getOptionallyAliasedFieldsToSelect(
@@ -694,11 +694,9 @@ public final class StmtLibrary {
   /**
    * Generates an OPSStmt that will fill data into the provided
    * RecordBuffer during the first pass fill phase.
-   * @param rbuf the RecordBuffer to fill
-   * @return the OPSStmt to be executed
    */
   public static OPSStmt prepareFirstPassFillQuery(
-      final PTRecord record) {
+      final PTBufferRecord record) {
 
     /*
      * Iterate over the fields in the expanded record field list

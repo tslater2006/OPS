@@ -209,10 +209,10 @@ public class OPSResultSet {
     }
   }
 
-  public void readIntoRecord(final PTRecord recObj) {
+  public void readIntoRecord(final PTRecord<?,?> recObj) {
     for (int i = 1; i <= this.getColumnCount(); i++) {
       final String colName = this.getColumnName(i);
-      final PTReference<PTField> fldRef = recObj.getFieldRef(colName);
+      final PTReference<? extends PTField> fldRef = recObj.getFieldRef(colName);
       final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
           fldRef.deref().getValue().getOriginatingTypeConstraint());
       Environment.assign(fldRef, dbVal);
@@ -227,12 +227,12 @@ public class OPSResultSet {
    * when such fields are the subject of an attempted write. If you use this method,
    * those fields will simply be skipped.
    */
-  public void readIntoRecordDefinedFieldsOnly(final PTRecord recObj) {
+  public void readIntoRecordDefinedFieldsOnly(final PTRecord<?,?> recObj) {
     final Record recDefn = recObj.getRecDefn();
     for (int i = 1; i <= this.getColumnCount(); i++) {
       final String colName = this.getColumnName(i);
       if (recDefn.hasField(colName)) {
-        final PTReference<PTField> fldRef = recObj.getFieldRef(colName);
+        final PTReference<? extends PTField> fldRef = recObj.getFieldRef(colName);
         final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
             fldRef.deref().getValue().getOriginatingTypeConstraint());
         Environment.assign(fldRef, dbVal);

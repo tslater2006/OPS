@@ -35,7 +35,7 @@ public class InterpretSupervisor {
     this.cBufferContextEntity = contextEntity;
   }
 
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
+  public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {
     if (this.cBufferContextEntity != null) {
       return this.cBufferContextEntity
           .resolveContextualCBufferRecordReference(recName);
@@ -43,7 +43,7 @@ public class InterpretSupervisor {
     return null;
   }
 
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
+  public PTReference<PTBufferField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
     if (this.cBufferContextEntity != null) {
       return this.cBufferContextEntity
@@ -52,7 +52,7 @@ public class InterpretSupervisor {
     return null;
   }
 
-  public PTRowset resolveContextualCBufferScrollReference(
+  public PTBufferRowset resolveContextualCBufferScrollReference(
       final PTScrollLiteral scrollName) {
     if (this.cBufferContextEntity != null) {
       return this.cBufferContextEntity
@@ -61,11 +61,11 @@ public class InterpretSupervisor {
     return null;
   }
 
-  public PTRecord getNearestCBufferRecordInContext() {
+  public PTBufferRecord getNearestCBufferRecordInContext() {
     if (this.cBufferContextEntity instanceof PTRecord) {
-      return (PTRecord) this.cBufferContextEntity;
+      return (PTBufferRecord) this.cBufferContextEntity;
     } else if (this.cBufferContextEntity instanceof PTField) {
-      return ((PTField) this.cBufferContextEntity).getParentRecord();
+      return ((PTBufferField) this.cBufferContextEntity).getParentRecord();
     } else {
       throw new OPSVMachRuntimeException("Can't find nearest record in component "
           + "buffer context; expected context entity to be Record or Field but "

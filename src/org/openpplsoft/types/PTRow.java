@@ -9,6 +9,8 @@ package org.openpplsoft.types;
 
 import java.lang.reflect.Method;
 
+import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,21 +30,22 @@ import org.openpplsoft.trace.*;
  * Represents a PeopleTools row definition; contains
  * 1 to n child records and 0 to m child rowsets.
  */
-public abstract class PTRow extends PTObjectType {
+public abstract class PTRow<R extends PTRowset, E extends PTRecord>
+    extends PTObjectType {
 
   private static Map<String, Method> ptMethodTable;
 
   private static final Logger log = LogManager.getLogger(PTRow.class.getName());
 
-  protected PTRowset parentRowset;
+  protected R parentRowset;
   protected PTImmutableReference<PTBoolean> selectedPropertyRef;
 
   // Maps record names to child record objects
-  protected Map<String, PTRecord> recordMap = new LinkedHashMap<String, PTRecord>();
+  protected Map<String, E> recordMap = new LinkedHashMap<String, E>();
   protected Set<Record> registeredRecordDefns = new HashSet<Record>();
 
   // Maps scroll/rowset primary rec names to rowset objects
-  protected Map<String, PTRowset> rowsetMap = new LinkedHashMap<String, PTRowset>();
+  protected Map<String, R> rowsetMap = new LinkedHashMap<String, R>();
   protected Map<String, ScrollBuffer> registeredChildScrollDefns =
       new LinkedHashMap<String, ScrollBuffer>();
 
@@ -63,25 +66,18 @@ public abstract class PTRow extends PTObjectType {
     super(origTc);
   }
 
-  public abstract void generateKeylist(String fieldName, Keylist keylist);
-  public abstract void emitScrolls(String indent);
-  public abstract void fireEvent(PCEvent event, FireEventSummary fireEventSummary);
-  public abstract void runFieldDefaultProcessing(FieldDefaultProcSummary fldDefProcSummary);
-  public abstract PTRowset resolveContextualCBufferScrollReference(PTScrollLiteral scrollName);
-  public abstract PTRecord resolveContextualCBufferRecordReference(String recName);
-  public abstract PTReference<PTField> resolveContextualCBufferRecordFieldReference(String recName, String fldName);
-  public abstract int determineScrollLevel();
-  public abstract void registerRecordDefn(Record rec);
-  public abstract void registerRecordDefn(RecordBuffer rBuf);
-  public abstract void registerChildScrollDefn(ScrollBuffer scrollBuf);
-  public abstract int getIndexPositionOfRecord(PTRecord record);
-  public abstract int getIndexOfThisRowInParentRowset();
+  public abstract void registerRecordDefn(final Record recDefn);
+  public abstract void registerChildScrollDefn(final ScrollBuffer childScrollDefn);
+
+  public R getParentRowset() {
+    return this.parentRowset;
+  }
 
   /**
    * Retrieve the record associated with the record name provided
    * @return the record associated with the record name provided
    */
-  public PTRecord getRecord(final String recName) {
+  public E getRecord(final String recName) {
     return this.recordMap.get(recName);
   }
 
@@ -89,12 +85,14 @@ public abstract class PTRow extends PTObjectType {
    * Retrieves the record at the given index (records are stored
    * in a linked hash map and thus are ordered).
    */
-  public PTRecord getRecord(final int index) {
+  public E getRecord(final int index) {
+    final List<E> orderedList = new ArrayList<E>(this.recordMap.values());
+
     // Remember: PS uses 1-based indices, not 0-based, must adjust here.
-    return (PTRecord) this.recordMap.values().toArray()[index - 1];
+    return orderedList.get(index - 1);
   }
 
-  public PTRowset getRowset(final String primaryRecName) {
+  public R getRowset(final String primaryRecName) {
     return this.rowsetMap.get(primaryRecName);
   }
 
@@ -116,7 +114,7 @@ public abstract class PTRow extends PTObjectType {
       throw new OPSVMachRuntimeException("Expected only one arg.");
     }
 
-    PTRecord rec = null;
+    E rec = null;
     if(args.get(0) instanceof PTRecordLiteral) {
       rec = this.getRecord(((PTRecordLiteral) args.get(0)).read());
     } else if (args.get(0) instanceof PTInteger) {
@@ -143,10 +141,6 @@ public abstract class PTRow extends PTObjectType {
     return null;
   }
 
-  public PTRowset getParentRowset() {
-    return this.parentRowset;
-  }
-
   @Override
   public Callable dotMethod(final String s) {
     if (ptMethodTable.containsKey(s)) {
@@ -155,7 +149,7 @@ public abstract class PTRow extends PTObjectType {
     return null;
   }
 
-  public Map<String, PTRecord> getRecordMap() {
+  public Map<String, E> getRecordMap() {
     return this.recordMap;
   }
 
@@ -164,12 +158,12 @@ public abstract class PTRow extends PTObjectType {
     super.setReadOnly();
 
     // Calls to make a row read-only must make its child records read-only.
-    for(Map.Entry<String, PTRecord> cursor: this.recordMap.entrySet()) {
+    for(Map.Entry<String, E> cursor: this.recordMap.entrySet()) {
       cursor.getValue().setReadOnly();
     }
 
     // Calls to make a row read-only must make its child rowsets read-only.
-    for(Map.Entry<String, PTRowset> cursor: this.rowsetMap.entrySet()) {
+    for(Map.Entry<String, R> cursor: this.rowsetMap.entrySet()) {
       cursor.getValue().setReadOnly();
     }
   }

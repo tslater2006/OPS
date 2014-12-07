@@ -32,7 +32,7 @@ import org.openpplsoft.trace.*;
 /**
  * Represents a PeopleTools standalone (not in component buffer) rowset.
  */
-public final class PTStandaloneRowset extends PTRowset {
+public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   private static Logger log = LogManager.getLogger(
       PTStandaloneRowset.class.getName());
@@ -85,7 +85,7 @@ public final class PTStandaloneRowset extends PTRowset {
     this.registerRecordDefn(this.primaryRecDefn);
   }
 
-  protected PTRow allocateNewRow() {
+  protected PTStandaloneRow allocateNewRow() {
     return new PTRowTypeConstraint().allocStandaloneRow(
         this, this.registeredRecordDefns, this.registeredChildScrollDefns);
   }
@@ -114,8 +114,11 @@ public final class PTStandaloneRowset extends PTRowset {
       // the underlying record defn and save a reference to that buffer
       if (this.cBufferScrollDefn != null
           && this.cBufferScrollDefn.hasRecordBuffer(recDefn.RECNAME)) {
-        row.registerRecordDefn(
-            this.cBufferScrollDefn.getRecordBuffer(recDefn.RECNAME));
+/*        row.registerRecordDefn(
+            this.cBufferScrollDefn.getRecordBuffer(recDefn.RECNAME));*/
+          throw new OPSVMachRuntimeException("If you are seeing this exception, "
+              + "it is because the above incorrect code has been commented out"
+              + " and needs to be replaced now.");
       } else {
         row.registerRecordDefn(recDefn);
       }
@@ -218,7 +221,7 @@ public final class PTStandaloneRowset extends PTRowset {
         this.rows.clear();
       }
 
-      final PTRow newRow = this.allocateNewRow();
+      final PTStandaloneRow newRow = this.allocateNewRow();
       rs.readIntoRecord(newRow.getRecord(this.primaryRecDefn.RECNAME));
       this.rows.add(newRow);
       rowsRead++;

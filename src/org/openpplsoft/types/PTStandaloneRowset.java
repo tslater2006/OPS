@@ -39,9 +39,6 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   private static Map<String, Method> ptMethodTable;
 
-  // If this is null, this rowset is a standalone rowset.
-  private ScrollBuffer cBufferScrollDefn;
-
   static {
     final String PT_METHOD_PREFIX = "PT_";
 
@@ -75,7 +72,6 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
       final ScrollBuffer scrollDefn) {
     super(origTc);
     this.parentRow = pRow;
-    this.cBufferScrollDefn = scrollDefn;
     this.primaryRecDefn = scrollDefn.getPrimaryRecDefn();
     this.initRowset();
   }
@@ -109,20 +105,7 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
     // Each row must also have this record registered.
     for (final PTRow row : this.rows) {
-
-      // If this is a component buffer scroll and the record has an
-      // associated record buffer, pass that to the row; it will register
-      // the underlying record defn and save a reference to that buffer
-      if (this.cBufferScrollDefn != null
-          && this.cBufferScrollDefn.hasRecordBuffer(recDefn.RECNAME)) {
-/*        row.registerRecordDefn(
-            this.cBufferScrollDefn.getRecordBuffer(recDefn.RECNAME));*/
-          throw new OPSVMachRuntimeException("If you are seeing this exception, "
-              + "it is because the above incorrect code has been commented out"
-              + " and needs to be replaced now.");
-      } else {
-        row.registerRecordDefn(recDefn);
-      }
+      row.registerRecordDefn(recDefn);
     }
   }
 

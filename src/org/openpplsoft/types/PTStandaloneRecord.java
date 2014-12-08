@@ -110,66 +110,6 @@ public final class PTStandaloneRecord extends PTRecord<PTStandaloneRow,
     }
   }
 
-  /**
-   * MQUINN 12-03-2014 : Remove after split.
-   */
-  public int getIndexPositionOfThisRecordInParentRow() {
-    return -5;
-  }
-  public int getIndexPositionOfField(final PTStandaloneField fld) {
-    return -5;
-  }
-  public void emitRecInScroll() {
-  }
-  public void emitScrolls(final String indent) {
-  }
-  public void fireEvent(final PCEvent event,
-      final FireEventSummary fireEventSummary) {
-  }
-  public void runFieldDefaultProcessing(
-      final FieldDefaultProcSummary fldDefProcSummary) {
-  }
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
-    return null;
-  }
-  public PTReference<PTStandaloneField> resolveContextualCBufferRecordFieldReference(
-      final String recName, final String fieldName) {
-    return null;
-  }
-  public PTRowset resolveContextualCBufferScrollReference(
-      final PTScrollLiteral scrollName) {
-    return null;
-  }
-  public void generateKeylist(
-      final String fieldName, final Keylist keylist) {
-  }
-
-  public Record getRecDefn() {
-    return this.recDefn;
-  }
-
-  public RecordBuffer getRecBuffer() {
-    return this.recBuffer;
-  }
-
-  public int determineRowIndex() {
-    if (this.parentRow != null) {
-      return this.parentRow.getIndexOfThisRowInParentRowset();
-    }
-
-    throw new OPSVMachRuntimeException("Failed to determine ancestral row "
-        + "index; parent row is null.");
-  }
-
-  public int determineScrollLevel() {
-    if (this.parentRow != null) {
-      return this.parentRow.determineScrollLevel();
-    }
-
-    throw new OPSVMachRuntimeException("Failed to determine scroll level of "
-        + "this record; parent row is null.");
-  }
-
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());

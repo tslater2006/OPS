@@ -95,53 +95,8 @@ public final class PTStandaloneField extends PTField<PTStandaloneRecord> {
     }
   }
 
-  /**
-   * MQUINN 12-02-2014 : TO REMOVE after split:
-   */
-  public void runNonConstantFieldDefaultProcessing(final FieldDefaultProcSummary summary) {}
-  public void runConstantFieldDefaultProcessing(
-      final FieldDefaultProcSummary fldDefProcSummary) {}
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
-    return null;
-  }
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
-      final String recName, final String fieldName) {
-    return null;
-  }
-  public PTRowset resolveContextualCBufferScrollReference(
-      final PTScrollLiteral scrollName) {
-    return null;
-  }
-  public void generateKeylist(
-      final String fieldName, final Keylist keylist) {}
-  public void generateKeylist(final Keylist keylist) {}
-  public int getIndexPositionOfThisFieldInParentRecord() {
-    return -5;
-  }
-  public void emitScrolls(final String indent) {}
-  public void fireEvent(final PCEvent event,
-      final FireEventSummary fireEventSummary) {}
-  public void runFieldDefaultProcessing(
-      final FieldDefaultProcSummary fldDefProcSummary) {}
-
   public PTImmutableReference dotProperty(String s) {
     if(s.toLowerCase().equals("value")) {
-
-      /*
-       * Why is this check here and not in Record's PT_GetField, you may ask?
-       * Furthermore, why are we only throwing an exception when attempting to
-       * write to the Value of a field that is not in the component buffer (and not
-       * Visible, DisplayOnly, etc.)?
-       * Because apparently that's what PS does according to the tracefile.
-       * This exception will be converted to a PCE in visitStmtAssign of the
-       * interpreter.
-       */
-      if (this.parentRecord != null
-          && this.parentRecord.getRecBuffer() != null
-          && this.recFieldBuffer == null) {
-        throw new OPSIllegalNonCBufferFieldAccessAttempt(
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
-      }
       return this.valueRef;
     } else if(s.toLowerCase().equals("visible")) {
       return this.visiblePropertyRef;
@@ -151,25 +106,6 @@ public final class PTStandaloneField extends PTField<PTStandaloneRecord> {
       return this.displayOnlyPropertyRef;
     }
     return null;
-  }
-
-  public int determineRowIndex() {
-    if (this.parentRecord != null
-        && this.parentRecord.getParentRow() != null) {
-      return this.parentRecord.getParentRow().getIndexOfThisRowInParentRowset();
-    }
-
-    throw new OPSVMachRuntimeException("Failed to determine ancestral row "
-        + "index; path to parent record and/or row contains null somewhere.");
-  }
-
-  public int determineScrollLevel() {
-    if (this.parentRecord != null) {
-      return this.parentRecord.determineScrollLevel();
-    }
-
-    throw new OPSVMachRuntimeException("Failed to determine scroll level for "
-        + "this field; parent record is null.");
   }
 
   @Override

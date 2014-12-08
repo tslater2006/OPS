@@ -59,12 +59,6 @@ public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandalon
       this.registerRecordDefn(recDefn);
     }
 
-    // Register all child scroll defns in the provided map.
-    for(Map.Entry<String, ScrollBuffer> entry
-        : childScrollDefnsToRegister.entrySet()) {
-      this.registerChildScrollDefn(entry.getValue());
-    }
-
     try {
       /*
        * Initialize read/write properties.
@@ -86,45 +80,6 @@ public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandalon
       this.recordMap.put(recDefn.RECNAME,
           new PTRecordTypeConstraint().allocStandaloneRecord(this, recDefn));
     }
-  }
-
-  /**
-   * MQUINN 12-03-2014 : Remove after split.
-   */
-  public void registerRecordDefn(final RecordBuffer recBuffer) {
-  }
-  public void registerChildScrollDefn(final ScrollBuffer childScrollDefn) {
-  }
-  public void emitScrolls(final String indent) {
-  }
-  public void fireEvent(final PCEvent event,
-      final FireEventSummary fireEventSummary) {
-  }
-  public void runFieldDefaultProcessing(
-      final FieldDefaultProcSummary fldDefProcSummary) {
-  }
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
-    return null;
-  }
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
-      String recName, String fldName) {
-    return null;
-  }
-  public PTRowset resolveContextualCBufferScrollReference(
-      final PTScrollLiteral scrollName) {
-    return null;
-  }
-  public void generateKeylist(
-      final String fieldName, final Keylist keylist) {
-  }
-  public int getIndexPositionOfRecord(final PTRecord rec) {
-    return -5;
-  }
-  public int getIndexOfThisRowInParentRowset() {
-    return -5;
-  }
-  public int determineScrollLevel() {
-    return -5;
   }
 
   @Override

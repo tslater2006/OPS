@@ -67,7 +67,6 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
   }
 
   public abstract void registerRecordDefn(final Record recDefn);
-  public abstract void registerChildScrollDefn(final ScrollBuffer childScrollDefn);
 
   public R getParentRowset() {
     return this.parentRowset;

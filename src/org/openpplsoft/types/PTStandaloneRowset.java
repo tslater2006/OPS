@@ -125,53 +125,6 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
     }
   }
 
-  public void registerChildScrollDefn(final ScrollBuffer childScrollDefn) {
-    if (this.registeredChildScrollDefns.containsKey(
-        childScrollDefn.getPrimaryRecName())) {
-      throw new OPSVMachRuntimeException("Halting on call to register child "
-          + "scroll defn with a primary record name that has already been registerd; "
-          + "registering it again would overwrite a potentially different defn.");
-    } else {
-      this.registeredChildScrollDefns.put(
-          childScrollDefn.getPrimaryRecName(), childScrollDefn);
-    }
-
-    for (final PTRow row : this.rows) {
-      row.registerChildScrollDefn(childScrollDefn);
-    }
-  }
-
-  /**
-   * MQUINN 12-03-2014 : Remove after split.
-   */
-  public void fireEvent(final PCEvent event,
-      final FireEventSummary fireEventSummary) {}
-  public PTRecord resolveContextualCBufferRecordReference(final String recName) {
-    return null;
-  }
-  public PTReference<PTField> resolveContextualCBufferRecordFieldReference(
-      final String recName, final String fieldName) {
-    return null;
-  }
-  public PTRowset resolveContextualCBufferScrollReference(
-      final PTScrollLiteral scrollName) {
-    return null;
-  }
-  public void emitScrolls(final String indent) {}
-  public void runFieldDefaultProcessing(
-      final FieldDefaultProcSummary fldDefProcSummary) {}
-  public ScrollBuffer getCBufferScrollDefn() {
-    return null;
-  }
-  public void generateKeylist(
-      final String fieldName, final Keylist keylist) {}
-  public int getIndexOfRow(final PTRow row) {
-    return -5;
-  }
-  public int determineScrollLevel() {
-    return -5;
-  }
-
   /**
    * Fill the rowset; the WHERE clause to use must be passed on the
    * OPS runtime stack.

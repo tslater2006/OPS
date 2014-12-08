@@ -12,10 +12,12 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,8 +88,10 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     return this.recDefn;
   }
 
-  public Map<String, PTImmutableReference<F>> getFieldRefs() {
-    return this.fieldRefs;
+  public List<PTImmutableReference<F>> getFieldRefsInAlphabeticOrderByFieldName() {
+    final Map<String, PTImmutableReference<F>> orderedRefMap =
+        new TreeMap<>(this.fieldRefs);
+    return new ArrayList<PTImmutableReference<F>>(orderedRefMap.values());
   }
 
   /**

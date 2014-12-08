@@ -525,28 +525,24 @@ public class GlobalFnLibrary {
     // append "&Action=<action>"
     url.append("&Action=").append(((PTString) args.get(6)).read());
 
+    final PTRecord<?, ?> keylistRec = ((PTRecord<?, ?>) args.get(7));
+
     /*
      * The keylist must be in alphabetical order by key.
      */
-/*    Map<String, PTImmutableReference<?> fieldsUnsorted
-        = ((PTRecord<?, ?>) args.get(7)).getFieldRefs();
-    Map<String, PTImmutableReference<?>> fieldsKeyAscMap =
-        new TreeMap<String, PTImmutableReference<PTField>>(fieldsUnsorted);
-    for(Map.Entry<String, PTImmutableReference<PTField>> cursor
-        : fieldsKeyAscMap.entrySet()) {
+    for(final PTReference<? extends PTField> fieldRef :
+        keylistRec.getFieldRefsInAlphabeticOrderByFieldName()) {
       // NOTE: trim() is important here; blank values are a single space
       // in PS and should be reduced to the empty string.
-      url.append("&").append(cursor.getKey()).append("=")
-          .append(cursor.getValue().deref().getValue().readAsString().trim());
-    }*/
-    throw new OPSVMachRuntimeException("TODO: In GenerateComponentContentRelUrl, "
-        + "replace the code above with one that doesn't require extensive generics "
-        + "AND RE-ENABLE THE CODE BELOW.");
+      final PTField fld = fieldRef.deref();
+      url.append("&").append(fld.getRecordFieldDefn().FIELDNAME).append("=")
+          .append(fld.getValue().readAsString().trim());
+    }
 
-/*    log.debug("GenerateComponentContentURL: From args, generated url: {}",
+    log.debug("GenerateComponentContentURL: From args, generated url: {}",
       url.toString());
 
-    Environment.pushToCallStack(new PTString(url.toString()));*/
+    Environment.pushToCallStack(new PTString(url.toString()));
   }
 
   public void PT_Truncate() {

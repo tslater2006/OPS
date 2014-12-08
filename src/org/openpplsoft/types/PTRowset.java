@@ -60,10 +60,6 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     }
   }
 
-  protected static Map<String, Method> getUniversalRowsetMethodTable() {
-    return ptMethodTable;
-  }
-
   public PTRowset(final PTRowsetTypeConstraint origTc) {
     super(origTc);
   }

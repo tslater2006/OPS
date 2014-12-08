@@ -47,17 +47,18 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
   static {
     final String PT_METHOD_PREFIX = "PT_";
 
-    final Method[] methods = PTBufferRowset.class.getMethods();
     ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
+    final Class[] classes = new Class[]{PTRowset.class, PTBufferRowset.class};
+
+    for (final Class cls : classes) {
+      final Method[] methods = cls.getMethods();
+      for (Method m : methods) {
+        if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
+          ptMethodTable.put(m.getName().substring(
+              PT_METHOD_PREFIX.length()), m);
+        }
       }
     }
-
-    // Add the universal methods defined in the superclass as well.
-    ptMethodTable.putAll(PTRowset.getUniversalRowsetMethodTable());
   }
 
   /**

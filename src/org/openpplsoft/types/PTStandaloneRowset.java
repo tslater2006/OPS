@@ -44,18 +44,19 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
-    // cache pointers to PeopleTools Rowset methods.
-    final Method[] methods = PTStandaloneRowset.class.getMethods();
+
     ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
+    final Class[] classes = new Class[]{PTRowset.class, PTStandaloneRowset.class};
+
+    for (final Class cls : classes) {
+      final Method[] methods = cls.getMethods();
+      for (Method m : methods) {
+        if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
+          ptMethodTable.put(m.getName().substring(
+              PT_METHOD_PREFIX.length()), m);
+        }
       }
     }
-
-    // Add the universal methods defined in the superclass as well.
-    ptMethodTable.putAll(PTRowset.getUniversalRowsetMethodTable());
   }
 
   /**

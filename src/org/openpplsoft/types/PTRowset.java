@@ -74,6 +74,23 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     return this.rows.size();
   }
 
+  protected void internalFlush() {
+    // One row is always present in the rowset, even when flushed.
+    this.rows.clear();
+    this.rows.add(this.allocateNewRow());
+  }
+
+  /**
+   * Return the row from the rowset corresponding to the given index;
+   * PeopleSoft RowSet indices start from 1, not 0.
+   * @param idx the index of the row to retrieve
+   * @return the row corresponding to idx
+   */
+  public R getRow(int idx) {
+    // Must subtract 1 from idx; rowset indices start at 1.
+    return this.rows.get(idx - 1);
+  }
+
   @Override
   public PTType dotProperty(final String s) {
     if (s.toLowerCase().equals("activerowcount")) {
@@ -95,12 +112,6 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
     }
     this.internalFlush();
-  }
-
-  protected void internalFlush() {
-    // One row is always present in the rowset, even when flushed.
-    this.rows.clear();
-    this.rows.add(this.allocateNewRow());
   }
 
   /**
@@ -132,17 +143,6 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     }
 
     Environment.pushToCallStack(this.getRow(idx));
-  }
-
-  /**
-   * Return the row from the rowset corresponding to the given index;
-   * PeopleSoft RowSet indices start from 1, not 0.
-   * @param idx the index of the row to retrieve
-   * @return the row corresponding to idx
-   */
-  public R getRow(int idx) {
-    // Must subtract 1 from idx; rowset indices start at 1.
-    return this.rows.get(idx - 1);
   }
 
   /**
@@ -293,5 +293,14 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     }
 
     return merged;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder b = new StringBuilder(super.toString());
+    b.append(":primaryRecDefn=").append(this.primaryRecDefn);
+    b.append(",numRows=").append(this.rows.size());
+    b.append(",registeredRecordDefns=").append(this.registeredRecordDefns);
+    return b.toString();
   }
 }

@@ -305,13 +305,6 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
   @Override
   public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    if(this.primaryRecDefn == null) {
-      b.append("!(CBUFFER-SCROLL-LEVEL-0-ROWSET)!");
-    }
-    b.append(":primaryRecDefn=").append(this.primaryRecDefn);
-    b.append(",numRows=").append(this.rows.size());
-    b.append(",registeredRecordDefns=").append(this.registeredRecordDefns);
-    return b.toString();
+    return "[BUFFER]" + super.toString();
   }
 }

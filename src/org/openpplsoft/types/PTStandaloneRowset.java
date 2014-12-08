@@ -65,18 +65,7 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
     super(origTc);
     this.parentRow = pRow;
     this.primaryRecDefn = primRecDefn;
-    this.initRowset();
-  }
 
-  public PTStandaloneRowset(final PTRowsetTypeConstraint origTc, final PTStandaloneRow pRow,
-      final ScrollBuffer scrollDefn) {
-    super(origTc);
-    this.parentRow = pRow;
-    this.primaryRecDefn = scrollDefn.getPrimaryRecDefn();
-    this.initRowset();
-  }
-
-  private void initRowset() {
     // One row is always present in the rowset, even when flushed.
     this.rows.add(this.allocateNewRow());
     this.registerRecordDefn(this.primaryRecDefn);
@@ -173,13 +162,6 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   @Override
   public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    if(this.primaryRecDefn == null) {
-      b.append("!(CBUFFER-SCROLL-LEVEL-0-ROWSET)!");
-    }
-    b.append(":primaryRecDefn=").append(this.primaryRecDefn);
-    b.append(",numRows=").append(this.rows.size());
-    b.append(",registeredRecordDefns=").append(this.registeredRecordDefns);
-    return b.toString();
+    return "[STANDALONE]" + super.toString();
   }
 }

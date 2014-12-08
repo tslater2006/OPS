@@ -49,8 +49,7 @@ public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandalon
 
   public PTStandaloneRow(final PTRowTypeConstraint origTc,
       final PTStandaloneRowset pRowset,
-      final Set<Record> recDefnsToRegister,
-      final Map<String, ScrollBuffer> childScrollDefnsToRegister) {
+      final Set<Record> recDefnsToRegister) {
     super(origTc);
     this.parentRowset = pRowset;
 

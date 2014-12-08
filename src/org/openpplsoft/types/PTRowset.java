@@ -44,8 +44,6 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
   protected Record primaryRecDefn;
 
   protected Set<Record> registeredRecordDefns = new HashSet<Record>();
-  protected Map<String, ScrollBuffer> registeredChildScrollDefns =
-      new LinkedHashMap<String, ScrollBuffer>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";

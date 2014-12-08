@@ -40,9 +40,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
   private static Map<String, Method> ptMethodTable;
 
-  // If this is null, this rowset is a standalone rowset.
   private ScrollBuffer cBufferScrollDefn;
-
   private Map<String, ScrollBuffer> registeredChildScrollDefns =
       new LinkedHashMap<String, ScrollBuffer>();
 

@@ -87,7 +87,7 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   protected PTStandaloneRow allocateNewRow() {
     return new PTRowTypeConstraint().allocStandaloneRow(
-        this, this.registeredRecordDefns, this.registeredChildScrollDefns);
+        this, this.registeredRecordDefns);
   }
 
   @Override

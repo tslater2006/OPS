@@ -12,6 +12,8 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -155,13 +157,13 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
    */
   public void PT_Sort() {
 
-    final LinkedList<String> fields = new LinkedList<String>();
-    final LinkedList<String> orders = new LinkedList<String>();
+    final LinkedList<String> sortFields = new LinkedList<String>();
+    final LinkedList<String> sortOrders = new LinkedList<String>();
 
     do {
       final PTString orderStr = (PTString) Environment.popFromCallStack();
       if (orderStr.read().equals("A") || orderStr.read().equals("D")){
-        orders.push(orderStr.read());
+        sortOrders.push(orderStr.read());
       } else {
         throw new OPSVMachRuntimeException("Unexpected order "
           + "string: " + orderStr.read());
@@ -180,119 +182,62 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
             + fldSpec.getFieldName() + " does not exist on the underlying "
             + "record.");
       }
-      fields.push(fldSpec.getFieldName());
+      sortFields.push(fldSpec.getFieldName());
 
     } while (!(Environment.peekAtCallStack() instanceof PTCallFrameBoundary));
 
-    this.rows = this.mergeSortRows(this.rows, fields, orders);
+    Collections.sort(this.rows, new Comparator<R>() {
+      @Override
+      public int compare(R aRow, R bRow) {
+
+        /*
+         * Order the rows based on the precedence
+         * specified in the list of sort fields,
+         * along with the order accompanying each ("A" or "D").
+         */
+        for (int i = 0; i < sortFields.size(); i++) {
+          final String order = sortOrders.get(i);
+
+          final PTRecord<?,?> aRecord = aRow.getRecord(primaryRecDefn.RECNAME);
+          final PTReference<? extends PTField> aRef = aRecord
+              .getFieldRef(sortFields.get(i));
+          final PTPrimitiveType aVal = aRef.deref().getValue();
+
+          final PTRecord<?,?> bRecord = bRow.getRecord(primaryRecDefn.RECNAME);
+          final PTReference<? extends PTField> bRef = bRecord
+              .getFieldRef(sortFields.get(i));
+          final PTPrimitiveType bVal = bRef.deref().getValue();
+
+          if (aVal.isLessThan(bVal).read()) {
+            if (order.equals("A")) {
+              return -1;
+            } else {
+              return 1;
+            }
+          } else if (aVal.isGreaterThan(bVal).read()) {
+            if (order.equals("A")) {
+              return 1;
+            } else {
+              return -1;
+            }
+          } else {
+            continue;
+          }
+        }
+        return 0;
+      }
+    });
 
     /*int i=1;
     log.debug("=========== Sorted Rowset ===========");
     for(PTRow row : this.rows) {
-      PTRecord rec = row.record;
+      PTRecord<?,?> rec = row.getRecord(1);
       log.debug("{}: STRM={}, ACAD_CAREER={}, INSTITUTION={}",
-        i++, rec.fields.get("STRM"), rec.fields.get("ACAD_CAREER"),
-        rec.fields.get("INSTITUTION"));
+        i++, rec.getFieldRef("STRM").deref().getValue(),
+        rec.getFieldRef("ACAD_CAREER").deref().getValue(),
+        rec.getFieldRef("INSTITUTION").deref().getValue());
     }
     log.debug("======== End Sorted Rowset =========");*/
-  }
-
-  private List<R> mergeSortRows(final List<R> rowsToSort,
-    final List<String> sortFields, final List<String> sortOrders) {
-
-    if (rowsToSort.size() < 2) {
-      return rowsToSort;
-    }
-
-    final int mid = rowsToSort.size() / 2;
-    final List<R> left = this.mergeSortRows(
-        rowsToSort.subList(0, mid), sortFields, sortOrders);
-    final List<R> right = this.mergeSortRows(
-        rowsToSort.subList(mid,
-          rowsToSort.size()), sortFields, sortOrders);
-    return this.merge(left, right, sortFields, sortOrders);
-  }
-
-  private List<R> merge(final List<R> left,
-      final List<R> right, final List<String> sortFields,
-      final List<String> sortOrders) {
-
-    final List<R> merged = new ArrayList<R>();
-    int l = 0, r = 0;
-    while (l < left.size() && r < right.size()) {
-      final R lRow = left.get(l);
-      final R rRow = right.get(r);
-
-      /*
-       * Order the rows based on the precedence
-       * specified in the list of sort fields,
-       * along with the order accompanying each (A or D).
-       */
-      for (int i = 0; i < sortFields.size(); i++) {
-        final String order = sortOrders.get(i);
-
-        final PTRecord<?,?> lRecord = lRow.getRecord(this.primaryRecDefn.RECNAME);
-        final PTReference<? extends PTField> lRef = lRecord
-            .getFieldRef(sortFields.get(i));
-        final PTPrimitiveType lVal = lRef.deref().getValue();
-
-        final PTRecord<?,?> rRecord = rRow.getRecord(this.primaryRecDefn.RECNAME);
-        final PTReference<? extends PTField> rRef = rRecord
-            .getFieldRef(sortFields.get(i));
-        final PTPrimitiveType rVal = rRef.deref().getValue();
-
-        if (lVal.isLessThan(rVal).read()) {
-          if (order.equals("A")) {
-            merged.add(lRow);
-            l++;
-          } else {
-            merged.add(rRow);
-            r++;
-          }
-          break;
-        } else if (lVal.isGreaterThan(rVal).read()) {
-          if (order.equals("A")) {
-            merged.add(rRow);
-            r++;
-          } else {
-            merged.add(lRow);
-            l++;
-          }
-          break;
-        } else {
-          /*
-           * If this is the last sort field,
-           * and the rows are still considered "equal"
-           * in terms of ordering, add both to the merged
-           * array in terms of their natural ordering.
-           */
-          if ((i + 1) == sortFields.size()) {
-            merged.add(lRow);
-            l++;
-            merged.add(rRow);
-            r++;
-          } else {
-            /*
-             * If another sort field exists,
-             * use that to determine ordering.
-             */
-            continue;
-          }
-        }
-      }
-    }
-
-    /*
-     * Add any surplus elements to end of merged array.
-     */
-    while (l < left.size()) {
-      merged.add(left.get(l++));
-    }
-    while (r < right.size()) {
-      merged.add(right.get(r++));
-    }
-
-    return merged;
   }
 
   @Override
@@ -304,3 +249,4 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     return b.toString();
   }
 }
+

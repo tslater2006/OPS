@@ -51,13 +51,6 @@ public final class PTStandaloneField extends PTField<PTStandaloneRecord> {
     this.parentRecord = pRecord;
   }
 
-  public PTStandaloneField(final PTFieldTypeConstraint origTc,
-      final PTStandaloneRecord pRecord, final RecordFieldBuffer recFldBuffer) {
-    super(origTc, recFldBuffer.getRecFldDefn());
-    this.parentRecord = pRecord;
-    this.recFieldBuffer = recFldBuffer;
-  }
-
   public PTImmutableReference dotProperty(String s) {
     if(s.toLowerCase().equals("value")) {
       return this.valueRef;

@@ -29,7 +29,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
 
   private static Map<String, Method> ptMethodTable;
 
-  private List<DropDownItem> dropDownList;
+  private List<DropDownItem> dropDownList = new ArrayList<>();
 
   private class DropDownItem {
     private String code, desc;
@@ -56,23 +56,17 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
   }
 
-  public PTBufferField(final PTFieldTypeConstraint origTc, final PTBufferRecord pRecord,
-      final RecordField rfd) {
+  public PTBufferField(final PTFieldTypeConstraint origTc,
+      final PTBufferRecord pRecord, final RecordField rfd) {
     super(origTc, rfd);
     this.parentRecord = pRecord;
-    this.init();
   }
 
-  public PTBufferField(final PTFieldTypeConstraint origTc, final PTBufferRecord pRecord,
-      final RecordFieldBuffer recFldBuffer) {
+  public PTBufferField(final PTFieldTypeConstraint origTc,
+      final PTBufferRecord pRecord, final RecordFieldBuffer recFldBuffer) {
     super(origTc, recFldBuffer.getRecFldDefn());
     this.parentRecord = pRecord;
     this.recFieldBuffer = recFldBuffer;
-    this.init();
-  }
-
-  private void init() {
-    this.dropDownList = new ArrayList<DropDownItem>();
   }
 
   public RecordFieldBuffer getRecordFieldBuffer() {

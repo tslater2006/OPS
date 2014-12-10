@@ -35,6 +35,14 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
   private static final Logger log = LogManager.getLogger(PTBufferRow.class.getName());
 
+  /*
+   * MQUINN 12-09-2014 TODO: Convert to list of RecordBuffers.
+   */
+  private Set<Record> registeredRecordDefns = new HashSet<Record>();
+
+  private Map<String, ScrollBuffer> registeredChildScrollDefns =
+      new LinkedHashMap<String, ScrollBuffer>();
+
   static {
     final String PT_METHOD_PREFIX = "PT_";
     // cache pointers to PeopleTools Row methods.

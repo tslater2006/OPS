@@ -53,18 +53,8 @@ public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandalon
     super(origTc);
     this.parentRowset = pRowset;
 
-    // Register all record defns in the provided set.
+    // Create records for each record defn registered on the parent rowset.
     for(final Record recDefn : recDefnsToRegister) {
-      this.registerRecordDefn(recDefn);
-    }
-  }
-
-  // Used to register record defns that don't have an associated
-  // buffer (i.e., standalone rows/rowsets)
-  public void registerRecordDefn(final Record recDefn) {
-    // Only register the record defn if it hasn't already been registered.
-    if (!this.registeredRecordDefns.contains(recDefn)) {
-      this.registeredRecordDefns.add(recDefn);
       this.recordMap.put(recDefn.RECNAME,
           new PTRecordTypeConstraint().allocStandaloneRecord(this, recDefn));
     }

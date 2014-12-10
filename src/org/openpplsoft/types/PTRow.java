@@ -42,12 +42,9 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   // Maps record names to child record objects
   protected Map<String, E> recordMap = new LinkedHashMap<String, E>();
-  protected Set<Record> registeredRecordDefns = new HashSet<Record>();
 
   // Maps scroll/rowset primary rec names to rowset objects
   protected Map<String, R> rowsetMap = new LinkedHashMap<String, R>();
-  protected Map<String, ScrollBuffer> registeredChildScrollDefns =
-      new LinkedHashMap<String, ScrollBuffer>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -76,8 +73,6 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
   }
-
-  public abstract void registerRecordDefn(final Record recDefn);
 
   public R getParentRowset() {
     return this.parentRowset;
@@ -142,7 +137,7 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
     if (this.recordMap.containsKey(s)) {
       return this.recordMap.get(s);
     } else if (s.toLowerCase().equals("recordcount")) {
-      return new PTInteger(this.registeredRecordDefns.size());
+      return new PTInteger(this.recordMap.size());
     } else if (s.toLowerCase().equals("parentrowset")) {
       return this.parentRowset;
     } else if (s.toLowerCase().equals("selected")) {

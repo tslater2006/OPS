@@ -39,7 +39,7 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   private static Map<String, Method> ptMethodTable;
 
-  private Set<Record> registeredRecordDefns = new HashSet<Record>();
+  private List<Record> registeredRecordDefns = new ArrayList<Record>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -79,13 +79,12 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
     this.rows.add(this.allocateNewRow());
   }
 
-  protected Set<Record> getRegisteredRecordDefns() {
+  protected List<Record> getRegisteredRecordDefns() {
     return this.registeredRecordDefns;
   }
 
   protected PTStandaloneRow allocateNewRow() {
-    return new PTRowTypeConstraint().allocStandaloneRow(
-        this, this.registeredRecordDefns);
+    return new PTRowTypeConstraint().allocStandaloneRow(this);
   }
 
   @Override

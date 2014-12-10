@@ -30,8 +30,7 @@ public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
     throw new OPSDataTypeException("Call to alloc() PTRow without args is illegal.");
   }
 
-  public PTStandaloneRow allocStandaloneRow(final PTStandaloneRowset parentRowset,
-      final Set<Record> recordDefns) {
+  public PTStandaloneRow allocStandaloneRow(final PTStandaloneRowset parentRowset) {
     return new PTStandaloneRow(this, parentRowset);
   }
 

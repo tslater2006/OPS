@@ -44,6 +44,11 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
   private Map<String, ScrollBuffer> registeredChildScrollDefns =
       new LinkedHashMap<String, ScrollBuffer>();
 
+  /**
+   * MQUINN 12-09-2014 : REMOVE.
+   */
+  private Set<Record> registeredRecordDefns = new HashSet<>();
+
   static {
     final String PT_METHOD_PREFIX = "PT_";
 

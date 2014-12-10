@@ -45,8 +45,6 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
   protected List<R> rows = new ArrayList<R>();
   protected Record primaryRecDefn;
 
-  protected Set<Record> registeredRecordDefns = new HashSet<Record>();
-
   static {
     final String PT_METHOD_PREFIX = "PT_";
 
@@ -245,7 +243,6 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     final StringBuilder b = new StringBuilder(super.toString());
     b.append(":primaryRecDefn=").append(this.primaryRecDefn);
     b.append(",numRows=").append(this.rows.size());
-    b.append(",registeredRecordDefns=").append(this.registeredRecordDefns);
     return b.toString();
   }
 }

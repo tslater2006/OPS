@@ -39,6 +39,8 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   private static Map<String, Method> ptMethodTable;
 
+  private Set<Record> registeredRecordDefns = new HashSet<Record>();
+
   static {
     final String PT_METHOD_PREFIX = "PT_";
 
@@ -60,15 +62,21 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
    * Remember: the provided primary record defn could be null if
    * this rowset represents the level 0 scroll of the component buffer.
    */
-  public PTStandaloneRowset(final PTRowsetTypeConstraint origTc, final PTStandaloneRow pRow,
-      final Record primRecDefn) {
+  public PTStandaloneRowset(final PTRowsetTypeConstraint origTc,
+      final PTStandaloneRow pRow, final Record primRecDefn) {
     super(origTc);
     this.parentRow = pRow;
     this.primaryRecDefn = primRecDefn;
 
+    if (primRecDefn != null) {
+      this.registeredRecordDefns.add(this.primaryRecDefn);
+    } else {
+      throw new OPSVMachRuntimeException("Encountered null primary rec defn "
+          + "during call to instantiate standalone rowset.");
+    }
+
     // One row is always present in the rowset, even when flushed.
     this.rows.add(this.allocateNewRow());
-    this.registerRecordDefn(this.primaryRecDefn);
   }
 
   protected PTStandaloneRow allocateNewRow() {
@@ -82,20 +90,6 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
       return new Callable(ptMethodTable.get(s), this);
     }
     return null;
-  }
-
-  public void registerRecordDefn(final Record recDefn) {
-
-    if (recDefn == null) {
-      return;
-    }
-
-    this.registeredRecordDefns.add(recDefn);
-
-    // Each row must also have this record registered.
-    for (final PTRow row : this.rows) {
-      row.registerRecordDefn(recDefn);
-    }
   }
 
   /**

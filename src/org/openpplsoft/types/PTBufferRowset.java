@@ -40,14 +40,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
   private static Map<String, Method> ptMethodTable;
 
-  private ScrollBuffer cBufferScrollDefn;
-  private Map<String, ScrollBuffer> registeredChildScrollDefns =
-      new LinkedHashMap<String, ScrollBuffer>();
+  private ScrollBuffer cBufferScrollBuffer;
 
-  /**
-   * MQUINN 12-09-2014 : REMOVE.
-   */
-  private Set<Record> registeredRecordDefns = new HashSet<>();
+  private List<RecordBuffer> registeredRecordBuffers = new ArrayList<>();
+  private List<ScrollBuffer> registeredChildScrollBuffers = new ArrayList<>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -67,78 +63,65 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
   }
 
   public PTBufferRowset(final PTRowsetTypeConstraint origTc, final PTBufferRow pRow,
-      final ScrollBuffer scrollDefn) {
+      final ScrollBuffer scrollBuf) {
     super(origTc);
     this.parentRow = pRow;
-    this.cBufferScrollDefn = scrollDefn;
-    this.primaryRecDefn = scrollDefn.getPrimaryRecDefn();
-    this.init();
+    this.cBufferScrollBuffer = scrollBuf;
+    this.primaryRecDefn = scrollBuf.getPrimaryRecDefn();
+
+    for (final RecordBuffer recBuf : scrollBuf.getOrderedRecBuffers()) {
+      this.registeredRecordBuffers.add(recBuf);
+    }
+
+    for (final ScrollBuffer childScrollBuf : scrollBuf.getOrderedScrollBuffers()) {
+      this.registeredChildScrollBuffers.add(childScrollBuf);
+    }
+
+    // One row is always present in the rowset, even when flushed.
+    this.rows.add(this.allocateNewRow());
   }
 
   /**
    * The topmost rowset in the component buffer holds the search
    * record as its primary record defn. In this case, there is no parent
-   * row, nor is there a scroll buffer defn for this rowset.
+   * row, nor is there a scroll buffer defn for this rowset. Later, when
+   * the component buffer is materialized, a child rowset (the level 0 rowset)
+   * will be added dynamically.
    */
   public PTBufferRowset(final PTRowsetTypeConstraint origTc,
       final SearchRecordBuffer searchRecBuf) {
     super(origTc);
     this.primaryRecDefn = searchRecBuf.getRecDefn();
-    this.init();
-  }
+    this.registeredRecordBuffers.add(searchRecBuf);
 
-  private void init() {
     // One row is always present in the rowset, even when flushed.
     this.rows.add(this.allocateNewRow());
-    this.registerRecordDefn(this.primaryRecDefn);
   }
 
-  public ScrollBuffer getCBufferScrollDefn() {
-    return this.cBufferScrollDefn;
+  public ScrollBuffer getCBufferScrollBuffer() {
+    return this.cBufferScrollBuffer;
+  }
+
+  public List<RecordBuffer> getRegisteredRecordBuffers() {
+    return this.registeredRecordBuffers;
+  }
+
+  public List<ScrollBuffer> getRegisteredChildScrollBuffers() {
+    return this.registeredChildScrollBuffers;
   }
 
   protected PTBufferRow allocateNewRow() {
-    return new PTRowTypeConstraint().allocBufferRow(
-        this, this.registeredRecordDefns, this.registeredChildScrollDefns);
+    return new PTRowTypeConstraint().allocBufferRow(this);
   }
 
-  public void registerRecordDefn(final Record recDefn) {
-
-    if (recDefn == null) {
-      return;
-    }
-
-    this.registeredRecordDefns.add(recDefn);
-
-    // Each row must also have this record registered.
+  /**
+   * This method is only intended to be used when materializing the level 0
+   * row of the component buffer.
+   */
+  public void dynamicallyRegisterChildScrollBuffer(
+      final ScrollBuffer childScrollBuf) {
     for (final PTBufferRow row : this.rows) {
-
-      // If this is a component buffer scroll and the record has an
-      // associated record buffer, pass that to the row; it will register
-      // the underlying record defn and save a reference to that buffer
-      if (this.cBufferScrollDefn != null
-          && this.cBufferScrollDefn.hasRecordBuffer(recDefn.RECNAME)) {
-        row.registerRecordDefn(
-            this.cBufferScrollDefn.getRecordBuffer(recDefn.RECNAME));
-      } else {
-        row.registerRecordDefn(recDefn);
-      }
-    }
-  }
-
-  public void registerChildScrollDefn(final ScrollBuffer childScrollDefn) {
-    if (this.registeredChildScrollDefns.containsKey(
-        childScrollDefn.getPrimaryRecName())) {
-      throw new OPSVMachRuntimeException("Halting on call to register child "
-          + "scroll defn with a primary record name that has already been registerd; "
-          + "registering it again would overwrite a potentially different defn.");
-    } else {
-      this.registeredChildScrollDefns.put(
-          childScrollDefn.getPrimaryRecName(), childScrollDefn);
-    }
-
-    for (final PTBufferRow row : this.rows) {
-      row.registerChildScrollDefn(childScrollDefn);
+      row.dynamicallyRegisterChildScrollBuffer(childScrollBuf);
     }
   }
 

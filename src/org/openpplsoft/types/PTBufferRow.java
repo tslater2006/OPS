@@ -33,15 +33,8 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
   private static Map<String, Method> ptMethodTable;
 
-  private static final Logger log = LogManager.getLogger(PTBufferRow.class.getName());
-
-  /*
-   * MQUINN 12-09-2014 TODO: Convert to list of RecordBuffers.
-   */
-  private Set<Record> registeredRecordDefns = new HashSet<Record>();
-
-  private Map<String, ScrollBuffer> registeredChildScrollDefns =
-      new LinkedHashMap<String, ScrollBuffer>();
+  private static final Logger log =
+      LogManager.getLogger(PTBufferRow.class.getName());
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -56,21 +49,21 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     }
   }
 
-  public PTBufferRow(final PTRowTypeConstraint origTc, final PTBufferRowset pRowset,
-      final Set<Record> recDefnsToRegister,
-      final Map<String, ScrollBuffer> childScrollDefnsToRegister) {
+  public PTBufferRow(final PTRowTypeConstraint origTc,
+      final PTBufferRowset pRowset) {
     super(origTc);
     this.parentRowset = pRowset;
 
-    // Register all record defns in the provided set.
-    for(final Record recDefn : recDefnsToRegister) {
-      this.registerRecordDefn(recDefn);
+    // Create a record for each record buffer registered in the parent rowset.
+    for(final RecordBuffer recBuf : pRowset.getRegisteredRecordBuffers()) {
+      this.recordMap.put(recBuf.getRecDefn().RECNAME,
+          new PTRecordTypeConstraint().allocBufferRecord(this, recBuf));
     }
 
-    // Register all child scroll defns in the provided map.
-    for(Map.Entry<String, ScrollBuffer> entry
-        : childScrollDefnsToRegister.entrySet()) {
-      this.registerChildScrollDefn(entry.getValue());
+    // Create a rowset for each child scroll buffer registered in the parent rowset.
+    for(final ScrollBuffer childScrollBuf : pRowset.getRegisteredChildScrollBuffers()) {
+      this.rowsetMap.put(childScrollBuf.getPrimaryRecName(),
+          childScrollBuf.allocRowset(this));
     }
   }
 
@@ -99,43 +92,14 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         + "not exist in this row; unable to determine index position.");
   }
 
-  // Used to register record defns that don't have an associated
-  // buffer (i.e., standalone rows/rowsets)
-  public void registerRecordDefn(final Record recDefn) {
-    // Only register the record defn if it hasn't already been registered.
-    if (!this.registeredRecordDefns.contains(recDefn)) {
-      this.registeredRecordDefns.add(recDefn);
-      this.recordMap.put(recDefn.RECNAME,
-          new PTRecordTypeConstraint().allocBufferRecord(this, recDefn));
-    }
-  }
-
-  // Used to register record defns that have an asscoiated buffer
-  // (i.e., for records in the component buffer).
-  public void registerRecordDefn(final RecordBuffer recBuffer) {
-
-    final Record recDefn = recBuffer.getRecDefn();
-
-    // Only register the record defn if it hasn't already been registered.
-    if (!this.registeredRecordDefns.contains(recDefn)) {
-      this.registeredRecordDefns.add(recDefn);
-      this.recordMap.put(recDefn.RECNAME,
-          new PTRecordTypeConstraint().allocBufferRecord(this, recBuffer));
-    }
-  }
-
-  public void registerChildScrollDefn(final ScrollBuffer childScrollDefn) {
-    if (this.registeredChildScrollDefns.containsKey(
-        childScrollDefn.getPrimaryRecName())) {
-      throw new OPSVMachRuntimeException("Halting on call to register child "
-          + "scroll defn with a primary record name that has already been registerd; "
-          + "registering it again would overwrite a potentially different defn.");
-    } else {
-      this.registeredChildScrollDefns.put(
-          childScrollDefn.getPrimaryRecName(), childScrollDefn);
-      this.rowsetMap.put(childScrollDefn.getPrimaryRecName(),
-          childScrollDefn.allocRowset(this));
-    }
+  /**
+   * This method is only intended to be used when materializing the level 0
+   * row of the component buffer.
+   */
+  public void dynamicallyRegisterChildScrollBuffer(
+      final ScrollBuffer childScrollBuf) {
+    this.rowsetMap.put(childScrollBuf.getPrimaryRecName(),
+          childScrollBuf.allocRowset(this));
   }
 
   public void emitScrolls(final String indent) {
@@ -143,10 +107,10 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     int scrollLevel = Math.max(0, this.determineScrollLevel());
     TraceFileVerifier.submitEnforcedEmission(new BeginLevel(
         scrollLevel, this.getIndexOfThisRowInParentRowset(), 1, 1, 0,
-        this.registeredChildScrollDefns.size(),
+        this.parentRowset.getRegisteredChildScrollBuffers().size(),
         // All non-level 0 rows seem to have these flags enabled.
         (scrollLevel != 0), (scrollLevel != 0),
-        this.registeredRecordDefns.size()));
+        this.parentRowset.getRegisteredRecordBuffers().size()));
 
     for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().emitRecInScroll();
@@ -231,7 +195,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     // If the parent rowset does not have a scroll defn, it may be the root
     // PTRowset representing the ComponentBuffer as a whole. If this is the case,
     // the entire search record (primary record for that rowset) should be searched.
-    if (this.parentRowset.getCBufferScrollDefn() == null) {
+    if (this.parentRowset.getCBufferScrollBuffer() == null) {
       if (this.parentRowset == ComponentBuffer.getCBufferRowset()) {
 
         final PTBufferRecord searchRecord = this.recordMap.get(
@@ -253,7 +217,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
      * as not all record fields may be in the component buffer for any given record.
      */
     for (final RecordBuffer recBuf
-        : this.parentRowset.getCBufferScrollDefn().getOrderedRecBuffers()) {
+        : this.parentRowset.getCBufferScrollBuffer().getOrderedRecBuffers()) {
       final RecordFieldBuffer rfBuf = recBuf.getRecordFieldBuffer(fieldName);
 
       if (rfBuf != null) {

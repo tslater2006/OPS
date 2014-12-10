@@ -34,10 +34,8 @@ public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
     return new PTStandaloneRow(this, parentRowset);
   }
 
-  public PTBufferRow allocBufferRow(final PTBufferRowset parentRowset,
-      final Set<Record> recordDefns,
-      final Map<String, ScrollBuffer> childScrollDefns) {
-    return new PTBufferRow(this, parentRowset, recordDefns, childScrollDefns);
+  public PTBufferRow allocBufferRow(final PTBufferRowset parentRowset) {
+    return new PTBufferRow(this, parentRowset);
   }
 
   @Override

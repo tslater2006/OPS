@@ -58,23 +58,12 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
   }
 
   public PTBufferRecord(final PTRecordTypeConstraint origTc,
-      final PTBufferRow pRow, final Record r) {
-    super(origTc);
-    this.parentRow = pRow;
-    this.recDefn = r;
-    this.init();
-  }
-
-  public PTBufferRecord(final PTRecordTypeConstraint origTc,
       final PTBufferRow pRow, final RecordBuffer recBuffer) {
     super(origTc);
     this.parentRow = pRow;
     this.recDefn = recBuffer.getRecDefn();
     this.recBuffer = recBuffer;
-    this.init();
-  }
 
-  private void init() {
     // this map is linked in order to preserve
     // the order in which fields are added.
     this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTBufferField>>();
@@ -88,15 +77,16 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         PTImmutableReference<PTBufferField> newFldRef = null;
 
         // If this record field has a buffer associated with it, allocate the
-        // field with that to give the field a reference to that buffer.
-        if (this.recBuffer != null
-            && this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
-          newFldRef
-            = new PTImmutableReference<PTBufferField>(fldTc,
-                fldTc.allocBufferField(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
+        // field with that to give the field a reference to that buffer. Otherwise,
+        // allocate the field with just its record field defn.
+        if (this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
+          newFldRef = new PTImmutableReference<PTBufferField>(fldTc,
+              fldTc.allocBufferField(this,
+                  this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
         } else {
           newFldRef
-            = new PTImmutableReference<PTBufferField>(fldTc, fldTc.allocBufferField(this, rf));
+              = new PTImmutableReference<PTBufferField>(fldTc,
+                  fldTc.allocBufferField(this, rf));
         }
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);

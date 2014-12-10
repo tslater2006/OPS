@@ -38,7 +38,9 @@ public class PTFieldTypeConstraint extends PTTypeConstraint<PTField> {
   }
 
   /**
-   * MQUINN 11-30-2014 : Adding temporarily to continue with split process; REMOVE EVENTUALLY.
+   * This field allows for the allocation of fields that are technically in
+   * the component buffer, but that lack an associated record buffer (i.e., fields
+   * that are not part of the so-called "component structure."
    */
   public PTBufferField allocBufferField(final PTBufferRecord parentRecord,
       final RecordField rfDefn) {

@@ -39,34 +39,33 @@ public class RecordBuffer implements IStreamableBuffer {
   private Record recDefn;
   private int scrollLevel;
   private boolean isPrimaryScrollRecordBuffer, hasBeenExpanded;
-  private Map<String, RecordFieldBuffer> fieldBufferTable;
-  private List<RecordFieldBuffer> fieldBuffers;
+  private Map<String, RecordFieldBuffer> fieldBufferTable = new HashMap<>();
+  private List<RecordFieldBuffer> fieldBuffers = new ArrayList<>();
 
   // Used for reading.
   private boolean hasEmittedSelf;
   private int fieldBufferCursor;
 
   /**
-   * Creates a new record buffer.
-   * @param p the ScrollBuffer to which the record belongs.
-   * @param r the name of the record (RECNAME)
-   * @param s the scroll level for this particular buffer
-   * @param primaryRecName the primary record name of the
-   *    scroll to which this record belongs.
+   * Creates a new record buffer that is attached to a parent ScrollBuffer.
+   * @param scrollBuf the ScrollBuffer to which the record belongs.
+   * @param recName the name of the record (RECNAME)
    */
-  public RecordBuffer(final ScrollBuffer p, final String r,
-      final int s, final String primaryRecName) {
-    this.sbuf = p;
-    this.recName = r;
-    this.scrollLevel = s;
+  public RecordBuffer(final ScrollBuffer scrollBuf, final String recName) {
+    this.sbuf = scrollBuf;
+    this.recName = recName;
+    this.recDefn = DefnCache.getRecord(this.recName);
+    this.scrollLevel = scrollBuf.getScrollLevel();
 
-    if (primaryRecName != null && this.recName.equals(primaryRecName)) {
+    if (scrollBuf.getPrimaryRecName() != null
+        && this.recName.equals(scrollBuf.getPrimaryRecName())) {
       this.isPrimaryScrollRecordBuffer = true;
     }
+  }
 
-    this.fieldBufferTable = new HashMap<String, RecordFieldBuffer>();
-    this.fieldBuffers = new ArrayList<RecordFieldBuffer>();
-    this.recDefn = DefnCache.getRecord(this.recName);
+  public RecordBuffer(final Record recDefn) {
+    this.recName = recDefn.RECNAME;
+    this.recDefn = recDefn;
   }
 
   /**

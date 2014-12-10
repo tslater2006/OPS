@@ -36,6 +36,11 @@ public class PTRowsetTypeConstraint extends PTTypeConstraint<PTRowset> {
     return new PTBufferRowset(this, searchRecBuf);
   }
 
+  /**
+   * This method allows for the root component buffer rowset to be intialized;
+   * remember that the level 0 rowset is a *child* rowset of the rowset
+   * allocated by this method.
+   */
   public PTBufferRowset allocBufferRowset(final PTBufferRow parentRow,
       final ScrollBuffer scrollDefn) {
     return new PTBufferRowset(this, parentRow, scrollDefn);

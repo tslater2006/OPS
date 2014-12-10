@@ -63,25 +63,10 @@ public class ScrollBuffer implements IStreamableBuffer {
   public PTBufferRowset allocRowset(final PTBufferRow parentRow) {
 
     // Create a rowset with the supplied parent; this scroll buffer object
-    // will be linked to the rowset, which will use the primary rec name
-    // defined in this object as the primary rec defn.
-    final PTBufferRowset rowset = new PTRowsetTypeConstraint()
+    // will be linked to the rowset, which will register the record
+    // and scroll buffers attached to this ScrollBuffer.
+    return new PTRowsetTypeConstraint()
         .allocBufferRowset(parentRow, this);
-
-    // For each record buffer in this scroll, register the underlying record
-    // defn in the rowset (and thus its newly created child row as well).
-    for (final RecordBuffer recBuf : this.orderedRecBuffers) {
-      rowset.registerRecordDefn(DefnCache.getRecord(recBuf.getRecName()));
-    }
-
-    // For each child scroll in this scroll, register it in the rowset
-    // (and thus in its newly created child row as well, where this method
-    // will be called to allocate a new child rowset).
-    for (final ScrollBuffer scrollBuf : this.orderedScrollBuffers) {
-      rowset.registerChildScrollDefn(scrollBuf);
-    }
-
-    return rowset;
   }
 
   /**
@@ -134,8 +119,7 @@ public class ScrollBuffer implements IStreamableBuffer {
 
     RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
     if (r == null) {
-      r = new RecordBuffer(this, tok.RECNAME, this.scrollLevel,
-          this.primaryRecName);
+      r = new RecordBuffer(this, tok.RECNAME);
       this.recBufferTable.put(r.getRecName(), r);
       this.orderedRecBuffers.add(r);
     }

@@ -120,7 +120,7 @@ public final class ComponentBuffer {
   }
 
   public static void materialize() {
-    cBuffer.registerChildScrollDefn(lvlZeroScrollBuffer);
+    cBuffer.dynamicallyRegisterChildScrollBuffer(lvlZeroScrollBuffer);
   }
 
   public static PTBufferRecord getSearchRecord() {

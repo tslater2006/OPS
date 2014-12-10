@@ -27,19 +27,14 @@ public class PTRecordTypeConstraint extends PTTypeConstraint<PTRecord> {
     throw new OPSDataTypeException("Call to alloc() PTRecord without args is illegal.");
   }
 
-  public PTStandaloneRecord allocStandaloneRecord(final PTStandaloneRow parentRow, final Record recDefn) {
+  public PTStandaloneRecord allocStandaloneRecord(final PTStandaloneRow parentRow,
+      final Record recDefn) {
     return new PTStandaloneRecord(this, parentRow, recDefn);
   }
 
-  public PTBufferRecord allocBufferRecord(final PTBufferRow parentRow, final RecordBuffer recBuffer) {
+  public PTBufferRecord allocBufferRecord(final PTBufferRow parentRow,
+      final RecordBuffer recBuffer) {
     return new PTBufferRecord(this, parentRow, recBuffer);
-  }
-
-  /**
-   * MQUINN 11-30-2014 : Adding temporarily for split purposes; REMOVE THIS EVENTUALLY.
-   */
-  public PTBufferRecord allocBufferRecord(final PTBufferRow parentRow, final Record recDefn) {
-    return new PTBufferRecord(this, parentRow, recDefn);
   }
 
   @Override

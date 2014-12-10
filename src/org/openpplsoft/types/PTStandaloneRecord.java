@@ -37,14 +37,10 @@ import org.openpplsoft.buffers.*;
 public final class PTStandaloneRecord extends PTRecord<PTStandaloneRow,
     PTStandaloneField> {
 
-  private static Logger log = LogManager.getLogger(PTStandaloneRecord.class.getName());
+  private static Logger log =
+      LogManager.getLogger(PTStandaloneRecord.class.getName());
 
   private static Map<String, Method> ptMethodTable;
-
-  /**
-   * MQUINN 12-03-2014: TODO: Remove after split.
-   */
-  private RecordBuffer recBuffer;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -65,43 +61,19 @@ public final class PTStandaloneRecord extends PTRecord<PTStandaloneRow,
     super(origTc);
     this.parentRow = pRow;
     this.recDefn = r;
-    this.init();
-  }
 
-  public PTStandaloneRecord(final PTRecordTypeConstraint origTc,
-      final PTStandaloneRow pRow, final RecordBuffer recBuffer) {
-    super(origTc);
-    this.parentRow = pRow;
-    this.recDefn = recBuffer.getRecDefn();
-    this.recBuffer = recBuffer;
-    this.init();
-  }
-
-  private void init() {
     // this map is linked in order to preserve
     // the order in which fields are added.
-    this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTStandaloneField>>();
-    this.fieldRefIdxTable =
-        new LinkedHashMap<Integer, PTImmutableReference<PTStandaloneField>>();
+    this.fieldRefs = new LinkedHashMap<>();
+    this.fieldRefIdxTable = new LinkedHashMap<>();
     int i = 1;
     for (final RecordField rf : this.recDefn.getExpandedFieldList()) {
       PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();
 
       try {
-        PTImmutableReference<PTStandaloneField> newFldRef = null;
-
-        // If this record field has a buffer associated with it, allocate the
-        // field with that to give the field a reference to that buffer.
-        if (this.recBuffer != null
-            && this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
-          throw new OPSVMachRuntimeException("MQUINN 11-30-2014 : Disabling for split.");
-/*          newFldRef
-            = new PTImmutableReference<PTField>(fldTc,
-                fldTc.allocBufferField(this, this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));*/
-        } else {
-          newFldRef
-            = new PTImmutableReference<PTStandaloneField>(fldTc, fldTc.allocStandaloneField(this, rf));
-        }
+        final PTImmutableReference<PTStandaloneField> newFldRef =
+            new PTImmutableReference<>(fldTc,
+                fldTc.allocStandaloneField(this, rf));
         this.fieldRefs.put(rf.FIELDNAME, newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);
       } catch (final OPSTypeCheckException opstce) {

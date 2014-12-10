@@ -61,28 +61,28 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     }
   }
 
-  /**
-   * Remember: the provided primary record defn could be null if
-   * this rowset represents the level 0 scroll of the component buffer.
-   */
-  public PTBufferRowset(final PTRowsetTypeConstraint origTc, final PTBufferRow pRow,
-      final Record primRecDefn) {
-    super(origTc);
-    this.parentRow = pRow;
-    this.primaryRecDefn = primRecDefn;
-    this.initRowset();
-  }
-
   public PTBufferRowset(final PTRowsetTypeConstraint origTc, final PTBufferRow pRow,
       final ScrollBuffer scrollDefn) {
     super(origTc);
     this.parentRow = pRow;
     this.cBufferScrollDefn = scrollDefn;
     this.primaryRecDefn = scrollDefn.getPrimaryRecDefn();
-    this.initRowset();
+    this.init();
   }
 
-  private void initRowset() {
+  /**
+   * The topmost rowset in the component buffer holds the search
+   * record as its primary record defn. In this case, there is no parent
+   * row, nor is there a scroll buffer defn for this rowset.
+   */
+  public PTBufferRowset(final PTRowsetTypeConstraint origTc,
+      final SearchRecordBuffer searchRecBuf) {
+    super(origTc);
+    this.primaryRecDefn = searchRecBuf.getRecDefn();
+    this.init();
+  }
+
+  private void init() {
     // One row is always present in the rowset, even when flushed.
     this.rows.add(this.allocateNewRow());
     this.registerRecordDefn(this.primaryRecDefn);

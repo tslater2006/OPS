@@ -64,17 +64,6 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         : childScrollDefnsToRegister.entrySet()) {
       this.registerChildScrollDefn(entry.getValue());
     }
-
-    try {
-      /*
-       * Initialize read/write properties.
-       */
-      this.selectedPropertyRef
-          = new PTImmutableReference<PTBoolean>(
-              PTBoolean.getTc(), new PTBoolean(false));
-    } catch (final OPSTypeCheckException opstce) {
-      throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
-    }
   }
 
   /**

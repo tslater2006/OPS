@@ -64,6 +64,17 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   public PTRow(final PTRowTypeConstraint origTc) {
     super(origTc);
+
+    try {
+      /*
+       * Initialize read/write properties.
+       */
+      this.selectedPropertyRef
+          = new PTImmutableReference<PTBoolean>(
+              PTBoolean.getTc(), new PTBoolean(false));
+    } catch (final OPSTypeCheckException opstce) {
+      throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
+    }
   }
 
   public abstract void registerRecordDefn(final Record recDefn);

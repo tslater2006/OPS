@@ -57,17 +57,6 @@ public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandalon
     for(final Record recDefn : recDefnsToRegister) {
       this.registerRecordDefn(recDefn);
     }
-
-    try {
-      /*
-       * Initialize read/write properties.
-       */
-      this.selectedPropertyRef
-          = new PTImmutableReference<PTBoolean>(
-              PTBoolean.getTc(), new PTBoolean(false));
-    } catch (final OPSTypeCheckException opstce) {
-      throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
-    }
   }
 
   // Used to register record defns that don't have an associated

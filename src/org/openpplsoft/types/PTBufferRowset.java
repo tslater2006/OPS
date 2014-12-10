@@ -88,6 +88,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     this.registerRecordDefn(this.primaryRecDefn);
   }
 
+  public ScrollBuffer getCBufferScrollDefn() {
+    return this.cBufferScrollDefn;
+  }
+
   protected PTBufferRow allocateNewRow() {
     return new PTRowTypeConstraint().allocBufferRow(
         this, this.registeredRecordDefns, this.registeredChildScrollDefns);
@@ -183,10 +187,6 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     for (final PTBufferRow row : this.rows) {
       row.runFieldDefaultProcessing(fldDefProcSummary);
     }
-  }
-
-  public ScrollBuffer getCBufferScrollDefn() {
-    return this.cBufferScrollDefn;
   }
 
   /**

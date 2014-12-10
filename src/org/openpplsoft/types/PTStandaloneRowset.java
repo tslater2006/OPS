@@ -79,6 +79,10 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
     this.rows.add(this.allocateNewRow());
   }
 
+  protected Set<Record> getRegisteredRecordDefns() {
+    return this.registeredRecordDefns;
+  }
+
   protected PTStandaloneRow allocateNewRow() {
     return new PTRowTypeConstraint().allocStandaloneRow(
         this, this.registeredRecordDefns);

@@ -32,7 +32,7 @@ public class PTRowTypeConstraint extends PTTypeConstraint<PTRow> {
 
   public PTStandaloneRow allocStandaloneRow(final PTStandaloneRowset parentRowset,
       final Set<Record> recordDefns) {
-    return new PTStandaloneRow(this, parentRowset, recordDefns);
+    return new PTStandaloneRow(this, parentRowset);
   }
 
   public PTBufferRow allocBufferRow(final PTBufferRowset parentRowset,

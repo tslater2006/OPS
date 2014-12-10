@@ -279,9 +279,6 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
   @Override
   public String toString() {
-    return new StringBuilder(super.toString())
-      .append(",childRecordRecDefns=").append(this.recordMap.keySet())
-      .append(",childRowsetRecDefns=").append(this.rowsetMap.keySet())
-      .toString();
+    return "[BUFFER]" + super.toString();
   }
 }

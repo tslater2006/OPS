@@ -72,9 +72,6 @@ public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandalon
 
   @Override
   public String toString() {
-    return new StringBuilder(super.toString())
-      .append(",childRecordRecDefns=").append(this.recordMap.keySet())
-      .append(",childRowsetRecDefns=").append(this.rowsetMap.keySet())
-      .toString();
+    return "[STANDALONE]" + super.toString();
   }
 }

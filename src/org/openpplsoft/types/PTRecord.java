@@ -325,4 +325,12 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
       }
     }
   }
+
+  @Override
+  public String toString() {
+    final StringBuilder b = new StringBuilder(super.toString());
+    b.append(":").append(this.recDefn.RECNAME);
+    b.append(",fieldRefs=").append(this.fieldRefs);
+    return b.toString();
+  }
 }

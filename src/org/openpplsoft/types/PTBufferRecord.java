@@ -389,9 +389,6 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
   @Override
   public String toString() {
-    final StringBuilder b = new StringBuilder(super.toString());
-    b.append(":").append(this.recDefn.RECNAME);
-    b.append(",fieldRefs=").append(this.fieldRefs);
-    return b.toString();
+    return "[BUFFER]" + super.toString();
   }
 }

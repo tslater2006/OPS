@@ -177,4 +177,12 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
       cursor.getValue().setReadOnly();
     }
   }
+
+  @Override
+  public String toString() {
+    return new StringBuilder(super.toString())
+      .append(",childRecordRecDefns=").append(this.recordMap.keySet())
+      .append(",childRowsetRecDefns=").append(this.rowsetMap.keySet())
+      .toString();
+  }
 }

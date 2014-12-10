@@ -35,7 +35,6 @@ public class RecordBuffer implements IStreamableBuffer {
       LogManager.getLogger(RecordBuffer.class.getName());
 
   private ScrollBuffer sbuf;
-  private String recName;
   private Record recDefn;
   private int scrollLevel;
   private boolean isPrimaryScrollRecordBuffer, hasBeenExpanded;
@@ -53,27 +52,17 @@ public class RecordBuffer implements IStreamableBuffer {
    */
   public RecordBuffer(final ScrollBuffer scrollBuf, final String recName) {
     this.sbuf = scrollBuf;
-    this.recName = recName;
-    this.recDefn = DefnCache.getRecord(this.recName);
+    this.recDefn = DefnCache.getRecord(recName);
     this.scrollLevel = scrollBuf.getScrollLevel();
 
     if (scrollBuf.getPrimaryRecName() != null
-        && this.recName.equals(scrollBuf.getPrimaryRecName())) {
+        && recName.equals(scrollBuf.getPrimaryRecName())) {
       this.isPrimaryScrollRecordBuffer = true;
     }
   }
 
   public RecordBuffer(final Record recDefn) {
-    this.recName = recDefn.RECNAME;
     this.recDefn = recDefn;
-  }
-
-  /**
-   * Get the name of the record underlying this buffer.
-   * @return the RECNAME of the underlying record
-   */
-  public String getRecName() {
-    return this.recName;
   }
 
   public Record getRecDefn() {
@@ -99,7 +88,7 @@ public class RecordBuffer implements IStreamableBuffer {
   public void addEffDtKeyIfNecessary() {
     final RecordField EFFDT = this.recDefn.fieldTable.get("EFFDT");
     if (this.recDefn.isDerivedWorkRecord() && EFFDT != null && EFFDT.isKey()) {
-      this.addPageField(this.recName, "EFFDT", null);
+      this.addPageField(this.recDefn.RECNAME, "EFFDT", null);
     }
   }
 
@@ -129,11 +118,11 @@ public class RecordBuffer implements IStreamableBuffer {
   public void addPageField(final String ptRECNAME,
       final String ptFIELDNAME, final PgToken srcTok) {
 
-    if (!ptRECNAME.equals(this.recName)) {
+    if (!ptRECNAME.equals(this.recDefn.RECNAME)) {
       throw new OPSVMachRuntimeException("Illegal attempt to add page "
         + "field " + ptRECNAME + "." + ptFIELDNAME + " ("
         + srcTok + ") to record with different name"
-        + this.recName);
+        + this.recDefn.RECNAME);
     }
 
     RecordFieldBuffer f = this.fieldBufferTable.get(ptFIELDNAME);
@@ -160,7 +149,7 @@ public class RecordBuffer implements IStreamableBuffer {
       final List<RecordFieldBuffer> newList =
           new ArrayList<RecordFieldBuffer>();
 
-      final Record recDefn = DefnCache.getRecord(this.recName);
+      final Record recDefn = DefnCache.getRecord(this.recDefn.RECNAME);
       final List<RecordField> expandedFieldList =
           recDefn.getExpandedFieldList();
 
@@ -204,11 +193,11 @@ public class RecordBuffer implements IStreamableBuffer {
 
   public boolean doesContainStructuralFields() {
 
-/*    log.debug("Begin fields for record: {}", this.recName);
+/*    log.debug("Begin fields for record: {}", this.recDefn.RECNAME);
     for (final RecordFieldBuffer buf : this.fieldBuffers) {
       log.debug("{} | {}", buf.getFldName(), buf.getSrcPageToken());
     }
-    log.debug("End fields for record: {}", this.recName);*/
+    log.debug("End fields for record: {}", this.recDefn.RECNAME);*/
 
     for (final RecordFieldBuffer buf : this.fieldBuffers) {
       if (!buf.isRelatedDisplayField()) {

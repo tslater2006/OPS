@@ -417,7 +417,7 @@ public final class ComponentBuffer {
         for (int i = 0; i < indent; i++) {
           b.append(" ");
         }
-        b.append(" + ").append(rbuf.getRecName());
+        b.append(" + ").append(rbuf.getRecDefn().RECNAME);
         log.debug(b.toString());
       } else {
 

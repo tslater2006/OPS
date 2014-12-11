@@ -57,7 +57,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     this.parentRowset = pRowset;
 
     // Create a record for each record buffer registered in the parent rowset.
-    for(final RecordBuffer recBuf : pRowset.getRegisteredRecordBuffers()) {
+    for(final RecordBuffer recBuf : pRowset.getRegisteredNonRelDispRecordBuffers()) {
       this.recordMap.put(recBuf.getRecDefn().RECNAME,
           new PTRecordTypeConstraint().allocBufferRecord(this, recBuf));
     }
@@ -120,7 +120,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         this.parentRowset.getRegisteredChildScrollBuffers().size(),
         // All non-level 0 rows seem to have these flags enabled.
         (scrollLevel != 0), (scrollLevel != 0),
-        this.parentRowset.getRegisteredRecordBuffers().size()));
+        this.parentRowset.getRegisteredNonRelDispRecordBuffers().size()));
 
     for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().emitRecInScroll();

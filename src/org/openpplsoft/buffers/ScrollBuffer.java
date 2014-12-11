@@ -27,6 +27,8 @@ public class ScrollBuffer implements IStreamableBuffer {
   private String primaryRecName;
   private ScrollBuffer parent;
 
+  private int nextRecBufferOrderIdx = 0;
+
   private Map<String, ScrollBuffer> scrollBufferTable;
   private List<ScrollBuffer> orderedScrollBuffers;
 
@@ -132,14 +134,14 @@ public class ScrollBuffer implements IStreamableBuffer {
       if (this.relDisplayRecordSet.hasRecord(tok.RECNAME, dispCtrlRecFldName)) {
         r = this.relDisplayRecordSet.getRecordBuffer(tok.RECNAME, dispCtrlRecFldName);
       } else {
-        r = new RecordBuffer(this, tok.RECNAME);
+        r = new RecordBuffer(this, this.nextRecBufferOrderIdx++, tok.RECNAME);
         this.relDisplayRecordSet.registerRecord(dispCtrlRecFldName, r);
         this.allRecBuffersOrdered.add(r);
       }
     } else {
       r = this.recBufferTable.get(tok.RECNAME);
       if (r == null) {
-        r = new RecordBuffer(this, tok.RECNAME);
+        r = new RecordBuffer(this, this.nextRecBufferOrderIdx++, tok.RECNAME);
         this.recBufferTable.put(r.getRecDefn().RECNAME, r);
         this.allRecBuffersOrdered.add(r);
       }

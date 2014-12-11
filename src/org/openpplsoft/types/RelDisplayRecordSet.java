@@ -88,6 +88,12 @@ public class RelDisplayRecordSet {
         copyRecEntry.rec = new PTRecordTypeConstraint().allocBufferRecord(
             parentRow, copyRecEntry.rbuf);
         newTable.put(recName, copyRecEntry);
+
+        // The parent's totally ordered record map will be incomplete without
+        // telling it about all allocated reldisp records in the RelDisplayRecordSet
+        // that will be returned to it.
+        parentRow.addRelDispRecordToTotallyOrderedMap(
+            copyRecEntry.rbuf.getOrderIdx(), copyRecEntry.rec);
       }
 
       // Add the new table to the copy record set's table.

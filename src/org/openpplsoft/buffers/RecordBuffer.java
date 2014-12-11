@@ -35,6 +35,7 @@ public class RecordBuffer implements IStreamableBuffer {
       LogManager.getLogger(RecordBuffer.class.getName());
 
   private ScrollBuffer sbuf;
+  private int orderIdx;
   private Record recDefn;
   private int scrollLevel;
   private boolean isPrimaryScrollRecordBuffer, hasBeenExpanded;
@@ -50,8 +51,10 @@ public class RecordBuffer implements IStreamableBuffer {
    * @param scrollBuf the ScrollBuffer to which the record belongs.
    * @param recName the name of the record (RECNAME)
    */
-  public RecordBuffer(final ScrollBuffer scrollBuf, final String recName) {
+  public RecordBuffer(final ScrollBuffer scrollBuf,
+      final int orderIdx, final String recName) {
     this.sbuf = scrollBuf;
+    this.orderIdx = orderIdx;
     this.recDefn = DefnCache.getRecord(recName);
     this.scrollLevel = scrollBuf.getScrollLevel();
 
@@ -67,6 +70,10 @@ public class RecordBuffer implements IStreamableBuffer {
 
   public Record getRecDefn() {
     return this.recDefn;
+  }
+
+  public int getOrderIdx() {
+    return this.orderIdx;
   }
 
   /**

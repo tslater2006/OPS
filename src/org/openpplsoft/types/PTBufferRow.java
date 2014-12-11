@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +39,14 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
   private RelDisplayRecordSet relDisplayRecordSet = new RelDisplayRecordSet();
 
+  /**
+   * This map contains *all* records, both non- and reldisp- records.
+   * Because the record buffers for reldisp-records are kept separate from
+   * the non-reldisp map, a separate TreeMap must be used to have a
+   * properly ordered map containing both.
+  */
+  private Map<Integer, PTBufferRecord> totallyOrderedAllRecords = new TreeMap<>();
+
   static {
     final String PT_METHOD_PREFIX = "PT_";
     // cache pointers to PeopleTools Row methods.
@@ -58,8 +67,10 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
     // Create a record for each record buffer registered in the parent rowset.
     for(final RecordBuffer recBuf : pRowset.getRegisteredNonRelDispRecordBuffers()) {
-      this.recordMap.put(recBuf.getRecDefn().RECNAME,
-          new PTRecordTypeConstraint().allocBufferRecord(this, recBuf));
+      final PTBufferRecord newRec =
+          new PTRecordTypeConstraint().allocBufferRecord(this, recBuf);
+      this.recordMap.put(recBuf.getRecDefn().RECNAME, newRec);
+      this.totallyOrderedAllRecords.put(recBuf.getOrderIdx(), newRec);
     }
 
     // Create a rowset for each child scroll buffer registered in the parent rowset.
@@ -75,6 +86,11 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
   public RelDisplayRecordSet getRelatedDisplayRecordSet() {
     return this.relDisplayRecordSet;
+  }
+
+  public void addRelDispRecordToTotallyOrderedMap(
+      final int orderIdx, final PTBufferRecord relDispRecordRef) {
+    this.totallyOrderedAllRecords.put(orderIdx, relDispRecordRef);
   }
 
   /**
@@ -122,11 +138,13 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         (scrollLevel != 0), (scrollLevel != 0),
         this.parentRowset.getRegisteredNonRelDispRecordBuffers().size()));
 
-    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
+    for (Map.Entry<Integer, PTBufferRecord> entry
+        : this.totallyOrderedAllRecords.entrySet()) {
       entry.getValue().emitRecInScroll();
     }
 
-    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
+    for (Map.Entry<Integer, PTBufferRecord> entry
+        : this.totallyOrderedAllRecords.entrySet()) {
       entry.getValue().emitScrolls(indent + "  ");
     }
 

@@ -9,6 +9,7 @@ package org.openpplsoft.buffers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +26,15 @@ public class ScrollBuffer implements IStreamableBuffer {
   private int scrollLevel;
   private String primaryRecName;
   private ScrollBuffer parent;
-  private Map<String, RecordBuffer> recBufferTable;
+
   private Map<String, ScrollBuffer> scrollBufferTable;
-  private List<RecordBuffer> orderedRecBuffers;
   private List<ScrollBuffer> orderedScrollBuffers;
+
+  private Map<String, RecordBuffer> recBufferTable;
+  private RelDisplayRecordSet relDisplayRecordSet;
+
+  // this list is a total order on *ALL* records (non-reldisp and reldisp)
+  private List<RecordBuffer> allRecBuffersOrdered;
 
   // Used for reading.
   private boolean hasEmittedSelf;
@@ -46,8 +52,9 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.primaryRecName = r;
     this.parent = p;
 
-    this.recBufferTable = new HashMap<String, RecordBuffer>();
-    this.orderedRecBuffers = new ArrayList<RecordBuffer>();
+    this.recBufferTable = new LinkedHashMap<String, RecordBuffer>();
+    this.relDisplayRecordSet = new RelDisplayRecordSet();
+    this.allRecBuffersOrdered = new ArrayList<RecordBuffer>();
     this.scrollBufferTable = new HashMap<String, ScrollBuffer>();
     this.orderedScrollBuffers = new ArrayList<ScrollBuffer>();
   }
@@ -121,7 +128,7 @@ public class ScrollBuffer implements IStreamableBuffer {
     if (r == null) {
       r = new RecordBuffer(this, tok.RECNAME);
       this.recBufferTable.put(r.getRecDefn().RECNAME, r);
-      this.orderedRecBuffers.add(r);
+      this.allRecBuffersOrdered.add(r);
     }
     r.addPageField(tok.RECNAME, tok.FIELDNAME, tok);
   }
@@ -145,7 +152,7 @@ public class ScrollBuffer implements IStreamableBuffer {
   }
 
   public List<RecordBuffer> getOrderedRecBuffers() {
-    return this.orderedRecBuffers;
+    return this.allRecBuffersOrdered;
   }
 
   public List<ScrollBuffer> getOrderedScrollBuffers() {
@@ -163,9 +170,9 @@ public class ScrollBuffer implements IStreamableBuffer {
       return this;
     }
 
-    if (this.recBufferCursor < this.orderedRecBuffers.size()) {
+    if (this.recBufferCursor < this.allRecBuffersOrdered.size()) {
       final RecordBuffer rbuf =
-          this.orderedRecBuffers.get(this.recBufferCursor);
+          this.allRecBuffersOrdered.get(this.recBufferCursor);
       final IStreamableBuffer toRet = rbuf.next();
       if (toRet != null) {
         return toRet;
@@ -200,7 +207,7 @@ public class ScrollBuffer implements IStreamableBuffer {
     this.recBufferCursor = 0;
     this.scrollBufferCursor = 0;
 
-    for (RecordBuffer rbuf : this.orderedRecBuffers) {
+    for (RecordBuffer rbuf : this.allRecBuffersOrdered) {
       rbuf.resetCursors();
     }
 

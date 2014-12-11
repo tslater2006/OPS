@@ -101,8 +101,8 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
    */
   public int getIndexPositionOfRecord(final PTBufferRecord rec) {
     int idxPos = 0;
-    for (Map.Entry<String, PTBufferRecord> entry
-        : this.recordMap.entrySet()) {
+    for (final Map.Entry<Integer, PTBufferRecord> entry
+        : this.totallyOrderedAllRecords.entrySet()) {
       if (entry.getValue() == rec) {
         return idxPos;
       }

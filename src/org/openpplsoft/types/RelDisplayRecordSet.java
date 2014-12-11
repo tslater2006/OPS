@@ -28,6 +28,7 @@ public class RelDisplayRecordSet {
   private static Logger log =
       LogManager.getLogger(RelDisplayRecordSet.class.getName());
 
+  // {<DISP_CTRL_RECNAME>.<DISP_CTRL_FLDNAME> : {<RELDISP_RECNAME> : RecordEntry}}
   private Map<String, Map<String, RecordEntry>> tables;
 
   private class RecordEntry {
@@ -51,18 +52,18 @@ public class RelDisplayRecordSet {
   public void registerRecord(final String dispCtrlRecFldName,
       final RecordBuffer relDispRecBuffer) {
 
-    Map<String, RecordEntry> table = tables.get(
-        relDispRecBuffer.getRecDefn().RECNAME);
+    Map<String, RecordEntry> table = tables.get(dispCtrlRecFldName);
     if (table == null) {
       table = new HashMap<String, RecordEntry>();
-      tables.put(relDispRecBuffer.getRecDefn().RECNAME, table);
+      tables.put(dispCtrlRecFldName, table);
     }
 
-    RecordEntry entry = table.get(dispCtrlRecFldName);
+    RecordEntry entry = table.get(
+        relDispRecBuffer.getRecDefn().RECNAME);
     if (entry == null) {
       entry = new RecordEntry();
       entry.rbuf = relDispRecBuffer;
-      table.put(dispCtrlRecFldName, entry);
+      table.put(relDispRecBuffer.getRecDefn().RECNAME, entry);
     }
   }
 
@@ -71,13 +72,13 @@ public class RelDisplayRecordSet {
 
     for (final Map.Entry<String, Map<String, RecordEntry>> tableEntry
         : this.tables.entrySet()) {
-      final String recName = tableEntry.getKey();
+      final String dispCtrlRecFldName = tableEntry.getKey();
       final Map<String, RecordEntry> newTable = new HashMap<>();
 
-      for (final Map.Entry<String, RecordEntry> dispCtrlEntry
+      for (final Map.Entry<String, RecordEntry> entry
           : tableEntry.getValue().entrySet()) {
-        final String dispCtrlRecFldName = dispCtrlEntry.getKey();
-        final RecordEntry recEntry = dispCtrlEntry.getValue();
+        final String recName = entry.getKey();
+        final RecordEntry recEntry = entry.getValue();
 
         /*
          * Copy existing entry and allocate new PTBufferRecord within it,
@@ -86,34 +87,34 @@ public class RelDisplayRecordSet {
         final RecordEntry copyRecEntry = new RecordEntry(recEntry);
         copyRecEntry.rec = new PTRecordTypeConstraint().allocBufferRecord(
             parentRow, copyRecEntry.rbuf);
-        newTable.put(dispCtrlRecFldName, copyRecEntry);
+        newTable.put(recName, copyRecEntry);
       }
 
       // Add the new table to the copy record set's table.
-      allocCopy.tables.put(recName, newTable);
+      allocCopy.tables.put(dispCtrlRecFldName, newTable);
     }
 
     return allocCopy;
   }
 
-  public boolean hasRecord(final String recName, final String dispCtrlRecFldName) {
-    if (this.tables.containsKey(recName)) {
-      return this.tables.get(recName).containsKey(dispCtrlRecFldName);
+  public boolean hasRecord(final String dispCtrlRecFldName, final String recName) {
+    if (this.tables.containsKey(dispCtrlRecFldName)) {
+      return this.tables.get(recName).containsKey(recName);
     }
     return false;
   }
 
-  public RecordBuffer getRecordBuffer(final String recName,
-      final String dispCtrlRecFldName) {
-    if (this.tables.containsKey(recName)) {
-      if (this.tables.get(recName).containsKey(dispCtrlRecFldName)) {
-        return this.tables.get(recName).get(dispCtrlRecFldName).rbuf;
+  public RecordBuffer getRecordBuffer(final String dispCtrlRecFldName,
+      final String recName) {
+    if (this.tables.containsKey(dispCtrlRecFldName)) {
+      if (this.tables.get(dispCtrlRecFldName).containsKey(recName)) {
+        return this.tables.get(dispCtrlRecFldName).get(recName).rbuf;
       }
     }
 
     throw new OPSVMachRuntimeException("Record buffer does not exist in rel "
-        + "display record set for recName=" + recName + " and dispCtrlRecFldName "
-        + dispCtrlRecFldName);
+        + "display record set for dispCtrlRecFldName=" + dispCtrlRecFldName
+        + " and recName= " + recName);
   }
 }
 

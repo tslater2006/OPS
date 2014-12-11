@@ -124,12 +124,27 @@ public class ScrollBuffer implements IStreamableBuffer {
    */
   public void addPageField(final PgToken tok) {
 
-    RecordBuffer r = this.recBufferTable.get(tok.RECNAME);
-    if (r == null) {
-      r = new RecordBuffer(this, tok.RECNAME);
-      this.recBufferTable.put(r.getRecDefn().RECNAME, r);
-      this.allRecBuffersOrdered.add(r);
+    RecordBuffer r = null;
+    if (tok.isRelatedDisplay()) {
+
+      final String dispCtrlRecFldName = tok.getDispControlRecFieldName();
+
+      if (this.relDisplayRecordSet.hasRecord(tok.RECNAME, dispCtrlRecFldName)) {
+        r = this.relDisplayRecordSet.getRecordBuffer(tok.RECNAME, dispCtrlRecFldName);
+      } else {
+        r = new RecordBuffer(this, tok.RECNAME);
+        this.relDisplayRecordSet.registerRecord(dispCtrlRecFldName, r);
+        this.allRecBuffersOrdered.add(r);
+      }
+    } else {
+      r = this.recBufferTable.get(tok.RECNAME);
+      if (r == null) {
+        r = new RecordBuffer(this, tok.RECNAME);
+        this.recBufferTable.put(r.getRecDefn().RECNAME, r);
+        this.allRecBuffersOrdered.add(r);
+      }
     }
+
     r.addPageField(tok.RECNAME, tok.FIELDNAME, tok);
   }
 
@@ -151,8 +166,14 @@ public class ScrollBuffer implements IStreamableBuffer {
     return sb;
   }
 
-  public List<RecordBuffer> getOrderedRecBuffers() {
-    return this.allRecBuffersOrdered;
+  public List<RecordBuffer> getOrderedNonRelDispRecBuffers() {
+    final List<RecordBuffer> orderedNonRelDispRecBuffers =
+        new ArrayList<RecordBuffer>();
+    for (final Map.Entry<String, RecordBuffer> entry
+        : this.recBufferTable.entrySet()) {
+      orderedNonRelDispRecBuffers.add(entry.getValue());
+    }
+    return orderedNonRelDispRecBuffers;
   }
 
   public List<ScrollBuffer> getOrderedScrollBuffers() {

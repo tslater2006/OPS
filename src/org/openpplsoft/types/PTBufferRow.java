@@ -217,7 +217,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
      * as not all record fields may be in the component buffer for any given record.
      */
     for (final RecordBuffer recBuf
-        : this.parentRowset.getCBufferScrollBuffer().getOrderedRecBuffers()) {
+        : this.parentRowset.getCBufferScrollBuffer().getOrderedNonRelDispRecBuffers()) {
       final RecordFieldBuffer rfBuf = recBuf.getRecordFieldBuffer(fieldName);
 
       if (rfBuf != null) {

@@ -69,7 +69,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     this.cBufferScrollBuffer = scrollBuf;
     this.primaryRecDefn = scrollBuf.getPrimaryRecDefn();
 
-    for (final RecordBuffer recBuf : scrollBuf.getOrderedRecBuffers()) {
+    for (final RecordBuffer recBuf : scrollBuf.getOrderedNonRelDispRecBuffers()) {
       this.registeredRecordBuffers.add(recBuf);
     }
 

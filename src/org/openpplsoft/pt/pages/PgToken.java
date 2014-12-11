@@ -64,6 +64,11 @@ public class PgToken {
     return ((this.FIELDUSE & this.REL_DISP_FLAG) > 0);
   }
 
+  public String getDispControlRecFieldName() {
+    return this.dispControlFieldTok.RECNAME
+        + "." + this.dispControlFieldTok.FIELDNAME;
+  }
+
   public boolean doesBelongInComponentStructure() {
 
     // If RECNAME or FIELDNAME is empty, don't add.

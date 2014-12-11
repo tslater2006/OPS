@@ -73,6 +73,10 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         .getAllocatedCopy(this);
   }
 
+  public RelDisplayRecordSet getRelatedDisplayRecordSet() {
+    return this.relDisplayRecordSet;
+  }
+
   /**
    * CAUTION: Do not rely on this as a way to get the
    * index for a record in all cases; this code does things

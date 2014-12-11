@@ -104,17 +104,28 @@ public class RelDisplayRecordSet {
     return false;
   }
 
-  public RecordBuffer getRecordBuffer(final String dispCtrlRecFldName,
-      final String recName) {
+  private RecordEntry getRecordEntry(
+      final String dispCtrlRecFldName, final String relDispRecName) {
+
     if (this.tables.containsKey(dispCtrlRecFldName)) {
-      if (this.tables.get(dispCtrlRecFldName).containsKey(recName)) {
-        return this.tables.get(dispCtrlRecFldName).get(recName).rbuf;
+      if (this.tables.get(dispCtrlRecFldName).containsKey(relDispRecName)) {
+        return this.tables.get(dispCtrlRecFldName).get(relDispRecName);
       }
     }
 
-    throw new OPSVMachRuntimeException("Record buffer does not exist in rel "
+    throw new OPSVMachRuntimeException("Record entry does not exist in rel "
         + "display record set for dispCtrlRecFldName=" + dispCtrlRecFldName
-        + " and recName= " + recName);
+        + " and relDispRecName= " + relDispRecName);
+  }
+
+  public RecordBuffer getRecordBuffer(
+      final String dispCtrlRecFldName, final String relDispRecName) {
+    return this.getRecordEntry(dispCtrlRecFldName, relDispRecName).rbuf;
+  }
+
+  public PTBufferRecord getRecord(
+      final String dispCtrlRecFldName, final String relDispRecName) {
+    return this.getRecordEntry(dispCtrlRecFldName, relDispRecName).rec;
   }
 }
 

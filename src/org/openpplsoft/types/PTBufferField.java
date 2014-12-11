@@ -438,7 +438,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
           + "arg to GetRelated.");
     }
 
-    final PTRecordFieldSpecifier recFldSpecifier =
+    final PTRecordFieldSpecifier relDispRecFldSpecifier =
         ((PTRecordFieldSpecifier) args.get(0));
 
     if (this.recFieldBuffer == null) {
@@ -459,8 +459,8 @@ public final class PTBufferField extends PTField<PTBufferRecord>
 
     PgToken desiredRelDispFieldTok = null;
     for (final PgToken relDispFieldTok : srcToken.relDispFieldToks) {
-      if (relDispFieldTok.RECNAME.equals(recFldSpecifier.getRecName())
-          && relDispFieldTok.FIELDNAME.equals(recFldSpecifier.getFieldName())) {
+      if (relDispFieldTok.RECNAME.equals(relDispRecFldSpecifier.getRecName())
+          && relDispFieldTok.FIELDNAME.equals(relDispRecFldSpecifier.getFieldName())) {
         desiredRelDispFieldTok = relDispFieldTok;
         break;
       }
@@ -468,11 +468,16 @@ public final class PTBufferField extends PTField<PTBufferRecord>
 
     if (desiredRelDispFieldTok == null) {
       throw new OPSVMachRuntimeException("In GetRelated, unable to find "
-          + "a related display token that matches the record field specifier "
-          + "provided: " + recFldSpecifier);
+          + "a related display token that matches the rel disp record field specifier "
+          + "provided: " + relDispRecFldSpecifier);
     }
 
-    final PTBufferField relDispField = recFldSpecifier.resolveInCBufferContext().deref();
+    final PTBufferRecord relDispRecord = this.parentRecord.getParentRow()
+        .getRelatedDisplayRecordSet().getRecord(
+            desiredRelDispFieldTok.getDispControlRecFieldName(),
+                relDispRecFldSpecifier.getRecName());
+    final PTBufferField relDispField = relDispRecord.getFieldRef(
+        relDispRecFldSpecifier.getFieldName()).deref();
 
     /*
      * This check makes absolutely sure that the resolved field's underlying

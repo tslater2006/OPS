@@ -32,7 +32,16 @@ public class RelDisplayRecordSet {
 
   private class RecordEntry {
     public RecordBuffer rbuf;
-    public PTRecord rec;
+    public PTBufferRecord rec;
+
+    public RecordEntry() {}
+
+    /**
+     * Copy constructor.
+     */
+    public RecordEntry(final RecordEntry srcEntry) {
+      this.rbuf = srcEntry.rbuf;
+    }
   }
 
   public RelDisplayRecordSet() {
@@ -57,9 +66,34 @@ public class RelDisplayRecordSet {
     }
   }
 
-  public PTRecord registerAndAllocRecord(final String dispCtrlRecFldName,
-      final RecordBuffer relDispRecBuffer) {
-    return null;
+  public RelDisplayRecordSet getAllocatedCopy(final PTBufferRow parentRow) {
+    final RelDisplayRecordSet allocCopy = new RelDisplayRecordSet();
+
+    for (final Map.Entry<String, Map<String, RecordEntry>> tableEntry
+        : this.tables.entrySet()) {
+      final String recName = tableEntry.getKey();
+      final Map<String, RecordEntry> newTable = new HashMap<>();
+
+      for (final Map.Entry<String, RecordEntry> dispCtrlEntry
+          : tableEntry.getValue().entrySet()) {
+        final String dispCtrlRecFldName = dispCtrlEntry.getKey();
+        final RecordEntry recEntry = dispCtrlEntry.getValue();
+
+        /*
+         * Copy existing entry and allocate new PTBufferRecord within it,
+         * then save in new table.
+         */
+        final RecordEntry copyRecEntry = new RecordEntry(recEntry);
+        copyRecEntry.rec = new PTRecordTypeConstraint().allocBufferRecord(
+            parentRow, copyRecEntry.rbuf);
+        newTable.put(dispCtrlRecFldName, copyRecEntry);
+      }
+
+      // Add the new table to the copy record set's table.
+      allocCopy.tables.put(recName, newTable);
+    }
+
+    return allocCopy;
   }
 
   public boolean hasRecord(final String recName, final String dispCtrlRecFldName) {

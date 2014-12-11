@@ -36,6 +36,8 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
   private static final Logger log =
       LogManager.getLogger(PTBufferRow.class.getName());
 
+  private RelDisplayRecordSet relDisplayRecordSet = new RelDisplayRecordSet();
+
   static {
     final String PT_METHOD_PREFIX = "PT_";
     // cache pointers to PeopleTools Row methods.
@@ -65,6 +67,10 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
       this.rowsetMap.put(childScrollBuf.getPrimaryRecName(),
           childScrollBuf.allocRowset(this));
     }
+
+    // Create an allocated copy of the parent rowset's related display record set.
+    this.relDisplayRecordSet = this.parentRowset.getRelDisplayRecordSet()
+        .getAllocatedCopy(this);
   }
 
   /**

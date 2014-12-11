@@ -180,6 +180,10 @@ public class ScrollBuffer implements IStreamableBuffer {
     return this.orderedScrollBuffers;
   }
 
+  public RelDisplayRecordSet getRelDisplayRecordSet() {
+    return this.relDisplayRecordSet;
+  }
+
   /**
    * Gets the next child buffer in the read sequence.
    * @return the next child buffer in the read sequence

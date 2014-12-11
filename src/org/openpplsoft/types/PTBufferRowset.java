@@ -42,6 +42,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
   private ScrollBuffer cBufferScrollBuffer;
 
+  private RelDisplayRecordSet relDisplayRecordSet = new RelDisplayRecordSet();
   private List<RecordBuffer> registeredRecordBuffers = new ArrayList<>();
   private List<ScrollBuffer> registeredChildScrollBuffers = new ArrayList<>();
 
@@ -77,6 +78,8 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
       this.registeredChildScrollBuffers.add(childScrollBuf);
     }
 
+    this.relDisplayRecordSet = scrollBuf.getRelDisplayRecordSet();
+
     // One row is always present in the rowset, even when flushed.
     this.rows.add(this.allocateNewRow());
   }
@@ -108,6 +111,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
   public List<ScrollBuffer> getRegisteredChildScrollBuffers() {
     return this.registeredChildScrollBuffers;
+  }
+
+  public RelDisplayRecordSet getRelDisplayRecordSet() {
+    return this.relDisplayRecordSet;
   }
 
   protected PTBufferRow allocateNewRow() {

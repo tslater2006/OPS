@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.buffers.*;
 import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.trace.*;
 
@@ -93,6 +94,51 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     this.totallyOrderedAllRecords.put(orderIdx, relDispRecordRef);
   }
 
+  public PTBufferField findDisplayControlField(final PgToken relDispFldTok) {
+    log.fatal("Looking for disp ctrl fld: {}",
+        relDispFldTok.getDispControlRecFieldName());
+
+    final PgToken dispCtrlFldTok = relDispFldTok.dispControlFieldTok;
+
+    // Is the display control field on a non-reldisp record? (most likely case)
+    if (this.recordMap.containsKey(dispCtrlFldTok.RECNAME)) {
+      final PTBufferRecord rec = this.recordMap.get(dispCtrlFldTok.RECNAME);
+      if (rec.hasField(dispCtrlFldTok.FIELDNAME)) {
+        final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.FIELDNAME).deref();
+        if (fld.getRecordFieldBuffer() != null) {
+          if (dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken()) {
+            log.fatal("Found display control field in recordMap.");
+            return fld;
+          } else {
+            log.fatal(dispCtrlFldTok);
+            log.fatal(fld.getRecordFieldBuffer().getSrcPageToken());
+            log.fatal("=? {}", dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken());
+          }
+        }
+      }
+    }
+
+    // If not, is the display control field also a related display field?
+    if (this.relDisplayRecordSet.hasRecord(
+        relDispFldTok.getDispControlRecFieldName(), relDispFldTok.RECNAME)) {
+      final PTBufferRecord rec = this.relDisplayRecordSet.getRecord(
+          relDispFldTok.getDispControlRecFieldName(), relDispFldTok.RECNAME);
+      if (rec.hasField(dispCtrlFldTok.FIELDNAME)) {
+        final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.FIELDNAME).deref();
+//        log.fatal("HERE: src page token: {}", fld.getRecordFieldBuffer().getSrcPageToken());
+/*        if (fld.getRecordFieldBuffer() != null
+            && dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken()) {
+          return fld;
+        }*/
+        log.fatal("Found display control field in relDisplayRecordSet.");
+        return fld;
+      }
+    }
+
+    throw new OPSVMachRuntimeException("Failed to find display ctrl field in this row "
+        + "for the provided related display field token: " + relDispFldTok);
+  }
+
   /**
    * CAUTION: Do not rely on this as a way to get the
    * index for a record in all cases; this code does things
@@ -100,6 +146,12 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
    * may not apply to your needs.
    */
   public int getIndexPositionOfRecord(final PTBufferRecord rec) {
+
+/*    for (final Map.Entry<Integer, PTBufferRecord> entry
+        : this.totallyOrderedAllRecords.entrySet()) {
+      log.fatal("Here {} -> {}", entry.getKey(), entry.getValue().getRecDefn().RECNAME);
+    }*/
+
     int idxPos = 0;
     for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {

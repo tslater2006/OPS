@@ -103,9 +103,10 @@ public class RelDisplayRecordSet {
     return allocCopy;
   }
 
-  public boolean hasRecord(final String dispCtrlRecFldName, final String recName) {
+  public boolean hasRecord(
+      final String dispCtrlRecFldName, final String relDispRecName) {
     if (this.tables.containsKey(dispCtrlRecFldName)) {
-      return this.tables.get(recName).containsKey(recName);
+      return this.tables.get(dispCtrlRecFldName).containsKey(relDispRecName);
     }
     return false;
   }

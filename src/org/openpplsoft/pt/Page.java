@@ -272,7 +272,7 @@ public class Page {
        * If this record contains subrecords, requests for their
        * Record PC listings should be issued now.
        */
-      for (String subrecname : recDefn.subRecordNames) {
+      for (String subrecname : recDefn.getSubrecordNames()) {
         this.issuePCListRequestForRecord(subrecname);
       }
     }

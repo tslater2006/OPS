@@ -86,7 +86,7 @@ public final class Main {
           .fireEvent(PCEvent.SEARCH_INIT, new FireEventSummary());
       ComponentBuffer.fillSearchRecord();
 
-      ComponentBuffer.assembleStructure();
+      ComponentBuffer.assembleBuffers();
       ComponentBuffer.expandRecordBuffersWhereNecessary();
       ComponentBuffer.addEffDtKeyWhereNecessary();
       ComponentBuffer.logPageHierarchyVisual();

@@ -69,7 +69,7 @@ public class PgToken {
         + "." + this.dispControlFieldTok.FIELDNAME;
   }
 
-  public boolean doesBelongInComponentStructure() {
+  public boolean doesBelongInComponentBuffer() {
 
     // If RECNAME or FIELDNAME is empty, don't add.
     if(this.RECNAME.length() == 0 || this.FIELDNAME.length() == 0) {
@@ -84,16 +84,6 @@ public class PgToken {
     // Subrecords should not be added.
     Record recDefn = DefnCache.getRecord(this.RECNAME);
     if(recDefn.isSubrecord()) {
-      return false;
-    }
-
-    /*
-     * Even if RECNAME does not point to a subrecord, this field
-     * may point to a subrecord on the record pointed to by RECNAME,
-     * in which case it will not be present in the immediate record.
-     * If that's the case, this field should not be added.
-     */
-    if(recDefn.fieldTable.get(this.FIELDNAME) == null) {
       return false;
     }
 

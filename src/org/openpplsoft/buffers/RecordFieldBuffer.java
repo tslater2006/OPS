@@ -36,14 +36,25 @@ public class RecordFieldBuffer implements IStreamableBuffer,
       final RecordBuffer parent, final PgToken srcTok) {
     this.fldName = f;
     this.recDefn = DefnCache.getRecord(r);
-    this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
     this.parentRecordBuffer = parent;
     this.srcPgTok = srcTok;
 
-    if (this.fldDefn == null) {
-      throw new OPSVMachRuntimeException("Field not found on the record "
-          + "supplied. Likely on a subrecord. Subrecord traversal in "
-          + "RecordFieldBuffer not supported at this time.");
+    if (this.recDefn.hasField(this.fldName)) {
+      this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
+    } else {
+      boolean wasFieldFoundOnSubrecord = false;
+      for (final String subrecName : this.recDefn.getSubrecordNames()) {
+        final Record subRecDefn = DefnCache.getRecord(subrecName);
+        if (subRecDefn.hasField(this.fldName)) {
+          this.fldDefn = subRecDefn.fieldTable.get(this.fldName);
+          wasFieldFoundOnSubrecord = true;
+          break;
+        }
+      }
+      if (!wasFieldFoundOnSubrecord) {
+        throw new OPSVMachRuntimeException("Field defn was not found "
+            + "in recDefn or any of its subrecord defns.");
+      }
     }
   }
 

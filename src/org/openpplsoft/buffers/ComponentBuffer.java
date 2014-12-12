@@ -184,7 +184,7 @@ public final class ComponentBuffer {
    * component definition, then builds appropriate buffers
    * to create the complete component buffer.
    */
-  public static void assembleStructure() {
+  public static void assembleBuffers() {
 
     for (Page p : compDefn.getPages()) {
       p.recursivelyLoadSubpages();
@@ -250,7 +250,7 @@ public final class ComponentBuffer {
           scrollMarkers.pop();
         }
 
-        if (tok.doesBelongInComponentStructure()) {
+        if (tok.doesBelongInComponentBuffer()) {
           ComponentBuffer.addPageField(tok, scrollMarkers.peek().scrollLevel,
             scrollMarkers.peek().primaryRecName);
         }

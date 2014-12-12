@@ -22,7 +22,7 @@ public class Record {
 
   public Map<String, RecordField> fieldTable;
   public TreeMap<Integer, Object> fldAndSubrecordTable;
-  public List<String> subRecordNames;
+  private List<String> subRecordNames;
   public Map<String, List<PeopleCodeProg>> recordProgsByFieldTable
       = new HashMap<String, List<PeopleCodeProg>>();
 
@@ -145,6 +145,10 @@ public class Record {
 
     rs.close();
     ostmt.close();
+  }
+
+  public List<String> getSubrecordNames() {
+    return this.subRecordNames;
   }
 
   public boolean isTable() {

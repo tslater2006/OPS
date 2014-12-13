@@ -7,6 +7,9 @@
 
 package org.openpplsoft.buffers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
@@ -21,23 +24,30 @@ public class RecordFieldBuffer implements IStreamableBuffer,
   private Record recDefn;
   private RecordField fldDefn;
   private RecordBuffer parentRecordBuffer;
-  private PgToken srcPgTok;
+
+  /*
+   * A record field buffer is usually associated with one or more
+   * page field tokens (a page field token represents a page field
+   * that references/displays/uses the underlying record field's value
+   * in some way). Keep in mind though that this list can be empty
+   * (i.e., record field buffers that are automatically inserted during
+   * buffer assembly).
+   */
+  private List<PgToken> pageFieldToks;
 
   // Used for reading.
   private boolean hasEmittedSelf;
 
-  /**
-   * Creates a buffer for a record field.
-   * @param r the RECNAME of the record field
-   * @param f the FLDNAME of the record field
-   * @param parent the field's parent RecordBuffer
-   */
   public RecordFieldBuffer(final String r, final String f,
-      final RecordBuffer parent, final PgToken srcTok) {
+      final RecordBuffer parent, final PgToken tok) {
     this.fldName = f;
     this.recDefn = DefnCache.getRecord(r);
     this.parentRecordBuffer = parent;
-    this.srcPgTok = srcTok;
+
+    this.pageFieldToks = new ArrayList<PgToken>();
+    if (tok != null) {
+      this.pageFieldToks.add(tok);
+    }
 
     if (this.recDefn.hasField(this.fldName)) {
       this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
@@ -58,12 +68,17 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     }
   }
 
-  public RecordBuffer getParentRecordBuffer() {
-    return this.parentRecordBuffer;
+  public PgToken getOnlyPageFieldTok() {
+    if (this.pageFieldToks.size() != 1) {
+      throw new OPSVMachRuntimeException("Illegal call to getOnlyPageFieldTok(); "
+          + "this record field buffer has 0 or multiple page field tokens: "
+          + this.pageFieldToks);
+    }
+    return this.pageFieldToks.get(0);
   }
 
-  public PgToken getSrcPageToken() {
-    return this.srcPgTok;
+  public RecordBuffer getParentRecordBuffer() {
+    return this.parentRecordBuffer;
   }
 
   /**
@@ -82,12 +97,27 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     return this.fldDefn;
   }
 
-  public boolean isRelatedDisplayField() {
-    return this.srcPgTok != null && this.srcPgTok.isRelatedDisplay();
+  public List<PgToken> getPageFieldToks() {
+    return this.pageFieldToks;
   }
 
-  public boolean isInvisibleField() {
-    return this.srcPgTok != null && this.srcPgTok.isInvisible();
+  public boolean isRelatedDisplayField() {
+    if (this.pageFieldToks.size() == 0) {
+      return false;
+    }
+
+    boolean result = pageFieldToks.get(0).isRelatedDisplay();
+
+    // Check any other page field tokens to ensure that they agree with the first one.
+    for (int i = 1; i < pageFieldToks.size(); i++) {
+      if (pageFieldToks.get(i).isRelatedDisplay() != result) {
+        throw new OPSVMachRuntimeException("While determining if record field "
+            + "buffer is related display, encountered a combination of nonreldisp "
+            + "page field tokens and reldisp page field tokens.");
+      }
+    }
+
+    return result;
   }
 
   public void expandParentRecordBufferIfNecessary() {

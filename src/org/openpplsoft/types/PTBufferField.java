@@ -446,12 +446,12 @@ public final class PTBufferField extends PTField<PTBufferRecord>
           + "(" + this + ") has no record field buffer.");
     }
 
-    if (this.recFieldBuffer.getSrcPageToken() == null) {
+    if (this.recFieldBuffer.getOnlyPageFieldTok() == null) {
       throw new OPSVMachRuntimeException("Illegal call to GetRelated; this field "
           + "(" + this + ") has no underlying page token.");
     }
 
-    final PgToken srcToken = this.recFieldBuffer.getSrcPageToken();
+    final PgToken srcToken = this.recFieldBuffer.getOnlyPageFieldTok();
     if (!srcToken.isDisplayControl()) {
       throw new OPSVMachRuntimeException("Illegal call to GetRelated; this field's "
           + "underlying page token is not a display control field: " + srcToken);
@@ -484,7 +484,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
      * page token is a reference to the desired token we saved a reference to
      * earlier. If they are equal, we have the related field.
      */
-    if (relDispField.getRecordFieldBuffer().getSrcPageToken() !=
+    if (relDispField.getRecordFieldBuffer().getOnlyPageFieldTok() !=
         desiredRelDispFieldTok) {
       throw new OPSVMachRuntimeException("In GetRelated, the resolved field's "
           + "underlying page token does not match the desired one.");

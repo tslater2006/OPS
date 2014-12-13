@@ -106,13 +106,13 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
       if (rec.hasField(dispCtrlFldTok.getFldName())) {
         final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.getFldName()).deref();
         if (fld.getRecordFieldBuffer() != null) {
-          if (dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken()) {
+          if (dispCtrlFldTok == fld.getRecordFieldBuffer().getOnlyPageFieldTok()) {
             log.fatal("Found display control field in recordMap.");
             return fld;
           } else {
             log.fatal(dispCtrlFldTok);
-            log.fatal(fld.getRecordFieldBuffer().getSrcPageToken());
-            log.fatal("=? {}", dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken());
+            log.fatal(fld.getRecordFieldBuffer().getOnlyPageFieldTok());
+            log.fatal("=? {}", dispCtrlFldTok == fld.getRecordFieldBuffer().getOnlyPageFieldTok());
           }
         }
       }

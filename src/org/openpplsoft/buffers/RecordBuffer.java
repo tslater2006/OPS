@@ -167,7 +167,7 @@ public class RecordBuffer implements IStreamableBuffer {
 
         PgToken srcPageToken = null;
         if (this.fieldBufferTable.containsKey(fld.FIELDNAME)) {
-          srcPageToken = this.fieldBufferTable.get(fld.FIELDNAME).getSrcPageToken();
+          srcPageToken = this.fieldBufferTable.get(fld.FIELDNAME).getOnlyPageFieldTok();
         }
 
         final RecordFieldBuffer fldBuffer =
@@ -186,12 +186,12 @@ public class RecordBuffer implements IStreamableBuffer {
    * There is no concept of a "related display record"
    * in PeopleSoft; this is the name I'm giving to
    * records in the component buffer that contain only
-   * a related field buffers.
+   * related field buffers.
    */
   public boolean isRelatedDisplayRecBuffer() {
     for (final RecordFieldBuffer fbuf : this.fieldBuffers) {
-      if (fbuf.getSrcPageToken() == null ||
-          !fbuf.getSrcPageToken().isRelatedDisplay()) {
+      if (fbuf.getPageFieldToks().size() == 0 ||
+          !fbuf.getOnlyPageFieldTok().isRelatedDisplay()) {
         return false;
       }
     }

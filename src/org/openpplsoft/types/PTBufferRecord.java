@@ -132,7 +132,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       }
 
       final RecordFieldBuffer relDispFldBuf = this.recBuffer.getFieldBuffers().get(0);
-      final PgToken relDispFldTok = relDispFldBuf.getSrcPageToken();
+      final PgToken relDispFldTok = relDispFldBuf.getOnlyPageFieldTok();
 
       /*
        * Remember: fields can serve as both display control AND

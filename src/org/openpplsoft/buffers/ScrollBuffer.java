@@ -131,23 +131,23 @@ public class ScrollBuffer implements IStreamableBuffer {
 
       final String dispCtrlRecFldName = tok.getDispControlRecFieldName();
 
-      if (this.relDisplayRecordSet.hasRecord(tok.RECNAME, dispCtrlRecFldName)) {
-        r = this.relDisplayRecordSet.getRecordBuffer(tok.RECNAME, dispCtrlRecFldName);
+      if (this.relDisplayRecordSet.hasRecord(tok.getRecName(), dispCtrlRecFldName)) {
+        r = this.relDisplayRecordSet.getRecordBuffer(tok.getRecName(), dispCtrlRecFldName);
       } else {
-        r = new RecordBuffer(this, this.nextRecBufferOrderIdx++, tok.RECNAME);
+        r = new RecordBuffer(this, this.nextRecBufferOrderIdx++, tok.getRecName());
         this.relDisplayRecordSet.registerRecord(dispCtrlRecFldName, r);
         this.allRecBuffersOrdered.add(r);
       }
     } else {
-      r = this.recBufferTable.get(tok.RECNAME);
+      r = this.recBufferTable.get(tok.getRecName());
       if (r == null) {
-        r = new RecordBuffer(this, this.nextRecBufferOrderIdx++, tok.RECNAME);
+        r = new RecordBuffer(this, this.nextRecBufferOrderIdx++, tok.getRecName());
         this.recBufferTable.put(r.getRecDefn().RECNAME, r);
         this.allRecBuffersOrdered.add(r);
       }
     }
 
-    r.addPageField(tok.RECNAME, tok.FIELDNAME, tok);
+    r.addPageField(tok.getRecName(), tok.getFldName(), tok);
   }
 
   /**

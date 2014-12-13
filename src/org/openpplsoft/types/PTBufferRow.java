@@ -98,13 +98,13 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     log.fatal("Looking for disp ctrl fld: {}",
         relDispFldTok.getDispControlRecFieldName());
 
-    final PgToken dispCtrlFldTok = relDispFldTok.dispControlFieldTok;
+    final PgToken dispCtrlFldTok = relDispFldTok.getDispControlFieldTok();
 
     // Is the display control field on a non-reldisp record? (most likely case)
-    if (this.recordMap.containsKey(dispCtrlFldTok.RECNAME)) {
-      final PTBufferRecord rec = this.recordMap.get(dispCtrlFldTok.RECNAME);
-      if (rec.hasField(dispCtrlFldTok.FIELDNAME)) {
-        final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.FIELDNAME).deref();
+    if (this.recordMap.containsKey(dispCtrlFldTok.getRecName())) {
+      final PTBufferRecord rec = this.recordMap.get(dispCtrlFldTok.getRecName());
+      if (rec.hasField(dispCtrlFldTok.getFldName())) {
+        final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.getFldName()).deref();
         if (fld.getRecordFieldBuffer() != null) {
           if (dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken()) {
             log.fatal("Found display control field in recordMap.");
@@ -120,11 +120,11 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
     // If not, is the display control field also a related display field?
     if (this.relDisplayRecordSet.hasRecord(
-        relDispFldTok.getDispControlRecFieldName(), relDispFldTok.RECNAME)) {
+        relDispFldTok.getDispControlRecFieldName(), relDispFldTok.getRecName())) {
       final PTBufferRecord rec = this.relDisplayRecordSet.getRecord(
-          relDispFldTok.getDispControlRecFieldName(), relDispFldTok.RECNAME);
-      if (rec.hasField(dispCtrlFldTok.FIELDNAME)) {
-        final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.FIELDNAME).deref();
+          relDispFldTok.getDispControlRecFieldName(), relDispFldTok.getRecName());
+      if (rec.hasField(dispCtrlFldTok.getFldName())) {
+        final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.getFldName()).deref();
 //        log.fatal("HERE: src page token: {}", fld.getRecordFieldBuffer().getSrcPageToken());
 /*        if (fld.getRecordFieldBuffer() != null
             && dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken()) {

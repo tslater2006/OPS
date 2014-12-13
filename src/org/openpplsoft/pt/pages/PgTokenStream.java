@@ -47,24 +47,24 @@ public class PgTokenStream {
       PgToken tok = tokens.get(this.cursor++);
 
       // Changes in scroll level must be reported to the receiver.
-      if(tok.OCCURSLEVEL < this.prevOCCURSLEVEL) {
-        tok.flags.add(PFlag.SCROLL_LVL_DECREMENT);
+      if(tok.getOccursLevel() < this.prevOCCURSLEVEL) {
+        tok.addFlag(PFlag.SCROLL_LVL_DECREMENT);
       }
 
       // If this is a subpage or secpage, expand it in-place to its constituent tokens.
-      if(tok.flags.contains(PFlag.PAGE)) {
-        if(this.loadedPageNames.get(tok.SUBPNLNAME) == null) {
-          this.pfs = new PgTokenStream(tok.SUBPNLNAME);
-          this.loadedPageNames.put(tok.SUBPNLNAME, true);
+      if(tok.hasFlag(PFlag.PAGE)) {
+        if(this.loadedPageNames.get(tok.getSubPnlName()) == null) {
+          this.pfs = new PgTokenStream(tok.getSubPnlName());
+          this.loadedPageNames.put(tok.getSubPnlName(), true);
           this.doReadFromPfs = true;
         } else {
-          this.prevOCCURSLEVEL = tok.OCCURSLEVEL; // Must save previous OCCURSLEVEL before returning.
+          this.prevOCCURSLEVEL = tok.getOccursLevel(); // Must save previous OCCURSLEVEL before returning.
           return this.next();
         }
       }
 
       // If this is a scroll bar / grid / scroll area, find its primary record name.
-      if(tok.flags.contains(PFlag.SCROLL_START)) {
+      if(tok.hasFlag(PFlag.SCROLL_START)) {
 
         int lookAheadCursor = this.cursor;
         String primaryRecNameCandidate = null;
@@ -73,13 +73,13 @@ public class PgTokenStream {
           PgToken lookToken = tokens.get(lookAheadCursor++);
 
           // Stop looking once this scroll area has ended.
-          if(lookToken.OCCURSLEVEL < tok.OCCURSLEVEL) {
+          if(lookToken.getOccursLevel() < tok.getOccursLevel()) {
             break;
           }
 
           // Ignore groupboxes and any field without a valid RECNAME.
-          if(!lookToken.flags.contains(PFlag.GROUPBOX) && lookToken.RECNAME != null
-            && !lookToken.isRelatedDisplay() && lookToken.RECNAME.length() > 0) {
+          if(!lookToken.hasFlag(PFlag.GROUPBOX) && lookToken.getRecName() != null
+            && !lookToken.isRelatedDisplay() && lookToken.getRecName().length() > 0) {
 
             /*
              * First priority is given to a RECNAME in the scroll area that *is not*
@@ -89,12 +89,12 @@ public class PgTokenStream {
              * for potential use as the primary record name of this scroll area.
              */
             if(ComponentBuffer.getCurrentScrollBuffer()
-                .getRecBufferTable().get(lookToken.RECNAME) == null) {
-              primaryRecNameCandidate = lookToken.RECNAME;
+                .getRecBufferTable().get(lookToken.getRecName()) == null) {
+              primaryRecNameCandidate = lookToken.getRecName();
               break;
             } else if(primaryRecNameCandidate == null) {
               // Save the candidate for consideration after while loop ends.
-              primaryRecNameCandidate = lookToken.RECNAME;
+              primaryRecNameCandidate = lookToken.getRecName();
             }
           }
         }
@@ -102,7 +102,7 @@ public class PgTokenStream {
         if(primaryRecNameCandidate == null) {
           throw new OPSVMachRuntimeException("Unable to find the scroll area's primary record name.");
         } else {
-          tok.primaryRecName = primaryRecNameCandidate;
+          tok.setPrimaryRecName(primaryRecNameCandidate);
         }
       }
 
@@ -111,10 +111,10 @@ public class PgTokenStream {
        * This token should be emitted immediately after the preemptively loaded page, so remind the cursor
        * by 1 to ensure that it gets picked up again later.
        */
-      if(tok.SUBPNLNAME.length() > 0 && !tok.flags.contains(PFlag.PAGE)) {
-        if(this.loadedPageNames.get(tok.SUBPNLNAME) == null) {
-          this.pfs = new PgTokenStream(tok.SUBPNLNAME);
-          this.loadedPageNames.put(tok.SUBPNLNAME, true);
+      if(tok.getSubPnlName().length() > 0 && !tok.hasFlag(PFlag.PAGE)) {
+        if(this.loadedPageNames.get(tok.getSubPnlName()) == null) {
+          this.pfs = new PgTokenStream(tok.getSubPnlName());
+          this.loadedPageNames.put(tok.getSubPnlName(), true);
           this.doReadFromPfs = true;
 
           this.cursor--;    // This token will be picked up again after page stream has ended.
@@ -126,19 +126,19 @@ public class PgTokenStream {
            * up where we left off later so the prevOCCURSLEVEL must not be changed.
            */
           PgToken preemptivePgToken = new PgToken(PFlag.PAGE);
-          preemptivePgToken.SUBPNLNAME = tok.SUBPNLNAME;
+          preemptivePgToken.setSubPnlName(tok.getSubPnlName());
           return preemptivePgToken;
         }
       }
 
-      this.prevOCCURSLEVEL = tok.OCCURSLEVEL;
+      this.prevOCCURSLEVEL = tok.getOccursLevel();
 
       return tok;
 
     } else {
       // Before null is emitted, tell the receiver that this page has ended.
       PgToken endTok = new PgToken();
-      endTok.flags.add(PFlag.END_OF_PAGE);
+      endTok.addFlag(PFlag.END_OF_PAGE);
       this.isClosed = true;
       return endTok;
     }

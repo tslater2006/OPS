@@ -207,7 +207,7 @@ public final class ComponentBuffer {
 
         //log.debug(tok);
 
-        if (tok.flags.contains(PFlag.PAGE)) {
+        if (tok.hasFlag(PFlag.PAGE)) {
           final ScrollMarker sm = new ScrollMarker();
           sm.src = PFlag.PAGE;
           sm.primaryRecName = scrollMarkers.peek().primaryRecName;
@@ -216,7 +216,7 @@ public final class ComponentBuffer {
           continue;
         }
 
-        if (tok.flags.contains(PFlag.END_OF_PAGE)) {
+        if (tok.hasFlag(PFlag.END_OF_PAGE)) {
           while (scrollMarkers.peek().src == PFlag.SCROLL_START) {
             // pop interim scroll levels.
             scrollMarkers.pop();
@@ -226,27 +226,27 @@ public final class ComponentBuffer {
           continue;
         }
 
-        if (tok.flags.contains(PFlag.SCROLL_START)) {
+        if (tok.hasFlag(PFlag.SCROLL_START)) {
 
           // This scroll may appear right after an unended scroll;
           // if so, pop the previous one.
           final ScrollMarker topSm = scrollMarkers.peek();
           if (topSm.src == PFlag.SCROLL_START
-              && !tok.primaryRecName.equals(topSm.primaryRecName)) {
+              && !tok.getPrimaryRecName().equals(topSm.primaryRecName)) {
             scrollMarkers.pop();
           }
 
           final ScrollMarker sm = new ScrollMarker();
           sm.src = PFlag.SCROLL_START;
-          sm.primaryRecName = tok.primaryRecName;
-          sm.scrollLevel = scrollMarkers.peek().scrollLevel + tok.OCCURSLEVEL;
+          sm.primaryRecName = tok.getPrimaryRecName();
+          sm.scrollLevel = scrollMarkers.peek().scrollLevel + tok.getOccursLevel();
           scrollMarkers.push(sm);
           continue;
         }
 
         // Remember: don't "continue" here, since SCROLL_LVL_DECREMENT
         // can be attached to regular fields.
-        if (tok.flags.contains(PFlag.SCROLL_LVL_DECREMENT)) {
+        if (tok.hasFlag(PFlag.SCROLL_LVL_DECREMENT)) {
           scrollMarkers.pop();
         }
 
@@ -277,13 +277,13 @@ public final class ComponentBuffer {
 
       while ((tok = pfs.next()) != null) {
 
-        if (tok.flags.contains(PFlag.PAGE)) {
+        if (tok.hasFlag(PFlag.PAGE)) {
           log.info("{}Page:{}", indent, tok);
           indent = indent.concat("   ");
           continue;
         }
 
-        if (tok.flags.contains(PFlag.END_OF_PAGE)) {
+        if (tok.hasFlag(PFlag.END_OF_PAGE)) {
           indent = indent.substring(3);
           log.info("{}{}", indent, tok);
           continue;

@@ -16,31 +16,48 @@ import org.openpplsoft.runtime.*;
 
 public class PgToken {
 
-  public EnumSet<PFlag> flags;
-  public String RECNAME;
-  public String FIELDNAME;
-  public String SUBPNLNAME;
-  public int OCCURSLEVEL, FIELDNUM, ASSOCFIELDNUM;
-  public byte FIELDUSE;
+  private EnumSet<PFlag> flags;
+  private String RECNAME, FIELDNAME, SUBPNLNAME;
+  private int OCCURSLEVEL, FIELDNUM, ASSOCFIELDNUM;
+  private byte FIELDUSE;
 
   // If this token represents a related display field,
   // dispControlFieldTok refers to the associated display
   // control field.
-  public PgToken dispControlFieldTok;
+  private PgToken dispControlFieldTok;
 
   // If this token represents a display control field,
   // this list contains references to all of the related
   // display field tokens that use this field for display control.
-  public List<PgToken> relDispFieldToks =
+  private List<PgToken> relDispFieldToks =
       new ArrayList<PgToken>();
+
+  private String primaryRecName;     // used for SCROLL_START tokens.
 
   private final byte INVISIBLE_FLAG = (byte) 2;
   private final byte DISP_CNTRL_FLAG = (byte) 8;
   private final byte REL_DISP_FLAG = (byte) 16;
 
-  public String primaryRecName;     // used for SCROLL_START tokens.
-
   public PgToken() {
+    this.flags = EnumSet.noneOf(PFlag.class);
+  }
+
+  public PgToken(
+      final String recName,
+      final String fldName,
+      final String subPnlName,
+      final int occursLevel,
+      final byte fieldUse,
+      final int assocFieldNum,
+      final int fieldNum) {
+    this.RECNAME = recName;
+    this.FIELDNAME = fldName;
+    this.SUBPNLNAME = subPnlName;
+    this.OCCURSLEVEL = occursLevel;
+    this.FIELDUSE = fieldUse;
+    this.ASSOCFIELDNUM = assocFieldNum;
+    this.FIELDNUM = fieldNum;
+
     this.flags = EnumSet.noneOf(PFlag.class);
   }
 
@@ -50,6 +67,66 @@ public class PgToken {
 
   public PgToken(EnumSet<PFlag> flagSet) {
     this.flags = EnumSet.copyOf(flagSet);
+  }
+
+  public String getRecName() {
+    return this.RECNAME;
+  }
+
+  public String getFldName() {
+    return this.FIELDNAME;
+  }
+
+  public int getOccursLevel() {
+    return this.OCCURSLEVEL;
+  }
+
+  public int getFieldNum() {
+    return this.FIELDNUM;
+  }
+
+  public int getAssocFieldNum() {
+    return this.ASSOCFIELDNUM;
+  }
+
+  public String getSubPnlName() {
+    return this.SUBPNLNAME;
+  }
+
+  public PgToken getDispControlFieldTok() {
+    return this.dispControlFieldTok;
+  }
+
+  public void setDispControlFieldTok(final PgToken dispCtrlFieldTok) {
+    this.dispControlFieldTok = dispCtrlFieldTok;
+  }
+
+  public List<PgToken> getRelDispFieldToks() {
+    return this.relDispFieldToks;
+  }
+
+  public void addRelDispFieldTok(final PgToken relDispTok) {
+    this.relDispFieldToks.add(relDispTok);
+  }
+
+  public String getPrimaryRecName() {
+    return this.primaryRecName;
+  }
+
+  public void setPrimaryRecName(final String recName) {
+    this.primaryRecName = recName;
+  }
+
+  public void setSubPnlName(final String subPnlName) {
+    this.SUBPNLNAME = subPnlName;
+  }
+
+  public void addFlag(final PFlag flag) {
+    this.flags.add(flag);
+  }
+
+  public boolean hasFlag(final PFlag flag) {
+    return this.flags.contains(flag);
   }
 
   public boolean isInvisible() {

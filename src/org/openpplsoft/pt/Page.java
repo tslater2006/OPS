@@ -100,21 +100,20 @@ public class Page {
     int nextFieldNum = 1;
     while (rs.next()) {
 
-      final PgToken pf = new PgToken();
-      pf.RECNAME = rs.getString("RECNAME").trim();
-      pf.FIELDNAME = rs.getString("FIELDNAME").trim();
-      pf.SUBPNLNAME = rs.getString("SUBPNLNAME").trim();
-      pf.OCCURSLEVEL = rs.getInt("OCCURSLEVEL");
-      pf.FIELDUSE = (byte) rs.getInt("FIELDUSE");
-      pf.ASSOCFIELDNUM = rs.getInt("ASSOCFIELDNUM");
-
-      /*
-       * Even though PSPNLFIELD has a FIELDNUM field, it is
-       * not selected in the query (although it is in the ORDER
-       * BY clause). I do not want to make PSPNLFIELD unenforced,
-       * so for now I am using an incremented var.
-       */
-      pf.FIELDNUM = nextFieldNum++;
+      final PgToken pf = new PgToken(
+          rs.getString("RECNAME").trim(),
+          rs.getString("FIELDNAME").trim(),
+          rs.getString("SUBPNLNAME").trim(),
+          rs.getInt("OCCURSLEVEL"),
+          (byte) rs.getInt("FIELDUSE"),
+          rs.getInt("ASSOCFIELDNUM"),
+        /*
+         * Even though PSPNLFIELD has a FIELDNUM field, it is
+         * not selected in the query (although it is in the ORDER
+         * BY clause). I do not want to make PSPNLFIELD unenforced,
+         * so for now I am using an incremented var.
+         */
+          nextFieldNum++);
 
       switch (rs.getInt("FIELDTYPE")) {
         case PSDefn.PageFieldType.STATIC_TEXT:
@@ -123,15 +122,15 @@ public class Page {
         case PSDefn.PageFieldType.HORIZONTAL_RULE:
           break;
         case PSDefn.PageFieldType.GROUPBOX:
-          pf.flags.add(PFlag.GROUPBOX);
-          this.tokenTable.put(pf.FIELDNUM, pf);
+          pf.addFlag(PFlag.GROUPBOX);
+          this.tokenTable.put(pf.getFieldNum(), pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.SUBPAGE:
-          pf.flags.add(PFlag.PAGE);
-          pf.flags.add(PFlag.SUBPAGE);
+          pf.addFlag(PFlag.PAGE);
+          pf.addFlag(PFlag.SUBPAGE);
           this.subpages.add(pf);
-          this.tokenTable.put(pf.FIELDNUM, pf);
+          this.tokenTable.put(pf.getFieldNum(), pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.PUSHBTN_LINK_PEOPLECODE:
@@ -144,29 +143,29 @@ public class Page {
         case PSDefn.PageFieldType.PUSHBTN_LINK_PROMPT_ACTION:
         case PSDefn.PageFieldType.PUSHBTN_LINK_PAGE_ANCHOR:
         case PSDefn.PageFieldType.PUSHBTN_LINK_INST_MSG_ACTION:
-          pf.flags.add(PFlag.PUSHBTN_LINK);
-          this.tokenTable.put(pf.FIELDNUM, pf);
+          pf.addFlag(PFlag.PUSHBTN_LINK);
+          this.tokenTable.put(pf.getFieldNum(), pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.SECPAGE:
-          pf.flags.add(PFlag.PAGE);
-          pf.flags.add(PFlag.SECPAGE);
+          pf.addFlag(PFlag.PAGE);
+          pf.addFlag(PFlag.SECPAGE);
           this.secpages.add(pf);
-          this.tokenTable.put(pf.FIELDNUM, pf);
+          this.tokenTable.put(pf.getFieldNum(), pf);
           this.tokens.add(pf);
           break;
         case PSDefn.PageFieldType.SCROLL_BAR:
         case PSDefn.PageFieldType.GRID:
         case PSDefn.PageFieldType.SCROLL_AREA:
-          pf.flags.add(PFlag.SCROLL_START);
-          this.tokenTable.put(pf.FIELDNUM, pf);
+          pf.addFlag(PFlag.SCROLL_START);
+          this.tokenTable.put(pf.getFieldNum(), pf);
           this.tokens.add(pf);
           break;
         default:
-          pf.flags.add(PFlag.GENERIC);
-          this.tokenTable.put(pf.FIELDNUM, pf);
+          pf.addFlag(PFlag.GENERIC);
+          this.tokenTable.put(pf.getFieldNum(), pf);
           this.tokens.add(pf);
-          if (pf.RECNAME.length() == 0 || pf.FIELDNAME.length() == 0) {
+          if (pf.getRecName().length() == 0 || pf.getFldName().length() == 0) {
             throw new OPSVMachRuntimeException("A generic field with "
                 + "either a blank RECNAME "
                 + "or FIELDNAME was encountered.");
@@ -187,14 +186,14 @@ public class Page {
      */
     for (PgToken tok : this.tokens) {
       if (tok.isRelatedDisplay()) {
-        final PgToken assocTok = this.tokenTable.get(tok.ASSOCFIELDNUM + 1);
+        final PgToken assocTok = this.tokenTable.get(tok.getAssocFieldNum() + 1);
         if (assocTok == null || !assocTok.isDisplayControl()) {
           throw new OPSVMachRuntimeException("On page " + this.ptPNLNAME + ", "
               + "encountered rel disp page token (" + tok + ") but assoc tok "
               + "is either null or not display control: " + assocTok);
         }
-        tok.dispControlFieldTok = assocTok;
-        assocTok.relDispFieldToks.add(tok);
+        tok.setDispControlFieldTok(assocTok);
+        assocTok.addRelDispFieldTok(tok);
       }
     }
   }
@@ -207,7 +206,7 @@ public class Page {
     final Page loadedPage = DefnCache.getPage(this.ptPNLNAME);
 
     for (PgToken tok : loadedPage.subpages) {
-      final Page p = DefnCache.getPage(tok.SUBPNLNAME);
+      final Page p = DefnCache.getPage(tok.getSubPnlName());
       p.recursivelyLoadSubpages();
     }
   }
@@ -236,26 +235,26 @@ public class Page {
     // Recursively expand/search subpages for secpages.
     for (PgToken tok : loadedPage.tokens) {
 
-      if (tok.flags.contains(PFlag.SUBPAGE)) {
+      if (tok.hasFlag(PFlag.SUBPAGE)) {
 
-        final Page p = DefnCache.getPage(tok.SUBPNLNAME);
+        final Page p = DefnCache.getPage(tok.getSubPnlName());
         p.recursivelyLoadSecpages();
 
-      } else if (tok.flags.contains(PFlag.SECPAGE)) {
+      } else if (tok.hasFlag(PFlag.SECPAGE)) {
 
         secpageTokens.add(tok);
 
-      } else if (tok.SUBPNLNAME.length() == 0
-          && tok.RECNAME != null && tok.FIELDNAME != null
-          && tok.RECNAME.length() > 0 && tok.FIELDNAME.length() > 0) {
+      } else if (tok.getSubPnlName().length() == 0
+          && tok.getRecName() != null && tok.getFldName() != null
+          && tok.getRecName().length() > 0 && tok.getFldName().length() > 0) {
 
-        this.issuePCListRequestForRecord(tok.RECNAME);
+        this.issuePCListRequestForRecord(tok.getRecName());
       }
     }
 
     // Then, recursively expand/search secpages for more secpages.
     for (PgToken marker : secpageTokens) {
-      final Page p = DefnCache.getPage(marker.SUBPNLNAME);
+      final Page p = DefnCache.getPage(marker.getSubPnlName());
       p.recursivelyLoadSecpages();
     }
   }

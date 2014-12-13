@@ -458,9 +458,9 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
 
     PgToken desiredRelDispFieldTok = null;
-    for (final PgToken relDispFieldTok : srcToken.relDispFieldToks) {
-      if (relDispFieldTok.RECNAME.equals(relDispRecFldSpecifier.getRecName())
-          && relDispFieldTok.FIELDNAME.equals(relDispRecFldSpecifier.getFieldName())) {
+    for (final PgToken relDispFieldTok : srcToken.getRelDispFieldToks()) {
+      if (relDispFieldTok.getRecName().equals(relDispRecFldSpecifier.getRecName())
+          && relDispFieldTok.getFldName().equals(relDispRecFldSpecifier.getFieldName())) {
         desiredRelDispFieldTok = relDispFieldTok;
         break;
       }

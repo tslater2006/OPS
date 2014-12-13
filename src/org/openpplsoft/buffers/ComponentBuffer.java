@@ -79,7 +79,7 @@ public final class ComponentBuffer {
       // and PostBuild have the first (and only) row of the level zero rowset
       // as their context.
       final InterpretSupervisor interpreter =
-          new InterpretSupervisor(eCtx, (PTBufferRow) getLevelZeroRowset().getRow(1));
+          new InterpretSupervisor(eCtx, getLevelZeroRowset().getRow(1));
       interpreter.run();
       fireEventSummary.incrementNumEventProgsExecuted();
     } else {

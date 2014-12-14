@@ -59,7 +59,7 @@ public class Record {
         new String[]{this.RECNAME});
     rs = ostmt.executeQuery();
 
-    this.fieldTable = new HashMap<String, RecordField>();
+    this.fieldTable = new LinkedHashMap<String, RecordField>();
     this.fldAndSubrecordTable = new TreeMap<Integer, Object>();
 
     int i = 0;

@@ -363,8 +363,8 @@ public final class StmtLibrary {
         .append(" ").append(effDtSubqueryAlias).append(" WHERE");
 
       final Record effDtRecord = DefnCache.getRecord(effDtCheckRecord);
-      for(Map.Entry<String, RecordField> cursor
-        : effDtRecord.fieldTable.entrySet()) {
+      for(final Map.Entry<String, RecordField> cursor
+          : effDtRecord.fieldTable.entrySet()) {
         final RecordField rf = cursor.getValue();
         if(rf.isKey() && !rf.FIELDNAME.equals("EFFDT")) {
           effDtSubqueryBuilder.append(" ").append(effDtSubqueryAlias)

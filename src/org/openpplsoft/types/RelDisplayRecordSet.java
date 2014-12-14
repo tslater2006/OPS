@@ -7,6 +7,8 @@
 
 package org.openpplsoft.types;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -133,6 +135,47 @@ public class RelDisplayRecordSet {
   public PTBufferRecord getRecord(
       final String dispCtrlRecFldName, final String relDispRecName) {
     return this.getRecordEntry(dispCtrlRecFldName, relDispRecName).rec;
+  }
+
+  public List<PTBufferRecord> getAllRecordsNamed(final String recName) {
+    final List<PTBufferRecord> records = new ArrayList<>();
+    for (final Map.Entry<String, Map<String, RecordEntry>> tableEntry
+        : this.tables.entrySet()) {
+      for (final Map.Entry<String, RecordEntry> entry
+          : tableEntry.getValue().entrySet()) {
+        if (entry.getValue().rec.getRecDefn().RECNAME.equals(recName)) {
+          records.add(entry.getValue().rec);
+        }
+      }
+    }
+    return records;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("RelDisplayRecordSet tables:\n");
+    for (final Map.Entry<String, Map<String, RecordEntry>> tableEntry
+        : this.tables.entrySet()) {
+      sb.append("- dispctrl field:")
+          .append(tableEntry.getKey()).append(": table{\n");
+      for (final Map.Entry<String, RecordEntry> entry
+          : tableEntry.getValue().entrySet()) {
+        sb.append("    -> ").append(entry.getKey()).append(": record{\n");
+        final PTBufferRecord rec = entry.getValue().rec;
+        for (final RecordFieldBuffer rfbuf
+            : rec.getRecBuffer().getFieldBuffers()) {
+          sb.append("        ").append(rfbuf).append("\n");
+        }
+/*        for (final PTImmutableReference<PTBufferField> fldref
+            : rec.getFieldRefsInAlphabeticOrderByFieldName()) {
+          sb.append("       ").append(fldref.deref().getRecordFieldBuffer())
+              .append("\n");
+        }*/
+        sb.append("      }\n");
+      }
+      sb.append("}\n");
+    }
+    return sb.toString();
   }
 }
 

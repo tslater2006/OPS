@@ -48,6 +48,7 @@
     <Logger name="org.openpplsoft.runtime.GlobalFnLibrary" level="DEBUG"/>
     <Logger name="org.openpplsoft.runtime.ComponentStructureVerifier" level="INFO"/>
     <Logger name="org.openpplsoft.runtime.Environment" level="DEBUG"/>
+    <Logger name="org.openpplsoft.types.RelDisplayRecordSet" level="DEBUG"/>
     <Logger name="org.openpplsoft.types.PTField" level="DEBUG"/>
     <Logger name="org.openpplsoft.types.PTRecord" level="DEBUG"/>
     <Logger name="org.openpplsoft.types.PTRowset" level="DEBUG"/>

@@ -95,8 +95,10 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
   }
 
   public PTBufferField findDisplayControlField(final PgToken relDispFldTok) {
-    log.fatal("Looking for disp ctrl fld: {}",
-        relDispFldTok.getDispControlRecFieldName());
+
+    /*log.debug("Looking for disp ctrl fld: {}, which is attached to reldisp fld: {}",
+        relDispFldTok.getDispControlRecFieldName(),
+        relDispFldTok);*/
 
     final PgToken dispCtrlFldTok = relDispFldTok.getDispControlFieldTok();
 
@@ -105,32 +107,24 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
       final PTBufferRecord rec = this.recordMap.get(dispCtrlFldTok.getRecName());
       if (rec.hasField(dispCtrlFldTok.getFldName())) {
         final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.getFldName()).deref();
-        if (fld.getRecordFieldBuffer() != null) {
-          if (dispCtrlFldTok == fld.getRecordFieldBuffer().getOnlyPageFieldTok()) {
-            log.fatal("Found display control field in recordMap.");
-            return fld;
-          } else {
-            log.fatal(dispCtrlFldTok);
-            log.fatal(fld.getRecordFieldBuffer().getOnlyPageFieldTok());
-            log.fatal("=? {}", dispCtrlFldTok == fld.getRecordFieldBuffer().getOnlyPageFieldTok());
-          }
+        if (fld.getRecordFieldBuffer() != null &&
+            fld.getRecordFieldBuffer().hasPageFieldTok(dispCtrlFldTok)) {
+          return fld;
         }
       }
     }
 
-    // If not, is the display control field also a related display field?
-    if (this.relDisplayRecordSet.hasRecord(
-        relDispFldTok.getDispControlRecFieldName(), relDispFldTok.getRecName())) {
-      final PTBufferRecord rec = this.relDisplayRecordSet.getRecord(
-          relDispFldTok.getDispControlRecFieldName(), relDispFldTok.getRecName());
-      if (rec.hasField(dispCtrlFldTok.getFldName())) {
-        final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.getFldName()).deref();
-//        log.fatal("HERE: src page token: {}", fld.getRecordFieldBuffer().getSrcPageToken());
-/*        if (fld.getRecordFieldBuffer() != null
-            && dispCtrlFldTok == fld.getRecordFieldBuffer().getSrcPageToken()) {
-          return fld;
-        }*/
-        log.fatal("Found display control field in relDisplayRecordSet.");
+    log.debug(this.relDisplayRecordSet);
+
+    /*
+     * If not, is the display control field also a related display field?
+     */
+    final List<PTBufferRecord> relDispRecords = this.relDisplayRecordSet
+        .getAllRecordsNamed(dispCtrlFldTok.getRecName());
+    for (final PTBufferRecord rec : relDispRecords) {
+      final PTBufferField fld = rec.getFieldRef(dispCtrlFldTok.getFldName()).deref();
+      if (fld.getRecordFieldBuffer() != null &&
+          fld.getRecordFieldBuffer().hasPageFieldTok(dispCtrlFldTok)) {
         return fld;
       }
     }
@@ -149,7 +143,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
 /*    for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {
-      log.fatal("Here {} -> {}", entry.getKey(), entry.getValue().getRecDefn().RECNAME);
+      log.debug("Here {} -> {}", entry.getKey(), entry.getValue().getRecDefn().RECNAME);
     }*/
 
     int idxPos = 0;

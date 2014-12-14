@@ -10,6 +10,9 @@ package org.openpplsoft.buffers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
@@ -19,6 +22,9 @@ import org.openpplsoft.runtime.*;
  */
 public class RecordFieldBuffer implements IStreamableBuffer,
     Comparable<RecordFieldBuffer> {
+
+  private static Logger log =
+      LogManager.getLogger(RecordFieldBuffer.class.getName());
 
   private String fldName;
   private Record recDefn;
@@ -68,6 +74,10 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     }
   }
 
+  public List<PgToken> getPageFieldToks() {
+    return this.pageFieldToks;
+  }
+
   public PgToken getOnlyPageFieldTok() {
     if (this.pageFieldToks.size() != 1) {
       throw new OPSVMachRuntimeException("Illegal call to getOnlyPageFieldTok(); "
@@ -75,6 +85,14 @@ public class RecordFieldBuffer implements IStreamableBuffer,
           + this.pageFieldToks);
     }
     return this.pageFieldToks.get(0);
+  }
+
+  public void addPageFieldTok(final PgToken pgFieldTok) {
+    this.pageFieldToks.add(pgFieldTok);
+  }
+
+  public boolean hasPageFieldTok(final PgToken pgFieldTok) {
+    return this.pageFieldToks.contains(pgFieldTok);
   }
 
   public RecordBuffer getParentRecordBuffer() {
@@ -95,10 +113,6 @@ public class RecordFieldBuffer implements IStreamableBuffer,
 
   public RecordField getRecFldDefn() {
     return this.fldDefn;
-  }
-
-  public List<PgToken> getPageFieldToks() {
-    return this.pageFieldToks;
   }
 
   public boolean isRelatedDisplayField() {
@@ -175,6 +189,12 @@ public class RecordFieldBuffer implements IStreamableBuffer,
    */
   public void resetCursors() {
     this.hasEmittedSelf = false;
+  }
+
+  @Override
+  public String toString() {
+    return "RecordFieldBuffer: fldName=" + this.fldName
+        + ", pageFieldToks=" + this.pageFieldToks;
   }
 }
 

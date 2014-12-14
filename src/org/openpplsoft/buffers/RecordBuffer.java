@@ -137,6 +137,8 @@ public class RecordBuffer implements IStreamableBuffer {
       f = new RecordFieldBuffer(ptRECNAME, ptFIELDNAME, this, srcTok);
       this.fieldBufferTable.put(f.getFldName(), f);
       this.fieldBuffers.add(f);
+    } else {
+      f.addPageFieldTok(srcTok);
     }
   }
 
@@ -160,20 +162,24 @@ public class RecordBuffer implements IStreamableBuffer {
       final List<RecordField> expandedFieldList =
           recDefn.getExpandedFieldList();
 
-      for (RecordField fld : expandedFieldList) {
-        // Note: the true RECNAME is preserved in the FieldBuffer;
+      for (final RecordField fld : expandedFieldList) {
+
+        // Note: The instantiated RecordFieldBuffer below preserves
+        // the true RECNAME of the record field;
         // if the field is in a subrecord, the RECNAME in the
-        // FieldBuffer will be that of the subrecord itself.
-
-        PgToken srcPageToken = null;
-        if (this.fieldBufferTable.containsKey(fld.FIELDNAME)) {
-          srcPageToken = this.fieldBufferTable.get(fld.FIELDNAME).getOnlyPageFieldTok();
-        }
-
+        // RecordFieldBuffer will be that of the subrecord itself.
         final RecordFieldBuffer fldBuffer =
-            new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this, srcPageToken);
+            new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this, null);
         newTable.put(fldBuffer.getFldName(), fldBuffer);
         newList.add(fldBuffer);
+
+        // If a record field buffer already exists in the pre-expansion
+        // field buffer table, copy its page field tokens into the new rec field buffer.
+        if (this.fieldBufferTable.containsKey(fld.FIELDNAME)) {
+          for (final PgToken tok : this.fieldBufferTable.get(fld.FIELDNAME).getPageFieldToks()) {
+            fldBuffer.addPageFieldTok(tok);
+          }
+        }
       }
 
       this.fieldBufferTable = newTable;
@@ -189,12 +195,17 @@ public class RecordBuffer implements IStreamableBuffer {
    * related field buffers.
    */
   public boolean isRelatedDisplayRecBuffer() {
+
+    if (this.fieldBuffers.size() == 0) {
+      return false;
+    }
+
     for (final RecordFieldBuffer fbuf : this.fieldBuffers) {
-      if (fbuf.getPageFieldToks().size() == 0 ||
-          !fbuf.getOnlyPageFieldTok().isRelatedDisplay()) {
+      if (!fbuf.isRelatedDisplayField()) {
         return false;
       }
     }
+
     return true;
   }
 

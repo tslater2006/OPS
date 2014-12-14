@@ -53,13 +53,8 @@ public class BeginLevel implements IEmission {
         && this.activeCount == other.activeCount
         && this.hiddenCount == other.hiddenCount
         && this.noAutoSelectFlag == other.noAutoSelectFlag
-        && this.noAutoUpdateFlag == other.noAutoUpdateFlag;
-
-        /*
-         * TODO: Re-enable this after RecInScroll emissions
-         * have been worked through.
-         */
-        //&& this.numRecs == other.numRecs;
+        && this.noAutoUpdateFlag == other.noAutoUpdateFlag
+        && this.numRecs == other.numRecs;
   }
 
   @Override

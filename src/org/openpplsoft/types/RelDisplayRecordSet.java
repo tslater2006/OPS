@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.openpplsoft.buffers.*;
+import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.types.PTRecord;
 
@@ -149,6 +150,25 @@ public class RelDisplayRecordSet {
       }
     }
     return records;
+  }
+
+  /**
+   * This method returns the record count, as expected during tracefile
+   * verification. Do not use this method for any purpose other than
+   * tracefile verification.
+   */
+  public int getEmissionRecordCount() {
+    int total = 0;
+    for (final Map.Entry<String, Map<String, RecordEntry>> tableEntry
+        : this.tables.entrySet()) {
+      for (final Map.Entry<String, RecordEntry> entry
+          : tableEntry.getValue().entrySet()) {
+        if (!PSDefn.isSystemRecord(entry.getValue().rec.getRecDefn().RECNAME)) {
+          total++;
+        }
+      }
+    }
+    return total;
   }
 
   @Override

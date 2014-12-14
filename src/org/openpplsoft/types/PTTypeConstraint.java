@@ -66,9 +66,9 @@ public class PTTypeConstraint<T extends PTType> {
         || (this.isUnderlyingClassObject() && (a instanceof PTNull))
         || (this.underlyingClass == PTNumber.class && a instanceof PTInteger)
     );
-    log.debug("~TYPECHECK: {} <----- {} ? {}",
-      this.underlyingClass.getSimpleName(), a.getClass().getSimpleName(), result);
     if (!result) {
+      log.fatal("~TYPECHECK: {} <----- {} ? {}",
+        this.underlyingClass.getSimpleName(), a.getClass().getSimpleName(), result);
       throw new OPSTypeCheckException("The typed value provided ("
           + a + ") is not type compatible with this type constraint ("
           + this + ").");

@@ -114,8 +114,6 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
       }
     }
 
-    log.debug(this.relDisplayRecordSet);
-
     /*
      * If not, is the display control field also a related display field?
      */
@@ -182,7 +180,8 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         this.parentRowset.getRegisteredChildScrollBuffers().size(),
         // All non-level 0 rows seem to have these flags enabled.
         (scrollLevel != 0), (scrollLevel != 0),
-        this.parentRowset.getRegisteredNonRelDispRecordBuffers().size()));
+        this.parentRowset.getRegisteredNonRelDispRecordBuffers().size()
+            + this.relDisplayRecordSet.getEmissionRecordCount()));
 
     for (Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {

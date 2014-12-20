@@ -77,7 +77,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     return this.parentRecord.getIndexPositionOfField(this);
   }
 
-  public void emitScrolls(final String indent) {
+  public void emitScrolls(final int indent) {
 
     // Do not log contents of a field that is not in the component buffer.
     if (this.recFieldBuffer == null) {

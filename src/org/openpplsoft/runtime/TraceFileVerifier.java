@@ -45,7 +45,7 @@ public final class TraceFileVerifier {
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
-      rowPattern;
+      rowPattern, cRecBufPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -101,6 +101,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Rec\\s+([0-9A-Z_]+)\\s+\\(recdefn\\s+\\S+\\)\\s+keyrec=(-?\\d+)\\s+keyfield=(-?\\d+)");
     rowPattern =
         Pattern.compile("Row\\s(\\d+)\\sat\\s.{8}.");
+    cRecBufPattern =
+        Pattern.compile("((\\|\\s{2})*)CRecBuf\\s([A-Z_0-9]+)");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -437,6 +439,16 @@ public final class TraceFileVerifier {
         currTraceLine = getNextTraceLine();
         return new RowInScroll(
             Integer.parseInt(rowMatcher.group(GROUP1)));
+      }
+
+      final Matcher cRecBufMatcher =
+          cRecBufPattern.matcher(currTraceLine);
+      if (cRecBufMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new CRecBuf(
+            cRecBufMatcher.group(GROUP1),
+            cRecBufMatcher.group(GROUP3));
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

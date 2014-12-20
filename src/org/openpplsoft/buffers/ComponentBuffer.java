@@ -174,7 +174,7 @@ public final class ComponentBuffer {
             + "one record.");
       }
       TraceFileVerifier.submitEnforcedEmission(new BeginScrolls("Search Results"));
-      cBuffer.emitScrolls("");
+      cBuffer.emitScrolls(0);
       TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
     }
   }

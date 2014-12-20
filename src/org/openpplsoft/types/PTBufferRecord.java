@@ -149,7 +149,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         this.recDefn.RECNAME, keyrec, keyfield));
   }
 
-  public void emitScrolls(final String indent) {
+  public void emitScrolls(final int indent) {
 
     if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
       return;
@@ -160,10 +160,17 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       return;
     }
 
-    log.debug("{}CRecBuf {}", indent, this.recDefn.RECNAME);
+    String indentStr = "";
+    for (int i = 0; i < indent; i++) {
+      indentStr += "|  ";
+    }
+
+    TraceFileVerifier.submitEnforcedEmission(
+        new CRecBuf(indentStr, this.recDefn.RECNAME));
+
     for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
-      entry.getValue().deref().emitScrolls(indent + "  ");
+      entry.getValue().deref().emitScrolls(indent + 1);
     }
   }
 

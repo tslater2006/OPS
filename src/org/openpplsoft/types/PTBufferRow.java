@@ -172,7 +172,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
           childScrollBuf.allocRowset(this));
   }
 
-  public void emitScrolls(final String indent) {
+  public void emitScrolls(final int indent) {
 
     int scrollLevel = Math.max(0, this.determineScrollLevel());
     TraceFileVerifier.submitEnforcedEmission(new BeginLevel(
@@ -193,11 +193,11 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
     for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {
-      entry.getValue().emitScrolls(indent + "  ");
+      entry.getValue().emitScrolls(indent);
     }
 
     for (final Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
-      entry.getValue().emitScrolls(indent + "  ");
+      entry.getValue().emitScrolls(indent + 1);
     }
   }
 

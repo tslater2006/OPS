@@ -183,17 +183,20 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         this.parentRowset.getRegisteredNonRelDispRecordBuffers().size()
             + this.relDisplayRecordSet.getEmissionRecordCount()));
 
-    for (Map.Entry<Integer, PTBufferRecord> entry
+    for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {
       entry.getValue().emitRecInScroll();
     }
 
-    for (Map.Entry<Integer, PTBufferRecord> entry
+    TraceFileVerifier.submitEnforcedEmission(
+      new RowInScroll(this.getIndexOfThisRowInParentRowset()));
+
+    for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {
       entry.getValue().emitScrolls(indent + "  ");
     }
 
-    for (Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
+    for (final Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().emitScrolls(indent + "  ");
     }
   }
@@ -202,12 +205,12 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
       final FireEventSummary fireEventSummary) {
 
     // Fire event on each record in this row.
-    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
+    for (final Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().fireEvent(event, fireEventSummary);
     }
 
     // Fire event on each rowset in this row.
-    for (Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
+    for (final Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().fireEvent(event, fireEventSummary);
     }
   }

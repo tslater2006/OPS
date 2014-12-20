@@ -44,7 +44,8 @@ public final class TraceFileVerifier {
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
-      beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern;
+      beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
+      rowPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -98,6 +99,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Begin\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]\\s+occcnt=(\\d+)\\s+activecnt=(\\d+)\\s+hiddencnt=(\\d+)\\s+scrlcnt=(\\d+)\\s+flags=\\S+\\s+(noautoselect\\s+)?(noautoupdate\\s+)?nrec=(\\d+)");
     recPattern =
         Pattern.compile("Rec\\s+([0-9A-Z_]+)\\s+\\(recdefn\\s+\\S+\\)\\s+keyrec=(-?\\d+)\\s+keyfield=(-?\\d+)");
+    rowPattern =
+        Pattern.compile("Row\\s(\\d+)\\sat\\s.{8}.");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -425,6 +428,15 @@ public final class TraceFileVerifier {
             recMatcher.group(GROUP1),
             Integer.parseInt(recMatcher.group(GROUP2)),
             Integer.parseInt(recMatcher.group(GROUP3)));
+      }
+
+      final Matcher rowMatcher =
+          rowPattern.matcher(currTraceLine);
+      if (rowMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new RowInScroll(
+            Integer.parseInt(rowMatcher.group(GROUP1)));
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

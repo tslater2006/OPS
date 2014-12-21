@@ -73,14 +73,29 @@ public final class PTChar extends PTPrimitiveType<Character> {
     this.value = newValue.charAt(0);
   }
 
+  /**
+   * readAsString() must be overridden by PTChar because
+   * the default toString() on Character will convert a null
+   * character to a string of length 1, with either a null (\0)
+   * or negative character code. If the character is blank,
+   * return the empty string.
+   */
+  @Override
+  public String readAsString() {
+    if (this.isBlank()) {
+      return "";
+    }
+    return Character.toString(this.value);
+  }
+
   @Override
   public void setBlank() {
-    this.value = '\0';
+    this.value = '\u0000';
   }
 
   @Override
   public boolean isBlank() {
-    return this.value == '\0';
+    return this.value == '\u0000';
   }
 
   @Override

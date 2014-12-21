@@ -149,7 +149,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         this.recDefn.RECNAME, keyrec, keyfield));
   }
 
-  public void emitScrolls(final int indent) {
+  public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
 
     if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
       return;
@@ -170,7 +170,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
     for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
-      entry.getValue().deref().emitScrolls(indent + 1);
+      entry.getValue().deref().emitScrolls(ctxFlag, indent);
     }
   }
 

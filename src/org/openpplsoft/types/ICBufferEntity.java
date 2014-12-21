@@ -23,4 +23,5 @@ public interface ICBufferEntity {
   void runFieldDefaultProcessing(
       final FieldDefaultProcSummary fldDefProcSummary);
   int determineScrollLevel();
+  void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent);
 }

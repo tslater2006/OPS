@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.sql.*;
 import org.openpplsoft.trace.*;
+import org.openpplsoft.types.ScrollEmissionContext;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -45,7 +46,7 @@ public final class TraceFileVerifier {
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
-      rowPattern, cRecBufPattern;
+      rowPattern, cRecBufPattern, cFldBufPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -103,6 +104,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Row\\s(\\d+)\\sat\\s.{8}.");
     cRecBufPattern =
         Pattern.compile("((\\|\\s{2})*)CRecBuf\\s([A-Z_0-9]+)");
+    cFldBufPattern =
+        Pattern.compile("((\\|\\s{2})*\\s{2})([A-Z_0-9]+)\\(.{8}\\)='(.*?)';");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -393,7 +396,8 @@ public final class TraceFileVerifier {
       if (beginScrollsMatcher.find()) {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
-        return new BeginScrolls(beginScrollsMatcher.group(GROUP1));
+        return new BeginScrolls(
+            ScrollEmissionContext.fromLabel(beginScrollsMatcher.group(GROUP1)));
       }
 
       final Matcher endScrollsMatcher =
@@ -449,6 +453,17 @@ public final class TraceFileVerifier {
         return new CRecBuf(
             cRecBufMatcher.group(GROUP1),
             cRecBufMatcher.group(GROUP3));
+      }
+
+      final Matcher cFldBufMatcher =
+          cFldBufPattern.matcher(currTraceLine);
+      if (cFldBufMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new CFldBuf(
+            cFldBufMatcher.group(GROUP1),
+            cFldBufMatcher.group(GROUP3),
+            cFldBufMatcher.group(GROUP4));
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

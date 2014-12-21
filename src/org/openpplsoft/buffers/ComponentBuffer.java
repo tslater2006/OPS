@@ -173,8 +173,9 @@ public final class ComponentBuffer {
             "Result set for search record fill has more than "
             + "one record.");
       }
-      TraceFileVerifier.submitEnforcedEmission(new BeginScrolls("Search Results"));
-      cBuffer.emitScrolls(0);
+      TraceFileVerifier.submitEnforcedEmission(
+          new BeginScrolls(ScrollEmissionContext.SEARCH_RESULTS));
+      cBuffer.emitScrolls(ScrollEmissionContext.SEARCH_RESULTS, 0);
       TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
     }
   }

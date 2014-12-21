@@ -77,15 +77,30 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     return this.parentRecord.getIndexPositionOfField(this);
   }
 
-  public void emitScrolls(final int indent) {
+  public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
 
-    // Do not log contents of a field that is not in the component buffer.
+    // Fields that do not have a corresponding record field buffer should
+    // not be emitted during scroll emission.
     if (this.recFieldBuffer == null) {
       return;
     }
 
-    log.debug("{}{}='{}'", indent, this.recFieldDefn.FIELDNAME,
-        this.getValue().readAsString());
+    // If we are emitting scrolls for search results, only emit key fields
+    // that have been updated.
+    if (ctxFlag == ScrollEmissionContext.SEARCH_RESULTS
+        && (!this.recFieldDefn.isKey()
+            || !this.getValue().isMarkedAsUpdated())) {
+      return;
+    }
+
+    String indentStr = "";
+    for (int i = 0; i < indent; i++) {
+      indentStr += "|  ";
+    }
+
+    TraceFileVerifier.submitEnforcedEmission(
+        new CFldBuf(indentStr + "  ", this.recFieldDefn.FIELDNAME,
+            this.getValue().readAsString()));
   }
 
   public void fireEvent(final PCEvent event,

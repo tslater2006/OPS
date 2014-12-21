@@ -171,9 +171,9 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     return null;
   }
 
-  public void emitScrolls(final int indent) {
+  public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
     for (int i = 0; i < this.rows.size(); i++) {
-      this.rows.get(i).emitScrolls(indent);
+      this.rows.get(i).emitScrolls(ctxFlag, indent);
     }
   }
 
@@ -293,8 +293,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     // Return the number of rows read from the fill operation.
     Environment.pushToCallStack(new PTInteger(rowsRead));
 
-    TraceFileVerifier.submitEnforcedEmission(new BeginScrolls("After ScrollSelect"));
-    ComponentBuffer.getLevelZeroRowset().emitScrolls(0);
+    TraceFileVerifier.submitEnforcedEmission(new BeginScrolls(
+        ScrollEmissionContext.AFTER_SCROLL_SELECT));
+    ComponentBuffer.getLevelZeroRowset().emitScrolls(
+        ScrollEmissionContext.AFTER_SCROLL_SELECT, 0);
     TraceFileVerifier.submitEnforcedEmission(new EndScrolls());
   }
 

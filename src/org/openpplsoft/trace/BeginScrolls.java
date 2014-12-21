@@ -7,15 +7,16 @@
 
 package org.openpplsoft.trace;
 
+import org.openpplsoft.types.ScrollEmissionContext;
+
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class BeginScrolls implements IEmission {
 
-  // i.e., "Search Results", "After ScrollSelect", etc.
-  private String phase;
+  private final ScrollEmissionContext emissionContext;
 
-  public BeginScrolls(final String phase) {
-    this.phase = phase;
+  public BeginScrolls(final ScrollEmissionContext emissionContext) {
+    this.emissionContext = emissionContext;
   }
 
   @Override
@@ -29,7 +30,7 @@ public class BeginScrolls implements IEmission {
     }
 
     final BeginScrolls other = (BeginScrolls) obj;
-    return this.phase.equals(other.phase);
+    return this.emissionContext.equals(other.emissionContext);
   }
 
   @Override
@@ -37,14 +38,15 @@ public class BeginScrolls implements IEmission {
     final int HCB_INITIAL = 79, HCB_MULTIPLIER = 619;
 
     final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.phase);
+        HCB_MULTIPLIER).append(this.emissionContext);
     return hbc.toHashCode();
   }
 
   @Override
   public String toString() {
     final StringBuilder builder = new StringBuilder();
-    builder.append("Begin Scrolls ").append(this.phase);
+    builder.append("Begin Scrolls ").append(
+        this.emissionContext.getTraceFileLabel());
     return builder.toString();
   }
 }

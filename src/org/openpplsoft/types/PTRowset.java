@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -184,46 +183,42 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
 
     } while (!(Environment.peekAtCallStack() instanceof PTCallFrameBoundary));
 
-    Collections.sort(this.rows, new Comparator<R>() {
-      @Override
-      public int compare(R aRow, R bRow) {
+    Collections.sort(this.rows, (aRow, bRow) -> {
+      /*
+       * Order the rows based on the precedence
+       * specified in the list of sort fields,
+       * along with the order accompanying each ("A" or "D").
+       */
+      for (int i = 0; i < sortFields.size(); i++) {
+        final String order = sortOrders.get(i);
 
-        /*
-         * Order the rows based on the precedence
-         * specified in the list of sort fields,
-         * along with the order accompanying each ("A" or "D").
-         */
-        for (int i = 0; i < sortFields.size(); i++) {
-          final String order = sortOrders.get(i);
+        final PTRecord<?,?> aRecord = aRow.getRecord(primaryRecDefn.RECNAME);
+        final PTReference<? extends PTField> aRef = aRecord
+            .getFieldRef(sortFields.get(i));
+        final PTPrimitiveType aVal = aRef.deref().getValue();
 
-          final PTRecord<?,?> aRecord = aRow.getRecord(primaryRecDefn.RECNAME);
-          final PTReference<? extends PTField> aRef = aRecord
-              .getFieldRef(sortFields.get(i));
-          final PTPrimitiveType aVal = aRef.deref().getValue();
+        final PTRecord<?,?> bRecord = bRow.getRecord(primaryRecDefn.RECNAME);
+        final PTReference<? extends PTField> bRef = bRecord
+            .getFieldRef(sortFields.get(i));
+        final PTPrimitiveType bVal = bRef.deref().getValue();
 
-          final PTRecord<?,?> bRecord = bRow.getRecord(primaryRecDefn.RECNAME);
-          final PTReference<? extends PTField> bRef = bRecord
-              .getFieldRef(sortFields.get(i));
-          final PTPrimitiveType bVal = bRef.deref().getValue();
-
-          if (aVal.isLessThan(bVal).read()) {
-            if (order.equals("A")) {
-              return -1;
-            } else {
-              return 1;
-            }
-          } else if (aVal.isGreaterThan(bVal).read()) {
-            if (order.equals("A")) {
-              return 1;
-            } else {
-              return -1;
-            }
+        if (aVal.isLessThan(bVal).read()) {
+          if (order.equals("A")) {
+            return -1;
           } else {
-            continue;
+            return 1;
           }
+        } else if (aVal.isGreaterThan(bVal).read()) {
+          if (order.equals("A")) {
+            return 1;
+          } else {
+            return -1;
+          }
+        } else {
+          continue;
         }
-        return 0;
       }
+      return 0;
     });
 
     /*int i=1;

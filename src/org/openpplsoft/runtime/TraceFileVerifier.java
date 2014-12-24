@@ -103,7 +103,7 @@ public final class TraceFileVerifier {
     rowPattern =
         Pattern.compile("Row\\s(\\d+)\\sat\\s.{8}.");
     cRecBufPattern =
-        Pattern.compile("((\\|\\s{2})*)CRecBuf\\s([A-Z_0-9]+)");
+        Pattern.compile("((\\|\\s{2})*)CRecBuf\\s([A-Z_0-9]+)\\(.{8}\\)\\sfields=(\\d+)\\s?(.+)?\\s?");
     cFldBufPattern =
         Pattern.compile("((\\|\\s{2})*\\s{2})([A-Z_0-9]+)\\(.{8}\\)='(.*?)';");
 
@@ -452,7 +452,9 @@ public final class TraceFileVerifier {
         currTraceLine = getNextTraceLine();
         return new CRecBuf(
             cRecBufMatcher.group(GROUP1),
-            cRecBufMatcher.group(GROUP3));
+            cRecBufMatcher.group(GROUP3),
+            Integer.parseInt(cRecBufMatcher.group(GROUP4)),
+            cRecBufMatcher.group(GROUP5));
       }
 
       final Matcher cFldBufMatcher =

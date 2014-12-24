@@ -166,7 +166,8 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     }
 
     TraceFileVerifier.submitEnforcedEmission(
-        new CRecBuf(indentStr, this.recDefn.RECNAME));
+        new CRecBuf(indentStr, this.recDefn.RECNAME,
+            this.recDefn.getExpandedFieldList().size(), ""));
 
     for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {

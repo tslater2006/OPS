@@ -17,11 +17,22 @@ public class CRecBuf implements IEmission {
   private static Logger log =
       LogManager.getLogger(CRecBuf.class.getName());
 
-  public final String indentStr, recName;
+  public final String indentStr, recName, flagStr;
+  public final int numFields;
 
-  public CRecBuf(final String indentStr, final String recName) {
+  public CRecBuf(final String indentStr, final String recName,
+      final int numFields, final String flagStr) {
     this.indentStr = indentStr;
     this.recName = recName;
+    this.numFields = numFields;
+
+    // Flag string can legitimately be empty; will be picked up as null
+    // by regex procedure in TraceFileVerifier.
+    if (flagStr == null) {
+      this.flagStr = "";
+    } else {
+      this.flagStr = flagStr;
+    }
   }
 
   @Override
@@ -36,7 +47,9 @@ public class CRecBuf implements IEmission {
 
     final CRecBuf other = (CRecBuf) obj;
     return this.indentStr.equals(other.indentStr)
-        && this.recName.equals(other.recName);
+        && this.recName.equals(other.recName)
+        && this.numFields == other.numFields
+        && this.flagStr.equals(other.flagStr);
   }
 
   @Override
@@ -44,7 +57,8 @@ public class CRecBuf implements IEmission {
     final int HCB_INITIAL = 2741, HCB_MULTIPLIER = 229;
 
     final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.indentStr).append(this.recName);
+        HCB_MULTIPLIER).append(this.indentStr).append(this.recName)
+        .append(this.numFields).append(this.flagStr);
     return hbc.toHashCode();
   }
 
@@ -52,7 +66,8 @@ public class CRecBuf implements IEmission {
   public String toString() {
     final StringBuilder builder = new StringBuilder();
     builder.append(this.indentStr).append("CRecBuf ")
-        .append(this.recName);
+        .append(this.recName).append(" fields=")
+        .append(this.numFields).append(" ").append(this.flagStr);
     return builder.toString();
   }
 }

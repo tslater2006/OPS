@@ -197,10 +197,10 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
    * A record may be physical (table, view) but still considered to be
    * a work record if one or more of its keys do not have a value.
    */
-  private boolean isEffectivelyAWorkRecord() {
+  public boolean isEffectivelyAWorkRecord() {
     for (final Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
-      final PTField fld = entry.getValue().deref();
+      final PTBufferField fld = entry.getValue().deref();
       if (fld.getRecordFieldDefn().isKey() && !fld.getValue().isMarkedAsUpdated()) {
         return true;
       }

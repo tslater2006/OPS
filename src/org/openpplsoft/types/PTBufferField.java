@@ -93,6 +93,16 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       return;
     }
 
+    // If the parent record is effectively a work record, only emit this
+    // field if it is a key that has been updated with a value.
+    if (this.parentRecord.isEffectivelyAWorkRecord()
+        && !(this.recFieldDefn.isKey()
+            && this.getValue().isMarkedAsUpdated())) {
+      log.debug("Record is effectively work; skipping field {} with value={}.",
+          this.recFieldDefn.FIELDNAME, this.getValue().readAsString());
+      return;
+    }
+
     String indentStr = "";
     for (int i = 0; i < indent; i++) {
       indentStr += "|  ";

@@ -165,14 +165,47 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       indentStr += "|  ";
     }
 
+    String flagStr = "";
+    if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
+      if (this.recDefn.isDerivedWorkRecord()) {
+        flagStr += " work";
+      } else {
+
+        if (this.isEffectivelyAWorkRecord()) {
+          log.debug("Effectively a work record: {}", this.recDefn.RECNAME);
+          flagStr += " work";
+        }
+
+        // By defn, if record is not derived/work, it is physical and must
+        // be marked as lvl0, even if it is also effectively a work record.
+        flagStr += " lvl0";
+      }
+    }
+    flagStr = flagStr.trim();
+
     TraceFileVerifier.submitEnforcedEmission(
         new CRecBuf(indentStr, this.recDefn.RECNAME,
-            this.recDefn.getExpandedFieldList().size(), ""));
+            this.recDefn.getExpandedFieldList().size(), flagStr));
 
     for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
       entry.getValue().deref().emitScrolls(ctxFlag, indent);
     }
+  }
+
+  /**
+   * A record may be physical (table, view) but still considered to be
+   * a work record if one or more of its keys do not have a value.
+   */
+  private boolean isEffectivelyAWorkRecord() {
+    for (final Map.Entry<String, PTImmutableReference<PTBufferField>> entry
+        : this.fieldRefs.entrySet()) {
+      final PTField fld = entry.getValue().deref();
+      if (fld.getRecordFieldDefn().isKey() && !fld.getValue().isMarkedAsUpdated()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void fireEvent(final PCEvent event,

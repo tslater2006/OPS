@@ -31,7 +31,7 @@ public class CRecBuf implements IEmission {
     if (flagStr == null) {
       this.flagStr = "";
     } else {
-      this.flagStr = flagStr;
+      this.flagStr = flagStr.trim();
     }
   }
 

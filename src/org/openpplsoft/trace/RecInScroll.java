@@ -57,7 +57,7 @@ public class RecInScroll implements IEmission {
   public String toString() {
     final StringBuilder builder = new StringBuilder();
     builder.append("Rec ").append(this.recName)
-        .append(" (recdefn xxxxxxxx) keyrec=").append(this.keyrec)
+        .append(" keyrec=").append(this.keyrec)
         .append(" keyfield=").append(this.keyfield);
     return builder.toString();
   }

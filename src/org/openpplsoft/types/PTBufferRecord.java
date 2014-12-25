@@ -172,7 +172,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       } else {
 
         if (this.isEffectivelyAWorkRecord()) {
-          log.debug("Effectively a work record: {}", this.recDefn.RECNAME);
+          //log.debug("Effectively a work record: {}", this.recDefn.RECNAME);
           flagStr += " work";
         }
 

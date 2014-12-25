@@ -93,13 +93,15 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       return;
     }
 
-    // If the parent record is effectively a work record, only emit this
-    // field if it is a key that has been updated with a value.
-    if (this.parentRecord.isEffectivelyAWorkRecord()
-        && !(this.recFieldDefn.isKey()
-            && this.getValue().isMarkedAsUpdated())) {
-      log.debug("Record is effectively work; skipping field {} with value={}.",
-          this.recFieldDefn.FIELDNAME, this.getValue().readAsString());
+    // If we are emitting scrolls in any context other than search
+    // results and the parent record is effectively a work record, only emit this
+    // field if it has one or more page field tokens.
+    if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
+        && this.parentRecord.isEffectivelyAWorkRecord()
+        && (this.recFieldBuffer == null
+            || this.recFieldBuffer.getPageFieldToks().size() == 0)) {
+      //log.debug("Record is effectively work; skipping field {}.",
+      //    this.recFieldDefn.FIELDNAME);
       return;
     }
 

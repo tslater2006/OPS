@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,7 +66,7 @@ public final class PTStandaloneRecord extends PTRecord<PTStandaloneRow,
     // this map is linked in order to preserve
     // the order in which fields are added.
     this.fieldRefs = new LinkedHashMap<>();
-    this.fieldRefIdxTable = new LinkedHashMap<>();
+    this.fieldRefIdxTable = new TreeMap<>();
     int i = 1;
     for (final RecordField rf : this.recDefn.getExpandedFieldList()) {
       PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();

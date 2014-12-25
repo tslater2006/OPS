@@ -21,7 +21,7 @@ public class Record {
   public int RECTYPE;
 
   public Map<String, RecordField> fieldTable;
-  public TreeMap<Integer, Object> fldAndSubrecordTable;
+  public Map<Integer, Object> fldAndSubrecordTable;
   private List<String> subRecordNames;
   public Map<String, List<PeopleCodeProg>> recordProgsByFieldTable
       = new HashMap<String, List<PeopleCodeProg>>();

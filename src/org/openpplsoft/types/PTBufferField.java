@@ -79,9 +79,11 @@ public final class PTBufferField extends PTField<PTBufferRecord>
 
   public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
 
-    // Fields that do not have a corresponding record field buffer should
-    // not be emitted during scroll emission.
-    if (this.recFieldBuffer == null) {
+    // For all non-reldisp record fields, do not emit the record field
+    // if it does not have a record field buffer.
+    if (!this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
+        && this.recFieldBuffer == null) {
+      //log.debug("[1] Skipping field: {}", this.recFieldDefn.FIELDNAME);
       return;
     }
 
@@ -90,6 +92,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (ctxFlag == ScrollEmissionContext.SEARCH_RESULTS
         && (!this.recFieldDefn.isKey()
             || !this.getValue().isMarkedAsUpdated())) {
+      //log.debug("[2] Skipping field: {}", this.recFieldDefn.FIELDNAME);
       return;
     }
 
@@ -98,10 +101,12 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     // field if it has one or more page field tokens.
     if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
         && this.parentRecord.isEffectivelyAWorkRecord()
+        && !this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
         && (this.recFieldBuffer == null
             || this.recFieldBuffer.getPageFieldToks().size() == 0)) {
       //log.debug("Record is effectively work; skipping field {}.",
       //    this.recFieldDefn.FIELDNAME);
+      //log.debug("[3] Skipping field: {}", this.recFieldDefn.FIELDNAME);
       return;
     }
 

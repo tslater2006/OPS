@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,7 +69,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     // the order in which fields are added.
     this.fieldRefs = new LinkedHashMap<String, PTImmutableReference<PTBufferField>>();
     this.fieldRefIdxTable =
-        new LinkedHashMap<Integer, PTImmutableReference<PTBufferField>>();
+        new TreeMap<Integer, PTImmutableReference<PTBufferField>>();
     int i = 1;
     for (final RecordField rf : this.recDefn.getExpandedFieldList()) {
       PTFieldTypeConstraint fldTc = new PTFieldTypeConstraint();
@@ -189,7 +190,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         new CRecBuf(indentStr, this.recDefn.RECNAME,
             this.recDefn.getExpandedFieldList().size(), flagStr));
 
-    for (Map.Entry<String, PTImmutableReference<PTBufferField>> entry
+    for (final Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
       entry.getValue().deref().emitScrolls(ctxFlag, indent);
     }

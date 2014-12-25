@@ -176,9 +176,11 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
           flagStr += " work";
         }
 
-        // By defn, if record is not derived/work, it is physical and must
-        // be marked as lvl0, even if it is also effectively a work record.
-        flagStr += " lvl0";
+        if (this.recBuffer.isRelatedDisplayRecBuffer()) {
+          flagStr += " reldisp";
+        } else {
+          flagStr += " lvl0";
+        }
       }
     }
     flagStr = flagStr.trim();

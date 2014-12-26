@@ -106,6 +106,14 @@ public class Component {
     ostmt.close();
   }
 
+  public String getComponentName() {
+    return this.ptPNLGRPNAME;
+  }
+
+  public String getMarket() {
+    return this.ptMARKET;
+  }
+
   /**
    * Retrieves the list of PeopleCode programs attached to this
    * component, and caches the corresponding definition for each.

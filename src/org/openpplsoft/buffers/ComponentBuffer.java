@@ -526,9 +526,12 @@ public final class ComponentBuffer {
       }
     }
 
-    log.debug("PRM entries (count={}):", recFldRefs.size());
-    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
-    throw new OPSVMachRuntimeException("TODO: Finish collecting PRM entries.");
+//    log.debug("PRM entries (count={}):", recFldRefs.size());
+//    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+
+    TraceFileVerifier.submitEnforcedEmission(
+        new PRMHeader(compDefn.getComponentName(), "ENG", compDefn.getMarket(),
+            recFldRefs.size()));
   }
 
   private static class ScrollMarker {

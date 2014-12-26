@@ -43,7 +43,7 @@ public abstract class PeopleCodeProg {
   private Map<String, RecordPeopleCodeProg> recordProgFnCalls;
   private Map<String, FuncImpl> funcImplNodes;
   private Map<String, Function> funcTable;
-  private Map<Integer, Reference> bytecodeRefTable;
+  private Map<Integer, BytecodeReference> bytecodeRefTable;
   private Map<String, List<AppPackagePath>> importedAppClasses;
   private List<AppPackagePath> importedAppPackagePaths;
 
@@ -133,7 +133,7 @@ public abstract class PeopleCodeProg {
           + this.bytecode.length + ") not equal to PROGLEN (" + PROGLEN + ").");
     }
 
-    this.bytecodeRefTable = new TreeMap<Integer, Reference>();
+    this.bytecodeRefTable = new TreeMap<Integer, BytecodeReference>();
 
     ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_GetRefs",
         new String[]{this.bindVals[0], this.bindVals[1], this.bindVals[2],
@@ -144,7 +144,8 @@ public abstract class PeopleCodeProg {
     rs = ostmt.executeQuery();
     while(rs.next()) {
       this.bytecodeRefTable.put(rs.getInt("NAMENUM"),
-          new Reference(rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
+          new BytecodeReference(
+              rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
     }
     rs.close();
     ostmt.close();
@@ -238,14 +239,14 @@ public abstract class PeopleCodeProg {
     return this.recordProgFnCalls.get(fnName);
   }
 
-  public Reference getBytecodeReference(int refNbr) {
+  public BytecodeReference getBytecodeReference(int refNbr) {
     return this.bytecodeRefTable.get(refNbr);
   }
 
   public Set<String> getUniqueRecordFieldBytecodeReferences() {
     return bytecodeRefTable.values().stream()
-        .filter(r -> r.isRecordFieldRef)
-        .map(r -> r.RECNAME + "." + r.REFNAME)
+        .filter(r -> r.isRecordFieldRef())
+        .map(r -> r.getValue())
         .collect(toSet());
   }
 

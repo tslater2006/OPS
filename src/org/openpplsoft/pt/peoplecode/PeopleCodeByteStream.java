@@ -51,7 +51,7 @@ public class PeopleCodeByteStream {
     return prog.getBytecode()[this.cursorPos];
   }
 
-  public Reference getBytecodeReference(int idx) {
+  public BytecodeReference getBytecodeReference(int idx) {
     return this.prog.getBytecodeReference(idx);
   }
 

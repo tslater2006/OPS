@@ -388,7 +388,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
          * If we've already seen this reference, no need to process it again.
          */
         if (!this.refIndicesSeen.containsKey(refIdx)) {
-          final Reference refObj = this.srcProg.getBytecodeReference(refIdx);
+          final BytecodeReference refObj = this.srcProg.getBytecodeReference(refIdx);
           this.refIndicesSeen.put(refIdx, null);
         }
       }

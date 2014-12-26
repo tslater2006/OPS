@@ -46,7 +46,7 @@ public final class TraceFileVerifier {
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
-      rowPattern, cRecBufPattern, cFldBufPattern;
+      rowPattern, cRecBufPattern, cFldBufPattern, prmHdrPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -106,6 +106,8 @@ public final class TraceFileVerifier {
         Pattern.compile("((\\|\\s{2})*)CRecBuf\\s([A-Z_0-9]+)\\(.{8}\\)\\sfields=(\\d+)\\s?(.+)?\\s?");
     cFldBufPattern =
         Pattern.compile("((\\|\\s{2})*\\s{2})([A-Z_0-9]+)\\(.{8}\\)='(.*?)';");
+    prmHdrPattern =
+        Pattern.compile("PRM\\s([A-Z_0-9]+)\\.([A-Z]+)\\.([A-Z]+)\\sversion\\s\\d+\\scount=(\\d+)");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -466,6 +468,18 @@ public final class TraceFileVerifier {
             cFldBufMatcher.group(GROUP1),
             cFldBufMatcher.group(GROUP3),
             cFldBufMatcher.group(GROUP4));
+      }
+
+      final Matcher prmHdrMatcher =
+          prmHdrPattern.matcher(currTraceLine);
+      if (prmHdrMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new PRMHeader(
+            prmHdrMatcher.group(GROUP1),
+            prmHdrMatcher.group(GROUP2),
+            prmHdrMatcher.group(GROUP3),
+            Integer.parseInt(prmHdrMatcher.group(GROUP4)));
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

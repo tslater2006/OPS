@@ -7,17 +7,22 @@
 
 package org.openpplsoft.pt.peoplecode;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.sql.*;
 import java.util.*;
 import java.io.*;
+
+import org.apache.logging.log4j.*;
+
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.tree.*;
+
 import org.openpplsoft.sql.*;
 import org.openpplsoft.bytecode.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.runtime.*;
-import org.apache.logging.log4j.*;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.tree.*;
 import org.openpplsoft.antlr4.*;
 import org.openpplsoft.antlr4.frontend.*;
 import org.openpplsoft.types.*;
@@ -235,6 +240,13 @@ public abstract class PeopleCodeProg {
 
   public Reference getBytecodeReference(int refNbr) {
     return this.bytecodeRefTable.get(refNbr);
+  }
+
+  public Set<String> getUniqueRecordFieldBytecodeReferences() {
+    return bytecodeRefTable.values().stream()
+        .filter(r -> r.isRecordFieldRef)
+        .map(r -> r.RECNAME + "." + r.REFNAME)
+        .collect(toSet());
   }
 
   public String toString() {

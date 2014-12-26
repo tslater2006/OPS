@@ -9,7 +9,9 @@ package org.openpplsoft.buffers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -35,6 +37,7 @@ public final class ComponentBuffer {
 
   private static Component compDefn;
   private static Record searchRecDefn;
+  private static Set<String> prmEntries;
 
   private static int currScrollLevel;
   private static ScrollBuffer currSB;
@@ -59,7 +62,19 @@ public final class ComponentBuffer {
     cBuffer = new PTRowsetTypeConstraint().allocBufferRowset(
         new SearchRecordBuffer(searchRecDefn));
 
-    compDefn.getListOfComponentPC();
+    final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
+
+    /*
+     * Collect all PRM entries now that all Component PC has been retrieved.
+     */
+    Set<String> recFldRefs = new TreeSet<String>();
+    for (final ComponentPeopleCodeProg prog : compProgs) {
+      recFldRefs.addAll(prog.getUniqueRecordFieldBytecodeReferences());
+    }
+
+    log.debug("PRM entries:");
+    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+    throw new OPSVMachRuntimeException("TODO: Finish collecting PRM entries.");
   }
 
   public static void fireEvent(final PCEvent event,
@@ -468,6 +483,12 @@ public final class ComponentBuffer {
         record.firstPassFill();
       }
     }
+  }
+
+  public static void emitPRM() {
+    log.debug("PRM contents: " + prmEntries);
+
+    throw new OPSVMachRuntimeException("TODO: Emit PRM header.");
   }
 
   private static class ScrollMarker {

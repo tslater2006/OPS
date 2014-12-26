@@ -110,9 +110,9 @@ public class Component {
    * Retrieves the list of PeopleCode programs attached to this
    * component, and caches the corresponding definition for each.
    */
-  public void getListOfComponentPC() {
+  public List<ComponentPeopleCodeProg> getListOfComponentPC() {
 
-    if (this.hasListOfComponentPCBeenRetrieved) { return; }
+    if (this.hasListOfComponentPCBeenRetrieved) { return this.orderedComponentProgs; }
     this.hasListOfComponentPCBeenRetrieved = true;
 
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_CompPCList",
@@ -162,6 +162,8 @@ public class Component {
 
     rs.close();
     ostmt.close();
+
+    return this.orderedComponentProgs;
   }
 
   public ComponentPeopleCodeProg getProgramForRecordFieldEvent(

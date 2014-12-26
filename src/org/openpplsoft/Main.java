@@ -94,6 +94,8 @@ public final class Main {
       ComponentStructureVerifier.verify(profileToRun);
       ComponentBuffer.materialize();
 
+      ComponentBuffer.emitPRM();
+
       ComponentBuffer.firstPassFill();
       ComponentBuffer.fireEvent(PCEvent.PRE_BUILD, new FireEventSummary());
       ComponentBuffer.runDefaultProcessing();

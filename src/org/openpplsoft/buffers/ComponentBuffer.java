@@ -62,19 +62,7 @@ public final class ComponentBuffer {
     cBuffer = new PTRowsetTypeConstraint().allocBufferRowset(
         new SearchRecordBuffer(searchRecDefn));
 
-    final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
-
-    /*
-     * Collect all PRM entries now that all Component PC has been retrieved.
-     */
-    Set<String> recFldRefs = new TreeSet<String>();
-    for (final ComponentPeopleCodeProg prog : compProgs) {
-      recFldRefs.addAll(prog.getUniqueRecordFieldBytecodeReferences());
-    }
-
-    log.debug("PRM entries:");
-    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
-    throw new OPSVMachRuntimeException("TODO: Finish collecting PRM entries.");
+    compDefn.getListOfComponentPC();
   }
 
   public static void fireEvent(final PCEvent event,
@@ -486,9 +474,61 @@ public final class ComponentBuffer {
   }
 
   public static void emitPRM() {
-    log.debug("PRM contents: " + prmEntries);
 
-    throw new OPSVMachRuntimeException("TODO: Emit PRM header.");
+    final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
+    final Set<String> recFldRefs = new TreeSet<String>();
+    final String RECFIELD_TO_FIND = "ACAD_CAL_WRK.ACAD_CAL_SRCH_CRIT";
+
+    /*
+     * Collect PRM entries from Component PeopleCode programs.
+     */
+    for (final ComponentPeopleCodeProg prog : compProgs) {
+      final Set<String> tempSet = prog.getUniqueRecFieldRefsForPRMInclusion();
+      if (tempSet.contains(RECFIELD_TO_FIND)) {
+        throw new OPSVMachRuntimeException("HERE1, prog is " + prog);
+      }
+      recFldRefs.addAll(tempSet);
+
+      prog.loadDefnsAndPrograms();
+      for (final PeopleCodeProg refProg : prog.getReferencedProgs()) {
+        if (refProg.getEvent().equals("FieldFormula")) { continue; }
+        final Set<String> tempSet2 = refProg.getUniqueRecFieldRefsForPRMInclusion();
+        if (tempSet2.contains(RECFIELD_TO_FIND)) {
+          throw new OPSVMachRuntimeException("HERE2, prog is " + refProg);
+        }
+        recFldRefs.addAll(tempSet2);
+      }
+    }
+
+    /*
+     * Collect PRM entries from Record PeopleCode programs.
+     */
+    IStreamableBuffer buf;
+    ComponentBuffer.resetCursors();
+    while ((buf = ComponentBuffer.next()) != null) {
+      if (buf instanceof RecordFieldBuffer) {
+        final RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+        final Record recDefn = fbuf.getRecDefn();
+        for (final RecordPeopleCodeProg prog
+            : recDefn.getRecordProgsForField(fbuf.getFldName())) {
+          final Set<String> progSet = prog.getUniqueRecFieldRefsForPRMInclusion();
+
+          // If program references the field it's on, remove that reference;
+          // these are excluded from PRM listing.
+          progSet.remove(recDefn.RECNAME + "." + fbuf.getFldName());
+
+          if (progSet.contains(RECFIELD_TO_FIND)) {
+            throw new OPSVMachRuntimeException("HERE3; record is " + recDefn
+                + ", prog is " + prog);
+          }
+          recFldRefs.addAll(progSet);
+        }
+      }
+    }
+
+    log.debug("PRM entries (count={}):", recFldRefs.size());
+    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+    throw new OPSVMachRuntimeException("TODO: Finish collecting PRM entries.");
   }
 
   private static class ScrollMarker {

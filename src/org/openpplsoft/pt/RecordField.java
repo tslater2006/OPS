@@ -114,9 +114,10 @@ public class RecordField {
     final Record recDefn = DefnCache.getRecord(this.RECNAME);
     recDefn.discoverRecordPC();
 
-    final List<PeopleCodeProg> recFldProgs = recDefn.getRecordProgsForField(this.FIELDNAME);
+    final List<RecordPeopleCodeProg> recFldProgs =
+        recDefn.getRecordProgsForField(this.FIELDNAME);
     if (recFldProgs != null) {
-      for (PeopleCodeProg prog : recFldProgs) {
+      for (final RecordPeopleCodeProg prog : recFldProgs) {
         if (prog.getEvent().equals(event.getName())) {
           return prog;
         }

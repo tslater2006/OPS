@@ -231,6 +231,10 @@ public abstract class PeopleCodeProg {
     this.referencedProgs.add(prog);
   }
 
+  public List<PeopleCodeProg> getReferencedProgs() {
+    return this.referencedProgs;
+  }
+
   public boolean hasRecordProgFnCall(final String fnName) {
     return this.recordProgFnCalls.containsKey(fnName);
   }
@@ -243,7 +247,7 @@ public abstract class PeopleCodeProg {
     return this.bytecodeRefTable.get(refNbr);
   }
 
-  public Set<String> getUniqueRecordFieldBytecodeReferences() {
+  public Set<String> getUniqueRecFieldRefsForPRMInclusion() {
     return bytecodeRefTable.values().stream()
         .filter(r -> r.isRecordFieldRef())
         .map(r -> r.getValue())

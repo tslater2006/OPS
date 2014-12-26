@@ -7,8 +7,11 @@
 
 package org.openpplsoft.pt;
 
+import static java.util.stream.Collectors.toList;
+
 import java.sql.*;
 import java.util.*;
+
 import org.openpplsoft.sql.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.pt.peoplecode.*;
@@ -23,8 +26,8 @@ public class Record {
   public Map<String, RecordField> fieldTable;
   public Map<Integer, Object> fldAndSubrecordTable;
   private List<String> subRecordNames;
-  public Map<String, List<PeopleCodeProg>> recordProgsByFieldTable
-      = new HashMap<String, List<PeopleCodeProg>>();
+  public Map<String, List<RecordPeopleCodeProg>> recordProgsByFieldTable
+      = new HashMap<>();
 
   private static Logger log = LogManager.getLogger(Record.class.getName());
 
@@ -133,13 +136,13 @@ public class Record {
           rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
       prog = DefnCache.getProgram(prog);
 
-      List<PeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
+      List<RecordPeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
           .get(rs.getString("OBJECTVALUE2"));
       if(fieldProgList == null) {
-        fieldProgList = new ArrayList<PeopleCodeProg>();
+        fieldProgList = new ArrayList<RecordPeopleCodeProg>();
       }
 
-      fieldProgList.add(prog);
+      fieldProgList.add((RecordPeopleCodeProg) prog);
       this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
     }
 
@@ -265,8 +268,11 @@ public class Record {
     return expandedFieldList;
   }
 
-  public List<PeopleCodeProg> getRecordProgsForField(String FLDNAME) {
-    return this.recordProgsByFieldTable.get(FLDNAME);
+  public List<RecordPeopleCodeProg> getRecordProgsForField(final String FLDNAME) {
+    if (this.recordProgsByFieldTable.containsKey(FLDNAME)) {
+      return this.recordProgsByFieldTable.get(FLDNAME);
+    }
+    return Collections.<RecordPeopleCodeProg>emptyList();
   }
 
   public String getDbTableName() {

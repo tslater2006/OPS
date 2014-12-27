@@ -477,7 +477,7 @@ public final class ComponentBuffer {
 
     final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
     final Set<String> recFldRefs = new TreeSet<String>();
-    final String RECFIELD_TO_FIND = "ACAD_CAL_WRK.ACAD_CAL_SRCH_CRIT";
+    final String RECFIELD_TO_FIND = "ACAD_CAR_TBL.SSR_DFLT_TRMAC_LST";
 
     /*
      * Collect PRM entries from Component PeopleCode programs.
@@ -508,6 +508,13 @@ public final class ComponentBuffer {
     while ((buf = ComponentBuffer.next()) != null) {
       if (buf instanceof RecordFieldBuffer) {
         final RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+
+        // Related display records will not have PeopleCode run on them,
+        // and thus should not have their reference included in the PRM listing.
+        if (fbuf.getParentRecordBuffer().isRelatedDisplayRecBuffer()) {
+          continue;
+        }
+
         final Record recDefn = fbuf.getRecDefn();
         for (final RecordPeopleCodeProg prog
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
@@ -526,12 +533,15 @@ public final class ComponentBuffer {
       }
     }
 
-//    log.debug("PRM entries (count={}):", recFldRefs.size());
-//    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
-
     TraceFileVerifier.submitEnforcedEmission(
         new PRMHeader(compDefn.getComponentName(), "ENG", compDefn.getMarket(),
             recFldRefs.size()));
+
+    log.debug("PRM entries (count={}):", recFldRefs.size());
+//    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+
+    recFldRefs.stream().forEach(r ->
+        TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));
   }
 
   private static class ScrollMarker {

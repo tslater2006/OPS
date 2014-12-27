@@ -46,7 +46,7 @@ public final class TraceFileVerifier {
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
-      rowPattern, cRecBufPattern, cFldBufPattern, prmHdrPattern;
+      rowPattern, cRecBufPattern, cFldBufPattern, prmHdrPattern, prmEntryPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -64,7 +64,7 @@ public final class TraceFileVerifier {
   private static final int GROUP8 = 8;
   private static final int GROUP9 = 9;
 
-  private static boolean isPausedAndWaitingToSyncUp;
+  private static boolean isPausedAndWaitingToSyncUp, isInPRMEmissionRegion;
   private static IEmission emissionToSyncUpOn;
 
   private static Logger log = LogManager.getLogger(
@@ -108,6 +108,8 @@ public final class TraceFileVerifier {
         Pattern.compile("((\\|\\s{2})*\\s{2})([A-Z_0-9]+)\\(.{8}\\)='(.*?)';");
     prmHdrPattern =
         Pattern.compile("PRM\\s([A-Z_0-9]+)\\.([A-Z]+)\\.([A-Z]+)\\sversion\\s\\d+\\scount=(\\d+)");
+    prmEntryPattern =
+        Pattern.compile("\\s{4}([A-Z_0-9]+\\.[A-Z_0-9]+)$");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -287,6 +289,7 @@ public final class TraceFileVerifier {
     // do-while because we want to check the line returned from the prior call
     // to getNextTraceLine().
     do {
+
       final Matcher sqlMatcher = sqlTokenPattern.matcher(currTraceLine);
       if (sqlMatcher.find()) {
         numTraceSQLStmts++;
@@ -475,11 +478,27 @@ public final class TraceFileVerifier {
       if (prmHdrMatcher.find()) {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
+        isInPRMEmissionRegion = true;
         return new PRMHeader(
             prmHdrMatcher.group(GROUP1),
             prmHdrMatcher.group(GROUP2),
             prmHdrMatcher.group(GROUP3),
             Integer.parseInt(prmHdrMatcher.group(GROUP4)));
+      }
+
+      if (isInPRMEmissionRegion) {
+        final Matcher prmEntryMatcher =
+            prmEntryPattern.matcher(currTraceLine);
+        if (prmEntryMatcher.find()) {
+          // We don't want the next call to check this line again.
+          currTraceLine = getNextTraceLine();
+          return new PRMEntry(prmEntryMatcher.group(GROUP1));
+        }
+      }
+
+      if (currTraceLine.endsWith("Page Constructed")) {
+        isInPRMEmissionRegion = false;
+        currTraceLine = getNextTraceLine();
       }
     } while ((currTraceLine = getNextTraceLine()) != null);
     return null;

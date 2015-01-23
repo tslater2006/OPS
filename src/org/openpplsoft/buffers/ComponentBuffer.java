@@ -9,6 +9,7 @@ package org.openpplsoft.buffers;
 
 import static java.util.stream.Collectors.toSet;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -478,6 +479,7 @@ public final class ComponentBuffer {
   public static void emitPRM() {
 
     final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
+    final Set<String> pfsRefs = new HashSet<String>();
     final Set<String> recFldRefs = new TreeSet<String>();
     final String RECFIELD_TO_FIND = "DERIVED_ADDRESS.ADDRESS2_ACa";
 
@@ -508,12 +510,14 @@ public final class ComponentBuffer {
           && !tok.isDisplayOnly()
           //&& !tok.isInvisible()
           && !tok.isRelatedDisplay()) {
-        recFldRefs.add(tok.getRecName() + "." + tok.getFldName());
-        if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
+        String entry = tok.getRecName() + "." + tok.getFldName();
+        log.debug("Adding from pfs: {}", entry); 
+        pfsRefs.add(entry);
+        /*if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
             && RECFIELD_TO_FIND.endsWith(tok.getFldName())) {
           throw new OPSVMachRuntimeException("HERE0, recfield on page: "
               + currPageTok + "; tok is: " + tok);
-        }
+        }*/
       }
     }
 
@@ -558,13 +562,12 @@ public final class ComponentBuffer {
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
           Set<String> progSet = prog.getUniqueRecFieldRefsForPRMInclusion();
 
-          // If program references the field it's on, remove that reference;
-          // these are excluded from PRM listing.
-          progSet.remove(recDefn.RECNAME + "." + fbuf.getFldName());
-
-          /*progSet = progSet.stream()
-              .filter(r -> !r.startsWith(recDefn.RECNAME + "."))
-              .collect(toSet());*/
+          // If program references the field it's on, but that
+          // field is not in the pfs, remove that reference from the set.
+          final String recFldStr = recDefn.RECNAME + "." + fbuf.getFldName();
+          if (!pfsRefs.contains(recFldStr)) {
+            progSet.remove(recFldStr);
+          }
 
           if (progSet.contains(RECFIELD_TO_FIND)) {
             throw new OPSVMachRuntimeException("HERE3; record is " + recDefn
@@ -580,7 +583,7 @@ public final class ComponentBuffer {
             recFldRefs.size()));
 
     log.debug("PRM entries (count={}):", recFldRefs.size());
-//    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+    //recFldRefs.stream().forEach(r -> log.debug("  {}", r));
 
     // TEMPORARY: remove ADDRESS_SBR.COUNTY while I figure it out.
 //    recFldRefs.remove("ADDRESS_SBR.COUNTY");

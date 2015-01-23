@@ -504,13 +504,13 @@ public final class ComponentBuffer {
           }
         }
       }*/
+      String entry = tok.getRecName() + "." + tok.getFldName();
 
       if (tok.hasFlag(PFlag.GENERIC)
           && !tok.isDisplayControl()
           && !tok.isDisplayOnly()
           //&& !tok.isInvisible()
           && !tok.isRelatedDisplay()) {
-        String entry = tok.getRecName() + "." + tok.getFldName();
         log.debug("Adding from pfs: {}", entry); 
         pfsRefs.add(entry);
         /*if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
@@ -530,10 +530,9 @@ public final class ComponentBuffer {
         throw new OPSVMachRuntimeException("HERE1, prog is " + prog);
       }
       recFldRefs.addAll(tempSet);
-
       /*prog.loadDefnsAndPrograms();
       for (final PeopleCodeProg refProg : prog.getReferencedProgs()) {
-        if (refProg.getEvent().equals("FieldFormula")) { continue; }
+        //if (refProg.getEvent().equals("FieldFormula")) { continue; }
         final Set<String> tempSet2 = refProg.getUniqueRecFieldRefsForPRMInclusion();
         if (tempSet2.contains(RECFIELD_TO_FIND)) {
           throw new OPSVMachRuntimeException("HERE2, prog is " + refProg);

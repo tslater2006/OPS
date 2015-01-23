@@ -190,7 +190,7 @@ public class PgToken {
       b.append(this.RECNAME).append(".").append(this.FIELDNAME);
 
       if(this.SUBPNLNAME != null && this.SUBPNLNAME.length() > 0) {
-        b.append("SUBPNLNAME=").append(this.SUBPNLNAME);
+        b.append(", SUBPNLNAME=").append(this.SUBPNLNAME);
       }
     }
 

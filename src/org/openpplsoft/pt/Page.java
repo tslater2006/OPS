@@ -105,7 +105,7 @@ public class Page {
           rs.getString("FIELDNAME").trim(),
           rs.getString("SUBPNLNAME").trim(),
           rs.getInt("OCCURSLEVEL"),
-          (byte) rs.getInt("FIELDUSE"),
+          rs.getInt("FIELDUSE"),
           rs.getInt("ASSOCFIELDNUM"),
         /*
          * Even though PSPNLFIELD has a FIELDNUM field, it is
@@ -114,6 +114,13 @@ public class Page {
          * so for now I am using an incremented var.
          */
           nextFieldNum++);
+
+    /*  if (pf.getRecName().equals("DERIVED_ADDRESS")
+          && pf.getFldName().equals("ADDRESS4")
+          && this.ptPNLNAME.equals("EO_ADDRESS_SRCH")
+          && rs.getInt("FIELDUSE") == 0) {
+        throw new OPSVMachRuntimeException("FIELDUSE is 0, here: " + this.ptPNLNAME);
+      }*/
 
       switch (rs.getInt("FIELDTYPE")) {
         case PSDefn.PageFieldType.STATIC_TEXT:

@@ -7,6 +7,8 @@
 
 package org.openpplsoft.buffers;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -477,7 +479,43 @@ public final class ComponentBuffer {
 
     final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
     final Set<String> recFldRefs = new TreeSet<String>();
-    final String RECFIELD_TO_FIND = "ACAD_CAR_TBL.SSR_DFLT_TRMAC_LST";
+    final String RECFIELD_TO_FIND = "DERIVED_ADDRESS.ADDRESS2_ACa";
+
+    /*
+     * Collect PRM entries from the page field token stream
+     * of the root active component page.
+     */
+    final PgTokenStream pfs = new PgTokenStream(
+        ((PTString) Environment.getSystemVar("%Page")).read());
+    PgToken tok;
+    PgToken currPageTok = null;
+    while ((tok = pfs.next()) != null) {
+
+      if (tok.hasFlag(PFlag.PAGE)) {
+        currPageTok = tok;
+      }
+
+    /*if (tok.hasFlag(PFlag.SUBPAGE)) {
+        while ((tok = pfs.next()) != null) {
+          if (tok.hasFlag(PFlag.END_OF_PAGE)) {
+            break;
+          }
+        }
+      }*/
+
+      if (tok.hasFlag(PFlag.GENERIC)
+          && !tok.isDisplayControl()
+          && !tok.isDisplayOnly()
+          //&& !tok.isInvisible()
+          && !tok.isRelatedDisplay()) {
+        recFldRefs.add(tok.getRecName() + "." + tok.getFldName());
+        if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
+            && RECFIELD_TO_FIND.endsWith(tok.getFldName())) {
+          throw new OPSVMachRuntimeException("HERE0, recfield on page: "
+              + currPageTok + "; tok is: " + tok);
+        }
+      }
+    }
 
     /*
      * Collect PRM entries from Component PeopleCode programs.
@@ -489,7 +527,7 @@ public final class ComponentBuffer {
       }
       recFldRefs.addAll(tempSet);
 
-      prog.loadDefnsAndPrograms();
+      /*prog.loadDefnsAndPrograms();
       for (final PeopleCodeProg refProg : prog.getReferencedProgs()) {
         if (refProg.getEvent().equals("FieldFormula")) { continue; }
         final Set<String> tempSet2 = refProg.getUniqueRecFieldRefsForPRMInclusion();
@@ -497,7 +535,7 @@ public final class ComponentBuffer {
           throw new OPSVMachRuntimeException("HERE2, prog is " + refProg);
         }
         recFldRefs.addAll(tempSet2);
-      }
+      }*/
     }
 
     /*
@@ -518,11 +556,15 @@ public final class ComponentBuffer {
         final Record recDefn = fbuf.getRecDefn();
         for (final RecordPeopleCodeProg prog
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
-          final Set<String> progSet = prog.getUniqueRecFieldRefsForPRMInclusion();
+          Set<String> progSet = prog.getUniqueRecFieldRefsForPRMInclusion();
 
           // If program references the field it's on, remove that reference;
           // these are excluded from PRM listing.
           progSet.remove(recDefn.RECNAME + "." + fbuf.getFldName());
+
+          /*progSet = progSet.stream()
+              .filter(r -> !r.startsWith(recDefn.RECNAME + "."))
+              .collect(toSet());*/
 
           if (progSet.contains(RECFIELD_TO_FIND)) {
             throw new OPSVMachRuntimeException("HERE3; record is " + recDefn
@@ -540,6 +582,12 @@ public final class ComponentBuffer {
     log.debug("PRM entries (count={}):", recFldRefs.size());
 //    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
 
+    // TEMPORARY: remove ADDRESS_SBR.COUNTY while I figure it out.
+//    recFldRefs.remove("ADDRESS_SBR.COUNTY");
+//    recFldRefs.remove("ADDRESS_SBR.HOUSE_TYPE");
+//
+
+//    recFldRefs.stream().forEach(r -> log.debug(r));
     recFldRefs.stream().forEach(r ->
         TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));
   }

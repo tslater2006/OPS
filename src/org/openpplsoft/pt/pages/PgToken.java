@@ -19,7 +19,7 @@ public class PgToken {
   private EnumSet<PFlag> flags;
   private String RECNAME, FIELDNAME, SUBPNLNAME;
   private int OCCURSLEVEL, FIELDNUM, ASSOCFIELDNUM;
-  private byte FIELDUSE;
+  private int FIELDUSE;
 
   // If this token represents a related display field,
   // dispControlFieldTok refers to the associated display
@@ -34,6 +34,7 @@ public class PgToken {
 
   private String primaryRecName;     // used for SCROLL_START tokens.
 
+  private final byte DISPLAY_ONLY_FLAG = (byte) 1;
   private final byte INVISIBLE_FLAG = (byte) 2;
   private final byte DISP_CNTRL_FLAG = (byte) 8;
   private final byte REL_DISP_FLAG = (byte) 16;
@@ -47,7 +48,7 @@ public class PgToken {
       final String fldName,
       final String subPnlName,
       final int occursLevel,
-      final byte fieldUse,
+      final int fieldUse,
       final int assocFieldNum,
       final int fieldNum) {
     this.RECNAME = recName;
@@ -129,6 +130,10 @@ public class PgToken {
     return this.flags.contains(flag);
   }
 
+  public boolean isDisplayOnly() {
+    return ((this.FIELDUSE & this.DISPLAY_ONLY_FLAG) > 0);
+  }
+
   public boolean isInvisible() {
     return ((this.FIELDUSE & this.INVISIBLE_FLAG) > 0);
   }
@@ -194,9 +199,10 @@ public class PgToken {
     }
 
     b.append(this.flags);
+    b.append(", dspctrl?").append(this.isDisplayControl());
     b.append(", reldisp?").append(this.isRelatedDisplay());
     b.append(", invis?").append(this.isInvisible());
-
+    b.append(", FIELDUSE=").append(this.FIELDUSE);
     return b.toString();
   }
 }

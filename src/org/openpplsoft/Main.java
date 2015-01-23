@@ -53,7 +53,8 @@ public final class Main {
       Environment.init((String) ctx.getBean("psEnvironmentName"),
           profileToRun.getOprid());
 
-      Environment.setSystemVar("%Component", new PTString(profileToRun.getComponentName()));
+      Environment.setSystemVar("%Component",
+          new PTString(profileToRun.getComponentName()));
       Environment.setSystemVar("%Menu", new PTString("SA_LEARNER_SERVICES"));
       Environment.setSystemVar("%Mode", new PTString(profileToRun.getMode()));
 
@@ -75,8 +76,10 @@ public final class Main {
 
       final Component c = DefnCache.getComponent(
           (String) Environment.getSystemVar("%Component").read(), "GBL");
+
       // Set %Page to the name of the first page in the component.
-      Environment.setSystemVar("%Page", new PTString(c.getPages().get(0).getPNLNAME()));
+      Environment.setSystemVar("%Page",
+          new PTString(c.getPages().get(0).getPNLNAME()));
 
       final Menu m = DefnCache.getMenu(
           (String) Environment.getSystemVar("%Menu").read());

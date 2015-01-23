@@ -174,9 +174,11 @@ public class RecordBuffer implements IStreamableBuffer {
         newList.add(fldBuffer);
 
         // If a record field buffer already exists in the pre-expansion
-        // field buffer table, copy its page field tokens into the new rec field buffer.
+        // field buffer table, copy its page field tokens
+        // into the new rec field buffer.
         if (this.fieldBufferTable.containsKey(fld.FIELDNAME)) {
-          for (final PgToken tok : this.fieldBufferTable.get(fld.FIELDNAME).getPageFieldToks()) {
+          for (final PgToken tok
+              : this.fieldBufferTable.get(fld.FIELDNAME).getPageFieldToks()) {
             fldBuffer.addPageFieldTok(tok);
           }
         }

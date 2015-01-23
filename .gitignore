@@ -11,3 +11,4 @@ pom.xml.asc
 /.nrepl-port
 ansible/roles/*/files/*.tar.gz
 .ant-targets-build.xml
+*.swp

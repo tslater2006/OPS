@@ -172,6 +172,10 @@ public class PgToken {
     return true;
   }
 
+  public boolean hasSubPnlName() {
+    return this.SUBPNLNAME != null && this.SUBPNLNAME.length() > 0;
+  }
+
   public String toString() {
 
     StringBuilder b = new StringBuilder();
@@ -189,7 +193,7 @@ public class PgToken {
     } else if (!this.flags.contains(PFlag.END_OF_PAGE)) {
       b.append(this.RECNAME).append(".").append(this.FIELDNAME);
 
-      if(this.SUBPNLNAME != null && this.SUBPNLNAME.length() > 0) {
+      if(this.hasSubPnlName()) {
         b.append(", SUBPNLNAME=").append(this.SUBPNLNAME);
       }
     }

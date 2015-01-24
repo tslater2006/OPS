@@ -506,6 +506,10 @@ public final class ComponentBuffer {
       }*/
       String entry = tok.getRecName() + "." + tok.getFldName();
 
+      if (tok.hasFlag(PFlag.PUSHBTN_LINK) && tok.hasSubPnlName()) {
+        recFldRefs.add(entry);
+      }
+
       if (tok.hasFlag(PFlag.GENERIC)
           && !tok.isDisplayControl()
           && !tok.isDisplayOnly()

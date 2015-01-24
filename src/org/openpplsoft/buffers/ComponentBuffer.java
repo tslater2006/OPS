@@ -498,12 +498,10 @@ public final class ComponentBuffer {
       }
 
       String entry = tok.getRecName() + "." + tok.getFldName();
+      log.debug("Adding from pfs: {}", entry);
+      pfsRefs.add(entry);
 
       if (tok.hasFlag(PFlag.PUSHBTN_LINK)) {
-
-        log.debug("Adding from pfs: {}", entry);
-        pfsRefs.add(entry);
-
         if (tok.hasSubPnlName()) {
           recFldRefs.add(entry);
           if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
@@ -512,14 +510,6 @@ public final class ComponentBuffer {
                 + currPageTok + "; tok is: " + tok);
           }
         }
-      }
-
-      if (tok.hasFlag(PFlag.GENERIC)
-          && !tok.isDisplayControl()
-          && !tok.isDisplayOnly()
-          && !tok.isRelatedDisplay()) {
-        log.debug("Adding from pfs: {}", entry);
-        pfsRefs.add(entry);
       }
     }
 
@@ -561,6 +551,7 @@ public final class ComponentBuffer {
         final Record recDefn = fbuf.getRecDefn();
         for (final RecordPeopleCodeProg prog
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
+            //: recDefn.getAllRecordProgs()) {
           Set<String> progSet = prog.getUniqueRecFieldRefsForPRMInclusion();
 
           if (progSet.contains(RECFIELD_TO_FIND)) {
@@ -568,6 +559,18 @@ public final class ComponentBuffer {
                 + ", prog is " + prog);
           }
           recFldRefs.addAll(progSet);
+
+          if (progSet.size() > 0) {
+              // TODO: Based on past experience, getting unique field refs
+              // for every program on *every* record yields too many refs.
+              // Instead, try, doing this only if at least one ref is added
+              // from any program on a record. For DERIVED_REGFRM1, the
+              // GROUPBOX RowInit program has at least one reference; if
+              // all other programs on DERIVED_REGFRM1 are then scanned
+              // for references, SSR_PB_SRCH.FieldChange's references will
+              // be loaded, which will include the desired SS_TRANSACT_TITLE
+              // field.
+          }
         }
       }
     }

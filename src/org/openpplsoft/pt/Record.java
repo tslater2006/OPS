@@ -26,6 +26,7 @@ public class Record {
   public Map<String, RecordField> fieldTable;
   public Map<Integer, Object> fldAndSubrecordTable;
   private List<String> subRecordNames;
+  public List<RecordPeopleCodeProg> allRecordProgs = new ArrayList<>();
   public Map<String, List<RecordPeopleCodeProg>> recordProgsByFieldTable
       = new HashMap<>();
 
@@ -143,6 +144,7 @@ public class Record {
       }
 
       fieldProgList.add((RecordPeopleCodeProg) prog);
+      this.allRecordProgs.addAll(fieldProgList);
       this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
     }
 
@@ -273,6 +275,10 @@ public class Record {
       return this.recordProgsByFieldTable.get(FLDNAME);
     }
     return Collections.<RecordPeopleCodeProg>emptyList();
+  }
+
+  public List<RecordPeopleCodeProg> getAllRecordProgs() {
+    return this.allRecordProgs;
   }
 
   public String getDbTableName() {

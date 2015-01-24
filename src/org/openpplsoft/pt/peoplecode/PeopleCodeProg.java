@@ -143,6 +143,12 @@ public abstract class PeopleCodeProg {
         this.bindVals[12], this.bindVals[13]});
     rs = ostmt.executeQuery();
     while(rs.next()) {
+
+    /*if (rs.getString("RECNAME").equals("DERIVED_REGFRM1")
+        && rs.getString("REFNAME").equals("SS_TRANSACT_TITLE")) {
+      throw new OPSVMachRuntimeException("Found SS_TRANSACT_TITLE on: " + this);
+    }*/
+
       this.bytecodeRefTable.put(rs.getInt("NAMENUM"),
           new BytecodeReference(
               rs.getInt("NAMENUM"),

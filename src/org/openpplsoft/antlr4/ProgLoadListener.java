@@ -42,7 +42,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
   private PeopleCodeProg srcProg;
   private BufferedTokenStream tokens;
-  private Map<Integer, Void> refIndicesSeen;
   private ParseTreeProperty<PeopleCodeProg> varTypeProgs =
       new ParseTreeProperty<PeopleCodeProg>();
 
@@ -54,7 +53,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   public ProgLoadListener(final PeopleCodeProg p) {
     this.srcProg = p;
     this.tokens = p.getTokenStream();
-    this.refIndicesSeen = new HashMap<Integer, Void>();
   }
 
   private void setVarTypeProg(final ParseTree node,
@@ -358,40 +356,6 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
       throw new OPSVMachRuntimeException("Encountered unexpected "
           + "expression type preceding a function call or rowset "
           + "index call: " + ctx.expr().getText());
-    }
-  }
-
-  /**
-   * Before entering all rule handlers, get any hidden tokens
-   * defined before the token that is about to be processed; if
-   * hidden tokens exist, get the first (and should be only) one,
-   * which contains the ID for a program referenced by the program
-   * currently being lexed/parsed by this listener.
-   * @param ctx the context node for the parser rule that is about
-   *    to be entered
-   */
-  @Override
-  public void enterEveryRule(final ParserRuleContext ctx) {
-
-    final int tokPos = ctx.getStart().getTokenIndex();
-    final List<Token> refChannel = this.tokens.getHiddenTokensToLeft(tokPos,
-      PeopleCodeLexer.REFERENCES_CHANNEL);
-
-    if (refChannel != null) {
-      final Token refTok = refChannel.get(0);
-      if (refTok != null) {
-        final String text = refTok.getText();
-        final int refIdx = Integer.parseInt(
-            text.substring(8, text.length() - 1));
-
-        /*
-         * If we've already seen this reference, no need to process it again.
-         */
-        if (!this.refIndicesSeen.containsKey(refIdx)) {
-          final BytecodeReference refObj = this.srcProg.getBytecodeReference(refIdx);
-          this.refIndicesSeen.put(refIdx, null);
-        }
-      }
     }
   }
 

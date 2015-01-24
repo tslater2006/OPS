@@ -13,13 +13,15 @@ import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 public class BytecodeReference {
 
+  private final int NAMENUM;
   private final String RECNAME, REFNAME;
 
-  private boolean isRecordFieldRef = false;
+  private boolean isUsedInProgram, isRecordFieldRef;
   private String refStr;
 
-  public BytecodeReference(String recname, String refname) {
-
+  public BytecodeReference(final int namenum, final String recname,
+        final String refname) {
+    this.NAMENUM = namenum;
     if (recname == null || recname.trim().length() == 0) {
       this.RECNAME = "";
       this.REFNAME = refname;
@@ -54,11 +56,30 @@ public class BytecodeReference {
     }
   }
 
+  public void markAsUsedInProgram() {
+    this.isUsedInProgram = true;
+  }
+
+  public boolean isUsedInProgram() {
+    return this.isUsedInProgram;
+  }
+
+  public int getNameNum() {
+    return this.NAMENUM;
+  }
+
   public boolean isRecordFieldRef() {
     return this.isRecordFieldRef;
   }
 
   public String getValue() {
     return this.refStr;
+  }
+
+  @Override
+  public String toString() {
+    return "[" + this.NAMENUM + "]"
+        + this.refStr + " (isRecordFieldRef? " + this.isRecordFieldRef + ")"
+        + ", (isUsed? " + this.isUsedInProgram + ")";
   }
 }

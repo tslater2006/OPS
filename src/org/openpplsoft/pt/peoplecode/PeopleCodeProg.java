@@ -145,7 +145,9 @@ public abstract class PeopleCodeProg {
     while(rs.next()) {
       this.bytecodeRefTable.put(rs.getInt("NAMENUM"),
           new BytecodeReference(
-              rs.getString("RECNAME").trim(), rs.getString("REFNAME").trim()));
+              rs.getInt("NAMENUM"),
+              rs.getString("RECNAME").trim(),
+              rs.getString("REFNAME").trim()));
     }
     rs.close();
     ostmt.close();
@@ -248,9 +250,12 @@ public abstract class PeopleCodeProg {
   }
 
   public Set<String> getUniqueRecFieldRefsForPRMInclusion() {
+    //log.debug("\n\n\n\nProg: {}\n\n", this);
+    //bytecodeRefTable.values().stream().forEach(r -> log.debug(" >$$$ {}", r));
     return bytecodeRefTable.values().stream()
-        .filter(r -> r.isRecordFieldRef())
-        .map(r -> r.getValue())
+        .filter(BytecodeReference::isUsedInProgram)
+        .filter(BytecodeReference::isRecordFieldRef)
+        .map(BytecodeReference::getValue)
         .collect(toSet());
   }
 

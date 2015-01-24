@@ -481,7 +481,7 @@ public final class ComponentBuffer {
     final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
     final Set<String> pfsRefs = new HashSet<String>();
     final Set<String> recFldRefs = new TreeSet<String>();
-    final String RECFIELD_TO_FIND = "DERIVED_ADDRESS.ADDRESS2_ACa";
+    final String RECFIELD_TO_FIND = "ADDRESS_SBR.COUNTRYa";
 
     /*
      * Collect PRM entries from the page field token stream
@@ -497,31 +497,29 @@ public final class ComponentBuffer {
         currPageTok = tok;
       }
 
-    /*if (tok.hasFlag(PFlag.SUBPAGE)) {
-        while ((tok = pfs.next()) != null) {
-          if (tok.hasFlag(PFlag.END_OF_PAGE)) {
-            break;
-          }
-        }
-      }*/
       String entry = tok.getRecName() + "." + tok.getFldName();
 
-      if (tok.hasFlag(PFlag.PUSHBTN_LINK) && tok.hasSubPnlName()) {
-        recFldRefs.add(entry);
+      if (tok.hasFlag(PFlag.PUSHBTN_LINK)) {
+
+        log.debug("Adding from pfs: {}", entry);
+        pfsRefs.add(entry);
+
+        if (tok.hasSubPnlName()) {
+          recFldRefs.add(entry);
+          if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
+              && RECFIELD_TO_FIND.endsWith(tok.getFldName())) {
+            throw new OPSVMachRuntimeException("HERE0, recfield on page: "
+                + currPageTok + "; tok is: " + tok);
+          }
+        }
       }
 
       if (tok.hasFlag(PFlag.GENERIC)
           && !tok.isDisplayControl()
           && !tok.isDisplayOnly()
-          //&& !tok.isInvisible()
           && !tok.isRelatedDisplay()) {
-        log.debug("Adding from pfs: {}", entry); 
+        log.debug("Adding from pfs: {}", entry);
         pfsRefs.add(entry);
-        /*if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
-            && RECFIELD_TO_FIND.endsWith(tok.getFldName())) {
-          throw new OPSVMachRuntimeException("HERE0, recfield on page: "
-              + currPageTok + "; tok is: " + tok);
-        }*/
       }
     }
 
@@ -565,13 +563,6 @@ public final class ComponentBuffer {
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
           Set<String> progSet = prog.getUniqueRecFieldRefsForPRMInclusion();
 
-          // If program references the field it's on, but that
-          // field is not in the pfs, remove that reference from the set.
-          final String recFldStr = recDefn.RECNAME + "." + fbuf.getFldName();
-          if (!pfsRefs.contains(recFldStr)) {
-            progSet.remove(recFldStr);
-          }
-
           if (progSet.contains(RECFIELD_TO_FIND)) {
             throw new OPSVMachRuntimeException("HERE3; record is " + recDefn
                 + ", prog is " + prog);
@@ -585,15 +576,9 @@ public final class ComponentBuffer {
         new PRMHeader(compDefn.getComponentName(), "ENG", compDefn.getMarket(),
             recFldRefs.size()));
 
-    log.debug("PRM entries (count={}):", recFldRefs.size());
+    //log.debug("PRM entries (count={}):", recFldRefs.size());
     //recFldRefs.stream().forEach(r -> log.debug("  {}", r));
 
-    // TEMPORARY: remove ADDRESS_SBR.COUNTY while I figure it out.
-//    recFldRefs.remove("ADDRESS_SBR.COUNTY");
-//    recFldRefs.remove("ADDRESS_SBR.HOUSE_TYPE");
-//
-
-//    recFldRefs.stream().forEach(r -> log.debug(r));
     recFldRefs.stream().forEach(r ->
         TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));
   }

@@ -481,7 +481,7 @@ public final class ComponentBuffer {
     final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
     final Set<String> pfsRefs = new HashSet<String>();
     final Set<String> recFldRefs = new TreeSet<String>();
-    final String RECFIELD_TO_FIND = "ADDRESS_SBR.COUNTRYa";
+    final String RECFIELD_TO_FIND = "COUNTRY_TBL.DESCRa";
 
     /*
      * Collect PRM entries from the page field token stream
@@ -497,9 +497,13 @@ public final class ComponentBuffer {
         currPageTok = tok;
       }
 
-      String entry = tok.getRecName() + "." + tok.getFldName();
-      log.debug("Adding from pfs: {}", entry);
-      pfsRefs.add(entry);
+      final String entry = tok.getRecName() + "." + tok.getFldName();
+      if (!tok.isRelatedDisplay()) {
+        log.debug("Adding from pfs: {}", entry);
+        pfsRefs.add(entry);
+      } else {
+        continue;
+      }
 
       if (tok.hasFlag(PFlag.PUSHBTN_LINK)) {
         if (tok.hasSubPnlName()) {
@@ -552,7 +556,8 @@ public final class ComponentBuffer {
         for (final RecordPeopleCodeProg prog
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
             //: recDefn.getAllRecordProgs()) {
-          Set<String> progSet = prog.getUniqueRecFieldRefsForPRMInclusion();
+          final Set<String> progSet =
+              prog.getUniqueRecFieldRefsForPRMInclusion();
 
           if (progSet.contains(RECFIELD_TO_FIND)) {
             throw new OPSVMachRuntimeException("HERE3; record is " + recDefn
@@ -561,15 +566,20 @@ public final class ComponentBuffer {
           recFldRefs.addAll(progSet);
 
           if (progSet.size() > 0) {
-              // TODO: Based on past experience, getting unique field refs
-              // for every program on *every* record yields too many refs.
-              // Instead, try, doing this only if at least one ref is added
-              // from any program on a record. For DERIVED_REGFRM1, the
-              // GROUPBOX RowInit program has at least one reference; if
-              // all other programs on DERIVED_REGFRM1 are then scanned
-              // for references, SSR_PB_SRCH.FieldChange's references will
-              // be loaded, which will include the desired SS_TRANSACT_TITLE
-              // field.
+            for (final RecordPeopleCodeProg prog2: recDefn.getAllRecordProgs()) {
+              final Set<String> allProgSet =
+                  prog2.getUniqueRecFieldRefsForPRMInclusion();
+
+              // Only add if rec flds that are in the page stream.
+              allProgSet.retainAll(pfsRefs);
+
+              if (allProgSet.contains(RECFIELD_TO_FIND)) {
+                throw new OPSVMachRuntimeException("HERE4; record is " + recDefn
+                    + ", prog2 is " + prog2 + "; prog is " + prog);
+              }
+
+              recFldRefs.addAll(allProgSet);
+            }
           }
         }
       }

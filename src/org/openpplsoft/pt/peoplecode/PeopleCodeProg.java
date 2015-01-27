@@ -146,7 +146,8 @@ public abstract class PeopleCodeProg {
 
     /*if (rs.getString("RECNAME").equals("DERIVED_REGFRM1")
         && rs.getString("REFNAME").equals("SS_TRANSACT_TITLE")) {
-      throw new OPSVMachRuntimeException("Found SS_TRANSACT_TITLE on: " + this);
+     log.fatal("Found SS_TRANSACT_TITLE referenced by: {}", this);
+     // throw new OPSVMachRuntimeException("Found SS_TRANSACT_TITLE on: " + this);
     }*/
 
       this.bytecodeRefTable.put(rs.getInt("NAMENUM"),

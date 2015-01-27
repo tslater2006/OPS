@@ -526,15 +526,23 @@ public final class ComponentBuffer {
         throw new OPSVMachRuntimeException("HERE1, prog is " + prog);
       }
       recFldRefs.addAll(tempSet);
-      /*prog.loadDefnsAndPrograms();
-      for (final PeopleCodeProg refProg : prog.getReferencedProgs()) {
-        //if (refProg.getEvent().equals("FieldFormula")) { continue; }
-        final Set<String> tempSet2 = refProg.getUniqueRecFieldRefsForPRMInclusion();
-        if (tempSet2.contains(RECFIELD_TO_FIND)) {
-          throw new OPSVMachRuntimeException("HERE2, prog is " + refProg);
+
+      if (prog.getEvent().equals("PreBuild")) {
+        prog.loadDefnsAndPrograms();
+        for (final PeopleCodeProg refProg : prog.getReferencedProgs()) {
+          final Set<String> tempSet2 =
+              refProg.getUniqueRecFieldRefsForPRMInclusion();
+
+          // Only add if rec flds that are in the page stream.
+          tempSet2.retainAll(pfsRefs);
+
+          if (tempSet2.contains(RECFIELD_TO_FIND)) {
+            throw new OPSVMachRuntimeException("HERE2, refProg is " + refProg
+                + "; prog is " + prog);
+          }
+          recFldRefs.addAll(tempSet2);
         }
-        recFldRefs.addAll(tempSet2);
-      }*/
+      }
     }
 
     /*
@@ -589,8 +597,8 @@ public final class ComponentBuffer {
         new PRMHeader(compDefn.getComponentName(), "ENG", compDefn.getMarket(),
             recFldRefs.size()));
 
-    //log.debug("PRM entries (count={}):", recFldRefs.size());
-    //recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+    log.debug("PRM entries (count={}):", recFldRefs.size());
+    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
 
     recFldRefs.stream().forEach(r ->
         TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));

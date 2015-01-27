@@ -144,11 +144,11 @@ public abstract class PeopleCodeProg {
     rs = ostmt.executeQuery();
     while(rs.next()) {
 
-    /*if (rs.getString("RECNAME").equals("DERIVED_REGFRM1")
-        && rs.getString("REFNAME").equals("SS_TRANSACT_TITLE")) {
-     log.fatal("Found SS_TRANSACT_TITLE referenced by: {}", this);
+    if (rs.getString("RECNAME").equals("DERIVED_SCC_SUM")
+        && rs.getString("REFNAME").equals("SSS_FOOTER_LINKS")) {
+     log.fatal("Found SSS_FOOTER_LINKS referenced by: {}", this);
      // throw new OPSVMachRuntimeException("Found SS_TRANSACT_TITLE on: " + this);
-    }*/
+    }
 
       this.bytecodeRefTable.put(rs.getInt("NAMENUM"),
           new BytecodeReference(

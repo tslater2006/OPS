@@ -45,6 +45,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   private ParseTreeProperty<PeopleCodeProg> varTypeProgs =
       new ParseTreeProperty<PeopleCodeProg>();
 
+  private boolean inExtFuncImport;
   private boolean inFuncImpl;
   private List<BytecodeReference> funcImplBytecodeRefs;
 
@@ -200,6 +201,12 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     }
   }
 
+  @Override
+  public void enterExtFuncImport(
+      final PeopleCodeParser.ExtFuncImportContext ctx) {
+    this.inExtFuncImport = true;
+  }
+
   /**
    * Detect references to externally-defined functions. We make
    * note of the referenced program at this time; later, once
@@ -229,6 +236,8 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
     // Load the prog's initial metadata if it hasn't already been cached.
     prog.init();
+
+    this.inExtFuncImport = false;
   }
 
   /**
@@ -380,27 +389,38 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   }
 
   /**
-   * If we are currently traversing a function implementation,
-   * check for reference channel tokens and add the accompanying
-   * BytecodeReference to a list for use by the source program later.
    * @param ctx the context node for the parser rule that is about
    *    to be entered
    */
   @Override
   public void enterEveryRule(final ParserRuleContext ctx) {
 
-    if (this.inFuncImpl) {
-      final int tokPos = ctx.getStart().getTokenIndex();
-      final List<Token> refChannel = this.tokens.getHiddenTokensToLeft(tokPos,
+    final int tokPos = ctx.getStart().getTokenIndex();
+    final List<Token> refChannel = this.tokens.getHiddenTokensToLeft(tokPos,
         PeopleCodeLexer.REFERENCES_CHANNEL);
 
-      if (refChannel != null) {
-        final Token refTok = refChannel.get(0);
-        if (refTok != null) {
-          final String text = refTok.getText();
-          final int refIdx = Integer.parseInt(
-              text.substring(8, text.length() - 1));
-          this.funcImplBytecodeRefs.add(this.srcProg.getBytecodeReference(refIdx));
+    if (refChannel != null) {
+      final Token refTok = refChannel.get(0);
+      if (refTok != null) {
+        final String text = refTok.getText();
+        final int refIdx = Integer.parseInt(
+            text.substring(8, text.length() - 1));
+
+        final BytecodeReference ref =
+            this.srcProg.getBytecodeReference(refIdx);
+
+        if (!this.inExtFuncImport) {
+          if (srcProg.getEvent().equals("FieldFormula") && this.inFuncImpl) {
+            // Do not mark as root reference.
+          } else {
+            ref.markAsRootReference();
+          }
+        }
+
+        // If we're currently traversing a function impl, add this
+        // bytecode reference to that function impl's metadata.
+        if (this.inFuncImpl) {
+          this.funcImplBytecodeRefs.add(ref);
         }
       }
     }

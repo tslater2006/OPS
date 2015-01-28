@@ -480,8 +480,8 @@ public final class ComponentBuffer {
 
     final Set<String> recFldRefs = new TreeSet<String>();
 
-    final boolean doDebug = true;
-    final String RECFIELD_TO_FIND = "FUNCLIB_CS.FERPA_FLAG";
+    final boolean doDebug = false;
+    final String RECFIELD_TO_FIND = "";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
@@ -489,11 +489,17 @@ public final class ComponentBuffer {
     final Page activePage = DefnCache.getPage(
         ((PTString) Environment.getSystemVar("%Page")).read());
     final PeopleCodeProg pageActivateProg = activePage.getPageActivateProg();
+
+    if (doDebug) {
+      pageActivateProg.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+          new HashSet<String>());
+    }
+
     final Set<String> progActivateSet =
         pageActivateProg.getPRMRecFields();
-    if (progActivateSet.contains(RECFIELD_TO_FIND)) {
-      throw new OPSVMachRuntimeException("[ACTIVATE] pageActivateProg is "
-          + pageActivateProg);
+    if (doDebug && progActivateSet.contains(RECFIELD_TO_FIND)) {
+      throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFIELD_TO_FIND
+          + "; pageActivateProg is " + pageActivateProg);
     }
     recFldRefs.addAll(progActivateSet);
 
@@ -511,8 +517,9 @@ public final class ComponentBuffer {
       }
 
       final Set<String> prog1Set = prog1.getPRMRecFields();
-      if (prog1Set.contains(RECFIELD_TO_FIND)) {
-        throw new OPSVMachRuntimeException("[COMP1] prog1 is " + prog1);
+      if (doDebug && prog1Set.contains(RECFIELD_TO_FIND)) {
+        throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFIELD_TO_FIND
+            + "; prog1 is " + prog1);
       }
       recFldRefs.addAll(prog1Set);
     }
@@ -547,9 +554,9 @@ public final class ComponentBuffer {
           }
 
           final Set<String> progSet = prog.getPRMRecFields();
-          if (progSet.contains(RECFIELD_TO_FIND)) {
-            throw new OPSVMachRuntimeException("HERE3; record is " + recDefn
-                + ", prog is " + prog);
+          if (doDebug && progSet.contains(RECFIELD_TO_FIND)) {
+            throw new OPSVMachRuntimeException("[PRM DEBUG] Found " +
+                RECFIELD_TO_FIND + "; prog is " + prog);
           }
           recFldRefs.addAll(progSet);
         }

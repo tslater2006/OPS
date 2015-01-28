@@ -16,7 +16,7 @@ public class BytecodeReference {
   private final int NAMENUM;
   private final String RECNAME, REFNAME;
 
-  private boolean isUsedInProgram, isRecordFieldRef;
+  private boolean isUsedInProgram, isRecordFieldRef, isRootReference;
   private String refStr;
 
   public BytecodeReference(final int namenum, final String recname,
@@ -64,6 +64,14 @@ public class BytecodeReference {
     return this.isUsedInProgram;
   }
 
+  public void markAsRootReference() {
+    this.isRootReference = true;
+  }
+
+  public boolean isRootReference() {
+    return this.isRootReference;
+  }
+
   public int getNameNum() {
     return this.NAMENUM;
   }
@@ -80,6 +88,7 @@ public class BytecodeReference {
   public String toString() {
     return "[" + this.NAMENUM + "]"
         + this.refStr + " (isRecordFieldRef? " + this.isRecordFieldRef + ")"
-        + ", (isUsed? " + this.isUsedInProgram + ")";
+        + ", (isUsed? " + this.isUsedInProgram + ") (isRootRef? "
+        + this.isRootReference + ")";
   }
 }

@@ -254,6 +254,7 @@ public abstract class PeopleCodeProg {
   }
 
   public Set<String> getPRMRecFields() {
+    this.loadDefnsAndPrograms();
 
     if (this.getEvent().equals("FieldFormula")) {
       throw new OPSVMachRuntimeException("Encountered call to get PRM fields "
@@ -270,11 +271,11 @@ public abstract class PeopleCodeProg {
     //bytecodeRefTable.values().stream().forEach(r -> log.debug(" >$$$ {}", r));
     final Set<String> uniqueFields = bytecodeRefTable.values().stream()
         .filter(BytecodeReference::isUsedInProgram)
+        .filter(BytecodeReference::isRootReference)
         .filter(BytecodeReference::isRecordFieldRef)
         .map(BytecodeReference::getValue)
         .collect(toSet());
 
-    this.loadDefnsAndPrograms();
     for (final Map.Entry<String, RecordPeopleCodeProg> entry
         : this.recordProgFnCalls.entrySet()) {
       final String fnName = entry.getKey();
@@ -286,11 +287,13 @@ public abstract class PeopleCodeProg {
   }
 
   public Set<String> getPRMRecFields(final String funcName) {
+    this.loadDefnsAndPrograms();
+
     // IMPORTANT: THIS MAY NOT BE CORRECT.
     if (this instanceof AppClassPeopleCodeProg) {
       return Collections.<String>emptySet();
     }
-    this.loadDefnsAndPrograms();
+
     final FuncImpl fnImpl = this.getFunctionImpl(funcName);
     return fnImpl.bytecodeReferences.stream()
         .filter(BytecodeReference::isUsedInProgram)
@@ -319,8 +322,8 @@ public abstract class PeopleCodeProg {
       .filter(ref -> ref.getValue().equals(recFieldName))
       .distinct()
       .forEach(ref -> {
-        log.info("[REFTREE]{}  *> {} ref found; (is used in program? {})",
-          indentStr, recFieldName, ref.isUsedInProgram());
+        log.info("[REFTREE]{}  *> Found: {}",
+          indentStr, ref);
       });
 
     for (final PeopleCodeProg prog : this.referencedProgs) {

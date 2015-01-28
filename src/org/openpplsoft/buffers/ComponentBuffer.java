@@ -486,23 +486,24 @@ public final class ComponentBuffer {
     /*
      * Collect PRM entries from Page Activate PeopleCode.
      */
-    final Page activePage = DefnCache.getPage(
-        ((PTString) Environment.getSystemVar("%Page")).read());
-    final PeopleCodeProg pageActivateProg = activePage.getPageActivateProg();
+    for (final Page page : compDefn.getPages()) {
+      final PeopleCodeProg pageActivateProg =
+          DefnCache.getPage(page.getPNLNAME()).getPageActivateProg();
+      if (pageActivateProg == null) { continue; }
 
-    if (doDebug) {
-      pageActivateProg.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
-          new HashSet<String>());
+      if (doDebug) {
+        pageActivateProg.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+            new HashSet<String>());
+      }
+
+      final Set<String> progActivateSet =
+          pageActivateProg.getPRMRecFields();
+      if (doDebug && progActivateSet.contains(RECFIELD_TO_FIND)) {
+        throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFIELD_TO_FIND
+            + "; pageActivateProg is " + pageActivateProg);
+      }
+      recFldRefs.addAll(progActivateSet);
     }
-
-    final Set<String> progActivateSet =
-        pageActivateProg.getPRMRecFields();
-    if (doDebug && progActivateSet.contains(RECFIELD_TO_FIND)) {
-      throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFIELD_TO_FIND
-          + "; pageActivateProg is " + pageActivateProg);
-    }
-    recFldRefs.addAll(progActivateSet);
-
 
     /*
      * Collect PRM entries from Component PeopleCode programs.

@@ -481,7 +481,7 @@ public final class ComponentBuffer {
     final Set<String> recFldRefs = new TreeSet<String>();
 
     final boolean doDebug = false;
-    final String RECFIELD_TO_FIND = "";
+    final String RECFIELD_TO_FIND = "PEOPLE_SRCH.NATIONAL_ID";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
@@ -543,11 +543,6 @@ public final class ComponentBuffer {
         for (final RecordPeopleCodeProg prog
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
 
-          // SearchInit PeopleCode will never run after component is built.
-          if (prog.getEvent().equals("SearchInit")) {
-            continue;
-          }
-
           if (doDebug) {
             prog.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
                 new HashSet<String>());
@@ -572,6 +567,8 @@ public final class ComponentBuffer {
 
     recFldRefs.stream().forEach(r ->
         TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));
+
+    throw new OPSVMachRuntimeException("PRM emission complete.");
   }
 
   private static class ScrollMarker {

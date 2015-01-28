@@ -480,8 +480,8 @@ public final class ComponentBuffer {
 
     final Set<String> recFldRefs = new TreeSet<String>();
 
-    final boolean doDebug = false;
-    final String RECFIELD_TO_FIND = "PEOPLE_SRCH.NATIONAL_ID";
+    final boolean doDebug = true;
+    final String RECFIELD_TO_FIND = "CLASS_LOC_VW.DESCR";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
@@ -558,17 +558,18 @@ public final class ComponentBuffer {
       }
     }
 
+    if (doDebug) {
+      log.debug("PRM entries (count={}):", recFldRefs.size());
+      recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+    }
+
     TraceFileVerifier.submitEnforcedEmission(
         new PRMHeader(compDefn.getComponentName(), "ENG", compDefn.getMarket(),
             recFldRefs.size()));
-
-    log.debug("PRM entries (count={}):", recFldRefs.size());
-    recFldRefs.stream().forEach(r -> log.debug("  {}", r));
-
     recFldRefs.stream().forEach(r ->
         TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));
 
-    throw new OPSVMachRuntimeException("PRM emission complete.");
+    //throw new OPSVMachRuntimeException("PRM emission complete.");
   }
 
   private static class ScrollMarker {

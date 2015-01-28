@@ -52,9 +52,13 @@ public abstract class PeopleCodeProg {
   public class FuncImpl {
     public String funcName;
     public PeopleCodeParser.FuncImplContext parseTreeNode;
+    private List<BytecodeReference> bytecodeReferences;
     public FuncImpl(String fName, PeopleCodeParser.FuncImplContext node) {
       this.funcName = fName;
       this.parseTreeNode = node;
+    }
+    public void setBytecodeReferences(final List<BytecodeReference> refs) {
+      this.bytecodeReferences = refs;
     }
   }
 
@@ -143,13 +147,6 @@ public abstract class PeopleCodeProg {
         this.bindVals[12], this.bindVals[13]});
     rs = ostmt.executeQuery();
     while(rs.next()) {
-
-    if (rs.getString("RECNAME").equals("DERIVED_SCC_SUM")
-        && rs.getString("REFNAME").equals("SSS_FOOTER_LINKS")) {
-     log.fatal("Found SSS_FOOTER_LINKS referenced by: {}", this);
-     // throw new OPSVMachRuntimeException("Found SS_TRANSACT_TITLE on: " + this);
-    }
-
       this.bytecodeRefTable.put(rs.getInt("NAMENUM"),
           new BytecodeReference(
               rs.getInt("NAMENUM"),
@@ -256,14 +253,79 @@ public abstract class PeopleCodeProg {
     return this.bytecodeRefTable.get(refNbr);
   }
 
-  public Set<String> getUniqueRecFieldRefsForPRMInclusion() {
+  public Set<String> getPRMRecFields() {
+
+    if (this.getEvent().equals("FieldFormula")) {
+      throw new OPSVMachRuntimeException("Encountered call to get PRM fields "
+          + "from FieldFormula program; this call must be made to the overload "
+          + "of this method instead.");
+    }
+
+    // IMPORTANT: THIS MAY NOT BE CORRECT.
+    if (this instanceof AppClassPeopleCodeProg) {
+      return Collections.<String>emptySet();
+    }
+
     //log.debug("\n\n\n\nProg: {}\n\n", this);
     //bytecodeRefTable.values().stream().forEach(r -> log.debug(" >$$$ {}", r));
-    return bytecodeRefTable.values().stream()
+    final Set<String> uniqueFields = bytecodeRefTable.values().stream()
         .filter(BytecodeReference::isUsedInProgram)
         .filter(BytecodeReference::isRecordFieldRef)
         .map(BytecodeReference::getValue)
         .collect(toSet());
+
+    this.loadDefnsAndPrograms();
+    for (final Map.Entry<String, RecordPeopleCodeProg> entry
+        : this.recordProgFnCalls.entrySet()) {
+      final String fnName = entry.getKey();
+      final RecordPeopleCodeProg referencedProg = entry.getValue();
+      uniqueFields.addAll(referencedProg.getPRMRecFields(fnName));
+    }
+
+    return uniqueFields;
+  }
+
+  public Set<String> getPRMRecFields(final String funcName) {
+    // IMPORTANT: THIS MAY NOT BE CORRECT.
+    if (this instanceof AppClassPeopleCodeProg) {
+      return Collections.<String>emptySet();
+    }
+    this.loadDefnsAndPrograms();
+    final FuncImpl fnImpl = this.getFunctionImpl(funcName);
+    return fnImpl.bytecodeReferences.stream()
+        .filter(BytecodeReference::isUsedInProgram)
+        .filter(BytecodeReference::isRecordFieldRef)
+        .map(BytecodeReference::getValue)
+        .collect(toSet());
+  }
+
+  /**
+   * This method expects a recFieldName in the form of "RECNAME.FLDNAME".
+   */
+  public void listRefsToRecordFieldAndRecur(final int indent,
+      final String recFieldName, final Set<String> visitedSet) {
+    if (visitedSet.contains(this.getDescriptor())) { return; }
+
+    this.loadDefnsAndPrograms();
+    visitedSet.add(this.getDescriptor());
+
+    final StringBuilder b = new StringBuilder();
+    for (int i = 0; i < indent; i++) { b.append(" "); }
+    final String indentStr = b.toString();
+
+    log.info("[REFTREE]{}-> {}", indentStr, this);
+    this.bytecodeRefTable.values().stream()
+      .filter(BytecodeReference::isRecordFieldRef)
+      .filter(ref -> ref.getValue().equals(recFieldName))
+      .distinct()
+      .forEach(ref -> {
+        log.info("[REFTREE]{}  *> {} ref found; (is used in program? {})",
+          indentStr, recFieldName, ref.isUsedInProgram());
+      });
+
+    for (final PeopleCodeProg prog : this.referencedProgs) {
+      prog.listRefsToRecordFieldAndRecur(indent + 2, recFieldName, visitedSet);
+    }
   }
 
   public String toString() {
@@ -417,7 +479,7 @@ public abstract class PeopleCodeProg {
       appClassParts.add(appClassName);
     } else {
       throw new OPSVMachRuntimeException("Unable to resolve authoritative "
-        + "path to class name (" + appClassName + ").");
+        + "path to class name (" + appClassName + "). in prog " + this);
     }
 
     return (AppClassPeopleCodeProg) DefnCache.getProgram(

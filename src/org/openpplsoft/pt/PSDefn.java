@@ -106,7 +106,9 @@ public final class PSDefn {
     "Record",
     "Row",
     "Rowset",
-    "SQL"
+    "SQL",
+    "ProcessRequest",
+    "Message"
   };
 
   static {

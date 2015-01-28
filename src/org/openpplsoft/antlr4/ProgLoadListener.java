@@ -45,6 +45,9 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   private ParseTreeProperty<PeopleCodeProg> varTypeProgs =
       new ParseTreeProperty<PeopleCodeProg>();
 
+  private boolean inFuncImpl;
+  private List<BytecodeReference> funcImplBytecodeRefs;
+
   /**
    * Attaches this listener to the specific program
    * that will be parsed.
@@ -243,6 +246,23 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
     this.srcProg.registerFunctionImpl(
         ctx.funcSignature().GENERIC_ID().getText(), ctx);
+
+    this.inFuncImpl = true;
+    this.funcImplBytecodeRefs = new ArrayList<BytecodeReference>();
+  }
+
+  @Override
+  public void exitFuncImpl(
+      final PeopleCodeParser.FuncImplContext ctx) {
+
+    log.debug("Saving func impl bytecode refs for Function *{}* in "
+        + "program {}; refs are: ", ctx.funcSignature().GENERIC_ID().getText(),
+        this.srcProg, this.funcImplBytecodeRefs);
+    this.srcProg.getFunctionImpl(ctx.funcSignature().GENERIC_ID().getText())
+        .setBytecodeReferences(this.funcImplBytecodeRefs);
+
+    this.inFuncImpl = false;
+    this.funcImplBytecodeRefs = null;
   }
 
   /**
@@ -356,6 +376,33 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
       throw new OPSVMachRuntimeException("Encountered unexpected "
           + "expression type preceding a function call or rowset "
           + "index call: " + ctx.expr().getText());
+    }
+  }
+
+  /**
+   * If we are currently traversing a function implementation,
+   * check for reference channel tokens and add the accompanying
+   * BytecodeReference to a list for use by the source program later.
+   * @param ctx the context node for the parser rule that is about
+   *    to be entered
+   */
+  @Override
+  public void enterEveryRule(final ParserRuleContext ctx) {
+
+    if (this.inFuncImpl) {
+      final int tokPos = ctx.getStart().getTokenIndex();
+      final List<Token> refChannel = this.tokens.getHiddenTokensToLeft(tokPos,
+        PeopleCodeLexer.REFERENCES_CHANNEL);
+
+      if (refChannel != null) {
+        final Token refTok = refChannel.get(0);
+        if (refTok != null) {
+          final String text = refTok.getText();
+          final int refIdx = Integer.parseInt(
+              text.substring(8, text.length() - 1));
+          this.funcImplBytecodeRefs.add(this.srcProg.getBytecodeReference(refIdx));
+        }
+      }
     }
   }
 

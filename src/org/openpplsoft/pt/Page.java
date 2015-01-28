@@ -284,6 +284,9 @@ public class Page {
     }
   }
 
+  public PeopleCodeProg getPageActivateProg() {
+    return this.pageActivateProg;
+  }
 
   /**
    * Retrieves any and all Page PeopleCode associated with this page

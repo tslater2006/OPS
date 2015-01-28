@@ -479,7 +479,7 @@ public final class ComponentBuffer {
   public static void emitPRM() {
 
     final Set<String> recFldRefs = new TreeSet<String>();
-    final String RECFIELD_TO_FIND = "aDERIVED_CC.FERPA_ACTVTS_PB";
+    final String RECFIELD_TO_FIND = "aFUNCLIB_CS.CARRY_ID";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
@@ -504,8 +504,8 @@ public final class ComponentBuffer {
     for (final ComponentPeopleCodeProg prog1 : compProgs) {
 
       //prog1.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
-      //  new HashSet<String>());
-      log.debug("[PRM]->{}", prog1);
+      //    new HashSet<String>());
+      //log.debug("[PRM]->{}", prog1);
 
       final Set<String> prog1Set = prog1.getPRMRecFields();
       if (prog1Set.contains(RECFIELD_TO_FIND)) {
@@ -533,8 +533,13 @@ public final class ComponentBuffer {
         for (final RecordPeopleCodeProg prog
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
 
-          //prog1.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
-          //  new HashSet<String>());
+          // SearchInit PeopleCode will never run after component is built.
+          if (prog.getEvent().equals("SearchInit")) {
+            continue;
+          }
+
+          //prog.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+          //    new HashSet<String>());
 
           final Set<String> progSet = prog.getPRMRecFields();
           if (progSet.contains(RECFIELD_TO_FIND)) {

@@ -478,54 +478,14 @@ public final class ComponentBuffer {
 
   public static void emitPRM() {
 
-    final List<ComponentPeopleCodeProg> compProgs = compDefn.getListOfComponentPC();
-    final Set<String> activePfsRefs = new HashSet<String>();
-    final Set<String> compPfsRefs = new HashSet<String>();
     final Set<String> recFldRefs = new TreeSet<String>();
     final String RECFIELD_TO_FIND = "aDERIVED_CC.FERPA_ACTVTS_PB";
-
-    final String activePageName =
-                  ((PTString) Environment.getSystemVar("%Page")).read();
-    for (final Page p : compDefn.getPages()) {
-      boolean isActivePage = (activePageName.equals(p.getPNLNAME()));
-      final PgTokenStream pfs = new PgTokenStream(p.getPNLNAME());
-      PgToken tok;
-      PgToken currPageTok = null;
-      while ((tok = pfs.next()) != null) {
-
-        if (tok.hasFlag(PFlag.PAGE)) {
-          currPageTok = tok;
-        }
-
-        final String entry = tok.getRecName() + "." + tok.getFldName();
-        if (!tok.isRelatedDisplay()) {
-          compPfsRefs.add(entry);
-          log.debug("Adding to compPfsRefs: {}", entry);
-          if (isActivePage) {
-            activePfsRefs.add(entry);
-            log.debug("Adding to activePfsRefs: {}", entry);
-          }
-        } else {
-          continue;
-        }
-
-        /*if (tok.hasFlag(PFlag.PUSHBTN_LINK)) {
-          if (tok.hasSubPnlName()) {
-            recFldRefs.add(entry);
-            if (RECFIELD_TO_FIND.startsWith(tok.getRecName())
-                && RECFIELD_TO_FIND.endsWith(tok.getFldName())) {
-              throw new OPSVMachRuntimeException("HERE0, recfield on page: "
-                  + currPageTok + "; tok is: " + tok);
-            }
-          }
-        }*/
-      }
-    }
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
      */
-    final Page activePage = DefnCache.getPage(activePageName);
+    final Page activePage = DefnCache.getPage(
+        ((PTString) Environment.getSystemVar("%Page")).read());
     final PeopleCodeProg pageActivateProg = activePage.getPageActivateProg();
     final Set<String> progActivateSet =
         pageActivateProg.getPRMRecFields();
@@ -539,6 +499,8 @@ public final class ComponentBuffer {
     /*
      * Collect PRM entries from Component PeopleCode programs.
      */
+    final List<ComponentPeopleCodeProg> compProgs =
+        compDefn.getListOfComponentPC();
     for (final ComponentPeopleCodeProg prog1 : compProgs) {
 
       //prog1.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
@@ -550,52 +512,6 @@ public final class ComponentBuffer {
         throw new OPSVMachRuntimeException("[COMP1] prog1 is " + prog1);
       }
       recFldRefs.addAll(prog1Set);
-      if (1 == 1) continue;
-
-      if (prog1.getEvent().equals("PreBuild")
-          || prog1.getEvent().equals("PostBuild")) {
-        prog1.loadDefnsAndPrograms();
-        for (final PeopleCodeProg prog2 : prog1.getReferencedProgs()) {
-     //if (!prog2.getEvent().equals("FieldFormula")) {
-          final Set<String> prog2Set =
-              prog2.getPRMRecFields();
-          log.debug("[PRM]   ->{} : {}", prog2, prog2Set);
-
-          /* BEGIN TEMP */
-          final java.util.Iterator<String> iter = prog2Set.iterator();
-          while(iter.hasNext()) {
-            final String ref = iter.next();
-            if (ref.startsWith("CLASS_SRCH_WRK2")) {
-              iter.remove();
-            }
-          }
-          /* END TEMP */
-          // Only add rec flds that are in the page stream.
-          prog2Set.retainAll(compPfsRefs);
-
-          if (prog2Set.contains(RECFIELD_TO_FIND)) {
-            throw new OPSVMachRuntimeException("[COMP2] prog2 is " + prog2
-                + "; prog1 is " + prog1);
-          }
-          recFldRefs.addAll(prog2Set);
-     //}
-          /*prog2.loadDefnsAndPrograms();
-          for (final PeopleCodeProg prog3 : prog2.getReferencedProgs()) {
-            final Set<String> prog3Set =
-                prog3.getUniqueRecFieldRefsForPRMInclusion();
-            //log.debug("[PRM]      ->{}", prog3);
-
-            // Only add rec flds that are in the page stream.
-            prog3Set.retainAll(compPfsRefs);
-
-            if (prog3Set.contains(RECFIELD_TO_FIND)) {
-                throw new OPSVMachRuntimeException("[COMP3] prog3 is " + prog3
-                  + "; prog2 is " + prog2 + "; prog1 is " + prog1);
-            }
-            recFldRefs.addAll(prog3Set);
-          }*/
-        }
-      }
     }
 
     /*
@@ -607,6 +523,7 @@ public final class ComponentBuffer {
       if (buf instanceof RecordFieldBuffer) {
         final RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
         final Record recDefn = fbuf.getRecDefn();
+
         // Related display records will not have PeopleCode run on them,
         // and thus should not have their reference included in the PRM listing.
         if (fbuf.getParentRecordBuffer().isRelatedDisplayRecBuffer()) {
@@ -616,33 +533,15 @@ public final class ComponentBuffer {
         for (final RecordPeopleCodeProg prog
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
 
-          //prog.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
-            //new HashSet<String>());
+          //prog1.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+          //  new HashSet<String>());
 
-            //: recDefn.getAllRecordProgs()) {
           final Set<String> progSet = prog.getPRMRecFields();
           if (progSet.contains(RECFIELD_TO_FIND)) {
             throw new OPSVMachRuntimeException("HERE3; record is " + recDefn
                 + ", prog is " + prog);
           }
           recFldRefs.addAll(progSet);
-          if (1 == 1) continue;
-
-          if (progSet.size() > 0) {
-            for (final RecordPeopleCodeProg prog2: recDefn.getAllRecordProgs()) {
-              final Set<String> allProgSet = prog2.getPRMRecFields();
-
-              // Only add rec flds that are in the page stream.
-              allProgSet.retainAll(activePfsRefs);
-
-              if (allProgSet.contains(RECFIELD_TO_FIND)) {
-                throw new OPSVMachRuntimeException("HERE4; record is " + recDefn
-                    + ", prog2 is " + prog2 + "; prog is " + prog);
-              }
-
-              recFldRefs.addAll(allProgSet);
-            }
-          }
         }
       }
     }

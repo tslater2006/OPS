@@ -479,7 +479,9 @@ public final class ComponentBuffer {
   public static void emitPRM() {
 
     final Set<String> recFldRefs = new TreeSet<String>();
-    final String RECFIELD_TO_FIND = "aFUNCLIB_CS.CARRY_ID";
+
+    final boolean doDebug = true;
+    final String RECFIELD_TO_FIND = "FUNCLIB_CS.FERPA_FLAG";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
@@ -503,9 +505,10 @@ public final class ComponentBuffer {
         compDefn.getListOfComponentPC();
     for (final ComponentPeopleCodeProg prog1 : compProgs) {
 
-      //prog1.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
-      //    new HashSet<String>());
-      //log.debug("[PRM]->{}", prog1);
+      if (doDebug) {
+        prog1.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+            new HashSet<String>());
+      }
 
       final Set<String> prog1Set = prog1.getPRMRecFields();
       if (prog1Set.contains(RECFIELD_TO_FIND)) {
@@ -538,8 +541,10 @@ public final class ComponentBuffer {
             continue;
           }
 
-          //prog.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
-          //    new HashSet<String>());
+          if (doDebug) {
+            prog.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+                new HashSet<String>());
+          }
 
           final Set<String> progSet = prog.getPRMRecFields();
           if (progSet.contains(RECFIELD_TO_FIND)) {

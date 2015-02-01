@@ -51,6 +51,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   private boolean inFuncImpl;
   private List<BytecodeReference> funcImplBytecodeRefs;
   private Set<String> funcImplInternalFuncRefs;
+  private Set<String> funcImplExternalFuncRefs;
 
   /**
    * Attaches this listener to the specific program
@@ -262,6 +263,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     this.inFuncImpl = true;
     this.funcImplBytecodeRefs = new ArrayList<BytecodeReference>();
     this.funcImplInternalFuncRefs = new HashSet<String>();
+    this.funcImplExternalFuncRefs = new HashSet<String>();
   }
 
   @Override
@@ -275,10 +277,12 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
         .getFunctionImpl(ctx.funcSignature().GENERIC_ID().getText());
     fnImpl.setBytecodeReferences(this.funcImplBytecodeRefs);
     fnImpl.setInternalFuncReferences(this.funcImplInternalFuncRefs);
+    fnImpl.setExternalFuncReferences(this.funcImplExternalFuncRefs);
 
     this.inFuncImpl = false;
     this.funcImplBytecodeRefs = null;
     this.funcImplInternalFuncRefs = null;
+    this.funcImplExternalFuncRefs = null;
   }
 
   /**
@@ -373,13 +377,17 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
           ((PeopleCodeParser.ExprIdContext) ctx.expr()).id().getText();
 
       /*
-       * If this is a function call within a function impl
-       * to a function defined on this program (and not an external one),
-       * add the name of this function to the function impl's list
-       * of internal function references.
+       * If this is a function call within a function impl,
+       * determine whether the called function is defined internally
+       * within this program or on an internal program, then annotate
+       * the current func impl accordingly.
        */
-      if (this.inFuncImpl && this.srcProg.hasFunctionImplNamed(exprId)) {
-        this.funcImplInternalFuncRefs.add(exprId);
+      if (this.inFuncImpl) {
+        if (this.srcProg.hasFunctionImplNamed(exprId)) {
+          this.funcImplInternalFuncRefs.add(exprId);
+        } else if (this.srcProg.hasRecordProgFnImport(exprId)) {
+          this.funcImplExternalFuncRefs.add(exprId);
+        }
       }
 
       /*

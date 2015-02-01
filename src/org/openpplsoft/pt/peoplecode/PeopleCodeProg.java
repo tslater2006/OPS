@@ -67,7 +67,7 @@ public abstract class PeopleCodeProg {
     public String funcName;
     public PeopleCodeParser.FuncImplContext parseTreeNode;
     private List<BytecodeReference> bytecodeReferences;
-    private Set<String> internalFuncReferences;
+    private Set<String> internalFuncReferences, externalFuncReferences;
     public FuncImpl(String fName, PeopleCodeParser.FuncImplContext node) {
       this.funcName = fName;
       this.parseTreeNode = node;
@@ -79,6 +79,9 @@ public abstract class PeopleCodeProg {
     }
     public void setInternalFuncReferences(final Set<String> refs) {
       this.internalFuncReferences = refs;
+    }
+    public void setExternalFuncReferences(final Set<String> refs) {
+      this.externalFuncReferences = refs;
     }
   }
 
@@ -336,6 +339,18 @@ public abstract class PeopleCodeProg {
      */
     for (final String internalFnRefName : fnImpl.internalFuncReferences) {
       fields.addAll(this.getPRMRecFields(internalFnRefName));
+    }
+
+    /*
+     * For each external function that is called by this function,
+     * collect its PRM record fields as well.
+     */
+    for (final String externalFnRefName : fnImpl.externalFuncReferences) {
+      final FuncImport fnImport = this.getRecordProgFnImport(externalFnRefName);
+      final String fnName = fnImport.funcName;
+      final RecordPeopleCodeProg referencedProg = fnImport.externalProg;
+      final Set<String> refProgFields = referencedProg.getPRMRecFields(fnName);
+      fields.addAll(refProgFields);
     }
 
     return fields;

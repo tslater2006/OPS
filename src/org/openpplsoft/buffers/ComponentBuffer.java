@@ -481,7 +481,7 @@ public final class ComponentBuffer {
     final Set<String> recFldRefs = new TreeSet<String>();
 
     final boolean doDebug = false;
-    final String RECFIELD_TO_FIND = "DERIVED_SSTSNAV.SSS_SUBFOOT_LINKS";
+    final String RECFIELD_TO_FIND = "DERIVED_SSR_TXB.SSR_VIEW_TXB_SUMM";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.

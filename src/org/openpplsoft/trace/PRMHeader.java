@@ -41,9 +41,8 @@ public class PRMHeader implements IEmission {
     final PRMHeader other = (PRMHeader) obj;
     return this.componentName.equals(other.componentName)
         && this.langCode.equals(other.langCode)
-        && this.market.equals(other.market);
-// TODO(mquinn): 12-26-2014 : Re-enable after emitting PRM contents.
-//        && this.prmEntryCount == other.prmEntryCount;
+        && this.market.equals(other.market)
+        && this.prmEntryCount == other.prmEntryCount;
   }
 
   @Override

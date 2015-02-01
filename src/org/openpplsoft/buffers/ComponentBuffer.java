@@ -481,7 +481,7 @@ public final class ComponentBuffer {
     final Set<String> recFldRefs = new TreeSet<String>();
 
     final boolean doDebug = true;
-    final String RECFIELD_TO_FIND = "CLASS_LOC_VW.DESCR";
+    final String RECFIELD_TO_FIND = "CLASS_TBL_VW1.SSR_COMPONENT";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.

@@ -232,7 +232,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     prog = DefnCache.getProgram(prog);
 
     this.srcProg.addReferencedProg(prog);
-    this.srcProg.addRecordProgFnCall(fnName, (RecordPeopleCodeProg) prog);
+    this.srcProg.addRecordProgFnImport(fnName, (RecordPeopleCodeProg) prog);
 
     // Load the prog's initial metadata if it hasn't already been cached.
     prog.init();
@@ -349,42 +349,30 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   }
 
   /**
-   * Detect function (*not* method) calls; if a call corresponds to a
-   * function referenced in a previously seen "Declare" stmt, mark that program
-   * as having at least one call to it. Calls to index into a rowset using
-   * PeopleCode's "(<int>)" syntax should be ignored here.
+   * Detect function calls; if the function is external
+   * (imported via "Declare" statement), mark it as used in program.
    * @param ctx the context node for the function or index call stmt
    */
   @Override
-  public void exitExprFnOrIdxCall(
+  public void enterExprFnOrIdxCall(
       final PeopleCodeParser.ExprFnOrIdxCallContext ctx) {
 
     if (this.srcProg instanceof AppClassPeopleCodeProg) {
       return;
     }
-    PeopleCodeParser.IdContext id = null;
 
     if (ctx.expr() instanceof PeopleCodeParser.ExprIdContext) {
-      id = ((PeopleCodeParser.ExprIdContext) ctx.expr()).id();
-    } else if (ctx.expr() instanceof PeopleCodeParser.ExprDotAccessContext) {
+      final String exprId =
+          ((PeopleCodeParser.ExprIdContext) ctx.expr()).id().getText();
+
       /*
-       * If a method call is the expr on which this fn/rowset call
-       * operates on, i.e., "&arr.Push(%Menu)", we can ignore it;
-       * methods cannot be the subject of "Declare" stmts.
+       * If this is a function call to a function defined on an
+       * external program, mark it as being used in the program.
        */
-      return;
-    } else if (ctx.expr() instanceof PeopleCodeParser.ExprFnOrIdxCallContext) {
-      /*
-       * If a function call is the expr on which this fn/rowset call
-       * operates on, i.e., "GetRowset(Scroll.ENRL_REQ_DETAIL)(1)", we
-       * can ignore it, the name of the function was already processed
-       * by the explicit call to visit(ctx.expr()) above.
-       */
-      return;
-    } else {
-      throw new OPSVMachRuntimeException("Encountered unexpected "
-          + "expression type preceding a function call or rowset "
-          + "index call: " + ctx.expr().getText());
+      if (!this.srcProg.hasFunctionImplNamed(exprId)
+          && this.srcProg.hasRecordProgFnImport(exprId)) {
+        this.srcProg.getRecordProgFnImport(exprId).markAsUsedInProgram();
+      }
     }
   }
 

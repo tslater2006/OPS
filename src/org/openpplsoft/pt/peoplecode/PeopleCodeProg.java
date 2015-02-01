@@ -40,7 +40,7 @@ public abstract class PeopleCodeProg {
   private boolean hasAtLeastOneStatementFlag;
 
   private List<PeopleCodeProg> referencedProgs;
-  private Map<String, RecordPeopleCodeProg> recordProgFnCalls;
+  private Map<String, FuncImport> recordProgFnImports;
   private Map<String, FuncImpl> funcImplNodes;
   private Map<String, Function> funcTable;
   private Map<Integer, BytecodeReference> bytecodeRefTable;
@@ -48,6 +48,20 @@ public abstract class PeopleCodeProg {
   private List<AppPackagePath> importedAppPackagePaths;
 
   private boolean hasInitialized, haveLoadedDefnsAndPrograms, haveLexedAndParsed;
+
+  public class FuncImport {
+    public String funcName;
+    public RecordPeopleCodeProg externalProg;
+    public boolean isUsedInProgram;
+    public FuncImport(final String funcName,
+        final RecordPeopleCodeProg externalProg) {
+      this.funcName = funcName;
+      this.externalProg = externalProg;
+    }
+    public void markAsUsedInProgram() {
+      this.isUsedInProgram = true;
+    }
+  }
 
   public class FuncImpl {
     public String funcName;
@@ -217,7 +231,7 @@ public abstract class PeopleCodeProg {
     this.haveLoadedDefnsAndPrograms = true;
 
     this.referencedProgs = new ArrayList<PeopleCodeProg>();
-    this.recordProgFnCalls = new HashMap<String, RecordPeopleCodeProg>();
+    this.recordProgFnImports = new HashMap<String, FuncImport>();
     this.funcImplNodes = new HashMap<String, FuncImpl>();
     this.funcTable = new HashMap<String, Function>();
     this.importedAppClasses = new HashMap<String, List<AppPackagePath>>();
@@ -228,11 +242,6 @@ public abstract class PeopleCodeProg {
     walker.walk(new ProgLoadListener(this), this.parseTree);
   }
 
-  public void addRecordProgFnCall(final String fnName,
-      final RecordPeopleCodeProg prog) {
-    this.recordProgFnCalls.put(fnName, prog);
-  }
-
   public void addReferencedProg(final PeopleCodeProg prog) {
     this.referencedProgs.add(prog);
   }
@@ -241,12 +250,18 @@ public abstract class PeopleCodeProg {
     return this.referencedProgs;
   }
 
-  public boolean hasRecordProgFnCall(final String fnName) {
-    return this.recordProgFnCalls.containsKey(fnName);
+  public void addRecordProgFnImport(final String fnName,
+      final RecordPeopleCodeProg prog) {
+    this.recordProgFnImports.put(fnName.toLowerCase(),
+        new FuncImport(fnName, prog));
   }
 
-  public RecordPeopleCodeProg getRecordProgFnCall(final String fnName) {
-    return this.recordProgFnCalls.get(fnName);
+  public boolean hasRecordProgFnImport(final String fnName) {
+    return this.recordProgFnImports.containsKey(fnName.toLowerCase());
+  }
+
+  public FuncImport getRecordProgFnImport(final String fnName) {
+    return this.recordProgFnImports.get(fnName.toLowerCase());
   }
 
   public BytecodeReference getBytecodeReference(int refNbr) {
@@ -276,10 +291,14 @@ public abstract class PeopleCodeProg {
         .map(BytecodeReference::getValue)
         .collect(toSet());
 
-    for (final Map.Entry<String, RecordPeopleCodeProg> entry
-        : this.recordProgFnCalls.entrySet()) {
-      final String fnName = entry.getKey();
-      final RecordPeopleCodeProg referencedProg = entry.getValue();
+    for (final Map.Entry<String, FuncImport> entry
+        : this.recordProgFnImports.entrySet()) {
+      final FuncImport fnImport = entry.getValue();
+      if (this.getEvent().equals("FieldChange") && !fnImport.isUsedInProgram) {
+        continue;
+      }
+      final String fnName = fnImport.funcName;
+      final RecordPeopleCodeProg referencedProg = fnImport.externalProg;
       uniqueFields.addAll(referencedProg.getPRMRecFields(fnName));
     }
 

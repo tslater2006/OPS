@@ -480,8 +480,8 @@ public final class ComponentBuffer {
 
     final Set<String> recFldRefs = new TreeSet<String>();
 
-    final boolean doDebug = true;
-    final String RECFIELD_TO_FIND = "CLASS_TBL_VW1.SSR_COMPONENT";
+    final boolean doDebug = false;
+    final String RECFIELD_TO_FIND = "DERIVED_SSTSNAV.SSS_SUBFOOT_LINKS";
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
@@ -496,8 +496,7 @@ public final class ComponentBuffer {
             new HashSet<String>());
       }
 
-      final Set<String> progActivateSet =
-          pageActivateProg.getPRMRecFields();
+      final Set<String> progActivateSet = pageActivateProg.getPRMRecFields();
       if (doDebug && progActivateSet.contains(RECFIELD_TO_FIND)) {
         throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFIELD_TO_FIND
             + "; pageActivateProg is " + pageActivateProg);

@@ -9,8 +9,10 @@ package org.openpplsoft.antlr4;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -48,6 +50,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   private boolean inExtFuncImport;
   private boolean inFuncImpl;
   private List<BytecodeReference> funcImplBytecodeRefs;
+  private Set<String> funcImplInternalFuncRefs;
 
   /**
    * Attaches this listener to the specific program
@@ -258,6 +261,7 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
 
     this.inFuncImpl = true;
     this.funcImplBytecodeRefs = new ArrayList<BytecodeReference>();
+    this.funcImplInternalFuncRefs = new HashSet<String>();
   }
 
   @Override
@@ -267,11 +271,14 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     log.debug("Saving func impl bytecode refs for Function *{}* in "
         + "program {}; refs are: ", ctx.funcSignature().GENERIC_ID().getText(),
         this.srcProg, this.funcImplBytecodeRefs);
-    this.srcProg.getFunctionImpl(ctx.funcSignature().GENERIC_ID().getText())
-        .setBytecodeReferences(this.funcImplBytecodeRefs);
+    final PeopleCodeProg.FuncImpl fnImpl = this.srcProg
+        .getFunctionImpl(ctx.funcSignature().GENERIC_ID().getText());
+    fnImpl.setBytecodeReferences(this.funcImplBytecodeRefs);
+    fnImpl.setInternalFuncReferences(this.funcImplInternalFuncRefs);
 
     this.inFuncImpl = false;
     this.funcImplBytecodeRefs = null;
+    this.funcImplInternalFuncRefs = null;
   }
 
   /**
@@ -364,6 +371,16 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
     if (ctx.expr() instanceof PeopleCodeParser.ExprIdContext) {
       final String exprId =
           ((PeopleCodeParser.ExprIdContext) ctx.expr()).id().getText();
+
+      /*
+       * If this is a function call within a function impl
+       * to a function defined on this program (and not an external one),
+       * add the name of this function to the function impl's list
+       * of internal function references.
+       */
+      if (this.inFuncImpl && this.srcProg.hasFunctionImplNamed(exprId)) {
+        this.funcImplInternalFuncRefs.add(exprId);
+      }
 
       /*
        * If this is a function call to a function defined on an

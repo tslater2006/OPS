@@ -52,7 +52,7 @@ public abstract class PeopleCodeProg {
   public class FuncImport {
     public String funcName;
     public RecordPeopleCodeProg externalProg;
-    public boolean isUsedInProgram;
+    private boolean isUsedInProgram;
     public FuncImport(final String funcName,
         final RecordPeopleCodeProg externalProg) {
       this.funcName = funcName;
@@ -67,12 +67,18 @@ public abstract class PeopleCodeProg {
     public String funcName;
     public PeopleCodeParser.FuncImplContext parseTreeNode;
     private List<BytecodeReference> bytecodeReferences;
+    private Set<String> internalFuncReferences;
     public FuncImpl(String fName, PeopleCodeParser.FuncImplContext node) {
       this.funcName = fName;
       this.parseTreeNode = node;
+      this.bytecodeReferences = new ArrayList<BytecodeReference>();
+      this.internalFuncReferences = new HashSet<String>();
     }
     public void setBytecodeReferences(final List<BytecodeReference> refs) {
       this.bytecodeReferences = refs;
+    }
+    public void setInternalFuncReferences(final Set<String> refs) {
+      this.internalFuncReferences = refs;
     }
   }
 
@@ -299,7 +305,11 @@ public abstract class PeopleCodeProg {
       }
       final String fnName = fnImport.funcName;
       final RecordPeopleCodeProg referencedProg = fnImport.externalProg;
-      uniqueFields.addAll(referencedProg.getPRMRecFields(fnName));
+      final Set<String> refProgFields = referencedProg.getPRMRecFields(fnName);
+      uniqueFields.addAll(refProgFields);
+      /*log.info("[getPRMRecFields] Retrieved PRM fields from {} function on"
+          + " referenced prog: {}; fields are: {}", fnName, referencedProg,
+          refProgFields);*/
     }
 
     return uniqueFields;
@@ -314,11 +324,21 @@ public abstract class PeopleCodeProg {
     }
 
     final FuncImpl fnImpl = this.getFunctionImpl(funcName);
-    return fnImpl.bytecodeReferences.stream()
+    final Set<String> fields = fnImpl.bytecodeReferences.stream()
         .filter(BytecodeReference::isUsedInProgram)
         .filter(BytecodeReference::isRecordFieldRef)
         .map(BytecodeReference::getValue)
         .collect(toSet());
+
+    /*
+     * For each internal function that is called by this function,
+     * collect its PRM record fields as well.
+     */
+    for (final String internalFnRefName : fnImpl.internalFuncReferences) {
+      fields.addAll(this.getPRMRecFields(internalFnRefName));
+    }
+
+    return fields;
   }
 
   /**

@@ -119,15 +119,28 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       return;
     }
 
+    log.debug("Field {} key? {}", this.recFieldDefn.FIELDNAME, this.recFieldDefn.isKey());
+    log.debug("Field {} recFieldBuffer null? {}",
+        this.parentRecord.getRecDefn().RECNAME, this.recFieldBuffer == null);
+    log.debug("Field {}.{} has PRM entry? {}",
+        this.recFieldDefn.RECNAME,
+        this.recFieldDefn.FIELDNAME,
+        ComponentBuffer.hasPRMEntry(new RecFldName(
+                this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME)));
     if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
         && this.parentRecord.isEffectivelyAWorkRecord()
         && this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
+        && !this.recFieldDefn.FIELDNAME.equals("EFF_STATUS")
         && !this.recFieldDefn.isKey()
         && (this.recFieldBuffer == null
             || (!this.recFieldBuffer.isRelatedDisplayField()
                 && !this.recFieldBuffer.isDisplayControlField()))
+        // NOTE: IT IS VERY IMPORTANT that you use the name of the parent record,
+        // and not that of the record field defn, due to possibility that field
+        // is defined on a subrecord of the parent record.
         && !ComponentBuffer.hasPRMEntry(new RecFldName(
-                this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME))) {
+                this.parentRecord.getRecDefn().RECNAME,
+                this.recFieldDefn.FIELDNAME))) {
       log.debug("[4] Skipping field: {}", this.recFieldDefn.FIELDNAME);
       return;
     }

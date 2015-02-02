@@ -51,6 +51,7 @@ public final class ComponentBuffer {
   private ComponentBuffer() {}
 
   static {
+    prmEntries = new TreeSet<RecFldName>();
     lvlZeroScrollBuffer = new ScrollBuffer(0, null, null);
     currSB = lvlZeroScrollBuffer;
   }
@@ -478,7 +479,7 @@ public final class ComponentBuffer {
 
   public static void emitPRM() {
 
-    prmEntries = new TreeSet<RecFldName>();
+    prmEntries.clear();
 
     final boolean doDebug = false;
     final RecFldName RECFLDNAME_TO_DEBUG =
@@ -571,6 +572,10 @@ public final class ComponentBuffer {
         TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));
 
     //throw new OPSVMachRuntimeException("PRM emission complete.");
+  }
+
+  public static boolean hasPRMEntry(final RecFldName recFldName) {
+    return prmEntries.contains(recFldName);
   }
 
   private static class ScrollMarker {

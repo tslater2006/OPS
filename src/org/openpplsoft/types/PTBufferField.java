@@ -79,11 +79,22 @@ public final class PTBufferField extends PTField<PTBufferRecord>
 
   public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
 
+    // If this is a reldisp record and this record field is not represented in the PRM,
+    // do not emit it during emission of scrolls.
+  /*  if(this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
+        && this.recFieldBuffer != null
+        && !this.recFieldBuffer.isRelatedDisplayField()
+        && !this.recFieldBuffer.isDisplayControlField()
+        && !ComponentBuffer.hasPRMEntry(new RecFldName(
+            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME))) {
+      return;
+    }*/
+
     // For all non-reldisp record fields, do not emit the record field
     // if it does not have a record field buffer.
     if (!this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
         && this.recFieldBuffer == null) {
-      //log.debug("[1] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+      log.debug("[1] Skipping field: {}", this.recFieldDefn.FIELDNAME);
       return;
     }
 
@@ -92,7 +103,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (ctxFlag == ScrollEmissionContext.SEARCH_RESULTS
         && (!this.recFieldDefn.isKey()
             || !this.getValue().isMarkedAsUpdated())) {
-      //log.debug("[2] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+      log.debug("[2] Skipping field: {}", this.recFieldDefn.FIELDNAME);
       return;
     }
 
@@ -104,9 +115,20 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         && !this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
         && (this.recFieldBuffer == null
             || this.recFieldBuffer.getPageFieldToks().size() == 0)) {
-      //log.debug("Record is effectively work; skipping field {}.",
-      //    this.recFieldDefn.FIELDNAME);
-      //log.debug("[3] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+      log.debug("[3] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+      return;
+    }
+
+    if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
+        && this.parentRecord.isEffectivelyAWorkRecord()
+        && this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
+        && !this.recFieldDefn.isKey()
+        && (this.recFieldBuffer == null
+            || (!this.recFieldBuffer.isRelatedDisplayField()
+                && !this.recFieldBuffer.isDisplayControlField()))
+        && !ComponentBuffer.hasPRMEntry(new RecFldName(
+                this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME))) {
+      log.debug("[4] Skipping field: {}", this.recFieldDefn.FIELDNAME);
       return;
     }
 

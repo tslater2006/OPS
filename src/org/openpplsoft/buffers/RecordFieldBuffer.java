@@ -9,6 +9,7 @@ package org.openpplsoft.buffers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -116,22 +117,35 @@ public class RecordFieldBuffer implements IStreamableBuffer,
   }
 
   public boolean isRelatedDisplayField() {
-    if (this.pageFieldToks.size() == 0) {
-      return false;
-    }
 
-    boolean result = pageFieldToks.get(0).isRelatedDisplay();
+    final Optional<Boolean> result = this.pageFieldToks.stream()
+        .map(PgToken::isRelatedDisplay)
+        .reduce((accum, b) -> {
+            if (accum != b) {
+              throw new OPSVMachRuntimeException("While determining if record field "
+                  + "buffer is related display, encountered a combination of nonreldisp "
+                  + "page field tokens and reldisp page field tokens.");
+            }
+            return accum && b;
+        });
 
-    // Check any other page field tokens to ensure that they agree with the first one.
-    for (int i = 1; i < pageFieldToks.size(); i++) {
-      if (pageFieldToks.get(i).isRelatedDisplay() != result) {
-        throw new OPSVMachRuntimeException("While determining if record field "
-            + "buffer is related display, encountered a combination of nonreldisp "
-            + "page field tokens and reldisp page field tokens.");
-      }
-    }
+    return result.orElse(false);
+  }
 
-    return result;
+  public boolean isDisplayControlField() {
+
+    final Optional<Boolean> result = this.pageFieldToks.stream()
+        .map(PgToken::isDisplayControl)
+        .reduce((accum, b) -> {
+            if (accum != b) {
+              throw new OPSVMachRuntimeException("While determining if record field "
+                  + "buffer is display control, encountered a combination of nondispctrl "
+                  + "page field tokens and dispctrl page field tokens.");
+            }
+            return accum && b;
+        });
+
+    return result.orElse(false);
   }
 
   public void expandParentRecordBufferIfNecessary() {

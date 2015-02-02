@@ -80,7 +80,15 @@ public class BytecodeReference {
     return this.isRecordFieldRef;
   }
 
-  public String getValue() {
+  public RecFldName getAsRecFldName() {
+    if (!this.isRecordFieldRef) {
+      throw new OPSVMachRuntimeException("Illegal call to get bytecode reference "
+          + "as RecFldName; this bytecode reference is not a record field reference.");
+    }
+    return new RecFldName(this.RECNAME, this.REFNAME);
+  }
+
+  public String getAsString() {
     return this.refStr;
   }
 

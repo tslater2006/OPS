@@ -22,7 +22,7 @@
     <dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.0-rc1"
       conf="runtime,compile->default"/>
     <dependency org="org.apache.commons" name="commons-lang3" rev="3.3.2"
-      conf="compile->default"/>
+      conf="runtime,compile->default"/>
     <dependency org="org.apache.commons" name="commons-dbcp2" rev="2.0.1"
       conf="runtime,compile->default"/>
     <dependency org="joda-time" name="joda-time" rev="2.6"

@@ -277,7 +277,7 @@ public abstract class PeopleCodeProg {
     return this.bytecodeRefTable.get(refNbr);
   }
 
-  public Set<String> getPRMRecFields() {
+  public Set<RecFldName> getPRMRecFields() {
     this.loadDefnsAndPrograms();
 
     if (this.getEvent().equals("FieldFormula")) {
@@ -286,18 +286,17 @@ public abstract class PeopleCodeProg {
           + "of this method instead.");
     }
 
-    // IMPORTANT: THIS MAY NOT BE CORRECT.
     if (this instanceof AppClassPeopleCodeProg) {
-      return Collections.<String>emptySet();
+      return Collections.<RecFldName>emptySet();
     }
 
     //log.debug("\n\n\n\nProg: {}\n\n", this);
     //bytecodeRefTable.values().stream().forEach(r -> log.debug(" >$$$ {}", r));
-    final Set<String> uniqueFields = bytecodeRefTable.values().stream()
+    final Set<RecFldName> uniqueFields = bytecodeRefTable.values().stream()
         .filter(BytecodeReference::isUsedInProgram)
         .filter(BytecodeReference::isRootReference)
         .filter(BytecodeReference::isRecordFieldRef)
-        .map(BytecodeReference::getValue)
+        .map(BytecodeReference::getAsRecFldName)
         .collect(toSet());
 
     for (final Map.Entry<String, FuncImport> entry
@@ -308,7 +307,7 @@ public abstract class PeopleCodeProg {
       }
       final String fnName = fnImport.funcName;
       final RecordPeopleCodeProg referencedProg = fnImport.externalProg;
-      final Set<String> refProgFields = referencedProg.getPRMRecFields(fnName);
+      final Set<RecFldName> refProgFields = referencedProg.getPRMRecFields(fnName);
       uniqueFields.addAll(refProgFields);
       /*log.info("[getPRMRecFields] Retrieved PRM fields from {} function on"
           + " referenced prog: {}; fields are: {}", fnName, referencedProg,
@@ -318,19 +317,18 @@ public abstract class PeopleCodeProg {
     return uniqueFields;
   }
 
-  public Set<String> getPRMRecFields(final String funcName) {
+  public Set<RecFldName> getPRMRecFields(final String funcName) {
     this.loadDefnsAndPrograms();
 
-    // IMPORTANT: THIS MAY NOT BE CORRECT.
     if (this instanceof AppClassPeopleCodeProg) {
-      return Collections.<String>emptySet();
+      return Collections.<RecFldName>emptySet();
     }
 
     final FuncImpl fnImpl = this.getFunctionImpl(funcName);
-    final Set<String> fields = fnImpl.bytecodeReferences.stream()
+    final Set<RecFldName> fields = fnImpl.bytecodeReferences.stream()
         .filter(BytecodeReference::isUsedInProgram)
         .filter(BytecodeReference::isRecordFieldRef)
-        .map(BytecodeReference::getValue)
+        .map(BytecodeReference::getAsRecFldName)
         .collect(toSet());
 
     /*
@@ -349,7 +347,7 @@ public abstract class PeopleCodeProg {
       final FuncImport fnImport = this.getRecordProgFnImport(externalFnRefName);
       final String fnName = fnImport.funcName;
       final RecordPeopleCodeProg referencedProg = fnImport.externalProg;
-      final Set<String> refProgFields = referencedProg.getPRMRecFields(fnName);
+      final Set<RecFldName> refProgFields = referencedProg.getPRMRecFields(fnName);
       fields.addAll(refProgFields);
     }
 
@@ -360,7 +358,7 @@ public abstract class PeopleCodeProg {
    * This method expects a recFieldName in the form of "RECNAME.FLDNAME".
    */
   public void listRefsToRecordFieldAndRecur(final int indent,
-      final String recFieldName, final Set<String> visitedSet) {
+      final RecFldName recFldToFind, final Set<String> visitedSet) {
     if (visitedSet.contains(this.getDescriptor())) { return; }
 
     this.loadDefnsAndPrograms();
@@ -373,7 +371,7 @@ public abstract class PeopleCodeProg {
     log.info("[REFTREE]{}-> {}", indentStr, this);
     this.bytecodeRefTable.values().stream()
       .filter(BytecodeReference::isRecordFieldRef)
-      .filter(ref -> ref.getValue().equals(recFieldName))
+      .filter(ref -> ref.getAsRecFldName().equals(recFldToFind))
       .distinct()
       .forEach(ref -> {
         log.info("[REFTREE]{}  *> Found: {}",
@@ -381,7 +379,7 @@ public abstract class PeopleCodeProg {
       });
 
     for (final PeopleCodeProg prog : this.referencedProgs) {
-      prog.listRefsToRecordFieldAndRecur(indent + 2, recFieldName, visitedSet);
+      prog.listRefsToRecordFieldAndRecur(indent + 2, recFldToFind, visitedSet);
     }
   }
 

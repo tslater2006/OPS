@@ -40,7 +40,7 @@ public final class ComponentBuffer {
 
   private static Component compDefn;
   private static Record searchRecDefn;
-  private static Set<String> prmEntries;
+  private static Set<RecFldName> prmEntries;
 
   private static int currScrollLevel;
   private static ScrollBuffer currSB;
@@ -478,10 +478,11 @@ public final class ComponentBuffer {
 
   public static void emitPRM() {
 
-    final Set<String> recFldRefs = new TreeSet<String>();
+    prmEntries = new TreeSet<RecFldName>();
 
     final boolean doDebug = false;
-    final String RECFIELD_TO_FIND = "DERIVED_SSR_TXB.SSR_VIEW_TXB_SUMM";
+    final RecFldName RECFLDNAME_TO_DEBUG =
+        new RecFldName("DERIVED_SSR_TXB", "SSR_VIEW_TXB_SUMM");
 
     /*
      * Collect PRM entries from Page Activate PeopleCode.
@@ -492,16 +493,16 @@ public final class ComponentBuffer {
       if (pageActivateProg == null) { continue; }
 
       if (doDebug) {
-        pageActivateProg.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+        pageActivateProg.listRefsToRecordFieldAndRecur(1, RECFLDNAME_TO_DEBUG,
             new HashSet<String>());
       }
 
-      final Set<String> progActivateSet = pageActivateProg.getPRMRecFields();
-      if (doDebug && progActivateSet.contains(RECFIELD_TO_FIND)) {
-        throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFIELD_TO_FIND
+      final Set<RecFldName> progActivateSet = pageActivateProg.getPRMRecFields();
+      if (doDebug && progActivateSet.contains(RECFLDNAME_TO_DEBUG)) {
+        throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFLDNAME_TO_DEBUG
             + "; pageActivateProg is " + pageActivateProg);
       }
-      recFldRefs.addAll(progActivateSet);
+      prmEntries.addAll(progActivateSet);
     }
 
     /*
@@ -512,16 +513,16 @@ public final class ComponentBuffer {
     for (final ComponentPeopleCodeProg prog1 : compProgs) {
 
       if (doDebug) {
-        prog1.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+        prog1.listRefsToRecordFieldAndRecur(1, RECFLDNAME_TO_DEBUG,
             new HashSet<String>());
       }
 
-      final Set<String> prog1Set = prog1.getPRMRecFields();
-      if (doDebug && prog1Set.contains(RECFIELD_TO_FIND)) {
-        throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFIELD_TO_FIND
+      final Set<RecFldName> prog1Set = prog1.getPRMRecFields();
+      if (doDebug && prog1Set.contains(RECFLDNAME_TO_DEBUG)) {
+        throw new OPSVMachRuntimeException("[PRM DEBUG] Found " + RECFLDNAME_TO_DEBUG
             + "; prog1 is " + prog1);
       }
-      recFldRefs.addAll(prog1Set);
+      prmEntries.addAll(prog1Set);
     }
 
     /*
@@ -544,29 +545,29 @@ public final class ComponentBuffer {
             : recDefn.getRecordProgsForField(fbuf.getFldName())) {
 
           if (doDebug) {
-            prog.listRefsToRecordFieldAndRecur(1, RECFIELD_TO_FIND,
+            prog.listRefsToRecordFieldAndRecur(1, RECFLDNAME_TO_DEBUG,
                 new HashSet<String>());
           }
 
-          final Set<String> progSet = prog.getPRMRecFields();
-          if (doDebug && progSet.contains(RECFIELD_TO_FIND)) {
+          final Set<RecFldName> progSet = prog.getPRMRecFields();
+          if (doDebug && progSet.contains(RECFLDNAME_TO_DEBUG)) {
             throw new OPSVMachRuntimeException("[PRM DEBUG] Found " +
-                RECFIELD_TO_FIND + "; prog is " + prog);
+                RECFLDNAME_TO_DEBUG + "; prog is " + prog);
           }
-          recFldRefs.addAll(progSet);
+          prmEntries.addAll(progSet);
         }
       }
     }
 
     if (doDebug) {
-      log.debug("PRM entries (count={}):", recFldRefs.size());
-      recFldRefs.stream().forEach(r -> log.debug("  {}", r));
+      log.debug("PRM entries (count={}):", prmEntries.size());
+      prmEntries.stream().forEach(r -> log.debug("  {}", r));
     }
 
     TraceFileVerifier.submitEnforcedEmission(
         new PRMHeader(compDefn.getComponentName(), "ENG", compDefn.getMarket(),
-            recFldRefs.size()));
-    recFldRefs.stream().forEach(r ->
+            prmEntries.size()));
+    prmEntries.stream().forEach(r ->
         TraceFileVerifier.submitEnforcedEmission(new PRMEntry(r)));
 
     //throw new OPSVMachRuntimeException("PRM emission complete.");

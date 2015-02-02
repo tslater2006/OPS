@@ -7,6 +7,8 @@
 
 package org.openpplsoft.trace;
 
+import org.openpplsoft.pt.RecFldName;
+
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import org.apache.logging.log4j.Logger;
@@ -17,10 +19,14 @@ public class PRMEntry implements IEmission {
   private static Logger log =
       LogManager.getLogger(PRMEntry.class.getName());
 
-  private final String recField;
+  private final RecFldName recFldName;
 
-  public PRMEntry(final String recField) {
-    this.recField = recField;
+  public PRMEntry(final RecFldName recFldName) {
+    this.recFldName = recFldName;
+  }
+
+  public PRMEntry(final String traceFileRecField) {
+    this.recFldName = new RecFldName(traceFileRecField);
   }
 
   @Override
@@ -34,7 +40,7 @@ public class PRMEntry implements IEmission {
     }
 
     final PRMEntry other = (PRMEntry) obj;
-    return this.recField.equals(other.recField);
+    return this.recFldName.equals(other.recFldName);
   }
 
   @Override
@@ -42,14 +48,14 @@ public class PRMEntry implements IEmission {
     final int HCB_INITIAL = 3323, HCB_MULTIPLIER = 457;
 
     final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.recField);
+        HCB_MULTIPLIER).append(this.recFldName);
     return hbc.toHashCode();
   }
 
   @Override
   public String toString() {
     final StringBuilder builder = new StringBuilder();
-    builder.append("    ").append(this.recField);
+    builder.append("    ").append(this.recFldName);
     return builder.toString();
   }
 }

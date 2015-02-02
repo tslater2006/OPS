@@ -67,7 +67,7 @@ public class ReferenceAssembler extends ElementAssembler {
         + refIdx + " on the program underlying this stream.");
     }
 
-    String ref = refObj.getValue();
+    String ref = refObj.getAsString();
 
     /*
      * If the reference refers to a data buffer or component buffer

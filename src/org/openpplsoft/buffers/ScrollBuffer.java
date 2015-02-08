@@ -13,6 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
@@ -22,6 +25,9 @@ import org.openpplsoft.types.*;
  * Represents a PeopleTools scroll buffer.
  */
 public class ScrollBuffer implements IStreamableBuffer {
+
+  private static Logger log = LogManager
+      .getLogger(ScrollBuffer.class.getName());
 
   private int scrollLevel;
   private String primaryRecName;
@@ -130,13 +136,19 @@ public class ScrollBuffer implements IStreamableBuffer {
     if (tok.isRelatedDisplay()) {
 
       final String dispCtrlRecFldName = tok.getDispControlRecFieldName();
+      log.debug("Adding page field for reldisp token {}; disp ctrl fld "
+          + "name is {}", tok, dispCtrlRecFldName);
 
-      if (this.relDisplayRecordSet.hasRecord(tok.getRecName(), dispCtrlRecFldName)) {
-        r = this.relDisplayRecordSet.getRecordBuffer(tok.getRecName(), dispCtrlRecFldName);
+      if (this.relDisplayRecordSet
+          .hasRecord(dispCtrlRecFldName, tok.getRecName())) {
+        r = this.relDisplayRecordSet
+          .getRecordBuffer(dispCtrlRecFldName, tok.getRecName());
+        log.debug("Using preexisting rel display record buffer: {}", r);
       } else {
         r = new RecordBuffer(this, this.nextRecBufferOrderIdx++, tok.getRecName());
         this.relDisplayRecordSet.registerRecord(dispCtrlRecFldName, r);
         this.allRecBuffersOrdered.add(r);
+        log.debug("Created new rel display record buffer: {}", r);
       }
     } else {
       r = this.recBufferTable.get(tok.getRecName());

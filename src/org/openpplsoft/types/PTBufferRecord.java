@@ -127,21 +127,16 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     int keyrec = -1, keyfield = -1;
     if (this.recBuffer.isRelatedDisplayRecBuffer()) {
 
-      if (this.recBuffer.getFieldBuffers().size() > 1) {
-        throw new OPSVMachRuntimeException("Expected only 1 field buffer "
-            + "in related display rec buffer while emitting scrolls.");
-      }
-
-      final RecordFieldBuffer relDispFldBuf = this.recBuffer.getFieldBuffers().get(0);
-      final PgToken relDispFldTok = relDispFldBuf.getOnlyPageFieldTok();
-
       /*
-       * Remember: fields can serve as both display control AND
-       * related display fields.
+       * All fields on a related display record are tied to
+       * the same display control field. Therefore, we can get
+       * the display control field by looking at just the first field.
        */
+      final RecordFieldBuffer relDispFldBuf =
+          this.recBuffer.getFieldBuffers().get(0);
+      final PgToken relDispFldTok = relDispFldBuf.getOnlyPageFieldTok();
       final PTBufferField dispCtrlFld =
           this.getParentRow().findDisplayControlField(relDispFldTok);
-
       keyrec = dispCtrlFld.getParentRecord()
           .getIndexPositionOfThisRecordInParentRow();
       keyfield = dispCtrlFld.getIndexPositionOfThisFieldInParentRecord();

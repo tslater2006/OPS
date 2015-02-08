@@ -108,7 +108,7 @@ public final class TraceFileVerifier {
     cRecBufPattern =
         Pattern.compile("((\\|\\s{2})*)CRecBuf\\s([A-Z_0-9]+)\\(.{8}\\)\\sfields=(\\d+)\\s?(.+)?\\s?");
     cFldBufPattern =
-        Pattern.compile("((\\|\\s{2})*\\s{2})([A-Z_0-9]+)\\(.{8}\\)='(.*?)';");
+        Pattern.compile("((\\|\\s{2})*\\s{2})([A-Z_0-9]+)\\(.{8}\\)='(.*?)';\\s?(.+)?\\s?");
     scrollIdxPattern = Pattern.compile("((\\|\\s{2})*)Scroll\\s([0-9]+)");
     prmHdrPattern =
         Pattern.compile("PRM\\s([A-Z_0-9]+)\\.([A-Z]+)\\.([A-Z]+)\\sversion\\s\\d+\\scount=(\\d+)");
@@ -485,7 +485,8 @@ public final class TraceFileVerifier {
         return new CFldBuf(
             cFldBufMatcher.group(GROUP1),
             cFldBufMatcher.group(GROUP3),
-            cFldBufMatcher.group(GROUP4));
+            cFldBufMatcher.group(GROUP4),
+            cFldBufMatcher.group(GROUP5));
       }
 
       final Matcher scrollIdxMatcher =

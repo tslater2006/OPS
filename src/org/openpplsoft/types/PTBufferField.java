@@ -150,9 +150,11 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       indentStr += "|  ";
     }
 
+    String flagStr = "";
+
     TraceFileVerifier.submitEnforcedEmission(
         new CFldBuf(indentStr + "  ", this.recFieldDefn.FIELDNAME,
-            this.getValue().readAsString()));
+            this.getValue().readAsString(), flagStr));
   }
 
   public void fireEvent(final PCEvent event,

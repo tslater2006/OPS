@@ -17,12 +17,13 @@ public class CFldBuf implements IEmission {
   private static Logger log =
       LogManager.getLogger(CFldBuf.class.getName());
 
-  public final String indentStr, fldName, fldValue;
+  private final String indentStr, fldName, fldValue, flagStr;
 
   public CFldBuf(final String indentStr,
-      final String fldName, final String fldValue) {
+      final String fldName, final String fldValue, final String flagStr) {
     this.indentStr = indentStr;
     this.fldName = fldName;
+    this.flagStr = flagStr;
 
     // The empty string will read as null from the tracefile, whereas
     // OPS will use the empty string; handle this here:
@@ -56,9 +57,10 @@ public class CFldBuf implements IEmission {
     }*/
 
     return this.indentStr.equals(other.indentStr)
-        && this.fldName.equals(other.fldName);
+        && this.fldName.equals(other.fldName)
        // TODO(mquinn): 12-20-2014: Eventually re-enable this.
        // && this.fldValue.equals(other.fldValue);
+        && this.flagStr.equals(other.flagStr);
   }
 
   @Override
@@ -67,7 +69,7 @@ public class CFldBuf implements IEmission {
 
     final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
         HCB_MULTIPLIER).append(this.indentStr).append(this.fldName)
-        .append(this.fldValue);
+        .append(this.fldValue).append(this.flagStr);
     return hbc.toHashCode();
   }
 
@@ -75,7 +77,8 @@ public class CFldBuf implements IEmission {
   public String toString() {
     final StringBuilder builder = new StringBuilder();
     builder.append(this.indentStr).append(this.fldName)
-        .append("='").append(this.fldValue).append("';");
+        .append("='").append(this.fldValue).append("'; ")
+        .append(this.flagStr);
     return builder.toString();
   }
 }

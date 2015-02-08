@@ -130,11 +130,13 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       /*
        * All fields on a related display record are tied to
        * the same display control field. Therefore, we can get
-       * the display control field by looking at just the first field.
+       * the display control field by looking at just the first field
+       * on the record, and then at the first rel disp field token
+       * attached to that field.
        */
       final RecordFieldBuffer relDispFldBuf =
           this.recBuffer.getFieldBuffers().get(0);
-      final PgToken relDispFldTok = relDispFldBuf.getOnlyPageFieldTok();
+      final PgToken relDispFldTok = relDispFldBuf.getPageFieldToks().get(0);
       final PTBufferField dispCtrlFld =
           this.getParentRow().findDisplayControlField(relDispFldTok);
       keyrec = dispCtrlFld.getParentRecord()

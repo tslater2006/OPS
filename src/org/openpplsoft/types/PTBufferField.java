@@ -77,6 +77,16 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     return this.parentRecord.getIndexPositionOfField(this);
   }
 
+  /**
+   * The meaning of "Used" here refers to the way in which PeopleSoft
+   * means it during scroll emissions; that is,
+   * to describe a field referenced by one or more page fields.
+   */
+  private boolean isUsed() {
+    return this.recFieldBuffer != null
+        && this.recFieldBuffer.getPageFieldToks().size() > 0;
+  }
+
   public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
 
     // If this is a reldisp record and this record field is not represented in the PRM,
@@ -151,6 +161,30 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
 
     String flagStr = "";
+    if (this.recFieldDefn.isKey()) {
+      flagStr += " key";
+    }
+
+    if (this.recFieldBuffer != null
+        && this.recFieldBuffer.isDisplayControlField()) {
+      flagStr += " relkey";
+    }
+
+    if (this.getValue().isMarkedAsUpdated()
+        && (this.parentRecord.getRecDefn().isDerivedWorkRecord()
+            || this.parentRecord.isEffectivelyAWorkRecord())
+        && ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
+      flagStr += " updated";
+    }
+
+    if (this.isHidden()
+        && ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
+      flagStr += " hide";
+    }
+
+    if (this.isUsed() || ctxFlag == ScrollEmissionContext.SEARCH_RESULTS) {
+      flagStr += " used";
+    }
 
     TraceFileVerifier.submitEnforcedEmission(
         new CFldBuf(indentStr + "  ", this.recFieldDefn.FIELDNAME,

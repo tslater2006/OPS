@@ -133,6 +133,10 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
     this.visiblePropertyRef.deref().write(true);
   }
 
+  public boolean isHidden() {
+    return !this.visiblePropertyRef.deref().read();
+  }
+
   /**
    * From PeopleBooks
    * (http://docs.oracle.com/cd/E38689_01/pt853pbr0/eng/pt/tpcl/langref_PeopleCodeBuilt-inFunctionsandLanguageConstructs-073e6a.html#SetDefault-073c69)

@@ -23,7 +23,6 @@ public class CFldBuf implements IEmission {
       final String fldName, final String fldValue, final String flagStr) {
     this.indentStr = indentStr;
     this.fldName = fldName;
-    this.flagStr = flagStr;
 
     // The empty string will read as null from the tracefile, whereas
     // OPS will use the empty string; handle this here:
@@ -31,6 +30,14 @@ public class CFldBuf implements IEmission {
       this.fldValue = "";
     } else {
       this.fldValue = fldValue;
+    }
+
+    // Flag string can legitimately be empty; will be picked up as null
+    // by regex procedure in TraceFileVerifier.
+    if (flagStr == null) {
+      this.flagStr = "";
+    } else {
+      this.flagStr = flagStr.trim();
     }
   }
 

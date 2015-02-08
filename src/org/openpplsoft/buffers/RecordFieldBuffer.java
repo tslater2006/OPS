@@ -137,12 +137,7 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     final Optional<Boolean> result = this.pageFieldToks.stream()
         .map(PgToken::isDisplayControl)
         .reduce((accum, b) -> {
-            if (accum != b) {
-              throw new OPSVMachRuntimeException("While determining if record field "
-                  + "buffer is display control, encountered a combination of nondispctrl "
-                  + "page field tokens and dispctrl page field tokens.");
-            }
-            return accum && b;
+            return accum || b;
         });
 
     return result.orElse(false);

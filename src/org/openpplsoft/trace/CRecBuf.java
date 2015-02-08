@@ -17,8 +17,8 @@ public class CRecBuf implements IEmission {
   private static Logger log =
       LogManager.getLogger(CRecBuf.class.getName());
 
-  public final String indentStr, recName, flagStr;
-  public final int numFields;
+  private final String indentStr, recName, flagStr;
+  private final int numFields;
 
   public CRecBuf(final String indentStr, final String recName,
       final int numFields, final String flagStr) {

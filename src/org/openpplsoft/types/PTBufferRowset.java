@@ -40,7 +40,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
   private static Map<String, Method> ptMethodTable;
 
-  private ScrollBuffer cBufferScrollBuffer;
+  private ScrollBuffer scrollBuffer;
 
   private RelDisplayRecordSet relDisplayRecordSet = new RelDisplayRecordSet();
   private List<RecordBuffer> registeredNonRelDispRecordBuffers = new ArrayList<>();
@@ -67,7 +67,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
       final ScrollBuffer scrollBuf) {
     super(origTc);
     this.parentRow = pRow;
-    this.cBufferScrollBuffer = scrollBuf;
+    this.scrollBuffer = scrollBuf;
     this.primaryRecDefn = scrollBuf.getPrimaryRecDefn();
 
     for (final RecordBuffer recBuf : scrollBuf.getOrderedNonRelDispRecBuffers()) {
@@ -102,7 +102,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
   }
 
   public ScrollBuffer getCBufferScrollBuffer() {
-    return this.cBufferScrollBuffer;
+    return this.scrollBuffer;
   }
 
   public List<RecordBuffer> getRegisteredNonRelDispRecordBuffers() {
@@ -178,14 +178,14 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
       indentStr += "|  ";
     }
 
+    if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
+        && this.determineScrollLevel() > 0) {
+      TraceFileVerifier.submitEnforcedEmission(
+          new ScrollIndex(indentStr, this.scrollBuffer
+              .getIndexOfThisChildScrollBufferInParent()));
+    }
+
     for (int i = 0; i < this.rows.size(); i++) {
-
-      if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
-          && this.determineScrollLevel() > 0) {
-        TraceFileVerifier.submitEnforcedEmission(
-            new ScrollIndex(indentStr, i));
-      }
-
       this.rows.get(i).emitScrolls(ctxFlag, indent);
     }
   }

@@ -84,6 +84,21 @@ public class ScrollBuffer implements IStreamableBuffer {
         .allocBufferRowset(parentRow, this);
   }
 
+  public int getIndexOfChildScrollBuffer(final ScrollBuffer childSb) {
+    for (int i = 0; i < this.orderedScrollBuffers.size(); i++) {
+      if (this.orderedScrollBuffers.get(i).equals(childSb)) {
+        return i;
+      }
+    }
+
+    throw new OPSVMachRuntimeException("Unable to find the provided "
+        + "scroll buffer as a child on this scroll buffer.");
+  }
+
+  public int getIndexOfThisChildScrollBufferInParent() {
+    return this.parent.getIndexOfChildScrollBuffer(this);
+  }
+
   /**
    * Get the scroll level on which this scroll buffer exists.
    * @return this scroll buffer's scroll level

@@ -147,6 +147,10 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         indentStr, this.recDefn.RECNAME, keyrec, keyfield));
   }
 
+  private boolean isPrimaryRecordInRowset() {
+    return this.parentRow.getParentRowset().getPrimaryRecDefn() == this.recDefn;
+  }
+
   public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
 
     if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
@@ -164,20 +168,27 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     }
 
     String flagStr = "";
+    final int scrollLevel = this.determineScrollLevel();
     if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
       if (this.recDefn.isDerivedWorkRecord()) {
         flagStr += " work";
       } else {
 
-        if (this.isEffectivelyAWorkRecord()) {
-          log.debug("Effectively a work record: {}", this.recDefn.RECNAME);
-          flagStr += " work";
-        }
+        if (scrollLevel == 0) {
+          if (this.isEffectivelyAWorkRecord()) {
+            log.debug("Effectively a work record: {}", this.recDefn.RECNAME);
+            flagStr += " work";
+          }
 
-        if (this.recBuffer.isRelatedDisplayRecBuffer()) {
-          flagStr += " reldisp";
+          if (this.recBuffer.isRelatedDisplayRecBuffer()) {
+            flagStr += " reldisp";
+          } else {
+            flagStr += " lvl0";
+          }
         } else {
-          flagStr += " lvl0";
+          if (this.isPrimaryRecordInRowset()) {
+            flagStr += " new dummy";
+          }
         }
       }
     }

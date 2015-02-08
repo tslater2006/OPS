@@ -174,7 +174,10 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         flagStr += " work";
       } else {
 
-        if (scrollLevel == 0) {
+        if (this.isPrimaryRecordInRowset()) {
+          flagStr += " new dummy";
+        } else {
+
           if (this.isEffectivelyAWorkRecord()) {
             log.debug("Effectively a work record: {}", this.recDefn.RECNAME);
             flagStr += " work";
@@ -182,12 +185,8 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
           if (this.recBuffer.isRelatedDisplayRecBuffer()) {
             flagStr += " reldisp";
-          } else {
+          } else if (scrollLevel == 0) {
             flagStr += " lvl0";
-          }
-        } else {
-          if (this.isPrimaryRecordInRowset()) {
-            flagStr += " new dummy";
           }
         }
       }
@@ -209,6 +208,11 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
    * a work record if one or more of its keys do not have a value.
    */
   public boolean isEffectivelyAWorkRecord() {
+
+    if (this.isPrimaryRecordInRowset()) {
+      return false;
+    }
+
     for (final Map.Entry<String, PTImmutableReference<PTBufferField>> entry
         : this.fieldRefs.entrySet()) {
       final PTBufferField fld = entry.getValue().deref();

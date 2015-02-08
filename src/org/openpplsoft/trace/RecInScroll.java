@@ -17,11 +17,12 @@ public class RecInScroll implements IEmission {
   private static Logger log =
       LogManager.getLogger(RecInScroll.class.getName());
 
-  public String recName;
-  public int keyrec, keyfield;
+  private final String indentStr, recName;
+  private final int keyrec, keyfield;
 
-  public RecInScroll(final String recName, final int keyrec,
-      final int keyfield) {
+  public RecInScroll(final String indentStr,
+      final String recName, final int keyrec, final int keyfield) {
+    this.indentStr = indentStr;
     this.recName = recName;
     this.keyrec = keyrec;
     this.keyfield = keyfield;
@@ -38,7 +39,8 @@ public class RecInScroll implements IEmission {
     }
 
     final RecInScroll other = (RecInScroll) obj;
-    return this.recName.equals(other.recName)
+    return this.indentStr.equals(other.indentStr)
+        && this.recName.equals(other.recName)
         && this.keyrec == other.keyrec
         && this.keyfield == other.keyfield;
   }
@@ -48,7 +50,8 @@ public class RecInScroll implements IEmission {
     final int HCB_INITIAL = 259, HCB_MULTIPLIER = 601;
 
     final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.recName).append(this.keyrec)
+        HCB_MULTIPLIER).append(this.indentStr)
+        .append(this.recName).append(this.keyrec)
         .append(this.keyfield);
     return hbc.toHashCode();
   }
@@ -56,7 +59,7 @@ public class RecInScroll implements IEmission {
   @Override
   public String toString() {
     final StringBuilder builder = new StringBuilder();
-    builder.append("Rec ").append(this.recName)
+    builder.append(this.indentStr).append("Rec ").append(this.recName)
         .append(" keyrec=").append(this.keyrec)
         .append(" keyfield=").append(this.keyfield);
     return builder.toString();

@@ -172,7 +172,20 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
   }
 
   public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
+
+    String indentStr = "";
+    for (int i = 0; i < indent - 1; i++) {
+      indentStr += "|  ";
+    }
+
     for (int i = 0; i < this.rows.size(); i++) {
+
+      if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
+          && this.determineScrollLevel() > 0) {
+        TraceFileVerifier.submitEnforcedEmission(
+            new ScrollIndex(indentStr, i));
+      }
+
       this.rows.get(i).emitScrolls(ctxFlag, indent);
     }
   }

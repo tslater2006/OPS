@@ -172,10 +172,16 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
           childScrollBuf.allocRowset(this));
   }
 
-  public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
+  public void emitScrolls(final ScrollEmissionContext ctxFlag,
+      final int indent) {
+
+    String indentStr = "";
+    for (int i = 0; i < indent; i++) {
+      indentStr += "|  ";
+    }
 
     int scrollLevel = Math.max(0, this.determineScrollLevel());
-    TraceFileVerifier.submitEnforcedEmission(new BeginLevel(
+    TraceFileVerifier.submitEnforcedEmission(new BeginLevel(indentStr,
         scrollLevel, this.getIndexOfThisRowInParentRowset(), 1, 1, 0,
         this.parentRowset.getRegisteredChildScrollBuffers().size(),
         // All non-level 0 rows seem to have these flags enabled.
@@ -185,18 +191,19 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
     for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {
-      entry.getValue().emitRecInScroll();
+      entry.getValue().emitRecInScroll(indentStr);
     }
 
     TraceFileVerifier.submitEnforcedEmission(
-      new RowInScroll(this.getIndexOfThisRowInParentRowset()));
+      new RowInScroll(indentStr, this.getIndexOfThisRowInParentRowset()));
 
     for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {
       entry.getValue().emitScrolls(ctxFlag, indent);
     }
 
-    for (final Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
+    for (final Map.Entry<String, PTBufferRowset> entry
+        : this.rowsetMap.entrySet()) {
       entry.getValue().emitScrolls(ctxFlag, indent + 1);
     }
   }

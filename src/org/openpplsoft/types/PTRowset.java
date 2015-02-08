@@ -69,6 +69,10 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     return this.parentRow;
   }
 
+  public Record getPrimaryRecDefn() {
+    return this.primaryRecDefn;
+  }
+
   public int getActiveRowCount() {
     return this.rows.size();
   }

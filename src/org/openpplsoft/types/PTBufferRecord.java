@@ -118,7 +118,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         + "on this record; unable to get index position.");
   }
 
-  public void emitRecInScroll() {
+  public void emitRecInScroll(final String indentStr) {
 
     if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
       return;
@@ -144,7 +144,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       keyfield = dispCtrlFld.getIndexPositionOfThisFieldInParentRecord();
     }
     TraceFileVerifier.submitEnforcedEmission(new RecInScroll(
-        this.recDefn.RECNAME, keyrec, keyfield));
+        indentStr, this.recDefn.RECNAME, keyrec, keyfield));
   }
 
   public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {

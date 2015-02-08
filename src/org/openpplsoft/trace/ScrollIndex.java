@@ -12,17 +12,17 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-public class RowInScroll implements IEmission {
+public class ScrollIndex implements IEmission {
 
   private static Logger log =
-      LogManager.getLogger(RowInScroll.class.getName());
+      LogManager.getLogger(ScrollIndex.class.getName());
 
   private final String indentStr;
-  private final int rowIdx;
+  private final int index;
 
-  public RowInScroll(final String indentStr, final int rowIdx) {
+  public ScrollIndex(final String indentStr, final int index) {
     this.indentStr = indentStr;
-    this.rowIdx = rowIdx;
+    this.index = index;
   }
 
   @Override
@@ -31,29 +31,26 @@ public class RowInScroll implements IEmission {
       return true;
     } else if (obj == null) {
       return false;
-    } else if (!(obj instanceof RowInScroll)) {
+    } else if (!(obj instanceof ScrollIndex)) {
       return false;
     }
 
-    final RowInScroll other = (RowInScroll) obj;
+    final ScrollIndex other = (ScrollIndex) obj;
     return this.indentStr.equals(other.indentStr)
-        && this.rowIdx == other.rowIdx;
+        && this.index == other.index;
   }
 
   @Override
   public int hashCode() {
-    final int HCB_INITIAL = 1481, HCB_MULTIPLIER = 37;
+    final int HCB_INITIAL = 3719, HCB_MULTIPLIER = 227;
 
     final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
-        HCB_MULTIPLIER).append(this.indentStr).append(this.rowIdx);
+        HCB_MULTIPLIER).append(this.indentStr).append(this.index);
     return hbc.toHashCode();
   }
 
   @Override
   public String toString() {
-    final StringBuilder builder = new StringBuilder();
-    builder.append(this.indentStr)
-        .append("Row ").append(this.rowIdx).append(" at xxxxxxxx.");
-    return builder.toString();
+    return this.indentStr + "Scroll " + this.index;
   }
 }

@@ -11,11 +11,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class BeginLevel implements IEmission {
 
-  public int levelIdx, rowIdx, occursCount, activeCount,
+  private final String indentStr;
+  public final int levelIdx, rowIdx, occursCount, activeCount,
       hiddenCount, scrollCount, numRecs;
-  public boolean noAutoSelectFlag, noAutoUpdateFlag;
+  public final boolean noAutoSelectFlag, noAutoUpdateFlag;
 
   public BeginLevel(
+      final String indentStr,
       final int levelIdx,
       final int rowIdx,
       final int occursCount,
@@ -25,6 +27,7 @@ public class BeginLevel implements IEmission {
       final boolean noAutoSelectFlag,
       final boolean noAutoUpdateFlag,
       final int numRecs) {
+    this.indentStr = indentStr;
     this.levelIdx = levelIdx;
     this.rowIdx = rowIdx;
     this.occursCount = occursCount;
@@ -47,7 +50,8 @@ public class BeginLevel implements IEmission {
     }
 
     final BeginLevel other = (BeginLevel) obj;
-    return this.levelIdx == other.levelIdx
+    return this.indentStr.equals(other.indentStr)
+        && this.levelIdx == other.levelIdx
         && this.rowIdx == other.rowIdx
         && this.occursCount == other.occursCount
         && this.activeCount == other.activeCount
@@ -63,6 +67,7 @@ public class BeginLevel implements IEmission {
 
     final HashCodeBuilder hbc = new HashCodeBuilder(HCB_INITIAL,
         HCB_MULTIPLIER)
+        .append(this.indentStr)
         .append(this.levelIdx)
         .append(this.rowIdx)
         .append(this.occursCount)
@@ -79,7 +84,8 @@ public class BeginLevel implements IEmission {
   public String toString() {
 
     final StringBuilder builder = new StringBuilder();
-    builder.append("Begin level ").append(this.levelIdx)
+    builder.append(this.indentStr)
+        .append("Begin level ").append(this.levelIdx)
         .append("[row ").append(this.rowIdx).append("]")
         .append(" occcnt=").append(this.occursCount)
         .append(" activecnt=").append(this.activeCount)

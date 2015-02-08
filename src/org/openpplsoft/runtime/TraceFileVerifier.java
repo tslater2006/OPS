@@ -46,7 +46,8 @@ public final class TraceFileVerifier {
       pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
-      rowPattern, cRecBufPattern, cFldBufPattern, prmHdrPattern, prmEntryPattern;
+      rowPattern, cRecBufPattern, cFldBufPattern, scrollIdxPattern,
+      prmHdrPattern, prmEntryPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -63,6 +64,8 @@ public final class TraceFileVerifier {
   private static final int GROUP7 = 7;
   private static final int GROUP8 = 8;
   private static final int GROUP9 = 9;
+  private static final int GROUP10 = 10;
+  private static final int GROUP11 = 11;
 
   private static boolean isPausedAndWaitingToSyncUp, isInPRMEmissionRegion;
   private static IEmission emissionToSyncUpOn;
@@ -97,15 +100,16 @@ public final class TraceFileVerifier {
     endScrollsPattern =
         Pattern.compile("End\\s+Scrolls");
     beginLevelPattern =
-        Pattern.compile("Begin\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]\\s+occcnt=(\\d+)\\s+activecnt=(\\d+)\\s+hiddencnt=(\\d+)\\s+scrlcnt=(\\d+)\\s+flags=\\S+\\s+(noautoselect\\s+)?(noautoupdate\\s+)?nrec=(\\d+)");
+        Pattern.compile("((\\|\\s{2})*)Begin\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]\\s+occcnt=(\\d+)\\s+activecnt=(\\d+)\\s+hiddencnt=(\\d+)\\s+scrlcnt=(\\d+)\\s+flags=\\S+\\s+(noautoselect\\s+)?(noautoupdate\\s+)?nrec=(\\d+)");
     recPattern =
-        Pattern.compile("Rec\\s+([0-9A-Z_]+)\\s+\\(recdefn\\s+\\S+\\)\\s+keyrec=(-?\\d+)\\s+keyfield=(-?\\d+)");
+        Pattern.compile("((\\|\\s{2})*)Rec\\s+([0-9A-Z_]+)\\s+\\(recdefn\\s+\\S+\\)\\s+keyrec=(-?\\d+)\\s+keyfield=(-?\\d+)");
     rowPattern =
-        Pattern.compile("Row\\s(\\d+)\\sat\\s.{8}.");
+        Pattern.compile("((\\|\\s{2})*)Row\\s(\\d+)\\sat\\s.{8}.");
     cRecBufPattern =
         Pattern.compile("((\\|\\s{2})*)CRecBuf\\s([A-Z_0-9]+)\\(.{8}\\)\\sfields=(\\d+)\\s?(.+)?\\s?");
     cFldBufPattern =
         Pattern.compile("((\\|\\s{2})*\\s{2})([A-Z_0-9]+)\\(.{8}\\)='(.*?)';");
+    scrollIdxPattern = Pattern.compile("((\\|\\s{2})*)Scroll\\s([0-9]+)");
     prmHdrPattern =
         Pattern.compile("PRM\\s([A-Z_0-9]+)\\.([A-Z]+)\\.([A-Z]+)\\sversion\\s\\d+\\scount=(\\d+)");
     prmEntryPattern =
@@ -241,14 +245,22 @@ public final class TraceFileVerifier {
           + "up on: {}", opsEmission, emissionToSyncUpOn);
 
     /*
-     * Look at DERIVED_CS.SRVC_IND_NEG.RowInit. There is a Break statement without a trailing
-     * semicolon. Although this is legal (in PeopleCode, semicolons are optional for the last
-     * statement in any statement list), the PeopleTools bytecode interpreter does not appear
-     * to interpret this correctly in the context of When statement lists in Evaluate statements;
-     * it appears to skip When branches until it reaches the next statement with a semicolon.
-     * I do not want to have to add semicolons to all programs where this is the case, so I am going
-     * to temporarily pause trace file verification until the interpreter emits that next
-     * statement with a semicolon. In theory, this should only cause the verifier to be paused for
+     * Look at DERIVED_CS.SRVC_IND_NEG.RowInit. There is a
+     * Break statement without a trailing
+     * semicolon. Although this is legal (in PeopleCode, semicolons
+     * are optional for the last
+     * statement in any statement list), the PeopleTools bytecode
+     * interpreter does not appear
+     * to interpret this correctly in the context of When statement
+     * lists in Evaluate statements;
+     * it appears to skip When branches until it reaches the
+     * next statement with a semicolon.
+     * I do not want to have to add semicolons to all programs where
+     * this is the case, so I am going
+     * to temporarily pause trace file verification until the interpreter
+     * emits that next
+     * statement with a semicolon. In theory, this should only cause
+     * the verifier to be paused for
      * a few emissions.
      */
     } else if (opsEmission instanceof PCInstruction
@@ -419,15 +431,16 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new BeginLevel(
-            Integer.parseInt(beginLevelMatcher.group(GROUP1)),
-            Integer.parseInt(beginLevelMatcher.group(GROUP2)),
+            beginLevelMatcher.group(GROUP1),
             Integer.parseInt(beginLevelMatcher.group(GROUP3)),
             Integer.parseInt(beginLevelMatcher.group(GROUP4)),
             Integer.parseInt(beginLevelMatcher.group(GROUP5)),
             Integer.parseInt(beginLevelMatcher.group(GROUP6)),
-            beginLevelMatcher.group(GROUP7) != null,
-            beginLevelMatcher.group(GROUP8) != null,
-            Integer.parseInt(beginLevelMatcher.group(GROUP9)));
+            Integer.parseInt(beginLevelMatcher.group(GROUP7)),
+            Integer.parseInt(beginLevelMatcher.group(GROUP8)),
+            beginLevelMatcher.group(GROUP9) != null,
+            beginLevelMatcher.group(GROUP10) != null,
+            Integer.parseInt(beginLevelMatcher.group(GROUP11)));
       }
 
       final Matcher recMatcher =
@@ -437,8 +450,9 @@ public final class TraceFileVerifier {
         currTraceLine = getNextTraceLine();
         return new RecInScroll(
             recMatcher.group(GROUP1),
-            Integer.parseInt(recMatcher.group(GROUP2)),
-            Integer.parseInt(recMatcher.group(GROUP3)));
+            recMatcher.group(GROUP3),
+            Integer.parseInt(recMatcher.group(GROUP4)),
+            Integer.parseInt(recMatcher.group(GROUP5)));
       }
 
       final Matcher rowMatcher =
@@ -447,7 +461,8 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new RowInScroll(
-            Integer.parseInt(rowMatcher.group(GROUP1)));
+            rowMatcher.group(GROUP1),
+            Integer.parseInt(rowMatcher.group(GROUP3)));
       }
 
       final Matcher cRecBufMatcher =
@@ -471,6 +486,16 @@ public final class TraceFileVerifier {
             cFldBufMatcher.group(GROUP1),
             cFldBufMatcher.group(GROUP3),
             cFldBufMatcher.group(GROUP4));
+      }
+
+      final Matcher scrollIdxMatcher =
+          scrollIdxPattern.matcher(currTraceLine);
+      if (scrollIdxMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new ScrollIndex(
+            scrollIdxMatcher.group(GROUP1),
+            Integer.parseInt(scrollIdxMatcher.group(GROUP3)));
       }
 
       final Matcher prmHdrMatcher =

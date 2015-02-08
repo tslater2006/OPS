@@ -134,13 +134,20 @@ public class RecordFieldBuffer implements IStreamableBuffer,
 
   public boolean isDisplayControlField() {
 
-    final Optional<Boolean> result = this.pageFieldToks.stream()
-        .map(PgToken::isDisplayControl)
-        .reduce((accum, b) -> {
-            return accum || b;
-        });
+    /*
+     * A field is a display control field if it has
+     * one or more display control tokens *that are actually
+     * referenced* by one or more rel display tokens. A field
+     * can have a display control PgToken, but if that token
+     * isn't actually used anywhere by a related display field,
+     * it doesn't qualify the field as display control in and of itself.
+     */
+    final long count = this.pageFieldToks.stream()
+        .filter(PgToken::isDisplayControl)
+        .filter(tok -> tok.getRelDispFieldToks().size() > 0)
+        .count();
 
-    return result.orElse(false);
+    return count > 0;
   }
 
   public void expandParentRecordBufferIfNecessary() {

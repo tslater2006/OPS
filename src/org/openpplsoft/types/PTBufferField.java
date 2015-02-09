@@ -195,7 +195,9 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       flagStr += " hide";
     }
 
-    if (this.isUsed() || ctxFlag == ScrollEmissionContext.SEARCH_RESULTS) {
+    if (this.isUsed()
+        || this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
+        || ctxFlag == ScrollEmissionContext.SEARCH_RESULTS) {
       flagStr += " used";
     }
 

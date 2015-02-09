@@ -118,18 +118,15 @@ public class RecordFieldBuffer implements IStreamableBuffer,
 
   public boolean isRelatedDisplayField() {
 
-    final Optional<Boolean> result = this.pageFieldToks.stream()
+    if (this.pageFieldToks.size() == 0) {
+      return false;
+    }
+
+    return this.pageFieldToks.stream()
         .map(PgToken::isRelatedDisplay)
-        .reduce((accum, b) -> {
-            if (accum != b) {
-              throw new OPSVMachRuntimeException("While determining if record field "
-                  + "buffer is related display, encountered a combination of nonreldisp "
-                  + "page field tokens and reldisp page field tokens.");
-            }
+        .reduce(true, (accum, b) -> {
             return accum && b;
         });
-
-    return result.orElse(false);
   }
 
   public boolean isDisplayControlField() {

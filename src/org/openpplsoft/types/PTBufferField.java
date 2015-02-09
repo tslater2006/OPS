@@ -28,6 +28,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
   private static Logger log = LogManager.getLogger(PTBufferField.class.getName());
 
   private static Map<String, Method> ptMethodTable;
+  private boolean isMarkedAsUpdated;
 
   private List<DropDownItem> dropDownList = new ArrayList<>();
   private boolean isMarkedAsDefaulted;
@@ -68,6 +69,16 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     super(origTc, recFldBuffer.getRecFldDefn());
     this.parentRecord = pRecord;
     this.recFieldBuffer = recFldBuffer;
+  }
+
+  /**
+   * NOTE: This applies to the field, not the value within
+   * the field; I realize this is confusing but am in the
+   * middle of trying to determine exactly where PeopleSoft
+   * draws the line.
+   */
+  private void markAsUpdated() {
+    this.isMarkedAsUpdated = true;
   }
 
   public RecordFieldBuffer getRecordFieldBuffer() {
@@ -172,7 +183,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
 
     if (this.getValue().isMarkedAsUpdated()
-        && !this.isMarkedAsDefaulted
+        && (!this.isMarkedAsDefaulted || this.isMarkedAsUpdated)
         && (this.parentRecord.getRecDefn().isDerivedWorkRecord()
             || this.parentRecord.isEffectivelyAWorkRecord())
         && ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
@@ -610,6 +621,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       throw new OPSVMachRuntimeException("Expected no args to ClearDropDownList");
     }
     this.dropDownList.clear();
+    this.markAsUpdated();
   }
 
   public void PT_AddDropDownItem() {

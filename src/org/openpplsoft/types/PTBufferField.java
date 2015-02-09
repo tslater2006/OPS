@@ -30,6 +30,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
   private static Map<String, Method> ptMethodTable;
 
   private List<DropDownItem> dropDownList = new ArrayList<>();
+  private boolean isMarkedAsDefaulted;
 
   private class DropDownItem {
     private String code, desc;
@@ -171,6 +172,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
 
     if (this.getValue().isMarkedAsUpdated()
+        && !this.isMarkedAsDefaulted
         && (this.parentRecord.getRecDefn().isDerivedWorkRecord()
             || this.parentRecord.isEffectivelyAWorkRecord())
         && ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
@@ -327,6 +329,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
      */
     if (!preFldDefProcIsMarkedAsUpdated && this.getValue().isMarkedAsUpdated()) {
       fldDefProcSummary.fieldWasChanged();
+      this.markAsDefaulted();
       TraceFileVerifier.submitEnforcedEmission(fdEmission);
     } else if (this.getValue().isBlank()) {
       fldDefProcSummary.blankFieldWasSeen();
@@ -435,10 +438,15 @@ public final class PTBufferField extends PTField<PTBufferRecord>
      */
     if (!preFldDefProcIsMarkedAsUpdated && this.getValue().isMarkedAsUpdated()) {
       fldDefProcSummary.fieldWasChanged();
+      this.markAsDefaulted();
       TraceFileVerifier.submitEnforcedEmission(fdEmission);
     } else if (this.getValue().isBlank()) {
       fldDefProcSummary.blankFieldWasSeen();
     }
+  }
+
+  private void markAsDefaulted() {
+    this.isMarkedAsDefaulted = true;
   }
 
   public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {

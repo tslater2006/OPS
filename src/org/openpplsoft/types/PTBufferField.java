@@ -180,6 +180,9 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (this.recFieldBuffer != null
         && this.recFieldBuffer.isDisplayControlField()) {
       flagStr += " relkey";
+    } else if (this.recFieldDefn.FIELDNAME.equals("EFFDT")
+        && this.determineScrollLevel() == 0) {
+      flagStr += " relkey";
     }
 
     if (this.getValue().isMarkedAsUpdated()

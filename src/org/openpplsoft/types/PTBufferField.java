@@ -177,6 +177,10 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       flagStr += " key";
     }
 
+    if (this.recFieldDefn.isAlternateSearchKey()) {
+      flagStr += " altkey";
+    }
+
     if (this.recFieldBuffer != null
         && this.recFieldBuffer.isDisplayControlField()) {
       flagStr += " relkey";

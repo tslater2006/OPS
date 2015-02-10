@@ -141,6 +141,7 @@ public class RecordFieldBuffer implements IStreamableBuffer,
      */
     final long count = this.pageFieldToks.stream()
         .filter(PgToken::isDisplayControl)
+        .filter(tok -> !tok.isXlatDisplayControl())
         .filter(tok -> tok.getRelDispFieldToks().size() > 0)
         .count();
 

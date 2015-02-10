@@ -98,6 +98,23 @@ public class PgToken {
     return this.dispControlFieldTok;
   }
 
+  /**
+   * If this is a display control token and *all* of
+   * the reldisp tokens referencing it are on the PSXLATITEM
+   * record, this token is considered an Xlat display control field
+   * token.
+   */
+  public boolean isXlatDisplayControl() {
+
+    long xlatCount = this.relDispFieldToks.stream()
+        .filter(tok -> tok.getRecName().equals("PSXLATITEM"))
+        .count();
+
+    return this.isDisplayControl()
+        && this.relDispFieldToks.size() > 0
+        && xlatCount == this.relDispFieldToks.size();
+  }
+
   public void setDispControlFieldTok(final PgToken dispCtrlFieldTok) {
     this.dispControlFieldTok = dispCtrlFieldTok;
   }

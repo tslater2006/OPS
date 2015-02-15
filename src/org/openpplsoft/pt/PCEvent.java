@@ -15,7 +15,7 @@ public enum PCEvent {
   ROW_INIT("RowInit"),
   POST_BUILD("PostBuild");
 
-  private String name;
+  private final String name;
 
   private PCEvent(final String n) {
     this.name = n;

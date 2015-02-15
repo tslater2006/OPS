@@ -26,8 +26,8 @@ public class Menu {
 
   private static Logger log = LogManager.getLogger(Menu.class.getName());
 
-  private String ptMENUNAME;
-  private List<MenuItem> menuItems;
+  private final String ptMENUNAME;
+  private final List<MenuItem> menuItems;
 
   /**
    * Create a representation of the menu defn with the

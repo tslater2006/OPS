@@ -99,7 +99,7 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
     if (s.toLowerCase().equals("activerowcount")) {
       return new PTInteger(this.getActiveRowCount());
     } else if (s.toLowerCase().equals("dbrecordname")) {
-      return new PTString(this.primaryRecDefn.RECNAME);
+      return new PTString(this.primaryRecDefn.getRecName());
     }
 
     return null;
@@ -172,13 +172,14 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
 
       final PTRecordFieldSpecifier fldSpec =
           (PTRecordFieldSpecifier) Environment.popFromCallStack();
-      if (!fldSpec.getRecName().equals(this.primaryRecDefn.RECNAME)) {
+      if (!fldSpec.getRecName().equals(this.primaryRecDefn.getRecName())) {
         throw new OPSVMachRuntimeException("Encountered a sort "
             + "field for a record other than the one underlying this "
             + "rowset; this is legal but not yet supported.");
       }
 
-      if (!this.primaryRecDefn.fieldTable.containsKey(fldSpec.getFieldName())) {
+      if (!this.primaryRecDefn.getFieldTable()
+          .containsKey(fldSpec.getFieldName())) {
         throw new OPSVMachRuntimeException("The field "
             + fldSpec.getFieldName() + " does not exist on the underlying "
             + "record.");
@@ -196,12 +197,12 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
       for (int i = 0; i < sortFields.size(); i++) {
         final String order = sortOrders.get(i);
 
-        final PTRecord<?,?> aRecord = aRow.getRecord(primaryRecDefn.RECNAME);
+        final PTRecord<?,?> aRecord = aRow.getRecord(primaryRecDefn.getRecName());
         final PTReference<? extends PTField> aRef = aRecord
             .getFieldRef(sortFields.get(i));
         final PTPrimitiveType aVal = aRef.deref().getValue();
 
-        final PTRecord<?,?> bRecord = bRow.getRecord(primaryRecDefn.RECNAME);
+        final PTRecord<?,?> bRecord = bRow.getRecord(primaryRecDefn.getRecName());
         final PTReference<? extends PTField> bRef = bRecord
             .getFieldRef(sortFields.get(i));
         final PTPrimitiveType bVal = bRef.deref().getValue();

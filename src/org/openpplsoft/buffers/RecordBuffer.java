@@ -93,9 +93,9 @@ public class RecordBuffer implements IStreamableBuffer {
   }
 
   public void addEffDtKeyIfNecessary() {
-    final RecordField EFFDT = this.recDefn.fieldTable.get("EFFDT");
+    final RecordField EFFDT = this.recDefn.getFieldTable().get("EFFDT");
     if (this.recDefn.isDerivedWorkRecord() && EFFDT != null && EFFDT.isKey()) {
-      this.addPageField(this.recDefn.RECNAME, "EFFDT", null);
+      this.addPageField(this.recDefn.getRecName(), "EFFDT", null);
     }
   }
 
@@ -125,11 +125,11 @@ public class RecordBuffer implements IStreamableBuffer {
   public void addPageField(final String ptRECNAME,
       final String ptFIELDNAME, final PgToken srcTok) {
 
-    if (!ptRECNAME.equals(this.recDefn.RECNAME)) {
+    if (!ptRECNAME.equals(this.recDefn.getRecName())) {
       throw new OPSVMachRuntimeException("Illegal attempt to add page "
         + "field " + ptRECNAME + "." + ptFIELDNAME + " ("
         + srcTok + ") to record with different name"
-        + this.recDefn.RECNAME);
+        + this.recDefn.getRecName());
     }
 
     RecordFieldBuffer f = this.fieldBufferTable.get(ptFIELDNAME);
@@ -158,7 +158,7 @@ public class RecordBuffer implements IStreamableBuffer {
       final List<RecordFieldBuffer> newList =
           new ArrayList<RecordFieldBuffer>();
 
-      final Record recDefn = DefnCache.getRecord(this.recDefn.RECNAME);
+      final Record recDefn = DefnCache.getRecord(this.recDefn.getRecName());
       final List<RecordField> expandedFieldList =
           recDefn.getExpandedFieldList();
 
@@ -169,16 +169,16 @@ public class RecordBuffer implements IStreamableBuffer {
         // if the field is in a subrecord, the RECNAME in the
         // RecordFieldBuffer will be that of the subrecord itself.
         final RecordFieldBuffer fldBuffer =
-            new RecordFieldBuffer(fld.RECNAME, fld.FIELDNAME, this, null);
+            new RecordFieldBuffer(fld.getRecName(), fld.getFldName(), this, null);
         newTable.put(fldBuffer.getFldName(), fldBuffer);
         newList.add(fldBuffer);
 
         // If a record field buffer already exists in the pre-expansion
         // field buffer table, copy its page field tokens
         // into the new rec field buffer.
-        if (this.fieldBufferTable.containsKey(fld.FIELDNAME)) {
+        if (this.fieldBufferTable.containsKey(fld.getFldName())) {
           for (final PgToken tok
-              : this.fieldBufferTable.get(fld.FIELDNAME).getPageFieldToks()) {
+              : this.fieldBufferTable.get(fld.getFldName()).getPageFieldToks()) {
             fldBuffer.addPageFieldTok(tok);
           }
         }
@@ -213,11 +213,11 @@ public class RecordBuffer implements IStreamableBuffer {
 
   public boolean doesContainStructuralFields() {
 
-/*    log.debug("Begin fields for record: {}", this.recDefn.RECNAME);
+/*    log.debug("Begin fields for record: {}", this.recDefn.getRecName());
     for (final RecordFieldBuffer buf : this.fieldBuffers) {
       log.debug("{} | {}", buf.getFldName(), buf.getSrcPageToken());
     }
-    log.debug("End fields for record: {}", this.recDefn.RECNAME);*/
+    log.debug("End fields for record: {}", this.recDefn.getRecName());*/
 
     for (final RecordFieldBuffer buf : this.fieldBuffers) {
       if (!buf.isRelatedDisplayField()) {

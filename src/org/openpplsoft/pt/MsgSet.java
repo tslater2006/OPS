@@ -31,7 +31,7 @@ public class MsgSet {
 
   private static Logger log = LogManager.getLogger(MsgSet.class.getName());
 
-  private int ptMESSAGE_SET_NBR;
+  private final int ptMESSAGE_SET_NBR;
   private Map<Integer, String> messages;
 
   /**

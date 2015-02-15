@@ -19,17 +19,13 @@ import org.openpplsoft.pt.*;
 
 public class RecordField {
 
-  public String RECNAME;
-  public String FIELDNAME;
-  public int USEEDIT;
-  public int FIELDNUM;
-  public int LENGTH;
-  public String DEFRECNAME;
-  public String DEFFIELDNAME;
-  public String LABEL_ID;
-  private int typeFlag;
+  private final String RECNAME, FIELDNAME;
+  private final int USEEDIT, FIELDNUM, LENGTH;
+  private final String DEFRECNAME, DEFFIELDNAME, LABEL_ID;
+  private final int FIELDTYPE;
+  private final Map<String, FieldLabel> labels;
+
   private FieldLabel defaultLabel;
-  private Map<String, FieldLabel> labels;
 
   private final int KEY_FLAG = 1;
   private final int ALTERNATE_SEARCH_KEY_FLAG = 16;
@@ -40,11 +36,50 @@ public class RecordField {
 
   private static Logger log = LogManager.getLogger(RecordField.class.getName());
 
-  public RecordField(String r, String f, int t) {
-    this.RECNAME = r;
-    this.FIELDNAME = f;
-    this.typeFlag = t;
+  public RecordField(final String recname,
+      final String fieldname,
+      final int fieldtype,
+      final int useedit,
+      final int fieldnum,
+      final int length,
+      final String defrecname,
+      final String deffieldname,
+      final String labelId) {
+    this.RECNAME = recname;
+    this.FIELDNAME = fieldname;
+    this.FIELDTYPE = fieldtype;
+    this.USEEDIT = useedit;
+    this.FIELDNUM = fieldnum;
+    this.LENGTH = length;
+    this.DEFRECNAME = defrecname;
+    this.DEFFIELDNAME = deffieldname;
+    this.LABEL_ID = labelId;
+
     this.labels = new HashMap<String, FieldLabel>();
+  }
+
+  public String getRecName() {
+    return this.RECNAME;
+  }
+
+  public String getFldName() {
+    return this.FIELDNAME;
+  }
+
+  public String getDefaultRecName() {
+    return this.DEFRECNAME;
+  }
+
+  public String getDefaultFldName() {
+    return this.DEFFIELDNAME;
+  }
+
+  public int getFldNum() {
+    return this.FIELDNUM;
+  }
+
+  public int getUseEdit() {
+    return this.USEEDIT;
   }
 
   public void addLabel(final FieldLabel label) {
@@ -55,7 +90,7 @@ public class RecordField {
   }
 
   public PTTypeConstraint getTypeConstraintForUnderlyingValue() {
-    switch(this.typeFlag) {
+    switch(this.FIELDTYPE) {
       case 0:  // char
         if(this.LENGTH == 1) {
           return PTChar.getTc();
@@ -81,7 +116,7 @@ public class RecordField {
         default:
       throw new OPSVMachRuntimeException("Unable to determine " +
         "appropriate type constraint for underlying record field " +
-        "value given a typeFlag of: " + this.typeFlag + "; " +
+        "value given a FIELDTYPE of: " + this.FIELDTYPE + "; " +
         "RECNAME=" + RECNAME + ", FIELDNAME=" + FIELDNAME);
     }
   }

@@ -20,20 +20,21 @@ import org.openpplsoft.runtime.*;
  */
 public final class PTRecordFieldSpecifier extends PTObjectType {
 
-  private Record recDefn;
-  private String fieldName;
-  private InterpretSupervisor interpretSupervisor;
+  private final Record recDefn;
+  private final String fieldName;
+  private final InterpretSupervisor interpretSupervisor;
 
   public PTRecordFieldSpecifier(final Record r, final String fieldName,
       final InterpretSupervisor interpretSupervisor) {
-    super(new PTTypeConstraint<PTRecordFieldSpecifier>(PTRecordFieldSpecifier.class));
+    super(new PTTypeConstraint<PTRecordFieldSpecifier>(
+          PTRecordFieldSpecifier.class));
     this.recDefn = r;
     this.fieldName = fieldName;
     this.interpretSupervisor = interpretSupervisor;
   }
 
   public String getRecName() {
-    return this.recDefn.RECNAME;
+    return this.recDefn.getRecName();
   }
 
   public String getFieldName() {
@@ -42,7 +43,7 @@ public final class PTRecordFieldSpecifier extends PTObjectType {
 
   public PTReference<PTBufferField> resolveInCBufferContext() {
     return this.interpretSupervisor.resolveContextualCBufferRecordFieldReference(
-        this.recDefn.RECNAME, this.fieldName);
+        this.recDefn.getRecName(), this.fieldName);
   }
 
   /**
@@ -66,7 +67,7 @@ public final class PTRecordFieldSpecifier extends PTObjectType {
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append("recName=").append(this.recDefn.RECNAME);
+    b.append("recName=").append(this.recDefn.getRecName());
     b.append(",fieldName=").append(this.fieldName);
     return b.toString();
   }

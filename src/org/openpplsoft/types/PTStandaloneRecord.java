@@ -75,7 +75,7 @@ public final class PTStandaloneRecord extends PTRecord<PTStandaloneRow,
         final PTImmutableReference<PTStandaloneField> newFldRef =
             new PTImmutableReference<>(fldTc,
                 fldTc.allocStandaloneField(this, rf));
-        this.fieldRefs.put(rf.FIELDNAME, newFldRef);
+        this.fieldRefs.put(rf.getFldName(), newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);
       } catch (final OPSTypeCheckException opstce) {
         throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);

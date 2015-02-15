@@ -31,7 +31,8 @@ public class Page {
 
   private static Logger log = LogManager.getLogger(Page.class.getName());
 
-  private String ptPNLNAME;
+  private final String ptPNLNAME;
+
   private List<PgToken> subpages;
   private List<PgToken> secpages;
   private Map<Integer, PgToken> tokenTable;
@@ -271,7 +272,7 @@ public class Page {
     if (recName != null && !PSDefn.isSystemRecord(recName)) {
 
       final Record recDefn = DefnCache.getRecord(recName);
-      log.debug("Issuing PC List Request for {}", recDefn.RECNAME);
+      log.debug("Issuing PC List Request for {}", recDefn.getRecName());
       recDefn.discoverRecordPC();
 
       /*

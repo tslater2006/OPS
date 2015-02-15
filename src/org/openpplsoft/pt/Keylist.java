@@ -64,7 +64,8 @@ public class Keylist {
         final PTField fld = this.keylist.get(i);
         final RecordField rf = fld.getRecordFieldDefn();
         b.append("  ").append(i).append(") ");
-        b.append("rf: ").append(rf.RECNAME).append(".").append(rf.FIELDNAME).append(", ");
+        b.append("rf: ").append(rf.getRecName())
+            .append(".").append(rf.getFldName()).append(", ");
         b.append("value=|").append(fld.getValue().readAsString()).append("|");
         if (rf.isKey()) {
           b.append(" (key)");

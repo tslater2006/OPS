@@ -108,7 +108,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         && !this.recFieldBuffer.isRelatedDisplayField()
         && !this.recFieldBuffer.isDisplayControlField()
         && !ComponentBuffer.hasPRMEntry(new RecFldName(
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME))) {
+            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName()))) {
       return;
     }*/
 
@@ -116,7 +116,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     // if it does not have a record field buffer.
     if (!this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
         && this.recFieldBuffer == null) {
-      log.debug("[1] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+      log.debug("[1] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 
@@ -125,7 +125,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (ctxFlag == ScrollEmissionContext.SEARCH_RESULTS
         && (!this.recFieldDefn.isKey()
             || !this.getValue().isMarkedAsUpdated())) {
-      log.debug("[2] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+      log.debug("[2] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 
@@ -137,22 +137,22 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         && !this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
         && (this.recFieldBuffer == null
             || this.recFieldBuffer.getPageFieldToks().size() == 0)) {
-      log.debug("[3] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+      log.debug("[3] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 
-    log.debug("Field {} key? {}", this.recFieldDefn.FIELDNAME, this.recFieldDefn.isKey());
+    log.debug("Field {} key? {}", this.recFieldDefn.getFldName(), this.recFieldDefn.isKey());
     log.debug("Field {} recFieldBuffer null? {}",
-        this.parentRecord.getRecDefn().RECNAME, this.recFieldBuffer == null);
+        this.parentRecord.getRecDefn().getRecName(), this.recFieldBuffer == null);
     log.debug("Field {}.{} has PRM entry? {}",
-        this.recFieldDefn.RECNAME,
-        this.recFieldDefn.FIELDNAME,
+        this.recFieldDefn.getRecName(),
+        this.recFieldDefn.getFldName(),
         ComponentBuffer.hasPRMEntry(new RecFldName(
-                this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME)));
+                this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName())));
     if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
         && this.parentRecord.isEffectivelyAWorkRecord()
         && this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
-        && !this.recFieldDefn.FIELDNAME.equals("EFF_STATUS")
+        && !this.recFieldDefn.getFldName().equals("EFF_STATUS")
         && !this.recFieldDefn.isKey()
         && (this.recFieldBuffer == null
             || (!this.recFieldBuffer.isRelatedDisplayField()
@@ -161,9 +161,9 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         // and not that of the record field defn, due to possibility that field
         // is defined on a subrecord of the parent record.
         && !ComponentBuffer.hasPRMEntry(new RecFldName(
-                this.parentRecord.getRecDefn().RECNAME,
-                this.recFieldDefn.FIELDNAME))) {
-      log.debug("[4] Skipping field: {}", this.recFieldDefn.FIELDNAME);
+                this.parentRecord.getRecDefn().getRecName(),
+                this.recFieldDefn.getFldName()))) {
+      log.debug("[4] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 
@@ -184,7 +184,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (this.recFieldBuffer != null
         && this.recFieldBuffer.isDisplayControlField()) {
       flagStr += " relkey";
-    } else if (this.recFieldDefn.FIELDNAME.equals("EFFDT")
+    } else if (this.recFieldDefn.getFldName().equals("EFFDT")
         && this.determineScrollLevel() == 0) {
       flagStr += " relkey";
     }
@@ -209,7 +209,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
 
     TraceFileVerifier.submitEnforcedEmission(
-        new CFldBuf(indentStr + "  ", this.recFieldDefn.FIELDNAME,
+        new CFldBuf(indentStr + "  ", this.recFieldDefn.getFldName(),
             this.getValue().readAsString(), flagStr));
   }
 
@@ -260,7 +260,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     // in the component buffer structure), do not run field default proc on it.
     if (this.recFieldBuffer == null) {
 //      log.debug("Skipping FldDefProc: {}.{}",
-//          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+//          this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
       return;
     }
 
@@ -269,7 +269,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
 
     log.debug("Running FldDefProc: {}.{}",
-          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+          this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
 
     // If field is not blank, no need to run field default proc on it.
     if (!this.getValue().isBlank()) {
@@ -281,23 +281,23 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       final Keylist keylist = new Keylist();
       this.generateKeylist(keylist);
       log.debug("{}.{} has the following keylist during non-constant field def proc:\n{}",
-          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keylist);
+          this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName(), keylist);
 
       if (keylist.size() > 0 && keylist.isFirstValueNonBlank()) {
         log.debug("Ignoring key field {}.{} during "
             + "non-constant FldDefProc; key value exists in immediate context "
             + "so no need to default it.",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
         return;
       }
     }
 
     boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
-        this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+        this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
 
-    final String defRecName = this.recFieldDefn.DEFRECNAME;
-    final String defFldName = this.recFieldDefn.DEFFIELDNAME;
+    final String defRecName = this.recFieldDefn.getDefaultRecName();
+    final String defFldName = this.recFieldDefn.getDefaultFldName();
     final Record defRecDefn = DefnCache.getRecord(defRecName);
 
     OPSStmt ostmt = null;
@@ -306,7 +306,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
           StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, this);
     } catch (final OPSCBufferKeyLookupException opscbkle) {
       log.warn("Failed to generate non constant "
-          + "field default query for field: " + this.recFieldDefn.FIELDNAME
+          + "field default query for field: " + this.recFieldDefn.getFldName()
           + "; a value for a key on the default record (" + defRecName + ") could "
           + "not be found in the component buffer. This is not an error, "
           + "just a warning that the field can't be defaulted at this time, "
@@ -317,7 +317,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
 
     log.debug("Querying {}.{} for default value for field {}.{}",
         defRecName, defFldName,
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
 
     /*
      * Keep in mind that zero records may legitimately be returned here,
@@ -363,7 +363,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     // in the component buffer structure), do not run field default proc on it.
     if (this.recFieldBuffer == null) {
 //      log.debug("Skipping FldDefProc: {}.{}",
-//          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+//          this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
       return;
     }
 
@@ -372,7 +372,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     }
 
     log.debug("Running FldDefProc: {}.{}",
-          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+          this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
 
     // If field is not blank, no need to run field default proc on it.
     if (!this.getValue().isBlank()) {
@@ -380,7 +380,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       return;
     }
 
-    if (this.recFieldDefn.FIELDNAME.equals("EFFDT")
+    if (this.recFieldDefn.getFldName().equals("EFFDT")
         && this.recFieldDefn.isKey()
         && (this.parentRecord.getRecDefn().isTable()
             || this.parentRecord.getRecDefn().isView())) {
@@ -388,41 +388,41 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       final Keylist keylist = new Keylist();
       this.generateKeylist(keylist);
       log.debug("Keylist for {}.{} during constant def proc: {}",
-          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keylist.toString());
+          this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName(), keylist.toString());
 
       if (keylist.hasNonBlankValue()) {
         log.debug("Ignorning key field {}.{} during "
             + "non-constant FldDefProc; key value exists in buffer context "
             + "so no need to default it.",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
         return;
       }
     }
 
-    if (this.recFieldDefn.isKey() && !this.recFieldDefn.FIELDNAME.equals("EFFDT")) {
+    if (this.recFieldDefn.isKey() && !this.recFieldDefn.getFldName().equals("EFFDT")) {
       final Keylist keylist = new Keylist();
       this.generateKeylist(keylist);
       log.debug("Keylist for {}.{} during constant def proc: {}",
-          this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME, keylist.toString());
+          this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName(), keylist.toString());
 
       if (keylist.hasNonBlankValue()) {
         log.debug("Ignorning key field {}.{} during "
             + "non-constant FldDefProc; key value exists in buffer context "
             + "so no need to default it.",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
         return;
       } else {
         log.debug("No value found for key {}.{} during non-default fld proc, "
             + "will continue processing.",
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
       }
     }
 
     boolean preFldDefProcIsMarkedAsUpdated = this.getValue().isMarkedAsUpdated();
     final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
-        this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+        this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
 
-      final String defValue = this.recFieldDefn.DEFFIELDNAME;
+      final String defValue = this.recFieldDefn.getDefaultFldName();
       final PTPrimitiveType fldValue = this.getValue();
 
       // First check if the value is actually a meta value (i.e., "%date")
@@ -502,7 +502,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
   public void generateKeylist(final Keylist keylist) {
     if (this.parentRecord != null) {
       this.parentRecord.generateKeylist(
-          this.recFieldDefn.FIELDNAME, keylist);
+          this.recFieldDefn.getFldName(), keylist);
     }
   }
 
@@ -522,7 +522,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
           && this.parentRecord.getRecBuffer() != null
           && this.recFieldBuffer == null) {
         throw new OPSIllegalNonCBufferFieldAccessAttempt(
-            this.recFieldDefn.RECNAME, this.recFieldDefn.FIELDNAME);
+            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
       }
       return this.valueRef;
     } else if(s.toLowerCase().equals("visible")) {

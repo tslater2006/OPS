@@ -283,7 +283,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     int rowsRead = 0, rowIdxToWriteTo = 1;
     while (rs.next()) {
       final PTBufferRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
-      final PTRecord recToWriteTo = rowToWriteTo.getRecord(this.primaryRecDefn.RECNAME);
+      final PTRecord recToWriteTo = rowToWriteTo.getRecord(this.primaryRecDefn.getRecName());
 
       /**
        * It is possible to select from a different record than the
@@ -291,7 +291,7 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
        * we need to read/write only those fields that are shared by both.
        * Otherwise, read into the record as usual.
        */
-      if (!this.primaryRecDefn.RECNAME.equals(recToSelectFrom.RECNAME)) {
+      if (!this.primaryRecDefn.getRecName().equals(recToSelectFrom.getRecName())) {
         rs.readIntoRecordDefinedFieldsOnly(recToWriteTo);
       } else {
         rs.readIntoRecord(recToWriteTo);

@@ -145,7 +145,7 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
       }
 
       final PTStandaloneRow newRow = this.allocateNewRow();
-      rs.readIntoRecord(newRow.getRecord(this.primaryRecDefn.RECNAME));
+      rs.readIntoRecord(newRow.getRecord(this.primaryRecDefn.getRecName()));
       this.rows.add(newRow);
       rowsRead++;
     }

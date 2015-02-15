@@ -29,8 +29,7 @@ public class HTML {
 
   private static Logger log = LogManager.getLogger(HTML.class.getName());
 
-  private String ptCONTNAME;
-  private String ptCONTDATA;
+  private final String ptCONTNAME, ptCONTDATA;
   private final String ptCONTTYPE = "4";
 
   /**

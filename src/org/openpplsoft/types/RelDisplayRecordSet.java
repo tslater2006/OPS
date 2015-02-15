@@ -62,11 +62,11 @@ public class RelDisplayRecordSet {
     }
 
     RecordEntry entry = table.get(
-        relDispRecBuffer.getRecDefn().RECNAME);
+        relDispRecBuffer.getRecDefn().getRecName());
     if (entry == null) {
       entry = new RecordEntry();
       entry.rbuf = relDispRecBuffer;
-      table.put(relDispRecBuffer.getRecDefn().RECNAME, entry);
+      table.put(relDispRecBuffer.getRecDefn().getRecName(), entry);
     }
   }
 
@@ -144,7 +144,7 @@ public class RelDisplayRecordSet {
         : this.tables.entrySet()) {
       for (final Map.Entry<String, RecordEntry> entry
           : tableEntry.getValue().entrySet()) {
-        if (entry.getValue().rec.getRecDefn().RECNAME.equals(recName)) {
+        if (entry.getValue().rec.getRecDefn().getRecName().equals(recName)) {
           records.add(entry.getValue().rec);
         }
       }
@@ -163,7 +163,7 @@ public class RelDisplayRecordSet {
         : this.tables.entrySet()) {
       for (final Map.Entry<String, RecordEntry> entry
           : tableEntry.getValue().entrySet()) {
-        if (!PSDefn.isSystemRecord(entry.getValue().rec.getRecDefn().RECNAME)) {
+        if (!PSDefn.isSystemRecord(entry.getValue().rec.getRecDefn().getRecName())) {
           total++;
         }
       }

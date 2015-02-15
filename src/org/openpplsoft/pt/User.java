@@ -26,13 +26,11 @@ public class User {
 
   private static Logger log = LogManager.getLogger(User.class.getName());
 
-  private String oprid, emplid, oprclass;
+  private final String oprid, emplid, oprclass;
 
   public User(final String oprid) {
-    this.oprid = oprid;
-
     OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSOPRDEFN",
-        new String[]{this.oprid});
+        new String[]{oprid});
     OPSResultSet rs = ostmt.executeQuery();
 
     rs.next();

@@ -17,8 +17,8 @@ public class FieldLabel {
 
   private static Logger log = LogManager.getLogger(FieldLabel.class.getName());
 
+  private final String labelId, longName, shortName;
   private boolean isDefault;
-  private String labelId, longName, shortName;
 
   public FieldLabel(final String labelId, final String longName,
       final String shortName) {

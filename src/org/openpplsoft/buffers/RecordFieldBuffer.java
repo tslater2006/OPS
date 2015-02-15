@@ -57,13 +57,13 @@ public class RecordFieldBuffer implements IStreamableBuffer,
     }
 
     if (this.recDefn.hasField(this.fldName)) {
-      this.fldDefn = this.recDefn.fieldTable.get(this.fldName);
+      this.fldDefn = this.recDefn.getFieldTable().get(this.fldName);
     } else {
       boolean wasFieldFoundOnSubrecord = false;
       for (final String subrecName : this.recDefn.getSubrecordNames()) {
         final Record subRecDefn = DefnCache.getRecord(subrecName);
         if (subRecDefn.hasField(this.fldName)) {
-          this.fldDefn = subRecDefn.fieldTable.get(this.fldName);
+          this.fldDefn = subRecDefn.getFieldTable().get(this.fldName);
           wasFieldFoundOnSubrecord = true;
           break;
         }
@@ -180,8 +180,8 @@ public class RecordFieldBuffer implements IStreamableBuffer,
    *    this buffer comes after, 0 otherwise.
    */
   public int compareTo(final RecordFieldBuffer fb) {
-    final int a = this.fldDefn.FIELDNUM;
-    final int b = fb.fldDefn.FIELDNUM;
+    final int a = this.fldDefn.getFldNum();
+    final int b = fb.fldDefn.getFldNum();
     return a > b ? +1 : a < b ? -1 : 0;
   }
 

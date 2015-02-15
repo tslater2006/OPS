@@ -70,7 +70,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     for(final RecordBuffer recBuf : pRowset.getRegisteredNonRelDispRecordBuffers()) {
       final PTBufferRecord newRec =
           new PTRecordTypeConstraint().allocBufferRecord(this, recBuf);
-      this.recordMap.put(recBuf.getRecDefn().RECNAME, newRec);
+      this.recordMap.put(recBuf.getRecDefn().getRecName(), newRec);
       this.totallyOrderedAllRecords.put(recBuf.getOrderIdx(), newRec);
     }
 
@@ -141,7 +141,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
 /*    for (final Map.Entry<Integer, PTBufferRecord> entry
         : this.totallyOrderedAllRecords.entrySet()) {
-      log.debug("Here {} -> {}", entry.getKey(), entry.getValue().getRecDefn().RECNAME);
+      log.debug("Here {} -> {}", entry.getKey(), entry.getValue().getRecDefn().getRecName());
     }*/
 
     int idxPos = 0;
@@ -153,7 +153,7 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
       // System records are not given a numeric position
       // and thus should not cause the index counter to be incremented.
-      if (!PSDefn.isSystemRecord(entry.getValue().getRecDefn().RECNAME)) {
+      if (!PSDefn.isSystemRecord(entry.getValue().getRecDefn().getRecName())) {
         idxPos++;
       }
     }
@@ -305,8 +305,8 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
       if (rfBuf != null) {
         final PTField fld = this.recordMap.get(
-            rfBuf.getRecDefn().RECNAME).getFieldRef(rfBuf.getRecFldDefn()
-                .FIELDNAME).deref();
+            rfBuf.getRecDefn().getRecName()).getFieldRef(rfBuf.getRecFldDefn()
+                .getFldName()).deref();
         keylist.add(fld);
       }
     }

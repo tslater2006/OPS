@@ -535,7 +535,7 @@ public class GlobalFnLibrary {
       // NOTE: trim() is important here; blank values are a single space
       // in PS and should be reduced to the empty string.
       final PTField fld = fieldRef.deref();
-      url.append("&").append(fld.getRecordFieldDefn().FIELDNAME).append("=")
+      url.append("&").append(fld.getRecordFieldDefn().getFldName()).append("=")
           .append(fld.getValue().readAsString().trim());
     }
 

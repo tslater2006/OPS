@@ -32,8 +32,8 @@ public class Component {
 
   private static Logger log = LogManager.getLogger(Component.class.getName());
 
-  private String ptPNLGRPNAME;
-  private String ptMARKET;
+  private final String ptPNLGRPNAME;
+  private final String ptMARKET;
 
   // search record used when in add mode
   private String ptADDSRCHRECNAME;
@@ -177,8 +177,8 @@ public class Component {
   public ComponentPeopleCodeProg getProgramForRecordFieldEvent(
       final PCEvent event, final RecordField recFldDefn) {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-      if (prog.RECNAME != null && prog.RECNAME.equals(recFldDefn.RECNAME)
-          && prog.FLDNAME != null && prog.FLDNAME.equals(recFldDefn.FIELDNAME)
+      if (prog.RECNAME != null && prog.RECNAME.equals(recFldDefn.getRecName())
+          && prog.FLDNAME != null && prog.FLDNAME.equals(recFldDefn.getFldName())
           && prog.getEvent().equals(event.getName())) {
         return prog;
       }
@@ -189,7 +189,7 @@ public class Component {
   public ComponentPeopleCodeProg getProgramForRecordEvent(
       final PCEvent event, final Record recDefn) {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-      if (prog.RECNAME != null && prog.RECNAME.equals(recDefn.RECNAME)
+      if (prog.RECNAME != null && prog.RECNAME.equals(recDefn.getRecName())
           && prog.FLDNAME == null
           && prog.getEvent().equals(event.getName())) {
         return prog;

@@ -54,7 +54,7 @@ public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandalon
 
     // Create records for each record defn registered on the parent rowset.
     for(final Record recDefn : pRowset.getRegisteredRecordDefns()) {
-      this.recordMap.put(recDefn.RECNAME,
+      this.recordMap.put(recDefn.getRecName(),
           new PTRecordTypeConstraint().allocStandaloneRecord(this, recDefn));
     }
   }

@@ -80,21 +80,21 @@ public class ComponentStructureVerifier {
         skipUpcomingRecordFields = false;
 
         if (!rbuf.doesContainStructuralFields()
-            || PSDefn.isSystemRecord(rbuf.getRecDefn().RECNAME)) {
+            || PSDefn.isSystemRecord(rbuf.getRecDefn().getRecName())) {
           skipUpcomingRecordFields = true;
           continue;
         }
 
         StringBuilder b = new StringBuilder();
         for(int i=0; i<indent; i++){b.append(" ");}
-        b.append(" + ").append(rbuf.getRecDefn().RECNAME);
+        b.append(" + ").append(rbuf.getRecDefn().getRecName());
         log.info(b.toString());
 
         if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
-            !lineParts[1].replaceAll("-", "_").equals(rbuf.getRecDefn().RECNAME)) {
+            !lineParts[1].replaceAll("-", "_").equals(rbuf.getRecDefn().getRecName())) {
           throw new OPSVMachRuntimeException("Incorrect/absent record token encountered " +
               "during component structure validation; expected: " + line + "; received: "
-              + rbuf.getRecDefn().RECNAME);
+              + rbuf.getRecDefn().getRecName());
         }
       } else {
 

@@ -168,14 +168,14 @@ public final class StmtLibrary {
 
     int i = 0;
     for (RecordField rf : rfList) {
-      log.debug("USEEDIT for {}: {}", rf.FIELDNAME, rf.USEEDIT);
+      log.debug("USEEDIT for {}: {}", rf.getFldName(), rf.getUseEdit());
       if (rf.isSearchKey()) {
         if (i > 0) { query.append(", "); }
-        if (rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
+        if (rf.isListBoxItem() && rf.getFldName().equals("EMPLID")) {
           query.append("DISTINCT ");
           distinctKeywordUsed = true;
         }
-        query.append(rf.FIELDNAME);
+        query.append(rf.getFldName());
         i++;
       }
     }
@@ -188,10 +188,10 @@ public final class StmtLibrary {
         if (i > 0) { query.append(" AND "); }
 
         final PTPrimitiveType val = searchRec
-            .getFieldRef(rf.FIELDNAME).deref().getValue();
-        query.append(rf.FIELDNAME);
+            .getFieldRef(rf.getFldName()).deref().getValue();
+        query.append(rf.getFldName());
 
-        if (rf.isListBoxItem() && rf.FIELDNAME.equals("EMPLID")) {
+        if (rf.isListBoxItem() && rf.getFldName().equals("EMPLID")) {
           query.append(" LIKE '").append((String) val.read()).append("%'");
         } else {
           query.append("=?");
@@ -205,7 +205,8 @@ public final class StmtLibrary {
            *    results shown to the user in the "list box" on the search page.
            * If both of those are true, add the condition now.
            */
-          if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
+          if (rf.getFldName().equals("OPRID")
+              && rf.isKey() && !rf.isListBoxItem()) {
             bindVals.add(Environment.getSystemVar("%OperatorId").readAsString());
           } else {
             bindVals.add((String) val.read());
@@ -221,7 +222,7 @@ public final class StmtLibrary {
     for (RecordField rf : rfList) {
       if (rf.isSearchKey()) {
         if (i > 0) { query.append(", "); }
-        query.append(rf.FIELDNAME);
+        query.append(rf.getFldName());
         if (rf.isDescendingKey()) {
           query.append(" DESC");
         }
@@ -315,7 +316,7 @@ public final class StmtLibrary {
       if (rf.isKey()) {
         if (i == 0) { query.append(" ORDER BY "); }
         if (i > 0) { query.append(", "); }
-        query.append(rf.FIELDNAME);
+        query.append(rf.getFldName());
         if (rf.isDescendingKey()) {
           query.append(" DESC");
         }
@@ -364,12 +365,12 @@ public final class StmtLibrary {
 
       final Record effDtRecord = DefnCache.getRecord(effDtCheckRecord);
       for(final Map.Entry<String, RecordField> cursor
-          : effDtRecord.fieldTable.entrySet()) {
+          : effDtRecord.getFieldTable().entrySet()) {
         final RecordField rf = cursor.getValue();
-        if(rf.isKey() && !rf.FIELDNAME.equals("EFFDT")) {
+        if(rf.isKey() && !rf.getFldName().equals("EFFDT")) {
           effDtSubqueryBuilder.append(" ").append(effDtSubqueryAlias)
-            .append(".").append(rf.FIELDNAME).append("=")
-            .append(effDtRootAlias).append(".").append(rf.FIELDNAME)
+            .append(".").append(rf.getFldName()).append("=")
+            .append(effDtRootAlias).append(".").append(rf.getFldName())
             .append(" AND");
         }
       }
@@ -432,11 +433,11 @@ public final class StmtLibrary {
         isFirstKey = false;
 
         query.append(tableAlias).append(".")
-            .append(rf.FIELDNAME).append("=");
+            .append(rf.getFldName()).append("=");
 
-        if (!rf.FIELDNAME.equals("EFFDT")) {
+        if (!rf.getFldName().equals("EFFDT")) {
           query.append("?");
-          bindVals.add((String) recObj.getFieldRef(rf.FIELDNAME)
+          bindVals.add((String) recObj.getFieldRef(rf.getFldName())
               .deref().getValue().read());
         } else {
           /*
@@ -451,10 +452,10 @@ public final class StmtLibrary {
           for (RecordField subRf : rfList) {
             if (subRf.isKey()) {
               if (!isFirstKeyOnSub) { query.append(" AND "); }
-              if (!subRf.FIELDNAME.equals("EFFDT")) {
-                query.append("B.").append(subRf.FIELDNAME)
+              if (!subRf.getFldName().equals("EFFDT")) {
+                query.append("B.").append(subRf.getFldName())
                    .append("=").append(tableAlias)
-                   .append(".").append(subRf.FIELDNAME);
+                   .append(".").append(subRf.getFldName());
               } else {
                 query.append("B.EFFDT<=TO_DATE(")
                    .append("?,'YYYY-MM-DD')");
@@ -500,8 +501,8 @@ public final class StmtLibrary {
           query.append(" AND ");
         }
 
-        query.append(rf.FIELDNAME).append("=?");
-        bindVals.add((String) recObj.getFieldRef(rf.FIELDNAME).deref()
+        query.append(rf.getFldName()).append("=?");
+        bindVals.add((String) recObj.getFieldRef(rf.getFldName()).deref()
           .getValue().read());
       }
     }
@@ -538,12 +539,12 @@ public final class StmtLibrary {
       if (rf.isKey()) {
 
         // Don't include EFFSEQ in non constant queries.
-        if (rf.FIELDNAME.equals("EFFSEQ")) {
+        if (rf.getFldName().equals("EFFSEQ")) {
           continue;
         }
 
-        log.debug("Looking up key for {}.{}", defaultRecDefn.RECNAME,
-            rf.FIELDNAME);
+        log.debug("Looking up key for {}.{}", defaultRecDefn.getRecName(),
+            rf.getFldName());
 
         String keyValue = null;
 
@@ -558,24 +559,25 @@ public final class StmtLibrary {
          *    results shown to the user in the "list box" on the search page.
          * If both of those are true, add the condition now.
          */
-        if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
+        if (rf.getFldName().equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
           keyValue = Environment.getSystemVar("%OperatorId").readAsString();
           log.debug("Using %OperatorId for OPRID field.");
-        } else if (rf.FIELDNAME.equals("OPRCLASS") && rf.isKey() && !rf.isListBoxItem()) {
+        } else if (rf.getFldName().equals("OPRCLASS")
+            && rf.isKey() && !rf.isListBoxItem()) {
           keyValue = Environment.getSystemVar("%OperatorClass").readAsString();
           log.debug("Using %OperatorClass for OPRCLASS field.");
         } else {
           final Keylist keylist = new Keylist();
           fieldBeingDefaulted.getParentRecord()
-              .generateKeylist(rf.FIELDNAME, keylist);
+              .generateKeylist(rf.getFldName(), keylist);
           log.debug("Keylist for {}.{} (def record for non-constant query): {}",
-              rf.RECNAME, rf.FIELDNAME, keylist);
+              rf.getRecName(), rf.getFldName(), keylist);
 
           if (keylist.hasNonBlankValue()) {
             keyValue = keylist.getFirstNonBlankField().getValue().readAsString();
-            log.debug("Resolved field {} to {}.", rf.FIELDNAME, keyValue);
+            log.debug("Resolved field {} to {}.", rf.getFldName(), keyValue);
           } else {
-            if (rf.FIELDNAME.equals("EFFDT")) {
+            if (rf.getFldName().equals("EFFDT")) {
               keyValue = Environment.getSystemVar("%Date").readAsString();
             } else if (!rf.isRequired()) {
               // If no value was found, but the field isn't marked as required,
@@ -583,20 +585,23 @@ public final class StmtLibrary {
               keyValue = ((PTPrimitiveType) rf.getTypeConstraintForUnderlyingValue()
                   .alloc()).readAsString();
             } else {
-              throw new OPSCBufferKeyLookupException("A non-blank value was not found for "
-                  + "the required key field: " + defaultRecDefn.RECNAME + "." + rf.FIELDNAME
+              throw new OPSCBufferKeyLookupException(
+                  "A non-blank value was not found for "
+                  + "the required key field: " + defaultRecDefn.getRecName()
+                  + "." + rf.getFldName()
                   + "; cannot "
-                  + "generate non-constant default query on this record at this time.");
+                  + "generate non-constant default query on this "
+                  + "record at this time.");
             }
           }
         }
 
         if (i == 0) { query.append(" WHERE "); }
         if (i > 0) { query.append(" AND "); }
-        if (rf.FIELDNAME.equals("EFFDT")) {
-          query.append(rf.FIELDNAME).append("<=TO_DATE(?,'YYYY-MM-DD')");
+        if (rf.getFldName().equals("EFFDT")) {
+          query.append(rf.getFldName()).append("<=TO_DATE(?,'YYYY-MM-DD')");
         } else {
-          query.append(rf.FIELDNAME).append("=?");
+          query.append(rf.getFldName()).append("=?");
         }
         bindVals.add(keyValue);
         i++;
@@ -608,7 +613,7 @@ public final class StmtLibrary {
       if (rf.isKey()) {
         if (i == 0) { query.append(" ORDER BY "); }
         if (i > 0) { query.append(", "); }
-        query.append(rf.FIELDNAME);
+        query.append(rf.getFldName());
         if (rf.isDescendingKey()) {
           query.append(" DESC");
         }
@@ -661,7 +666,7 @@ public final class StmtLibrary {
     final List<String> aliasedFields = new ArrayList<String>();
 
     for (int i = 0; i < rfList.size(); i++) {
-      final String fieldname = rfList.get(i).FIELDNAME;
+      final String fieldname = rfList.get(i).getFldName();
 
       /**
        * For certain field types, wrap field names in
@@ -725,13 +730,16 @@ public final class StmtLibrary {
       if (rf.isKey()) {
 
         final Keylist keylist = new Keylist();
-        record.generateKeylist(rf.FIELDNAME, keylist);
-        log.debug("Keylist for field {}.{}: {}", rf.RECNAME, rf.FIELDNAME, keylist);
+        record.generateKeylist(rf.getFldName(), keylist);
+        log.debug("Keylist for field {}.{}: {}",
+            rf.getRecName(), rf.getFldName(), keylist);
 
         if (keylist.size() == 0) {
           if (rf.isRequired()) {
-            throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
-                + recDefn.RECNAME + "; keylist is empty for: " + rf.FIELDNAME);
+            throw new OPSVMachRuntimeException(
+                "Aborting first pass fill for Record. "
+                + recDefn.getRecName()
+                + "; keylist is empty for: " + rf.getFldName());
           } else {
             // If a non-required key field does not have a matching value,
             // we need to issue a query for all of the fields on the record.
@@ -739,7 +747,8 @@ public final class StmtLibrary {
           }
         } else if (keylist.size() > 1) {
           throw new OPSVMachRuntimeException("Aborting first pass fill for Record. "
-              + recDefn.RECNAME + "; multiple key values found for: " + rf.FIELDNAME);
+              + recDefn.getRecName() + "; multiple key values found for: "
+              + rf.getFldName());
         }
       }
     }
@@ -762,12 +771,12 @@ public final class StmtLibrary {
 
       // Excluding OPRID for recs w/ non key fields present;
       // this may be incorrect long-term.
-      if (rf.FIELDNAME.equals("OPRID") && limitSelectClauseToKeys) {
+      if (rf.getFldName().equals("OPRID") && limitSelectClauseToKeys) {
         continue;
       }
 
       if (i > 0) { query.append(", "); }
-      final String fieldname = rf.FIELDNAME;
+      final String fieldname = rf.getFldName();
       final PTTypeConstraint valTc = rf
           .getTypeConstraintForUnderlyingValue();
 
@@ -807,12 +816,13 @@ public final class StmtLibrary {
          *    results shown to the user in the "list box" on the search page.
          * If both of those are true, add the condition now.
          */
-        if (rf.FIELDNAME.equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
+        if (rf.getFldName().equals("OPRID") && rf.isKey() && !rf.isListBoxItem()) {
           val = Environment.getSystemVar("%OperatorId").readAsString();
         } else {
           final Keylist keylist = new Keylist();
-          record.generateKeylist(rf.FIELDNAME, keylist);
-          log.debug("Keylist for field {}.{}: {}", rf.RECNAME, rf.FIELDNAME, keylist);
+          record.generateKeylist(rf.getFldName(), keylist);
+          log.debug("Keylist for field {}.{}: {}",
+              rf.getRecName(), rf.getFldName(), keylist);
 
           if (keylist.size() == 0) {
             // If key value cannot be resolved, do not include it (see logic above).
@@ -820,14 +830,15 @@ public final class StmtLibrary {
           } else if (keylist.size() == 1) {
             val = keylist.get(0).getValue().readAsString();
           } else {
-            throw new OPSVMachRuntimeException("Expected one value for key " + rf.FIELDNAME
-                + " on record " + rf.RECNAME + ", multiple found.");
+            throw new OPSVMachRuntimeException(
+                "Expected one value for key " + rf.getFldName()
+                + " on record " + rf.getRecName() + ", multiple found.");
           }
         }
 
         if (i == 0) { query.append(" WHERE "); }
         if (i > 0) { query.append(" AND "); }
-        query.append(rf.FIELDNAME).append("=?");
+        query.append(rf.getFldName()).append("=?");
         bindVals.add(val);
         i++;
       }
@@ -839,13 +850,13 @@ public final class StmtLibrary {
 
         // Excluding OPRID for recs w/ non key fields present;
         // this may be incorrect long-term.
-        if (rf.FIELDNAME.equals("OPRID") && limitSelectClauseToKeys) {
+        if (rf.getFldName().equals("OPRID") && limitSelectClauseToKeys) {
           continue;
         }
 
         if (i == 0) { query.append(" ORDER BY "); }
         if (i > 0) { query.append(", "); }
-        query.append(rf.FIELDNAME);
+        query.append(rf.getFldName());
         if (rf.isDescendingKey()) {
           query.append(" DESC");
         }

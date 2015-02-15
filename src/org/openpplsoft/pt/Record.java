@@ -19,15 +19,16 @@ import org.apache.logging.log4j.*;
 
 public class Record {
 
-  public String RECNAME;
-  public String RELLANGRECNAME;
-  public int RECTYPE;
+  private final String RECNAME;
 
-  public Map<String, RecordField> fieldTable;
-  public Map<Integer, Object> fldAndSubrecordTable;
+  private String RELLANGRECNAME;
+  private int RECTYPE;
+
+  private Map<String, RecordField> fieldTable;
+  private Map<Integer, Object> fldAndSubrecordTable;
   private List<String> subRecordNames;
-  public List<RecordPeopleCodeProg> allRecordProgs = new ArrayList<>();
-  public Map<String, List<RecordPeopleCodeProg>> recordProgsByFieldTable
+  private List<RecordPeopleCodeProg> allRecordProgs = new ArrayList<>();
+  private Map<String, List<RecordPeopleCodeProg>> recordProgsByFieldTable
       = new HashMap<>();
 
   private static Logger log = LogManager.getLogger(Record.class.getName());
@@ -68,16 +69,18 @@ public class Record {
 
     int i = 0;
     while(rs.next()) {
-      RecordField f = new RecordField(this.RECNAME,
-          rs.getString("FIELDNAME").trim(), rs.getInt("FIELDTYPE"));
-      f.USEEDIT = rs.getInt("USEEDIT");
-      f.FIELDNUM = rs.getInt("FIELDNUM");
-      f.LENGTH = rs.getInt("LENGTH");
-      f.DEFRECNAME = rs.getString("DEFRECNAME");
-      f.DEFFIELDNAME = rs.getString("DEFFIELDNAME");
-      f.LABEL_ID = rs.getString("LABEL_ID");
-      this.fieldTable.put(f.FIELDNAME, f);
-      this.fldAndSubrecordTable.put(f.FIELDNUM, f);
+      final RecordField f = new RecordField(
+          this.RECNAME,
+          rs.getString("FIELDNAME").trim(),
+          rs.getInt("FIELDTYPE"),
+          rs.getInt("USEEDIT"),
+          rs.getInt("FIELDNUM"),
+          rs.getInt("LENGTH"),
+          rs.getString("DEFRECNAME"),
+          rs.getString("DEFFIELDNAME"),
+          rs.getString("LABEL_ID"));
+      this.fieldTable.put(f.getFldName(), f);
+      this.fldAndSubrecordTable.put(f.getFldNum(), f);
       i++;
     }
     rs.close();
@@ -290,6 +293,14 @@ public class Record {
 
   public boolean hasField(final String fldName) {
     return this.fieldTable.containsKey(fldName);
+  }
+
+  public String getRecName() {
+    return this.RECNAME;
+  }
+
+  public Map<String, RecordField> getFieldTable() {
+    return this.fieldTable;
   }
 
   @Override

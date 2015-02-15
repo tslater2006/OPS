@@ -80,16 +80,16 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         // If this record field has a buffer associated with it, allocate the
         // field with that to give the field a reference to that buffer. Otherwise,
         // allocate the field with just its record field defn.
-        if (this.recBuffer.hasRecordFieldBuffer(rf.FIELDNAME)) {
+        if (this.recBuffer.hasRecordFieldBuffer(rf.getFldName())) {
           newFldRef = new PTImmutableReference<PTBufferField>(fldTc,
               fldTc.allocBufferField(this,
-                  this.recBuffer.getRecordFieldBuffer(rf.FIELDNAME)));
+                  this.recBuffer.getRecordFieldBuffer(rf.getFldName())));
         } else {
           newFldRef
               = new PTImmutableReference<PTBufferField>(fldTc,
                   fldTc.allocBufferField(this, rf));
         }
-        this.fieldRefs.put(rf.FIELDNAME, newFldRef);
+        this.fieldRefs.put(rf.getFldName(), newFldRef);
         this.fieldRefIdxTable.put(i++, newFldRef);
       } catch (final OPSTypeCheckException opstce) {
         throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
@@ -120,7 +120,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
   public void emitRecInScroll(final String indentStr) {
 
-    if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
+    if (PSDefn.isSystemRecord(this.recDefn.getRecName())) {
       return;
     }
 
@@ -144,7 +144,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       keyfield = dispCtrlFld.getIndexPositionOfThisFieldInParentRecord();
     }
     TraceFileVerifier.submitEnforcedEmission(new RecInScroll(
-        indentStr, this.recDefn.RECNAME, keyrec, keyfield));
+        indentStr, this.recDefn.getRecName(), keyrec, keyfield));
   }
 
   private boolean isPrimaryRecordInRowset() {
@@ -153,7 +153,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
   public void emitScrolls(final ScrollEmissionContext ctxFlag, final int indent) {
 
-    if (PSDefn.isSystemRecord(this.recDefn.RECNAME)) {
+    if (PSDefn.isSystemRecord(this.recDefn.getRecName())) {
       return;
     }
 
@@ -179,7 +179,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         } else {
 
           if (this.isEffectivelyAWorkRecord()) {
-            log.debug("Effectively a work record: {}", this.recDefn.RECNAME);
+            log.debug("Effectively a work record: {}", this.recDefn.getRecName());
             flagStr += " work";
           }
 
@@ -194,7 +194,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     flagStr = flagStr.trim();
 
     TraceFileVerifier.submitEnforcedEmission(
-        new CRecBuf(indentStr, this.recDefn.RECNAME,
+        new CRecBuf(indentStr, this.recDefn.getRecName(),
             this.recDefn.getExpandedFieldList().size(), flagStr));
 
     for (final Map.Entry<String, PTImmutableReference<PTBufferField>> entry
@@ -306,7 +306,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
         if (summary.getNumEventProgsExecuted() > 0) {
           final PCFldDefaultEmission fdEmission = new PCFldDefaultEmission(
-              recFieldDefn.RECNAME, recFieldDefn.FIELDNAME);
+              recFieldDefn.getRecName(), recFieldDefn.getFldName());
           fdEmission.setDefaultedValue("from peoplecode");
 
           /*
@@ -326,7 +326,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
   }
 
   public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {
-    if (recName.equals(this.recDefn.RECNAME)) {
+    if (recName.equals(this.recDefn.getRecName())) {
       return this;
     } else if (this.parentRow != null) {
       return this.parentRow.resolveContextualCBufferRecordReference(recName);
@@ -336,7 +336,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
   public PTReference<PTBufferField> resolveContextualCBufferRecordFieldReference(
       final String recName, final String fieldName) {
-    if (recName.equals(this.recDefn.RECNAME)
+    if (recName.equals(this.recDefn.getRecName())
         && this.hasField(fieldName)) {
       return this.getFieldRef(fieldName);
     } else if (this.parentRow != null) {
@@ -417,7 +417,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
     OPSStmt ostmt = null;
 
-    final Record recDefn = DefnCache.getRecord(this.recDefn.RECNAME);
+    final Record recDefn = DefnCache.getRecord(this.recDefn.getRecName());
     if (recDefn.hasARequiredKeyField() || recDefn.hasNoKeys()) {
       ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
     } else {

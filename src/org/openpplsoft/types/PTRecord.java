@@ -144,7 +144,7 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     if (this.fieldRefs.containsKey(s)) {
       return this.fieldRefs.get(s);
     } else if (s.toLowerCase().equals("name")) {
-      return new PTString(this.recDefn.RECNAME);
+      return new PTString(this.recDefn.getRecName());
     } else if (s.toLowerCase().equals("fieldcount")) {
       return new PTInteger(this.fieldRefs.size());
     } else if (s.toLowerCase().equals("parentrow")) {
@@ -329,7 +329,7 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(":").append(this.recDefn.RECNAME);
+    b.append(":").append(this.recDefn.getRecName());
     b.append(",fieldRefs=").append(this.fieldRefs);
     return b.toString();
   }

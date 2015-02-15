@@ -31,8 +31,7 @@ public class SQL {
 
   private static Logger log = LogManager.getLogger(SQL.class.getName());
 
-  private String ptSQLID;
-  private String ptSQLTEXT;
+  private final String ptSQLID, ptSQLTEXT;
 
   /*
    * Although this value can vary among SQL objects, the most

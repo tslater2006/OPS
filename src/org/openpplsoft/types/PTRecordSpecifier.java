@@ -35,7 +35,7 @@ public final class PTRecordSpecifier extends PTObjectType {
    * @return the name of the record
    */
   public String getRecName() {
-    return this.recDefn.RECNAME;
+    return this.recDefn.getRecName();
   }
 
   /**
@@ -50,14 +50,14 @@ public final class PTRecordSpecifier extends PTObjectType {
   public PTType dotProperty(final String s) {
     final List<RecordField> rfList = this.recDefn.getExpandedFieldList();
     for (RecordField rf : rfList) {
-      if (rf.FIELDNAME.equals(s)) {
+      if (rf.getFldName().equals(s)) {
         return new PTRecordFieldSpecifier(this.recDefn, s, this.interpretSupervisor);
       }
     }
 
     throw new OPSVMachRuntimeException("Unable to resolve s="
         + s + " to a field on the PTRecordSpecifier for record "
-        + this.recDefn.RECNAME);
+        + this.recDefn.getRecName());
   }
 
   @Override
@@ -68,7 +68,7 @@ public final class PTRecordSpecifier extends PTObjectType {
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append("recName=").append(this.recDefn.RECNAME);
+    b.append("recName=").append(this.recDefn.getRecName());
     return b.toString();
   }
 }

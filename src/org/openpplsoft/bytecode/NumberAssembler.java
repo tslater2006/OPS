@@ -35,7 +35,7 @@ import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
  */
 public class NumberAssembler extends ElementAssembler {
 
-  private int nBytes;
+  private final int nBytes;
 
   /**
    * Constructs a new number assembler.

@@ -35,7 +35,7 @@ import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
  */
 public class EmbeddedStringAssembler extends PureStringAssembler {
 
-  private String preStr, postStr;
+  private final String preStr, postStr;
 
   /**
    * Creates a new embedded string assembler.

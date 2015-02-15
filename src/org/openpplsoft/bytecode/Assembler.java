@@ -49,7 +49,8 @@ public class Assembler {
   private static ElementAssembler[] allAssemblers;
   private static HashMap<Byte, ElementAssembler> assemblerTable;
 
-  private PeopleCodeByteStream stream;
+  private final PeopleCodeByteStream stream;
+
   private int nIndent;
   private boolean endDetected;
   private boolean firstLine = true;

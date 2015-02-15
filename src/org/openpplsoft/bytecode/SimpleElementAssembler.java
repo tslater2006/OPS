@@ -35,7 +35,7 @@ import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
  */
 public class SimpleElementAssembler extends ElementAssembler {
 
-  private String text;
+  private final String text;
 
   /**
    * Creates a new simple element assembler without

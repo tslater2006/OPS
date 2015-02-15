@@ -41,17 +41,18 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private static Logger log =
       LogManager.getLogger(InterpreterVisitor.class.getName());
 
-  private ExecContext eCtx;
-  private InterpretSupervisor supervisor;
-  private ParseTreeProperty<PTType> nodeData;
-  private ParseTreeProperty<Callable> nodeCallables;
-  private ParseTreeProperty<PTTypeConstraint> nodeTypeConstraints;
-  private Stack<EvaluateConstruct> evalConstructStack;
+  private final ExecContext eCtx;
+  private final InterpretSupervisor supervisor;
+  private final ParseTreeProperty<PTType> nodeData;
+  private final ParseTreeProperty<Callable> nodeCallables;
+  private final ParseTreeProperty<PTTypeConstraint> nodeTypeConstraints;
+  private final Stack<EvaluateConstruct> evalConstructStack;
+  private final GlobalFnLibrary globalFnLib;
+
   private AccessLevel blockAccessLvl;
   private PeopleCodeParser.StmtBreakContext lastSeenBreakContext;
   private boolean inLhsOfAssignmentFlag;
   private PCInstruction lastSubmittedEmission;
-  private GlobalFnLibrary globalFnLib;
 
   /**
    * Creates a new interpreter instance that is aware

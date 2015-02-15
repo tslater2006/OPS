@@ -42,8 +42,9 @@ public class ProgLoadListener extends PeopleCodeBaseListener {
   private static Logger log =
       LogManager.getLogger(ProgLoadListener.class.getName());
 
-  private PeopleCodeProg srcProg;
-  private BufferedTokenStream tokens;
+  private final PeopleCodeProg srcProg;
+  private final BufferedTokenStream tokens;
+
   private ParseTreeProperty<PeopleCodeProg> varTypeProgs =
       new ParseTreeProperty<PeopleCodeProg>();
 

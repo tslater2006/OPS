@@ -141,7 +141,7 @@ public final class DefnCache {
     if (ap == null) {
       log.debug("Caching app package defn for {}", packageName);
       ap = new AppPackage(packageName);
-      appPackages.put(ap.rootPkgName, ap);
+      appPackages.put(ap.getRootPkgName(), ap);
     }
     ap.discoverAppClassPC();
     return ap;

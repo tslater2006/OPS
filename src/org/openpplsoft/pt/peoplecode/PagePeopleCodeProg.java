@@ -12,9 +12,9 @@ import org.openpplsoft.pt.*;
 
 public class PagePeopleCodeProg extends PeopleCodeProg {
 
-  public String PNLNAME;
+  private String PNLNAME;
 
-  public PagePeopleCodeProg(String pnlname) {
+  public PagePeopleCodeProg(final String pnlname) {
     super();
     this.PNLNAME = pnlname;
     this.event = "Activate";
@@ -35,7 +35,6 @@ public class PagePeopleCodeProg extends PeopleCodeProg {
   }
 
   public String getDescriptor() {
-
     StringBuilder builder = new StringBuilder();
     builder.append("PagePC.").append(this.PNLNAME).append(".").append(this.event);
     return builder.toString();

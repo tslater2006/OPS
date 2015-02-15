@@ -11,13 +11,18 @@ import org.openpplsoft.pt.*;
 
 public class PeopleCodeByteStream {
 
-  public PeopleCodeProg prog;
-  private StringBuilder assembledTextBuilder;
+  private final PeopleCodeProg prog;
+  private final StringBuilder assembledTextBuilder;
+
   private int cursorPos;
 
   public PeopleCodeByteStream(PeopleCodeProg prog) {
     this.prog = prog;
     this.assembledTextBuilder = new StringBuilder();
+  }
+
+  public PeopleCodeProg getProg() {
+    return this.prog;
   }
 
   public void setCursorPos(int pos) {

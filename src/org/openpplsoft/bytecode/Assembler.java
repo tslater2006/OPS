@@ -239,7 +239,7 @@ public class Assembler {
     if (a == null) {
       throw new OPSAssembleException(String.format(
           "Encountered unknown byte: 0x%02X on %s",
-          b, this.stream.prog.getDescriptor()));
+          b, this.stream.getProg().getDescriptor()));
     } else {
       this.isInDeclare = (this.isInDeclare
           && !((this.lastAssembler != null && (this.lastAssembler.formatBitmask

@@ -11,9 +11,9 @@ import org.openpplsoft.runtime.*;
 
 public class AppPackagePath {
 
-  public String[] parts;
+  private final String[] parts;
 
-  public AppPackagePath(String pathStr) {
+  public AppPackagePath(final String pathStr) {
     String[] pathParts = pathStr.split(":");
     if(pathParts.length < 2) {
       throw new OPSVMachRuntimeException("Expecting at least two parts " +
@@ -39,6 +39,10 @@ public class AppPackagePath {
 
   public String getRootPkgName() {
     return this.parts[0];
+  }
+
+  public String[] getParts() {
+    return this.parts;
   }
 
   public String toString() {

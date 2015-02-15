@@ -12,29 +12,41 @@ import org.openpplsoft.pt.*;
 
 public class ComponentPeopleCodeProg extends PeopleCodeProg {
 
-  public String PNLGRPNAME;
-  public String MARKET;
-  public String RECNAME;
-  public String FLDNAME;
+  private final String PNLGRPNAME, MARKET, RECNAME, FLDNAME;
 
-  public ComponentPeopleCodeProg(String pnlgrpname, String market, String event) {
+  public ComponentPeopleCodeProg(
+      final String pnlgrpname,
+      final String market,
+      final String event) {
     super();
     this.PNLGRPNAME = pnlgrpname;
     this.MARKET = market;
+    this.RECNAME = null;
+    this.FLDNAME = null;
     this.event = event;
     this.initBindVals();
   }
 
-  public ComponentPeopleCodeProg(String pnlgrpname, String market, String recname, String event) {
+  public ComponentPeopleCodeProg(
+      final String pnlgrpname,
+      final String market,
+      final String recname,
+      final String event) {
     super();
     this.PNLGRPNAME = pnlgrpname;
     this.MARKET = market;
     this.RECNAME = recname;
+    this.FLDNAME = null;
     this.event = event;
     this.initBindVals();
   }
 
-  public ComponentPeopleCodeProg(String pnlgrpname, String market, String recname, String fldname, String event) {
+  public ComponentPeopleCodeProg(
+      final String pnlgrpname,
+      final String market,
+      final String recname,
+      final String fldname,
+      final String event) {
     super();
     this.PNLGRPNAME = pnlgrpname;
     this.MARKET = market;
@@ -87,5 +99,13 @@ public class ComponentPeopleCodeProg extends PeopleCodeProg {
 
     builder.append(this.event);
     return builder.toString();
+  }
+
+  public String getRecName() {
+    return this.RECNAME;
+  }
+
+  public String getFldName() {
+    return this.FLDNAME;
   }
 }

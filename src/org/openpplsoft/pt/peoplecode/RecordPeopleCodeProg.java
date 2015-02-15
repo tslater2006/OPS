@@ -13,8 +13,7 @@ import org.openpplsoft.pt.*;
 
 public class RecordPeopleCodeProg extends PeopleCodeProg {
 
-  public String RECNAME;
-  public String FLDNAME;
+  private final String RECNAME, FLDNAME;
 
   public RecordPeopleCodeProg(String recname, String fldname, String event) {
     super();

@@ -7,11 +7,10 @@
 
 package org.openpplsoft.pt.peoplecode;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.sql.*;
 import java.util.*;
 import java.io.*;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.*;
 
@@ -48,53 +47,6 @@ public abstract class PeopleCodeProg {
   private List<AppPackagePath> importedAppPackagePaths;
 
   private boolean hasInitialized, haveLoadedDefnsAndPrograms, haveLexedAndParsed;
-
-  public class FuncImport {
-    public String funcName;
-    public RecordPeopleCodeProg externalProg;
-    private boolean isUsedInProgram;
-    public FuncImport(final String funcName,
-        final RecordPeopleCodeProg externalProg) {
-      this.funcName = funcName;
-      this.externalProg = externalProg;
-    }
-    public void markAsUsedInProgram() {
-      this.isUsedInProgram = true;
-    }
-  }
-
-  public class FuncImpl {
-    public String funcName;
-    public PeopleCodeParser.FuncImplContext parseTreeNode;
-    private List<BytecodeReference> bytecodeReferences;
-    private Set<String> internalFuncReferences, externalFuncReferences;
-    public FuncImpl(String fName, PeopleCodeParser.FuncImplContext node) {
-      this.funcName = fName;
-      this.parseTreeNode = node;
-      this.bytecodeReferences = new ArrayList<BytecodeReference>();
-      this.internalFuncReferences = new HashSet<String>();
-    }
-    public void setBytecodeReferences(final List<BytecodeReference> refs) {
-      this.bytecodeReferences = refs;
-    }
-    public void setInternalFuncReferences(final Set<String> refs) {
-      this.internalFuncReferences = refs;
-    }
-    public void setExternalFuncReferences(final Set<String> refs) {
-      this.externalFuncReferences = refs;
-    }
-  }
-
-  public class Function {
-    public String name;
-    public List<FormalParam> formalParams;
-    public PTTypeConstraint returnTypeConstraint;
-    public Function(String n, List<FormalParam> l, PTTypeConstraint rtc) {
-      this.name = n;
-      this.formalParams = l;
-      this.returnTypeConstraint = rtc;
-    }
-  }
 
   protected PeopleCodeProg() {}
 
@@ -297,7 +249,7 @@ public abstract class PeopleCodeProg {
         .filter(BytecodeReference::isRootReference)
         .filter(BytecodeReference::isRecordFieldRef)
         .map(BytecodeReference::getAsRecFldName)
-        .collect(toSet());
+        .collect(Collectors.toSet());
 
     for (final Map.Entry<String, FuncImport> entry
         : this.recordProgFnImports.entrySet()) {
@@ -329,7 +281,7 @@ public abstract class PeopleCodeProg {
         .filter(BytecodeReference::isUsedInProgram)
         .filter(BytecodeReference::isRecordFieldRef)
         .map(BytecodeReference::getAsRecFldName)
-        .collect(toSet());
+        .collect(Collectors.toSet());
 
     /*
      * For each internal function that is called by this function,
@@ -528,7 +480,7 @@ public abstract class PeopleCodeProg {
 
     if (authoritativePath != null) {
       appClassParts = new ArrayList<String>();
-      for (String part : authoritativePath.parts) {
+      for (String part : authoritativePath.getParts()) {
         appClassParts.add(part);
       }
       appClassParts.add(appClassName);
@@ -544,5 +496,52 @@ public abstract class PeopleCodeProg {
 
   public boolean doesImportClass(final String appClassName) {
     return this.importedAppClasses.containsKey(appClassName);
+  }
+
+  public class FuncImport {
+    public String funcName;
+    public RecordPeopleCodeProg externalProg;
+    private boolean isUsedInProgram;
+    public FuncImport(final String funcName,
+        final RecordPeopleCodeProg externalProg) {
+      this.funcName = funcName;
+      this.externalProg = externalProg;
+    }
+    public void markAsUsedInProgram() {
+      this.isUsedInProgram = true;
+    }
+  }
+
+  public class FuncImpl {
+    public String funcName;
+    public PeopleCodeParser.FuncImplContext parseTreeNode;
+    private List<BytecodeReference> bytecodeReferences;
+    private Set<String> internalFuncReferences, externalFuncReferences;
+    public FuncImpl(String fName, PeopleCodeParser.FuncImplContext node) {
+      this.funcName = fName;
+      this.parseTreeNode = node;
+      this.bytecodeReferences = new ArrayList<BytecodeReference>();
+      this.internalFuncReferences = new HashSet<String>();
+    }
+    public void setBytecodeReferences(final List<BytecodeReference> refs) {
+      this.bytecodeReferences = refs;
+    }
+    public void setInternalFuncReferences(final Set<String> refs) {
+      this.internalFuncReferences = refs;
+    }
+    public void setExternalFuncReferences(final Set<String> refs) {
+      this.externalFuncReferences = refs;
+    }
+  }
+
+  public class Function {
+    public String name;
+    public List<FormalParam> formalParams;
+    public PTTypeConstraint returnTypeConstraint;
+    public Function(String n, List<FormalParam> l, PTTypeConstraint rtc) {
+      this.name = n;
+      this.formalParams = l;
+      this.returnTypeConstraint = rtc;
+    }
   }
 }

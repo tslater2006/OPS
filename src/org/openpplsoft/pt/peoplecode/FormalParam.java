@@ -12,20 +12,29 @@ import org.openpplsoft.types.PTTypeConstraint;
 
 public class FormalParam {
 
-  public String id;
-  public PTTypeConstraint typeConstraint;
+  private final String id;
+  private final PTTypeConstraint typeConstraint;
 
   public FormalParam(final String i, final PTTypeConstraint tc) {
     this.id = i;
-    this.typeConstraint = tc;
 
     /*
      * If no type constraint is provided, assume the Any type,
      * as happens in PeopleSoft.
      */
-    if (this.typeConstraint == null) {
+    if (tc == null) {
       this.typeConstraint = new PTAnyTypeConstraint();
+    } else {
+      this.typeConstraint = tc;
     }
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public PTTypeConstraint getTypeConstraint() {
+    return this.typeConstraint;
   }
 
   public String toString() {

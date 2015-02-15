@@ -266,8 +266,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitClassDeclaration(
       final PeopleCodeParser.ClassDeclarationContext ctx) {
-    ((AppClassPeopleCodeProg) this.eCtx.getProg()).appClassName =
-        ctx.GENERIC_ID().getText();
+    ((AppClassPeopleCodeProg) this.eCtx.getProg()).setAppClassName(
+        ctx.GENERIC_ID().getText());
     for (PeopleCodeParser.ClassBlockContext bCtx : ctx.classBlock()) {
       visit(bCtx);
     }
@@ -1163,7 +1163,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
     final List<FormalParam> formalParams =
-        ((AppClassPeopleCodeProg) this.eCtx.getProg()).methodTable.
+        ((AppClassPeopleCodeProg) this.eCtx.getProg()).getMethodTable().
             get(ctx.GENERIC_ID().getText()).formalParams;
 
     // This logic is externalized from this method b/c visitFuncImpl
@@ -1217,7 +1217,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final List<FormalParam> formalParams = new ArrayList<FormalParam>();
     final FormalParam formalParam =
         new FormalParam("&NewValue",
-            ((AppClassPeopleCodeProg) this.eCtx.getProg()).propertyTable.
+            ((AppClassPeopleCodeProg) this.eCtx.getProg()).getPropertyTable().
                 get(ctx.GENERIC_ID().getText()).typeConstraint);
     formalParams.add(formalParam);
 
@@ -1737,7 +1737,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * This info is in the class declaration body at the start of the
      * program. If the class declaration has not yet been processed, do so now.
      */
-    if (!objTc.getReqdProgDefn().hasClassDefnBeenLoaded) {
+    if (!objTc.getReqdProgDefn().hasClassDefnBeenLoaded()) {
       objTc.getReqdProgDefn().loadDefnsAndPrograms();
       final ExecContext classDeclCtx = new AppClassDeclExecContext(objTc);
       this.supervisor.runImmediately(classDeclCtx);
@@ -1765,7 +1765,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         }
       }
 
-      final String constructorName = newObj.progDefn.appClassName;
+      final String constructorName = newObj.progDefn.getAppClassName();
       final ExecContext constructorCtx =
           new AppClassObjMethodExecContext(newObj, constructorName,
               newObj.progDefn.getMethodImplStartNode(constructorName), null);
@@ -1927,7 +1927,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       }
 
       try {
-        localScope.declareAndInitVar(fp.id, fp.typeConstraint, arg);
+        localScope.declareAndInitVar(fp.getId(), fp.getTypeConstraint(), arg);
       } catch (final OPSTypeCheckException opstce1) {
         /*
          * It's possible that the argument is a field object (or reference to one,
@@ -1945,7 +1945,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         if (arg instanceof PTField) {
           try {
-            localScope.declareAndInitVar(fp.id, fp.typeConstraint,
+            localScope.declareAndInitVar(fp.getId(), fp.getTypeConstraint(),
                 ((PTField) arg).getValue());
           } catch (final OPSTypeCheckException opstce2) {
             throw new OPSVMachRuntimeException("Failed to bind arg to param, "

@@ -16,10 +16,10 @@ import java.util.*;
 
 public class AppPackage {
 
-  public String rootPkgName;
-  public PackageTreeNode rootPkgNode;
-
   private static Logger log = LogManager.getLogger(AppPackage.class.getName());
+
+  private final String rootPkgName;
+  private final PackageTreeNode rootPkgNode;
 
   private boolean hasDiscoveredAppClassPC = false;
 
@@ -128,19 +128,21 @@ public class AppPackage {
   public Map<String, Void> getClassesInPath(AppPackagePath pkgPath) {
 
     PackageTreeNode currNode = this.rootPkgNode;
+    final String[] pathParts = pkgPath.getParts();
 
-    if(!pkgPath.parts[0].equals(this.rootPkgNode.pkgName)) {
-      throw new OPSVMachRuntimeException("The app package path provided (" +
-          pkgPath + ") does not match the root package name (" + this.rootPkgName + ").");
+    if(!pathParts[0].equals(this.rootPkgNode.pkgName)) {
+      throw new OPSVMachRuntimeException("The app package path provided ("
+          + pkgPath + ") does not match the root package name ("
+          + this.rootPkgName + ").");
     }
 
-    for(int i = 1; i < pkgPath.parts.length; i++) {
+    for(int i = 1; i < pathParts.length; i++) {
 
-      PackageTreeNode newCurrNode = currNode.subPkgs.get(pkgPath.parts[i]);
+      PackageTreeNode newCurrNode = currNode.subPkgs.get(pathParts[i]);
 
       if(newCurrNode != null) {
         currNode = newCurrNode;
-      } else if(currNode.classNames.containsKey(pkgPath.parts[i])) {
+      } else if(currNode.classNames.containsKey(pathParts[i])) {
         /*
          * Apparently in PS it is possible to "import $Pkg:$Subpkg:$Class:*",
          * which makes no sense to me at all. This check will catch instances
@@ -149,12 +151,17 @@ public class AppPackage {
          */
         return currNode.classNames;
       } else {
-        throw new OPSVMachRuntimeException("The app package path provided (" +
-          pkgPath + ") does not resolve in the context of this package (" + this.rootPkgName + ").");
+        throw new OPSVMachRuntimeException("The app package path provided ("
+            + pkgPath + ") does not resolve in the context of this package ("
+            + this.rootPkgName + ").");
       }
     }
 
     //log.debug("Classes in path: {}", currNode.classNames);
     return currNode.classNames;
+  }
+
+  public String getRootPkgName() {
+    return this.rootPkgName;
   }
 }

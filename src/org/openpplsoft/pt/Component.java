@@ -177,8 +177,10 @@ public class Component {
   public ComponentPeopleCodeProg getProgramForRecordFieldEvent(
       final PCEvent event, final RecordField recFldDefn) {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-      if (prog.RECNAME != null && prog.RECNAME.equals(recFldDefn.getRecName())
-          && prog.FLDNAME != null && prog.FLDNAME.equals(recFldDefn.getFldName())
+      if (prog.getRecName() != null
+          && prog.getRecName().equals(recFldDefn.getRecName())
+          && prog.getFldName() != null
+          && prog.getFldName().equals(recFldDefn.getFldName())
           && prog.getEvent().equals(event.getName())) {
         return prog;
       }
@@ -189,8 +191,9 @@ public class Component {
   public ComponentPeopleCodeProg getProgramForRecordEvent(
       final PCEvent event, final Record recDefn) {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-      if (prog.RECNAME != null && prog.RECNAME.equals(recDefn.getRecName())
-          && prog.FLDNAME == null
+      if (prog.getRecName() != null
+          && prog.getRecName().equals(recDefn.getRecName())
+          && prog.getFldName() == null
           && prog.getEvent().equals(event.getName())) {
         return prog;
       }
@@ -200,8 +203,8 @@ public class Component {
 
   public ComponentPeopleCodeProg getProgramForEvent(final PCEvent event) {
     for (ComponentPeopleCodeProg prog : this.orderedComponentProgs) {
-      if (prog.RECNAME == null
-          && prog.FLDNAME == null
+      if (prog.getRecName() == null
+          && prog.getFldName() == null
           && prog.getEvent().equals(event.getName())) {
         return prog;
       }

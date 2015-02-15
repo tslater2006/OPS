@@ -18,53 +18,21 @@ import org.antlr.v4.runtime.tree.*;
 
 public class AppClassPeopleCodeProg extends PeopleCodeProg {
 
-  private static Logger log = LogManager.getLogger(AppClassPeopleCodeProg.class.getName());
+  private static Logger log = LogManager.getLogger(
+      AppClassPeopleCodeProg.class.getName());
 
-  public String appClassName;
+  private final String[] pathParts;
+  private final AppPackage rootPackage;
+  private final Map<String, Instance> instanceTable;
+  private final Map<String, Property> propertyTable;
+  private final Map<String, Method> methodTable;
+  private final Map<String, ParseTree> methodImplStartNodes;
+  private final Map<String, ParseTree> propGetterImplStartNodes;
+  private final Map<String, ParseTree> propSetterImplStartNodes;
+
+  private String appClassName;
   private ParseTree classDeclNode;
-  public String[] pathParts;
-  public AppPackage rootPackage;
-  public Map<String, Instance> instanceTable;
-  public Map<String, Property> propertyTable;
-  public Map<String, Method> methodTable;
-  private Map<String, ParseTree> methodImplStartNodes;
-  private Map<String, ParseTree> propGetterImplStartNodes;
-  private Map<String, ParseTree> propSetterImplStartNodes;
-  public boolean hasClassDefnBeenLoaded = false;
-
-  public class Instance {
-    public String id;
-    public PTTypeConstraint typeConstraint;
-    public Instance(String i, PTTypeConstraint tc) {
-      this.id = i;
-      this.typeConstraint = tc;
-    }
-  }
-
-  public class Property {
-    public String id;
-    public PTTypeConstraint typeConstraint;
-    public boolean hasGetter, hasSetter;
-    public Property(String i, PTTypeConstraint t, boolean g, boolean s) {
-      this.id = i;
-      this.typeConstraint = t;
-      this.hasGetter = g;
-      this.hasSetter = s;
-    }
-  }
-
-  public class Method {
-    public AccessLevel aLevel;
-    public String name;
-    public List<FormalParam> formalParams;
-    public PTTypeConstraint returnTypeConstraint;
-    public Method(AccessLevel a, String n, List<FormalParam> l, PTTypeConstraint rTc) {
-      this.aLevel = a;
-      this.name = n;
-      this.formalParams = l;
-      this.returnTypeConstraint = rTc;
-    }
-  }
+  private boolean hasClassDefnBeenLoaded = false;
 
   public AppClassPeopleCodeProg(String[] path) {
     super();
@@ -78,6 +46,30 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     this.methodImplStartNodes = new HashMap<String, ParseTree>();
     this.propGetterImplStartNodes = new HashMap<String, ParseTree>();
     this.propSetterImplStartNodes = new HashMap<String, ParseTree>();
+  }
+
+  public String getAppClassName() {
+    return this.appClassName;
+  }
+
+  public void setAppClassName(final String appClassName) {
+    this.appClassName = appClassName;
+  }
+
+  public Map<String, Property> getPropertyTable() {
+    return this.propertyTable;
+  }
+
+  public Map<String, Method> getMethodTable() {
+    return this.methodTable;
+  }
+
+  public Map<String, Instance> getInstanceTable() {
+    return this.instanceTable;
+  }
+
+  public boolean hasClassDefnBeenLoaded() {
+    return this.hasClassDefnBeenLoaded;
   }
 
   protected void initBindVals() {
@@ -224,5 +216,39 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
       b.append(this.pathParts[i]);
     }
     return b.toString();
+  }
+
+  public class Instance {
+    public String id;
+    public PTTypeConstraint typeConstraint;
+    public Instance(String i, PTTypeConstraint tc) {
+      this.id = i;
+      this.typeConstraint = tc;
+    }
+  }
+
+  public class Property {
+    public String id;
+    public PTTypeConstraint typeConstraint;
+    public boolean hasGetter, hasSetter;
+    public Property(String i, PTTypeConstraint t, boolean g, boolean s) {
+      this.id = i;
+      this.typeConstraint = t;
+      this.hasGetter = g;
+      this.hasSetter = s;
+    }
+  }
+
+  public class Method {
+    public AccessLevel aLevel;
+    public String name;
+    public List<FormalParam> formalParams;
+    public PTTypeConstraint returnTypeConstraint;
+    public Method(AccessLevel a, String n, List<FormalParam> l, PTTypeConstraint rTc) {
+      this.aLevel = a;
+      this.name = n;
+      this.formalParams = l;
+      this.returnTypeConstraint = rTc;
+    }
   }
 }

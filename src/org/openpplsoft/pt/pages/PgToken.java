@@ -16,7 +16,8 @@ import org.openpplsoft.runtime.*;
 
 public class PgToken {
 
-  private EnumSet<PFlag> flags;
+  private final EnumSet<PFlag> flags;
+
   private String RECNAME, FIELDNAME, SUBPNLNAME;
   private int OCCURSLEVEL, FIELDNUM, ASSOCFIELDNUM;
   private int FIELDUSE;

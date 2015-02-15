@@ -15,18 +15,19 @@ import org.apache.logging.log4j.*;
 
 public class PgTokenStream {
 
-  private Page p;
+  private static Logger log = LogManager.getLogger(PgTokenStream.class.getName());
+
+  private final Page page;
+  private final HashMap<String, Boolean> loadedPageNames;
+
   private int cursor;
   private PgTokenStream pfs;
   private boolean doReadFromPfs;
   private boolean isClosed;
   private int prevOCCURSLEVEL = -1;
-  private HashMap<String, Boolean> loadedPageNames;
 
-  private static Logger log = LogManager.getLogger(PgTokenStream.class.getName());
-
-  public PgTokenStream(String PNLNAME) {
-    this.p = DefnCache.getPage(PNLNAME);
+  public PgTokenStream(final String PNLNAME) {
+    this.page = DefnCache.getPage(PNLNAME);
     this.loadedPageNames = new HashMap<String, Boolean>();
   }
 
@@ -42,7 +43,7 @@ public class PgTokenStream {
       return this.readFromPfs();
     }
 
-    List<PgToken> tokens = p.getTokens();
+    List<PgToken> tokens = this.page.getTokens();
     if(this.cursor < tokens.size()) {
       PgToken tok = tokens.get(this.cursor++);
 

@@ -14,18 +14,20 @@ import org.openpplsoft.runtime.*;
 
 public class ProgramExecContext extends ExecContext {
 
-  public String funcName = "";
-  public ParseTree funcStartNode;
-
-  public ProgramExecContext(PeopleCodeProg p,
+  public ProgramExecContext(final PeopleCodeProg p,
       final int cBufferLevel, final int cBufferRow) {
     super(p);
     this.setExecutionScrollLevel(cBufferLevel);
     this.setExecutionRowIdx(cBufferRow);
   }
 
+  /**
+   * Program execution contexts do not involve
+   * a function or method name, so return blank as
+   * is shown in PS trace files.
+   */
   @Override
   public String getMethodOrFuncName() {
-    return this.funcName;
+    return "";
   }
 }

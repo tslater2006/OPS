@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.tree.*;
  */
 public class FunctionExecContext extends ExecContext {
 
-  public String funcName = "";
+  public String funcName;
   public ParseTree funcNodeToRun;
   public boolean hasTargetFuncBeenExecuted;
 

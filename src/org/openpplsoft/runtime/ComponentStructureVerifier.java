@@ -15,9 +15,14 @@ import org.apache.logging.log4j.*;
 
 public class ComponentStructureVerifier {
 
-  public static boolean hasBeenVerified = false;
+  private static boolean hasBeenVerified = false;
 
-  private static Logger log = LogManager.getLogger(ComponentStructureVerifier.class.getName());
+  private static Logger log = LogManager.getLogger(
+      ComponentStructureVerifier.class.getName());
+
+  public static boolean hasBeenVerified() {
+    return hasBeenVerified;
+  }
 
   public static void verify(ComponentRuntimeProfile profile) {
 

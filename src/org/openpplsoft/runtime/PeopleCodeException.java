@@ -45,7 +45,8 @@ public class PeopleCodeException extends OPSVMachRuntimeException {
   public String getResponsibleProgAndEvent() {
     // The regex removes the first part of the descriptor (i.e., we don't
     // want "AppClassPC" in "AppClassPC.EO.CA...")
-    return this.responsibleExecContext.prog.getDescriptor().replaceFirst(".*?\\.", "");
+    return this.responsibleExecContext.getProg()
+        .getDescriptor().replaceFirst(".*?\\.", "");
   }
 
   public String getResponsibleMethodOrFuncName() {

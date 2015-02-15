@@ -17,23 +17,38 @@ public class Callable {
 
   private static Logger log = LogManager.getLogger(Callable.class.getName());
 
-  public ExecContext eCtx;
-  public Method ptMethod;
-  public Object obj;
+  private final ExecContext eCtx;
+  private final Method ptMethod;
+  private final Object obj;
 
-  public Callable() {}
+  public Callable()  {
+    this.eCtx = null;
+    this.ptMethod = null;
+    this.obj = null;
+  }
 
-  public Callable(ExecContext e) {
+  public Callable(final ExecContext e) {
     this.eCtx = e;
+    this.ptMethod = null;
+    this.obj = null;
   }
 
   /*
    * For method calls on PT objects (i.e., PTRowset.Flush())
    * or system func calls (i.e., GlobalFnLibrary's Lower()).
    */
-  public Callable(Method m, Object o) {
+  public Callable(final Method m, final Object o) {
+    this.eCtx = null;
     this.ptMethod = m;
     this.obj = o;
+  }
+
+  public ExecContext getExecContext() {
+    return this.eCtx;
+  }
+
+  public boolean hasMethod() {
+    return this.ptMethod != null;
   }
 
   public void invokePtMethod() {

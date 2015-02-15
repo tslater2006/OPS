@@ -9,11 +9,13 @@ package org.openpplsoft.runtime;
 
 import java.lang.RuntimeException;
 
-public class OPSIllegalNonCBufferFieldAccessAttempt extends OPSVMachRuntimeException {
+public class OPSIllegalNonCBufferFieldAccessAttempt
+    extends OPSVMachRuntimeException {
 
-  private String RECNAME, FIELDNAME;
+  private final String RECNAME, FIELDNAME;
 
-  public OPSIllegalNonCBufferFieldAccessAttempt(final String RECNAME, final String FIELDNAME) {
+  public OPSIllegalNonCBufferFieldAccessAttempt(
+      final String RECNAME, final String FIELDNAME) {
     super();
     this.RECNAME = RECNAME;
     this.FIELDNAME = FIELDNAME;

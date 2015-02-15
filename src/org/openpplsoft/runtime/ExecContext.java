@@ -19,11 +19,13 @@ import org.apache.logging.log4j.LogManager;
 
 public abstract class ExecContext {
 
-  private static final Logger log = LogManager.getLogger(ExecContext.class.getName());
+  private static final Logger log = LogManager.getLogger(
+      ExecContext.class.getName());
 
-  public PeopleCodeProg prog;
-  public ParseTree startNode;
-  public LinkedList<Scope> scopeStack;
+  private final PeopleCodeProg prog;
+  private final LinkedList<Scope> scopeStack;
+
+  protected ParseTree startNode;
 
   /*
    * The level (scroll) the program to be run resides on, along with
@@ -42,6 +44,18 @@ public abstract class ExecContext {
   }
 
   public abstract String getMethodOrFuncName();
+
+  public PeopleCodeProg getProg() {
+    return this.prog;
+  }
+
+  public ParseTree getStartNode() {
+    return this.startNode;
+  }
+
+  public LinkedList<Scope> getScopeStack() {
+    return this.scopeStack;
+  }
 
   public void setExecutionScrollLevel(final int lvl) {
     this.execCBufferScrollLevel = lvl;
@@ -98,13 +112,13 @@ public abstract class ExecContext {
     }
 
     // If id is not in any local scopes, check the Component scope.
-    if(Environment.componentScope.isIdResolvable(id)) {
-      return Environment.componentScope.resolveVar(id);
+    if(Environment.getComponentScope().isIdResolvable(id)) {
+      return Environment.getComponentScope().resolveVar(id);
     }
 
     // If id is still not resolved, check the Global scope.
-    if(Environment.globalScope.isIdResolvable(id)) {
-      return Environment.globalScope.resolveVar(id);
+    if(Environment.getGlobalScope().isIdResolvable(id)) {
+      return Environment.getGlobalScope().resolveVar(id);
     }
 
     /*

@@ -14,9 +14,9 @@ import org.antlr.v4.runtime.tree.*;
 
 public abstract class AppClassObjExecContext extends ExecContext {
 
-  public String methodOrGetterName;
-  public PTAppClassObj appClassObj;
-  public PTTypeConstraint expectedReturnTypeConstraint;
+  private final String methodOrGetterName;
+  private final PTAppClassObj appClassObj;
+  private final PTTypeConstraint expectedReturnTypeConstraint;
 
   public AppClassObjExecContext(final PTAppClassObj obj, final String m,
       final ParseTree s, final PTTypeConstraint rTc) {
@@ -27,6 +27,14 @@ public abstract class AppClassObjExecContext extends ExecContext {
     this.expectedReturnTypeConstraint = rTc;
     this.pushScope(obj.propertyScope);
     this.pushScope(obj.instanceScope);
+  }
+
+  public PTAppClassObj getAppClassObj() {
+    return this.appClassObj;
+  }
+
+  public PTTypeConstraint getExpectedReturnTypeConstraint() {
+    return this.expectedReturnTypeConstraint;
   }
 
   @Override

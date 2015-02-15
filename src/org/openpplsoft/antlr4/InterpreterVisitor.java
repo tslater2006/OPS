@@ -101,7 +101,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     int i = interval.a;
     boolean newlineSeen = false;
     while (i <= interval.b) {
-      final Token t = this.eCtx.prog.getTokenStream().get(i);
+      final Token t = this.eCtx.getProg().getTokenStream().get(i);
       if (t.getChannel() == PeopleCodeLexer.REFERENCES_CHANNEL) {
         i++;
         continue;
@@ -133,7 +133,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
   private String getSemicolonsAfterTokenIdx(final int tokIdx) {
     int i = tokIdx;
     final StringBuilder b = new StringBuilder();
-    while (this.eCtx.prog.getTokenStream().get(i).getText().equals(";")) {
+    while (this.eCtx.getProg().getTokenStream().get(i).getText().equals(";")) {
       b.append(";");
       i++;
     }
@@ -249,7 +249,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * has already been placed on the scope stack for this exec context. All
      * other programs get a fresh program-local scope.
      */
-    if (!(this.eCtx.prog instanceof AppClassPeopleCodeProg)) {
+    if (!(this.eCtx.getProg() instanceof AppClassPeopleCodeProg)) {
       this.eCtx.pushScope(new Scope(Scope.Lvl.PROGRAM_LOCAL));
     }
 
@@ -266,7 +266,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
    */
   public Void visitClassDeclaration(
       final PeopleCodeParser.ClassDeclarationContext ctx) {
-    ((AppClassPeopleCodeProg) this.eCtx.prog).appClassName =
+    ((AppClassPeopleCodeProg) this.eCtx.getProg()).appClassName =
         ctx.GENERIC_ID().getText();
     for (PeopleCodeParser.ClassBlockContext bCtx : ctx.classBlock()) {
       visit(bCtx);
@@ -323,7 +323,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     for (TerminalNode varId : ctx.VAR_ID()) {
       log.debug("Adding instance identifier ({}); type constraint: {}.",
           varId.getText(), tc);
-      ((AppClassPeopleCodeProg) this.eCtx.prog).addInstanceIdentifier(
+      ((AppClassPeopleCodeProg) this.eCtx.getProg()).addInstanceIdentifier(
           varId.getText(), tc);
     }
     return null;
@@ -355,7 +355,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     final PTTypeConstraint tc = this.getNodeTypeConstraint(ctx.varType());
-    ((AppClassPeopleCodeProg) this.eCtx.prog).addPropertyIdentifier(
+    ((AppClassPeopleCodeProg) this.eCtx.getProg()).addPropertyIdentifier(
       id, tc, hasGetter, hasSetter);
     return null;
   }
@@ -382,7 +382,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       rTypeConstraint = this.getNodeTypeConstraint(ctx.returnType().varType());
     }
 
-    ((AppClassPeopleCodeProg) this.eCtx.prog).addMethod(
+    ((AppClassPeopleCodeProg) this.eCtx.getProg()).addMethod(
       this.blockAccessLvl, ctx.GENERIC_ID().getText(), formalParams, rTypeConstraint);
     return null;
   }
@@ -412,7 +412,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       rTypeConstraint = this.getNodeTypeConstraint(ctx.returnType().varType());
     }
 
-    this.eCtx.prog.addFunction(
+    this.eCtx.getProg().addFunction(
         ctx.GENERIC_ID().getText(), formalParams, rTypeConstraint);
     return null;
   }
@@ -539,7 +539,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           .createInvocation().GENERIC_ID().getSymbol();
       final String appClassName = appClassTok.getText();
       final AppClassPeopleCodeProg appClassProg =
-          this.eCtx.prog.resolveAppClassToProg(appClassName);
+          this.eCtx.getProg().resolveAppClassToProg(appClassName);
       final String fqn = appClassProg.getFullyQualifiedName();
 
       this.emit(ctx, appClassTok, fqn);
@@ -621,7 +621,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
       PTTypeConstraint rTc = null;
       if (this.eCtx instanceof AppClassObjExecContext) {
         rTc = ((AppClassObjExecContext) this.eCtx)
-            .expectedReturnTypeConstraint;
+            .getExpectedReturnTypeConstraint();
       } else if (this.eCtx instanceof FunctionExecContext) {
         // Unlike app classes, which have all method signatures in the initial
         // class block declaration, function signatures are parsed on-demand, prior
@@ -630,7 +630,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         // is instantiated, so it must be retrieved now, since we know the function
         // signature had to be processed in order for the function to be executing
         // in the first place.
-        rTc = this.eCtx.prog.getFunction(((FunctionExecContext) this.eCtx).funcName)
+        rTc = this.eCtx.getProg().getFunction(
+            ((FunctionExecContext) this.eCtx).getMethodOrFuncName())
             .returnTypeConstraint;
       } else {
         throw new OPSVMachRuntimeException("Return statement encountered in "
@@ -759,11 +760,11 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     } else if(call == null) {
       throw new OPSVMachRuntimeException("No Callable exists for fn expression: "
           + ctx.expr().getText());
-    } else if (call.ptMethod != null) {
+    } else if (call.hasMethod()) {
       call.invokePtMethod();
     } else {
-      this.supervisor.runImmediately(call.eCtx);
-      if(!(call.eCtx instanceof FunctionExecContext)) {
+      this.supervisor.runImmediately(call.getExecContext());
+      if(!(call.getExecContext() instanceof FunctionExecContext)) {
         this.resubmitLastEmission();
       }
     }
@@ -787,8 +788,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * If there are issues with this, it will have to involve checking
        * whether the last emitted context was an instanceof ExprStmtAssign.
        */
-      if (call != null && call.eCtx != null
-            && call.eCtx instanceof FunctionExecContext) {
+      if (call != null && call.getExecContext() != null
+            && call.getExecContext() instanceof FunctionExecContext) {
         this.resubmitLastEmission();
       }
     }
@@ -1162,7 +1163,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final Scope localScope = new Scope(Scope.Lvl.METHOD_LOCAL);
     final List<FormalParam> formalParams =
-        ((AppClassPeopleCodeProg) this.eCtx.prog).methodTable.
+        ((AppClassPeopleCodeProg) this.eCtx.getProg()).methodTable.
             get(ctx.GENERIC_ID().getText()).formalParams;
 
     // This logic is externalized from this method b/c visitFuncImpl
@@ -1216,7 +1217,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     final List<FormalParam> formalParams = new ArrayList<FormalParam>();
     final FormalParam formalParam =
         new FormalParam("&NewValue",
-            ((AppClassPeopleCodeProg) this.eCtx.prog).propertyTable.
+            ((AppClassPeopleCodeProg) this.eCtx.getProg()).propertyTable.
                 get(ctx.GENERIC_ID().getText()).typeConstraint);
     formalParams.add(formalParam);
 
@@ -1248,7 +1249,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        */
       if (ctx.SYS_VAR_ID().getText().equals("%This")) {
         this.setNodeData(ctx,
-            ((AppClassObjExecContext) this.eCtx).appClassObj);
+            ((AppClassObjExecContext) this.eCtx).getAppClassObj());
       } else {
         this.setNodeData(ctx,
             Environment.getSystemVar(ctx.SYS_VAR_ID().getText()));
@@ -1267,7 +1268,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
       final String id = ctx.GENERIC_ID().getText();
 
-      if (this.eCtx.prog.hasFunctionImplNamed(id)) {
+      if (this.eCtx.getProg().hasFunctionImplNamed(id)) {
 
         log.debug("Resolved GENERIC_ID: {} to an internal function "
             + "within this program.", id);
@@ -1279,21 +1280,16 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         // Create an execution context pointing to the currently
         // running program and the name of the function to execute.
-        FunctionExecContext fec = new FunctionExecContext(
-            this.eCtx.prog, id);
+        final FunctionExecContext fec = new FunctionExecContext(
+            this.eCtx.getProg(), id, FunctionExecContext.FuncDefnLoc.INTERNAL);
 
-        // CRITICAL: Override the start node to be the function, rather
-        // than the program; according to PT rules, functions local to
-        // a program share the same program-local variables and thus
-        // should not be placed on the scope stack again.
-        fec.startNode = fec.funcNodeToRun;
-
-        // ALSO CRITICAL: For the same reason as above (for changing the
-        // start node), the PROGRAM_LOCAL scope of the current context
+        // According to PT rules, functions local to
+        // a program share the same program-local variables.
+        // Thus, the PROGRAM_LOCAL scope of the current context
         // must be placed on the scope stack of the execution context
         // that is about to run, so that changes to those variables
         // by the callee can be seen by the caller once the callee returns.
-        Scope progLocalScope = this.eCtx.scopeStack.getLast();
+        final Scope progLocalScope = this.eCtx.getScopeStack().getLast();
         if (progLocalScope.getLevel() != Scope.Lvl.PROGRAM_LOCAL) {
           throw new OPSVMachRuntimeException("Expected first scope on "
               + "current program's scope stack to be PROGRAM_LOCAL; is "
@@ -1303,7 +1299,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         this.setNodeCallable(ctx, new Callable(fec));
 
-      } else if (this.eCtx.prog.hasRecordProgFnImport(id)) {
+      } else if (this.eCtx.getProg().hasRecordProgFnImport(id)) {
 
         log.debug("Resolved GENERIC_ID: {} to an external function "
             + "referenced by this program.", id);
@@ -1313,14 +1309,14 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
          */
 
         // Ensure external program has been init'ed and parsed.
-        final PeopleCodeProg extProg = DefnCache.getProgram(this.eCtx.prog
+        final PeopleCodeProg extProg = DefnCache.getProgram(this.eCtx.getProg()
             .getRecordProgFnImport(id).externalProg);
         extProg.loadDefnsAndPrograms();
 
         // Create an execution context pointing to the external program
         // and the name of the function to execute.
         this.setNodeCallable(ctx, new Callable(new FunctionExecContext(
-            extProg, id)));
+            extProg, id, FunctionExecContext.FuncDefnLoc.EXTERNAL)));
 
       } else if (PTDefnLiteralKeyword.isKeyword(id)) {
 
@@ -1523,8 +1519,8 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
            * name as the type encountered here, and 2) if so, resolve the app class name to
            * the appropriate program so the associated type constraint can be instantiated.
            */
-          if (this.eCtx.prog.doesImportClass(id)) {
-            final AppClassPeopleCodeProg appClassProg = this.eCtx.prog.resolveAppClassToProg(id);
+          if (this.eCtx.getProg().doesImportClass(id)) {
+            final AppClassPeopleCodeProg appClassProg = this.eCtx.getProg().resolveAppClassToProg(id);
             typeConstraint = new PTAppClassObjTypeConstraint(appClassProg);
             log.debug("Resolved GENERIC_ID var type w/o app pkg path "
                 + "to app class: {}", appClassProg);
@@ -1731,7 +1727,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           this.getNodeTypeConstraint(ctx.appClassPath());
     } else {
       final AppClassPeopleCodeProg appClassProg =
-          this.eCtx.prog.resolveAppClassToProg(ctx.GENERIC_ID().getText());
+          this.eCtx.getProg().resolveAppClassToProg(ctx.GENERIC_ID().getText());
       objTc = new PTAppClassObjTypeConstraint(appClassProg);
     }
 
@@ -1808,7 +1804,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
        * to the supervisor that it needs to switch to the correct
        * ParseTree node.
        */
-      if (((FunctionExecContext) this.eCtx).funcName.equals(
+      if (((FunctionExecContext) this.eCtx).getMethodOrFuncName().equals(
           ctx.funcSignature().GENERIC_ID().getText())) {
 
         this.emit(ctx.funcSignature());
@@ -1816,7 +1812,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
         final Scope localScope = new Scope(Scope.Lvl.FUNCTION_LOCAL);
         final List<FormalParam> formalParams =
-            this.eCtx.prog.getFunction(
+            this.eCtx.getProg().getFunction(
               ctx.funcSignature().GENERIC_ID().getText()).formalParams;
 
         // This logic is externalized from this method b/c visitMethodImpl
@@ -1852,10 +1848,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         this.eCtx.declareLocalVar(id, tc);
         break;
       case "Component":
-        Environment.componentScope.declareVar(id, tc);
+        Environment.getComponentScope().declareVar(id, tc);
         break;
       case "Global":
-        Environment.globalScope.declareVar(id, tc);
+        Environment.getGlobalScope().declareVar(id, tc);
         break;
       default:
         throw new OPSVMachRuntimeException("Encountered unexpected variable "
@@ -1871,10 +1867,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
           this.eCtx.declareAndInitLocalVar(id, tc, initialVal);
           break;
         case "Component":
-          Environment.componentScope.declareAndInitVar(id, tc, initialVal);
+          Environment.getComponentScope().declareAndInitVar(id, tc, initialVal);
           break;
         case "Global":
-          Environment.globalScope.declareAndInitVar(id, tc, initialVal);
+          Environment.getGlobalScope().declareAndInitVar(id, tc, initialVal);
           break;
         default:
           throw new OPSVMachRuntimeException("Encountered unexpected variable "

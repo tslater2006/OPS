@@ -19,8 +19,8 @@ import java.text.ParseException;
  */
 public class ComponentRuntimeProfile {
 
-  private String componentName, mode, tracefileName, oprid;
-  private PTDate tracefileDate;
+  private final String componentName, mode, tracefileName, oprid;
+  private final PTDate tracefileDate;
 
   public ComponentRuntimeProfile(final String c, final String m,
       final String oprid, final String tfName, final String tfDate) {

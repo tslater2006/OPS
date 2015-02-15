@@ -18,11 +18,11 @@ import org.apache.logging.log4j.*;
 
 public class Environment {
 
-  public static Scope globalScope;
-  public static Scope componentScope;
+  private static Scope globalScope;
+  private static Scope componentScope;
 
   // i.e., XENCSDEV, ENTCSDEV (appears in PS URLs)
-  public static String psEnvironmentName;
+  private static String name;
   private static User user;
 
   private static Map<String, PTPrimitiveType> systemVarTable;
@@ -44,11 +44,23 @@ public class Environment {
   }
 
   public static void init(final String psEnviName, final String oprid) {
-    psEnvironmentName = psEnviName;
+    name = psEnviName;
     user = DefnCache.getUser(oprid);
     Environment.setSystemVar("%OperatorId", new PTString(user.getOprid()));
     Environment.setSystemVar("%EmployeeId", new PTString(user.getEmplid()));
     Environment.setSystemVar("%OperatorClass", new PTString(user.getOprClass()));
+  }
+
+  public static Scope getGlobalScope() {
+    return globalScope;
+  }
+
+  public static Scope getComponentScope() {
+    return componentScope;
+  }
+
+  public static String getName() {
+    return name;
   }
 
   /**

@@ -584,7 +584,7 @@ public final class TraceFileVerifier {
         numEnforcedSQLEmissions + unenforcedEmissions.size()
         + numPCEmissionMatches + numOPSOptionalPCInstrsEmitted);
     log.info("Component Structure Valid?\t\t\t\t{}",
-        ComponentStructureVerifier.hasBeenVerified ? "YES" : "!!NO!!");
+        ComponentStructureVerifier.hasBeenVerified() ? "YES" : "!!NO!!");
     log.info("Coverage Area Bounded?\t\t\t\t{}",
         mismatchFlag ? "!!NO!!" : "YES");
     log.info("Coverage Area (Start / End Lines):\tL_{}\t\tL_{}",

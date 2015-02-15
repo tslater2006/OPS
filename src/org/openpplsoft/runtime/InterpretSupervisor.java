@@ -111,12 +111,13 @@ public class InterpretSupervisor {
     if(execContextStack.size() > 1) {
       // get the context that was interrupted by the call to run this context.
       ExecContext prevContext = execContextStack.get(1);
-      if(prevContext.prog.getDescriptor().equals(context.prog.getDescriptor())) {
+      if(prevContext.getProg().getDescriptor()
+          .equals(context.getProg().getDescriptor())) {
         isThisProgSameAsInterruptedProg = true;
       }
     }
 
-    context.prog.loadDefnsAndPrograms();
+    context.getProg().loadDefnsAndPrograms();
 
     /*
      * Requests to load app class declaration bodies do not
@@ -125,13 +126,13 @@ public class InterpretSupervisor {
      */
     if(context instanceof AppClassDeclExecContext) {
       InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
-      interpreter.visit(context.startNode);
+      interpreter.visit(context.getStartNode());
       execContextStack.pop();
       return;
     }
 
     final String methodOrFuncName = context.getMethodOrFuncName();
-    String descriptor = context.prog.getDescriptor();
+    String descriptor = context.getProg().getDescriptor();
     descriptor = descriptor.substring(descriptor.indexOf(".") + 1);
 
     if(!isThisProgSameAsInterruptedProg) {
@@ -151,7 +152,7 @@ public class InterpretSupervisor {
     InterpreterVisitor interpreter = new InterpreterVisitor(context, this);
     boolean normalExit = true;
     try {
-      interpreter.visit(context.startNode);
+      interpreter.visit(context.getStartNode());
     } catch (final OPSReturnException opsre) {
       normalExit = false;
     } catch (final OPSFuncImplSignalException opsise) {
@@ -164,19 +165,19 @@ public class InterpretSupervisor {
       if (!((FunctionExecContext) context).hasTargetFuncBeenExecuted()) {
         log.debug("Caught OPSFuncImplSignalException and target func has "
             + "yet been executed; switching to target function now.");
-        interpreter.visit(((FunctionExecContext) context).funcNodeToRun);
+        interpreter.visit(((FunctionExecContext) context).getFuncNodeToRun());
       }
     }
 
     if(normalExit) {
       if(context instanceof ProgramExecContext &&
-        context.scopeStack.size() > 0) {
+        context.getScopeStack().size() > 0) {
         throw new OPSVMachRuntimeException("Expected all scope ptrs in the " +
           "ProgramExecContext to be popped.");
       }
 
       if(context instanceof AppClassObjExecContext &&
-        context.scopeStack.size() > 2) {
+        context.getScopeStack().size() > 2) {
         throw new OPSVMachRuntimeException("Expected all scope ptrs except " +
           "for the underlying object's prop and instance scopes to be popped.");
       }
@@ -216,10 +217,10 @@ public class InterpretSupervisor {
     for (int i = this.execContextStack.size() - 1; i >= 0; i--) {
       ExecContext e = this.execContextStack.get(i);
       if (e.getMethodOrFuncName().length() > 0) {
-        log.fatal("!!! PC Call Stack !!! {} |-> {} [Method/Func: {}]", indent, e.prog,
-            e.getMethodOrFuncName());
+        log.fatal("!!! PC Call Stack !!! {} |-> {} [Method/Func: {}]",
+            indent, e.getProg(), e.getMethodOrFuncName());
       } else {
-        log.fatal("!!! PC Call Stack !!! {} |-> {}", indent, e.prog);
+        log.fatal("!!! PC Call Stack !!! {} |-> {}", indent, e.getProg());
       }
       indent = indent.concat("    ");
     }

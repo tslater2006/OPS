@@ -34,8 +34,8 @@ public class Scope {
     APP_CLASS_OBJ_INSTANCE, APP_CLASS_OBJ_PROPERTY
   }
 
-  private Lvl level;
-  private Map<String, PTReference<PTType>> symbolTable;
+  private final Lvl level;
+  private final Map<String, PTReference<PTType>> symbolTable;
 
   /**
    * Creates a new scope for the specified scope level.

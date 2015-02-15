@@ -503,7 +503,7 @@ public class GlobalFnLibrary {
     final StringBuilder url = new StringBuilder("/psc/");
 
     // append PS environment name (i.e., XENCSDEV, ENTCSDEV, etc.)
-    url.append(Environment.psEnvironmentName);
+    url.append(Environment.getName());
 
     // append portal name (i.e., EMPLOYEE)
     url.append("/").append(((PTString) args.get(0)).read());
@@ -920,7 +920,7 @@ public class GlobalFnLibrary {
     final StringBuilder url = new StringBuilder("/psp/");
 
     // append PS environment name (i.e., XENCSDEV, ENTCSDEV, etc.)
-    url.append(Environment.psEnvironmentName);
+    url.append(Environment.getName());
 
     // append portal name (i.e., EMPLOYEE)
     url.append("/").append(((PTString) args.get(0)).read());

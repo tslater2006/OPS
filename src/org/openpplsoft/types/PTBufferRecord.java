@@ -39,10 +39,9 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(PTBufferRecord.class.getName());
-
   private static Map<String, Method> ptMethodTable;
 
-  private RecordBuffer recBuffer;
+  private final RecordBuffer recBuffer;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";

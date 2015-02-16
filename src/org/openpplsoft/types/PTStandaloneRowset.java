@@ -36,10 +36,9 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   private static Logger log = LogManager.getLogger(
       PTStandaloneRowset.class.getName());
-
   private static Map<String, Method> ptMethodTable;
 
-  private List<Record> registeredRecordDefns = new ArrayList<Record>();
+  private final List<Record> registeredRecordDefns;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -67,6 +66,7 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
     super(origTc);
     this.parentRow = pRow;
     this.primaryRecDefn = primRecDefn;
+    this.registeredRecordDefns = new ArrayList<>();
 
     if (primRecDefn != null) {
       this.registeredRecordDefns.add(this.primaryRecDefn);

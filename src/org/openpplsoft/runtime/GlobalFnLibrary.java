@@ -292,7 +292,7 @@ public class GlobalFnLibrary {
     PTArray newArray = null;
     if(args.get(0) instanceof PTArray) {
       PTArray arr = (PTArray) args.get(0);
-      newArray = new PTArrayTypeConstraint(arr.dimensions + 1,
+      newArray = new PTArrayTypeConstraint(arr.getDimensions() + 1,
           arr.getOriginatingTypeConstraint()).alloc();
     } else {
       newArray = new PTArrayTypeConstraint(1,

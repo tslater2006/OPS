@@ -22,7 +22,8 @@ import org.joda.time.format.DateTimeFormatter;
 
 public final class PTDateTime extends PTPrimitiveType<DateTime> {
 
-  private static final Logger log = LogManager.getLogger(PTDateTime.class.getName());
+  private static final Logger log = LogManager.getLogger(
+      PTDateTime.class.getName());
 
   private static PTTypeConstraint<PTDateTime> dateTimeTc;
   private static final String PS_DATE_TIME_FMT1 = "yyyy-MM-dd-HH.mm.ss.SSSSSS";

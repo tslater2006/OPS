@@ -19,8 +19,8 @@ public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
   private static Logger log = LogManager.getLogger(
       PTArrayTypeConstraint.class.getName());
 
-  private int reqdDimension;
-  private PTTypeConstraint reqdNestedTypeConstraint;
+  private final int reqdDimension;
+  private final PTTypeConstraint reqdNestedTypeConstraint;
 
   public PTArrayTypeConstraint(final int dim, final PTTypeConstraint nestedTc) {
     super(PTArray.class);
@@ -46,9 +46,9 @@ public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
     boolean result =
         ((a instanceof PTNull)
          || (a instanceof PTArray
-              && (this.reqdDimension == ((PTArray) a).dimensions)
+              && (this.reqdDimension == ((PTArray) a).getDimensions())
               && this.reqdNestedTypeConstraint.equals(((PTArray) a)
-                    .baseTypeConstraint)));
+                    .getBaseTypeConstraint())));
     if (!result) {
       throw new OPSTypeCheckException("This type constraint (" + this + ") and "
           + "a (" + a + ") are not type-compatible.");

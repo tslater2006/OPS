@@ -24,7 +24,8 @@ import org.apache.logging.log4j.Logger;
 
 public final class PTStandaloneField extends PTField<PTStandaloneRecord> {
 
-  private static Logger log = LogManager.getLogger(PTStandaloneField.class.getName());
+  private static Logger log = LogManager.getLogger(
+      PTStandaloneField.class.getName());
 
   private static Map<String, Method> ptMethodTable;
 

@@ -15,10 +15,11 @@ import java.lang.reflect.*;
 public final class PTArray extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTArray.class.getName());
-  public int dimensions;
-  public PTTypeConstraint baseTypeConstraint;
-  public LinkedList<PTType> values;
   private static Map<String, Method> ptMethodTable;
+
+  private final int dimensions;
+  private final PTTypeConstraint baseTypeConstraint;
+  private final LinkedList<PTType> values;
 
   static {
     // cache pointers to PeopleTools Array methods.
@@ -57,6 +58,14 @@ public final class PTArray extends PTObjectType {
 
     // Must subtract 1; PT array indices are 1-based.
     return this.values.get(idx - 1);
+  }
+
+  public int getDimensions() {
+    return this.dimensions;
+  }
+
+  public PTTypeConstraint getBaseTypeConstraint() {
+    return this.baseTypeConstraint;
   }
 
   public PTType dotProperty(String s) {

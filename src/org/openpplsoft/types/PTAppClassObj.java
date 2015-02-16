@@ -15,27 +15,26 @@ import org.openpplsoft.runtime.*;
 
 public final class PTAppClassObj extends PTObjectType {
 
-  public AppClassPeopleCodeProg progDefn;
-  public Scope propertyScope;
-  public Scope instanceScope;
+  private final AppClassPeopleCodeProg prog;
+  private final Scope propertyScope, instanceScope;
 
   public PTAppClassObj(final PTAppClassObjTypeConstraint origTc,
       final AppClassPeopleCodeProg prog) {
     super(origTc);
-    this.progDefn = prog;
+    this.prog = prog;
     this.propertyScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_PROPERTY);
     this.instanceScope = new Scope(Scope.Lvl.APP_CLASS_OBJ_INSTANCE);
 
     // Load instance identifiers into instance scope.
     for(Map.Entry<String, AppClassPeopleCodeProg.Instance> cursor :
-        this.progDefn.getInstanceTable().entrySet()) {
+        this.prog.getInstanceTable().entrySet()) {
       AppClassPeopleCodeProg.Instance instance = cursor.getValue();
       this.instanceScope.declareVar(instance.id, instance.typeConstraint);
     }
 
     // Load property identifiers into property scope.
     for(Map.Entry<String, AppClassPeopleCodeProg.Property> cursor :
-        this.progDefn.getPropertyTable().entrySet()) {
+        this.prog.getPropertyTable().entrySet()) {
       AppClassPeopleCodeProg.Property property = cursor.getValue();
       this.propertyScope.declareVar(property.id, property.typeConstraint);
     }
@@ -48,10 +47,10 @@ public final class PTAppClassObj extends PTObjectType {
      * return the value associated with them in this object's property scope.
      * Note that properties are always public, so no need to check access level.
      */
-    if (this.progDefn.hasPropertyGetterImpl(s)
-        && !this.progDefn.getPropertyTable().get(s).hasGetter) {
+    if (this.prog.hasPropertyGetterImpl(s)
+        && !this.prog.getPropertyTable().get(s).hasGetter) {
       return this.propertyScope.resolveVar(s);
-    } else if (this.progDefn.hasIdentifier("&" + s)) {
+    } else if (this.prog.hasIdentifier("&" + s)) {
       // Instance identifiers are stored in the prog defn table and in the scope
       // with ampersand prefixes; & are not allowed after ".", so we always need
       // to prefix with an ampersand when checking if the provided String is an
@@ -71,11 +70,11 @@ public final class PTAppClassObj extends PTObjectType {
      * object; return a callable accordingly. Note that properties are always
      * public, so no need to check access level.
      */
-    if (this.progDefn.hasPropertyGetterImpl(s)
-        && this.progDefn.getPropertyTable().get(s).hasGetter) {
+    if (this.prog.hasPropertyGetterImpl(s)
+        && this.prog.getPropertyTable().get(s).hasGetter) {
       gsCallable.setGetterExecContext(new AppClassObjMethodExecContext(this, s,
-          this.progDefn.getPropGetterImplStartNode(s),
-          this.progDefn.getPropertyTable().get(s).typeConstraint));
+          this.prog.getPropGetterImplStartNode(s),
+          this.prog.getPropertyTable().get(s).typeConstraint));
     }
 
     /*
@@ -83,10 +82,10 @@ public final class PTAppClassObj extends PTObjectType {
      * object; return a callable accordingly. Note that properties are always
      * public, so no need to check access level.
      */
-    if (this.progDefn.hasPropertySetterImpl(s)
-        && this.progDefn.getPropertyTable().get(s).hasSetter) {
+    if (this.prog.hasPropertySetterImpl(s)
+        && this.prog.getPropertyTable().get(s).hasSetter) {
       gsCallable.setSetterExecContext(new AppClassObjMethodExecContext(this, s,
-          this.progDefn.getPropSetterImplStartNode(s), null));
+          this.prog.getPropSetterImplStartNode(s), null));
     }
 
     if (gsCallable.hasSetterExecContext() || gsCallable.hasGetterExecContext()) {
@@ -97,11 +96,11 @@ public final class PTAppClassObj extends PTObjectType {
     * Note: Private methods
     * are private to the *CLASS*, not the instances of the class themselves.
     */
-    if(this.progDefn.hasMethod(s)) {
-      if(this.progDefn.getMethodTable().get(s).aLevel == AccessLevel.PUBLIC) {
+    if(this.prog.hasMethod(s)) {
+      if(this.prog.getMethodTable().get(s).aLevel == AccessLevel.PUBLIC) {
         return new Callable(new AppClassObjMethodExecContext(this, s,
-          this.progDefn.getMethodImplStartNode(s),
-          this.progDefn.getMethodTable().get(s).returnTypeConstraint));
+          this.prog.getMethodImplStartNode(s),
+          this.prog.getMethodTable().get(s).returnTypeConstraint));
       } else {
         throw new OPSVMachRuntimeException("Encountered request for non-public "+
           "method; need to determine if the calling entity is an obj "+
@@ -112,10 +111,22 @@ public final class PTAppClassObj extends PTObjectType {
     return null;
   }
 
+  public AppClassPeopleCodeProg getProg() {
+    return this.prog;
+  }
+
+  public Scope getInstanceScope() {
+    return this.instanceScope;
+  }
+
+  public Scope getPropertyScope() {
+    return this.propertyScope;
+  }
+
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder(super.toString());
-    b.append(",prog=").append(this.progDefn.getDescriptor());
+    b.append(",prog=").append(this.prog.getDescriptor());
     return b.toString();
   }
 }

@@ -38,9 +38,10 @@ public final class PTSQL extends PTObjectType {
   private static Map<String, Method> ptMethodTable;
   private static Pattern dtPattern, datePattern, dotPattern;
 
-  private SQL sqlDefn;
-  private PTPrimitiveType[] bindVals;
-  private OPSStmt ostmt;
+  private final SQL sqlDefn;
+  private final PTPrimitiveType[] bindVals;
+  private final OPSStmt ostmt;
+
   private OPSResultSet rs;
 
   static {

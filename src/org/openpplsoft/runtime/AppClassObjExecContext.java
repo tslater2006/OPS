@@ -20,13 +20,13 @@ public abstract class AppClassObjExecContext extends ExecContext {
 
   public AppClassObjExecContext(final PTAppClassObj obj, final String m,
       final ParseTree s, final PTTypeConstraint rTc) {
-    super(obj.progDefn);
+    super(obj.getProg());
     this.appClassObj = obj;
     this.startNode = s;
     this.methodOrGetterName = m;
     this.expectedReturnTypeConstraint = rTc;
-    this.pushScope(obj.propertyScope);
-    this.pushScope(obj.instanceScope);
+    this.pushScope(obj.getPropertyScope());
+    this.pushScope(obj.getInstanceScope());
   }
 
   public PTAppClassObj getAppClassObj() {

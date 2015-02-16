@@ -40,11 +40,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
   private static Map<String, Method> ptMethodTable;
 
-  private ScrollBuffer scrollBuffer;
-
-  private RelDisplayRecordSet relDisplayRecordSet = new RelDisplayRecordSet();
-  private List<RecordBuffer> registeredNonRelDispRecordBuffers = new ArrayList<>();
-  private List<ScrollBuffer> registeredChildScrollBuffers = new ArrayList<>();
+  private final ScrollBuffer scrollBuffer;
+  private final RelDisplayRecordSet relDisplayRecordSet;
+  private final List<RecordBuffer> registeredNonRelDispRecordBuffers;
+  private final List<ScrollBuffer> registeredChildScrollBuffers;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -69,6 +68,8 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     this.parentRow = pRow;
     this.scrollBuffer = scrollBuf;
     this.primaryRecDefn = scrollBuf.getPrimaryRecDefn();
+    this.registeredNonRelDispRecordBuffers = new ArrayList<>();
+    this.registeredChildScrollBuffers = new ArrayList<>();
 
     for (final RecordBuffer recBuf : scrollBuf.getOrderedNonRelDispRecBuffers()) {
       this.registeredNonRelDispRecordBuffers.add(recBuf);
@@ -94,7 +95,13 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
   public PTBufferRowset(final PTRowsetTypeConstraint origTc,
       final SearchRecordBuffer searchRecBuf) {
     super(origTc);
+    this.parentRow = null;
+    this.scrollBuffer = null;
     this.primaryRecDefn = searchRecBuf.getRecDefn();
+    this.relDisplayRecordSet = new RelDisplayRecordSet();
+    this.registeredNonRelDispRecordBuffers = new ArrayList<>();
+    this.registeredChildScrollBuffers = new ArrayList<>();
+
     this.registeredNonRelDispRecordBuffers.add(searchRecBuf);
 
     // One row is always present in the rowset, even when flushed.

@@ -33,18 +33,17 @@ import org.openpplsoft.trace.*;
 public abstract class PTRow<R extends PTRowset, E extends PTRecord>
     extends PTObjectType {
 
+  private static final Logger log = LogManager.getLogger(PTRow.class.getName());
   private static Map<String, Method> ptMethodTable;
 
-  private static final Logger log = LogManager.getLogger(PTRow.class.getName());
+  // Maps record names to child record objects
+  protected final Map<String, E> recordMap;
+
+  // Maps scroll/rowset primary rec names to rowset objects
+  protected final Map<String, R> rowsetMap;
 
   protected R parentRowset;
   protected PTImmutableReference<PTBoolean> selectedPropertyRef;
-
-  // Maps record names to child record objects
-  protected Map<String, E> recordMap = new LinkedHashMap<String, E>();
-
-  // Maps scroll/rowset primary rec names to rowset objects
-  protected Map<String, R> rowsetMap = new LinkedHashMap<String, R>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -61,6 +60,8 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   public PTRow(final PTRowTypeConstraint origTc) {
     super(origTc);
+    this.recordMap = new LinkedHashMap<>();
+    this.rowsetMap = new LinkedHashMap<>();
 
     try {
       /*

@@ -32,21 +32,7 @@ public class RelDisplayRecordSet {
       LogManager.getLogger(RelDisplayRecordSet.class.getName());
 
   // {<DISP_CTRL_RECNAME>.<DISP_CTRL_FLDNAME> : {<RELDISP_RECNAME> : RecordEntry}}
-  private Map<String, Map<String, RecordEntry>> tables;
-
-  private class RecordEntry {
-    public RecordBuffer rbuf;
-    public PTBufferRecord rec;
-
-    public RecordEntry() {}
-
-    /**
-     * Copy constructor.
-     */
-    public RecordEntry(final RecordEntry srcEntry) {
-      this.rbuf = srcEntry.rbuf;
-    }
-  }
+  private final Map<String, Map<String, RecordEntry>> tables;
 
   public RelDisplayRecordSet() {
     this.tables = new HashMap<String, Map<String, RecordEntry>>();
@@ -197,5 +183,18 @@ public class RelDisplayRecordSet {
     }
     return sb.toString();
   }
-}
 
+  private class RecordEntry {
+    public RecordBuffer rbuf;
+    public PTBufferRecord rec;
+
+    public RecordEntry() {}
+
+    /**
+     * Copy constructor.
+     */
+    public RecordEntry(final RecordEntry srcEntry) {
+      this.rbuf = srcEntry.rbuf;
+    }
+  }
+}

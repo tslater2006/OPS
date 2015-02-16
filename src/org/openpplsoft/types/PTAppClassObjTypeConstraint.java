@@ -19,7 +19,7 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
   private static Logger log = LogManager.getLogger(
       PTAppClassObjTypeConstraint.class.getName());
 
-  private AppClassPeopleCodeProg requiredProgDefn;
+  private final AppClassPeopleCodeProg requiredProgDefn;
 
   public PTAppClassObjTypeConstraint(final AppClassPeopleCodeProg p) {
     super(PTAppClassObj.class);
@@ -47,7 +47,7 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
     boolean result =
         ((a instanceof PTNull)
           || (a instanceof PTAppClassObj
-               && (this.requiredProgDefn == ((PTAppClassObj) a).progDefn)));
+               && (this.requiredProgDefn == ((PTAppClassObj) a).getProg())));
     if (!result) {
       throw new OPSTypeCheckException("This type constraint (" + this + ") and "
           + "a (" + a + ") are not type-compatible.");

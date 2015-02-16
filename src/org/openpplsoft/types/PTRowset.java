@@ -37,11 +37,11 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(
       PTRowset.class.getName());
-
   private static Map<String, Method> ptMethodTable;
 
+  protected final List<R> rows;
+
   protected R parentRow;
-  protected List<R> rows = new ArrayList<R>();
   protected Record primaryRecDefn;
 
   static {
@@ -61,6 +61,7 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
 
   public PTRowset(final PTRowsetTypeConstraint origTc) {
     super(origTc);
+    this.rows = new ArrayList<>();
   }
 
   protected abstract R allocateNewRow();

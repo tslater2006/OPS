@@ -26,20 +26,10 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(PTBufferField.class.getName());
-
   private static Map<String, Method> ptMethodTable;
-  private boolean isMarkedAsUpdated;
 
-  private List<DropDownItem> dropDownList = new ArrayList<>();
-  private boolean isMarkedAsDefaulted;
-
-  private class DropDownItem {
-    private String code, desc;
-    public DropDownItem(final String c, final String d) {
-      this.code = c;
-      this.desc = d;
-    }
-  }
+  private final List<DropDownItem> dropDownList = new ArrayList<>();
+  private boolean isMarkedAsDefaulted, isMarkedAsUpdated;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";
@@ -651,5 +641,13 @@ public final class PTBufferField extends PTField<PTBufferRecord>
   @Override
   public String toString() {
     return "[BUFFER]" + super.toString();
+  }
+
+  private class DropDownItem {
+    private String code, desc;
+    public DropDownItem(final String c, final String d) {
+      this.code = c;
+      this.desc = d;
+    }
   }
 }

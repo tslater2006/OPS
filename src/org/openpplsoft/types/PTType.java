@@ -19,7 +19,8 @@ import org.openpplsoft.pt.peoplecode.*;
  */
 public abstract class PTType {
 
-  private PTTypeConstraint originatingTypeConstraint;
+  private final PTTypeConstraint originatingTypeConstraint;
+
   private boolean isReadOnly;
 
   protected PTType(final PTTypeConstraint origTypeConstraint) {

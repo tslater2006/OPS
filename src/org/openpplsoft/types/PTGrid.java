@@ -28,7 +28,7 @@ public final class PTGrid extends PTObjectType {
 
   private static Map<String, Method> ptMethodTable;
 
-  private String pageName, gridName;
+  private final String pageName, gridName;
 
   static {
     final String PT_METHOD_PREFIX = "PT_";

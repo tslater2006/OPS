@@ -28,13 +28,14 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
 
   private static Map<String, Method> ptMethodTable;
 
-  protected R parentRecord;
-  protected RecordField recFieldDefn;
-  protected RecordFieldBuffer recFieldBuffer;
-  protected PTImmutableReference<PTPrimitiveType> valueRef;
-  protected PTImmutableReference<PTBoolean> visiblePropertyRef,
+  protected final RecordField recFieldDefn;
+  protected final PTImmutableReference<PTPrimitiveType> valueRef;
+  protected final PTImmutableReference<PTBoolean> visiblePropertyRef,
       displayOnlyPropertyRef;
-  protected PTImmutableReference<PTString> fldNamePropertyRef;
+  protected final PTImmutableReference<PTString> fldNamePropertyRef;
+
+  protected R parentRecord;
+  protected RecordFieldBuffer recFieldBuffer;
   protected boolean isGrayedOut;
 
   static {
@@ -51,7 +52,8 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
     }
   }
 
-  public PTField(final PTFieldTypeConstraint origTc, final RecordField recFieldDefn) {
+  public PTField(final PTFieldTypeConstraint origTc,
+      final RecordField recFieldDefn) {
     super(origTc);
     this.recFieldDefn = recFieldDefn;
 

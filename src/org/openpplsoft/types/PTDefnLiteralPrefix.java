@@ -13,7 +13,7 @@ import org.openpplsoft.runtime.*;
 
 public final class PTDefnLiteralPrefix extends PTObjectType {
 
-  private PTDefnLiteralKeyword prefixKeyword;
+  private final PTDefnLiteralKeyword prefixKeyword;
 
   public PTDefnLiteralPrefix(final PTDefnLiteralKeyword k) {
     super(new PTTypeConstraint<PTDefnLiteralPrefix>(PTDefnLiteralPrefix.class));

@@ -33,12 +33,11 @@ import org.openpplsoft.trace.*;
 public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     implements ICBufferEntity {
 
-  private static Map<String, Method> ptMethodTable;
-
   private static final Logger log =
       LogManager.getLogger(PTBufferRow.class.getName());
+  private static Map<String, Method> ptMethodTable;
 
-  private RelDisplayRecordSet relDisplayRecordSet = new RelDisplayRecordSet();
+  private final RelDisplayRecordSet relDisplayRecordSet;
 
   /**
    * This map contains *all* records, both non- and reldisp- records.
@@ -46,7 +45,8 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
    * the non-reldisp map, a separate TreeMap must be used to have a
    * properly ordered map containing both.
   */
-  private Map<Integer, PTBufferRecord> totallyOrderedAllRecords = new TreeMap<>();
+  private final Map<Integer, PTBufferRecord> totallyOrderedAllRecords =
+      new TreeMap<>();
 
   static {
     final String PT_METHOD_PREFIX = "PT_";

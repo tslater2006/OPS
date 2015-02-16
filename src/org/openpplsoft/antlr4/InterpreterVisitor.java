@@ -1752,7 +1752,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * the method declaration to ensure that the constructor (if it exists)
      * is only called when the appropriate number of arguments are supplied.
      */
-    if (newObj.progDefn.hasConstructor()) {
+    if (newObj.getProg().hasConstructor()) {
       /*
        * Load arguments to constructor onto call stack if
        * args have been provided.
@@ -1765,10 +1765,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         }
       }
 
-      final String constructorName = newObj.progDefn.getAppClassName();
+      final String constructorName = newObj.getProg().getAppClassName();
       final ExecContext constructorCtx =
           new AppClassObjMethodExecContext(newObj, constructorName,
-              newObj.progDefn.getMethodImplStartNode(constructorName), null);
+              newObj.getProg().getMethodImplStartNode(constructorName), null);
       this.supervisor.runImmediately(constructorCtx);
 
       // Constructors don't return anything

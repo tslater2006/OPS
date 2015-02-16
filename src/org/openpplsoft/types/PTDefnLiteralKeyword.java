@@ -24,13 +24,15 @@ public enum PTDefnLiteralKeyword {
   HTML("html"),
   SCROLL("scroll");
 
-  private String lcKeyword, aliasOfKeyword;
+  private final String lcKeyword, aliasOfKeyword;
 
   private PTDefnLiteralKeyword(final String lcKeyword) {
     this.lcKeyword = lcKeyword;
+    this.aliasOfKeyword = null;
   }
 
-  private PTDefnLiteralKeyword(final String lcKeyword, final String aliasOfKeyword) {
+  private PTDefnLiteralKeyword(final String lcKeyword,
+      final String aliasOfKeyword) {
     this.lcKeyword = lcKeyword;
     this.aliasOfKeyword = aliasOfKeyword;
   }

@@ -26,10 +26,10 @@ import org.openpplsoft.sql.*;
 
 public final class PTDate extends PTPrimitiveType<Date> {
 
+  private static Logger log = LogManager.getLogger(PTDate.class.getName());
+
   private static PTTypeConstraint<PTDate> dateTc;
   private static final String PS_DATE_FORMAT = "yyyy-MM-dd";
-
-  private static Logger log = LogManager.getLogger(PTDate.class.getName());
 
   static {
     dateTc = new PTTypeConstraint<PTDate>(PTDate.class);

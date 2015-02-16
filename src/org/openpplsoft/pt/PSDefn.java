@@ -27,7 +27,7 @@ public final class PSDefn {
   public static final String PAGE = "9";
   public static final String NULL = " ";
   public static final Map<String, String> DEFN_LITERAL_RESERVED_WORDS_TABLE;
-  public static final Map<String, Void> VAR_TYPES_TABLE;
+  public static final Set<String> VAR_TYPES_TABLE;
 
   /*
    * These are the allowed bit flags for the 4-bit Actions bit mask,
@@ -122,9 +122,9 @@ public final class PSDefn {
     }
 
     // Index var types for O(1) lookup.
-    VAR_TYPES_TABLE = new HashMap<String, Void>();
-    for (String s : varTypes) {
-      VAR_TYPES_TABLE.put(s, null);
+    VAR_TYPES_TABLE = new HashSet<>();
+    for (final String s : varTypes) {
+      VAR_TYPES_TABLE.add(s);
     }
   }
 

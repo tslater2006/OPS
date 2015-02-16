@@ -7,12 +7,16 @@
 
 package org.openpplsoft.pt.peoplecode;
 
-import java.sql.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.logging.log4j.*;
+
 import org.openpplsoft.sql.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.pt.*;
-import org.apache.logging.log4j.*;
-import java.util.*;
 
 public class AppPackage {
 
@@ -26,19 +30,19 @@ public class AppPackage {
   private class PackageTreeNode {
     public String pkgName;
     public Map<String, PackageTreeNode> subPkgs;
-    public Map<String, Void> classNames;
+    public Set<String> classNames;
     public PackageTreeNode(String name) {
       this.pkgName = name;
-      this.subPkgs = new HashMap<String, PackageTreeNode>();
-      this.classNames = new HashMap<String, Void>();
+      this.subPkgs = new HashMap<>();
+      this.classNames = new HashSet<>();
     }
 
     public String toString() {
       StringBuilder builder = new StringBuilder();
       builder.append("Package: ").append(this.pkgName).append("\n");
       builder.append(" - Classes: ");
-      for(Map.Entry<String, Void> entry : this.classNames.entrySet()) {
-        builder.append(entry.getKey()).append(", ");
+      for(final String className : this.classNames) {
+        builder.append(className).append(", ");
       }
       builder.append("\nSubpackages:\n");
       for(Map.Entry<String, PackageTreeNode> entry : this.subPkgs.entrySet()) {
@@ -115,7 +119,7 @@ public class AppPackage {
       // We've reached the app class; is either root or in a sub package.
       // Once we've reached the app class field, we can stop looping.
       if(id == 107) {
-        currNode.classNames.put(val, null);
+        currNode.classNames.add(val);
         break;
       }
 
@@ -125,7 +129,7 @@ public class AppPackage {
     }
   }
 
-  public Map<String, Void> getClassesInPath(AppPackagePath pkgPath) {
+  public Set<String> getClassesInPath(AppPackagePath pkgPath) {
 
     PackageTreeNode currNode = this.rootPkgNode;
     final String[] pathParts = pkgPath.getParts();
@@ -142,7 +146,7 @@ public class AppPackage {
 
       if(newCurrNode != null) {
         currNode = newCurrNode;
-      } else if(currNode.classNames.containsKey(pathParts[i])) {
+      } else if(currNode.classNames.contains(pathParts[i])) {
         /*
          * Apparently in PS it is possible to "import $Pkg:$Subpkg:$Class:*",
          * which makes no sense to me at all. This check will catch instances

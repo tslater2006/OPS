@@ -464,9 +464,9 @@ public abstract class PeopleCodeProg {
           : this.importedAppPackagePaths) {
         final AppPackage pkg = DefnCache.getAppPackage(
             importedPkgPath.getRootPkgName());
-        final Map<String, Void> appClassesInPath =
+        final Set<String> appClassesInPath =
             pkg.getClassesInPath(importedPkgPath);
-        if (appClassesInPath.containsKey(appClassName)) {
+        if (appClassesInPath.contains(appClassName)) {
           if (authoritativePath == null) {
             authoritativePath = importedPkgPath;
           } else {

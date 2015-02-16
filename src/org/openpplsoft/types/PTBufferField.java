@@ -183,9 +183,10 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       flagStr += " hide";
     }
 
-    if (this.isUsed()
-        || this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
-        || ctxFlag == ScrollEmissionContext.SEARCH_RESULTS) {
+    if (!this.recFieldDefn.getFldName().equals("EFF_STATUS")
+        && (this.isUsed()
+          || this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
+          || ctxFlag == ScrollEmissionContext.SEARCH_RESULTS)) {
       flagStr += " used";
     }
 

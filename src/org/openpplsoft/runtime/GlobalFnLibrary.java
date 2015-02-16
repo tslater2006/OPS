@@ -107,6 +107,7 @@ public class GlobalFnLibrary {
    * Return true if none of the specified fields contain a value, return false
    * if one or more contain a value.
    */
+  @PeopleToolsImplementation
   public void None() {
     for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(doesContainValue(arg)) {
@@ -122,6 +123,7 @@ public class GlobalFnLibrary {
    * Return true if all of the specified fields contain a value, return false
    * if one or more do not.
    */
+  @PeopleToolsImplementation
   public void All() {
     for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(!doesContainValue(arg)) {
@@ -132,6 +134,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(true));
   }
 
+  @PeopleToolsImplementation
   public void Hide() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -143,6 +146,7 @@ public class GlobalFnLibrary {
     ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext().deref().hide();
   }
 
+  @PeopleToolsImplementation
   public void UnHide() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -157,6 +161,7 @@ public class GlobalFnLibrary {
   /**
    * TODO(mquinn): Implement this function.
    */
+  @PeopleToolsImplementation
   public void SetSearchDialogBehavior() {
     Environment.getDereferencedArgsFromCallStack();
   }
@@ -164,10 +169,12 @@ public class GlobalFnLibrary {
   /**
    * TODO(mquinn): Implement this function.
    */
+  @PeopleToolsImplementation
   public void AllowEmplIdChg() {
     Environment.getDereferencedArgsFromCallStack();
   }
 
+  @PeopleToolsImplementation
   public void Rept() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -186,6 +193,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(b.toString()));
     }
 
+  @PeopleToolsImplementation
   public void Len() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -201,6 +209,7 @@ public class GlobalFnLibrary {
    * TODO: Return true if DoModalComponent
    * has been previously called; requires more research.
    */
+  @PeopleToolsImplementation
   public void IsModalComponent() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -210,6 +219,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(false));
   }
 
+  @PeopleToolsImplementation
   public void CreateRecord() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -226,6 +236,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(rec);
   }
 
+  @PeopleToolsImplementation
   public void CreateRowset() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -242,6 +253,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(newRowset);
   }
 
+  @PeopleToolsImplementation
   public void CreateArray() {
 
     /*
@@ -259,6 +271,7 @@ public class GlobalFnLibrary {
    * Makes the Rowset object representing the level 0
    * component buffer available to caller.
    */
+  @PeopleToolsImplementation
   public void GetLevel0() {
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 0) {
@@ -268,6 +281,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(ComponentBuffer.getLevelZeroRowset());
   }
 
+  @PeopleToolsImplementation
   public void CreateArrayRept() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -307,6 +321,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(newArray);
   }
 
+  @PeopleToolsImplementation
   public void IsMenuItemAuthorized() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -407,6 +422,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(false));
   }
 
+  @PeopleToolsImplementation
   public void MsgGetText() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -469,6 +485,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(msg));
   }
 
+  @PeopleToolsImplementation
   public void GenerateComponentContentRelURL() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -539,6 +556,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(url.toString()));
   }
 
+  @PeopleToolsImplementation
   public void Truncate() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -561,6 +579,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTNumber(truncatedBigDec));
   }
 
+  @PeopleToolsImplementation
   public void String() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -575,6 +594,7 @@ public class GlobalFnLibrary {
         new PTString(((PTInteger) args.get(0)).readAsString()));
   }
 
+  @PeopleToolsImplementation
   public void GetHTMLText() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -621,6 +641,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(htmlStr));
   }
 
+  @PeopleToolsImplementation
   public void Proper() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -662,6 +683,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(sb.toString()));
   }
 
+  @PeopleToolsImplementation
   public void Lower() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -676,6 +698,7 @@ public class GlobalFnLibrary {
         new PTString(((PTString) args.get(0)).read().toLowerCase()));
   }
 
+  @PeopleToolsImplementation
   public void GetSQL() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -713,6 +736,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(sqlObj);
   }
 
+  @PeopleToolsImplementation
   public void SQLExec() {
 
     // Do not get all args in their dereferenced form; outvars will likely
@@ -832,6 +856,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(true));
   }
 
+  @PeopleToolsImplementation
   public void GetField() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -846,6 +871,7 @@ public class GlobalFnLibrary {
         ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext().deref());
   }
 
+  @PeopleToolsImplementation
   public void GetRecord() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -871,6 +897,7 @@ public class GlobalFnLibrary {
     }
   }
 
+  @PeopleToolsImplementation
   public void Gray() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -891,6 +918,7 @@ public class GlobalFnLibrary {
    * with the final URL reproduced, due to lack of info at this time.
    * TODO(mquinn): Keep this in mind in the event of issues.
    */
+  @PeopleToolsImplementation
   public void GenerateScriptRelativeURL() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -941,6 +969,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(url.toString()));
   }
 
+  @PeopleToolsImplementation
   public void GetGrid() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -964,6 +993,7 @@ public class GlobalFnLibrary {
    * It does not reach up the rowset hierarchy indefinitely, unlike
    * GetRecord().
    */
+  @PeopleToolsImplementation
   public void GetRowset() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -985,6 +1015,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(resRowset);
   }
 
+  @PeopleToolsImplementation
   public void Weekday() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -1007,6 +1038,7 @@ public class GlobalFnLibrary {
    * Note; negative delta values are allowed here (both in
    * technical sense and in the PT defn/implementation.
    */
+  @PeopleToolsImplementation
   public void AddToDate() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -1039,10 +1071,12 @@ public class GlobalFnLibrary {
   }
 
   // Not implementing for now.
+  @PeopleToolsImplementation
   public void SetCursorPos() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
   }
 
+  @PeopleToolsImplementation
   public void RTrim() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -1062,6 +1096,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(trimmedStr));
   }
 
+  @PeopleToolsImplementation
   public void Char() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
@@ -1076,6 +1111,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(Character.toString((char) n)));
   }
 
+  @PeopleToolsImplementation
   public void GetUserOption() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();

@@ -77,7 +77,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     b.append(this.getSemicolonsAfterTokenIdx(tok.getTokenIndex()+1));
 
     final PCInstruction instr = new PCInstruction(b.toString());
-    instr.sourceToken = tok;
+    instr.setSourceToken(tok);
     TraceFileVerifier.submitEnforcedEmission(instr);
     this.lastSubmittedEmission = instr;
   }
@@ -125,7 +125,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     }
 
     final PCInstruction instr = new PCInstruction(line.toString());
-    instr.sourceContext = ctx;
+    instr.setSourceContext(ctx);
     TraceFileVerifier.submitEnforcedEmission(instr);
     this.lastSubmittedEmission = instr;
   }

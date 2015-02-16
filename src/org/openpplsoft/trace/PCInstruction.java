@@ -29,30 +29,30 @@ public class PCInstruction implements IEmission {
   private static Logger log =
       LogManager.getLogger(PCInstruction.class.getName());
 
-  private String instruction;
+  private final String instruction;
 
   // These are used in determining which instructions should be
   // emitted; only used by OPS-constructed PCInstruction objects,
   // not PCInstruction objects created from the tracefile.
-  public Token sourceToken;
-  public ParserRuleContext sourceContext;
+  private Token sourceToken;
+  private ParserRuleContext sourceContext;
 
   /**
    * Creates a new PCInstruction instance.
    * @param i the PeopleCode instruction that was executed
    */
-  public PCInstruction(final String i) {
-    this.instruction = i;
-
+  public PCInstruction(final String instruction) {
     // Although the interpreter will never emit an instruction emission
     // containing a comment, the tracefile includes comments that appear
     // on the same line as PC instructions. Therefore, if there is a trailing
     // comment on this instruction, it should be removed to ensure that
     // tracefile verification doesn't fail for otherwise equivalent emissions.
-    Pattern commPattern = Pattern.compile("\\s+/\\*(.+?)\\*/\\s*$");
-    Matcher commMatcher = commPattern.matcher(this.instruction);
+    final Pattern commPattern = Pattern.compile("\\s+/\\*(.+?)\\*/\\s*$");
+    final Matcher commMatcher = commPattern.matcher(instruction);
     if (commMatcher.find()) {
       this.instruction = commMatcher.replaceAll("");
+    } else {
+      this.instruction = instruction;
     }
   }
 
@@ -63,6 +63,14 @@ public class PCInstruction implements IEmission {
    */
   public String getInstruction() {
     return this.instruction;
+  }
+
+  public void setSourceToken(final Token sourceToken) {
+    this.sourceToken = sourceToken;
+  }
+
+  public void setSourceContext(final ParserRuleContext ctx) {
+    this.sourceContext = ctx;
   }
 
   public boolean isOptional() {

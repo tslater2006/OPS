@@ -16,10 +16,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class PCEnd implements IEmission {
 
-  private String endTag;
-  private String nest;
-  private String methodName;
-  private String progDescriptor;
+  private final String endTag, nest, methodName, progDescriptor;
 
   /**
    * Creates a new instance of PCEnd.

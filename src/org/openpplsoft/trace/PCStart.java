@@ -16,10 +16,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class PCStart implements IEmission {
 
-  private String startTag;
-  private String nest;
-  private String methodName;
-  private String progDescriptor;
+  private final String startTag, nest, methodName, progDescriptor;
 
   /**
    * Creates a new PCStart instance.

@@ -12,9 +12,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class BeginLevel implements IEmission {
 
   private final String indentStr;
-  public final int levelIdx, rowIdx, occursCount, activeCount,
+  private final int levelIdx, rowIdx, occursCount, activeCount,
       hiddenCount, scrollCount, numRecs;
-  public final boolean noAutoSelectFlag, noAutoUpdateFlag;
+  private final boolean noAutoSelectFlag, noAutoUpdateFlag;
 
   public BeginLevel(
       final String indentStr,

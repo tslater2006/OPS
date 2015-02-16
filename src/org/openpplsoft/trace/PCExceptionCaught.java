@@ -22,10 +22,12 @@ public class PCExceptionCaught implements IEmission {
   private static Logger log =
       LogManager.getLogger(PCExceptionCaught.class.getName());
 
-  public int msgSetNbr, msgNbr;
-  public String exMsg, responsibleProgAndEvent, responsibleMethodOrFuncName;
+  private final int msgSetNbr, msgNbr;
+  private final String exMsg, responsibleProgAndEvent,
+      responsibleMethodOrFuncName;
 
-  // NOTE: responsibleMethodOrFuncName may legitimately be null if exception was thrown
+  // NOTE: responsibleMethodOrFuncName may legitimately
+  // be null if exception was thrown
   // from the root stmt list of a program.
   public PCExceptionCaught(final String exMsg, int msgSetNbr,
       int msgNbr, final String responsibleProgAndEvent,

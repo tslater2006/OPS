@@ -31,9 +31,11 @@ public class PCFldDefaultEmission implements IEmission {
   private static Logger log =
       LogManager.getLogger(PCFldDefaultEmission.class.getName());
 
-  public String ptRECNAME, ptFLDNAME, defaultedValue;
-  public boolean fromConstantFlag, fromRecordFlag;
-  public String metaValue = null;
+  private final String ptRECNAME, ptFLDNAME;
+  private String defaultedValue;
+
+  private boolean fromConstantFlag, fromRecordFlag;
+  private String metaValue = null;
 
   public PCFldDefaultEmission(final String recName, final String fldName) {
     this.ptRECNAME = recName;

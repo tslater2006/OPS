@@ -34,7 +34,6 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
     extends PTObjectType {
 
   private static final Logger log = LogManager.getLogger(PTRow.class.getName());
-  private static Map<String, Method> ptMethodTable;
 
   // Maps record names to child record objects
   protected final Map<String, E> recordMap;
@@ -44,19 +43,6 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   protected R parentRowset;
   protected PTImmutableReference<PTBoolean> selectedPropertyRef;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-    // cache pointers to PeopleTools Row methods.
-    final Method[] methods = PTRow.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   public PTRow(final PTRowTypeConstraint origTc) {
     super(origTc);
@@ -114,7 +100,8 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
    * Implementation of GetRecord method for the PeopleTools
    * row class.
    */
-  public void PT_GetRecord() {
+  @PeopleToolsImplementation
+  public void GetRecord() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() != 1) {
       throw new OPSVMachRuntimeException("Expected only one arg.");
@@ -143,14 +130,6 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
       return this.parentRowset;
     } else if (s.toLowerCase().equals("selected")) {
       return this.selectedPropertyRef;
-    }
-    return null;
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
     }
     return null;
   }

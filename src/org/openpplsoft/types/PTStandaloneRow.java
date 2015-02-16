@@ -30,22 +30,8 @@ import org.openpplsoft.trace.*;
  */
 public final class PTStandaloneRow extends PTRow<PTStandaloneRowset, PTStandaloneRecord> {
 
-  private static Map<String, Method> ptMethodTable;
-
-  private static final Logger log = LogManager.getLogger(PTStandaloneRow.class.getName());
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-    // cache pointers to PeopleTools Row methods.
-    final Method[] methods = PTStandaloneRow.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
+  private static final Logger log = LogManager.getLogger(
+      PTStandaloneRow.class.getName());
 
   public PTStandaloneRow(final PTRowTypeConstraint origTc,
       final PTStandaloneRowset pRowset) {

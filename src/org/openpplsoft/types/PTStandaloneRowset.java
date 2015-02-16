@@ -36,26 +36,8 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
 
   private static Logger log = LogManager.getLogger(
       PTStandaloneRowset.class.getName());
-  private static Map<String, Method> ptMethodTable;
 
   private final List<Record> registeredRecordDefns;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    ptMethodTable = new HashMap<String, Method>();
-    final Class[] classes = new Class[]{PTRowset.class, PTStandaloneRowset.class};
-
-    for (final Class cls : classes) {
-      final Method[] methods = cls.getMethods();
-      for (Method m : methods) {
-        if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-          ptMethodTable.put(m.getName().substring(
-              PT_METHOD_PREFIX.length()), m);
-        }
-      }
-    }
-  }
 
   /**
    * Remember: the provided primary record defn could be null if
@@ -87,19 +69,12 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
     return new PTRowTypeConstraint().allocStandaloneRow(this);
   }
 
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
-    }
-    return null;
-  }
-
   /**
    * Fill the rowset; the WHERE clause to use must be passed on the
    * OPS runtime stack.
    */
-  public void PT_Fill() {
+  @PeopleToolsImplementation
+  public void Fill() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
     // If no args are provided to Fill, use a single blank as the where

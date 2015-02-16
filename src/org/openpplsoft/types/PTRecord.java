@@ -41,7 +41,6 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
 
   private static Logger log = LogManager.getLogger(PTRecord.class.getName());
 
-  private static Map<String, Method> ptMethodTable;
   private static Pattern dtPattern, datePattern, dotPattern;
 
   protected Record recDefn;
@@ -62,18 +61,6 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
         "TO_CHAR\\(([^,]*),'YYYY-MM-DD'\\)");
 
     dotPattern = Pattern.compile("([^\\.]*)\\.(.*)");
-
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to PeopleTools Record methods.
-    final Method[] methods = PTRecord.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
   }
 
   public PTRecord(final PTRecordTypeConstraint origTc) {
@@ -153,14 +140,6 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     return null;
   }
 
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
-    }
-    return null;
-  }
-
   /**
    * Determines whether this record has the provided
    * field within it.
@@ -182,7 +161,8 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     }
   }
 
-  public void PT_GetField() {
+  @PeopleToolsImplementation
+  public void GetField() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() != 1) {
@@ -212,7 +192,8 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
    * Recursively sets the default value for every field object within this
    * record object. Arguments must be placed on the OPS runtime stack.
    */
-  public void PT_SetDefault() {
+  @PeopleToolsImplementation
+  public void SetDefault() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected no args.");
@@ -224,7 +205,8 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
    * Implements the .SelectByKeyEffDt PeopleCode method for record objects.
    * Arguments must be placed on the OPS runtime stack.
    */
-  public void PT_SelectByKeyEffDt() {
+  @PeopleToolsImplementation
+  public void SelectByKeyEffDt() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 1 || (!(args.get(0) instanceof PTDate))) {
       throw new OPSVMachRuntimeException("Expected single date arg.");
@@ -265,7 +247,8 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
    * Implements the .SelectByKey PeopleTools method for record objects.
    * Arguments must be placed on the OPS runtime stack.
    */
-  public void PT_SelectByKey() {
+  @PeopleToolsImplementation
+  public void SelectByKey() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero args.");

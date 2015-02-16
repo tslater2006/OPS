@@ -7,6 +7,8 @@
 
 package org.openpplsoft.types;
 
+import java.lang.reflect.Method;
+
 import org.openpplsoft.runtime.*;
 
 public abstract class PTObjectType extends PTType {
@@ -16,5 +18,13 @@ public abstract class PTObjectType extends PTType {
   }
 
   public abstract PTType dotProperty(String s);
-  public abstract Callable dotMethod(String s);
+
+  public Callable dotMethod(final String methodName) {
+    try {
+      final Method method = this.getClass().getMethod(methodName, new Class[0]);
+      return new Callable(method, this);
+    } catch (final NoSuchMethodException nsme) {
+      return null;
+    }
+  }
 }

@@ -35,7 +35,6 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
 
   private static final Logger log =
       LogManager.getLogger(PTBufferRow.class.getName());
-  private static Map<String, Method> ptMethodTable;
 
   private final RelDisplayRecordSet relDisplayRecordSet;
 
@@ -47,19 +46,6 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
   */
   private final Map<Integer, PTBufferRecord> totallyOrderedAllRecords =
       new TreeMap<>();
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-    // cache pointers to PeopleTools Row methods.
-    final Method[] methods = PTBufferRow.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   public PTBufferRow(final PTRowTypeConstraint origTc,
       final PTBufferRowset pRowset) {

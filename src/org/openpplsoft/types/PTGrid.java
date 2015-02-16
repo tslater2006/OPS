@@ -26,23 +26,7 @@ public final class PTGrid extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTGrid.class.getName());
 
-  private static Map<String, Method> ptMethodTable;
-
   private final String pageName, gridName;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to PeopleTools Record methods.
-    final Method[] methods = PTGrid.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   public PTGrid(final PTGridTypeConstraint origTc,
       final PTPageLiteral pageName, final PTString gridName) {
@@ -53,14 +37,6 @@ public final class PTGrid extends PTObjectType {
 
   @Override
   public PTType dotProperty(final String s) {
-    return null;
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
-    }
     return null;
   }
 

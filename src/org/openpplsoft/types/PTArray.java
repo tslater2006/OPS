@@ -7,30 +7,20 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.runtime.*;
 import java.util.*;
-import org.apache.logging.log4j.*;
 import java.lang.reflect.*;
+
+import org.apache.logging.log4j.*;
+import org.openpplsoft.runtime.*;
+import org.openpplsoft.pt.PeopleToolsImplementation;
 
 public final class PTArray extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTArray.class.getName());
-  private static Map<String, Method> ptMethodTable;
 
   private final int dimensions;
   private final PTTypeConstraint baseTypeConstraint;
   private final LinkedList<PTType> values;
-
-  static {
-    // cache pointers to PeopleTools Array methods.
-    Method[] methods = PTArray.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for(Method m : methods) {
-      if(m.getName().indexOf("PT_") == 0) {
-        ptMethodTable.put(m.getName().substring(3), m);
-      }
-    }
-  }
 
   public PTArray(PTArrayTypeConstraint origTc, int d, PTTypeConstraint baseTypeTc) {
     super(origTc);
@@ -71,13 +61,6 @@ public final class PTArray extends PTObjectType {
   public PTType dotProperty(String s) {
     if(s.toLowerCase().equals("len")) {
       return new PTInteger(values.size());
-    }
-    return null;
-  }
-
-  public Callable dotMethod(String s) {
-    if(ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
     }
     return null;
   }
@@ -153,7 +136,8 @@ public final class PTArray extends PTObjectType {
     log.debug("After push, array is: {}.", this);
   }
 
-  public void PT_Push() {
+  @PeopleToolsImplementation
+  public void Push() {
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1) {
       throw new OPSVMachRuntimeException("Expected one argument.");

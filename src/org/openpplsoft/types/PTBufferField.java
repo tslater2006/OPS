@@ -26,27 +26,9 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(PTBufferField.class.getName());
-  private static Map<String, Method> ptMethodTable;
 
   private final List<DropDownItem> dropDownList = new ArrayList<>();
   private boolean isMarkedAsDefaulted, isMarkedAsUpdated;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    ptMethodTable = new HashMap<String, Method>();
-    final Class[] classes = new Class[]{PTField.class, PTBufferField.class};
-
-    for (final Class cls : classes) {
-      final Method[] methods = cls.getMethods();
-      for (final Method m : methods) {
-        if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-          ptMethodTable.put(m.getName().substring(
-              PT_METHOD_PREFIX.length()), m);
-        }
-      }
-    }
-  }
 
   public PTBufferField(final PTFieldTypeConstraint origTc,
       final PTBufferRecord pRecord, final RecordField rfd) {
@@ -500,7 +482,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if(s.toLowerCase().equals("value")) {
 
       /*
-       * Why is this check here and not in Record's PT_GetField, you may ask?
+       * Why is this check here and not in Record's GetField, you may ask?
        * Furthermore, why are we only throwing an exception when attempting to
        * write to the Value of a field that is not in the component buffer (and not
        * Visible, DisplayOnly, etc.)?
@@ -544,15 +526,8 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         + "this field; parent record is null.");
   }
 
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
-    }
-    return null;
-  }
-
-  public void PT_GetRelated() {
+  @PeopleToolsImplementation
+  public void GetRelated() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() != 1 || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
       throw new OPSVMachRuntimeException("Expected single PTRecordFieldSpecifier "
@@ -614,7 +589,8 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     Environment.pushToCallStack(relDispField);
   }
 
-  public void PT_ClearDropDownList() {
+  @PeopleToolsImplementation
+  public void ClearDropDownList() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected no args to ClearDropDownList");
@@ -623,7 +599,8 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     this.markAsUpdated();
   }
 
-  public void PT_AddDropDownItem() {
+  @PeopleToolsImplementation
+  public void AddDropDownItem() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() != 2

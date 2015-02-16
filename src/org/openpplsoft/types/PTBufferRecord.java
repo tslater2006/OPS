@@ -39,23 +39,8 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     implements ICBufferEntity {
 
   private static Logger log = LogManager.getLogger(PTBufferRecord.class.getName());
-  private static Map<String, Method> ptMethodTable;
 
   private final RecordBuffer recBuffer;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to PeopleTools Record methods.
-    final Method[] methods = PTBufferRecord.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   public PTBufferRecord(final PTRecordTypeConstraint origTc,
       final PTBufferRow pRow, final RecordBuffer recBuffer) {

@@ -38,29 +38,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
   private static Logger log = LogManager.getLogger(
       PTBufferRowset.class.getName());
 
-  private static Map<String, Method> ptMethodTable;
-
   private final ScrollBuffer scrollBuffer;
   private final RelDisplayRecordSet relDisplayRecordSet;
   private final List<RecordBuffer> registeredNonRelDispRecordBuffers;
   private final List<ScrollBuffer> registeredChildScrollBuffers;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    ptMethodTable = new HashMap<String, Method>();
-    final Class[] classes = new Class[]{PTRowset.class, PTBufferRowset.class};
-
-    for (final Class cls : classes) {
-      final Method[] methods = cls.getMethods();
-      for (Method m : methods) {
-        if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-          ptMethodTable.put(m.getName().substring(
-              PT_METHOD_PREFIX.length()), m);
-        }
-      }
-    }
-  }
 
   public PTBufferRowset(final PTRowsetTypeConstraint origTc, final PTBufferRow pRow,
       final ScrollBuffer scrollBuf) {
@@ -144,14 +125,6 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     for (final PTBufferRow row : this.rows) {
       row.fireEvent(event, fireEventSummary);
     }
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
-    }
-    return null;
   }
 
   public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {
@@ -238,7 +211,8 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     }
   }
 
-  public void PT_Select() {
+  @PeopleToolsImplementation
+  public void Select() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 

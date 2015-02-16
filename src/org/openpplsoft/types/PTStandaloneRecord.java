@@ -41,22 +41,6 @@ public final class PTStandaloneRecord extends PTRecord<PTStandaloneRow,
   private static Logger log =
       LogManager.getLogger(PTStandaloneRecord.class.getName());
 
-  private static Map<String, Method> ptMethodTable;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to PeopleTools Record methods.
-    final Method[] methods = PTStandaloneRecord.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
-
   public PTStandaloneRecord(final PTRecordTypeConstraint origTc,
       final PTStandaloneRow pRow, final Record r) {
     super(origTc);

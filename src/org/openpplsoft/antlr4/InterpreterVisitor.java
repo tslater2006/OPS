@@ -753,10 +753,10 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
      * the indexing operation.
      */
     if (t instanceof PTRowset) {
-      ((PTRowset) t).PT_GetRow();
+      ((PTRowset) t).GetRow();
     } else if (t instanceof PTReference
         && ((PTReference) t).deref() instanceof PTRowset) {
-      ((PTRowset) ((PTReference) t).deref()).PT_GetRow();
+      ((PTRowset) ((PTReference) t).deref()).GetRow();
     } else if(call == null) {
       throw new OPSVMachRuntimeException("No Callable exists for fn expression: "
           + ctx.expr().getText());

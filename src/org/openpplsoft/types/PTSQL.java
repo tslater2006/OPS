@@ -35,7 +35,6 @@ public final class PTSQL extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTSQL.class.getName());
 
-  private static Map<String, Method> ptMethodTable;
   private static Pattern dtPattern, datePattern, dotPattern;
 
   private final SQL sqlDefn;
@@ -43,20 +42,6 @@ public final class PTSQL extends PTObjectType {
   private final OPSStmt ostmt;
 
   private OPSResultSet rs;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to PeopleTools Record methods.
-    final Method[] methods = PTSQL.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   /**
    * Creates a new SQL object that is attached
@@ -100,18 +85,11 @@ public final class PTSQL extends PTObjectType {
     return null;
   }
 
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
-    }
-    return null;
-  }
-
   /**
    * Returns True if a row was fetched; false otherwise.
    */
-  public void PT_Fetch() {
+  @PeopleToolsImplementation
+  public void Fetch() {
 
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() == 0) {

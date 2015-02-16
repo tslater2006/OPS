@@ -26,8 +26,6 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(PTField.class.getName());
 
-  private static Map<String, Method> ptMethodTable;
-
   protected final RecordField recFieldDefn;
   protected final PTImmutableReference<PTPrimitiveType> valueRef;
   protected final PTImmutableReference<PTBoolean> visiblePropertyRef,
@@ -37,20 +35,6 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
   protected R parentRecord;
   protected RecordFieldBuffer recFieldBuffer;
   protected boolean isGrayedOut;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to PeopleTools Field methods.
-    final Method[] methods = PTField.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   public PTField(final PTFieldTypeConstraint origTc,
       final RecordField recFieldDefn) {
@@ -150,7 +134,8 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
    * CONTINUED EXECUTION OF THE CALLING FUNCTION / PROGRAM; you must
    * implement these cases in the future.
    */
-  public void PT_SetDefault() {
+  @PeopleToolsImplementation
+  public void SetDefault() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected no args to SetDefault.");
@@ -158,7 +143,8 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
     this.setBlank();
   }
 
-  public void PT_GetLongLabel() {
+  @PeopleToolsImplementation
+  public void GetLongLabel() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 1
         || !(args.get(0) instanceof PTString)) {

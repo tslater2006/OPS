@@ -27,25 +27,6 @@ public final class PTStandaloneField extends PTField<PTStandaloneRecord> {
   private static Logger log = LogManager.getLogger(
       PTStandaloneField.class.getName());
 
-  private static Map<String, Method> ptMethodTable;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    ptMethodTable = new HashMap<String, Method>();
-    final Class[] classes = new Class[]{PTField.class, PTStandaloneField.class};
-
-    for (final Class cls : classes) {
-      final Method[] methods = cls.getMethods();
-      for (Method m : methods) {
-        if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-          ptMethodTable.put(m.getName().substring(
-              PT_METHOD_PREFIX.length()), m);
-        }
-      }
-    }
-  }
-
   public PTStandaloneField(final PTFieldTypeConstraint origTc,
       final PTStandaloneRecord pRecord, final RecordField rfd) {
     super(origTc, rfd);
@@ -61,14 +42,6 @@ public final class PTStandaloneField extends PTField<PTStandaloneRecord> {
       return this.fldNamePropertyRef;
     } else if(s.toLowerCase().equals("displayonly")) {
       return this.displayOnlyPropertyRef;
-    }
-    return null;
-  }
-
-  @Override
-  public Callable dotMethod(final String s) {
-    if (ptMethodTable.containsKey(s)) {
-      return new Callable(ptMethodTable.get(s), this);
     }
     return null;
   }

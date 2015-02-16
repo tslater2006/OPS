@@ -34,38 +34,32 @@ import org.apache.logging.log4j.*;
 
 public class GlobalFnLibrary {
 
-  private static Logger log = LogManager.getLogger(GlobalFnLibrary.class.getName());
-  private static Map<String, Method> ptMethodTable;
-
+  private static Logger log = LogManager.getLogger(
+      GlobalFnLibrary.class.getName());
   public InterpretSupervisor interpretSupervisor;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to PeopleTools global functions.
-    final Method[] methods = GlobalFnLibrary.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   public GlobalFnLibrary(final InterpretSupervisor supervisor) {
     this.interpretSupervisor = supervisor;
   }
 
   public static boolean hasFuncNamed(final String id) {
-    return ptMethodTable.containsKey(id);
+    try {
+      final Method method = GlobalFnLibrary.class
+          .getMethod(id, new Class[0]);
+    } catch (final NoSuchMethodException nsme) {
+      return false;
+    }
+    return true;
   }
 
   public Callable getFuncCallable(final String id) {
-    if (!ptMethodTable.containsKey(id)) {
-      throw new OPSVMachRuntimeException("No global function exists for identifier: " + id);
+    try {
+      final Method method = this.getClass().getMethod(id, new Class[0]);
+      return new Callable(method, this);
+    } catch (final NoSuchMethodException nsme) {
+      throw new OPSVMachRuntimeException(
+          "No global function exists for identifier: " + id);
     }
-    return new Callable(ptMethodTable.get(id), this);
   }
 
   /*
@@ -113,7 +107,7 @@ public class GlobalFnLibrary {
    * Return true if none of the specified fields contain a value, return false
    * if one or more contain a value.
    */
-  public void PT_None() {
+  public void None() {
     for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(doesContainValue(arg)) {
         Environment.pushToCallStack(new PTBoolean(false));
@@ -128,7 +122,7 @@ public class GlobalFnLibrary {
    * Return true if all of the specified fields contain a value, return false
    * if one or more do not.
    */
-  public void PT_All() {
+  public void All() {
     for(PTType arg : Environment.getDereferencedArgsFromCallStack()) {
       if(!doesContainValue(arg)) {
         Environment.pushToCallStack(new PTBoolean(false));
@@ -138,7 +132,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(true));
   }
 
-  public void PT_Hide() {
+  public void Hide() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
@@ -149,7 +143,7 @@ public class GlobalFnLibrary {
     ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext().deref().hide();
   }
 
-  public void PT_UnHide() {
+  public void UnHide() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 || !(args.get(0) instanceof PTRecordFieldSpecifier)) {
@@ -163,18 +157,18 @@ public class GlobalFnLibrary {
   /**
    * TODO(mquinn): Implement this function.
    */
-  public void PT_SetSearchDialogBehavior() {
+  public void SetSearchDialogBehavior() {
     Environment.getDereferencedArgsFromCallStack();
   }
 
   /**
    * TODO(mquinn): Implement this function.
    */
-  public void PT_AllowEmplIdChg() {
+  public void AllowEmplIdChg() {
     Environment.getDereferencedArgsFromCallStack();
   }
 
-  public void PT_Rept() {
+  public void Rept() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 2) {
@@ -192,7 +186,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(b.toString()));
     }
 
-  public void PT_Len() {
+  public void Len() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 && !(args.get(0) instanceof PTString)) {
@@ -207,7 +201,7 @@ public class GlobalFnLibrary {
    * TODO: Return true if DoModalComponent
    * has been previously called; requires more research.
    */
-  public void PT_IsModalComponent() {
+  public void IsModalComponent() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 0) {
@@ -216,7 +210,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(false));
   }
 
-  public void PT_CreateRecord() {
+  public void CreateRecord() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 || (!(args.get(0) instanceof PTRecordLiteral))) {
@@ -232,7 +226,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(rec);
   }
 
-  public void PT_CreateRowset() {
+  public void CreateRowset() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 1 || (!(args.get(0) instanceof PTRecordLiteral))) {
@@ -248,7 +242,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(newRowset);
   }
 
-  public void PT_CreateArray() {
+  public void CreateArray() {
 
     /*
      * I am simply calling CreateArrayRept for now,
@@ -258,14 +252,14 @@ public class GlobalFnLibrary {
      * instances where something other than CreateArrayRept
      * should be done.
      */
-    PT_CreateArrayRept();
+    CreateArrayRept();
   }
 
   /**
    * Makes the Rowset object representing the level 0
    * component buffer available to caller.
    */
-  public void PT_GetLevel0() {
+  public void GetLevel0() {
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
@@ -274,7 +268,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(ComponentBuffer.getLevelZeroRowset());
   }
 
-  public void PT_CreateArrayRept() {
+  public void CreateArrayRept() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if(args.size() != 2 || (!(args.get(1) instanceof PTInteger))) {
@@ -313,7 +307,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(newArray);
   }
 
-  public void PT_IsMenuItemAuthorized() {
+  public void IsMenuItemAuthorized() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -413,7 +407,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(false));
   }
 
-  public void PT_MsgGetText() {
+  public void MsgGetText() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -475,7 +469,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(msg));
   }
 
-  public void PT_GenerateComponentContentRelURL() {
+  public void GenerateComponentContentRelURL() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -545,7 +539,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(url.toString()));
   }
 
-  public void PT_Truncate() {
+  public void Truncate() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -567,7 +561,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTNumber(truncatedBigDec));
   }
 
-  public void PT_String() {
+  public void String() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -581,7 +575,7 @@ public class GlobalFnLibrary {
         new PTString(((PTInteger) args.get(0)).readAsString()));
   }
 
-  public void PT_GetHTMLText() {
+  public void GetHTMLText() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -627,7 +621,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(htmlStr));
   }
 
-  public void PT_Proper() {
+  public void Proper() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -668,7 +662,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(sb.toString()));
   }
 
-  public void PT_Lower() {
+  public void Lower() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -682,7 +676,7 @@ public class GlobalFnLibrary {
         new PTString(((PTString) args.get(0)).read().toLowerCase()));
   }
 
-  public void PT_GetSQL() {
+  public void GetSQL() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -719,7 +713,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(sqlObj);
   }
 
-  public void PT_SQLExec() {
+  public void SQLExec() {
 
     // Do not get all args in their dereferenced form; outvars will likely
     // be references and we need to preserve that.
@@ -838,7 +832,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTBoolean(true));
   }
 
-  public void PT_GetField() {
+  public void GetField() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -852,7 +846,7 @@ public class GlobalFnLibrary {
         ((PTRecordFieldSpecifier) args.get(0)).resolveInCBufferContext().deref());
   }
 
-  public void PT_GetRecord() {
+  public void GetRecord() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -877,7 +871,7 @@ public class GlobalFnLibrary {
     }
   }
 
-  public void PT_Gray() {
+  public void Gray() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -897,7 +891,7 @@ public class GlobalFnLibrary {
    * with the final URL reproduced, due to lack of info at this time.
    * TODO(mquinn): Keep this in mind in the event of issues.
    */
-  public void PT_GenerateScriptRelativeURL() {
+  public void GenerateScriptRelativeURL() {
 
     List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -947,7 +941,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(url.toString()));
   }
 
-  public void PT_GetGrid() {
+  public void GetGrid() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -970,7 +964,7 @@ public class GlobalFnLibrary {
    * It does not reach up the rowset hierarchy indefinitely, unlike
    * GetRecord().
    */
-  public void PT_GetRowset() {
+  public void GetRowset() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -991,7 +985,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(resRowset);
   }
 
-  public void PT_Weekday() {
+  public void Weekday() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -1013,7 +1007,7 @@ public class GlobalFnLibrary {
    * Note; negative delta values are allowed here (both in
    * technical sense and in the PT defn/implementation.
    */
-  public void PT_AddToDate() {
+  public void AddToDate() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -1045,11 +1039,11 @@ public class GlobalFnLibrary {
   }
 
   // Not implementing for now.
-  public void PT_SetCursorPos() {
+  public void SetCursorPos() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
   }
 
-  public void PT_RTrim() {
+  public void RTrim() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -1068,7 +1062,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(trimmedStr));
   }
 
-  public void PT_Char() {
+  public void Char() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 
@@ -1082,7 +1076,7 @@ public class GlobalFnLibrary {
     Environment.pushToCallStack(new PTString(Character.toString((char) n)));
   }
 
-  public void PT_GetUserOption() {
+  public void GetUserOption() {
 
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
 

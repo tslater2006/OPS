@@ -37,27 +37,11 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
 
   private static Logger log = LogManager.getLogger(
       PTRowset.class.getName());
-  private static Map<String, Method> ptMethodTable;
 
   protected final List<R> rows;
 
   protected R parentRow;
   protected Record primaryRecDefn;
-
-  static {
-    final String PT_METHOD_PREFIX = "PT_";
-
-    // cache pointers to superclass PTRowset methods (applicable to
-    // all rowsets regardless of whether or not they're in the comp buffer).
-    Method[] methods = PTRowset.class.getMethods();
-    ptMethodTable = new HashMap<String, Method>();
-    for (Method m : methods) {
-      if (m.getName().indexOf(PT_METHOD_PREFIX) == 0) {
-        ptMethodTable.put(m.getName().substring(
-            PT_METHOD_PREFIX.length()), m);
-      }
-    }
-  }
 
   public PTRowset(final PTRowsetTypeConstraint origTc) {
     super(origTc);
@@ -110,7 +94,8 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
    * Flush the rowset (only a default empty row will be present
    * after the flush).
    */
-  public void PT_Flush() {
+  @PeopleToolsImplementation
+  public void Flush() {
     final List<PTType> args = Environment.getArgsFromCallStack();
     if (args.size() != 0) {
       throw new OPSVMachRuntimeException("Expected zero arguments.");
@@ -122,7 +107,8 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
    * Get a row from the rowset; the index to use must be placed
    * on the OPS runtime stack.
    */
-  public void PT_GetRow() {
+  @PeopleToolsImplementation
+  public void GetRow() {
     final List<PTType> args = Environment.getDereferencedArgsFromCallStack();
     if (args.size() != 1) {
       throw new OPSVMachRuntimeException("Expected only one arg.");
@@ -157,7 +143,8 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
    * future issues with this method, as I am deferring support for those
    * scenarios.
    */
-  public void PT_Sort() {
+  @PeopleToolsImplementation
+  public void Sort() {
 
     final LinkedList<String> sortFields = new LinkedList<String>();
     final LinkedList<String> sortOrders = new LinkedList<String>();

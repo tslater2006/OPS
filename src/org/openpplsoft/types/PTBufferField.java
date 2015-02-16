@@ -157,7 +157,10 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         && this.recFieldBuffer.isDisplayControlField()) {
       flagStr += " relkey";
     } else if (this.recFieldDefn.getFldName().equals("EFFDT")
-        && this.determineScrollLevel() == 0) {
+        && this.determineScrollLevel() == 0
+        && !this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
+        && (this.parentRecord.getRecDefn().isDerivedWorkRecord()
+            || this.parentRecord.isEffectivelyAWorkRecord())) {
       flagStr += " relkey";
     } else if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
         && !this.parentRecord.getRecDefn().isDerivedWorkRecord()

@@ -9,7 +9,7 @@
   </configurations>
 
   <dependencies>
-    <dependency org="org.antlr" name="antlr4" rev="4.3"
+    <dependency org="org.antlr" name="antlr4" rev="4.5"
       conf="antlr,compile,runtime->default"/>
 
     <dependency org="com.puppycrawl.tools" name="checkstyle" rev="5.7"

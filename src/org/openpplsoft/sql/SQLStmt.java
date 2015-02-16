@@ -26,8 +26,8 @@ public class SQLStmt implements IEmission {
 
   private static Logger log = LogManager.getLogger(SQLStmt.class.getName());
 
-  protected String sql;
-  protected Map<Integer, String> bindVals;
+  private final String sql;
+  private final Map<Integer, String> bindVals;
 
   /**
    * @param s the SQL statement to represent; note that
@@ -42,10 +42,6 @@ public class SQLStmt implements IEmission {
   /**
    * @return bind values for this SQL statement
    */
-  public Map<Integer, String> getBindVals() {
-    return this.bindVals;
-  }
-
   @Override
   public boolean equals(final Object obj) {
     if (obj == this) {
@@ -79,6 +75,18 @@ public class SQLStmt implements IEmission {
       }
     }
     return true;
+  }
+
+  protected void setBindVal(final int idx, final String val) {
+    this.bindVals.put(idx, val);
+  }
+
+  public Map<Integer, String> getBindVals() {
+    return this.bindVals;
+  }
+
+  protected String getSql() {
+    return this.sql;
   }
 
   @Override

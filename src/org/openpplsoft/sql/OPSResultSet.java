@@ -28,7 +28,7 @@ public class OPSResultSet {
   private static Logger log =
       LogManager.getLogger(OPSResultSet.class.getName());
 
-  private ResultSet rs;
+  private final ResultSet rs;
 
   public OPSResultSet(final ResultSet rs) {
     this.rs = rs;

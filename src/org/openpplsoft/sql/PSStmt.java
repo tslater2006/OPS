@@ -24,8 +24,8 @@ public class PSStmt extends SQLStmt {
 
   private static Pattern bindIdxPattern;
 
-  private String originalStmt;
-  private int lineNbr;
+  private final String originalStmt;
+  private final int lineNbr;
 
   static {
     // Note: this regex uses positve lookbehind and lookahead.
@@ -38,13 +38,9 @@ public class PSStmt extends SQLStmt {
    *   which the issued statement is located
    */
   public PSStmt(final String s, final int l) {
-    super(s.trim());
-
-    this.lineNbr = l;
-
-    final Matcher m = bindIdxPattern.matcher(s);
+    super(bindIdxPattern.matcher(s).replaceAll("?").trim());
     this.originalStmt = s;
-    this.sql = m.replaceAll("?").trim();
+    this.lineNbr = l;
   }
 
   /**

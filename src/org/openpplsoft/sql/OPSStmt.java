@@ -33,9 +33,9 @@ public class OPSStmt extends SQLStmt {
 
   private static int stmtCounter;
 
-  private String[] bindValList;
-  private EmissionType emissionType;
-  private PreparedStatement pstmt;
+  private final EmissionType emissionType;
+  private final  PreparedStatement pstmt;
+
   private OPSResultSet rs;
 
   /**
@@ -71,15 +71,15 @@ public class OPSStmt extends SQLStmt {
        * TODO(mquinn): keep this in mind.
        */
       if (bVals[i].equals("")) {
-        this.bindVals.put(i + 1, " ");
+        this.setBindVal(i + 1, " ");
       } else {
-        this.bindVals.put(i + 1, bVals[i]);
+        this.setBindVal(i + 1, bVals[i]);
       }
     }
 
     try {
-      this.pstmt = StmtLibrary.getConnection().prepareStatement(this.sql);
-      for (Map.Entry<Integer, String> cursor : this.bindVals.entrySet()) {
+      this.pstmt = StmtLibrary.getConnection().prepareStatement(this.getSql());
+      for (Map.Entry<Integer, String> cursor : this.getBindVals().entrySet()) {
         this.pstmt.setString(cursor.getKey(), cursor.getValue());
       }
     } catch (final java.sql.SQLException sqle) {

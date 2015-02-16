@@ -15,9 +15,8 @@ public class PagePeopleCodeProg extends PeopleCodeProg {
   private String PNLNAME;
 
   public PagePeopleCodeProg(final String pnlname) {
-    super();
+    super("Activate");
     this.PNLNAME = pnlname;
-    this.event = "Activate";
     this.initBindVals();
   }
 

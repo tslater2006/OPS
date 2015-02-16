@@ -15,11 +15,11 @@ public class RecordPeopleCodeProg extends PeopleCodeProg {
 
   private final String RECNAME, FLDNAME;
 
-  public RecordPeopleCodeProg(String recname, String fldname, String event) {
-    super();
+  public RecordPeopleCodeProg(final String recname,
+      final String fldname, final String event) {
+    super(event);
     this.RECNAME = recname;
     this.FLDNAME = fldname;
-    this.event = event;
     this.initBindVals();
   }
 

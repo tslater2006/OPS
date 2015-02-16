@@ -35,9 +35,8 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
   private boolean hasClassDefnBeenLoaded = false;
 
   public AppClassPeopleCodeProg(String[] path) {
-    super();
+    super("OnExecute");
     this.pathParts = path;
-    this.event = "OnExecute";
     this.initBindVals();
     this.rootPackage = DefnCache.getAppPackage(this.bindVals[1]);
     this.instanceTable = new HashMap<String, Instance>();

@@ -28,10 +28,12 @@ import org.openpplsoft.types.*;
 
 public abstract class PeopleCodeProg {
 
-  private static Logger log = LogManager.getLogger(PeopleCodeProg.class.getName());
+  private static Logger log = LogManager.getLogger(
+      PeopleCodeProg.class.getName());
+
+  protected final String event;
 
   protected String[] bindVals;
-  protected String event;
   private String programText;
   private byte[] bytecode;
   private CommonTokenStream tokenStream;
@@ -48,7 +50,9 @@ public abstract class PeopleCodeProg {
 
   private boolean hasInitialized, haveLoadedDefnsAndPrograms, haveLexedAndParsed;
 
-  protected PeopleCodeProg() {}
+  protected PeopleCodeProg(final String event) {
+    this.event = event;
+  }
 
   protected abstract void initBindVals();
 

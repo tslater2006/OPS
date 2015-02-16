@@ -18,12 +18,11 @@ public class ComponentPeopleCodeProg extends PeopleCodeProg {
       final String pnlgrpname,
       final String market,
       final String event) {
-    super();
+    super(event);
     this.PNLGRPNAME = pnlgrpname;
     this.MARKET = market;
     this.RECNAME = null;
     this.FLDNAME = null;
-    this.event = event;
     this.initBindVals();
   }
 
@@ -32,12 +31,11 @@ public class ComponentPeopleCodeProg extends PeopleCodeProg {
       final String market,
       final String recname,
       final String event) {
-    super();
+    super(event);
     this.PNLGRPNAME = pnlgrpname;
     this.MARKET = market;
     this.RECNAME = recname;
     this.FLDNAME = null;
-    this.event = event;
     this.initBindVals();
   }
 
@@ -47,12 +45,11 @@ public class ComponentPeopleCodeProg extends PeopleCodeProg {
       final String recname,
       final String fldname,
       final String event) {
-    super();
+    super(event);
     this.PNLGRPNAME = pnlgrpname;
     this.MARKET = market;
     this.RECNAME = recname;
     this.FLDNAME = fldname;
-    this.event = event;
     this.initBindVals();
   }
 

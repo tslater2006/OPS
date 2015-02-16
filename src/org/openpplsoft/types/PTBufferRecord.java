@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Set;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -359,6 +360,14 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
 
     this.parentRow.getParentRowset().getParentRow()
           .generateKeylist(fieldName, keylist);
+  }
+
+  public boolean sharesSearchKeysWithSearchRecord() {
+    final Set<String> searchRecSearchKeyFldNames =
+        ComponentBuffer.getSearchRecord().getSearchKeyFieldNames();
+    final Set<String> thisRecSearchKeyFldNames =
+        this.getSearchKeyFieldNames();
+    return searchRecSearchKeyFldNames.equals(thisRecSearchKeyFldNames);
   }
 
   /**

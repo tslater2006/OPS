@@ -18,9 +18,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Set;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,6 +84,20 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     return new ArrayList<PTImmutableReference<F>>(orderedRefMap.values());
   }
 
+  public Set<String> getSearchKeyFieldNames() {
+    return this.getAllFields().stream()
+        .filter(fld -> fld.getRecordFieldDefn().isSearchKey())
+        .map(fld -> fld.getRecordFieldDefn().getFldName())
+        .collect(Collectors.toSet());
+  }
+
+  protected List<F> getAllFields() {
+    return this.fieldRefs.entrySet().stream()
+        .map(entry -> entry.getValue())
+        .map(ref -> ref.deref())
+        .collect(Collectors.toList());
+  }
+
   /**
    * Retrieves the field object corresponding to the
    * provided field name.
@@ -126,6 +143,7 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     return this.fieldRefs.get(unwrappedFldName);
   }
 
+
   @Override
   public PTType dotProperty(final String s) {
     if (this.fieldRefs.containsKey(s)) {
@@ -148,6 +166,14 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
    */
   public boolean hasField(final String fldName) {
     return this.fieldRefs.containsKey(fldName);
+  }
+
+  protected F getField(final String fldName) {
+    if (!this.fieldRefs.containsKey(fldName)) {
+      throw new OPSVMachRuntimeException("Field '" + fldName + "' does not "
+          + "exist on this record.");
+    }
+    return this.fieldRefs.get(fldName).deref();
   }
 
   /**

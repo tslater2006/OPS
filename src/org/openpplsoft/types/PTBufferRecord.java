@@ -367,6 +367,14 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         ComponentBuffer.getSearchRecord().getSearchKeyFieldNames();
     final Set<String> thisRecSearchKeyFldNames =
         this.getSearchKeyFieldNames();
+
+    for (final String fldName : thisRecSearchKeyFldNames) {
+      final PTBufferField fld = this.getField(fldName);
+      if (fld.getRecordFieldBuffer() == null
+          || fld.getRecordFieldBuffer().getPageFieldToks().size() == 0) {
+        return false;
+      }
+    }
     return searchRecSearchKeyFldNames.equals(thisRecSearchKeyFldNames);
   }
 

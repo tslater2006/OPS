@@ -55,8 +55,8 @@ public class ReferenceAssembler extends ElementAssembler {
               CHAINED_REFERENCE_BYTE = 74,
               QUOTED_REFERENCE_BYTE = 72;
 
-    final int b1 = (int) (stream.readNextByte() & WIDE_AND);
-    final int b2 = (int) (stream.readNextByte() & WIDE_AND);
+    final int b1 = stream.readNextByte() & WIDE_AND;
+    final int b2 = stream.readNextByte() & WIDE_AND;
 
     final int refIdx = b2 * MULTIPLIER_SHIFT + b1 + 1;
     final BytecodeReference refObj = stream.getBytecodeReference(refIdx);

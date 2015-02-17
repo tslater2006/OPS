@@ -211,7 +211,7 @@ public class Environment {
         return (PTNumberType) derefedVal;
       } else if (ref instanceof PTAnyTypeReference) {
         ((PTAnyTypeReference) ref).castTo(PTNumber.getTc());
-        return (PTNumberType) ((PTReference) ref).deref();
+        return (PTNumberType) ref.deref();
       }
     }
 

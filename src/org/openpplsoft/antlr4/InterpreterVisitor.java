@@ -9,11 +9,8 @@ package org.openpplsoft.antlr4;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.LinkedList;
 import java.util.Stack;
-import java.util.Iterator;
 
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
@@ -25,8 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.antlr4.frontend.*;
-import org.openpplsoft.buffers.*;
-import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.trace.*;
@@ -1408,7 +1403,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
 
     final String scope = ctx.varScope.getText();
     final PTTypeConstraint varTc = this.getNodeTypeConstraint(ctx.varType());
-    boolean didInitializeAnIdentifier = false;
 
     final List<PeopleCodeParser.VarDeclaratorContext> varsToDeclare =
         ctx.varDeclarator();
@@ -1420,7 +1414,6 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
         final PTType initialValue = this.getNodeData(idCtx.expr());
         this.declareAndInitIdentifier(scope,
             idCtx.VAR_ID().getText(), varTc, initialValue);
-        didInitializeAnIdentifier = true;
       } else {
         // Otherwise, just declare the identifier.
         this.declareIdentifier(scope, idCtx.VAR_ID().getText(), varTc);

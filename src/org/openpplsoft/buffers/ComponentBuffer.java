@@ -7,17 +7,12 @@
 
 package org.openpplsoft.buffers;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

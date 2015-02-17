@@ -8,10 +8,8 @@
 package org.openpplsoft.antlr4;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.antlr.v4.runtime.BufferedTokenStream;
@@ -29,7 +27,6 @@ import org.openpplsoft.antlr4.frontend.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
-import org.openpplsoft.types.*;
 
 /**
  * Responsible for listening to events during the lexing/parsing

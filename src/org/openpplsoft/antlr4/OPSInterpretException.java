@@ -16,6 +16,8 @@ import org.openpplsoft.runtime.OPSVMachRuntimeException;
  */
 public class OPSInterpretException extends OPSVMachRuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   /**
    * Constructs an exception message from the provided args.
    * @param msg the msg describing the exceptional situation

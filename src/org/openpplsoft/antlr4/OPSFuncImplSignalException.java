@@ -17,6 +17,8 @@ import org.openpplsoft.runtime.OPSVMachRuntimeException;
  */
 public class OPSFuncImplSignalException extends OPSVMachRuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   /**
    * Creates an instance of the exception.
    * @param fn the name of the fn encountered (for debugging purposes;

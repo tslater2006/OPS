@@ -17,6 +17,8 @@ import org.openpplsoft.runtime.OPSVMachRuntimeException;
  */
 public class OPSReturnException extends OPSVMachRuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   /**
    * Creates an instance of the exception.
    * @param instructionText the text of the return stmt in the

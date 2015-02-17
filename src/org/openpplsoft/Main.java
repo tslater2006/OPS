@@ -7,8 +7,6 @@
 
 package org.openpplsoft;
 
-import java.util.List;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -81,7 +79,7 @@ public final class Main {
       Environment.setSystemVar("%Page",
           new PTString(c.getPages().get(0).getPNLNAME()));
 
-      final Menu m = DefnCache.getMenu(
+      DefnCache.getMenu(
           (String) Environment.getSystemVar("%Menu").read());
 
       ComponentBuffer.init(c);

@@ -18,6 +18,8 @@ import org.openpplsoft.runtime.OPSVMachRuntimeException;
  */
 public class OPSBreakSignalException extends OPSVMachRuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   /**
    * Creates an instance of the exception.
    */

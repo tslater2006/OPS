@@ -377,7 +377,7 @@ public final class StmtLibrary {
 
       // If the effDtBound is not a meta-sql construct, it will not
       // be wrapped with TO_DATE later in this function, so wrap it now.
-      if (!effDtBound.startsWith("%")) {
+      if (effDtBound.length() == 0 || effDtBound.charAt(0) != '%') {
         effDtBound = "TO_DATE(" + effDtBound + ",'YYYY-MM-DD')";
       }
 

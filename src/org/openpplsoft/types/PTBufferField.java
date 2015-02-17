@@ -408,7 +408,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       final PTPrimitiveType fldValue = this.getValue();
 
       // First check if the value is actually a meta value (i.e., "%date")
-      if (defValue.startsWith("%")) {
+      if (defValue.length() > 0 && defValue.charAt(0) == '%') {
         if (defValue.equals("%date") && fldValue instanceof PTDateTime) {
           ((PTDateTime) fldValue).writeSYSDATE();
           fdEmission.setMetaValue(defValue);

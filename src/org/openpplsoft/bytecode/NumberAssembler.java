@@ -85,7 +85,7 @@ public class NumberAssembler extends ElementAssembler {
       outNumber = outNumber.substring(0, outNumber.length() - dValue) + "."
           + outNumber.substring(outNumber.length() - dValue);
 
-      if (outNumber.startsWith(".")) {
+      if (outNumber.length() > 0 && outNumber.charAt(0) == '.') {
         outNumber = "0" + outNumber;
       }
     }

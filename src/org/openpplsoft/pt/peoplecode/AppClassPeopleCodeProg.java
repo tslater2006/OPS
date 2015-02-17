@@ -8,7 +8,6 @@
 package org.openpplsoft.pt.peoplecode;
 
 import java.util.*;
-import java.lang.StringBuilder;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.types.*;

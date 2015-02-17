@@ -10,7 +10,6 @@ package org.openpplsoft.runtime;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.runtime.*;
 
 public class ProgramExecContext extends ExecContext {
 

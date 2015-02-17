@@ -9,7 +9,6 @@ package org.openpplsoft.types;
 
 import org.openpplsoft.pt.*;
 import java.util.*;
-import org.openpplsoft.types.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.runtime.*;
 

@@ -15,7 +15,6 @@ import org.apache.logging.log4j.*;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.types.*;
 import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.pt.*;
 
 public class RecordField {
 

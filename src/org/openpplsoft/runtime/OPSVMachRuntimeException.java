@@ -7,8 +7,6 @@
 
 package org.openpplsoft.runtime;
 
-import java.lang.RuntimeException;
-
 public class OPSVMachRuntimeException extends RuntimeException {
 
   public OPSVMachRuntimeException() {

@@ -10,7 +10,6 @@ package org.openpplsoft.runtime;
 import java.util.*;
 import java.io.*;
 import java.nio.charset.Charset;
-import org.openpplsoft.runtime.*;
 import org.openpplsoft.trace.*;
 import org.openpplsoft.pt.peoplecode.*;
 import org.openpplsoft.types.*;

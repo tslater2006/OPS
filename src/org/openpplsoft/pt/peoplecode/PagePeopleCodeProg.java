@@ -7,7 +7,6 @@
 
 package org.openpplsoft.pt.peoplecode;
 
-import java.lang.StringBuilder;
 import org.openpplsoft.pt.*;
 
 public class PagePeopleCodeProg extends PeopleCodeProg {

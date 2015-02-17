@@ -8,7 +8,6 @@
 package org.openpplsoft.runtime;
 
 import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.runtime.*;
 import org.openpplsoft.types.PTTypeConstraint;
 
 import org.antlr.v4.runtime.tree.*;

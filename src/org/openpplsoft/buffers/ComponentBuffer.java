@@ -405,12 +405,12 @@ public final class ComponentBuffer {
         indent = sbuf.getScrollLevel() * INDENT_INCREMENT;
         final StringBuilder b = new StringBuilder();
         for (int i = 0; i < indent; i++) {
-          b.append(" ");
+          b.append(' ');
         }
         b.append("Scroll - Level ").append(sbuf.getScrollLevel())
             .append("\tPrimary Record: ").append(sbuf.getPrimaryRecName());
         for (int i = 0; i < indent; i++) {
-          b.append(" ");
+          b.append(' ');
         }
         log.debug(b.toString());
         log.debug("=======================================================");
@@ -418,7 +418,7 @@ public final class ComponentBuffer {
         final RecordBuffer rbuf = (RecordBuffer) buf;
         final StringBuilder b = new StringBuilder();
         for (int i = 0; i < indent; i++) {
-          b.append(" ");
+          b.append(' ');
         }
         b.append(" + ").append(rbuf.getRecDefn().getRecName());
         log.debug(b.toString());
@@ -427,7 +427,7 @@ public final class ComponentBuffer {
         final RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
         final StringBuilder b = new StringBuilder();
         for (int i = 0; i < indent; i++) {
-          b.append(" ");
+          b.append(' ');
         }
         b.append("   - ").append(fbuf.getFldName());
         if (fbuf.getPageFieldToks().size() > 0) {

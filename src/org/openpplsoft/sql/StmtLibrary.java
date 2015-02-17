@@ -361,16 +361,16 @@ public final class StmtLibrary {
 
       StringBuilder effDtSubqueryBuilder = new StringBuilder(
         "SELECT MAX(EFFDT) FROM ").append(effDtCheckRecord)
-        .append(" ").append(effDtSubqueryAlias).append(" WHERE");
+        .append(' ').append(effDtSubqueryAlias).append(" WHERE");
 
       final Record effDtRecord = DefnCache.getRecord(effDtCheckRecord);
       for(final Map.Entry<String, RecordField> cursor
           : effDtRecord.getFieldTable().entrySet()) {
         final RecordField rf = cursor.getValue();
         if(rf.isKey() && !rf.getFldName().equals("EFFDT")) {
-          effDtSubqueryBuilder.append(" ").append(effDtSubqueryAlias)
-            .append(".").append(rf.getFldName()).append("=")
-            .append(effDtRootAlias).append(".").append(rf.getFldName())
+          effDtSubqueryBuilder.append(' ').append(effDtSubqueryAlias)
+            .append('.').append(rf.getFldName()).append('=')
+            .append(effDtRootAlias).append('.').append(rf.getFldName())
             .append(" AND");
         }
       }
@@ -381,7 +381,7 @@ public final class StmtLibrary {
         effDtBound = "TO_DATE(" + effDtBound + ",'YYYY-MM-DD')";
       }
 
-      effDtSubqueryBuilder.append(" ").append(effDtSubqueryAlias)
+      effDtSubqueryBuilder.append(' ').append(effDtSubqueryAlias)
         .append(".EFFDT<=").append(effDtBound);
 
       newWhereStr = effDtCheckMatcher.replaceAll(effDtRootAlias
@@ -432,18 +432,18 @@ public final class StmtLibrary {
         if (!isFirstKey) { query.append(" AND "); }
         isFirstKey = false;
 
-        query.append(tableAlias).append(".")
-            .append(rf.getFldName()).append("=");
+        query.append(tableAlias).append('.')
+            .append(rf.getFldName()).append('=');
 
         if (!rf.getFldName().equals("EFFDT")) {
-          query.append("?");
+          query.append('?');
           bindVals.add((String) recObj.getFieldRef(rf.getFldName())
               .deref().getValue().read());
         } else {
           /*
            * Insert subquery for EFFDT field.
            */
-          query.append("(")
+          query.append('(')
              .append("SELECT MAX(EFFDT) FROM ")
              .append(recDefn.getDbTableName())
              .append(" B WHERE ");
@@ -454,8 +454,8 @@ public final class StmtLibrary {
               if (!isFirstKeyOnSub) { query.append(" AND "); }
               if (!subRf.getFldName().equals("EFFDT")) {
                 query.append("B.").append(subRf.getFldName())
-                   .append("=").append(tableAlias)
-                   .append(".").append(subRf.getFldName());
+                   .append('=').append(tableAlias)
+                   .append('.').append(subRf.getFldName());
               } else {
                 query.append("B.EFFDT<=TO_DATE(")
                    .append("?,'YYYY-MM-DD')");
@@ -464,7 +464,7 @@ public final class StmtLibrary {
               isFirstKeyOnSub = false;
             }
           }
-          query.append(")");
+          query.append(')');
         }
       }
     }
@@ -645,16 +645,16 @@ public final class StmtLibrary {
         recDefn, dottedAlias, false);
     for (int i = 0; i < aliasedFields.length; i++) {
       if (i > 0) {
-        selectClause.append(",");
+        selectClause.append(',');
         if (delimitFieldsWithSpace) {
-          selectClause.append(" ");
+          selectClause.append(' ');
         }
       }
       selectClause.append(aliasedFields[i]);
     }
 
     selectClause.append(" FROM ").append(recDefn
-        .getDbTableName()).append(" ").append(tableAlias);
+        .getDbTableName()).append(' ').append(tableAlias);
 
     return selectClause.toString();
   }

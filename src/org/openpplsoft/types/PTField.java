@@ -166,7 +166,7 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(":").append(recFieldDefn.getFldName());
+    b.append(':').append(recFieldDefn.getFldName());
     b.append(",valueRef=").append(valueRef.toString());
     return b.toString();
   }

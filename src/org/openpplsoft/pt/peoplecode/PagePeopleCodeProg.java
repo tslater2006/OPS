@@ -35,7 +35,7 @@ public class PagePeopleCodeProg extends PeopleCodeProg {
 
   public String getDescriptor() {
     StringBuilder builder = new StringBuilder();
-    builder.append("PagePC.").append(this.PNLNAME).append(".").append(this.event);
+    builder.append("PagePC.").append(this.PNLNAME).append('.').append(this.event);
     return builder.toString();
   }
 }

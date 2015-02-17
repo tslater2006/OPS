@@ -108,7 +108,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     StringBuilder sb = new StringBuilder();
     sb.append("AppClassPC.");
     for(int i = 0; i < this.pathParts.length; i++) {
-      sb.append(this.pathParts[i]).append(".");
+      sb.append(this.pathParts[i]).append('.');
     }
     sb.append(this.event);
     return sb.toString();
@@ -210,7 +210,7 @@ public class AppClassPeopleCodeProg extends PeopleCodeProg {
     final StringBuilder b = new StringBuilder();
     for (int i = 0; i < this.pathParts.length; i++) {
       if (i > 0) {
-        b.append(":");
+        b.append(':');
       }
       b.append(this.pathParts[i]);
     }

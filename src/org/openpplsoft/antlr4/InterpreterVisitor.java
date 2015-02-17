@@ -129,7 +129,7 @@ public class InterpreterVisitor extends PeopleCodeBaseVisitor<Void> {
     int i = tokIdx;
     final StringBuilder b = new StringBuilder();
     while (this.eCtx.getProg().getTokenStream().get(i).getText().equals(";")) {
-      b.append(";");
+      b.append(';');
       i++;
     }
     return b.toString();

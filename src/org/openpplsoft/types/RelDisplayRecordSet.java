@@ -170,7 +170,7 @@ public class RelDisplayRecordSet {
         final PTBufferRecord rec = entry.getValue().rec;
         for (final RecordFieldBuffer rfbuf
             : rec.getRecBuffer().getFieldBuffers()) {
-          sb.append("        ").append(rfbuf).append("\n");
+          sb.append("        ").append(rfbuf).append('\n');
         }
 /*        for (final PTImmutableReference<PTBufferField> fldref
             : rec.getFieldRefsInAlphabeticOrderByFieldName()) {

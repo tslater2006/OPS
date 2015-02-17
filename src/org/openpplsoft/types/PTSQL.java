@@ -129,7 +129,7 @@ public final class PTSQL extends PTObjectType {
   @Override
   public String toString() {
     final StringBuilder b = new StringBuilder(super.toString());
-    b.append(":").append(this.sqlDefn);
+    b.append(':').append(this.sqlDefn);
     b.append(",bindVals=").append(Arrays.toString(this.bindVals));
     return b.toString();
   }

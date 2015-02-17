@@ -39,7 +39,7 @@ public class AppPackage {
 
     public String toString() {
       StringBuilder builder = new StringBuilder();
-      builder.append("Package: ").append(this.pkgName).append("\n");
+      builder.append("Package: ").append(this.pkgName).append('\n');
       builder.append(" - Classes: ");
       for(final String className : this.classNames) {
         builder.append(className).append(", ");
@@ -49,7 +49,7 @@ public class AppPackage {
         String subTreeStr = entry.getValue().toString();
         String[] lines = subTreeStr.split("\n");
         for(String line : lines) {
-          builder.append("     ").append(line).append("\n");
+          builder.append("     ").append(line).append('\n');
         }
       }
       return builder.toString();

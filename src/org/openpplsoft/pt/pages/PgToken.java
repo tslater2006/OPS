@@ -209,7 +209,7 @@ public class PgToken {
         b.append(", ").append("FIELDNAME=").append(this.FIELDNAME);
       }
     } else if (!this.flags.contains(PFlag.END_OF_PAGE)) {
-      b.append(this.RECNAME).append(".").append(this.FIELDNAME);
+      b.append(this.RECNAME).append('.').append(this.FIELDNAME);
 
       if(this.hasSubPnlName()) {
         b.append(", SUBPNLNAME=").append(this.SUBPNLNAME);

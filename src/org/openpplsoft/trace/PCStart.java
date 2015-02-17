@@ -71,8 +71,8 @@ public class PCStart implements IEmission {
     final StringBuilder builder = new StringBuilder();
     builder.append(">>> ").append(this.startTag);
     builder.append("     Nest=").append(this.nest);
-    builder.append(" ").append(this.methodName);
-    builder.append(" ").append(this.progDescriptor);
+    builder.append(' ').append(this.methodName);
+    builder.append(' ').append(this.progDescriptor);
     return builder.toString();
   }
 }

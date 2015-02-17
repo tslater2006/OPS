@@ -321,7 +321,7 @@ public abstract class PeopleCodeProg {
     visitedSet.add(this.getDescriptor());
 
     final StringBuilder b = new StringBuilder();
-    for (int i = 0; i < indent; i++) { b.append(" "); }
+    for (int i = 0; i < indent; i++) { b.append(' '); }
     final String indentStr = b.toString();
 
     log.info("[REFTREE]{}-> {}", indentStr, this);

@@ -7,10 +7,6 @@
 
 package org.openpplsoft.buffers;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,8 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.openpplsoft.pt.*;
 import org.openpplsoft.pt.pages.*;
 import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.*;
-import org.openpplsoft.types.*;
 
 /**
  * Represents a PeopleTools record buffer.

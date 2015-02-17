@@ -80,7 +80,7 @@ public class PTAppClassObjTypeConstraint extends PTTypeConstraint<PTAppClassObj>
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder(super.toString());
-    b.append("[requiredProgDefn=").append(this.requiredProgDefn.getDescriptor()).append("]");
+    b.append("[requiredProgDefn=").append(this.requiredProgDefn.getDescriptor()).append(']');
     return b.toString();
   }
 }

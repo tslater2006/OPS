@@ -65,10 +65,10 @@ public class ComponentStructureVerifier {
         indent = sbuf.getScrollLevel() * 3;
 
         StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(" ");}
+        for(int i=0; i<indent; i++){b.append(' ');}
         b.append("Scroll - Level ").append(sbuf.getScrollLevel()).append("\tPrimary Record: ")
             .append(sbuf.getPrimaryRecName());
-        for(int i=0; i<indent; i++){b.append(" ");}
+        for(int i=0; i<indent; i++){b.append(' ');}
         log.info(b.toString());
         log.info("=======================================================");
 
@@ -91,7 +91,7 @@ public class ComponentStructureVerifier {
         }
 
         StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(" ");}
+        for(int i=0; i<indent; i++){b.append(' ');}
         b.append(" + ").append(rbuf.getRecDefn().getRecName());
         log.info(b.toString());
 
@@ -109,7 +109,7 @@ public class ComponentStructureVerifier {
 
         RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
         StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(" ");}
+        for(int i=0; i<indent; i++){b.append(' ');}
         b.append("   - ").append(fbuf.getFldName());
         log.info(b.toString());
 

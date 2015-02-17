@@ -67,7 +67,7 @@ public class CRecBuf implements IEmission {
     final StringBuilder builder = new StringBuilder();
     builder.append(this.indentStr).append("CRecBuf ")
         .append(this.recName).append(" fields=")
-        .append(this.numFields).append(" ").append(this.flagStr);
+        .append(this.numFields).append(' ').append(this.flagStr);
     return builder.toString();
   }
 }

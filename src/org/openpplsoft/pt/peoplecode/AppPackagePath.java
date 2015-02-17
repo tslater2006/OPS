@@ -49,7 +49,7 @@ public class AppPackagePath {
     StringBuilder builder = new StringBuilder();
     builder.append(this.parts[0]);
     for(int i = 1; i < this.parts.length; i++) {
-      builder.append(":").append(parts[i]);
+      builder.append(':').append(parts[i]);
     }
     return builder.toString();
   }

@@ -75,7 +75,7 @@ public class PCExceptionCaught implements IEmission {
     final StringBuilder builder = new StringBuilder();
     builder.append("Caught Exception: ").append(this.exMsg);
     builder.append(" (").append(this.msgSetNbr);
-    builder.append(",").append(this.msgNbr);
+    builder.append(',').append(this.msgNbr);
     builder.append(") ").append(this.responsibleProgAndEvent);
     // May be null if exception was thrown in the root stmt list of a program.
     if (this.responsibleMethodOrFuncName != null) {

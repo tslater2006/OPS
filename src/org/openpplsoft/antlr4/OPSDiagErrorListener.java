@@ -69,7 +69,7 @@ public class OPSDiagErrorListener extends DiagnosticErrorListener {
     Collections.reverse(stack);
     final StringBuilder builder = new StringBuilder();
     builder.append("line ").append(line);
-    builder.append(":").append(charPositionInLine);
+    builder.append(':').append(charPositionInLine);
     builder.append(" at ").append(offendingSymbol);
     builder.append(": ").append(msg);
     builder.append(". Rule stack: ").append(stack);

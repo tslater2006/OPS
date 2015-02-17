@@ -517,18 +517,18 @@ public class GlobalFnLibrary {
     url.append(Environment.getName());
 
     // append portal name (i.e., EMPLOYEE)
-    url.append("/").append(((PTString) args.get(0)).read());
+    url.append('/').append(((PTString) args.get(0)).read());
 
     // append node name (i.e., HRMS)
-    url.append("/").append(((PTString) args.get(1)).read());
+    url.append('/').append(((PTString) args.get(1)).read());
 
     // append "c" (for component)
     url.append("/c/");
 
     // append <menu>.<component>.<market>
     url.append(((PTMenuLiteral) args.get(2)).read())
-       .append(".").append(((PTComponentLiteral) args.get(4)).read())
-       .append(".").append(((PTString) args.get(3)).read());
+       .append('.').append(((PTComponentLiteral) args.get(4)).read())
+       .append('.').append(((PTString) args.get(3)).read());
 
     // append "?Page=<page>"
     url.append("?Page=").append(((PTPageLiteral) args.get(5)).read());
@@ -546,7 +546,7 @@ public class GlobalFnLibrary {
       // NOTE: trim() is important here; blank values are a single space
       // in PS and should be reduced to the empty string.
       final PTField fld = fieldRef.deref();
-      url.append("&").append(fld.getRecordFieldDefn().getFldName()).append("=")
+      url.append('&').append(fld.getRecordFieldDefn().getFldName()).append('=')
           .append(fld.getValue().readAsString().trim());
     }
 
@@ -945,23 +945,23 @@ public class GlobalFnLibrary {
     url.append(Environment.getName());
 
     // append portal name (i.e., EMPLOYEE)
-    url.append("/").append(((PTString) args.get(0)).read());
+    url.append('/').append(((PTString) args.get(0)).read());
 
     // append node name (i.e., HRMS)
-    url.append("/").append(((PTString) args.get(1)).read());
+    url.append('/').append(((PTString) args.get(1)).read());
 
     // append "s" (for script)
     url.append("/s/");
 
     // append <recname>.<fldname>
     url.append(((PTRecordLiteral) args.get(2)).read())
-       .append(".").append(((PTFieldLiteral) args.get(3)).read());
+       .append('.').append(((PTFieldLiteral) args.get(3)).read());
 
     // append ".<event>"
-    url.append(".").append(((PTString) args.get(4)).read());
+    url.append('.').append(((PTString) args.get(4)).read());
 
     // append ".<funcname>"
-    url.append(".").append(((PTString) args.get(5)).read());
+    url.append('.').append(((PTString) args.get(5)).read());
 
     log.debug("GenerateScriptRelativeURL: From args, generated url: {}",
       url.toString());

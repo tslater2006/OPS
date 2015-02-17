@@ -59,21 +59,21 @@ public class Keylist {
     if (this.keylist.size() == 0) {
       b.append("EMPTY ==================\n");
     } else {
-      b.append("(").append(this.keylist.size()).append(" values) ================\n");
+      b.append('(').append(this.keylist.size()).append(" values) ================\n");
       for (int i = 0; i < this.keylist.size(); i++) {
         final PTField fld = this.keylist.get(i);
         final RecordField rf = fld.getRecordFieldDefn();
         b.append("  ").append(i).append(") ");
         b.append("rf: ").append(rf.getRecName())
-            .append(".").append(rf.getFldName()).append(", ");
-        b.append("value=|").append(fld.getValue().readAsString()).append("|");
+            .append('.').append(rf.getFldName()).append(", ");
+        b.append("value=|").append(fld.getValue().readAsString()).append('|');
         if (rf.isKey()) {
           b.append(" (key)");
         }
         if (fld.getValue().isMarkedAsUpdated()) {
           b.append(" (updated)");
         }
-        b.append("\n");
+        b.append('\n');
       }
     }
     return b.toString();

@@ -84,13 +84,13 @@ public class ComponentPeopleCodeProg extends PeopleCodeProg {
   public String getDescriptor() {
 
     StringBuilder builder = new StringBuilder();
-    builder.append("ComponentPC.").append(this.PNLGRPNAME).append(".").append(this.MARKET).append(".");
+    builder.append("ComponentPC.").append(this.PNLGRPNAME).append('.').append(this.MARKET).append('.');
 
     if(this.RECNAME != null) {
-      builder.append(this.RECNAME).append(".");
+      builder.append(this.RECNAME).append('.');
 
       if(this.FLDNAME != null) {
-        builder.append(this.FLDNAME).append(".");
+        builder.append(this.FLDNAME).append('.');
       }
     }
 

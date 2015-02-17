@@ -58,8 +58,8 @@ public class PRMHeader implements IEmission {
   @Override
   public String toString() {
     final StringBuilder builder = new StringBuilder();
-    builder.append("PRM ").append(this.componentName).append(".")
-        .append(this.langCode).append(".").append(this.market)
+    builder.append("PRM ").append(this.componentName).append('.')
+        .append(this.langCode).append('.').append(this.market)
         .append(" version xx count=").append(this.prmEntryCount);
     return builder.toString();
   }

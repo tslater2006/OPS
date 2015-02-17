@@ -86,7 +86,7 @@ public class BeginLevel implements IEmission {
     final StringBuilder builder = new StringBuilder();
     builder.append(this.indentStr)
         .append("Begin level ").append(this.levelIdx)
-        .append("[row ").append(this.rowIdx).append("]")
+        .append("[row ").append(this.rowIdx).append(']')
         .append(" occcnt=").append(this.occursCount)
         .append(" activecnt=").append(this.activeCount)
         .append(" hiddencnt=").append(this.hiddenCount)

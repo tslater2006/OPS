@@ -85,7 +85,7 @@ public class PTArrayTypeConstraint extends PTTypeConstraint<PTArray> {
     StringBuilder b = new StringBuilder(super.toString());
     b.append("[reqdDimension=").append(this.reqdDimension);
     b.append(",reqdNestedTypeConstraint=").append(this.reqdNestedTypeConstraint);
-    b.append("]");
+    b.append(']');
     return b.toString();
   }
 }

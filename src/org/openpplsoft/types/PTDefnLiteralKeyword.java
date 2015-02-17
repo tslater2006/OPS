@@ -7,9 +7,6 @@
 
 package org.openpplsoft.types;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum PTDefnLiteralKeyword {
 
   RECORD("record"),

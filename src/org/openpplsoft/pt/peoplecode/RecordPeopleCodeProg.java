@@ -7,9 +7,7 @@
 
 package org.openpplsoft.pt.peoplecode;
 
-import java.sql.*;
-import org.openpplsoft.sql.StmtLibrary;
-import org.openpplsoft.pt.*;
+import org.openpplsoft.pt.PSDefn;
 
 public class RecordPeopleCodeProg extends PeopleCodeProg {
 

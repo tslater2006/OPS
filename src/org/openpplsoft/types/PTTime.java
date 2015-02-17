@@ -8,10 +8,7 @@
 package org.openpplsoft.types;
 
 import java.text.SimpleDateFormat;
-
 import java.util.Calendar;
-
-import org.openpplsoft.runtime.*;
 
 /**
  * Implementation of the PeopleTools time data type.

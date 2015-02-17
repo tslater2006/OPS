@@ -7,12 +7,6 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.Record;
-import org.openpplsoft.buffers.ScrollBuffer;
-
-import java.util.Set;
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

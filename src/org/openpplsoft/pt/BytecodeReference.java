@@ -7,8 +7,6 @@
 
 package org.openpplsoft.pt;
 
-import java.util.HashMap;
-
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 public class BytecodeReference {

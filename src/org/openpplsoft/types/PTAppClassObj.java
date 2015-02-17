@@ -7,10 +7,15 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.*;
-import java.util.*;
-import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.runtime.*;
+import java.util.Map;
+
+import org.openpplsoft.pt.peoplecode.AccessLevel;
+import org.openpplsoft.pt.peoplecode.AppClassPeopleCodeProg;
+import org.openpplsoft.runtime.AppClassObjMethodExecContext;
+import org.openpplsoft.runtime.Callable;
+import org.openpplsoft.runtime.GetterSetterCallable;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
+import org.openpplsoft.runtime.Scope;
 
 public final class PTAppClassObj extends PTObjectType {
 

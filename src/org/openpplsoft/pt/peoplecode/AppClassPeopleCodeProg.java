@@ -7,13 +7,18 @@
 
 package org.openpplsoft.pt.peoplecode;
 
-import java.util.*;
-import org.openpplsoft.runtime.*;
-import org.openpplsoft.pt.*;
-import org.openpplsoft.types.*;
-import org.apache.logging.log4j.*;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.openpplsoft.pt.PSDefn;
+import org.openpplsoft.runtime.DefnCache;
+import org.openpplsoft.types.PTTypeConstraint;
 
 public class AppClassPeopleCodeProg extends PeopleCodeProg {
 

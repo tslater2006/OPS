@@ -9,10 +9,6 @@ package org.openpplsoft.runtime;
 
 import org.openpplsoft.types.PTDate;
 
-import java.util.Date;
-import java.text.DateFormat;
-import java.text.ParseException;
-
 /*
  * Represents a component to load with the OPS
  * runtime, along with tracefile info.

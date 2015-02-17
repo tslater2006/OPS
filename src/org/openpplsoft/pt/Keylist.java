@@ -3,9 +3,8 @@ package org.openpplsoft.pt;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openpplsoft.types.PTField;
-import org.openpplsoft.types.PTNumberType;
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
+import org.openpplsoft.types.PTField;
 
 public class Keylist {
 

@@ -7,15 +7,18 @@
 
 package org.openpplsoft.runtime;
 
-import java.util.*;
-import java.io.*;
-import java.nio.charset.Charset;
-import org.openpplsoft.trace.*;
-import org.openpplsoft.pt.peoplecode.*;
+import java.util.LinkedList;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.openpplsoft.antlr4.InterpreterVisitor;
+import org.openpplsoft.antlr4.OPSFuncImplSignalException;
+import org.openpplsoft.antlr4.OPSReturnException;
+import org.openpplsoft.trace.PCBegin;
+import org.openpplsoft.trace.PCEnd;
+import org.openpplsoft.trace.PCStart;
 import org.openpplsoft.types.*;
-import org.apache.logging.log4j.*;
-import org.openpplsoft.antlr4.*;
-import org.antlr.v4.runtime.*;
 
 public class InterpretSupervisor {
 

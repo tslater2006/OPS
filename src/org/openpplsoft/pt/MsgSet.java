@@ -7,22 +7,18 @@
 
 package org.openpplsoft.pt;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.*;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
+import org.openpplsoft.sql.OPSResultSet;
+import org.openpplsoft.sql.OPSStmt;
+import org.openpplsoft.sql.StmtLibrary;
 
 /**
  * Represents a PeopleTools message set definition.

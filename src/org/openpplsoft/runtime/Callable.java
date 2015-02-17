@@ -7,11 +7,10 @@
 
 package org.openpplsoft.runtime;
 
-import java.util.*;
-import org.openpplsoft.pt.*;
-import org.apache.logging.log4j.*;
-import java.lang.reflect.*;
-import org.openpplsoft.types.*;
+import java.lang.reflect.Method;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Callable {
 

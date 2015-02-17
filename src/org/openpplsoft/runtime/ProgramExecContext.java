@@ -7,9 +7,7 @@
 
 package org.openpplsoft.runtime;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
-import org.openpplsoft.pt.peoplecode.*;
+import org.openpplsoft.pt.peoplecode.PeopleCodeProg;
 
 public class ProgramExecContext extends ExecContext {
 

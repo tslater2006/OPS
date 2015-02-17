@@ -7,10 +7,7 @@
 
 package org.openpplsoft.types;
 
-import java.util.List;
-
-import org.openpplsoft.pt.*;
-import org.openpplsoft.runtime.*;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 /**
  * Represents a PeopleTools record literal.

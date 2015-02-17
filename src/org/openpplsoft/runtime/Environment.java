@@ -7,13 +7,18 @@
 
 package org.openpplsoft.runtime;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
-import org.openpplsoft.pt.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.openpplsoft.pt.User;
 import org.openpplsoft.types.*;
-import org.apache.logging.log4j.*;
 
 public class Environment {
 

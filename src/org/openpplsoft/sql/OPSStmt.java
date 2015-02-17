@@ -7,20 +7,13 @@
 
 package org.openpplsoft.sql;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
-import java.util.HashMap;
 import java.util.Map;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import org.openpplsoft.runtime.*;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
+import org.openpplsoft.runtime.TraceFileVerifier;
 
 /**
  * Used for all SQL emissions emitted by

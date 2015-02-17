@@ -7,21 +7,18 @@
 
 package org.openpplsoft.types;
 
-import java.util.*;
-
-import java.sql.ResultSet;
-
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
-
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.*;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
+import org.openpplsoft.sql.OPSResultSet;
+import org.openpplsoft.sql.OPSStmt;
+import org.openpplsoft.sql.StmtLibrary;
 
 public final class PTDate extends PTPrimitiveType<Date> {
 

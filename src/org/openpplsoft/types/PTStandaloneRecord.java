@@ -7,30 +7,15 @@
 
 package org.openpplsoft.types;
 
-import java.lang.reflect.Method;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.openpplsoft.pt.*;
-import org.openpplsoft.pt.pages.*;
-import org.openpplsoft.runtime.*;
-import org.openpplsoft.trace.*;
-import org.openpplsoft.sql.*;
-import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.buffers.*;
+import org.openpplsoft.pt.Record;
+import org.openpplsoft.pt.RecordField;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 /**
  * Represents a PeopleTools standalone record (not in the component buffer).

@@ -7,9 +7,7 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.*;
-import java.util.*;
-import org.openpplsoft.runtime.*;
+import org.openpplsoft.runtime.Callable;
 
 public final class PTDefnLiteralPrefix extends PTObjectType {
 

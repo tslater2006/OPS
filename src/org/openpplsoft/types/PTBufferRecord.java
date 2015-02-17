@@ -7,31 +7,26 @@
 
 package org.openpplsoft.types;
 
-import java.lang.reflect.Method;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Set;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.openpplsoft.buffers.ComponentBuffer;
+import org.openpplsoft.buffers.RecordBuffer;
+import org.openpplsoft.buffers.RecordFieldBuffer;
 import org.openpplsoft.pt.*;
-import org.openpplsoft.pt.pages.*;
+import org.openpplsoft.pt.pages.PgToken;
+import org.openpplsoft.pt.peoplecode.PeopleCodeProg;
 import org.openpplsoft.runtime.*;
-import org.openpplsoft.trace.*;
-import org.openpplsoft.sql.*;
-import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.buffers.*;
+import org.openpplsoft.sql.OPSResultSet;
+import org.openpplsoft.sql.OPSStmt;
+import org.openpplsoft.sql.StmtLibrary;
+import org.openpplsoft.trace.CRecBuf;
+import org.openpplsoft.trace.PCFldDefaultEmission;
+import org.openpplsoft.trace.RecInScroll;
 
 /**
  * Represents a PeopleTools record in the component buffer.

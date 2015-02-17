@@ -7,10 +7,9 @@
 
 package org.openpplsoft.runtime;
 
-import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.types.PTTypeConstraint;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-import org.antlr.v4.runtime.tree.*;
+import org.openpplsoft.pt.peoplecode.PeopleCodeProg;
 
 /**
  * Execution context details for calls to referenced

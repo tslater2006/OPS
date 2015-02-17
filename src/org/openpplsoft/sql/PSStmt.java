@@ -7,13 +7,6 @@
 
 package org.openpplsoft.sql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**

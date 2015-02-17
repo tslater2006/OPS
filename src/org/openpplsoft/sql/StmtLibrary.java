@@ -9,16 +9,11 @@ package org.openpplsoft.sql;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,10 +21,14 @@ import javax.sql.DataSource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import org.openpplsoft.buffers.*;
-import org.openpplsoft.pt.*;
-import org.openpplsoft.runtime.*;
+import org.openpplsoft.buffers.ComponentBuffer;
+import org.openpplsoft.pt.Keylist;
+import org.openpplsoft.pt.Record;
+import org.openpplsoft.pt.RecordField;
+import org.openpplsoft.pt.SQL;
+import org.openpplsoft.runtime.DefnCache;
+import org.openpplsoft.runtime.Environment;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 import org.openpplsoft.types.*;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;

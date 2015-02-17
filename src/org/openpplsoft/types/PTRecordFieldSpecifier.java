@@ -7,10 +7,9 @@
 
 package org.openpplsoft.types;
 
-import java.util.List;
-
-import org.openpplsoft.pt.*;
-import org.openpplsoft.runtime.*;
+import org.openpplsoft.pt.Record;
+import org.openpplsoft.runtime.Callable;
+import org.openpplsoft.runtime.InterpretSupervisor;
 
 /**
  * Represents a PeopleTools record field specifier (i.e., a record field name

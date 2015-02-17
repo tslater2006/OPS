@@ -7,10 +7,6 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.*;
-import java.util.*;
-import org.openpplsoft.runtime.*;
-
 public final class PTImmutableReference<T extends PTType> extends PTReference<T> {
 
   /**

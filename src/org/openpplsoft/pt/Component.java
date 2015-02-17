@@ -7,23 +7,18 @@
 
 package org.openpplsoft.pt;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import org.openpplsoft.buffers.*;
-import org.openpplsoft.pt.pages.*;
-import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.*;
-import org.openpplsoft.trace.*;
-import org.openpplsoft.types.*;
+import org.openpplsoft.pt.peoplecode.ComponentPeopleCodeProg;
+import org.openpplsoft.pt.peoplecode.PeopleCodeProg;
+import org.openpplsoft.runtime.DefnCache;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
+import org.openpplsoft.sql.OPSResultSet;
+import org.openpplsoft.sql.OPSStmt;
+import org.openpplsoft.sql.StmtLibrary;
 
 /**
  * Represents a PeopleTools component definition.

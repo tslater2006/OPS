@@ -7,11 +7,19 @@
 
 package org.openpplsoft.runtime;
 
-import java.util.*;
-import java.io.*;
-import org.openpplsoft.buffers.*;
-import org.openpplsoft.pt.*;
-import org.apache.logging.log4j.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.openpplsoft.buffers.ComponentBuffer;
+import org.openpplsoft.buffers.IStreamableBuffer;
+import org.openpplsoft.buffers.RecordBuffer;
+import org.openpplsoft.buffers.RecordFieldBuffer;
+import org.openpplsoft.buffers.ScrollBuffer;
+import org.openpplsoft.pt.PSDefn;
 
 public class ComponentStructureVerifier {
 

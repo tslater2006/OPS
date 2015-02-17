@@ -7,18 +7,17 @@
 
 package org.openpplsoft.types;
 
-import java.util.*;
-import java.sql.ResultSet;
-
-import org.openpplsoft.runtime.*;
-import org.openpplsoft.sql.*;
-
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
+import org.openpplsoft.sql.OPSResultSet;
+import org.openpplsoft.sql.OPSStmt;
+import org.openpplsoft.sql.StmtLibrary;
 
 public final class PTDateTime extends PTPrimitiveType<DateTime> {
 

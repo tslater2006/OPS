@@ -7,13 +7,6 @@
 
 package org.openpplsoft.types;
 
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.openpplsoft.pt.*;
-import org.openpplsoft.pt.peoplecode.*;
-
 /**
  * Root parent class for all PeopleTools type implementations.
  */

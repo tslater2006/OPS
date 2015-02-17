@@ -7,9 +7,7 @@
 
 package org.openpplsoft.types;
 
-import org.openpplsoft.pt.*;
-import java.util.*;
-import org.openpplsoft.runtime.*;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 public final class PTFieldLiteral extends PTString {
 

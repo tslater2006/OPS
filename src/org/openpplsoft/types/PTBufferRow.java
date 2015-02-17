@@ -7,24 +7,21 @@
 
 package org.openpplsoft.types;
 
-import java.lang.reflect.Method;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.openpplsoft.buffers.*;
-import org.openpplsoft.pt.*;
-import org.openpplsoft.pt.pages.*;
+import org.openpplsoft.pt.Keylist;
+import org.openpplsoft.pt.PCEvent;
+import org.openpplsoft.pt.PSDefn;
+import org.openpplsoft.pt.pages.PgToken;
 import org.openpplsoft.runtime.*;
-import org.openpplsoft.trace.*;
+import org.openpplsoft.trace.BeginLevel;
+import org.openpplsoft.trace.RowInScroll;
 
 /**
  * Represents a PeopleTools row definition; contains

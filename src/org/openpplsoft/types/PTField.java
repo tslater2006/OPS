@@ -7,20 +7,17 @@
 
 package org.openpplsoft.types;
 
-import java.lang.reflect.Method;
-import java.util.*;
-import java.sql.*;
-
-import org.openpplsoft.runtime.*;
-import org.openpplsoft.buffers.*;
-import org.openpplsoft.pt.*;
-import org.openpplsoft.pt.pages.*;
-import org.openpplsoft.sql.*;
-import org.openpplsoft.trace.*;
-import org.openpplsoft.pt.peoplecode.*;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import org.openpplsoft.buffers.RecordFieldBuffer;
+import org.openpplsoft.pt.FieldLabel;
+import org.openpplsoft.pt.PeopleToolsImplementation;
+import org.openpplsoft.pt.RecordField;
+import org.openpplsoft.runtime.Environment;
+import org.openpplsoft.runtime.OPSVMachRuntimeException;
 
 public abstract class PTField<R extends PTRecord> extends PTObjectType {
 

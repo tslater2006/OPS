@@ -7,9 +7,10 @@
 
 package org.openpplsoft.runtime;
 
-import org.openpplsoft.pt.peoplecode.*;
-import org.openpplsoft.types.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import org.openpplsoft.types.PTAppClassObj;
+import org.openpplsoft.types.PTTypeConstraint;
 
 public class AppClassObjMethodExecContext extends AppClassObjExecContext {
 

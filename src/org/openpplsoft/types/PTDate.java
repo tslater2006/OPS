@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

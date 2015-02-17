@@ -147,11 +147,9 @@ public abstract class PeopleCodeProg {
   public void appendBytecode(final Blob blob) {
 
     int b;
-    InputStream stream = null;
     ArrayList<Integer> bytes = new ArrayList<Integer>();
 
-    try {
-      stream = blob.getBinaryStream();
+    try(final InputStream stream = blob.getBinaryStream()) {
       while((b = stream.read()) != -1) {
         bytes.add(b);
       }
@@ -159,10 +157,6 @@ public abstract class PeopleCodeProg {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     } catch(final java.io.IOException ioe) {
       throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
-    } finally {
-      try {
-        if(stream != null) { stream.close(); }
-      } catch(java.io.IOException ioe) {}
     }
 
     int startIdx;

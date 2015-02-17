@@ -12,3 +12,7 @@ pom.xml.asc
 ansible/roles/*/files/*.tar.gz
 .ant-targets-build.xml
 *.swp
+.classpath
+.project
+.settings
+/lib

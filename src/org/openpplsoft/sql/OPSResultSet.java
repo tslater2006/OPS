@@ -60,7 +60,8 @@ public class OPSResultSet implements AutoCloseable {
 
   private String clobToString(final Clob clob) {
 
-    try {
+    try (final BufferedReader clobReader = new BufferedReader(
+            clob.getCharacterStream())) {
       if (clob.length() > (long) Integer.MAX_VALUE) {
         throw new OPSVMachRuntimeException("Clob is longer than maximum possible "
             + "length of String; unable to store entire value in String unless "
@@ -68,14 +69,10 @@ public class OPSResultSet implements AutoCloseable {
       }
 
       final StringBuilder sb = new StringBuilder();
-      final BufferedReader clobReader = new BufferedReader(
-          clob.getCharacterStream());
-
       String line;
       while(null != (line = clobReader.readLine())) {
           sb.append(line);
       }
-      clobReader.close();
 
       clob.free();
       return sb.toString();

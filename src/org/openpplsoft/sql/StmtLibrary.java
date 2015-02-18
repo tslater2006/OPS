@@ -68,9 +68,8 @@ public final class StmtLibrary {
         (ClassPathResource) ctx.getBean("staticSqlDefnsResource");
     staticSqlDefns = new HashMap<String, StaticSqlDefn>();
 
-    BufferedReader br = null;
-    try {
-      br = new BufferedReader(new FileReader(sqlDefnRsrc.getFile()));
+    try (final BufferedReader br =
+          new BufferedReader(new FileReader(sqlDefnRsrc.getFile()))) {
       StringBuilder b = new StringBuilder();
       StaticSqlDefn defn = null;
       String line = "";
@@ -109,12 +108,6 @@ public final class StmtLibrary {
 
     } catch (final java.io.IOException ioe) {
       throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
-    } finally {
-      try {
-        if (br != null) { br.close(); }
-      } catch (final java.io.IOException ioe) {
-        log.warn("Unable to close br in finally block.");
-      }
     }
 
     // compile meta-SQL detection regex patterns.

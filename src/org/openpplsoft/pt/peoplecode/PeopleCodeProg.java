@@ -344,24 +344,28 @@ public abstract class PeopleCodeProg {
 
     log.debug("Lexing and parsing: {}", this.getDescriptor());
 
-    try {
-      /*
-       * Write program text to cache if necessary.
-       */
-      if(System.getProperty("cacheProgText").equals("true")) {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(
-           new File("/home/opsdev/ops/cache/" + this.getDescriptor() + ".pc")));
+    /*
+     * Write program text to cache if necessary.
+     */
+    if(System.getProperty("cacheProgText").equals("true")) {
+      try (final BufferedWriter writer = new BufferedWriter(
+            new FileWriter(new File("/home/opsdev/ops/cache/"
+                + this.getDescriptor() + ".pc")))) {
         writer.write(this.programText);
-        writer.close();
+      } catch (final IOException ioe) {
+        throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
       }
+    }
 
-      InputStream progTextInputStream =
-          new ByteArrayInputStream(this.programText.getBytes());
-      ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
-      NoErrorTolerancePeopleCodeLexer lexer =
+    InputStream progTextInputStream =
+        new ByteArrayInputStream(this.programText.getBytes());
+
+    try {
+      final ANTLRInputStream input = new ANTLRInputStream(progTextInputStream);
+      final NoErrorTolerancePeopleCodeLexer lexer =
           new NoErrorTolerancePeopleCodeLexer(input);
       this.tokenStream = new CommonTokenStream(lexer);
-      PeopleCodeParser parser = new PeopleCodeParser(this.tokenStream);
+      final PeopleCodeParser parser = new PeopleCodeParser(this.tokenStream);
 
       parser.removeErrorListeners();
       parser.addErrorListener(new OPSDiagErrorListener());
@@ -370,13 +374,13 @@ public abstract class PeopleCodeProg {
       parser.setErrorHandler(new OPSErrorStrategy());
 
       this.parseTree = parser.program();
-
-      //log.debug(">>> Parse Tree >>>>>>>>>>>>");
-      //log.debug(this.parseTree.toStringTree(parser));
-      //log.debug("====================================================");
-    } catch(java.io.IOException ioe) {
-      throw new OPSVMachRuntimeException(ioe.getMessage());
+    } catch (final IOException ioe) {
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
     }
+
+    //log.debug(">>> Parse Tree >>>>>>>>>>>>");
+    //log.debug(this.parseTree.toStringTree(parser));
+    //log.debug("====================================================");
   }
 
   public void addFunction(final String name,

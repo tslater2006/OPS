@@ -10,6 +10,7 @@ package org.openpplsoft.runtime;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,107 +42,98 @@ public class ComponentStructureVerifier {
     IStreamableBuffer buf;
 
     File structureFile = new File("test/" + pnlgrpname + ".structure");
-    BufferedReader reader = null;
 
-    try {
-      reader = new BufferedReader(new FileReader(structureFile));
-    } catch(final java.io.FileNotFoundException fnfe) {
-      throw new OPSVMachRuntimeException(fnfe.getMessage(), fnfe);
-    }
+    try (final BufferedReader reader =
+          new BufferedReader(new FileReader(structureFile))) {
 
-    String line = null;
-    String lineParts[];
-    boolean skipUpcomingRecordFields = false;
+      String line = null;
+      String lineParts[];
+      boolean skipUpcomingRecordFields = false;
 
-    ComponentBuffer.resetCursors();
-    while((buf = ComponentBuffer.next()) != null) {
+      ComponentBuffer.resetCursors();
+      while((buf = ComponentBuffer.next()) != null) {
+
+        if (!skipUpcomingRecordFields) {
+          line = reader.readLine().trim();
+        }
+
+        lineParts = line.split(";");
+
+        if(buf instanceof ScrollBuffer) {
+
+          ScrollBuffer sbuf = (ScrollBuffer) buf;
+          skipUpcomingRecordFields = false;
+          indent = sbuf.getScrollLevel() * 3;
+
+          StringBuilder b = new StringBuilder();
+          for(int i=0; i<indent; i++){b.append(' ');}
+          b.append("Scroll - Level ").append(sbuf.getScrollLevel()).append("\tPrimary Record: ")
+              .append(sbuf.getPrimaryRecName());
+          for(int i=0; i<indent; i++){b.append(' ');}
+          log.info(b.toString());
+          log.info("=======================================================");
+
+          if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
+              Integer.parseInt(lineParts[1]) != sbuf.getScrollLevel() ||
+              (!lineParts[2].replaceAll("-", "_").equals(sbuf.getPrimaryRecName())
+              && Integer.parseInt(lineParts[1]) > 0)) {
+            throw new OPSVMachRuntimeException("Incorrect/absent scroll token encountered " +
+                "during component structure validation.");
+          }
+        } else if(buf instanceof RecordBuffer) {
+
+          RecordBuffer rbuf = (RecordBuffer) buf;
+          skipUpcomingRecordFields = false;
+
+          if (!rbuf.doesContainStructuralFields()
+              || PSDefn.isSystemRecord(rbuf.getRecDefn().getRecName())) {
+            skipUpcomingRecordFields = true;
+            continue;
+          }
+
+          StringBuilder b = new StringBuilder();
+          for(int i=0; i<indent; i++){b.append(' ');}
+          b.append(" + ").append(rbuf.getRecDefn().getRecName());
+          log.info(b.toString());
+
+          if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
+              !lineParts[1].replaceAll("-", "_").equals(rbuf.getRecDefn().getRecName())) {
+            throw new OPSVMachRuntimeException("Incorrect/absent record token encountered " +
+                "during component structure validation; expected: " + line + "; received: "
+                + rbuf.getRecDefn().getRecName());
+          }
+        } else {
+
+          if (skipUpcomingRecordFields) {
+            continue;
+          }
+
+          RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
+          StringBuilder b = new StringBuilder();
+          for(int i=0; i<indent; i++){b.append(' ');}
+          b.append("   - ").append(fbuf.getFldName());
+          log.info(b.toString());
+
+          if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
+              !lineParts[1].replaceAll("-", "_").equals(fbuf.getFldName())) {
+            throw new OPSVMachRuntimeException("Incorrect/absent field token encountered " +
+                "during component structure validation.");
+          }
+        }
+      }
 
       if (!skipUpcomingRecordFields) {
-        try {
-          line = reader.readLine().trim();
-        } catch(final java.io.IOException ioe) {
-          throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
-        }
-      }
-
-      lineParts = line.split(";");
-
-      if(buf instanceof ScrollBuffer) {
-
-        ScrollBuffer sbuf = (ScrollBuffer) buf;
-        skipUpcomingRecordFields = false;
-        indent = sbuf.getScrollLevel() * 3;
-
-        StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(' ');}
-        b.append("Scroll - Level ").append(sbuf.getScrollLevel()).append("\tPrimary Record: ")
-            .append(sbuf.getPrimaryRecName());
-        for(int i=0; i<indent; i++){b.append(' ');}
-        log.info(b.toString());
-        log.info("=======================================================");
-
-        if(lineParts.length != 3 || !lineParts[0].equals("SCROLL") ||
-            Integer.parseInt(lineParts[1]) != sbuf.getScrollLevel() ||
-            (!lineParts[2].replaceAll("-", "_").equals(sbuf.getPrimaryRecName())
-            && Integer.parseInt(lineParts[1]) > 0)) {
-          throw new OPSVMachRuntimeException("Incorrect/absent scroll token encountered " +
-              "during component structure validation.");
-        }
-      } else if(buf instanceof RecordBuffer) {
-
-        RecordBuffer rbuf = (RecordBuffer) buf;
-        skipUpcomingRecordFields = false;
-
-        if (!rbuf.doesContainStructuralFields()
-            || PSDefn.isSystemRecord(rbuf.getRecDefn().getRecName())) {
-          skipUpcomingRecordFields = true;
-          continue;
-        }
-
-        StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(' ');}
-        b.append(" + ").append(rbuf.getRecDefn().getRecName());
-        log.info(b.toString());
-
-        if(lineParts.length != 2 || !lineParts[0].equals("RECORD") ||
-            !lineParts[1].replaceAll("-", "_").equals(rbuf.getRecDefn().getRecName())) {
-          throw new OPSVMachRuntimeException("Incorrect/absent record token encountered " +
-              "during component structure validation; expected: " + line + "; received: "
-              + rbuf.getRecDefn().getRecName());
-        }
-      } else {
-
-        if (skipUpcomingRecordFields) {
-          continue;
-        }
-
-        RecordFieldBuffer fbuf = (RecordFieldBuffer) buf;
-        StringBuilder b = new StringBuilder();
-        for(int i=0; i<indent; i++){b.append(' ');}
-        b.append("   - ").append(fbuf.getFldName());
-        log.info(b.toString());
-
-        if(lineParts.length != 2 || !lineParts[0].equals("FIELD") ||
-            !lineParts[1].replaceAll("-", "_").equals(fbuf.getFldName())) {
-          throw new OPSVMachRuntimeException("Incorrect/absent field token encountered " +
-              "during component structure validation.");
-        }
-      }
-    }
-
-    if (!skipUpcomingRecordFields) {
-      try {
         line = reader.readLine();
-      } catch(final java.io.IOException ioe) {
-        throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
       }
-    }
 
-    if(!line.trim().equals("END-COMPONENT-STRUCTURE")) {
-      throw new OPSVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
-    }
+      if(!line.trim().equals("END-COMPONENT-STRUCTURE")) {
+        throw new OPSVMachRuntimeException("Expected END-COMPONENT-STRUCTURE in .structure file.");
+      }
 
-    hasBeenVerified = true;
+      hasBeenVerified = true;
+    } catch(final IOException ioe) {
+      throw new OPSVMachRuntimeException(ioe.getMessage(), ioe);
+    }
   }
 }
 

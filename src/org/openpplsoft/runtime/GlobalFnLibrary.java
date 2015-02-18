@@ -363,49 +363,45 @@ public class GlobalFnLibrary {
      * the tracefiles I have at this point. Keep this in mind in the event
      * of future issues / changes.
      */
-    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
-        "query.PSAUTHITEM_PSOPRCLS_IsMenuItemAuthorized",
-        bindVals);
-    OPSResultSet rs = ostmt.executeQuery();
-
-    /*
-     * Iterate over each record in the resultset; we are looking for
-     * the first one that allows the user to access the requested menu item
-     * in the mode provided as an argument.
-     * NOTE: I am checking simple equality b/w the mode arg and
-     * AUTHORIZEDACTIONS for now. AUTHORIZEDACTIONS is actually a bit mask.
-     * See the following for more information:
-     * - http://www.erpassociates.com/peoplesoft-corner-weblog/security/secrets-of-psauthitem.html
-     * - http://peoplesoftwiki.blogspot.com/2009/12/finding-barname-itemname-and-all-about.html
-     * - http://peoplesoft.ittoolbox.com/groups/technical-functional/peopletools-l/how-to-interpret-authorizedactons-with-components-under-barname-3522093
-     */
-    while (rs.next()) {
-      final String permList = rs.getString("PERMISSION_LIST_NAME");
-      final int authorizedActions = rs.getInt("AUTHORIZEDACTIONS");
-
-      log.debug("IsMenuItemAuthorized: Checking: "
-          + "Permission List: {}; AUTHORIZEDACTIONS: {}",
-          rs.getString("PERMISSION_LIST_NAME"),
-          rs.getInt("AUTHORIZEDACTIONS"));
-
+    try (final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
+            "query.PSAUTHITEM_PSOPRCLS_IsMenuItemAuthorized", bindVals);
+         final OPSResultSet rs = ostmt.executeQuery()) {
       /*
-       * TODO(mquinn): This mapping is done adhoc right now, but once
-       * more action modes are added, an enum should be use; see the links
-       * listed above for exact mappings.
+       * Iterate over each record in the resultset; we are looking for
+       * the first one that allows the user to access the requested menu item
+       * in the mode provided as an argument.
+       * NOTE: I am checking simple equality b/w the mode arg and
+       * AUTHORIZEDACTIONS for now. AUTHORIZEDACTIONS is actually a bit mask.
+       * See the following for more information:
+       * - http://www.erpassociates.com/peoplesoft-corner-weblog/security/secrets-of-psauthitem.html
+       * - http://peoplesoftwiki.blogspot.com/2009/12/finding-barname-itemname-and-all-about.html
+       * - http://peoplesoft.ittoolbox.com/groups/technical-functional/peopletools-l/how-to-interpret-authorizedactons-with-components-under-barname-3522093
        */
-      final int ADD_MASK = 1;
-      final int UPDATE_DISPLAY_MASK = 2;
-      if (   ((authorizedActions & ADD_MASK) > 0) && actionMode.equals("A")
-          || ((authorizedActions & UPDATE_DISPLAY_MASK) > 0)
-                 && actionMode.equals("U")) {
-        log.debug("IsMenuItemAuthorized: found permissible record, returning True.");
-        Environment.pushToCallStack(new PTBoolean(true));
-        return;
+      while (rs.next()) {
+        final String permList = rs.getString("PERMISSION_LIST_NAME");
+        final int authorizedActions = rs.getInt("AUTHORIZEDACTIONS");
+
+        log.debug("IsMenuItemAuthorized: Checking: "
+            + "Permission List: {}; AUTHORIZEDACTIONS: {}",
+            rs.getString("PERMISSION_LIST_NAME"),
+            rs.getInt("AUTHORIZEDACTIONS"));
+
+        /*
+         * TODO(mquinn): This mapping is done adhoc right now, but once
+         * more action modes are added, an enum should be use; see the links
+         * listed above for exact mappings.
+         */
+        final int ADD_MASK = 1;
+        final int UPDATE_DISPLAY_MASK = 2;
+        if (   ((authorizedActions & ADD_MASK) > 0) && actionMode.equals("A")
+            || ((authorizedActions & UPDATE_DISPLAY_MASK) > 0)
+                   && actionMode.equals("U")) {
+          log.debug("IsMenuItemAuthorized: found permissible record, returning True.");
+          Environment.pushToCallStack(new PTBoolean(true));
+          return;
+        }
       }
     }
-
-    rs.close();
-    ostmt.close();
 
     // If no record permitted access for the given actionMode,
     // access to the menu item is not authorized.
@@ -782,67 +778,65 @@ public class GlobalFnLibrary {
     bindIdxMatcher.reset();
     sqlCmd = bindIdxMatcher.replaceAll("?");
 
-    final OPSStmt ostmt = new OPSStmt(sqlCmd,
-        bindVals.toArray(new String[bindVals.size()]),
-        OPSStmt.EmissionType.ENFORCED);
-    OPSResultSet rs = ostmt.executeQuery();
+    try (final OPSStmt ostmt = new OPSStmt(sqlCmd,
+            bindVals.toArray(new String[bindVals.size()]),
+                OPSStmt.EmissionType.ENFORCED);
+         final OPSResultSet rs = ostmt.executeQuery()) {
 
-    // The index of the first argument to be used as an out var is
-    // 1 greater than the index of the last argument used as a bind expr.
-    int nextOutVarIdx = maxArgIdx + 1;
+      // The index of the first argument to be used as an out var is
+      // 1 greater than the index of the last argument used as a bind expr.
+      int nextOutVarIdx = maxArgIdx + 1;
 
-    /*
-     * SQLExec only selects the first row of a result set; it discards
-     * any rows after that. Additionally, the result set may legitimately
-     * be empty.
-     */
-    if (rs.next()) {
-      log.debug("Record returned by SQLExec; writing selected fields to out vars...");
-
-      for (int colIdx = 1; colIdx <= rs.getColumnCount(); colIdx++) {
-
-        if (nextOutVarIdx >= args.size()) {
-          throw new OPSVMachRuntimeException("Expected an out var "
-              + "but reached the end of the provided argument list.");
-        }
-
-        final PTType outVar = args.get(nextOutVarIdx++);
-        final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(colIdx,
-            outVar.getOriginatingTypeConstraint());
-
-        Environment.assign(outVar, dbVal);
-      }
-    } else {
       /*
-       * If no row was returned, SQLExec blanks/NULLs any outvars passed
-       * as arguments. The exception to this involves *NON-WORK* Component
-       * Processor fields, these are *not* blanked/nullified.
+       * SQLExec only selects the first row of a result set; it discards
+       * any rows after that. Additionally, the result set may legitimately
+       * be empty.
        */
-      for (int i = nextOutVarIdx; i < args.size(); i++) {
-        final PTType outVar = args.get(i);
-        final PTType outVarDerefed = Environment.getOrDeref(outVar);
-        log.debug("In SQLExec, about to blank/nullify field due to absence "
-            + "of record returned by SQLExec: {}", outVar);
-        if (outVarDerefed instanceof PTPrimitiveType) {
-          ((PTPrimitiveType) outVarDerefed).setBlank();
-        } else {
-          if (outVarDerefed instanceof PTField) {
-            throw new OPSVMachRuntimeException("TODO: Need to blank a field; "
-                + "YOU MUST FIRST DETERMINE "
-                + "if it's a non-work component processor field, these do not get "
-                + "blanked; see PT documentation for SQLExec: "
-                + "http://docs.oracle.com/cd/E13292_01/pt849pbr0/eng/psbooks/tpcl/chapter.htm?File=tpcl/htm/tpcl02.htm");
+      if (rs.next()) {
+        log.debug("Record returned by SQLExec; writing selected fields to out vars...");
+
+        for (int colIdx = 1; colIdx <= rs.getColumnCount(); colIdx++) {
+
+          if (nextOutVarIdx >= args.size()) {
+            throw new OPSVMachRuntimeException("Expected an out var "
+                + "but reached the end of the provided argument list.");
+          }
+
+          final PTType outVar = args.get(nextOutVarIdx++);
+          final PTPrimitiveType dbVal = rs.getTypeCompatibleValue(colIdx,
+              outVar.getOriginatingTypeConstraint());
+
+          Environment.assign(outVar, dbVal);
+        }
+      } else {
+        /*
+         * If no row was returned, SQLExec blanks/NULLs any outvars passed
+         * as arguments. The exception to this involves *NON-WORK* Component
+         * Processor fields, these are *not* blanked/nullified.
+         */
+        for (int i = nextOutVarIdx; i < args.size(); i++) {
+          final PTType outVar = args.get(i);
+          final PTType outVarDerefed = Environment.getOrDeref(outVar);
+          log.debug("In SQLExec, about to blank/nullify field due to absence "
+              + "of record returned by SQLExec: {}", outVar);
+          if (outVarDerefed instanceof PTPrimitiveType) {
+            ((PTPrimitiveType) outVarDerefed).setBlank();
           } else {
-            // Do not pass derefed outvar as l-value, assgmt will fail.
-            Environment.assign(outVar, new PTNull(
-                outVar.getOriginatingTypeConstraint()));
+            if (outVarDerefed instanceof PTField) {
+              throw new OPSVMachRuntimeException("TODO: Need to blank a field; "
+                  + "YOU MUST FIRST DETERMINE "
+                  + "if it's a non-work component processor field, these do not get "
+                  + "blanked; see PT documentation for SQLExec: "
+                  + "http://docs.oracle.com/cd/E13292_01/pt849pbr0/eng/psbooks/tpcl/chapter.htm?File=tpcl/htm/tpcl02.htm");
+            } else {
+              // Do not pass derefed outvar as l-value, assgmt will fail.
+              Environment.assign(outVar, new PTNull(
+                  outVar.getOriginatingTypeConstraint()));
+            }
           }
         }
       }
     }
-
-    rs.close();
-    ostmt.close();
 
     // SQLExec returns True if execution completed successfully.
     Environment.pushToCallStack(new PTBoolean(true));
@@ -1120,24 +1114,22 @@ public class GlobalFnLibrary {
       ((PTString) args.get(1)).read()
     };
 
-    final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
-        "query.GetUserOption", bindVals);
-    final OPSResultSet rs = ostmt.executeQuery();
+    try (final OPSStmt ostmt = StmtLibrary.getStaticSQLStmt(
+            "query.GetUserOption", bindVals);
+         final OPSResultSet rs = ostmt.executeQuery()) {
 
-    if (rs.next()) {
-      Environment.pushToCallStack(
-          new PTString(rs.getString("USER_OPTION_VALUE")));
-    } else {
-      throw new OPSVMachRuntimeException("Expected a single record in GetUserOption "
-          + "result set, none returned.");
+      if (rs.next()) {
+        Environment.pushToCallStack(
+            new PTString(rs.getString("USER_OPTION_VALUE")));
+      } else {
+        throw new OPSVMachRuntimeException("Expected a single record in GetUserOption "
+            + "result set, none returned.");
+      }
+
+      if (rs.next()) {
+        throw new OPSVMachRuntimeException("Expected a single record in GetUserOption "
+            + "result set, multiple returned.");
+      }
     }
-
-    if (rs.next()) {
-      throw new OPSVMachRuntimeException("Expected a single record in GetUserOption "
-          + "result set, multiple returned.");
-    }
-
-    rs.close();
-    ostmt.close();
   }
 }

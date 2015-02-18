@@ -284,10 +284,34 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     final String defFldName = this.recFieldDefn.getDefaultFldName();
     final Record defRecDefn = DefnCache.getRecord(defRecName);
 
-    OPSStmt ostmt = null;
-    try {
-      ostmt =
-          StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, this);
+    try (final OPSStmt ostmt =
+            StmtLibrary.generateNonConstantFieldDefaultQuery(defRecDefn, this);
+         final OPSResultSet rs = ostmt.executeQuery()) {
+
+      log.debug("Queried {}.{} for default value for field {}.{}",
+          defRecName, defFldName,
+              this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
+
+      /*
+       * Keep in mind that zero records may legitimately be returned here,
+       * in which case the field will remain blank.
+       */
+      if (rs.next()) {
+        log.debug("Defaulting to: {}", rs.getString(defFldName));
+
+        // REMEMBER: defFldName is the name of a field on a *different* record;
+        // we are reading that value into this field.
+        rs.readNamedColumnIntoField(this, defFldName);
+
+        if (rs.next()) {
+          throw new OPSVMachRuntimeException(
+              "Result set for default non constant field default query "
+              + "returned multiple records; only expected one.");
+        }
+
+        fdEmission.setDefaultedValue(this.getValue().readAsString());
+        fdEmission.setFromRecordFlag();
+      }
     } catch (final OPSCBufferKeyLookupException opscbkle) {
       log.warn("Failed to generate non constant "
           + "field default query for field: " + this.recFieldDefn.getFldName()
@@ -298,34 +322,6 @@ public final class PTBufferField extends PTField<PTBufferRecord>
           + "is available at that time.");
       return;
     }
-
-    log.debug("Querying {}.{} for default value for field {}.{}",
-        defRecName, defFldName,
-            this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName());
-
-    /*
-     * Keep in mind that zero records may legitimately be returned here,
-     * in which case the field will remain blank.
-     */
-    final OPSResultSet rs = ostmt.executeQuery();
-    if (rs.next()) {
-      log.debug("Defaulting to: {}", rs.getString(defFldName));
-
-      // REMEMBER: defFldName is the name of a field on a *different* record;
-      // we are reading that value into this field.
-      rs.readNamedColumnIntoField(this, defFldName);
-
-      if (rs.next()) {
-        throw new OPSVMachRuntimeException(
-            "Result set for default non constant field default query "
-            + "returned multiple records; only expected one.");
-      }
-
-      fdEmission.setDefaultedValue(this.getValue().readAsString());
-      fdEmission.setFromRecordFlag();
-    }
-    rs.close();
-    ostmt.close();
 
     /*
      * Check if the field's value changed. If it did, an emission

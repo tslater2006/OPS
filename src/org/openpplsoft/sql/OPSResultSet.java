@@ -23,7 +23,7 @@ import org.openpplsoft.types.*;
  * Wrapper for all ResultSets opened by
  * the OPS runtime.
  */
-public class OPSResultSet {
+public class OPSResultSet implements AutoCloseable {
 
   private static Logger log =
       LogManager.getLogger(OPSResultSet.class.getName());
@@ -318,11 +318,12 @@ public class OPSResultSet {
    * @throws SQLException if closing of underlying ResultSet
    *    results in an error.
    */
+  @Override
   public void close() {
     try {
       rs.close();
     } catch (final SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+      log.warn("Failed to close ResultSet.", sqle);
     }
   }
 }

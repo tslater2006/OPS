@@ -8,6 +8,7 @@
 package org.openpplsoft.sql;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +20,7 @@ import org.openpplsoft.runtime.TraceFileVerifier;
  * Used for all SQL emissions emitted by
  * the OPS runtime.
  */
-public class OPSStmt extends SQLStmt {
+public class OPSStmt extends SQLStmt implements AutoCloseable {
 
   private static Logger log =
       LogManager.getLogger(OPSStmt.class.getName());
@@ -112,14 +113,15 @@ public class OPSStmt extends SQLStmt {
    * @throws java.sql.SQLException if closing of underlying PreparedStatement
    *    results in an error.
    */
+  @Override
   public void close() {
     try {
       this.pstmt.close();
       if (this.rs != null) {
         rs.close();
       }
-    } catch (final java.sql.SQLException sqle) {
-      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    } catch (final SQLException sqle) {
+      log.warn("Unable to close pstmt and/or rs.", sqle);
     }
   }
 }

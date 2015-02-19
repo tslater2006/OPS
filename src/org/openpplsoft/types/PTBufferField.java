@@ -190,6 +190,9 @@ public final class PTBufferField extends PTField<PTBufferRecord>
           || this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
           || ctxFlag == ScrollEmissionContext.SEARCH_RESULTS)) {
       flagStr += " used";
+    } else if (this.determineScrollLevel() > 0
+        && this.recFieldDefn.isKey()) {
+      flagStr += " used";
     }
 
     TraceFileVerifier.submitEnforcedEmission(

@@ -155,6 +155,14 @@ public final class PTBufferField extends PTField<PTBufferRecord>
       flagStr += " altkey";
     }
 
+    if (this.getValue().isMarkedAsUpdated()
+        && (!this.isMarkedAsDefaulted || this.isMarkedAsUpdated)
+        && (this.parentRecord.getRecDefn().isDerivedWorkRecord()
+            || this.parentRecord.isEffectivelyAWorkRecord())
+        && ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
+      flagStr += " updated";
+    }
+
     if (this.recFieldBuffer != null
         && this.recFieldBuffer.isDisplayControlField()) {
       flagStr += " relkey";
@@ -170,14 +178,6 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         && this.recFieldDefn.isKey()
         && this.parentRecord.sharesSearchKeysWithSearchRecord()) {
       flagStr += " relkey";
-    }
-
-    if (this.getValue().isMarkedAsUpdated()
-        && (!this.isMarkedAsDefaulted || this.isMarkedAsUpdated)
-        && (this.parentRecord.getRecDefn().isDerivedWorkRecord()
-            || this.parentRecord.isEffectivelyAWorkRecord())
-        && ctxFlag != ScrollEmissionContext.SEARCH_RESULTS) {
-      flagStr += " updated";
     }
 
     if (this.isHidden()

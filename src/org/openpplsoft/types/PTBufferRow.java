@@ -21,6 +21,7 @@ import org.openpplsoft.pt.PSDefn;
 import org.openpplsoft.pt.pages.PgToken;
 import org.openpplsoft.runtime.*;
 import org.openpplsoft.trace.BeginLevel;
+import org.openpplsoft.trace.EndLevel;
 import org.openpplsoft.trace.RowInScroll;
 
 /**
@@ -164,8 +165,10 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
     }
 
     int scrollLevel = Math.max(0, this.determineScrollLevel());
+    int rowIdx = this.getIndexOfThisRowInParentRowset();
+
     TraceFileVerifier.submitEnforcedEmission(new BeginLevel(indentStr,
-        scrollLevel, this.getIndexOfThisRowInParentRowset(), 1, 1, 0,
+        scrollLevel, rowIdx, 1, 1, 0,
         this.parentRowset.getRegisteredChildScrollBuffers().size(),
         // All non-level 0 rows seem to have these flags enabled.
         (scrollLevel != 0), (scrollLevel != 0),
@@ -189,6 +192,9 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         : this.rowsetMap.entrySet()) {
       entry.getValue().emitScrolls(ctxFlag, indent + 1);
     }
+
+    TraceFileVerifier.submitEnforcedEmission(
+        new EndLevel(indentStr, scrollLevel, rowIdx));
   }
 
   public void fireEvent(final PCEvent event,

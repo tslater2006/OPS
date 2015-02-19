@@ -47,7 +47,7 @@ public final class TraceFileVerifier {
       pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
       rowPattern, cRecBufPattern, cFldBufPattern, scrollIdxPattern,
-      prmHdrPattern, prmEntryPattern;
+      prmHdrPattern, prmEntryPattern, endLevelPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -101,6 +101,7 @@ public final class TraceFileVerifier {
         Pattern.compile("End\\s+Scrolls");
     beginLevelPattern =
         Pattern.compile("((\\|\\s{2})*)Begin\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]\\s+occcnt=(\\d+)\\s+activecnt=(\\d+)\\s+hiddencnt=(\\d+)\\s+scrlcnt=(\\d+)\\s+flags=\\S+\\s+(noautoselect\\s+)?(noautoupdate\\s+)?nrec=(\\d+)");
+    endLevelPattern = Pattern.compile("((\\|\\s{2})*)End\\s+level\\s+(\\d+)\\[row\\s+(\\d+)\\]");
     recPattern =
         Pattern.compile("((\\|\\s{2})*)Rec\\s+([0-9A-Z_]+)\\s+\\(recdefn\\s+\\S+\\)\\s+keyrec=(-?\\d+)\\s+keyfield=(-?\\d+)");
     rowPattern =
@@ -441,6 +442,17 @@ public final class TraceFileVerifier {
             beginLevelMatcher.group(GROUP9) != null,
             beginLevelMatcher.group(GROUP10) != null,
             Integer.parseInt(beginLevelMatcher.group(GROUP11)));
+      }
+
+      final Matcher endLevelMatcher =
+          endLevelPattern.matcher(currTraceLine);
+      if (endLevelMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new EndLevel(
+            endLevelMatcher.group(GROUP1),
+            Integer.parseInt(endLevelMatcher.group(GROUP3)),
+            Integer.parseInt(endLevelMatcher.group(GROUP4)));
       }
 
       final Matcher recMatcher =

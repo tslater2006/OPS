@@ -140,28 +140,38 @@ public class Record {
     if(this.hasRecordPCBeenDiscovered) { return; }
     this.hasRecordPCBeenDiscovered = true;
 
-    OPSStmt ostmt = StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
-        new String[]{PSDefn.RECORD, this.RECNAME});
-    OPSResultSet rs = ostmt.executeQuery();
+    this.discoverRecordPCForRecord(this.RECNAME);
 
-    while (rs.next()) {
-      PeopleCodeProg prog = new RecordPeopleCodeProg(rs.getString("OBJECTVALUE1"),
-          rs.getString("OBJECTVALUE2"), rs.getString("OBJECTVALUE3"));
-      prog = DefnCache.getProgram(prog);
-
-      List<RecordPeopleCodeProg> fieldProgList = this.recordProgsByFieldTable
-          .get(rs.getString("OBJECTVALUE2"));
-      if(fieldProgList == null) {
-        fieldProgList = new ArrayList<RecordPeopleCodeProg>();
-      }
-
-      fieldProgList.add((RecordPeopleCodeProg) prog);
-      this.allRecordProgs.addAll(fieldProgList);
-      this.recordProgsByFieldTable.put(rs.getString("OBJECTVALUE2"), fieldProgList);
+    // Include subrecord programs as well.
+    for (final String subRecName : this.subRecordNames) {
+      this.discoverRecordPCForRecord(subRecName);
     }
+  }
 
-    rs.close();
-    ostmt.close();
+  private void discoverRecordPCForRecord(final String recName) {
+    try (final OPSStmt ostmt =
+            StmtLibrary.getStaticSQLStmt("query.PSPCMPROG_RecordPCList",
+                new String[]{PSDefn.RECORD, recName});
+         final OPSResultSet rs = ostmt.executeQuery()) {
+      while (rs.next()) {
+        PeopleCodeProg prog = new RecordPeopleCodeProg(
+            rs.getString("OBJECTVALUE1"),
+            rs.getString("OBJECTVALUE2"),
+            rs.getString("OBJECTVALUE3"));
+        prog = DefnCache.getProgram(prog);
+
+        List<RecordPeopleCodeProg> fieldProgList =
+            this.recordProgsByFieldTable.get(rs.getString("OBJECTVALUE2"));
+        if(fieldProgList == null) {
+          fieldProgList = new ArrayList<RecordPeopleCodeProg>();
+        }
+
+        fieldProgList.add((RecordPeopleCodeProg) prog);
+        this.allRecordProgs.addAll(fieldProgList);
+        this.recordProgsByFieldTable.put(
+            rs.getString("OBJECTVALUE2"), fieldProgList);
+      }
+    }
   }
 
   public List<String> getSubrecordNames() {

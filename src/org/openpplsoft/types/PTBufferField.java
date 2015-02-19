@@ -191,7 +191,10 @@ public final class PTBufferField extends PTField<PTBufferRecord>
           || ctxFlag == ScrollEmissionContext.SEARCH_RESULTS)) {
       flagStr += " used";
     } else if (this.determineScrollLevel() > 0
-        && this.recFieldDefn.isKey()) {
+        && (this.recFieldDefn.isKey()
+            || ComponentBuffer.hasPRMEntry(new RecFldName(
+                this.recFieldDefn.getRecName(),
+                this.recFieldDefn.getFldName())))) {
       flagStr += " used";
     }
 

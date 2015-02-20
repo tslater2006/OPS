@@ -59,7 +59,7 @@
     <constructor-arg value="SSR_SSENRL_LIST"/>
     <constructor-arg value="A"/>
     <constructor-arg value="KADAMS"/>
-    <constructor-arg value="MQUINN_XEN/007_XEN_KADAMS_SSR_SSENRL_LIST.trace"/>
-    <constructor-arg value="2014-01-15"/>
+    <constructor-arg value="MQUINN_XEN/012_XEN_KADAMS_SSR_SSENRL_LIST.trace"/>
+    <constructor-arg value="2015-02-19"/>
   </bean>
 </beans>

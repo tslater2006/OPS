@@ -180,6 +180,24 @@ SID / Server Cluster: XENCSDEV / Local Xen Server
 - Signed in as KADAMS
 - Waited for portal to load completely.
 - Erased trace file.
-- Pasted http://localhost/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
+- Pasted http://xen/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+
+012_XEN_KADAMS_SSR_SSENRL_LIST.trace
+========================================
+Generated: 02-19-2015
+SID / Server Cluster: XENCSDEV / Local Xen Server
+- Shut down app and process servers, cleared cache and IPC resources on both.
+- Rebooted web server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely before deleting trace file on filesystem.
+- Erased trace file.
+- Pasted http://xen/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_LIST.GBL into browser and pressed Enter.
 - Waited for page to load completely.
 - Captured trace file at this point.

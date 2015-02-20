@@ -140,7 +140,7 @@ SID / Server Cluster: ENTCSDEV / AWS
 - Selected all Component Buffer trace options except "Internal counters (debug build only)"
 - Signed in as KADAMS
 - Waited for portal to load completely.
-- Pasted http://localhost/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
+- Pasted http://localhost/psp/ENTCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
 - Waited for page to load completely.
 - Captured trace file at this point.
 
@@ -163,3 +163,23 @@ SID / Server Cluster: XENCSDEV / Local Xen Server
 - Waited for page to load completely.
 - Captured trace file at this point.
 - In Sublime Text, replaced all instances of ^PSAPPSRV.2976.*?\] with PSAPPSRV.2976 in order to remove unnecessary info.
+
+
+011_XEN_KADAMS_CLASS_SEARCH.trace
+========================================
+Generated: 02-19-2015
+SID / Server Cluster: XENCSDEV / Local Xen Server
+- Shut down app, web, and process servers, cleared cache and IPC resources on both.
+- Deleted all app server logs (in C:\Users\Administrator\psft\pt\8.52\appserv\ENTCSDEV\LOGS)
+- Started web server and app server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely.
+- Erased trace file.
+- Pasted http://localhost/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.

@@ -154,21 +154,29 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         flagStr += " work";
       } else {
 
-        if (this.isPrimaryRecordInRowset()) {
-          flagStr += " new dummy";
-        } else {
-
-          if (this.isEffectivelyAWorkRecord()) {
-            log.debug("Effectively a work record: {}", this.recDefn.getRecName());
-            flagStr += " work";
-          }
-
-          if (this.recBuffer.isRelatedDisplayRecBuffer()) {
-            flagStr += " reldisp";
-          } else if (scrollLevel == 0) {
-            flagStr += " lvl0";
-          }
+        if (this.isEffectivelyAWorkRecord()) {
+          log.debug("Effectively a work record: {}", this.recDefn.getRecName());
+          flagStr += " work";
         }
+
+        if (this.isPrimaryRecordInRowset()) {
+          flagStr += " new";
+        }
+
+        if (this.parentRow.needsInit()) {
+          flagStr += " needsinit";
+        }
+
+        if (this.isPrimaryRecordInRowset()) {
+          flagStr += " dummy";
+        }
+
+        if (this.recBuffer.isRelatedDisplayRecBuffer()) {
+          flagStr += " reldisp";
+        } else if (scrollLevel == 0) {
+          flagStr += " lvl0";
+        }
+
       }
     }
     flagStr = flagStr.trim();

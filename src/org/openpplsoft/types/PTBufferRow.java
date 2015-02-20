@@ -197,6 +197,19 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
         new EndLevel(indentStr, scrollLevel, rowIdx));
   }
 
+  /*
+   * The "needsinit" flag is added to every CRecBuf emission
+   * within a scroll when that scroll does not contain at least
+   * one record with a RowInit program.
+   */
+  public boolean needsInit() {
+    long rowInitProgs = this.totallyOrderedAllRecords.entrySet().stream()
+        .flatMap(e -> e.getValue().getRecDefn().getAllRecordProgs().stream())
+        .filter(p -> p.getEvent().equals("RowInit"))
+        .count();
+    return rowInitProgs == 0;
+  }
+
   public void fireEvent(final PCEvent event,
       final FireEventSummary fireEventSummary) {
 

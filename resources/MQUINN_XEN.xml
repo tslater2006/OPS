@@ -41,8 +41,8 @@
     <constructor-arg value="SSS_STUDENT_CENTER"/>
     <constructor-arg value="U"/>
     <constructor-arg value="KADAMS"/>
-    <constructor-arg value="MQUINN_XEN/003_XEN_KADAMS_SSS_STUDENT_CENTER.trace"/>
-    <constructor-arg value="2013-10-04"/>
+    <constructor-arg value="MQUINN_XEN/010_XEN_KADAMS_SSS_STUDENT_CENTER.trace"/>
+    <constructor-arg value="2015-02-19"/>
   </bean>
 
   <bean id="CLASS_SEARCH"

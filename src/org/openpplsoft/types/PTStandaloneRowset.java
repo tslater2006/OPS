@@ -50,8 +50,10 @@ public final class PTStandaloneRowset extends PTRowset<PTStandaloneRow> {
           + "during call to instantiate standalone rowset.");
     }
 
-    // One row is always present in the rowset, even when flushed.
-    this.rows.add(this.allocateNewRow());
+    // Rowsets are always initialized with a dummy row.
+    final PTStandaloneRow dummyRow = this.allocateNewRow();
+    dummyRow.tagAsDummy();
+    this.rows.add(dummyRow);
   }
 
   protected List<Record> getRegisteredRecordDefns() {

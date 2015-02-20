@@ -67,8 +67,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
     this.relDisplayRecordSet = scrollBuf.getRelDisplayRecordSet();
 
-    // One row is always present in the rowset, even when flushed.
-    this.rows.add(this.allocateNewRow());
+    // Rowsets are always initialized with a dummy row.
+    final PTBufferRow dummyRow = this.allocateNewRow();
+    dummyRow.tagAsDummy();
+    this.rows.add(dummyRow);
   }
 
   /**
@@ -90,8 +92,10 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
     this.registeredNonRelDispRecordBuffers.add(searchRecBuf);
 
-    // One row is always present in the rowset, even when flushed.
-    this.rows.add(this.allocateNewRow());
+    // Rowsets are always initialized with a dummy row.
+    final PTBufferRow dummyRow = this.allocateNewRow();
+    dummyRow.tagAsDummy();
+    this.rows.add(dummyRow);
   }
 
   public ScrollBuffer getCBufferScrollBuffer() {

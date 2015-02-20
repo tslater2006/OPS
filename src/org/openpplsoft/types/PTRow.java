@@ -28,7 +28,7 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   private static final Logger log = LogManager.getLogger(PTRow.class.getName());
 
-  private boolean isNewRow;
+  private boolean isNewRow, isDummyRow;
 
   // Maps record names to child record objects
   protected final Map<String, E> recordMap;
@@ -63,6 +63,14 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   protected void untagAsNew() {
     this.isNewRow = false;
+  }
+
+  public boolean isDummy() {
+    return this.isDummyRow;
+  }
+
+  protected void tagAsDummy() {
+    this.isDummyRow = true;
   }
 
   public R getParentRowset() {

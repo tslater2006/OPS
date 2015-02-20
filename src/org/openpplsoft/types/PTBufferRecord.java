@@ -167,7 +167,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
           flagStr += " needsinit";
         }
 
-        if (this.isPrimaryRecordInRowset()) {
+        if (this.isPrimaryRecordInRowset() && this.parentRow.isDummy()) {
           flagStr += " dummy";
         }
 

@@ -1,0 +1,165 @@
+001_AWS_KADAMS_SSS_STUDENT_CENTER.trace
+======================================
+Generated: 10-02-2013
+SID / Server Cluster: ENTCSDEV / AWS VPC
+- Clicked Trace Options
+- Selected most SQL trace options
+- Signed in as KADAMS
+- Clicked Self-Service link
+- Erased trace file.
+- Clicked Student Center.
+- Waited for page to load.
+- Captured trace file at this point.
+
+002_AWS_KADAMS_SSS_STUDENT_CENTER.trace
+======================================
+Generated: 10-03-2013
+SID / Server Cluster: ENTCSDEV / AWS VPC
+- Clicked Trace Options
+- Selected most SQL trace options
+- Selected PeopleCode listings and start trace options
+- Signed in as KADAMS
+- Clicked Self-Service link
+- Erased trace file.
+- Clicked Student Center.
+- Waited for page to load.
+- Captured trace file at this point.
+
+003_AWS_KADAMS_SSS_STUDENT_CENTER.trace
+======================================
+Generated: 10-04-2013
+SID / Server Cluster: ENTCSDEV / AWS VPC
+- Clicked Trace Options
+- Selected most SQL trace options
+- Selected PeopleCode listings and start trace options
+- Selected all Component Buffer trace options except the debug build only one.
+- Signed in as KADAMS
+- Clicked Self-Service link
+- Erased trace file.
+- Clicked Student Center.
+- Waited for page to load.
+- Captured trace file at this point.
+
+004_AWS_KADAMS_CLASS_SEARCH.trace
+======================================
+Generated: 11-06-2013
+SID / Server Cluster: ENTCSDEV / AWS VPC
+- Shut down app and process servers, cleared cache and IPC resources on both.
+- Rebooted web server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely before deleting trace file on filesystem.
+- Pasted http://university.enterrupt.com/psp/ENTCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+
+005_AWS_KADAMS_SSR_SSENRL_LIST.trace
+========================================
+Generated: 11-16-2013
+SID / Server Cluster: ENTCSDEV / AWS VPC
+- Shut down app and process servers, cleared cache and IPC resources on both.
+- Rebooted web server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely before deleting trace file on filesystem.
+- Pasted http://university.enterrupt.com/psp/ENTCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_LIST.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+
+006_AWS_KADAMS_SSR_SSENRL_ADD.trace
+========================================
+Generated: 11-16-2013
+SID / Server Cluster: ENTCSDEV / AWS VPC
+- Shut down app and process servers, cleared cache and IPC resources on both.
+- Rebooted web server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely before deleting trace file on filesystem.
+- Pasted http://university.enterrupt.com/psp/ENTCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_ADD.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+
+007_XEN_KADAMS_SSR_SSENRL_LIST.trace
+========================================
+Generated: 01-15-2014
+SID / Server Cluster: XENCSDEV / Local Xen Server
+- Shut down app and process servers, cleared cache and IPC resources on both.
+- Rebooted web server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely before deleting trace file on filesystem.
+- Pasted http://192.168.0.100/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_LIST.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+
+008_XEN_KADAMS_CLASS_SEARCH.trace
+========================================
+Generated: 11-06-2014
+SID / Server Cluster: XENCSDEV / Local Xen Server
+- Shut down app, web, and process servers, cleared cache and IPC resources on both.
+- Deleted all app server logs (in C:\Users\Administrator\psft\pt\8.52\appserv\XENCSDEV\LOGS)
+- Started web server and app server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely.
+- Pasted http://localhost/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+
+009_AWS_KADAMS_CLASS_SEARCH.trace
+========================================
+Generated: 11-12-2014
+SID / Server Cluster: ENTCSDEV / AWS
+- Shut down app, web, and process servers, cleared cache and IPC resources on both.
+- Deleted all app server logs (in C:\Users\Administrator\psft\pt\8.52\appserv\ENTCSDEV\LOGS)
+- Started web server and app server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely.
+- Pasted http://localhost/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+
+010_XEN_KADAMS_SSS_STUDENT_CENTER.trace
+========================================
+Generated: 02-19-2015
+SID / Server Cluster: XENCSDEV / Local Xen Server
+- Shut down app, web, and process servers, cleared cache and IPC resources on both.
+- Deleted all app server logs (in C:\Users\Administrator\psft\pt\8.52\appserv\XENCSDEV\LOGS)
+- Started web server and app server.
+- Opened PS sign-on page in browser.
+- Clicked Trace Options
+- Selected "SQL statements", "SQL statement variables", and "Database specific API calls" under SQL trace settings
+- Selected "Program starts" and "Each statement" under PeopleCode trace settings.
+- Selected all Component Buffer trace options except "Internal counters (debug build only)"
+- Signed in as KADAMS
+- Waited for portal to load completely.
+- Erased trace file.
+- Pasted http://localhost/psp/XENCSDEV/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL into browser and pressed Enter.
+- Waited for page to load completely.
+- Captured trace file at this point.
+- In Sublime Text, replaced all instances of ^PSAPPSRV.2976.*?\] with PSAPPSRV.2976 in order to remove unnecessary info.

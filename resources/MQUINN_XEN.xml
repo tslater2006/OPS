@@ -41,7 +41,7 @@
     <constructor-arg value="SSS_STUDENT_CENTER"/>
     <constructor-arg value="U"/>
     <constructor-arg value="KADAMS"/>
-    <constructor-arg value="003_KADAMS_SSS_STUDENT_CENTER.trace"/>
+    <constructor-arg value="MQUINN_XEN/003_XEN_KADAMS_SSS_STUDENT_CENTER.trace"/>
     <constructor-arg value="2013-10-04"/>
   </bean>
 
@@ -50,7 +50,7 @@
     <constructor-arg value="CLASS_SEARCH"/>
     <constructor-arg value="U"/>
     <constructor-arg value="KADAMS"/>
-    <constructor-arg value="008_XEN_KADAMS_CLASS_SEARCH.trace"/>
+    <constructor-arg value="MQUINN_XEN/008_XEN_KADAMS_CLASS_SEARCH.trace"/>
     <constructor-arg value="2014-11-06"/>
   </bean>
 
@@ -59,16 +59,7 @@
     <constructor-arg value="SSR_SSENRL_LIST"/>
     <constructor-arg value="A"/>
     <constructor-arg value="KADAMS"/>
-    <constructor-arg value="007_KADAMS_SSR_SSENRL_LIST.trace"/>
+    <constructor-arg value="MQUINN_XEN/007_XEN_KADAMS_SSR_SSENRL_LIST.trace"/>
     <constructor-arg value="2014-01-15"/>
-  </bean>
-
-  <bean id="SSR_SSENRL_ADD"
-    class="org.openpplsoft.runtime.ComponentRuntimeProfile">
-    <constructor-arg value="SSR_SSENRL_ADD"/>
-    <constructor-arg value="U"/>
-    <constructor-arg value="KADAMS"/>
-    <constructor-arg value="006_KADAMS_SSR_SSENRL_ADD.trace"/>
-    <constructor-arg value="2013-11-16"/>
   </bean>
 </beans>

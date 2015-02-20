@@ -159,7 +159,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
           flagStr += " work";
         }
 
-        if (this.isPrimaryRecordInRowset()) {
+        if (this.isPrimaryRecordInRowset() && this.parentRow.isNew()) {
           flagStr += " new";
         }
 

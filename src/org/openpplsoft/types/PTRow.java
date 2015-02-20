@@ -28,6 +28,8 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   private static final Logger log = LogManager.getLogger(PTRow.class.getName());
 
+  private boolean isNewRow;
+
   // Maps record names to child record objects
   protected final Map<String, E> recordMap;
 
@@ -39,6 +41,7 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
 
   public PTRow(final PTRowTypeConstraint origTc) {
     super(origTc);
+    this.isNewRow = true;
     this.recordMap = new LinkedHashMap<>();
     this.rowsetMap = new LinkedHashMap<>();
 
@@ -52,6 +55,14 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
+  }
+
+  public boolean isNew() {
+    return this.isNewRow;
+  }
+
+  protected void untagAsNew() {
+    this.isNewRow = false;
   }
 
   public R getParentRowset() {

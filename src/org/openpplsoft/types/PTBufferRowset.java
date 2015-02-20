@@ -268,8 +268,13 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
 
     int rowsRead = 0, rowIdxToWriteTo = 1;
     while (rs.next()) {
+
+      // Rows filled via Select are no longer considered "new".
       final PTBufferRow rowToWriteTo = this.getRow(rowIdxToWriteTo);
-      final PTRecord recToWriteTo = rowToWriteTo.getRecord(this.primaryRecDefn.getRecName());
+      rowToWriteTo.untagAsNew();
+
+      final PTRecord recToWriteTo =
+          rowToWriteTo.getRecord(this.primaryRecDefn.getRecName());
 
       /**
        * It is possible to select from a different record than the

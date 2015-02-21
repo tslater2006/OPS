@@ -47,11 +47,12 @@ public final class PTBoolean extends PTPrimitiveType<Boolean> {
         + "to determine if false really does constitute a blank value in PT.");
   }
 
-  public void copyValueFrom(PTPrimitiveType src) {
+  @Override
+  protected Boolean primitiveToRaw(final PTPrimitiveType src) {
     if(!(src instanceof PTBoolean)) {
       throw new OPSDataTypeException("Expected src to be PTBoolean.");
     }
-    this.write(((PTBoolean)src).read());
+    return ((PTBoolean)src).read();
   }
 
   public PTBoolean isEqual(PTPrimitiveType op) {

@@ -50,6 +50,7 @@
     <Logger name="org.openpplsoft.runtime.Environment" level="DEBUG"/>
     <Logger name="org.openpplsoft.types" level="DEBUG"/>
     <Logger name="org.openpplsoft.types.PTBufferField" level="DEBUG"/>
+    <Logger name="org.openpplsoft.types.PTBufferRecord" level="DEBUG"/>
     <Logger name="org.openpplsoft.trace" level="DEBUG"/>
     <Logger name="org.openpplsoft.pt.peoplecode.PeopleCodeProg" level="INFO"/>
     <Logger name="org.openpplsoft.sql.StmtLibrary" level="DEBUG"/>

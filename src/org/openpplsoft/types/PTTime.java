@@ -30,8 +30,8 @@ public final class PTTime extends PTPrimitiveType<String> {
   }
 
   @Override
-  public void copyValueFrom(final PTPrimitiveType src) {
-    throw new OPSDataTypeException("copyValueFrom is not yet supported.");
+  protected String primitiveToRaw(final PTPrimitiveType src) {
+    throw new OPSDataTypeException("primitiveToRaw is not yet supported.");
   }
 
   @Override

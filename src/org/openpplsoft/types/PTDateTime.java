@@ -58,11 +58,12 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
     return dateTimeTc;
   }
 
-  public void copyValueFrom(PTPrimitiveType src) {
+  @Override
+  protected DateTime primitiveToRaw(final PTPrimitiveType src) {
     if (!(src instanceof PTDateTime)) {
       throw new OPSDataTypeException("Expected src to be PTDateTime.");
     }
-    this.write(((PTDateTime) src).read());
+    return ((PTDateTime) src).read();
   }
 
   @Override

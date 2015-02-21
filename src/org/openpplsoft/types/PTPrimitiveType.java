@@ -19,7 +19,7 @@ public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType
   }
 
   public abstract boolean equals(Object obj);
-  public abstract void copyValueFrom(PTPrimitiveType src);
+  protected abstract T primitiveToRaw(PTPrimitiveType src);
 
   public abstract void setBlank();
   public abstract boolean isBlank();
@@ -32,6 +32,14 @@ public abstract class PTPrimitiveType<T extends java.lang.Object> extends PTType
 
   public T read() {
     return this.value;
+  }
+
+  public void copyValueFrom(final PTPrimitiveType src) {
+    this.write(this.primitiveToRaw(src));
+  }
+
+  public void systemCopyValueFrom(final PTPrimitiveType src) {
+    this.systemWrite(this.primitiveToRaw(src));
   }
 
   public String readAsString() {

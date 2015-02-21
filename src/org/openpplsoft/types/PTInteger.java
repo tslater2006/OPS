@@ -50,11 +50,12 @@ public final class PTInteger extends PTNumberType<Integer> {
     return (this.value == 0);
   }
 
-  public void copyValueFrom(final PTPrimitiveType src) {
+  @Override
+  protected Integer primitiveToRaw(final PTPrimitiveType src) {
     if(src instanceof PTInteger) {
-      this.write(((PTInteger) src).read());
+      return ((PTInteger) src).read();
     } else if (src instanceof PTNumber) {
-      this.write(((PTNumber) src).readAsInteger());
+      return ((PTNumber) src).readAsInteger();
     } else {
       throw new OPSDataTypeException("Expected src to be PTInteger or PTNumber.");
     }

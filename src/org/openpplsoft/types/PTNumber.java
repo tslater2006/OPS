@@ -60,11 +60,12 @@ public final class PTNumber extends PTNumberType<BigDecimal> {
     return (this.value.compareTo(BigDecimal.ZERO) == 0);
   }
 
-  public void copyValueFrom(PTPrimitiveType src) {
+  @Override
+  protected BigDecimal primitiveToRaw(final PTPrimitiveType src) {
     if(src instanceof PTNumber) {
-      this.write(((PTNumber) src).read());
+      return ((PTNumber) src).read();
     } else if(src instanceof PTInteger) {
-      this.write(new BigDecimal(((PTInteger) src).read()));
+      return new BigDecimal(((PTInteger) src).read());
     } else {
       throw new OPSDataTypeException("Expected src to be PTNumber or PTInteger.");
     }

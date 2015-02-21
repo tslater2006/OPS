@@ -8,6 +8,7 @@
 package org.openpplsoft.types;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -419,25 +420,42 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
    */
   public void firstPassFill() {
 
-    OPSStmt ostmt = null;
-
     final Record recDefn = DefnCache.getRecord(this.recDefn.getRecName());
+
     if (recDefn.hasARequiredKeyField() || recDefn.hasNoKeys()) {
-      ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
+      try (final OPSStmt ostmt = StmtLibrary.prepareFirstPassFillQuery(this);
+           final OPSResultSet rs = ostmt.executeQuery()) {
+        final int numCols = rs.getColumnCount();
+
+        // NOTE: record may legitimately be empty.
+        if (rs.next()) {
+          rs.readIntoRecord(this);
+        }
+      }
     } else {
-      return;
+      log.debug("{} does not meet reqs for first pass fill; now searching "
+          + "for keys that can be set.", recDefn.getRecName());
+      final List<PTBufferField> flds = this.getAllFields();
+      for (final PTBufferField fld : flds) {
+        final RecordField rf = fld.getRecordFieldDefn();
+        if (rf.isKey()) {
+          final Keylist keylist = new Keylist();
+          this.generateKeylist(rf.getFldName(), keylist);
+          log.debug("Keylist for field {}.{}: {}",
+              rf.getRecName(), rf.getFldName(), keylist);
+          if (keylist.hasNonBlankValue()) {
+            final PTPrimitiveType keyVal =
+                keylist.getFirstNonBlankField().getValue();
+            log.debug("Performing a system copy to {}.{} with value {}.",
+                rf.getRecName(), rf.getFldName(), keyVal);
+            fld.getValue().systemCopyValueFrom(keyVal);
+          } else {
+            log.debug("No suitable value found for {}.{} in keylist.",
+                rf.getRecName(), rf.getFldName());
+          }
+        }
+      }
     }
-
-    final OPSResultSet rs = ostmt.executeQuery();
-    final int numCols = rs.getColumnCount();
-
-    // NOTE: record may legitimately be empty.
-    if (rs.next()) {
-      rs.readIntoRecord(this);
-    }
-
-    rs.close();
-    ostmt.close();
   }
 
   @Override

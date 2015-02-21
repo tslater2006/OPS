@@ -72,11 +72,12 @@ public final class PTDate extends PTPrimitiveType<Date> {
     return df.format(this.value);
   }
 
-  public void copyValueFrom(PTPrimitiveType src) {
+  @Override
+  protected Date primitiveToRaw(final PTPrimitiveType src) {
     if (!(src instanceof PTDate)) {
       throw new OPSDataTypeException("Expected src to be PTDate.");
     }
-    this.write(((PTDate) src).read());
+    return ((PTDate) src).read();
   }
 
   public void setBlank() {

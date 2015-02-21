@@ -428,12 +428,6 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       return;
     }
 
-    /*
-     * If null comes back, one or more key values is not
-     * available, and thus the fill cannot be run.
-     */
-    if (ostmt == null) { return; }
-
     final OPSResultSet rs = ostmt.executeQuery();
     final int numCols = rs.getColumnCount();
 

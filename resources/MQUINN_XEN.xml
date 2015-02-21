@@ -43,6 +43,7 @@
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="MQUINN_XEN/010_XEN_KADAMS_SSS_STUDENT_CENTER.trace"/>
     <constructor-arg value="2015-02-19"/>
+    <constructor-arg value="2015-02-19-22.47.54.000000"/>
   </bean>
 
   <bean id="CLASS_SEARCH"
@@ -52,6 +53,7 @@
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="MQUINN_XEN/011_XEN_KADAMS_CLASS_SEARCH.trace"/>
     <constructor-arg value="2015-02-19"/>
+    <constructor-arg value="2015-02-19-00.00.00.000000"/>
   </bean>
 
   <bean id="SSR_SSENRL_LIST"
@@ -61,5 +63,6 @@
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="MQUINN_XEN/012_XEN_KADAMS_SSR_SSENRL_LIST.trace"/>
     <constructor-arg value="2015-02-19"/>
+    <constructor-arg value="2015-02-19-23.48.14.000000"/>
   </bean>
 </beans>

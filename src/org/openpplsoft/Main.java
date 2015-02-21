@@ -69,8 +69,10 @@ public final class Main {
       Environment.setSystemVar("%Node", new PTString("HRMS"));
 
       // Since we are verifying against a tracefile, we have to override
-      // the default current date with the date the tracefile was generated on.
+      // the default current date and time with the date and time
+      // on/at which the tracefile was generated.
       Environment.setSystemVar("%Date", profileToRun.getTraceFileDate());
+      Environment.setSystemVar("%Time", profileToRun.getTraceFileDateTime());
 
       final Component c = DefnCache.getComponent(
           (String) Environment.getSystemVar("%Component").read(), "GBL");

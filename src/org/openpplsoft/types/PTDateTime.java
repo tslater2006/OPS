@@ -14,6 +14,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import org.openpplsoft.runtime.Environment;
 import org.openpplsoft.runtime.OPSVMachRuntimeException;
 import org.openpplsoft.sql.OPSResultSet;
 import org.openpplsoft.sql.OPSStmt;
@@ -69,7 +70,7 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
     if (this.value == null) {
       return null;
     }
-    final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT2);
+    final DateTimeFormatter dtf = DateTimeFormat.forPattern(PS_DATE_TIME_FMT1);
     return dtf.print(this.value);
   }
 
@@ -124,7 +125,12 @@ public final class PTDateTime extends PTPrimitiveType<DateTime> {
     final OPSResultSet rs = ostmt.executeQuery();
 
     rs.next();
-    this.write(new DateTime(rs.getTimestamp("sysdate")));
+
+    // TODO: MAKE THIS CONDITIONAL BASED ON TRACEFILE VERIFICATION
+    // Overriding the datetime with that on which the tracefile was generated
+    // is only relevant when verifying against a tracefile in the first place.
+    //this.write(new DateTime(rs.getTimestamp("sysdate")));
+    this.write((DateTime) Environment.getSystemVar("%Time").read());
 
     rs.close();
     ostmt.close();

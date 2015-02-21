@@ -43,6 +43,7 @@
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="MQUINN_AWS/003_AWS_KADAMS_SSS_STUDENT_CENTER.trace"/>
     <constructor-arg value="2013-10-04"/>
+    <constructor-arg value="2013-10-04-14.29.20.000000"/>
   </bean>
 
   <bean id="CLASS_SEARCH"
@@ -52,6 +53,7 @@
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="MQUINN_AWS/009_AWS_KADAMS_CLASS_SEARCH.trace"/>
     <constructor-arg value="2014-11-12"/>
+    <constructor-arg value="2014-11-12-00.00.00.000000"/>
   </bean>
 
   <bean id="SSR_SSENRL_LIST"
@@ -61,6 +63,7 @@
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="MQUINN_AWS/005_AWS_KADAMS_SSR_SSENRL_LIST.trace"/>
     <constructor-arg value="2013-11-16"/>
+    <constructor-arg value="2013-11-16-14.58.46.000000"/>
   </bean>
 
   <bean id="SSR_SSENRL_ADD"
@@ -70,5 +73,6 @@
     <constructor-arg value="KADAMS"/>
     <constructor-arg value="MQUINN_AWS/006_AWS_KADAMS_SSR_SSENRL_ADD.trace"/>
     <constructor-arg value="2013-11-16"/>
+    <constructor-arg value="2013-11-16-00.00.00.000000"/>
   </bean>
 </beans>

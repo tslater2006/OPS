@@ -90,7 +90,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     // if it does not have a record field buffer.
     if (!this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
         && this.recFieldBuffer == null) {
-      log.debug("[1] Skipping field: {}", this.recFieldDefn.getFldName());
+      //log.debug("[1] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 
@@ -99,7 +99,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (ctxFlag == ScrollEmissionContext.SEARCH_RESULTS
         && (!this.recFieldDefn.isKey()
             || !this.getValue().isMarkedAsUpdated())) {
-      log.debug("[2] Skipping field: {}", this.recFieldDefn.getFldName());
+      //log.debug("[2] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 
@@ -111,11 +111,11 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         && !this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
         && (this.recFieldBuffer == null
             || this.recFieldBuffer.getPageFieldToks().size() == 0)) {
-      log.debug("[3] Skipping field: {}", this.recFieldDefn.getFldName());
+      //log.debug("[3] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 
-    log.debug("Field {} key? {}", this.recFieldDefn.getFldName(), this.recFieldDefn.isKey());
+    /*log.debug("Field {} key? {}", this.recFieldDefn.getFldName(), this.recFieldDefn.isKey());
     log.debug("Field {} recFieldBuffer null? {}",
         this.parentRecord.getRecDefn().getRecName(), this.recFieldBuffer == null);
     log.debug("Field {}.{} has PRM entry? {}",
@@ -123,6 +123,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         this.recFieldDefn.getFldName(),
         ComponentBuffer.hasPRMEntry(new RecFldName(
                 this.recFieldDefn.getRecName(), this.recFieldDefn.getFldName())));
+    */
     if (ctxFlag != ScrollEmissionContext.SEARCH_RESULTS
         && this.parentRecord.isEffectivelyAWorkRecord()
         && this.parentRecord.getRecBuffer().isRelatedDisplayRecBuffer()
@@ -137,7 +138,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
         && !ComponentBuffer.hasPRMEntry(new RecFldName(
                 this.parentRecord.getRecDefn().getRecName(),
                 this.recFieldDefn.getFldName()))) {
-      log.debug("[4] Skipping field: {}", this.recFieldDefn.getFldName());
+      //log.debug("[4] Skipping field: {}", this.recFieldDefn.getFldName());
       return;
     }
 

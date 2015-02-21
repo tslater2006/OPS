@@ -65,8 +65,7 @@ public class CFldBuf implements IEmission {
 
     return this.indentStr.equals(other.indentStr)
         && this.fldName.equals(other.fldName)
-       // TODO(mquinn): 12-20-2014: Eventually re-enable this.
-       // && this.fldValue.equals(other.fldValue);
+        && this.fldValue.equals(other.fldValue)
         && this.flagStr.equals(other.flagStr);
   }
 

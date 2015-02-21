@@ -18,10 +18,14 @@ import org.openpplsoft.pt.peoplecode.*;
 
 public class RecordField {
 
+  private static Logger log = LogManager.getLogger(RecordField.class.getName());
+
+  private static Map<Integer, FieldType> fieldTypeMap;
+
   private final String RECNAME, FIELDNAME;
   private final int USEEDIT, FIELDNUM, LENGTH;
   private final String DEFRECNAME, DEFFIELDNAME, LABEL_ID;
-  private final int FIELDTYPE;
+  private final FieldType fieldType;
   private final Map<String, FieldLabel> labels;
 
   private FieldLabel defaultLabel;
@@ -33,7 +37,9 @@ public class RecordField {
   private final int REQUIRED_FLAG = 256;
   private final int SEARCH_KEY_FLAG = 2048;
 
-  private static Logger log = LogManager.getLogger(RecordField.class.getName());
+  static {
+    fieldTypeMap = new HashMap<>();
+  }
 
   public RecordField(final String recname,
       final String fieldname,
@@ -46,7 +52,6 @@ public class RecordField {
       final String labelId) {
     this.RECNAME = recname;
     this.FIELDNAME = fieldname;
-    this.FIELDTYPE = fieldtype;
     this.USEEDIT = useedit;
     this.FIELDNUM = fieldnum;
     this.LENGTH = length;
@@ -54,6 +59,7 @@ public class RecordField {
     this.DEFFIELDNAME = deffieldname;
     this.LABEL_ID = labelId;
 
+    this.fieldType = FieldType.fieldTypeCodeToEnum(fieldtype);
     this.labels = new HashMap<String, FieldLabel>();
   }
 
@@ -81,6 +87,10 @@ public class RecordField {
     return this.USEEDIT;
   }
 
+  public FieldType getFieldType() {
+    return this.fieldType;
+  }
+
   public void addLabel(final FieldLabel label) {
     this.labels.put(label.getLabelId(), label);
     if (label.isDefault()) {
@@ -89,33 +99,34 @@ public class RecordField {
   }
 
   public PTTypeConstraint getTypeConstraintForUnderlyingValue() {
-    switch(this.FIELDTYPE) {
-      case 0:  // char
+    switch(this.fieldType) {
+      case CHARACTER:
         if(this.LENGTH == 1) {
           return PTChar.getTc();
         } else {
           return PTString.getTc();
         }
-      case 1: // long char
+      case LONG_CHARACTER:
         return PTString.getTc();
-      case 2:
+      case NUMBER:
         return PTNumber.getTc();
-      case 3: // TODO: 2 is unsigned, 3 is signed: should I distinguish?
+      // TODO: eventually distinguish b/w NUMBER and SIGNED_NUMBER.
+      case SIGNED_NUMBER:
         return PTNumber.getTc();
-      case 4:
+      case DATE:
         return PTDate.getTc();
-      case 5:
+      case TIME:
         return PTTime.getTc();
-      case 6:
+      case DATETIME:
         return PTDateTime.getTc();
-      case 8: // TODO: 8 is image/attachment; doesn't need to be stored.
+      case IMAGE_ATTACHMENT:
         return PTString.getTc();
-      case 9: // TODO: 9 is image reference; doesn't need to be stored.
+      case IMAGE_REFERENCE:
         return PTString.getTc();
         default:
       throw new OPSVMachRuntimeException("Unable to determine " +
         "appropriate type constraint for underlying record field " +
-        "value given a FIELDTYPE of: " + this.FIELDTYPE + "; " +
+        "value given a fieldType of: " + this.fieldType + "; " +
         "RECNAME=" + RECNAME + ", FIELDNAME=" + FIELDNAME);
     }
   }
@@ -176,6 +187,32 @@ public class RecordField {
 
   public FieldLabel getLabelById(final String labelId) {
     return this.labels.get(labelId);
+  }
+
+  public enum FieldType {
+    CHARACTER(0),
+    LONG_CHARACTER(1),
+    NUMBER(2),
+    SIGNED_NUMBER(3),
+    DATE(4),
+    TIME(5),
+    DATETIME(6),
+    IMAGE_ATTACHMENT(8),
+    IMAGE_REFERENCE(9);
+
+    private final int FIELDTYPE;
+
+    private FieldType(final int fieldType) {
+      this.FIELDTYPE = fieldType;
+      fieldTypeMap.put(fieldType, this);
+    }
+
+    private static FieldType fieldTypeCodeToEnum(final int code) {
+      if (fieldTypeMap.containsKey(code)) {
+        return fieldTypeMap.get(code);
+      }
+      throw new OPSVMachRuntimeException("No FieldType found for code: " + code);
+    }
   }
 }
 

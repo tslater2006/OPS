@@ -56,7 +56,7 @@ public class PTString extends PTPrimitiveType<String> {
 
   @Override
   public boolean isBlank() {
-    return this.value.trim().length() == 0;
+    return this.value.length() == 0;
   }
 
   @Override

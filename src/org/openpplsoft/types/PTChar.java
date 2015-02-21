@@ -104,8 +104,11 @@ public final class PTChar extends PTPrimitiveType<Character> {
       if (str.length() > 1) {
         throw new OPSDataTypeException("Cannot write string longer than 1 char to "
             + "PTChar: " + src);
+      } else if (str.length() == 0) {
+        this.write('\u0000');
+      } else {
+        this.write(str.charAt(0));
       }
-      this.write(str.charAt(0));
     } else {
       throw new OPSDataTypeException("Expected src to be PTChar or PTString.");
     }

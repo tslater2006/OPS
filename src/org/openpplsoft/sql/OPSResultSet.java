@@ -229,8 +229,7 @@ public class OPSResultSet implements AutoCloseable {
     for (int i = 1; i <= this.getColumnCount(); i++) {
       final String colName = this.getColumnName(i);
       final PTReference<? extends PTField> fldRef = recObj.getFieldRef(colName);
-      final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
-          fldRef.deref().getValue().getOriginatingTypeConstraint());
+      final PTPrimitiveType dbVal = this.coerceDbValToFldVal(i, fldRef.deref());
       Environment.assign(fldRef, dbVal);
     }
   }
@@ -249,8 +248,7 @@ public class OPSResultSet implements AutoCloseable {
       final String colName = this.getColumnName(i);
       if (recDefn.hasField(colName)) {
         final PTReference<? extends PTField> fldRef = recObj.getFieldRef(colName);
-        final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
-            fldRef.deref().getValue().getOriginatingTypeConstraint());
+        final PTPrimitiveType dbVal = this.coerceDbValToFldVal(i, fldRef.deref());
         Environment.assign(fldRef, dbVal);
       }
     }
@@ -260,8 +258,7 @@ public class OPSResultSet implements AutoCloseable {
 
     for (int i = 1; i <= this.getColumnCount(); i++) {
       if (this.getColumnName(i).equals(colName)) {
-        final PTPrimitiveType dbVal = this.getTypeCompatibleValue(i,
-            fldObj.getValue().getOriginatingTypeConstraint());
+        final PTPrimitiveType dbVal = this.coerceDbValToFldVal(i, fldObj);
 
         // We cannot use Environment.assign() b/c that method requires that
         // the destination be a reference. Since we know fields contain only
@@ -269,6 +266,35 @@ public class OPSResultSet implements AutoCloseable {
         // assignment manually here.
         fldObj.getValue().copyValueFrom(dbVal);
       }
+    }
+  }
+
+  /**
+   * This method must be used whenever a Field's value is
+   * being read in from the database. This method takes into
+   * account the FieldType of the Field being written to; this
+   * is the PeopleTools-specific field type that is database agnostic
+   * and has various conventions surrounding it (i.e., regarding blanks, nulls,
+   * etc.). See the book "PeopleSoft for the Oracle DBA", pages 136-137 for
+   * more. Note that this method is evolving and is not final.
+   */
+  private PTPrimitiveType coerceDbValToFldVal(final int colIdx,
+      final PTField fld) {
+    final RecordField fldDefn = fld.getRecordFieldDefn();
+    switch (fldDefn.getFieldType()) {
+      case CHARACTER:
+        /**
+         * PeopleSoft stores non-required blank CHARACTER fields
+         * as ' ' in the database. These must be translated to
+         * their empty string runtime equivalent.
+         */
+        final String dbStr = this.getString(colIdx);
+        if (!fldDefn.isRequired() && dbStr.equals(" ")) {
+          return new PTString("");
+        }
+      default:
+        return this.getTypeCompatibleValue(colIdx,
+            fld.getValue().getOriginatingTypeConstraint());
     }
   }
 

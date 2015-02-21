@@ -44,7 +44,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public String getClobAsString(final int colIdx) {
     try {
-      return this.clobToString(rs.getClob(colIdx));
+      final String clobAsStr = this.clobToString(rs.getClob(colIdx));
+      log.debug("[OPSResultSet] clob as string: {}", clobAsStr);
+      return clobAsStr;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -52,7 +54,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public String getClobAsString(final String colName) {
     try {
-      return this.clobToString(rs.getClob(colName));
+      final String clobAsStr = this.clobToString(rs.getClob(colName));
+      log.debug("[OPSResultSet] clob as string: {}", clobAsStr);
+      return clobAsStr;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -104,6 +108,7 @@ public class OPSResultSet implements AutoCloseable {
       }
 
       blob.free();
+      log.debug("[OPSResultSet] blob as string: {}", sb.toString());
       return sb.toString();
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
@@ -112,7 +117,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public Timestamp getTimestamp(final String colName) {
     try {
-      return rs.getTimestamp(colName);
+      final Timestamp ts = rs.getTimestamp(colName);
+      log.debug("[OPSResultSet] timestamp: {}", ts);
+      return ts;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -120,7 +127,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public int getInt(final String colName) {
     try {
-      return rs.getInt(colName);
+      final int integer = rs.getInt(colName);
+      log.debug("[OPSResultSet] int: {}", integer);
+      return integer;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -128,7 +137,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public int getInt(final int colIdx) {
     try {
-      return rs.getInt(colIdx);
+      final int integer = rs.getInt(colIdx);
+      log.debug("[OPSResultSet] int: {}", integer);
+      return integer;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -136,7 +147,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public String getString(final String colName) {
     try {
-      return rs.getString(colName);
+      final String str = rs.getString(colName);
+      log.debug("[OPSResultSet] str: {}", str);
+      return str;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -144,7 +157,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public String getString(final int colIdx) {
     try {
-      return rs.getString(colIdx);
+      final String str = rs.getString(colIdx);
+      log.debug("[OPSResultSet] str: {}", str);
+      return str;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -152,7 +167,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public BigDecimal getBigDecimal(final String colName) {
     try {
-      return rs.getBigDecimal(colName);
+      final BigDecimal bd = rs.getBigDecimal(colName);
+      log.debug("[OPSResultSet] big decimal: {}", bd);
+      return bd;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }
@@ -160,7 +177,9 @@ public class OPSResultSet implements AutoCloseable {
 
   public BigDecimal getBigDecimal(final int colIdx) {
     try {
-      return rs.getBigDecimal(colIdx);
+      final BigDecimal bd = rs.getBigDecimal(colIdx);
+      log.debug("[OPSResultSet] big decimal: {}", bd);
+      return bd;
     } catch (final SQLException sqle) {
       throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
     }

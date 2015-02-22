@@ -9,9 +9,9 @@ package org.openpplsoft.trace;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class RelDispStart implements IEmission {
+public class RelDispFinish implements IEmission {
 
-  public RelDispStart() {}
+  public RelDispFinish() {}
 
   @Override
   public boolean equals(final Object obj) {
@@ -19,17 +19,17 @@ public class RelDispStart implements IEmission {
       return true;
     } else if (obj == null) {
       return false;
-    } else if (!(obj instanceof RelDispStart)) {
+    } else if (!(obj instanceof RelDispFinish)) {
       return false;
     }
 
-    // All RelDispStart objects are equal.
+    // All RelDispFinish objects are equal.
     return true;
   }
 
   @Override
   public int hashCode() {
-    final int HCB_INITIAL = 1103, HCB_MULTIPLIER = 983;
+    final int HCB_INITIAL = 1597, HCB_MULTIPLIER = 29;
 
     return new HashCodeBuilder(HCB_INITIAL,
         HCB_MULTIPLIER).toHashCode();
@@ -37,6 +37,6 @@ public class RelDispStart implements IEmission {
 
   @Override
   public String toString() {
-    return "Starting Related Display processing";
+    return "Finished Related Display processing";
   }
 }

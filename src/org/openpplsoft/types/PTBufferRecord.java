@@ -244,6 +244,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     final PeopleCodeProg compProg = ComponentBuffer.getComponentDefn()
         .getProgramForRecordEvent(event, this.recDefn);
     if (compProg != null && compProg.hasAtLeastOneStatement()) {
+
       final ExecContext eCtx = new ProgramExecContext(compProg,
           this.determineScrollLevel(), this.determineRowIndex());
       // Pass this record to the supervisor as the component buffer context.

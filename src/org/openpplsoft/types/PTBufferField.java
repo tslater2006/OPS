@@ -219,6 +219,11 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     // If a Record PeopleCode program has been written for this event, run it now.
     final PeopleCodeProg recProg = this.recFieldDefn.getProgramForEvent(event);
     if (recProg != null && recProg.hasAtLeastOneStatement()) {
+
+      if (event == PCEvent.SEARCH_INIT) {
+        ComponentBuffer.runRelDispProc();
+      }
+
       final ExecContext eCtx = new ProgramExecContext(recProg,
           this.determineScrollLevel(), this.determineRowIndex());
       // Pass this field to the supervisor as the component buffer context.
@@ -231,6 +236,11 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     final PeopleCodeProg compProg = ComponentBuffer.getComponentDefn()
         .getProgramForRecordFieldEvent(event, this.recFieldDefn);
     if (compProg != null && compProg.hasAtLeastOneStatement()) {
+
+      if (event == PCEvent.SEARCH_INIT) {
+        ComponentBuffer.runRelDispProc();
+      }
+
       final ExecContext eCtx = new ProgramExecContext(compProg,
             this.determineScrollLevel(), this.determineRowIndex());
       // Pass this field to the supervisor as the component buffer context.

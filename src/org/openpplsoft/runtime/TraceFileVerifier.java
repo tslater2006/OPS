@@ -43,11 +43,11 @@ public final class TraceFileVerifier {
   private static int currTraceLineNbr;
   private static BufferedReader traceFileReader;
   private static Pattern sqlTokenPattern, bindValPattern, pcStartPattern,
-      pcBeginPattern, pcInstrPattern, pcEndPattern, pcRelDispProcStartPattern,
-      pcRelDispProcEndPattern, pcFldDefaultPattern, pcExceptionCaughtPattern,
+      pcBeginPattern, pcInstrPattern, pcEndPattern,
+      pcFldDefaultPattern, pcExceptionCaughtPattern,
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
       rowPattern, cRecBufPattern, cFldBufPattern, scrollIdxPattern,
-      prmHdrPattern, prmEntryPattern, endLevelPattern;
+      prmHdrPattern, prmEntryPattern, endLevelPattern, relDispStartPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -87,10 +87,6 @@ public final class TraceFileVerifier {
         + "\\s+(\\d+)\\s+row\\s+(\\d+)");
     pcEndPattern = Pattern.compile("\\s+<<<\\s(end|end-ext)"
         + "\\s+Nest=(\\d+)\\s+([A-Za-z0-9_]*?)\\s+([A-Za-z\\._0-9]+)");
-    pcRelDispProcStartPattern =
-        Pattern.compile("Starting\\sRelated\\sDisplay\\sprocessing");
-    pcRelDispProcEndPattern =
-        Pattern.compile("Finished\\sRelated\\sDisplay\\sprocessing");
     pcFldDefaultPattern =
         Pattern.compile("([A-Z_0-9]+)\\.([A-Z_0-9]+)\\s+(constant\\s+)?default\\s+(from\\s+record\\s+)?(.+?)$");
     pcExceptionCaughtPattern =
@@ -115,6 +111,8 @@ public final class TraceFileVerifier {
         Pattern.compile("PRM\\s([A-Z_0-9]+)\\.([A-Z]+)\\.([A-Z]+)\\sversion\\s\\d+\\scount=(\\d+)");
     prmEntryPattern =
         Pattern.compile("\\s{4}([A-Z_0-9]+\\.[A-Z_0-9]+)$");
+    relDispStartPattern =
+        Pattern.compile("Starting\\sRelated\\sDisplay\\sprocessing$");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -380,20 +378,6 @@ public final class TraceFileVerifier {
         return fldDefEmission;
       }
 
-      final Matcher pcRelDispProcStartMatcher =
-          pcRelDispProcStartPattern.matcher(currTraceLine);
-      if (pcRelDispProcStartMatcher.find()) {
-
-        // Discard all tracefile emissions until end of rel disp proc is seen.
-        while ((currTraceLine = getNextTraceLine()) != null) {
-          final Matcher pcRelDispProcEndMatcher =
-              pcRelDispProcEndPattern.matcher(currTraceLine);
-          if (pcRelDispProcEndMatcher.find()) {
-            break;
-          }
-        }
-      }
-
       final Matcher pcExCaughtMatcher =
           pcExceptionCaughtPattern.matcher(currTraceLine);
       if (pcExCaughtMatcher.find()) {
@@ -532,6 +516,14 @@ public final class TraceFileVerifier {
           currTraceLine = getNextTraceLine();
           return new PRMEntry(prmEntryMatcher.group(GROUP1));
         }
+      }
+
+      final Matcher relDispStartMatcher =
+          relDispStartPattern.matcher(currTraceLine);
+      if (relDispStartMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new RelDispStart();
       }
 
       if (currTraceLine.endsWith("Page Constructed")) {

@@ -133,6 +133,10 @@ public final class ComponentBuffer {
     return compDefn;
   }
 
+  public static void runRelDispProc() {
+    TraceFileVerifier.submitEnforcedEmission(new RelDispStart());
+  }
+
   /**
    * Get the scroll buffer that the ComponentBuffer is
    * currently pointing at.

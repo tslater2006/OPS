@@ -101,6 +101,7 @@ public final class Main {
 
       ComponentBuffer.firstPassFill();
       ComponentBuffer.fireEvent(PCEvent.PRE_BUILD, new FireEventSummary());
+      ComponentBuffer.runRelatedDisplayProcessing();
       ComponentBuffer.runDefaultProcessing();
 
       ComponentBuffer.fireEvent(PCEvent.ROW_INIT, new FireEventSummary());

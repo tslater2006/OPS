@@ -331,9 +331,11 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       return;
     }
 
-    final PTBufferField dispCtrlFld = this.getDisplayControlField();
-    TraceFileVerifier.submitEnforcedEmission(
-        new RelDispFldStart(new RecFldName(dispCtrlFld.getRecordFieldDefn())));
+    if (!PSDefn.isSystemRecord(this.getRecDefn().getRecName())) {
+      final PTBufferField dispCtrlFld = this.getDisplayControlField();
+      TraceFileVerifier.submitEnforcedEmission(
+          new RelDispFldStart(new RecFldName(dispCtrlFld.getRecordFieldDefn())));
+    }
   }
 
   public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {

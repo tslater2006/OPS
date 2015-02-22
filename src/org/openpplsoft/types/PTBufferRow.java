@@ -228,13 +228,27 @@ public final class PTBufferRow extends PTRow<PTBufferRowset, PTBufferRecord>
       final FieldDefaultProcSummary fldDefProcSummary) {
 
     // Run field default processing on each record in this row.
-    for (Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
+    for (final Map.Entry<String, PTBufferRecord> entry : this.recordMap.entrySet()) {
       entry.getValue().runFieldDefaultProcessing(fldDefProcSummary);
     }
 
     // Run field default processing on each rowset in this row.
-    for (Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
+    for (final Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
       entry.getValue().runFieldDefaultProcessing(fldDefProcSummary);
+    }
+  }
+
+  public void runRelatedDisplayProcessing() {
+
+    // Run related display processing on each record in this row.
+    for (final Map.Entry<Integer, PTBufferRecord> entry :
+        this.totallyOrderedAllRecords.entrySet()) {
+      entry.getValue().runRelatedDisplayProcessing();
+    }
+
+    // Run related display processing on each rowset in this row.
+    for (final Map.Entry<String, PTBufferRowset> entry : this.rowsetMap.entrySet()) {
+      entry.getValue().runRelatedDisplayProcessing();
     }
   }
 

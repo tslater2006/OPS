@@ -48,7 +48,7 @@ public final class TraceFileVerifier {
       beginScrollsPattern, endScrollsPattern, beginLevelPattern, recPattern,
       rowPattern, cRecBufPattern, cFldBufPattern, scrollIdxPattern,
       prmHdrPattern, prmEntryPattern, endLevelPattern, relDispStartPattern,
-      relDispFinishPattern;
+      relDispFinishPattern, relDispFldStartPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -116,6 +116,8 @@ public final class TraceFileVerifier {
         Pattern.compile("Starting\\sRelated\\sDisplay\\sprocessing$");
     relDispFinishPattern =
         Pattern.compile("Finished\\sRelated\\sDisplay\\sprocessing$");
+    relDispFldStartPattern =
+        Pattern.compile("\\s{4}Starting\\sRelated\\sDisplay\\sprocessing\\sfor\\s-\\s([A-Z_0-9]+\\.[A-Z_0-9]+)$");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -535,6 +537,14 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new RelDispFinish();
+      }
+
+      final Matcher relDispFldStartMatcher =
+          relDispFldStartPattern.matcher(currTraceLine);
+      if (relDispFldStartMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new RelDispFldStart(relDispFldStartMatcher.group(GROUP1));
       }
 
       if (currTraceLine.endsWith("Page Constructed")) {

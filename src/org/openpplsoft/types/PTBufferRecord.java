@@ -25,9 +25,7 @@ import org.openpplsoft.runtime.*;
 import org.openpplsoft.sql.OPSResultSet;
 import org.openpplsoft.sql.OPSStmt;
 import org.openpplsoft.sql.StmtLibrary;
-import org.openpplsoft.trace.CRecBuf;
-import org.openpplsoft.trace.PCFldDefaultEmission;
-import org.openpplsoft.trace.RecInScroll;
+import org.openpplsoft.trace.*;
 
 /**
  * Represents a PeopleTools record in the component buffer.
@@ -106,26 +104,39 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
     }
 
     int keyrec = -1, keyfield = -1;
-    if (this.recBuffer.isRelatedDisplayRecBuffer()) {
-
-      /*
-       * All fields on a related display record are tied to
-       * the same display control field. Therefore, we can get
-       * the display control field by looking at just the first field
-       * on the record, and then at the first rel disp field token
-       * attached to that field.
-       */
-      final RecordFieldBuffer relDispFldBuf =
-          this.recBuffer.getFieldBuffers().get(0);
-      final PgToken relDispFldTok = relDispFldBuf.getPageFieldToks().get(0);
-      final PTBufferField dispCtrlFld =
-          this.getParentRow().findDisplayControlField(relDispFldTok);
+    if (this.isRelatedDisplayRecord()) {
+      final PTBufferField dispCtrlFld = this.getDisplayControlField();
       keyrec = dispCtrlFld.getParentRecord()
           .getIndexPositionOfThisRecordInParentRow();
       keyfield = dispCtrlFld.getIndexPositionOfThisFieldInParentRecord();
     }
+
     TraceFileVerifier.submitEnforcedEmission(new RecInScroll(
         indentStr, this.recDefn.getRecName(), keyrec, keyfield));
+  }
+
+  public PTBufferField getDisplayControlField() {
+
+    if (!this.isRelatedDisplayRecord()) {
+      throw new OPSVMachRuntimeException("Illegal call to getDisplayControlField(); this "
+          + "record is not a related display record.");
+    }
+
+    /*
+     * All fields on a related display record are tied to
+     * the same display control field. Therefore, we can get
+     * the display control field by looking at just the first field
+     * on the record, and then at the first rel disp field token
+     * attached to that field.
+     */
+    final RecordFieldBuffer relDispFldBuf =
+        this.recBuffer.getFieldBuffers().get(0);
+    final PgToken relDispFldTok = relDispFldBuf.getPageFieldToks().get(0);
+    return this.getParentRow().findDisplayControlField(relDispFldTok);
+  }
+
+  public boolean isRelatedDisplayRecord() {
+    return this.recBuffer.isRelatedDisplayRecBuffer();
   }
 
   private boolean isPrimaryRecordInRowset() {
@@ -172,7 +183,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
           flagStr += " dummy";
         }
 
-        if (this.recBuffer.isRelatedDisplayRecBuffer()) {
+        if (this.isRelatedDisplayRecord()) {
           flagStr += " reldisp";
         } else if (scrollLevel == 0) {
           flagStr += " lvl0";
@@ -313,6 +324,16 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         }
       }
     }
+  }
+
+  public void runRelatedDisplayProcessing() {
+    if (!this.isRelatedDisplayRecord()) {
+      return;
+    }
+
+    final PTBufferField dispCtrlFld = this.getDisplayControlField();
+    TraceFileVerifier.submitEnforcedEmission(
+        new RelDispFldStart(new RecFldName(dispCtrlFld.getRecordFieldDefn())));
   }
 
   public PTBufferRecord resolveContextualCBufferRecordReference(final String recName) {

@@ -24,6 +24,12 @@ public class RecFldName implements Comparable<RecFldName> {
 
   private final String recName, fldName;
 
+  public RecFldName(final RecordField recFldDefn) {
+    validate(recFldDefn.getRecName(), recFldDefn.getFldName());
+    this.recName = recFldDefn.getRecName();
+    this.fldName = recFldDefn.getFldName();
+  }
+
   public RecFldName(final String recName, final String fldName) {
     validate(recName, fldName);
     this.recName = recName;

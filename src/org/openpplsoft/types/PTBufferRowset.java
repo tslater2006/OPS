@@ -186,6 +186,12 @@ public final class PTBufferRowset extends PTRowset<PTBufferRow>
     }
   }
 
+  public void runRelatedDisplayProcessing() {
+    for (final PTBufferRow row : this.rows) {
+      row.runRelatedDisplayProcessing();
+    }
+  }
+
   /**
    * If a key lookup request reaches a Rowset, the request should
    * always be passed to the parent row in order to look at the child

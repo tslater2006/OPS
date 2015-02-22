@@ -335,6 +335,8 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       final PTBufferField dispCtrlFld = this.getDisplayControlField();
       TraceFileVerifier.submitEnforcedEmission(
           new RelDispFldStart(new RecFldName(dispCtrlFld.getRecordFieldDefn())));
+      TraceFileVerifier.submitEnforcedEmission(
+          new RelDispFldComplete(new RecFldName(dispCtrlFld.getRecordFieldDefn())));
     }
   }
 

@@ -37,6 +37,6 @@ public class RelDispFinish implements IEmission {
 
   @Override
   public String toString() {
-    return "Finished Related Display processing";
+    return "    Finished Related Display processing";
   }
 }

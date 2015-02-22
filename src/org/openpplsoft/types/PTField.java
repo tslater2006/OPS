@@ -31,7 +31,7 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
 
   protected R parentRecord;
   protected RecordFieldBuffer recFieldBuffer;
-  protected boolean isGrayedOut;
+  protected boolean isGrayedOut, hasBeenAssignedTo;
 
   public PTField(final PTFieldTypeConstraint origTc,
       final RecordField recFieldDefn) {
@@ -70,6 +70,10 @@ public abstract class PTField<R extends PTRecord> extends PTObjectType {
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
+  }
+
+  public void notifyPostAssignment(final PTPrimitiveType previousValue) {
+    this.hasBeenAssignedTo = true;
   }
 
   public R getParentRecord() {

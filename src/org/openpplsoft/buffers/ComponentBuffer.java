@@ -133,7 +133,7 @@ public final class ComponentBuffer {
     return compDefn;
   }
 
-  public static void runRelDispProc() {
+  public static void runRelatedDisplayProcessing() {
     TraceFileVerifier.submitEnforcedEmission(new RelDispStart());
     TraceFileVerifier.submitEnforcedEmission(new RelDispFinish());
   }

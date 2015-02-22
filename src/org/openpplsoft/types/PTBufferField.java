@@ -63,6 +63,17 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     return this.parentRecord.getIndexPositionOfField(this);
   }
 
+  @Override
+  public void notifyPostAssignment(final PTPrimitiveType previousValue) {
+    super.notifyPostAssignment(previousValue);
+
+    // Only run related display processing if value has changed.
+    if (this.parentRecord == ComponentBuffer.getSearchRecord()
+        && !this.getValue().isEqual(previousValue).read()) {
+      ComponentBuffer.runRelatedDisplayProcessing();
+    }
+  }
+
   /**
    * The meaning of "Used" here refers to the way in which PeopleSoft
    * means it during scroll emissions; that is,
@@ -221,7 +232,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (recProg != null && recProg.hasAtLeastOneStatement()) {
 
       if (event == PCEvent.SEARCH_INIT) {
-        ComponentBuffer.runRelDispProc();
+        ComponentBuffer.runRelatedDisplayProcessing();
       }
 
       final ExecContext eCtx = new ProgramExecContext(recProg,
@@ -238,7 +249,7 @@ public final class PTBufferField extends PTField<PTBufferRecord>
     if (compProg != null && compProg.hasAtLeastOneStatement()) {
 
       if (event == PCEvent.SEARCH_INIT) {
-        ComponentBuffer.runRelDispProc();
+        ComponentBuffer.runRelatedDisplayProcessing();
       }
 
       final ExecContext eCtx = new ProgramExecContext(compProg,

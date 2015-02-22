@@ -271,7 +271,12 @@ public class Environment {
       if (lRef.deref() instanceof PTPrimitiveType) {
         ((PTPrimitiveType) lRef.deref()).copyValueFrom((PTPrimitiveType) rawSrc);
       } else if (lRef.deref() instanceof PTField) {
-        ((PTField) lRef.deref()).getValue().copyValueFrom((PTPrimitiveType) rawSrc);
+        final PTField fld = (PTField) lRef.deref();
+        final PTPrimitiveType previousValue =
+            (PTPrimitiveType) fld.getValue().getOriginatingTypeConstraint().alloc();
+        previousValue.copyValueFrom(fld.getValue());
+        fld.getValue().copyValueFrom((PTPrimitiveType) rawSrc);
+        fld.notifyPostAssignment(previousValue);
 
       // NOTE: You must look at the type constraint of the *reference* in the
       // conditional directly below this comment, not the

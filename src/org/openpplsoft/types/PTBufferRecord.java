@@ -335,6 +335,24 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       final PTBufferField dispCtrlFld = this.getDisplayControlField();
       TraceFileVerifier.submitEnforcedEmission(
           new RelDispFldStart(new RecFldName(dispCtrlFld.getRecordFieldDefn())));
+
+      if (!dispCtrlFld.getValue().isBlank()) {
+        boolean hasEmittedKeylistGenStart = false;
+        for (final PTBufferField fld : this.getAllFields()) {
+
+          if (fld.getRecordFieldDefn().isKey()
+              && !dispCtrlFld.getParentRecord().hasField(fld.getRecordFieldDefn().getFldName())) {
+
+            log.debug("Need to find value for key: {}", fld.getRecordFieldDefn());
+
+            if (!hasEmittedKeylistGenStart) {
+              TraceFileVerifier.submitEnforcedEmission(new KeylistGenStart());
+              hasEmittedKeylistGenStart = true;
+            }
+          }
+        }
+      }
+
       TraceFileVerifier.submitEnforcedEmission(
           new RelDispFldComplete(new RecFldName(dispCtrlFld.getRecordFieldDefn())));
     }

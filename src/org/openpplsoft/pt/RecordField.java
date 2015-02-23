@@ -214,5 +214,12 @@ public class RecordField {
       throw new OPSVMachRuntimeException("No FieldType found for code: " + code);
     }
   }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("[RecordFieldDefn]:");
+    sb.append(this.RECNAME).append(".").append(this.FIELDNAME);
+    return sb.toString();
+  }
 }
 

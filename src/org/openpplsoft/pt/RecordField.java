@@ -71,6 +71,10 @@ public class RecordField {
     return this.FIELDNAME;
   }
 
+  public RecFldName getRecFldName() {
+    return new RecFldName(this.RECNAME, this.FIELDNAME);
+  }
+
   public String getDefaultRecName() {
     return this.DEFRECNAME;
   }

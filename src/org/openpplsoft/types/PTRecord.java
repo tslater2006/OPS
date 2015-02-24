@@ -159,6 +159,11 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     return this.fieldRefs.containsKey(fldName);
   }
 
+  public boolean hasKeyField(final String fldName) {
+    return this.fieldRefs.containsKey(fldName)
+        && this.fieldRefs.get(fldName).deref().getRecordFieldDefn().isKey();
+  }
+
   protected F getField(final String fldName) {
     if (!this.fieldRefs.containsKey(fldName)) {
       throw new OPSVMachRuntimeException("Field '" + fldName + "' does not "

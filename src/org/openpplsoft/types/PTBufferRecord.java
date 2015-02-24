@@ -340,14 +340,29 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
         boolean hasEmittedKeylistGenStart = false;
         for (final PTBufferField fld : this.getAllFields()) {
 
+          if (!hasEmittedKeylistGenStart) {
+            TraceFileVerifier.submitEnforcedEmission(new KeylistGenStart());
+            hasEmittedKeylistGenStart = true;
+          }
+
           if (fld.getRecordFieldDefn().isKey()
-              && !dispCtrlFld.getParentRecord().hasField(fld.getRecordFieldDefn().getFldName())) {
+              && !dispCtrlFld.getParentRecord().hasField(
+                  fld.getRecordFieldDefn().getFldName())) {
 
-            log.debug("Need to find value for key: {}", fld.getRecordFieldDefn());
+            TraceFileVerifier.submitEnforcedEmission(new KeylistGenDetectedKey(
+                  fld.getRecordFieldDefn().getFldName()));
+            log.fatal("Keylist generation - Finding value for {}",
+                fld.getRecordFieldDefn().getRecFldName());
 
-            if (!hasEmittedKeylistGenStart) {
-              TraceFileVerifier.submitEnforcedEmission(new KeylistGenStart());
-              hasEmittedKeylistGenStart = true;
+            if (dispCtrlFld.getParentRecord().hasKeyField(
+                fld.getRecordFieldDefn().getFldName())) {
+              throw new OPSVMachRuntimeException("TODO: Field found in key "
+                  + "buffers; need to handle this.");
+            } else {
+              log.fatal("Not Found in key buffer");
+              log.fatal("Seaching for field {} in component buffers",
+                  fld.getRecordFieldDefn().getFldName());
+              log.fatal("Scanning level 0");
             }
           }
         }

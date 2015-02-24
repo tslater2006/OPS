@@ -12,6 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,6 +58,14 @@ public abstract class PTRow<R extends PTRowset, E extends PTRecord>
     } catch (final OPSTypeCheckException opstce) {
       throw new OPSVMachRuntimeException(opstce.getMessage(), opstce);
     }
+  }
+
+  public Stream<E> getRecordStream() {
+    return this.recordMap.entrySet().stream().map(entry -> entry.getValue());
+  }
+
+  public List<E> getRecordList() {
+    return this.getRecordStream().collect(Collectors.toList());
   }
 
   public boolean isNew() {

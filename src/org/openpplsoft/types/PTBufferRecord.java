@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -339,6 +340,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
       if (!dispCtrlFld.getValue().isBlank()) {
         boolean hasEmittedKeylistGenStart = false;
         for (final PTBufferField fld : this.getAllFields()) {
+          final String fldName = fld.getRecordFieldDefn().getFldName();
 
           if (!hasEmittedKeylistGenStart) {
             TraceFileVerifier.submitEnforcedEmission(new KeylistGenStart());
@@ -346,26 +348,42 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
           }
 
           if (fld.getRecordFieldDefn().isKey()
-              && !dispCtrlFld.getParentRecord().hasField(
-                  fld.getRecordFieldDefn().getFldName())) {
+              && !dispCtrlFld.getParentRecord().hasField(fldName)) {
 
             TraceFileVerifier.submitEnforcedEmission(new KeylistGenDetectedKey(
-                fld.getRecordFieldDefn().getFldName()));
+                fldName));
             TraceFileVerifier.submitEnforcedEmission(new KeylistGenFindingKey(
                 fld.getRecordFieldDefn().getRecFldName()));
 
-            if (dispCtrlFld.getParentRecord().hasKeyField(
-                fld.getRecordFieldDefn().getFldName())) {
+            /**
+             * TODO: IMPORTANT NOTE: I am assuming that "key buffer"
+             * means the record on which the display control field exists;
+             * this might actually mean the search record, in which case the
+             * conditional must be changed.
+             */
+            if (dispCtrlFld.getParentRecord().hasKeyField(fldName)) {
               throw new OPSVMachRuntimeException("TODO: Field found in key "
                   + "buffers; need to handle this.");
             } else {
               TraceFileVerifier.submitEnforcedEmission(
                   new KeylistGenNotInKeyBuffer());
               TraceFileVerifier.submitEnforcedEmission(
-                  new KeylistGenSearchingCompBuffers(
-                      fld.getRecordFieldDefn().getFldName()));
+                  new KeylistGenSearchingCompBuffers(fldName));
               TraceFileVerifier.submitEnforcedEmission(
                   new KeylistGenScanningLevel(0));
+
+              for (final PTBufferRecord rec : ComponentBuffer
+                  .getLevelZeroRowset().getRow(1).getRecordList()) {
+                if(!rec.isEffectivelyAWorkRecord()) {
+                  log.debug("Scanning record {}", rec.getRecName());
+                  if (rec.hasField(fldName)
+                      && rec.getField(fldName).isPresentInScrollEmissions(
+                          ScrollEmissionContext.AFTER_SCROLL_SELECT)) {
+                    log.debug("Found on record {}", rec.getRecName());
+                    break;
+                  }
+                }
+              }
             }
           }
         }

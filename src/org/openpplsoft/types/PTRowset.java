@@ -65,6 +65,12 @@ public abstract class PTRowset<R extends PTRow> extends PTObjectType {
    * @return the row corresponding to idx
    */
   public R getRow(int idx) {
+
+    if (idx == 0) {
+      throw new OPSVMachRuntimeException("Illegal call to getRow; you have "
+          + "supplied 0 as a row index, but PS row indices begin at 1.");
+    }
+
     // Must subtract 1 from idx; rowset indices start at 1.
     return this.rows.get(idx - 1);
   }

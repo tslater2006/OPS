@@ -69,6 +69,10 @@ public abstract class PTRecord<R extends PTRow, F extends PTField>
     return this.recDefn;
   }
 
+  public String getRecName() {
+    return this.recDefn.getRecName();
+  }
+
   public List<PTImmutableReference<F>> getFieldRefsInAlphabeticOrderByFieldName() {
     final Map<String, PTImmutableReference<F>> orderedRefMap =
         new TreeMap<>(this.fieldRefs);

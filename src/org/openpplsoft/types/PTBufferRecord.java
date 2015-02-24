@@ -359,7 +359,8 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
               throw new OPSVMachRuntimeException("TODO: Field found in key "
                   + "buffers; need to handle this.");
             } else {
-              log.fatal("Not Found in key buffer");
+              TraceFileVerifier.submitEnforcedEmission(
+                  new KeylistGenNotInKeyBuffer());
               log.fatal("Seaching for field {} in component buffers",
                   fld.getRecordFieldDefn().getFldName());
               log.fatal("Scanning level 0");

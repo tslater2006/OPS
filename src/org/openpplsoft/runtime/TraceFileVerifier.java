@@ -50,7 +50,8 @@ public final class TraceFileVerifier {
       prmHdrPattern, prmEntryPattern, endLevelPattern, relDispStartPattern,
       relDispFinishPattern, relDispFldStartPattern, relDispFldCompletePattern,
       keylistGenStartPattern, keylistGenDetectedKeyPattern,
-      keylistGenFindingKeyPattern, keylistGenNotInKeyBufferPattern;
+      keylistGenFindingKeyPattern, keylistGenNotInKeyBufferPattern,
+      keylistGenSearchingCompBuffersPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -125,12 +126,15 @@ public final class TraceFileVerifier {
     keylistGenStartPattern =
         Pattern.compile("\\s{8}\\sStarting\\sKeylist\\sgeneration$");
     keylistGenDetectedKeyPattern =
-        Pattern.compile("\\s{12}\\sKeylist\\sgeneration\\s-\\s([A-Z_0-9]+)\\sis\\sa\\skey");
+        Pattern.compile("\\s{12}\\sKeylist\\sgeneration\\s-\\s([A-Z_0-9]+)\\sis\\sa\\skey$");
     keylistGenFindingKeyPattern =
         Pattern.compile("\\s{12}\\sKeylist\\sgeneration\\s-\\sFinding\\svalue\\sfor\\s([A-Z_0-9]+\\.[A-Z_0-9]+)$");
     keylistGenNotInKeyBufferPattern =
-        Pattern.compile("\\s{16}\\sNot\\sFound\\sin\\skey\\sbuffer");
-
+        Pattern.compile("\\s{16}\\sNot\\sFound\\sin\\skey\\sbuffer$");
+    // IMPORTANT: The typo below ("Seaching", not "Searching") is intentional;
+    // this typo is present in the tracefiles emitted by PS.
+    keylistGenSearchingCompBuffersPattern =
+        Pattern.compile("\\s{20}Seaching\\sfor\\sfield\\s([A-Z_0-9]+)\\sin\\scomponent\\sbuffers$");
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
   }
@@ -599,6 +603,15 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new KeylistGenNotInKeyBuffer();
+      }
+
+      final Matcher keylistGenSearchingCompBuffersMatcher =
+          keylistGenSearchingCompBuffersPattern.matcher(currTraceLine);
+      if (keylistGenSearchingCompBuffersMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new KeylistGenSearchingCompBuffers(
+            keylistGenSearchingCompBuffersMatcher.group(GROUP1));
       }
 
       if (currTraceLine.endsWith("Page Constructed")) {

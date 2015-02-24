@@ -361,8 +361,9 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
             } else {
               TraceFileVerifier.submitEnforcedEmission(
                   new KeylistGenNotInKeyBuffer());
-              log.fatal("Seaching for field {} in component buffers",
-                  fld.getRecordFieldDefn().getFldName());
+              TraceFileVerifier.submitEnforcedEmission(
+                  new KeylistGenSearchingCompBuffers(
+                      fld.getRecordFieldDefn().getFldName()));
               log.fatal("Scanning level 0");
             }
           }

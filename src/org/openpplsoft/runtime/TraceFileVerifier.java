@@ -51,7 +51,7 @@ public final class TraceFileVerifier {
       relDispFinishPattern, relDispFldStartPattern, relDispFldCompletePattern,
       keylistGenStartPattern, keylistGenDetectedKeyPattern,
       keylistGenFindingKeyPattern, keylistGenNotInKeyBufferPattern,
-      keylistGenSearchingCompBuffersPattern;
+      keylistGenSearchingCompBuffersPattern, keylistGenScanningLevelPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -135,6 +135,8 @@ public final class TraceFileVerifier {
     // this typo is present in the tracefiles emitted by PS.
     keylistGenSearchingCompBuffersPattern =
         Pattern.compile("\\s{20}Seaching\\sfor\\sfield\\s([A-Z_0-9]+)\\sin\\scomponent\\sbuffers$");
+    keylistGenScanningLevelPattern =
+        Pattern.compile("\\s{20}Scanning\\slevel\\s(\\d+)$");
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
   }
@@ -612,6 +614,15 @@ public final class TraceFileVerifier {
         currTraceLine = getNextTraceLine();
         return new KeylistGenSearchingCompBuffers(
             keylistGenSearchingCompBuffersMatcher.group(GROUP1));
+      }
+
+      final Matcher keylistGenScanningLevelMatcher =
+          keylistGenScanningLevelPattern.matcher(currTraceLine);
+      if (keylistGenScanningLevelMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new KeylistGenScanningLevel(
+            Integer.parseInt(keylistGenScanningLevelMatcher.group(GROUP1)));
       }
 
       if (currTraceLine.endsWith("Page Constructed")) {

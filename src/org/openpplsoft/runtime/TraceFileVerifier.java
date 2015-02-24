@@ -49,7 +49,8 @@ public final class TraceFileVerifier {
       rowPattern, cRecBufPattern, cFldBufPattern, scrollIdxPattern,
       prmHdrPattern, prmEntryPattern, endLevelPattern, relDispStartPattern,
       relDispFinishPattern, relDispFldStartPattern, relDispFldCompletePattern,
-      keylistGenStartPattern, keylistGenDetectedKeyPattern;
+      keylistGenStartPattern, keylistGenDetectedKeyPattern,
+      keylistGenFindingKeyPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -125,6 +126,8 @@ public final class TraceFileVerifier {
         Pattern.compile("\\s{8}\\sStarting\\sKeylist\\sgeneration$");
     keylistGenDetectedKeyPattern =
         Pattern.compile("\\s{12}\\sKeylist\\sgeneration\\s-\\s([A-Z_0-9]+)\\sis\\sa\\skey");
+    keylistGenFindingKeyPattern =
+        Pattern.compile("\\s{12}\\sKeylist\\sgeneration\\s-\\sFinding\\svalue\\sfor\\s([A-Z_0-9]+\\.[A-Z_0-9]+)$");
 
     // Note: this pattern excludes any and all trailing semicolons.
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
@@ -577,6 +580,15 @@ public final class TraceFileVerifier {
         currTraceLine = getNextTraceLine();
         return new KeylistGenDetectedKey(
             keylistGenDetectedKeyMatcher.group(GROUP1));
+      }
+
+      final Matcher keylistGenFindingKeyMatcher =
+          keylistGenFindingKeyPattern.matcher(currTraceLine);
+      if (keylistGenFindingKeyMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new KeylistGenFindingKey(
+            keylistGenFindingKeyMatcher.group(GROUP1));
       }
 
       if (currTraceLine.endsWith("Page Constructed")) {

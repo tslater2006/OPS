@@ -350,9 +350,9 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                   fld.getRecordFieldDefn().getFldName())) {
 
             TraceFileVerifier.submitEnforcedEmission(new KeylistGenDetectedKey(
-                  fld.getRecordFieldDefn().getFldName()));
-            log.fatal("Keylist generation - Finding value for {}",
-                fld.getRecordFieldDefn().getRecFldName());
+                fld.getRecordFieldDefn().getFldName()));
+            TraceFileVerifier.submitEnforcedEmission(new KeylistGenFindingKey(
+                fld.getRecordFieldDefn().getRecFldName()));
 
             if (dispCtrlFld.getParentRecord().hasKeyField(
                 fld.getRecordFieldDefn().getFldName())) {

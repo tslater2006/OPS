@@ -16,7 +16,8 @@
     <javac includeantruntime="false"/>
   </presetdef>
 
-  <property name="ANTLR_SRC_DIR" value="${basedir}/src/org/openpplsoft/antlr4/frontend"/>
+  <property name="ANTLR_SRC_DIR"
+          value="${basedir}/src/org/openpplsoft/antlr4/frontend"/>
 
     <!-- ================================= 
           target: resolve              
@@ -127,4 +128,6 @@
       <sysproperty key="user.timezone" value="GMT"/>
     </java>
   </target>
+
+  <target name="cleancompile" depends="clean,antlr,compile"/>
 </project>

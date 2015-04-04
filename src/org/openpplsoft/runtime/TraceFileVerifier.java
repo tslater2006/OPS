@@ -52,7 +52,7 @@ public final class TraceFileVerifier {
       keylistGenStartPattern, keylistGenDetectedKeyPattern,
       keylistGenFindingKeyPattern, keylistGenNotInKeyBufferPattern,
       keylistGenSearchingCompBuffersPattern, keylistGenScanningLevelPattern,
-      keylistGenScanningRecordPattern;
+      keylistGenScanningRecordPattern, keylistGenFoundInRecordPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -142,6 +142,8 @@ public final class TraceFileVerifier {
     pcInstrPattern = Pattern.compile("\\s+\\d+:\\s+(.+?[;]*)$");
     keylistGenScanningRecordPattern =
         Pattern.compile("\\s{24}Scanning\\srecord\\s([A-Z_0-9]+)\\sfor\\sfield\\s([A-Z_0-9]+)$");
+    keylistGenFoundInRecordPattern =
+        Pattern.compile("\\s{24}Field\\s([A-Z_0-9]+)\\sfound\\sin\\srecord\\s([A-Z_0-9]+)$");
   }
 
   private TraceFileVerifier() {}
@@ -636,6 +638,16 @@ public final class TraceFileVerifier {
         return new KeylistGenScanningRecord(
             keylistGenScanningRecordMatcher.group(GROUP1),
             keylistGenScanningRecordMatcher.group(GROUP2));
+      }
+
+      final Matcher keylistGenFoundInRecordMatcher =
+          keylistGenFoundInRecordPattern.matcher(currTraceLine);
+      if (keylistGenFoundInRecordMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new KeylistGenFoundInRecord(
+            keylistGenFoundInRecordMatcher.group(GROUP2),
+            keylistGenFoundInRecordMatcher.group(GROUP1));
       }
 
       if (currTraceLine.endsWith("Page Constructed")) {

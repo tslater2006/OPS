@@ -382,7 +382,8 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                   if (rec.hasField(fldName)
                       && rec.getField(fldName).isPresentInScrollEmissions(
                           ScrollEmissionContext.AFTER_SCROLL_SELECT)) {
-                    log.debug("Found on record {}", rec.getRecName());
+                    TraceFileVerifier.submitEnforcedEmission(
+                        new KeylistGenFoundInRecord(rec.getRecName(), fldName));
                     break;
                   }
                 }

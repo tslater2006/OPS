@@ -375,7 +375,10 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
               for (final PTBufferRecord rec : ComponentBuffer
                   .getLevelZeroRowset().getRow(1).getRecordList()) {
                 if(!rec.isEffectivelyAWorkRecord()) {
-                  log.debug("Scanning record {}", rec.getRecName());
+
+                  TraceFileVerifier.submitEnforcedEmission(
+                      new KeylistGenScanningRecord(rec.getRecName(), fldName));
+
                   if (rec.hasField(fldName)
                       && rec.getField(fldName).isPresentInScrollEmissions(
                           ScrollEmissionContext.AFTER_SCROLL_SELECT)) {

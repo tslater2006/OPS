@@ -37,6 +37,6 @@ public class KeylistGenStart implements IEmission {
 
   @Override
   public String toString() {
-    return "        Starting Keylist generation";
+    return "    Starting Keylist generation";
   }
 }

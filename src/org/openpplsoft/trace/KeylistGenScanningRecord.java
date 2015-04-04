@@ -44,7 +44,7 @@ public class KeylistGenScanningRecord implements IEmission {
 
   @Override
   public String toString() {
-    return "                        Scanning record " + recName + " for field "
+    return "            Scanning record " + recName + " for field "
         + this.fldName;
   }
 }

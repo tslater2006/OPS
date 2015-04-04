@@ -41,7 +41,7 @@ public class KeylistGenSearchingCompBuffers implements IEmission {
 
   @Override
   public String toString() {
-    return "                    Seaching for field "
+    return "          Seaching for field "
         + this.fldName + " in component buffers";
   }
 }

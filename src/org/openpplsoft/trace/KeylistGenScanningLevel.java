@@ -40,6 +40,6 @@ public class KeylistGenScanningLevel implements IEmission {
 
   @Override
   public String toString() {
-    return "                    Scanning level " + this.level;
+    return "          Scanning level " + this.level;
   }
 }

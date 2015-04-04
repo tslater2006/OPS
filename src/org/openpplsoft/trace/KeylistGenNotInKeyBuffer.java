@@ -36,6 +36,6 @@ public class KeylistGenNotInKeyBuffer implements IEmission {
 
   @Override
   public String toString() {
-    return "                Not Found in key buffer";
+    return "        Not Found in key buffer";
   }
 }

@@ -40,6 +40,6 @@ public class KeylistGenDetectedKey implements IEmission {
 
   @Override
   public String toString() {
-    return "            Keylist generation - " + this.keyName + " is a key";
+    return "      Keylist generation - " + this.keyName + " is a key";
   }
 }

@@ -46,7 +46,7 @@ public class KeylistGenFindingKey implements IEmission {
 
   @Override
   public String toString() {
-    return "            Keylist generation - Finding value for "
+    return "      Keylist generation - Finding value for "
         + this.recFldName;
   }
 }

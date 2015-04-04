@@ -372,6 +372,7 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
               TraceFileVerifier.submitEnforcedEmission(
                   new KeylistGenScanningLevel(0));
 
+              Optional<PTBufferField> foundCBufferField = Optional.empty();
               for (final PTBufferRecord rec : ComponentBuffer
                   .getLevelZeroRowset().getRow(1).getRecordList()) {
                 if(!rec.isEffectivelyAWorkRecord()) {
@@ -382,11 +383,18 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                   if (rec.hasField(fldName)
                       && rec.getField(fldName).isPresentInScrollEmissions(
                           ScrollEmissionContext.AFTER_SCROLL_SELECT)) {
+                    foundCBufferField = Optional.of(rec.getField(fldName));
                     TraceFileVerifier.submitEnforcedEmission(
                         new KeylistGenFoundInRecord(rec.getRecName(), fldName));
                     break;
                   }
                 }
+              }
+
+              if (foundCBufferField.isPresent()) {
+                TraceFileVerifier.submitEnforcedEmission(
+                    new KeylistGenFoundInCBuffer(
+                        foundCBufferField.get().getValue().readAsString()));
               }
             }
           }

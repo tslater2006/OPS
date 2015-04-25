@@ -392,9 +392,18 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
               }
 
               if (foundCBufferField.isPresent()) {
+                final PTPrimitiveType val = foundCBufferField.get().getValue();
                 TraceFileVerifier.submitEnforcedEmission(
-                    new KeylistGenFoundInCBuffer(
-                        foundCBufferField.get().getValue().readAsString()));
+                    new KeylistGenFoundInCBuffer(val.readAsString()));
+
+                /*
+                 * I am aware that this directly contradicts the emission above,
+                 * but that's what PS does.
+                 */
+                if (val.isBlank()) {
+                  TraceFileVerifier.submitEnforcedEmission(
+                      new KeylistGenNotInCompBuffers());
+                }
               }
             }
           }

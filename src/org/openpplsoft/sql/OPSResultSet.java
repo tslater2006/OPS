@@ -217,6 +217,21 @@ public class OPSResultSet implements AutoCloseable {
     }
   }
 
+  public boolean hasColumnNamed(final String colName) {
+    try {
+      final ResultSetMetaData rsMetaData = this.rs.getMetaData();
+      final int colCount = rsMetaData.getColumnCount();
+      for (int i = 1; i <= colCount; i++) {
+        if (rsMetaData.getColumnName(i).equals(colName)) {
+          return true;
+        }
+      }
+      return false;
+    } catch (final SQLException sqle) {
+      throw new OPSVMachRuntimeException(sqle.getMessage(), sqle);
+    }
+  }
+
   public String getColumnTypeName(final int idx) {
     try {
       return this.rs.getMetaData().getColumnTypeName(idx);

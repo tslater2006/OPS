@@ -411,8 +411,16 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                   try (final OPSStmt ostmt =
                           StmtLibrary.generateGenericTableQuery(installRecordDefn);
                        final OPSResultSet rs = ostmt.executeQuery()) {
-                    throw new OPSVMachRuntimeException("TODO: Is fld present?");
+                    if (rs.hasColumnNamed(fldName)) {
+                      throw new OPSVMachRuntimeException("TODO: Found keylist "
+                          + "field on INSTALLATION table, need to handle this.");
+                    }
                   }
+
+                  TraceFileVerifier.submitEnforcedEmission(
+                      new KeylistGenNotInInstallRecord());
+
+                  throw new OPSVMachRuntimeException("TODO: Query PSOPTIONS.");
                 }
               }
             }

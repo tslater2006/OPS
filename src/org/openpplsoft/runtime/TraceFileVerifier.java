@@ -53,7 +53,8 @@ public final class TraceFileVerifier {
       keylistGenFindingKeyPattern, keylistGenNotInKeyBufferPattern,
       keylistGenSearchingCompBuffersPattern, keylistGenScanningLevelPattern,
       keylistGenScanningRecordPattern, keylistGenFoundInRecordPattern,
-      keylistGenFoundInCBufferPattern, keylistGenNotInCompBuffersPattern;
+      keylistGenFoundInCBufferPattern, keylistGenNotInCompBuffersPattern,
+      keylistGenNotInCompKeylistPattern;
 
   private static int coverageAreaStartLineNbr, coverageAreaEndLineNbr;
   private static int numEnforcedSQLEmissions, numPCEmissionMatches;
@@ -149,6 +150,8 @@ public final class TraceFileVerifier {
         Pattern.compile("\\s{16}Found\\sin\\scomponent\\sbuffers,\\svalue\\s=\\s(.*?)$");
     keylistGenNotInCompBuffersPattern =
         Pattern.compile("\\s{16}\\sNot\\sfound\\sin\\scomponent\\sbuffers$");
+    keylistGenNotInCompKeylistPattern =
+        Pattern.compile("\\s{16}\\sNot\\sfound\\sin\\scomponent\\skeylist$");
   }
 
   private TraceFileVerifier() {}
@@ -670,6 +673,14 @@ public final class TraceFileVerifier {
         // We don't want the next call to check this line again.
         currTraceLine = getNextTraceLine();
         return new KeylistGenNotInCompBuffers();
+      }
+
+      final Matcher keylistGenNotInCompKeylistMatcher =
+          keylistGenNotInCompKeylistPattern.matcher(currTraceLine);
+      if (keylistGenNotInCompKeylistMatcher.find()) {
+        // We don't want the next call to check this line again.
+        currTraceLine = getNextTraceLine();
+        return new KeylistGenNotInCompKeylist();
       }
 
       if (currTraceLine.endsWith("Page Constructed")) {

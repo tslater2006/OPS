@@ -403,6 +403,8 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                 if (val.isBlank()) {
                   TraceFileVerifier.submitEnforcedEmission(
                       new KeylistGenNotInCompBuffers());
+                  TraceFileVerifier.submitEnforcedEmission(
+                      new KeylistGenNotInCompKeylist());
                 }
               }
             }

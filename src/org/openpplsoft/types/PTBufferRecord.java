@@ -405,6 +405,14 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                       new KeylistGenNotInCompBuffers());
                   TraceFileVerifier.submitEnforcedEmission(
                       new KeylistGenNotInCompKeylist());
+
+                  final Record installRecordDefn = DefnCache
+                      .getRecord("INSTALLATION");
+                  try (final OPSStmt ostmt =
+                          StmtLibrary.generateGenericTableQuery(installRecordDefn);
+                       final OPSResultSet rs = ostmt.executeQuery()) {
+                    throw new OPSVMachRuntimeException("TODO: Is fld present?");
+                  }
                 }
               }
             }

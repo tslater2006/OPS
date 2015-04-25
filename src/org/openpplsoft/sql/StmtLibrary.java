@@ -618,6 +618,17 @@ public final class StmtLibrary {
   }
 
   /**
+   * Generates a minimal SELECT statement that selects all columns,
+   * with no WHERE clause.
+   * @param recDefn the record definition to query
+   * @return the corresponding OPSStmt to execute
+   */
+  public static OPSStmt generateGenericTableQuery(final Record recDefn) {
+    return new OPSStmt(StmtLibrary.generateSelectClause(recDefn, "", true),
+        new String[0], OPSStmt.EmissionType.ENFORCED);
+  }
+
+  /**
    * Generates the SELECT clause given a record defn.
    * @param recDefn the record definition to select from
    * @param tableAlias the alias for the record (if none, use empty str)

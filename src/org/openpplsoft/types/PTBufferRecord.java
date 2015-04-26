@@ -406,10 +406,9 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                   TraceFileVerifier.submitEnforcedEmission(
                       new KeylistGenNotInCompKeylist());
 
-                  final Record installRecordDefn = DefnCache
-                      .getRecord("INSTALLATION");
                   try (final OPSStmt ostmt =
-                          StmtLibrary.generateGenericTableQuery(installRecordDefn);
+                          StmtLibrary.generateGenericTableQuery(
+                              DefnCache.getRecord("INSTALLATION"));
                        final OPSResultSet rs = ostmt.executeQuery()) {
                     if (rs.hasColumnNamed(fldName)) {
                       throw new OPSVMachRuntimeException("TODO: Found keylist "
@@ -420,7 +419,18 @@ public final class PTBufferRecord extends PTRecord<PTBufferRow, PTBufferField>
                   TraceFileVerifier.submitEnforcedEmission(
                       new KeylistGenNotInInstallRecord());
 
-                  throw new OPSVMachRuntimeException("TODO: Query PSOPTIONS.");
+                  try (final OPSStmt ostmt =
+                          StmtLibrary.generateGenericTableQuery(
+                              DefnCache.getRecord("PSOPTIONS"));
+                       final OPSResultSet rs = ostmt.executeQuery()) {
+                    if (rs.hasColumnNamed(fldName)) {
+                      throw new OPSVMachRuntimeException("TODO: Found keylist "
+                          + "field on PSOPTIONS table, need to handle this.");
+                    }
+                  }
+
+                  TraceFileVerifier.submitEnforcedEmission(
+                      new KeylistGenNotInPSOPTIONS());
                 }
               }
             }

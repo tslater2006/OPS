@@ -132,7 +132,7 @@ id  : SYS_VAR_ID | VAR_ID | GENERIC_ID ;
 
 DecimalLiteral  : IntegerLiteral '.' [0-9]+ ;
 IntegerLiteral  : '0' | '1'..'9' '0'..'9'* ;
-StringLiteral   : '"' ( ~'"' )* '"' ;
+StringLiteral   : '"' (~'"'|'""')* '"' ;
 BoolLiteral     :   'True' | 'False' ;
 
 VAR_ID      : '&' GENERIC_ID ;

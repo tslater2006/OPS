@@ -99,7 +99,7 @@ setImpl     : 'set' GENERIC_ID stmtList endset='end-set' ;
 
 funcImpl        : funcSignature stmtList endfunction='End-Function' ;
 funcSignature   : 'Function' GENERIC_ID formalParamList? returnType? ';'? ;
-formalParamList : '(' ( param (',' param)* )? ')' ;
+formalParamList : '(' ( param 'out'? (',' param 'out'?)* )? ')' ;
 param           : VAR_ID ('As' varType)? ;
 returnType      : 'Returns' varType ;
 

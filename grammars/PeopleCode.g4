@@ -85,7 +85,7 @@ extFuncImport   : 'Declare' 'Function' GENERIC_ID 'PeopleCode' recDefnPath event
 recDefnPath     : GENERIC_ID '.' GENERIC_ID ;
 event           : 'FieldFormula' | 'FieldChange' ;
 
-classDeclaration  : 'class' GENERIC_ID classBlock* 'end-class' ;
+classDeclaration : 'class' GENERIC_ID ('implements' appClassPath)? classBlock* 'end-class' ;
 classBlock        : aLvl='private'? (classBlockStmt ';'*)+ ;
 classBlockStmt    : method | constant | property | instance ;
 method            : 'method' GENERIC_ID formalParamList returnType? ;

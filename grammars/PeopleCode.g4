@@ -19,7 +19,7 @@ grammar PeopleCode;
 program : stmtList ;
 
 // Multiple semicolons may be present; the last/only statement may not have a semicolon.
-stmtList: (stmt ';'+)* stmt? ;   
+stmtList: (stmt ';'+)* stmt? ;
 
 stmt  : appClassImport          # StmtAppClassImport
       | extFuncImport           # StmtExternalFuncImport
@@ -137,7 +137,7 @@ BoolLiteral     :   'True' | 'False' ;
 
 VAR_ID      : '&' GENERIC_ID ;
 SYS_VAR_ID  : '%' GENERIC_ID ;
-GENERIC_ID  : [a-zA-Z] [0-9a-zA-Z_#]* ;
+GENERIC_ID : [a-zA-Z_] [0-9a-zA-Z_#]* ;
 
 REM       : WS? [rR][eE][mM] WS .*? ';' -> skip;
 COMMENT_1 : '/*' .*? '*/' -> skip;

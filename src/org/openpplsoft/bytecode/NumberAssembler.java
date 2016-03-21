@@ -28,6 +28,7 @@
 
 package org.openpplsoft.bytecode;
 
+import java.math.BigInteger;
 import org.openpplsoft.pt.peoplecode.PeopleCodeByteStream;
 
 /**
@@ -54,7 +55,7 @@ public class NumberAssembler extends ElementAssembler {
   public void assemble(final PeopleCodeByteStream stream) {
 
     final int BYTES_TO_IGNORE = 3,
-              SHIFT_MULTIPLIER = 256,
+              SHIFT_MULTIPLIER = BigInteger.valueOf(256),
               WIDE_AND = 0xff;
 
     // decimal position from far right going left
@@ -68,13 +69,15 @@ public class NumberAssembler extends ElementAssembler {
 
     dValue = (int) stream.readNextByte();
     long val = 0, fact = 1;
-
+	BigInteger val = BigInteger.ZERO;
+	BigInteger fact = BigInteger.ONE;
+	
     for (int i = 0; i < numBytes; i++) {
-      val += fact * (long) (stream.readNextByte() & WIDE_AND);
-      fact = fact * (long) SHIFT_MULTIPLIER;
+	  val = val.add(fact.multiply(BigInteger.valueOf((stream.readNextByte() & WIDE_AND))));
+      fact = fact.multiply(SHIFT_MULTIPLIER);
     }
 
-    outNumber = Long.toString(val);
+    outNumber = val.toString();
 
     if (dValue > 0 && !outNumber.equals("0")) {
 
